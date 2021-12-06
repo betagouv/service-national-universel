@@ -9,7 +9,7 @@ import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { getResultLabel } from "../../../utils";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
-export default ({ young, onAffect, onClick }) => {
+export default function AssignMeetingPoint({ young, onAffect, onClick }) {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
 
@@ -22,7 +22,7 @@ export default ({ young, onAffect, onClick }) => {
   });
 
   const handleAffectation = async (meetingPoint) => {
-    const { data, ok, code } = await api.put(`/young/${young._id}/meeting-point`, { meetingPointId: meetingPoint._id });
+    const { ok, code } = await api.put(`/young/${young._id}/meeting-point`, { meetingPointId: meetingPoint._id });
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la sélection du point de rassemblement", code);
     toastr.success(`${young.firstName} a choisi le point de rassemblement affecté(e) au centre ${meetingPoint.departureAddress}, ${meetingPoint.departureAtString}`);
     setSearchedValue("");
@@ -84,14 +84,14 @@ export default ({ young, onAffect, onClick }) => {
       </ReactiveBase>
     </>
   );
-};
+}
 
-const HitMeetingPoint = ({ hit, onSend, onClick }) => {
+const HitMeetingPoint = ({ hit, onSend }) => {
   return (
     <tr>
       <td>{hit.busExcelId}</td>
       <td>
-        <a href={`/centre/${hit.centerId}`} target="_blank">
+        <a href={`/centre/${hit.centerId}`} target="_blank" rel="noreferrer">
           {hit.centerCode}
         </a>
       </td>

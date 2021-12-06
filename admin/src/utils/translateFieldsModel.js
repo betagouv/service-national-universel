@@ -128,10 +128,10 @@ const translateFieldYoung = (f) => {
       return "Département";
     case "region":
       return "Région";
+    case "academy":
+      return "Académie";
     case "location":
       return "Coordonnées";
-    case "populationDensity":
-      return "Densité de population";
     case "grade":
       return "Niveau scolaire";
     case "schooled":
@@ -145,15 +145,15 @@ const translateFieldYoung = (f) => {
     case "schoolComplementAdresse":
       return "Complément d'adresse de l'établissement";
     case "schoolZip":
-      return "Code postal de l'établisdement";
+      return "Code postal de l'établissement";
     case "schoolCity":
-      return "Ville de l'établisdement";
+      return "Ville de l'établissement";
     case "schoolDepartment":
-      return "Département de l'établisdement";
+      return "Département de l'établissement";
     case "schoolRegion":
-      return "Région de l'établisdement";
+      return "Région de l'établissement";
     case "schoolLocation":
-      return "Coordonnées de l'établisdement";
+      return "Coordonnées de l'établissement";
     case "parent1Status":
       return "Statut du représentant légal 1";
     case "parent1FirstName":

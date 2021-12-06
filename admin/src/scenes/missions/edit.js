@@ -28,7 +28,7 @@ import Loader from "../../components/Loader";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 
-export default (props) => {
+export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
   const [structure, setStructure] = useState();
   const [structures, setStructures] = useState();
@@ -196,8 +196,7 @@ export default (props) => {
           });
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
-      }}
-    >
+      }}>
       {({ values, handleChange, handleSubmit, errors, touched }) => (
         <div>
           <Header>
@@ -211,8 +210,7 @@ export default (props) => {
                 onClick={() => {
                   handleChange({ target: { value: "DRAFT", name: "status" } });
                   handleSubmit();
-                }}
-              >
+                }}>
                 Enregistrer
               </LoadingButton>
             ) : null}
@@ -223,8 +221,7 @@ export default (props) => {
               onClick={() => {
                 handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                 handleSubmit();
-              }}
-            >
+              }}>
               {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
             </LoadingButton>
           </Header>
@@ -240,19 +237,20 @@ export default (props) => {
                         <span>*</span>NOM DE LA MISSION
                       </label>
                       <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                        Privilégiez une phrase précisant l'action du volontaire.
+                        Privilégiez une phrase précisant l&apos;action du volontaire.
                         <br />
-                        Exemple: "Je fais les courses de produits pour mes voisins les plus fragiles"
+                        Exemple: « Je fais les courses de produits pour mes voisins les plus fragiles »
                       </p>
                       <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="Nom de votre mission" />
                       <ErrorMessage errors={errors} touched={touched} name="name" />
                     </FormGroup>
                     <FormGroup>
-                      <label>DOMAINES D'ACTION</label>
+                      <label>DOMAINES D&apos;ACTION</label>
                       <MultiSelect
                         value={values.domains || []}
                         onChange={handleChange}
                         name="domains"
+                        // eslint-disable-next-line no-prototype-builtins
                         options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
                         placeholder="Sélectionnez un ou plusieurs domains"
                       />
@@ -377,7 +375,7 @@ export default (props) => {
                       </FormGroup>
                       <FormGroup>
                         <label>Durée de la mission</label>
-                        <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d'heures prévisionnelles pour la réalisation de la mission</p>
+                        <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</p>
                         <Row>
                           <Col>
                             <Input type="number" name="duration" onChange={handleChange} value={values.duration} />
@@ -447,7 +445,7 @@ export default (props) => {
                         <span>*</span>TUTEUR
                       </label>
                       <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                        Sélectionner le tuteur qui va s'occuper de la mission. <br />
+                        Sélectionner le tuteur qui va s&apos;occuper de la mission. <br />
                         {/* todo invite tuteur */}
                         {structure && (
                           <span>
@@ -457,8 +455,7 @@ export default (props) => {
                                 style={{ textDecoration: "underline", cursor: "pointer" }}
                                 onClick={() => {
                                   setShowTutor(true);
-                                }}
-                              >
+                                }}>
                                 ajouter un nouveau tuteur
                               </a>
                             </u>{" "}
@@ -489,7 +486,7 @@ export default (props) => {
                       errors={errors}
                       touched={touched}
                     />
-                    <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l'adresse n'est pas reconnue, veuillez saisir le nom de la ville.</p>
+                    <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la ville.</p>
                   </Wrapper>
                 </Col>
               </Row>
@@ -526,8 +523,7 @@ export default (props) => {
                               disabled={loadings.saveButton || loadings.submitButton}
                               onClick={() => {
                                 modifyStructure();
-                              }}
-                            >
+                              }}>
                               Modifier la structure
                             </LoadingButton>
                           </div>
@@ -552,8 +548,7 @@ export default (props) => {
                   onClick={() => {
                     handleChange({ target: { value: "DRAFT", name: "status" } });
                     handleSubmit();
-                  }}
-                >
+                  }}>
                   Enregistrer
                 </LoadingButton>
               ) : null}
@@ -564,8 +559,7 @@ export default (props) => {
                 onClick={() => {
                   handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                   handleSubmit();
-                }}
-              >
+                }}>
                 {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
               </LoadingButton>
             </Header>
@@ -574,7 +568,7 @@ export default (props) => {
       )}
     </Formik>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 2rem;
@@ -643,28 +637,4 @@ const Title = styled.div`
   font-size: 24px;
   margin-bottom: 10px;
   flex: 1;
-`;
-
-const ButtonContainer = styled.div`
-  button {
-    background-color: #5245cc;
-    color: #fff;
-    &.white-button {
-      color: #000;
-      background-color: #fff;
-      :hover {
-        background: #ddd;
-      }
-    }
-    margin-left: 1rem;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
 `;

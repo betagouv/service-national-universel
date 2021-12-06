@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { HeroContainer, Hero } from "../../components/Content";
-import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import api from "../../services/api";
 import { translate, formatStringDate } from "../../utils";
 
-export default () => {
+export default function Index() {
   const [diagorienteUrl, setDiagorienteUrl] = useState();
   const [diagorienteCardData, setDiagorienteCardData] = useState();
   const [skills, setSkills] = useState([]);
@@ -69,7 +67,7 @@ export default () => {
           <div className="content">
             <img src={require("../../assets/logo-diagoriente-blue.png")} />
             <h1>Identifiez vos compétences et explorez vos intérêts</h1>
-            <p>Complètez vos expériences, qu'elles soient professionnelles ou personnelles, puis évaluez vos compétences.</p>
+            <p>Complètez vos expériences, qu&apos;elles soient professionnelles ou personnelles, puis évaluez vos compétences.</p>
 
             <VioletButton href={diagorienteUrl} target="_blank">
               Accéder à Diagoriente
@@ -118,8 +116,8 @@ export default () => {
                     <Separator />
                     <ContainerFooter>
                       <p>
-                        <a target="_blank" href={diagorienteUrl}>
-                          J'AJOUTE UNE EXPERIENCE
+                        <a target="_blank" href={diagorienteUrl} rel="noreferrer">
+                          J&apos;AJOUTE UNE EXPERIENCE
                         </a>
                       </p>
                     </ContainerFooter>
@@ -132,7 +130,7 @@ export default () => {
       </CardContainer>
     </>
   );
-};
+}
 
 const MiddleContainer = styled.div`
   font-size: 1rem;

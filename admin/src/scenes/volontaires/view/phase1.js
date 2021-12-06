@@ -14,7 +14,6 @@ import {
   FORCE_DISABLED_ASSIGN_COHESION_CENTER,
   confirmMessageChangePhase1Presence,
   ROLES,
-  colors,
 } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
@@ -28,7 +27,7 @@ import Badge from "../../../components/Badge";
 import Select from "../components/Select";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-export default (props) => {
+export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
   const [young, setYoung] = useState(props.young);
@@ -80,7 +79,7 @@ export default (props) => {
     if (young.statusPhase1 === "NOT_DONE")
       return (
         <>
-          <p>{young.firstName} n'a pas réalisé son séjour de cohésion.</p>
+          <p>{young.firstName} n&apos;a pas réalisé son séjour de cohésion.</p>
           <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
           <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
@@ -111,14 +110,14 @@ export default (props) => {
     if (young.statusPhase1 === "WAITING_AFFECTATION")
       return (
         <>
-          <p>{young.firstName} est en attente d'affectation à un centre de cohésion</p>
+          <p>{young.firstName} est en attente d&apos;affectation à un centre de cohésion</p>
           {!FORCE_DISABLED_ASSIGN_COHESION_CENTER && user.role === ROLES.ADMIN ? <AssignCenter young={young} onAffect={props.getYoung} /> : null}
         </>
       );
     if (young.statusPhase1 === "WAITING_LIST")
       return (
         <>
-          <p>{young.firstName} est sur liste d'attente au centre :</p>
+          <p>{young.firstName} est sur liste d&apos;attente au centre :</p>
           <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
           <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
@@ -138,7 +137,7 @@ export default (props) => {
     if (young.statusPhase1 === "WITHDRAWN")
       return (
         <>
-          <p>{young.firstName} s'est désisté(e) du séjour de cohésion.</p>
+          <p>{young.firstName} s&apos;est désisté(e) du séjour de cohésion.</p>
           <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
           <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
@@ -173,16 +172,15 @@ export default (props) => {
                 initialValues={young}
                 onSubmit={async (values) => {
                   try {
-                    const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
+                    const { ok, code } = await api.put(`/referent/young/${values._id}`, values);
                     if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
                     toastr.success("Mis à jour!");
                   } catch (e) {
                     console.log(e);
                     toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
                   }
-                }}
-              >
-                {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+                }}>
+                {({ values, handleChange }) => (
                   <>
                     <Bloc title="Date de séjour" borderBottom disabled={disabled}>
                       <Details title="Début" value={young.cohesionStartAt} />
@@ -239,10 +237,10 @@ export default (props) => {
           {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
             <div style={{ textAlign: "center" }}>
               <DownloadAttestationButton young={young} uri="1">
-                Télécharger l'attestation de réalisation de la phase 1
+                Télécharger l&apos;attestation de réalisation de la phase 1
               </DownloadAttestationButton>
               <MailAttestationButton style={{ marginTop: ".5rem" }} young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
-                Envoyer l'attestation par mail
+                Envoyer l&apos;attestation par mail
               </MailAttestationButton>
             </div>
           ) : null}
@@ -265,7 +263,7 @@ export default (props) => {
       />
     </div>
   );
-};
+}
 
 const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled }) => {
   return (
@@ -276,13 +274,11 @@ const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTo
         borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}
-    >
+      }}>
       <Wrapper
         style={{
           width: "100%",
-        }}
-      >
+        }}>
         <div style={{ display: "flex", width: "100%" }}>
           <BoxTitle>
             <div>{title}</div>

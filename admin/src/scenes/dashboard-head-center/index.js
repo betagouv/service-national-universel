@@ -5,7 +5,7 @@ import { useHistory, useParams } from "react-router-dom";
 import Volontaires from "./volontaires";
 import Center from "./center";
 
-export default () => {
+export default function Index() {
   const history = useHistory();
   const { currentTab } = useParams();
 
@@ -30,7 +30,7 @@ export default () => {
       <Wrapper>{currentTab === "centre" && <Center />}</Wrapper>
     </>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 20px 40px;

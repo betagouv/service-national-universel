@@ -5,16 +5,16 @@ import StopIcon from "../components/stopIcon";
 import TickIcon from "../components/tickIcon";
 import conditions from "./conditions";
 
-export default () => {
+export default function DesktopView() {
   return (
     <Wrapper>
       <Points backgroundColor="#fff">
-        <div className="points-title">Conditions d'inscription</div>
+        <div className="points-title">Conditions d&apos;inscription</div>
         <div className="first_container">
           <FirstSection>
             <div className="section_conditions">
               <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
+                <rect width="20" height="20" rx="10" fill="#32267F" fillOpacity=".06" />
                 <path
                   d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z"
                   fill="#32267F"
@@ -26,7 +26,7 @@ export default () => {
             </div>
             <div className="section_conditions">
               <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
+                <rect width="20" height="20" rx="10" fill="#32267F" fillOpacity=".06" />
                 <path
                   d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z"
                   fill="#32267F"
@@ -39,45 +39,70 @@ export default () => {
           </FirstSection>
           <div className="border_container">
             <SecondSection>
-              <p>Vérifiez si vous êtes <strong>éligible au SNU :</strong></p>
-              <p className="conditions_date">séjour du <strong>13 au 25 février 2022</strong></p>
-              <p className="conditions_date">séjour du <strong>12 au 24 juin 2022</strong></p>
-              <p className="conditions_date">séjour du <strong>3 au 15 juillet 2022</strong></p>
-              {conditions.map((condition) => (
-                <>
-                  <p className="conditions_label">{condition.label} <strong>{condition.bold}</strong></p>
+              <p>
+                Vérifiez si vous êtes <strong>éligible au SNU :</strong>
+              </p>
+              <p className="conditions_date">
+                séjour du <strong>13 au 25 février 2022</strong>
+              </p>
+              <p className="conditions_date">
+                séjour du <strong>12 au 24 juin 2022</strong>
+              </p>
+              <p className="conditions_date">
+                séjour du <strong>3 au 15 juillet 2022</strong>
+              </p>
+              {conditions.map((condition, i) => (
+                <React.Fragment key={i}>
+                  <p className="conditions_label">
+                    {condition.label} <strong>{condition.bold}</strong>
+                  </p>
                   {condition.isDate1 ? (
-                    <p className="centered"><TickIcon /></p>
+                    <p className="centered">
+                      <TickIcon />
+                    </p>
                   ) : (
-                    <p className="centered"><StopIcon /></p>
+                    <p className="centered">
+                      <StopIcon />
+                    </p>
                   )}
                   {condition.isDate2 ? (
-                    <p className="centered"><TickIcon /></p>
+                    <p className="centered">
+                      <TickIcon />
+                    </p>
                   ) : (
-                    <p className="centered"><StopIcon /></p>
+                    <p className="centered">
+                      <StopIcon />
+                    </p>
                   )}
                   {condition.isDate3 ? (
-                    <p className="centered"><TickIcon /></p>
+                    <p className="centered">
+                      <TickIcon />
+                    </p>
                   ) : (
-                    <p className="centered"><StopIcon /></p>
+                    <p className="centered">
+                      <StopIcon />
+                    </p>
                   )}
-                </>
+                </React.Fragment>
               ))}
             </SecondSection>
-            <p className="conditions_info">*Les élèves de 2nde dont l'établissement relève du ministère de l’éducation nationale, de la jeunesse et des sports peuvent s’inscrire même si le séjour se déroule sur leur temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.</p>
+            <p className="conditions_info">
+              *Les élèves de 2nde dont l&apos;établissement relève du ministère de l’éducation nationale, de la jeunesse et des sports peuvent s’inscrire même si le séjour se
+              déroule sur leur temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.
+            </p>
           </div>
         </div>
         <GridContainer className="second_container">
           <div className="third_section bottom_section">
             <svg width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="40" height="40" rx="8" fill="#32257F" />
-              <path d="M21 24h-1v-4h-1l2 4zm-1-8h.01H20zm9 4a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M21 24h-1v-4h-1l2 4zm-1-8h.01H20zm9 4a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <Infos>
-              <p>Pour compléter l'inscription en quelques minutes, il vous faudra :</p>
+              <p>Pour compléter l&apos;inscription en quelques minutes, il vous faudra :</p>
               <p>
-                • Une <b>pièce d'identité</b> (Carte Nationale d'Identité ou Passeport)
-                <br />• L'accord de votre ou vos <b>représentants légaux</b>
+                • Une <b>pièce d&apos;identité</b> (Carte Nationale d&apos;Identité ou Passeport)
+                <br />• L&apos;accord de votre ou vos <b>représentants légaux</b>
               </p>
             </Infos>
           </div>
@@ -87,14 +112,14 @@ export default () => {
               <path
                 d="M16.228 17c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M29 20a9 9 0 11-18 0 9 9 0 0118 0z"
                 stroke="#fff"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
             <FAQ href={`${appURL}/public-besoin-d-aide`} target="blank">
               <p>
-                <strong>Besoin d'aide ?</strong>
+                <strong>Besoin d&apos;aide ?</strong>
               </p>
               <p>Toutes les réponses à vos questions</p>
             </FAQ>
@@ -103,7 +128,7 @@ export default () => {
       </Points>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   display: flex;
@@ -235,7 +260,7 @@ const SecondSection = styled.section`
   color: #32267f;
   .conditions_date {
     font-size: 0.8rem;
-    color: #6B7280;
+    color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 1px;
   }
@@ -246,7 +271,7 @@ const SecondSection = styled.section`
     place-self: center;
   }
   p {
-    padding: 0.5rem
+    padding: 0.5rem;
   }
   .section_year {
     padding: 1rem 3rem;

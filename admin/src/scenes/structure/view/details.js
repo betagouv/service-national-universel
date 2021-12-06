@@ -14,7 +14,7 @@ import Invite from "../components/invite";
 import { Box, BoxTitle } from "../../../components/box";
 import Badge from "../../../components/Badge";
 
-export default ({ structure }) => {
+export default function DetailsView({ structure }) {
   const [referents, setReferents] = useState([]);
   const [parentStructure, setParentStructure] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -75,7 +75,7 @@ export default ({ structure }) => {
               <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                 <Wrapper>
                   <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
-                  {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
+                  {referents.length ? null : <i>Aucun compte n&apos;est associé à cette structure.</i>}
                   {referents.map((referent) => (
                     <Link to={`/user/${referent._id}`} key={referent._id}>
                       <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={referent._id}>
@@ -93,7 +93,7 @@ export default ({ structure }) => {
       </StructureView>
     </div>
   );
-};
+}
 
 const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled }) => {
   return (
@@ -104,13 +104,11 @@ const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTo
         borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}
-    >
+      }}>
       <Wrapper
         style={{
           width: "100%",
-        }}
-      >
+        }}>
         <div style={{ display: "flex", width: "100%" }}>
           <BoxTitle>
             <div>{title}</div>

@@ -11,7 +11,7 @@ import Application from "./components/application";
 import api from "../../services/api";
 import AlertBox from "../../components/AlertBox";
 
-export default () => {
+export default function Index() {
   const [applications, setApplications] = useState(null);
   const [showInfo, setShowInfo] = useState(true);
   const young = useSelector((state) => state.Auth.young);
@@ -59,15 +59,14 @@ export default () => {
       <Heading>
         <p>Phase 2</p>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <h1>Suivez vos candidatures aux missions d'intérêt général</h1>
+          <h1>Suivez vos candidatures aux missions d&apos;intérêt général</h1>
           <div className="icon" onClick={toggleShowInfo}>
             <svg fill="none" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
+                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
         </div>
@@ -95,7 +94,7 @@ export default () => {
           </DragDropContext>
         ) : (
           <NoResult>
-            <p>Vous n'avez candidaté à aucune mission.</p>
+            <p>Vous n&apos;avez candidaté à aucune mission.</p>
             <Link to="/mission">
               <Button>Trouver des missions</Button>
             </Link>
@@ -104,7 +103,7 @@ export default () => {
       </Container>
     </div>
   );
-};
+}
 
 const Heading = styled(Container)`
   margin-bottom: 40px;

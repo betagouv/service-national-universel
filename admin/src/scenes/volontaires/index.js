@@ -6,7 +6,7 @@ import List from "./list";
 import View from "./view";
 import Create from "./create";
 
-export default () => {
+export default function Index() {
   return (
     <Switch>
       <Route path="/volontaire/create" component={Create} />
@@ -15,4 +15,4 @@ export default () => {
       <Route path="/volontaire" component={List} />
     </Switch>
   );
-};
+}

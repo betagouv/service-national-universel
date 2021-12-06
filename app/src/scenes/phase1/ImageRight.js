@@ -9,11 +9,10 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import { translate } from "../../utils";
-import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, DownloadText, BackButton, Content, SignBox, ContinueButton } from "./components/printable";
-import DownloadFormButton from "../../components/buttons/DownloadFormButton";
+import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, BackButton, Content } from "./components/printable";
 import LoadingButton from "../../components/buttons/LoadingButton";
 
-export default () => {
+export default function ImageRight() {
   const young = useSelector((state) => state.Auth.young);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -32,15 +31,14 @@ export default () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-                ></path>
+                  d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
               </svg>
             </div>
             <div>
-              <h2>Consentement de droit à l'image</h2>
+              <h2>Consentement de droit à l&apos;image</h2>
               <p style={{ color: "#9C9C9C" }}>
-                {isPlural ? "Vos représentants légaux doivent" : "Votre représentant légal doit"} renseigner le formulaire relatif au droit à l'image avant votre départ en séjour
-                de cohésion. Cette étape est un pré-requis au séjour de cohésion.
+                {isPlural ? "Vos représentants légaux doivent" : "Votre représentant légal doit"} renseigner le formulaire relatif au droit à l&apos;image avant votre départ en
+                séjour de cohésion. Cette étape est un pré-requis au séjour de cohésion.
               </p>
             </div>
           </div>
@@ -79,9 +77,8 @@ export default () => {
                     console.log(e);
                     toastr.error("Erreur !");
                   }
-                }}
-              >
-                {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, submitForm }) => (
+                }}>
+                {({ values, handleChange, handleSubmit, errors, touched }) => (
                   <>
                     <Title>
                       <span>
@@ -145,7 +142,7 @@ export default () => {
                       </FormGroup>
                     ) : null}
                     <Title>
-                      <span>Autorisez ou non le droit à l'image</span>
+                      <span>Autorisez ou non le droit à l&apos;image</span>
                     </Title>
                     <FormRow>
                       <Col>
@@ -197,7 +194,7 @@ export default () => {
                             </DownloadFormButton>
                           </BackButton> */}
                           <BackButton>
-                            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/droit_a_l_image_2022.pdf" target="_blank">
+                            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/droit_a_l_image_2022.pdf" target="_blank" rel="noreferrer">
                               télécharger le modèle à remplir
                             </a>
                           </BackButton>
@@ -264,4 +261,4 @@ export default () => {
       </Hero>
     </HeroContainer>
   );
-};
+}

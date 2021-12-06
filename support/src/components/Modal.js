@@ -7,7 +7,7 @@ const Modal = ({ children, isOpen, onRequestClose }) => {
     <ReactModal
       isOpen={isOpen}
       className="relative min-w-min max-h-3/4 border-2 border-snu-purple-900 bg-white p-12 rounded-lg overflow-auto"
-      overlayClassName="bg-opacity-75	 bg-black flex w-screen h-screen fixed inset-0 items-center justify-center"
+      overlayClassName="bg-opacity-75	z-50 bg-black flex w-screen h-screen fixed inset-0 items-center justify-center"
       shouldCloseOnOverlayClick
       shouldCloseOnEsc
       onRequestClose={onRequestClose}

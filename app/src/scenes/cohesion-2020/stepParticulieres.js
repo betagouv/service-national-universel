@@ -18,7 +18,7 @@ import FormRadioLabelTrueFalse from "../../components/form/FormRadioLabelTrueFal
 import FormLegend from "../../components/form/FormLegend";
 import FormRow from "../../components/form/FormRow";
 
-export default () => {
+export default function Specific() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -52,9 +52,8 @@ export default () => {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormLegend>Handicap et pathologies chroniques</FormLegend>
             <FormRadioLabelTrueFalse title="Etes-vous en situation de handicap ?" name="handicap" values={values} handleChange={handleChange} errors={errors} touched={touched} />
@@ -64,10 +63,9 @@ export default () => {
               values={values}
               handleChange={handleChange}
               errors={errors}
-              touched={touched}
-            >
+              touched={touched}>
               <div>
-                <a href="https://www.service-public.fr/particuliers/vosdroits/F33865" target="_blank">
+                <a href="https://www.service-public.fr/particuliers/vosdroits/F33865" target="_blank" rel="noreferrer">
                   En savoir plus
                 </a>
               </div>
@@ -78,10 +76,9 @@ export default () => {
               values={values}
               handleChange={handleChange}
               errors={errors}
-              touched={touched}
-            >
+              touched={touched}>
               <div>
-                <a href="https://www.service-public.fr/particuliers/vosdroits/F21392" target="_blank">
+                <a href="https://www.service-public.fr/particuliers/vosdroits/F21392" target="_blank" rel="noreferrer">
                   En savoir plus
                 </a>
               </div>
@@ -152,8 +149,7 @@ export default () => {
                   values={values}
                   handleChange={handleChange}
                   errors={errors}
-                  touched={touched}
-                >
+                  touched={touched}>
                   <div className="info">Affectation à proximité du domicile, participation de jour uniquement, activités sportives adaptées, ...</div>
                   {values["specificAmenagment"] === "true" && (
                     <div className="info" style={{ marginTop: "1rem" }}>
@@ -197,7 +193,7 @@ export default () => {
               <>
                 <FormRow align="center">
                   <Col md={4}>
-                    <Label>Nature de l'activité de haut-niveau</Label>
+                    <Label>Nature de l&apos;activité de haut-niveau</Label>
                   </Col>
                   <Col>
                     <Field
@@ -213,7 +209,9 @@ export default () => {
                 </FormRow>
                 <FormRow>
                   <Col md={4}>
-                    <Label>En cas de compétition, concours, audition ... prévu(e) pendant le séjour de cohésion, déposez ici votre convocation - justificatif d'engagement</Label>
+                    <Label>
+                      En cas de compétition, concours, audition ... prévu(e) pendant le séjour de cohésion, déposez ici votre convocation - justificatif d&apos;engagement
+                    </Label>
                   </Col>
                   <Col>
                     <DndFileInput
@@ -226,7 +224,7 @@ export default () => {
                           return toastr.error(
                             "Le fichier semble corrompu",
                             "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                            { timeOut: 0 }
+                            { timeOut: 0 },
                           );
                         }
 
@@ -246,7 +244,7 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 40px;

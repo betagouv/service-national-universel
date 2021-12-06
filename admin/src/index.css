@@ -49,3 +49,11 @@ a {
 a:hover {
   text-decoration: none;
 }
+
+.modal-backdrop  {
+  background-color: #382F79;
+}
+
+.modal-backdrop.show  {
+  opacity: 0.88;
+}

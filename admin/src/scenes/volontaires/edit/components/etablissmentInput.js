@@ -53,7 +53,7 @@ export default function EtablissementInput({ handleChange, values, keys, errors,
         <Label>Pays de l&apos;établissement</Label>
         <Field
           as="select"
-          validate={(v) => !v && requiredMessage}
+          validate={(v) => required && !v && requiredMessage}
           className="form-control"
           placeholder="Pays"
           name={keys.schoolCountry}
@@ -108,7 +108,7 @@ export default function EtablissementInput({ handleChange, values, keys, errors,
           className="form-control"
           name={keys.grade}
           value={values[keys.grade]}
-          validate={(v) => !v && requiredMessage}
+          validate={(v) => required && !v && requiredMessage}
           onChange={(e) => {
             const value = e.target.value;
             handleChange({ target: { name: keys.grade, value } });

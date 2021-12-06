@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Autosuggest from "react-autosuggest";
 import styled from "styled-components";
-import { Row, Col, Input } from "reactstrap";
+import { Row, Col } from "reactstrap";
 import { Field } from "formik";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import api from "../../../services/api";
@@ -11,7 +11,7 @@ countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 const NORESULTMESSAGE = "Aucun résultat trouvé";
 
-export default ({ handleChange, values, keys, errors, touched, setFieldValue }) => {
+export default function EtablissmentInput({ handleChange, values, keys, errors, touched, setFieldValue }) {
   useEffect(() => {
     if (document.getElementsByTagName) {
       const inputElements = document.getElementsByTagName("input");
@@ -23,7 +23,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue }) 
   return (
     <Row>
       <Col md={12}>
-        <Label>Pays de l'établissement</Label>
+        <Label>Pays de l&apos;établissement</Label>
         <Field
           as="select"
           validate={(v) => !v && requiredMessage}
@@ -36,8 +36,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue }) 
             setFieldValue(keys.schoolName, "");
             setFieldValue(keys.schoolCity, "");
             setFieldValue(keys.schoolId, "");
-          }}
-        >
+          }}>
           {Object.values(countriesList)
             .sort((a, b) => a.localeCompare(b))
             .map((countryName) => (
@@ -51,7 +50,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue }) 
       <Col md={12}>
         {values[keys.schoolCountry] === "France" && (
           <>
-            <Label>Ville de l'établissement</Label>
+            <Label>Ville de l&apos;établissement</Label>
             <SchoolCityTypeahead
               initialValue={values[keys.schoolCity] || ""}
               onChange={(text) => {
@@ -64,7 +63,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue }) 
           </>
         )}
 
-        <Label>Nom de l'établissement</Label>
+        <Label>Nom de l&apos;établissement</Label>
         <SchoolNameTypeahead
           initialValue={values[keys.schoolName] || ""}
           country={values[keys.schoolCountry]}
@@ -86,8 +85,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue }) 
           onChange={(e) => {
             const value = e.target.value;
             handleChange({ target: { name: keys.grade, value } });
-          }}
-        >
+          }}>
           <option key="" value="" disabled>
             Sélectionner votre niveau scolaire
           </option>
@@ -111,7 +109,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue }) 
       </Col>
     </Row>
   );
-};
+}
 
 function SchoolCityTypeahead({ onChange, initialValue }) {
   const [suggestions, setSuggestions] = useState([]);
@@ -134,7 +132,9 @@ function SchoolCityTypeahead({ onChange, initialValue }) {
             });
             const res = await response.json();
             return setSuggestions(res.slice(0, 10));
-          } catch (error) {}
+          } catch (error) {
+            console.log(error);
+          }
         }}
         onSuggestionsClearRequested={() => setSuggestions([])}
         getSuggestionValue={(suggestion) => (suggestion !== "noresult" ? `${suggestion.nom}` : "")}

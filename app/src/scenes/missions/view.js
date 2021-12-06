@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Container } from "reactstrap";
+import { Container, Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
@@ -14,7 +13,7 @@ import Loader from "../../components/Loader";
 import Badge from "../../components/Badge";
 import DomainThumb from "../../components/DomainThumb";
 
-export default (props) => {
+export default function View(props) {
   const [mission, setMission] = useState();
   const [modal, setModal] = useState(null);
 
@@ -112,7 +111,7 @@ export default (props) => {
       </Footer>
     </Container>
   );
-};
+}
 
 const ApplyButton = ({ applied, placesLeft, setModal }) => {
   return applied ? (

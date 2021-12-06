@@ -4,7 +4,7 @@ import { Field } from "formik";
 
 import Error, { requiredMessage } from "../../../components/errorMessage";
 
-export default ({ title, name, values, handleChange, disabled, options, required = false, errors, touched, placeholder = "" }) => {
+export default function Select({ title, name, values, handleChange, disabled, options, required = false, errors, touched, placeholder = "" }) {
   return (
     <Row className="detail">
       <Col md={4}>
@@ -26,4 +26,4 @@ export default ({ title, name, values, handleChange, disabled, options, required
       </Col>
     </Row>
   );
-};
+}

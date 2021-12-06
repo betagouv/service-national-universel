@@ -7,7 +7,7 @@ import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
 import Loader from "../../components/Loader";
 
-export default ({ location }) => {
+export default function Connect({ location }) {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
@@ -42,4 +42,4 @@ export default ({ location }) => {
 
   if (loading) return <Loader />;
   return <Redirect to="/" />;
-};
+}

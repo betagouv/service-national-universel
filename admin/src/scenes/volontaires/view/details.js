@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS } from "../../../utils";
+import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason, colors } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -12,6 +12,9 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import { Box, BoxTitle } from "../../../components/box";
 import Emails from "../../../components/views/Emails";
 import InfoIcon from "../../../assets/InfoIcon";
+import TickDone from "../../../assets/TickDone";
+import Copy from "../../../assets/Copy";
+import PatchHistoric from "../../../components/views/PatchHistoric";
 import ExpandComponent from "../../../components/ExpandComponent";
 
 const youngConsentmentText = (
@@ -49,7 +52,7 @@ const parentsConsentmentText = (
   </ul>
 );
 
-export default function VolontaireView({ young }) {
+export default function VolontaireViewDetails({ young }) {
   const user = useSelector((state) => state.Auth.user);
 
   function isFromFranceConnect() {
@@ -67,9 +70,11 @@ export default function VolontaireView({ young }) {
           </Box>
         ) : null}
         {young.status === YOUNG_STATUS.WAITING_CORRECTION && young.inscriptionCorrectionMessage ? (
-          <Bloc title="Message de demande de correction :" id={young._id}>
-            {young.inscriptionCorrectionMessage}
-          </Bloc>
+          <Box>
+            <Bloc title="Message de demande de correction :" id={young._id}>
+              <PatchHistoric value={young} model="young" field="inscriptionCorrectionMessage" previewNumber={1} />
+            </Bloc>
+          </Box>
         ) : null}
         <Box>
           <Row>
@@ -245,9 +250,10 @@ export default function VolontaireView({ young }) {
                 <Details title="Consentements validés par ses représentants légaux" value={t(young.parentConsentment || "false")} style={{ border: "none" }} />
                 <ExpandComponent>{parentsConsentmentText}</ExpandComponent>
               </Bloc>
-              {young.withdrawnMessage ? (
+              {young.withdrawnMessage === YOUNG_STATUS.WITHDRAWN && (young.withdrawnMessage || young.withdrawnReason) ? (
                 <Bloc title="Désistement">
-                  <div className="quote">{`« ${young.withdrawnMessage} »`}</div>
+                  {young.withdrawnReason ? <div className="quote">{getLabelWithdrawnReason(young.withdrawnReason)}</div> : null}
+                  <div className="quote">Précision : {young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
                 </Bloc>
               ) : null}
             </Col>
@@ -279,7 +285,13 @@ const Bloc = ({ children, title, last }) => {
 
 const Details = ({ title, value, copy, style }) => {
   if (!value) return <div />;
+  const [copied, setCopied] = React.useState(false);
   if (typeof value === "function") value = value();
+  React.useEffect(() => {
+    if (copied) {
+      setTimeout(() => setCopied(false), 3000);
+    }
+  }, [copied]);
   return (
     <div className="detail" style={style}>
       <div className="detail-title">{`${title} :`}</div>
@@ -288,12 +300,12 @@ const Details = ({ title, value, copy, style }) => {
         {copy ? (
           <div
             className="icon"
-            icon={require(`../../../assets/copy.svg`)}
             onClick={() => {
               copyToClipboard(value);
-              toastr.success(`'${title}' a été copié dans le presse papier.`);
-            }}
-          />
+              setCopied(true);
+            }}>
+            {copied ? <TickDone color={colors.green} width={17} height={17} /> : <Copy color={colors.darkPurple} width={17} height={17} />}
+          </div>
         ) : null}
       </section>
     </div>
@@ -322,12 +334,6 @@ const Wrapper = styled.div`
   .icon {
     cursor: pointer;
     margin: 0 0.5rem;
-    width: 15px;
-    height: 15px;
-    background: ${`url(${require("../../../assets/copy.svg")})`};
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 15px 15px;
   }
 `;
 

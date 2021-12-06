@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { adminURL } from "../config";
@@ -11,6 +12,8 @@ function sendMessage(chat, message) {
     session_id: chat.sessionId,
   });
 }
+
+//! Pour Raph : on fait quoi avec ce fichier ?
 
 export default function Zammad() {
   const young = useSelector((state) => state.Auth.young);
@@ -42,7 +45,7 @@ export default function Zammad() {
             const info = [
               `🧑‍🎓 <a href="${adminURL}/volontaire/${young._id}">${young.firstName + " " + young.lastName}</a> ${young.email}`,
               `🔋 Statut : <b>${translate(young.status)}</b> (phase1: ${translate(young.statusPhase1)} - phase2: ${translate(young.statusPhase2)} - phase3: ${translate(
-                young.statusPhase2
+                young.statusPhase2,
               )} )`,
             ];
             // We have to create a ticket before initializing first chat message
@@ -59,7 +62,7 @@ export default function Zammad() {
                 // Actually send the message when ticket is created
                 sendMessage(chat, [...info, `📝 Ticket : https://support.snu.gouv.fr/#ticket/zoom/${res.data.id}`]);
               })
-              .catch((e) => {
+              .catch(() => {
                 // We don't care about errors.
                 sendMessage(chat, [...info, `Échec de la création du ticket, il faut le créer manuellement`]);
               });
@@ -85,7 +88,7 @@ export default function Zammad() {
             .put(`/support-center/ticket/${chat.ticketId}`, {
               message: `https://support.snu.gouv.fr/#customer_chat/session/${data.message.chat_session_id}`,
             })
-            .then((res) => {
+            .then(() => {
               //
             });
         }
