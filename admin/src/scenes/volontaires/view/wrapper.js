@@ -15,7 +15,7 @@ import Tab from "../../../components/views/Tab";
 import Title from "../../../components/views/Title";
 import { appURL } from "../../../config";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
-import ActionButtonPseudonymize from "../../../components/buttons/ActionButtonPseudonymize";
+import ActionButtonArchive from "../../../components/buttons/ActionButtonArchive";
 
 export default function Wrapper({ children, young, tab }) {
   const history = useHistory();
@@ -86,7 +86,7 @@ export default function Wrapper({ children, young, tab }) {
                 <PanelActionButton icon="pencil" title="Modifier" />
               </Link>
               <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
-              <ActionButtonPseudonymize young={young} />
+              <ActionButtonArchive young={young} />
             </Row>
           </Col>
         </Row>

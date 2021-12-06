@@ -5,13 +5,13 @@ import PanelActionButton from "./PanelActionButton";
 import api from "../../services/api";
 import ModalConfirm from "../modals/ModalConfirm";
 
-export default function ActionButtonPseudonymize({ young, ...rest }) {
+export default function ActionButtonArchive({ young, ...rest }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const history = useHistory();
 
   const onConfirm = async () => {
     try {
-      const { ok } = await api.post(`/young/${young._id}/anonymize`);
+      const { ok } = await api.post(`/young/${young._id}/archive`);
       if (ok) history.go(0);
     } catch (e) {
       console.log(e);
@@ -31,7 +31,7 @@ export default function ActionButtonPseudonymize({ young, ...rest }) {
           });
         }}
         {...rest}>
-        <PanelActionButton icon="eraser" title="Anonymiser" />
+        <PanelActionButton icon="archive" title="Archiver" />
       </div>
       <ModalConfirm
         isOpen={modal?.isOpen}

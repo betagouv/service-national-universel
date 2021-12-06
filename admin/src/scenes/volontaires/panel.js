@@ -9,7 +9,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
-import ActionButtonPseudonymize from "../../components/buttons/ActionButtonPseudonymize";
+import ActionButtonArchive from "../../components/buttons/ActionButtonArchive";
 
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -63,7 +63,7 @@ export default function VolontairePanel({ onChange, value }) {
           <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>
-          <ActionButtonPseudonymize young={young} />
+          <ActionButtonArchive young={young} />
         </div>
         <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
       </div>

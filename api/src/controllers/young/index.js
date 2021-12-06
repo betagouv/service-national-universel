@@ -340,7 +340,7 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
   }
 });
 
-router.post("/:id/anonymize", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/archive", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
