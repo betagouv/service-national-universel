@@ -1,6 +1,13 @@
 const dataMapper = require("../dataMapper/dataMapper");
+const YoungModel = require("../models/young");
+const ReferentModel = require("../models/referent");
+const TicketModel = require("../models/ticket");
+const TagModel = require("../models/tag");
 
 (async () => {
+  console.log("AM I HERE ???");
+  //? Mes étapes
+  // 1. Récupérer les différentes tables et les filtrer pour récupérer les champs intéressants
   const tickets = await dataMapper.getAllTickets();
   const ticketArticles = await dataMapper.getAllTicketArticles();
   const ticketStates = await dataMapper.getAllTicketStates();
@@ -10,6 +17,18 @@ const dataMapper = require("../dataMapper/dataMapper");
   const ticketTags = await dataMapper.getAllTags();
   const tagItems = await dataMapper.getAllTagItems();
   const groups = await dataMapper.getAllGroups();
+  console.log("TAGS", tagItems);
+
+  for (let tag of tagItems) {
+    const tagExisting = await TagModel.findOne({ zammadId: tag.id });
+    if (tagExisting) {
+      if (tagExisting.name !== tag.name) {
+        await tagExisting.save({ name: tag.name });
+      } return;
+    };
+    const SNUtag = await TagModel.create({ zammadId: tag.id, name: tag.name });
+    console.log("TAG CREATED", SNUtag);
+  }
 
   let ticketsArray = [];
   for (let ticket of tickets) {
@@ -36,6 +55,8 @@ const dataMapper = require("../dataMapper/dataMapper");
     let fromCanal = "";
     let category = "";
     let subject = "";
+    let department = "";
+    let region = "";
     for (let tag of tags) {
       const tagName = tagItems.filter((item) => item.id === tag.tag_item_id)[0].name;
       tagsArray.push(tagName);
@@ -45,6 +66,10 @@ const dataMapper = require("../dataMapper/dataMapper");
         fromCanal = tagName;
       } else if (tagName.includes("TECHNICAL") || tagName.includes("QUESTION")) {
         category = tagName;
+      } else if (tagName.includes("DEPARTEMENT")) {
+        department = tagName;
+      } else if (tagName.includes("REGION")) {
+        region = tagName;
       } else {
         subject = tagName;
       }
@@ -58,6 +83,8 @@ const dataMapper = require("../dataMapper/dataMapper");
       emitterUserId: ticket.created_by_id,
       emitterYoungId: "",
       emitterExternal: !!ticket.created_by_id,
+      department,
+      region,
       addressedToAgents,
       fromCanal,
       group: group[0].name,
@@ -76,7 +103,12 @@ const dataMapper = require("../dataMapper/dataMapper");
       lastAgentInChargeUpdateAt: ticket.last_owner_update_at,
       lastUpdateById: ticket.updated_by_id,
     });
-    // Here we could make our TicketModel.create ?
+    // 2. Créer / mettre à jour ma table Tag avec toutes les occurences
+    // 3. Récupérer les ids des tags du ticket dans la table Tag
+    // 4. Checker via l'adresse mail si l'émetteur existe dans notre DB
+    // 5. S'il existe : récupérer son rôle, son département et sa région
+    // 6. S'il n'existe pas : stocker son Zammad id et passer emitterExternal à true
+    // 7. Rassembler toutes les données et créer une nouvelle occurence dans ma table Ticket
   }
   console.log(tickets.length);
 });

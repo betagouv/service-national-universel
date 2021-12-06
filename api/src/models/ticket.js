@@ -12,36 +12,42 @@ const Message = new mongoose.Schema({
       description: "D'où provient l'article (mail, chat, Facebook...)",
       // Not sure if it's relevant to keep this field : we already have a "fromCanal" field in the ticket Schema
     },
-    emitterRole: {
-      type: String,
-      documentation: {
-        description: "rôle de l'émetteur : agent, référent, volontaire..."
-      },
+  },
+  emitterRole: {
+    type: String,
+    documentation: {
+      description: "rôle de l'émetteur : agent, référent, volontaire..."
     },
-    createdByUserId: {
-      type: mongoose.Types.ObjectId,
-      ref: 'referent',
+  },
+  createdByUserId: {
+    type: mongoose.Types.ObjectId,
+    ref: 'referent',
+  },
+  createdByYoungId: {
+    type: mongoose.Types.ObjectId,
+    ref: 'young',
+  },
+  createdByZammadId: {
+    type: String,
+    documentation: {
+      description: "identifiant Zammad de l'émetteur"
     },
-    createdByYoungId: {
-      type: mongoose.Types.ObjectId,
-      ref: 'young',
-    },
-    contentType: {
-      type: String,
-    },
-    body: {
-      type: String,
-      documentation: {
-        description: "contenu du message"
-      }
-    },
-    internal: {
-      type: Boolean,
-      documentation: {
-        description: "le message est-il de visibilité interne"
-      }
-    },
-  }
+  },
+  contentType: {
+    type: String,
+  },
+  body: {
+    type: String,
+    documentation: {
+      description: "contenu du message"
+    }
+  },
+  internal: {
+    type: Boolean,
+    documentation: {
+      description: "le message est-il de visibilité interne"
+    }
+  },
 }, { timestamps: true });
 
 const Schema = new mongoose.Schema({
@@ -88,7 +94,13 @@ const Schema = new mongoose.Schema({
     documentation: {
       description: "Identifiant de l'émetteur",
     },
-  }, // OK
+  },
+  emitterZammadId: {
+    type: String,
+    documentation: {
+      description: "identifiant Zammad de l'émetteur"
+    },
+  },
   emitterExternal: {
     type: Boolean,
     default: false,
@@ -207,11 +219,11 @@ const Schema = new mongoose.Schema({
     ref: 'young'
   },
 
-  tagId: {
+  tags: {
     type: mongoose.Types.ObjectId,
     ref: 'tag',
     documentation: {
-      description: "étiquette reliées au ticket'",
+      description: "étiquettes reliées au ticket",
     },
   },
   messages: {
