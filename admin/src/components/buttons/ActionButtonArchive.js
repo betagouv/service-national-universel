@@ -25,7 +25,7 @@ export default function ActionButtonArchive({ young, ...rest }) {
           setModal({
             isOpen: true,
             onConfirm,
-            title: `Êtes-vous sûr(e) de vouloir anonymiser le profil de ${young.firstName} ?`,
+            title: `Êtes-vous sûr(e) de vouloir archiver le profil de ${young.firstName} ?`,
             message:
               "Cette action est irréversible, et enverra automatiquement un mail au volontaire lui indiquant qu'il peut à nouveau s'inscrire sur la plateforme. Si vous souhaitez modifier le sujet du template, contactez l'équipe technique.",
           });
