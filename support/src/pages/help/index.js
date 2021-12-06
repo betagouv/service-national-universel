@@ -1,4 +1,4 @@
-import Wrapper from "../components/Wrapper";
+import Wrapper from "../../components/Wrapper";
 import Link from "next/link";
 
 const Home = () => {
@@ -6,18 +6,18 @@ const Home = () => {
     <Wrapper>
       <div className="grid grid-cols-1 grid-rows-[auto,180px,auto]">
         <div className="row-span-2 row-start-1 bg-center bg-cover col-span-full" style={{ backgroundImage: `url('/assets/home/hero.png')` }}>
-          <div className="bg-[#32257F] bg-opacity-95 h-full">
+          <div className="bg-snu-purple-900 bg-opacity-95 h-full">
             <div className="pt-24 pb-[276px] wrapper">
               <h1 className="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">Base de connaissance</h1>
-              <h6 className="text-[#C7D2FE] max-w-3xl text-base md:text-lg lg:text-xl">
+              <h6 className="text-snu-purple-100 max-w-3xl text-base md:text-lg lg:text-xl">
                 Retrouvez ici toutes les réponses aux questions et les tutoriels d’utilisation de la plateforme .
               </h6>
             </div>
           </div>
         </div>
 
-        <div className="md:px-10 px-6 flex lg:flex flex-col lg:flex-nowrap max-w-screen-2xl mx-auto flex-wrap grid-cols-2 md:grid md:flex-row row-span-2 row-start-2 col-span-full gap-2.5">
-          <Card title="Gestion du compte utilisateur" small="mon compte" imgSrc="mon-compte.png" to="/mon-compte" />
+        <div className="md:px-10 px-6 flex lg:flex flex-col lg:flex-nowrap overflow-hidden max-w-screen-2xl mx-auto flex-wrap grid-cols-2 md:grid md:flex-row row-span-2 row-start-2 col-span-full gap-2.5 h-80">
+          <Card title="Gestion du compte utilisateur" small="mon compte" imgSrc="my-account.png" to="/mon-compte" />
           <Card title="L’inscription du volontaire" small="Phase 0" imgSrc="phase-0.png" to="/phase0" />
           <Card title="Le séjour de cohésion" small="Phase 1" imgSrc="phase-1.png" to="/phase1" />
           <Card title="La mission d’intérêt général" small="Phase 2" imgSrc="phase-2.png" to="/phase2" />
@@ -31,9 +31,9 @@ const Home = () => {
 
 const Card = ({ title, small, imgSrc, to }) => (
   <Link href={to}>
-    <div className="flex flex-col overflow-hidden bg-white rounded-lg shadow-lg">
-      <div className="h-60">
-        <img className="object-cover w-full h-full" src={`/assets/home/${imgSrc}`} alt={title} />
+    <div className="flex flex-col overflow-hidden bg-white rounded-lg shadow-lg flex-shrink-0 flex-grow w-60 h-full cursor-pointer">
+      <div className="h-1/2 flex-shrink-0 flex-grow-0">
+        <img className="object-cover w-full h-full" src={`/assets/${imgSrc}`} alt={title} />
       </div>
       <div className="flex flex-col gap-2 p-6 pb-12">
         <span className="text-[#C93D38] text-xs lg:text-sm uppercase font-bold">{small}</span>

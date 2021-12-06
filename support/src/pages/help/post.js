@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { HiChevronRight } from "react-icons/hi";
 
-import Wrapper from "../components/Wrapper";
+import Wrapper from "../../components/Wrapper";
 
 const Post = () => {
   return (
     <Wrapper>
-      <div className="bg-[#32257F]">
+      <div className="bg-snu-purple-900">
         <div className="px-8 wrapper flex-col md:flex-row items-start pt-10 pb-[52px] flex md:items-center gap-4">
           <div className="flex-1">
             {/* <div className="flex items-center px-6 bg-white rounded-md mb-7 h-11 w-max shadow-base">
               <span className="text-sm text-gray-500">La mission d’intérêt général / Critères d'éligibilité MIG et structure</span>
             </div> */}
-            <span className="inline-block uppercase mb-2.5 text-[#C7D2FE] font-bold text-sm lg:text-base">mon compte</span>
+            <span className="inline-block uppercase mb-2.5 text-snu-purple-100 font-bold text-sm lg:text-base">mon compte</span>
             <h2 className="text-2xl font-bold text-white lg:text-5xl md:text-3xl">🔐 J'ai oublié mon mot de passe</h2>
           </div>
 

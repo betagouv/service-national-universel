@@ -76,7 +76,7 @@ const Header = ({ isLogin }) => {
 
 const Footer = () => {
   return (
-    <footer className="flex-none bg-white">
+    <footer className="flex flex-col gap-6 wrapper bg-white">
       <div className="flex flex-col gap-6 wrapper">
         <div className="flex flex-col items-center gap-4 md:flex-row">
           <Link href="#">

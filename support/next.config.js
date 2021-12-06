@@ -10,6 +10,15 @@ const moduleExports = {
   images: {
     domains: ["snu-bucket-staging.cellar-c2.services.clever-cloud.com"],
   },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/help",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 const sentryWebpackPluginOptions = {

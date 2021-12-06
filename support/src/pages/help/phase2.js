@@ -1,14 +1,19 @@
-import PopularCard from "../components/PopularCard";
-import CategoryCard from "../components/CategoryCard";
-import Banner from "../components/Banner";
+import PopularCard from "../../components/PopularCard";
+import CategoryCard from "../../components/CategoryCard";
+import Banner from "../../components/Banner";
 import { HiOutlineBadgeCheck, HiOutlineBookmarkAlt } from "react-icons/hi";
 
-import Wrapper from "../components/Wrapper";
+import Wrapper from "../../components/Wrapper";
 
 const Phase2 = () => {
   return (
     <Wrapper>
-      <Banner title="La mission d’intérêt général" category="Phase 2" text="La mission d’intérêt général vise à développer la culture de l’engagement ainsi qu’à renforcer la responsabilité et l’autonomie des jeunes." tag="La mission d’intérêt général" />
+      <Banner
+        title="La mission d’intérêt général"
+        category="Phase 2"
+        text="La mission d’intérêt général vise à développer la culture de l’engagement ainsi qu’à renforcer la responsabilité et l’autonomie des jeunes."
+        tag="La mission d’intérêt général"
+      />
       <div className="flex flex-col py-12 gap-14 md:gap-0 md:py-0 md:flex-row pr-6 pl-6 wrapper">
         <div className="border-gray-300 md:pt-6 md:pr-4 md:border-r md:w-2/3 lg:pt-10 lg:pr-11 md:pb-14 lg:pb-28">
           <h6 className="text-[#32257F] px-4 font-bold text-sm mb-6 uppercase">sujets populaires</h6>

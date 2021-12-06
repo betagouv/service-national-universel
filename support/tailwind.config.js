@@ -14,11 +14,11 @@ module.exports = {
         block: "0px 10px 20px rgba(0, 0, 0, 0.1)",
       },
       colors: {
-        "snu-purple-900": "#342484",
+        "snu-purple-900": "#32257F",
         "snu-purple-800": "#3830a9",
         "snu-purple-600": "#43389b",
         "snu-purple-300": "#5145cc",
-        "snu-purple-100": "#dee7ff",
+        "snu-purple-100": "#C7D2FE",
         warmGray: colors.warmGray,
         trueGray: colors.trueGray,
         coolGray: colors.coolGray,
