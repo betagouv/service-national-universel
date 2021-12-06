@@ -139,6 +139,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         isOpen={modalConfirm?.isOpen}
         title={modalConfirm?.title}
         message={modalConfirm?.message}
+        headerText="Confirmation"
         onCancel={() => setModalConfirm({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
           modalConfirm?.onConfirm?.();
@@ -175,6 +176,8 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         }}
       />
       <ModalConfirmMultiAction
+        showHeaderIcon={true}
+        showHeaderText={false}
         isOpen={modalGoal?.isOpen}
         title={modalGoal?.title}
         message={modalGoal?.message}
