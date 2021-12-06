@@ -62,7 +62,12 @@ const Message = new mongoose.Schema({
 }, { timestamps: true });
 
 const Schema = new mongoose.Schema({
-
+  zammadId: {
+    type: String,
+    documentation: {
+      description: "identifiant dans Zammad",
+    },
+  },
   number: {
     type: [String],
     documentation: {
@@ -78,16 +83,13 @@ const Schema = new mongoose.Schema({
   }, // OK
   category: {
     type: String,
-    enum: ["TECHNICAL", "QUESTION"],
-    required: true,
+    enum: ["TECHNICAL", "QUESTION", ""],
     documentation: {
       description: "Catégorie du ticket",
     },
   }, // OK
   subject: {
     type: String,
-    enum: ["DOWNLOAD", "UPLOAD", "ENGAGEMENT_CONTRACT", "OTHER", "PHASE_1", "PHASE_2", "PHASE_3", "LOGIN"],
-    required: true,
     documentation: {
       description: "Sujet du ticket",
     },
@@ -136,23 +138,21 @@ const Schema = new mongoose.Schema({
   },
   addressedToAgent: {
     type: [String],
-    enum: ["AGENT_SUPPORT", "AGENT_TECHNICAL", "AGENT_DEPARTMENT_REFERENT", "AGENT_REGION_REFERENT"],
-    required: true,
+    enum: ["AGENT_SUPPORT", "AGENT_TECHNICAL", "AGENT_DEPARTMENT_REFERENT", "AGENT_REGION_REFERENT", ""],
     documentation: {
       description: "L'agent (ou les agents) auquel est destiné le ticket",
     },
   }, // OK
   fromCanal: {
     type: String,
-    enum: ["CANAL_FORM", "CANAL_PUBLIC_FORM", "CANAL_MAIL", "CANAL_CHAT", "CANAL_FACEBOOK", "CANAL_TWITTER"],
-    required: true,
+    enum: ["CANAL_Chat", "CANAL_Mail", "CANAL_Plateforme", "CANAL_Formulaire", "CANAL_Facebook", "CANAL_Twitter", ""],
     documentation: {
       description: "canal de communication d'où provient le ticket",
     },
   }, // OK
   group: {
     type: String,
-    enum: ["ADMIN", "CONTACT", "INSCRIPTION", "YOUNG", "REFERENT", "STRUCTURE", "VOLUNTEER"],
+    enum: ["Admin", "Contact", "Inscription", "Jeunes", "Référents", "Structure", "Sous-direction", "Volontaires", "Test", "AnciensUsers"],
     documentation: {
       description: "nom du groupe",
     },
@@ -167,7 +167,7 @@ const Schema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["NEW", "OPEN", "CLOSED", "PENDING_REMINDER", "PENDING_CLOSURE"],
+    enum: ["new", "open", "closed", "pending reminder", "pending close", "merged"],
     documentation: {
       description: "nom de l'état du ticket",
     },
@@ -217,22 +217,26 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  agentInChargeZammadId: {
+    type: String,
+    documentation: {
+      description: "identifiant de l'agent en charge du ticket",
+    },
+  },
+
   lastAgentInChargeUpdateAt: {
-    type: mongoose.Types.ObjectId,
-    ref: 'referent',
+    type: Date,
     documentation: {
       description: "dernière mise à jour de la part de l'agent en charge",
     },
   },
 
   lastUpdateById: {
-    type: mongoose.Types.ObjectId,
-    ref: 'young'
+    type: String,
   },
 
   tags: {
-    type: mongoose.Types.ObjectId,
-    ref: 'tag',
+    type: Array,
     documentation: {
       description: "étiquettes reliées au ticket",
     },
