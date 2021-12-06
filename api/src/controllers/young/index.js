@@ -359,7 +359,7 @@ router.post("/:id/archive", passport.authenticate("referent", { session: false, 
     await young.save({ fromUser: req.user });
     await sendTemplate(SENDINBLUE_TEMPLATES.young.ARCHIVED, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: previousEmail }],
-      params: { cta: `${config.APP_URL}/inscription` },
+      params: { cta: `${config.APP_URL}/inscription/profil` },
     });
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
