@@ -11,7 +11,7 @@ const dataMapper = {
   },
   getAllTicketArticles: async () => {
     try {
-      const articles = await client("SELECT * from ticket_articles limit 10");
+      const articles = await client("SELECT * from ticket_articles");
       return articles.rows;
     } catch (error) {
       throw error;
