@@ -19,6 +19,7 @@ const TagModel = require("../models/tag");
   const groups = await dataMapper.getAllGroups();
   console.log("TAGS", tagItems);
 
+  // 2. Créer / mettre à jour ma table Tag avec toutes les occurences
   for (let tag of tagItems) {
     const tagExisting = await TagModel.findOne({ zammadId: tag.id });
     if (tagExisting) {
@@ -50,16 +51,14 @@ const TagModel = require("../models/tag");
     const priority = ticketPriorities.filter((priority) => ticket.priority_id === priority.id);
     const group = groups.filter((group) => ticket.group_id === group.id);
     const tags = ticketTags.filter((tag) => tag.o_id === ticket.id);
-    let tagsArray = [];
+    let tagsIds = [];
     let addressedToAgents = [];
     let fromCanal = "";
     let category = "";
-    let subject = "";
     let department = "";
     let region = "";
     for (let tag of tags) {
       const tagName = tagItems.filter((item) => item.id === tag.tag_item_id)[0].name;
-      tagsArray.push(tagName);
       if (tagName.includes("AGENT")) {
         addressedToAgents.push(tagName);
       } else if (tagName.includes("CANAL")) {
@@ -71,11 +70,14 @@ const TagModel = require("../models/tag");
       } else if (tagName.includes("REGION")) {
         region = tagName;
       } else {
-        subject = tagName;
+        // 3. Récupérer les ids des tags du ticket dans la table Tag
+        const tagId = await TagModel.findOne({ zammadId: tag_item_id });
+        tagsIds.push(tagId.zammadId);
       }
     }
 
     ticketsArray.push({
+      zammadId: ticket.id,
       number: ticket.number,
       title: ticket.title,
       category,
@@ -103,8 +105,6 @@ const TagModel = require("../models/tag");
       lastAgentInChargeUpdateAt: ticket.last_owner_update_at,
       lastUpdateById: ticket.updated_by_id,
     });
-    // 2. Créer / mettre à jour ma table Tag avec toutes les occurences
-    // 3. Récupérer les ids des tags du ticket dans la table Tag
     // 4. Checker via l'adresse mail si l'émetteur existe dans notre DB
     // 5. S'il existe : récupérer son rôle, son département et sa région
     // 6. S'il n'existe pas : stocker son Zammad id et passer emitterExternal à true

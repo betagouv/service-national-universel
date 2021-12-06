@@ -6,11 +6,10 @@ const esClient = require("../es");
 const MODELNAME = "ticket";
 
 const Message = new mongoose.Schema({
-  type: {
+  zammadId: {
     type: String,
     documentation: {
-      description: "D'où provient l'article (mail, chat, Facebook...)",
-      // Not sure if it's relevant to keep this field : we already have a "fromCanal" field in the ticket Schema
+      description: "identifiant dans Zammad",
     },
   },
   emitterRole: {
