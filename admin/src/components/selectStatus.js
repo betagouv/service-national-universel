@@ -21,19 +21,14 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
   const user = useSelector((state) => state.Auth.user);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
 
-  // const getInscriptions = async (department) => {
-  //   const { data } = await api.get(`/inscription-goal/${department}/current`);
-  //   return data;
-  // };
-
-  // const getInscriptionGoalReachedNormalized = async (departement) => {
-  //   const { data, ok, code } = await api.get("/inscription-goal");
-  //   let max = 0;
-  //   if (data) max = data.filter((d) => d.department === departement)[0]?.max;
-  //   if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
-  //   const nbYoungs = await getInscriptions(departement);
-  //   return max > 0 && { ...nbYoungs, max };
-  // };
+  const getInscriptionGoalReachedNormalized = async ({ departement, cohort }) => {
+    const { data, ok, code } = await api.get(`/inscription-goal/${encodeURIComponent(cohort)}/department/${encodeURIComponent(departement)}`);
+    if (!ok) {
+      toastr.error("Oups, une erreur s'est produite", translate(code));
+      return null;
+    }
+    return data;
+  };
 
   useEffect(() => {
     (async () => {
@@ -49,13 +44,12 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
   const handleClickStatus = async (status) => {
     setModalConfirm({
       isOpen: true,
-      onConfirm: () => {
+      onConfirm: async () => {
         if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
-        // if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-        //   const youngs = await getInscriptionGoalReachedNormalized(young.department);
-        //   const ratioRegistered = youngs.registered / youngs.max;
-        //   if (ratioRegistered >= 1) return setModal("goal");
-        // }
+        if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
+          const fillingRate = await getInscriptionGoalReachedNormalized(young.department);
+          if (fillingRate >= 1) return setModal("goal");
+        }
         setStatus(status);
       },
       title: "Modification de statut",
