@@ -24,7 +24,7 @@ const KnowledgeBase = () => {
 
   const [metadataVisible, setMetadataVisible] = useState(!localStorage.getItem("snu-support-kb-meta-hidden"));
   useEffect(() => {
-    if (!treeVisible) {
+    if (!metadataVisible) {
       localStorage.setItem("snu-support-kb-meta-hidden", "true");
     } else {
       localStorage.removeItem("snu-support-kb-meta-hidden");
