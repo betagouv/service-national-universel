@@ -51,7 +51,8 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange, 
 
   let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " 🔴 " : " ";
 
-  const showOpen = isDragging || open;
+  // const showOpen = isDragging || open;
+  const showOpen = open;
 
   return (
     <div
@@ -148,15 +149,17 @@ const KnowledgeBaseTree = ({ visible }) => {
 
   // reloadTreeKey to prevent error `Failed to execute 'removeChild' on 'Node'` from sortablejs after updating messy tree
   const [reloadTreeKey, setReloadeTreeKey] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
+  // const [isDragging, setIsDragging] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const rootRef = useRef(null);
-  const onStartDrag = () => setIsDragging(true);
+  const onStartDrag = () => {
+    // setIsDragging(true);
+  };
 
   const onListChange = async () => {
     setIsSaving(true);
-    setIsDragging(false);
+    // setIsDragging(false);
     const body = getReorderedTree(rootRef.current.children[0], flattenedData);
     const response = await API.put({ path: "/support-center/knowledge-base/reorder", body });
     if (!response.ok) {
@@ -164,7 +167,7 @@ const KnowledgeBaseTree = ({ visible }) => {
       return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
     }
     mutate(response);
-    setIsDragging(false);
+    // setIsDragging(false);
     setReloadeTreeKey((k) => k + 1);
     setIsSaving(false);
   };
