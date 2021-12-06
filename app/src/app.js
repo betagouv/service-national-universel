@@ -126,11 +126,11 @@ const Espace = () => {
             <Route path="/phase2" component={Phase2} />
             <Route path="/phase3" component={Phase3} />
             <Route path="/les-programmes" component={Engagement} />
-            <Route path="/documents" component={Documents} />
+            {/* useless ? */}
+            {/* <Route path="/documents" component={Documents} /> */}
             <Route path="/preferences" component={Preferences} />
             <Route path="/mission" component={Missions} />
             <Route path="/candidature" component={Applications} />
-            <Route path="/cohesion" component={Cohesion} />
             <Route path="/diagoriente" component={Diagoriente} />
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />

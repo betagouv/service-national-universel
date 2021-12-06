@@ -10,11 +10,13 @@ import Loader from "../../components/Loader";
 import Application from "./components/application";
 import api from "../../services/api";
 import AlertBox from "../../components/AlertBox";
+import { permissionPhase2 } from "../../utils";
 
 export default function Index() {
   const [applications, setApplications] = useState(null);
   const [showInfo, setShowInfo] = useState(true);
   const young = useSelector((state) => state.Auth.young);
+  if (!young || !permissionPhase2(young)) history.push("/");
 
   const toggleShowInfo = () => {
     setShowInfo(!showInfo);
