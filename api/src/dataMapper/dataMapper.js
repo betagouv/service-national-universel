@@ -73,6 +73,14 @@ const dataMapper = {
       throw error;
     }
   },
+  getAllUsers: async () => {
+    try {
+      const users = await client("SELECT * from users");
+      return users.rows;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 module.exports = dataMapper;
