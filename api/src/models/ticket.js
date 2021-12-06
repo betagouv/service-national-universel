@@ -12,10 +12,22 @@ const Message = new mongoose.Schema({
       description: "identifiant dans Zammad",
     },
   },
-  emitterRole: {
+  type: {
+    type: String,
+    documentation: {
+      description: "zammad type",
+    }
+  },
+  emitterSNURole: {
     type: String,
     documentation: {
       description: "rôle de l'émetteur : agent, référent, volontaire..."
+    },
+  },
+  emitterZammadRole: {
+    type: String,
+    documentation: {
+      description: "rôle de l'émetteur sur Zammad"
     },
   },
   createdByUserId: {
@@ -226,7 +238,7 @@ const Schema = new mongoose.Schema({
     },
   },
   messages: {
-    type: Message,
+    type: [Message],
   },
 
   closedAt: {
