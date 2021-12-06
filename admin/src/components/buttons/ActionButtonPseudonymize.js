@@ -31,7 +31,7 @@ export default function ActionButtonPseudonymize({ young, ...rest }) {
           });
         }}
         {...rest}>
-        <PanelActionButton icon="impersonate" title="Anonymiser" />
+        <PanelActionButton icon="eraser" title="Anonymiser" />
       </div>
       <ModalConfirm
         isOpen={modal?.isOpen}
