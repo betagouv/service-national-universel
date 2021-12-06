@@ -351,12 +351,16 @@ router.post("/:id/archive", passport.authenticate("referent", { session: false, 
 
     const young = await YoungObject.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
+    const previousEmail = young.email;
     young.set({
       email: "reliquat-2021+" + young.email.replace("reliquat-2021+", ""),
       lastName: "Reliquat 2021 " + young.lastName.replace("Reliquat 2021 ", ""),
     });
     await young.save({ fromUser: req.user });
+    await sendTemplate(SENDINBLUE_TEMPLATES.young.ARCHIVED, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: previousEmail }],
+      params: { cta: `${config.APP_URL}/inscription` },
+    });
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
