@@ -3,7 +3,7 @@ const client = require('./database');
 const dataMapper = {
   getAllTickets: async () => {
     try {
-      const tickets = await client("SELECT * from tickets");
+      const tickets = await client("SELECT * from tickets limit 5");
       return tickets.rows;
     } catch (error) {
       throw error;
@@ -11,7 +11,7 @@ const dataMapper = {
   },
   getAllTicketArticles: async () => {
     try {
-      const articles = await client("SELECT * from ticket_articles");
+      const articles = await client("SELECT * from ticket_articles limit 10");
       return articles.rows;
     } catch (error) {
       throw error;
