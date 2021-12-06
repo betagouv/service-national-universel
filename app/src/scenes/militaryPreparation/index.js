@@ -7,7 +7,7 @@ import { useHistory, Link } from "react-router-dom";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
-import { translate, SENDINBLUE_TEMPLATES } from "../../utils";
+import { translate, SENDINBLUE_TEMPLATES, permissionPhase2 } from "../../utils";
 import { HeroContainer, Hero, Content, SeparatorXS } from "../../components/Content";
 import UploadCard from "./components/UploadCard";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -20,9 +20,10 @@ export default function Index() {
   const dispatch = useDispatch();
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-
   const [applicationsToMilitaryPreparation, setApplicationsToMilitaryPreparation] = useState(null);
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
+
+  if (!young || !permissionPhase2(young)) history.push("/");
 
   useEffect(() => {
     getApplications();

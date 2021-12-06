@@ -19,11 +19,9 @@ import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Diagoriente from "./scenes/diagoriente";
 import SupportCenter from "./scenes/support-center";
-import Documents from "./scenes/documents";
 import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
 import Applications from "./scenes/applications";
-import Cohesion from "./scenes/cohesion-2020/";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
 import Loader from "./components/Loader";
@@ -126,11 +124,9 @@ const Espace = () => {
             <Route path="/phase2" component={Phase2} />
             <Route path="/phase3" component={Phase3} />
             <Route path="/les-programmes" component={Engagement} />
-            <Route path="/documents" component={Documents} />
             <Route path="/preferences" component={Preferences} />
             <Route path="/mission" component={Missions} />
             <Route path="/candidature" component={Applications} />
-            <Route path="/cohesion" component={Cohesion} />
             <Route path="/diagoriente" component={Diagoriente} />
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
