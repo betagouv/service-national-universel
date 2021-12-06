@@ -407,6 +407,12 @@ const Schema = new mongoose.Schema({
       description: "Ville pendant le snu du volontaire",
     },
   },
+  addressVerified: {
+    type: String,
+    documentation: {
+      description: "Adresse validée",
+    },
+  },
   cityCode: {
     type: String,
     documentation: {

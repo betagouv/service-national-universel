@@ -255,6 +255,7 @@ export default function StepCoordonnees() {
                         region: "region",
                         cityCode: "cityCode",
                         academy: "academy",
+                        addressVerified: "addressVerified",
                       }}
                       values={values}
                       handleChange={handleChange}
@@ -366,6 +367,7 @@ export default function StepCoordonnees() {
                           region: "region",
                           cityCode: "cityCode",
                           academy: "academy",
+                          addressVerified: "addressVerified",
                         }}
                         values={values}
                         departAndRegionVisible={false}
