@@ -77,45 +77,47 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey }) => {
   });
 
   return (
-    <div className="px-8 pt-8 flex-grow flex-shrink flex flex-col overflow-hidden">
-      <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
-        <Toolbar>
-          <Button>
-            <EmojiPicker size={10} className="text-2xl my-1.5 !mr-0 !h-5 !w-5" insertEmoji={editor.insertText} />
-          </Button>
-          <MarkButton format="bold" icon="format_bold" />
-          <MarkButton format="italic" icon="format_italic" />
-          <MarkButton format="underline" icon="format_underlined" />
-          <BlockButton format="block-quote" icon="format_quote" />
-          {/* <MarkButton format="code" icon="code" /> */}
-          <Spacer />
-          <BlockButton format="heading-one" icon="looks_one" />
-          <BlockButton format="heading-two" icon="looks_two" />
-          <BlockButton format="heading-three" icon="looks_3" />
-          <Spacer />
-          <BlockButton format="numbered-list" icon="format_list_numbered" />
-          <BlockButton format="bulleted-list" icon="format_list_bulleted" />
-        </Toolbar>
-        <div id="text-editor" className="overflow-auto flex-shrink flex-grow">
-          <Editable
-            renderElement={renderElement}
-            renderLeaf={renderLeaf}
-            placeholder="Commencez à écrire votre article..."
-            spellCheck
-            autoFocus
-            onKeyDown={(event) => {
-              for (const hotkey in HOTKEYS) {
-                if (isHotkey(hotkey, event)) {
-                  event.preventDefault();
-                  const mark = HOTKEYS[hotkey];
-                  toggleMark(editor, mark);
+    <div className="flex-grow flex-shrink flex flex-col  overflow-hidden">
+      <div className="px-8 mt-6 pt-2 flex-grow flex-shrink flex flex-col bg-white  overflow-hidden">
+        <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
+          <Toolbar>
+            <Button>
+              <EmojiPicker size={10} className="text-2xl my-1.5 !mr-0 !h-5 !w-5" insertEmoji={editor.insertText} />
+            </Button>
+            <MarkButton format="bold" icon="format_bold" />
+            <MarkButton format="italic" icon="format_italic" />
+            <MarkButton format="underline" icon="format_underlined" />
+            <BlockButton format="block-quote" icon="format_quote" />
+            {/* <MarkButton format="code" icon="code" /> */}
+            <Spacer />
+            <BlockButton format="heading-one" icon="looks_one" />
+            <BlockButton format="heading-two" icon="looks_two" />
+            <BlockButton format="heading-three" icon="looks_3" />
+            <Spacer />
+            <BlockButton format="numbered-list" icon="format_list_numbered" />
+            <BlockButton format="bulleted-list" icon="format_list_bulleted" />
+          </Toolbar>
+          <div id="text-editor" className="overflow-auto flex-shrink flex-grow">
+            <Editable
+              renderElement={renderElement}
+              renderLeaf={renderLeaf}
+              placeholder="Commencez à écrire votre article..."
+              spellCheck
+              autoFocus
+              onKeyDown={(event) => {
+                for (const hotkey in HOTKEYS) {
+                  if (isHotkey(hotkey, event)) {
+                    event.preventDefault();
+                    const mark = HOTKEYS[hotkey];
+                    toggleMark(editor, mark);
+                  }
                 }
-              }
-            }}
-          />
-        </div>
-      </Slate>
-      <div className="py-2 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
+              }}
+            />
+          </div>
+        </Slate>
+      </div>
+      <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
         <button onClick={onSave} disabled={!isSaveable} className="px-8 py-2 box-border">
           Enregistrer
         </button>

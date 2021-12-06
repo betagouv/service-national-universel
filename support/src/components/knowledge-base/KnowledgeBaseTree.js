@@ -49,7 +49,7 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange, 
     sortable.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange, onStart: onStartDrag });
   }, []);
 
-  let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " 🚦 " : " ";
+  let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " 🔴 " : " ";
 
   const showOpen = isDragging || open;
 
@@ -105,6 +105,7 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange, 
 
 const Answer = ({ article, level, onIsActive, position, parentId }) => {
   const isActive = useIsActive(article, onIsActive);
+  const icon = article.status === "DRAFT" ? "📝 🔴 " : "📃 ";
   return (
     <Link key={article._id} href={`/admin/knowledge-base/${article.slug}`} passHref>
       <a
@@ -114,7 +115,7 @@ const Answer = ({ article, level, onIsActive, position, parentId }) => {
         href="#"
         className={`text-warmGray-500  overflow-hidden overflow-ellipsis whitespace-nowrap block ml-${level * horizontalSpacing} ${isActive ? "font-bold" : ""}`}
       >
-        {`${article.status === "DRAFT" ? "📝" : "📃"}  ${article.title}`}
+        {`${icon}  ${article.title}`}
       </a>
     </Link>
   );
