@@ -1,4 +1,4 @@
-const WIP = ({ title, children }) => {
+const WIP = ({ children }) => {
   return (
     <div className="flex flex-col items-center justify-center w-full h-full flex-shrink">
       {/* <h1 className="mb-10">{title}</h1> */}
