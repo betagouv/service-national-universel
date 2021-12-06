@@ -136,6 +136,7 @@ const Home = () => {
           <RestrictedRoute path="/association" component={Association} />
           <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
           <RestrictedRoute path="/boite-de-reception" component={Inbox} />
+          <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
           <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
           <RestrictedRoute path="/" component={renderDashboard} />
         </Switch>
