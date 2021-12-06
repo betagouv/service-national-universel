@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { SUPPORT_ROLES } from "snu-lib/roles";
+import Image from "next/image";
 import { toast } from "react-toastify";
 import API from "../../services/api";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
@@ -46,6 +47,20 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
     }
   };
 
+  const onUploadImage = async (event) => {
+    const imageRes = await API.uploadFile("/support-center/knowledge-base/picture", event.target.files);
+    if (imageRes.code === "FILE_CORRUPTED") {
+      return toast.error("Le fichier semble corrompu", "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support", {
+        timeOut: 0,
+      });
+    }
+    if (!imageRes.ok) return toast.error("Une erreur s'est produite lors du téléversement de votre fichier");
+    const response = await API.put({ path: `/support-center/knowledge-base/${item._id}`, body: { imageSrc: imageRes.data } });
+    if (response.error) return toast.error(response.error);
+    mutate();
+    toast.success("Fichier téléversé");
+  };
+
   return (
     <aside className={`flex-grow-0 flex-shrink-0 border-l-2 shadow-lg z-10 resize-x dir-rtl overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
       <form onSubmit={onSubmit} className="flex-grow-0 flex-shrink-0  px-4 py-6 flex flex-col w-full overflow-scroll h-full dir-ltr items-start" key={item._id}>
@@ -59,6 +74,24 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
         />
         <label htmlFor="slug">Slug (Url)</label>
         <input className="p-2 border-2 mb-5 w-full" placeholder={`Slug ${item.type === "section" ? "de la rubrique" : "de l'article"}`} name="slug" defaultValue={item.slug} />
+        {item.type === "section" && (
+          <>
+            {!!item.imageSrc && (
+              <div className="relative h-40 w-full bg-gray-300 flex-shrink-0 ">
+                <Image alt={item.title} className="block h-auto w-full object-cover" src={item.imageSrc} layout="fill" />
+              </div>
+            )}
+            <label htmlFor="imageSrc">Image (option)</label>
+            <input
+              className="p-2 border-2 mb-5 w-full flex-shrink-0"
+              accept="image/jpeg,image/png"
+              name="imageSrc"
+              type="file"
+              onChange={onUploadImage}
+              placeholder="Choisissez un fichier"
+            />
+          </>
+        )}
         <label htmlFor="description">Description</label>
         <textarea
           className="p-2 border-2 mb-5 w-full flex-shrink-0"

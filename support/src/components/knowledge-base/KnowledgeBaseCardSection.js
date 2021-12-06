@@ -17,7 +17,7 @@ const KnowledgeBaseCardSection = ({ _id, imageSrc, position, imageAlt, title, sl
     <Link key={_id} href={`/admin/knowledge-base/${slug}`} passHref>
       <a href="#" data-position={position} data-id={_id} className="my-1 px-1 w-full flex-shrink-0 flex-grow-0 lg:my-4 lg:px-4 ">
         <article className="overflow-hidden rounded-lg shadow-lg bg-white">
-          <div className="h-32 w-full bg-gray-300 flex items-center justify-center ">
+          <div className="h-40 w-full bg-gray-300 flex items-center justify-center overflow-hidden">
             {!!imageSrc ? <img alt={imageAlt} className="block h-auto w-full" src={imageSrc} /> : <span className="text-gray-400">Pas d'image</span>}
           </div>
           <header className="flex items-center justify-between leading-tight p-2 md:p-4">
