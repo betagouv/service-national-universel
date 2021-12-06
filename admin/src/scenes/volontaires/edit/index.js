@@ -13,6 +13,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import { translate, ROLES } from "../../../utils";
 import api from "../../../services/api";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import ActionButtonArchive from "../../../components/buttons/ActionButtonArchive";
 import { appURL } from "../../../config";
 import Loader from "../../../components/Loader";
 
@@ -83,6 +84,7 @@ export default function VolontaireEdit(props) {
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
               <div style={{ display: "flex" }}>
+                <ActionButtonArchive young={values} />
                 <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
                   <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                 </a>
