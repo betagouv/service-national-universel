@@ -486,8 +486,8 @@ export default function Edit(props) {
                       errors={errors}
                       touched={touched}
                       validateField={validateField}
+                      required={true}
                     />
-                    <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la ville.</p>
                   </Wrapper>
                 </Col>
               </Row>

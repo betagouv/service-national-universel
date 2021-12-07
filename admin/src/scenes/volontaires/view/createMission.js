@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 
 import MultiSelect from "../../../components/Multiselect";
 import LoadingButton from "../../../components/buttons/LoadingButton";
-import AddressInput from "../../../components/addressInput";
+import AddressInput from "../../../components/addressInputV2";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
 import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES, SENDINBLUE_TEMPLATES, PERIOD } from "../../../utils";
 import api from "../../../services/api";
@@ -155,7 +155,7 @@ export default function CreateMission({ young, onSend }) {
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
       }}>
-      {({ values, handleChange, handleSubmit, errors, touched, isSubmitting }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, validateField }) => (
         <div>
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
@@ -499,8 +499,9 @@ export default function CreateMission({ young, onSend }) {
                     handleChange={handleChange}
                     errors={errors}
                     touched={touched}
+                    validateField={validateField}
+                    required={true}
                   />
-                  <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la ville.</p>
                 </Wrapper>
               </Col>
             </Row>
