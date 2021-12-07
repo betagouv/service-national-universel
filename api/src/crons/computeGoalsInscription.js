@@ -37,10 +37,10 @@ exports.handler = async () => {
       const values = await getCount({ department });
       await getGoalAndComputeFillingRates({ department, values });
     }
-    slack.success({ title: "computeGoalsInscription", text: "I'm done !" });
+    slack.success({ title: "filling rates computed" });
   } catch (e) {
     capture(`ERROR`, JSON.stringify(e));
     capture(e);
-    slack.error({ title: "computeGoalsInscription", text: "An error occured 😢" });
+    slack.error({ title: "computeGoalsInscription", text: JSON.stringify(e) });
   }
 };
