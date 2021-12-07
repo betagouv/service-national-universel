@@ -44,7 +44,7 @@
     "webpack-dev-server": "3.11.3"
   },
   "dependencies": {
-    "@appbaseio/reactivesearch": "^3.14.0",
+    "@appbaseio/reactivesearch": "3.26.0",
     "@sentry/react": "^6.13.3",
     "@sentry/tracing": "^6.13.3",
     "babel-loader": "8.2.3",
