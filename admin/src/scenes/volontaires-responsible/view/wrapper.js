@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import api from "../../../services/api";
 import { useHistory } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate, userIsResponsibleFromStructureMilitaryPreparation, ENABLE_PM } from "../../../utils";
+import { userIsResponsibleFromStructureMilitaryPreparation, ENABLE_PM } from "../../../utils";
 import Badge from "../../../components/Badge";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import Title from "../../../components/views/Title";
 
-export default ({ children, young, tab }) => {
+export default function Wrapper({ children, young, tab }) {
   const user = useSelector((state) => state.Auth.user);
   const [showMilitaryPreparationTab, setShowMilitaryPreparationTab] = useState(false);
   useEffect(() => {
@@ -40,8 +38,7 @@ export default ({ children, young, tab }) => {
                   <Tab
                     disabled={young.statusMilitaryPreparationFiles !== "VALIDATED"}
                     isActive={tab === "militaryPreparation"}
-                    onClick={() => young.statusMilitaryPreparationFiles === "VALIDATED" && history.push(`/volontaire/${young._id}/preparation-militaire`)}
-                  >
+                    onClick={() => young.statusMilitaryPreparationFiles === "VALIDATED" && history.push(`/volontaire/${young._id}/preparation-militaire`)}>
                     Préparation militaire
                   </Tab>
                 ) : null}
@@ -53,7 +50,7 @@ export default ({ children, young, tab }) => {
       {children}
     </div>
   );
-};
+}
 
 const Header = styled.div`
   padding: 0 25px 0;

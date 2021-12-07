@@ -16,7 +16,7 @@ import LoginBox from "./components/LoginBox";
 import Text from "./components/Text";
 import Subtitle from "./components/Subtitle";
 
-export default () => {
+export default function Forgot() {
   const [done, setDone] = useState(false);
   const [mail, setMail] = useState();
 
@@ -52,8 +52,7 @@ export default () => {
                   toastr.error("Erreur !", translate(e.code));
                 }
                 actions.setSubmitting(false);
-              }}
-            >
+              }}>
               {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
                 return (
                   <form onSubmit={handleSubmit}>
@@ -89,4 +88,4 @@ export default () => {
       </LoginBox>
     </div>
   );
-};
+}

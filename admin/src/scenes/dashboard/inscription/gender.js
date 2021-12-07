@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 
-export default ({ filter }) => {
+export default function Gender({ filter }) {
   const [gender, setGender] = useState(null);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export default ({ filter }) => {
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );
-};
+}
 
 const Content = styled.div`
   display: flex;

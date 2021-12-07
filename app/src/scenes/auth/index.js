@@ -8,7 +8,7 @@ import SignupInvite from "./signupInvite";
 
 import Signin from "./signin";
 
-export default () => {
+export default function Index() {
   return (
     <Switch>
       <Route path="/auth/signup/invite" component={SignupInvite} />
@@ -18,4 +18,4 @@ export default () => {
       <Route path="/auth" component={Signin} />
     </Switch>
   );
-};
+}

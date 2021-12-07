@@ -1,28 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
-import { NavLink } from "react-router-dom";
-import { useHistory } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
+import { translate } from "../../../utils";
 
-export default () => {
+export default function TicketCreate() {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
 
   return (
     <Container>
-      <BackButton to={`/besoin-d-aide`}>{"<"} Retour à l'accueil</BackButton>
+      <BackButton to={`/besoin-d-aide`}>{"<"} Retour à l&apos;accueil</BackButton>
       <Heading>
-        <h4>Contacter quelqu'un</h4>
-        <p>Vous avez un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l'un de vos référents ?</p>
+        <h4>Contacter quelqu&apos;un</h4>
+        <p>Vous avez un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l&apos;un de vos référents ?</p>
       </Heading>
       <Form>
         <Formik
@@ -32,10 +32,11 @@ export default () => {
           onSubmit={async (values) => {
             try {
               const { message, step1, step2 } = values;
-              const { ok, code, data } = await api.post("/support-center/ticket", {
+              const { ok, code } = await api.post("/support-center/ticket", {
                 title: `${step1?.label} - ${step2?.label}`,
                 message,
-                tags: [...new Set([...tags, ...step1?.tags, ...step2?.tags])], // we use this dirty hack to remove duplicates
+                // eslint-disable-next-line no-unsafe-optional-chaining
+                tags: [...new Set([...tags, ...[step1?.tags || []], ...[step2?.tags || []]])], // we use this dirty hack to remove duplicates
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
@@ -44,8 +45,7 @@ export default () => {
               console.log(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
             }
-          }}
-        >
+          }}>
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
             <>
               <SelectTag
@@ -96,7 +96,7 @@ export default () => {
       </Form>
     </Container>
   );
-};
+}
 
 const Item = ({ title, name, value, handleChange, errors, touched, validate, type, options, ...props }) => {
   return (

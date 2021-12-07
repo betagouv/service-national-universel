@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Node 14.x
         uses: actions/setup-node@v1
@@ -35,7 +35,7 @@ jobs:
           node-version: 14.x
       
       - name: Start MongoDB 4.0
-        uses: supercharge/mongodb-github-action@1.6.0
+        uses: supercharge/mongodb-github-action@1.7.0
         with:
           mongodb-version: '4.0'
 
@@ -49,7 +49,7 @@ jobs:
         run: npm install
 
       - name: Test and Send coverage
-        uses: paambaati/codeclimate-action@v2.7.4
+        uses: paambaati/codeclimate-action@v2.7.5
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           CI: true
@@ -65,7 +65,7 @@ jobs:
 
     steps:
       - name: Git checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Node 14.x
         uses: actions/setup-node@v1

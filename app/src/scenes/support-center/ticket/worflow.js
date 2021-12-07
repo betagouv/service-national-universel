@@ -15,8 +15,7 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
         onChange={(e) => {
           const value = options.find((o) => o.id === e.target.value);
           handleChange({ target: { name, value } });
-        }}
-      >
+        }}>
         <option value="" disabled>
           {selectPlaceholder}
         </option>

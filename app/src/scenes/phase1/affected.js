@@ -12,14 +12,14 @@ import DownloadConvocationButton from "../../components/buttons/DownloadConvocat
 import SelectMeetingPoint from "./SelectMeetingPoint";
 import Convocation from "./components/Convocation";
 
-export default () => {
+export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(true);
 
   const isFromDOMTOM = () => {
     return ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
-      young.department
+      young.department,
     );
   };
   const showConvocation = () => {
@@ -60,13 +60,13 @@ export default () => {
               <strong>Mon séjour de cohésion</strong>
             </h1>
             <p>
-              Le SNU vous donne l'opportunité de découvrir la vie collective au sein d'un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens nouveaux
-              et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
+              Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
+              nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
             </p>
             <p>Cette année, il se déroule du 21 juin au 2 juillet 2021. </p>
             <Separator />
             <p>
-              <strong>Votre lieu d'affectation</strong>
+              <strong>Votre lieu d&apos;affectation</strong>
               <br />
               Vous êtes actuellement affecté(e) à un centre de cohésion.
               <br />
@@ -134,7 +134,7 @@ export default () => {
               <div>
                 <h2>Votre convocation</h2>
                 <p>
-                  Votre convocation sera à présenter à votre arrivée muni d'une pièce d'identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures
+                  Votre convocation sera à présenter à votre arrivée muni d&apos;une pièce d&apos;identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures
                   (recommandé)
                 </p>
               </div>
@@ -152,7 +152,7 @@ export default () => {
       ) : null}
     </>
   );
-};
+}
 
 const ContentHorizontal = styled(Content)`
   display: flex;

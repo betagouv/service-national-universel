@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 
 const getActiveClassName = (pathname, href, exact) => {
   if (exact) {
-    if (pathname === href) return "bg-snu-purple-300";
+    if (pathname === href) return "font-bold";
     return "";
   }
-  if (pathname.includes(href)) return "bg-snu-purple-300";
+  if (pathname.includes(href)) return "font-bold";
   return "";
 };
 
@@ -20,7 +20,7 @@ const NavLink = ({ href, children, exact = false, className = "" }) => {
 
   return (
     <Link href={href} passHref>
-      <li className={`hover:bg-snu-purple-600 px-6 py-4 cursor-pointer ${activeClassName} ${className}`}>{children}</li>
+      <li className={`px-4 py-2 text-sm cursor-pointer ${activeClassName} ${className}`}>{children}</li>
     </Link>
   );
 };

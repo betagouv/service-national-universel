@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import api from "../../../services/api";
-import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
@@ -16,8 +15,9 @@ import Tab from "../../../components/views/Tab";
 import Title from "../../../components/views/Title";
 import { appURL } from "../../../config";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ActionButtonArchive from "../../../components/buttons/ActionButtonArchive";
 
-export default ({ children, young, tab }) => {
+export default function Wrapper({ children, young, tab }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -86,6 +86,7 @@ export default ({ children, young, tab }) => {
                 <PanelActionButton icon="pencil" title="Modifier" />
               </Link>
               <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+              <ActionButtonArchive young={young} />
             </Row>
           </Col>
         </Row>
@@ -103,7 +104,7 @@ export default ({ children, young, tab }) => {
       />
     </div>
   );
-};
+}
 
 const Header = styled.div`
   padding: 0 25px 0;

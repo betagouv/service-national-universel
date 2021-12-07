@@ -10,7 +10,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS"];
 
-export default () => {
+export default function MeetingPoint() {
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
@@ -117,7 +117,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit }) => {
   let mounted = useRef(true);
@@ -135,7 +135,7 @@ const Hit = ({ hit }) => {
       <td>{hit.departureDepartment}</td>
       <td>{hit.departureAddress}</td>
       <td>
-        <a href={`/centre/${hit.centerId}`} target="_blank">
+        <a href={`/centre/${hit.centerId}`} target="_blank" rel="noreferrer">
           {hit.centerCode}
         </a>
       </td>

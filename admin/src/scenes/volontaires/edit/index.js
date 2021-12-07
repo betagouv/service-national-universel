@@ -13,6 +13,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import { translate, ROLES } from "../../../utils";
 import api from "../../../services/api";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import ActionButtonArchive from "../../../components/buttons/ActionButtonArchive";
 import { appURL } from "../../../config";
 import Loader from "../../../components/Loader";
 
@@ -67,7 +68,7 @@ export default function VolontaireEdit(props) {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
+            const { ok, code } = await api.put(`/referent/young/${values._id}`, values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Mis à jour!");
           } catch (e) {
@@ -75,7 +76,7 @@ export default function VolontaireEdit(props) {
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
         }}>
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, validateField, errors, touched, setFieldValue }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, validateField, errors, touched, setFieldValue }) => (
           <>
             <TitleWrapper>
               <div>
@@ -83,6 +84,7 @@ export default function VolontaireEdit(props) {
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
               <div style={{ display: "flex" }}>
+                <ActionButtonArchive young={values} />
                 <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
                   <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                 </a>

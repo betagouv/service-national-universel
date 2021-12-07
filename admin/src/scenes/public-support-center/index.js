@@ -11,31 +11,54 @@ const articles = [
   {
     title: "Je n'arrive pas à me connecter",
     emoji: "⛔",
-    body: `Ces actions vous permettront de réinitialiser...`,
+    body: "Ces actions vous permettront de réinitialiser...",
     url: "https://support.snu.gouv.fr/help/fr-fr/8-mon-compte/15-je-n-arrive-pas-a-me-connecter",
   },
   {
     title: "Je crée ma structure",
     emoji: "📝",
-    body: `Connectez-vous à l'espace d'inscription structure...`,
+    body: "Connectez-vous à l'espace d'inscription structure...",
     url: "https://support.snu.gouv.fr/help/fr-fr/8-mon-compte/45-je-cree-ma-structure",
   },
   {
     title: "Je crée une nouvelle mission",
     emoji: "📇",
-    body: `Cliquez pour voir les instructions en vidéo.`,
+    body: "Cliquez pour voir les instructions en vidéo.",
     url: "https://support.snu.gouv.fr/help/fr-fr/9-mes-missions/183-je-cree-une-nouvelle-mission",
   },
-  //! Ne pas supprimer, article en cours
-  /* {
-    title: "Je m'identifie via FranceConnect",
-    emoji: "🌐",
-    body: `Article en cours de rédaction`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/160-je-m-identifie-via-franceconnect",
-  }, */
+  {
+    title: "Phase 0 : le parcours des inscriptions",
+    emoji: "📄",
+    body: "Rédaction du dossier d'inscription : Le jeune...",
+    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/170-phase-0-le-parcours-des-inscriptions",
+  },
+  {
+    title: "Phase 1 : l'organisation du séjour de cohésion",
+    emoji: "🌲",
+    body: "Lorsque l'inscription du volontaire est validée...",
+    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/169-phase-1-l-organisation-du-sejour-de-cohesion",
+  },
+  {
+    title: "Phase 2 : le parcours d'une MIG",
+    emoji: "🤝",
+    body: "La publication d'une MIG : La structure...",
+    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/5-phase-2-le-parcours-d-une-mig",
+  },
+  {
+    title: "Phase 3 : le parcours de l'engagement",
+    emoji: "🌟",
+    body: "Optionnelle, la phase 3 vous permet de poursuivre...",
+    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/60-phase-3-le-parcours-de-l-engagement",
+  },
+  {
+    title: "J'invite un nouveau responsable pour ma structure",
+    emoji: "👋",
+    body: "Vous pouvez ajouter d'autres responsables à votre...",
+    url: "https://support.snu.gouv.fr/help/fr-fr/8-mon-compte/20-j-invite-un-nouveau-responsable-pour-ma-structure",
+  },
 ];
 
-export default () => {
+export default function PublicSupportCenter() {
   const user = useSelector((state) => state.Auth.user);
   const [open, setOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -51,13 +74,13 @@ export default () => {
             </a>
           </p>
         )}
-        <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
+        <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d'engagement&nbsp;?
+              Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d&apos;engagement&nbsp;?
               <br />
-              N'hésitez pas à consulter notre{" "}
+              N&apos;hésitez pas à consulter notre{" "}
               <strong>
                 <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/2-responsable-de-structure" target="_blank" rel="noopener noreferrer">
                   base de connaissance
@@ -83,7 +106,7 @@ export default () => {
             </div>
             <p>{article.body}</p>
             <p>
-              <a className="block-link" href={article.url} target="_blank">
+              <a className="block-link" href={article.url} target="_blank" rel="noreferrer">
                 Lire la suite
               </a>
             </p>
@@ -92,7 +115,7 @@ export default () => {
       </Articles>
       <hr style={{ margin: "3rem auto", maxWidth: "600px" }} />
       <Container>
-        <h4 style={{ textAlign: "center" }}>Vous n'avez pas trouvé de réponse à votre demande&nbsp;?</h4>
+        <h4 style={{ textAlign: "center" }}>Vous n&apos;avez pas trouvé de réponse à votre demande&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280", marginBottom: "0.5rem" }}>
@@ -100,7 +123,7 @@ export default () => {
               une réponse par mail.
             </div>
             <div className="zammad-container">
-              <LinkButton onClick={() => setOpen(true)}>Contacter quelqu'un</LinkButton>
+              <LinkButton onClick={() => setOpen(true)}>Contacter quelqu&apos;un</LinkButton>
             </div>
           </div>
         </div>
@@ -109,7 +132,7 @@ export default () => {
       </Container>
     </div>
   );
-};
+}
 
 const Container = styled.div`
   position: relative;

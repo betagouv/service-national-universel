@@ -6,7 +6,7 @@ import Phase1 from "./phase1";
 import CohesionStayMedicalFileReceived from "./cohesionStayMedicalFileReceived";
 import CohesionStayPresence from "./cohesionStayPresence";
 
-export default ({ filter }) => {
+export default function Status({ filter }) {
   const [statusPhase1, setStatusPhase1] = useState({});
   const [cohesionStayMedicalFileReceived, setCohesionStayMedicalFileReceived] = useState({});
   const [cohesionStayPresence, setCohesionStayPresence] = useState({});
@@ -70,4 +70,4 @@ export default ({ filter }) => {
       <CohesionStayPresence data={cohesionStayPresence} getLink={getLink} />
     </>
   );
-};
+}

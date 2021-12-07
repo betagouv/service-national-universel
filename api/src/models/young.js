@@ -163,6 +163,12 @@ const Schema = new mongoose.Schema({
       description: "Date de dernière modification d'un statut",
     },
   },
+  withdrawnReason: {
+    type: String,
+    documentation: {
+      description: "Motif lors de l'abandon du SNU.",
+    },
+  },
   withdrawnMessage: {
     type: String,
     documentation: {
@@ -1294,15 +1300,7 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
-  excludes: [
-    "/password",
-    "/lastLoginAt",
-    "/forgotPasswordResetToken",
-    "/forgotPasswordResetExpires",
-    "/invitationToken",
-    "/invitationExpires",
-    "/phase3Token",
-  ],
+  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/phase3Token"],
 });
 Schema.plugin(mongooseElastic(esClient, { ignore: ["historic"] }), MODELNAME);
 

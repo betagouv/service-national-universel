@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { regionList, REFERENT_ROLES } from "../../../utils";
 import MultiSelect from "./MultiSelect";
 
-export default ({ value = [], onChange }) => {
+export default function FilterRegion({ value = [], onChange }) {
   const user = useSelector((state) => state.Auth.user);
   const options = regionList.map((region) => ({ label: region, value: region }));
 
@@ -14,4 +14,4 @@ export default ({ value = [], onChange }) => {
     return <MultiSelect disabled label="Région(s)" options={options} onChange={onChange} value={value} />;
   }
   return <MultiSelect label="Région(s)" options={options} onChange={onChange} value={value} />;
-};
+}

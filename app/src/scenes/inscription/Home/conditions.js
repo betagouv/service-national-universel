@@ -49,4 +49,4 @@ export default [
     date2: "du 12 au 24 juin 2022",
     date3: "du 3 au 15 juillet 2022",
   },
-]
+];

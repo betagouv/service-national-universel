@@ -6,9 +6,8 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import ReactSelect from "react-select";
-import { Link } from "react-router-dom";
 
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -22,8 +21,9 @@ import { setUser as ReduxSetUser } from "../../redux/auth/actions";
 import Emails from "../../components/views/Emails";
 import HistoricComponent from "../../components/views/Historic";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import { requiredMessage } from "../../components/errorMessage";
 
-export default (props) => {
+export default function Edit(props) {
   const [user, setUser] = useState();
   const [service, setService] = useState();
   const [centers, setCenters] = useState();
@@ -114,7 +114,7 @@ export default (props) => {
   const handleImpersonate = async () => {
     try {
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${user._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
       history.push("/dashboard");
       if (token) api.setToken(token);
       if (data) dispatch(ReduxSetUser(data));
@@ -156,7 +156,7 @@ export default (props) => {
             if (
               user.structureId !== structure?._id &&
               !confirm(
-                'Attention, vous avez modifié la structure de cet utilisateur sans valider. Si vous continuez, ce changement de structure ne sera pas pris en compte. Pour valider ce changement, cliquez sur annuler et valider en cliquant sur "Modifier la structure".'
+                'Attention, vous avez modifié la structure de cet utilisateur sans valider. Si vous continuez, ce changement de structure ne sera pas pris en compte. Pour valider ce changement, cliquez sur annuler et valider en cliquant sur "Modifier la structure".',
               )
             )
               return;
@@ -169,9 +169,8 @@ export default (props) => {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, isSubmitting }) => (
           <>
             <TitleWrapper>
               <div>
@@ -326,9 +325,8 @@ export default (props) => {
               console.log(e);
               toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
             }
-          }}
-        >
-          {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+          }}>
+          {({ values, handleChange, handleSubmit, isSubmitting }) => (
             <>
               <TitleWrapper>
                 <div>
@@ -374,7 +372,7 @@ export default (props) => {
       />
     </Wrapper>
   );
-};
+}
 
 const Item = ({ title, values, name, handleChange, type = "text", disabled = false }) => {
   const renderInput = () => {
@@ -415,7 +413,7 @@ const Item = ({ title, values, name, handleChange, type = "text", disabled = fal
   );
 };
 
-const Select = ({ title, name, values, onChange, disabled, errors, touched, validate, options, allowEmpty = true }) => {
+const Select = ({ title, name, values, onChange, disabled, options, allowEmpty = true }) => {
   return (
     <Row className="detail">
       <Col md={4}>
@@ -498,8 +496,7 @@ const AutocompleteSelectStructure = ({ options, structure, setStructure, onClick
               marginTop: "1rem",
               marginLeft: "0",
               padding: "7px 20px",
-            }}
-          >
+            }}>
             Modifier la structure
           </LoadingButton>
         </Col>

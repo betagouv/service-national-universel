@@ -1,16 +1,19 @@
 import React from "react";
 import styled from "styled-components";
 
-export default () => (
-  <SuccessMessage>
-    <Logo>
-      <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-      </svg>
-    </Logo>
-    La mission a été validée !
-  </SuccessMessage>
-);
+export default function Done() {
+  return (
+    <SuccessMessage>
+      <Logo>
+        <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </Logo>
+      La mission a été validée !
+    </SuccessMessage>
+  );
+}
+
 const Logo = styled.div`
   width: 5rem;
   height: 5rem;

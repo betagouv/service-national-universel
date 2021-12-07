@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Row, Container } from "reactstrap";
+import { Container } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import { YOUNG_STATUS_PHASE3 } from "../../../utils";
@@ -9,7 +9,7 @@ import WaitingValidation from "./WaitingValidation";
 import Validated from "./Validated";
 import WaitingRealisation from "./WaitingRealisation";
 
-export default () => {
+export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const [infosHover, setInfosHover] = useState(false);
   const [infosClick, setInfosClick] = useState(false);
@@ -27,15 +27,15 @@ export default () => {
       <Heading>
         <p>VALIDER MA PHASE 3</p>
         <div style={{ display: "flex", alignItems: "center" }}>
-          <h1>J'ai terminé ma mission de phase 3</h1>
+          <h1>J&apos;ai terminé ma mission de phase 3</h1>
           <Icon src={QuestionMark} onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)} />
         </div>
         {infosHover || infosClick ? (
           <Infos>
             Vous devez renseigner ici un engagement que vous avez réalisé sur une durée minimum de 3 mois, pour le valoriser comme mission de phase 3.
             <br />
-            Le tuteur de mission à déclarer est la personne qui vous a accompagné lors de votre mission. C'est lui qui sera en charge de valider la réalisation de votre mission de
-            phase 3.
+            Le tuteur de mission à déclarer est la personne qui vous a accompagné lors de votre mission. C&apos;est lui qui sera en charge de valider la réalisation de votre
+            mission de phase 3.
             <br />
             NB : Les candidature sur les missions de phase 3 se font en dehors de la plateforme, selon les procédures propres à chaque dispositif.
           </Infos>
@@ -44,7 +44,7 @@ export default () => {
       {renderContent()}
     </Wrapper>
   );
-};
+}
 
 const Infos = styled.div`
   color: #6b7280;

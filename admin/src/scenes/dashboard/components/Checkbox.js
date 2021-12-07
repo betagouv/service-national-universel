@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ isChecked, onChange, label, name }) => {
-  const handleChange = (event) => {
+export default function Checkbox({ isChecked, onChange, label, name }) {
+  const handleChange = () => {
     onChange(name);
   };
 
@@ -12,7 +12,7 @@ export default ({ isChecked, onChange, label, name }) => {
       <StyledCheckboxLabel htmlFor={name}>{label}</StyledCheckboxLabel>
     </StyledCheckbox>
   );
-};
+}
 
 const StyledCheckbox = styled.div`
   background-color: white;

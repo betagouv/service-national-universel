@@ -10,12 +10,13 @@ export const ModalContainer = styled.div`
   padding-top: 2rem;
   border-radius: 1rem;
   overflow: hidden;
-  img {
+  .close-icon {
     position: absolute;
     right: 0;
     top: 0;
     margin: 1rem;
     cursor: pointer;
+    color: ${colors.grey};
   }
 `;
 
@@ -48,7 +49,7 @@ export const Content = styled.div`
     padding: 1rem;
     line-height: 1.5;
     border-radius: 0.5rem;
-    border: 1px solid ${colors.grey};
+    border: 1px solid #ced4da;
     min-width: 100%;
     margin-bottom: 2rem;
   }

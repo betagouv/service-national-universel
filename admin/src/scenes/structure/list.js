@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -23,7 +22,7 @@ const formatLongDate = (date) => {
   return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
 };
 
-export default () => {
+export default function List() {
   const [structure, setStructure] = useState(null);
   // List of structure IDS currently displayed in results
   const [structureIds, setStructureIds] = useState([]);
@@ -263,7 +262,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, selected, missions }) => {
   const missionsInfo = {

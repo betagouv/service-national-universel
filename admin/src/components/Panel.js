@@ -1,7 +1,8 @@
 import React from "react";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
-import { copyToClipboard } from "../utils";
+import { copyToClipboard, colors } from "../utils";
+import TickDone from "../assets/TickDone";
+import Copy from "../assets/Copy";
 
 export const Info = ({ children, title }) => {
   return (
@@ -16,7 +17,13 @@ export const Info = ({ children, title }) => {
 
 export const Details = ({ title, value, copy }) => {
   if (!value) return <div />;
+  const [copied, setCopied] = React.useState(false);
   if (typeof value === "function") value = value();
+  React.useEffect(() => {
+    if (copied) {
+      setTimeout(() => setCopied(false), 3000);
+    }
+  }, [copied]);
   return (
     <div className="detail">
       <div className="detail-title">{title}&nbsp;:</div>
@@ -25,12 +32,12 @@ export const Details = ({ title, value, copy }) => {
         {copy ? (
           <div
             className="icon"
-            icon={require(`../assets/copy.svg`)}
             onClick={() => {
               copyToClipboard(value);
-              toastr.success(`'${title}' a été copié dans le presse papier.`);
-            }}
-          />
+              setCopied(true);
+            }}>
+            {copied ? <TickDone color={colors.green} width={17} height={17} /> : <Copy color={colors.darkPurple} width={17} height={17} />}
+          </div>
         ) : null}
       </div>
     </div>
@@ -122,7 +129,7 @@ export default styled.div`
       font-size: 0.8rem;
     }
     .quote {
-      font-size: 18px;
+      font-size: 0.9rem;
       font-weight: 400;
       font-style: italic;
     }
@@ -130,12 +137,6 @@ export default styled.div`
   .icon {
     cursor: pointer;
     margin: 0 0.5rem;
-    width: 15px;
-    height: 15px;
-    background: ${`url(${require("../assets/copy.svg")})`};
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 15px 15px;
   }
   .application-detail {
     display: flex;
@@ -161,7 +162,7 @@ export default styled.div`
     }
   }
   .quote {
-    font-size: 18px;
+    font-size: 0.9rem;
     font-weight: 400;
     font-style: italic;
   }

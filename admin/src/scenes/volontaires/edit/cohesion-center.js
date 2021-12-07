@@ -7,7 +7,7 @@ import Item from "../components/Item";
 import AssignCenter from "../components/AssignCenter";
 import { canAssignCohesionCenter } from "../../../utils";
 
-export default ({ values, handleChange }) => {
+export default function CohesionCenter({ values, handleChange }) {
   const user = useSelector((state) => state.Auth.user);
 
   return (
@@ -40,4 +40,4 @@ export default ({ values, handleChange }) => {
       </Box>
     </Col>
   );
-};
+}

@@ -10,7 +10,7 @@ import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel, SENDIN
 import { Link } from "react-router-dom";
 import Loadingbutton from "../../../components/buttons/LoadingButton";
 
-export default ({ young, onSend }) => {
+export default function xxxxxxx({ young, onSend }) {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
 
@@ -122,7 +122,7 @@ export default ({ young, onSend }) => {
       </ReactiveBase>
     </>
   );
-};
+}
 
 const HitMission = ({ hit, onSend }) => {
   const [sending, setSending] = useState(false);
@@ -163,8 +163,7 @@ const HitMission = ({ hit, onSend }) => {
             setSending(true);
             onSend();
           }}
-          loading={sending}
-        >
+          loading={sending}>
           Proposer cette mission
         </Loadingbutton>
       </td>

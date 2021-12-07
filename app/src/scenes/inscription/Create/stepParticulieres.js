@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
-import { Field, Formik } from "formik";
+import { Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
@@ -14,7 +13,7 @@ import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
 import FormRadioLabelTrueFalse from "../../../components/form/FormRadioLabelTrueFalse";
 
-export default () => {
+export default function StepSpecific() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -31,9 +30,9 @@ export default () => {
         <h2>Situations particulières</h2>
         <p style={{ color: "#6B7280" }}>Complétez les informations ci-dessous.</p>
         <p style={{ color: "#6B7280" }}>
-          Il est important de signaler dès l'inscription toute situation nécessitant une vigilance particulière ou des aménagements spécifiques : situation de handicap, allergies,
-          intolérance alimentaire, projet d'accueil individualisé (PAI), sport de haut niveau, etc. <br />
-          En fonction des situations signalées, un responsable en charge du séjour de cohésion ou de la mission d'intérêt général prendra contact avec le volontaire et ses
+          Il est important de signaler dès l&apos;inscription toute situation nécessitant une vigilance particulière ou des aménagements spécifiques : situation de handicap,
+          allergies, intolérance alimentaire, projet d&apos;accueil individualisé (PAI), sport de haut niveau, etc. <br />
+          En fonction des situations signalées, un responsable en charge du séjour de cohésion ou de la mission d&apos;intérêt général prendra contact avec le volontaire et ses
           représentants légaux.
         </p>
       </Heading>
@@ -55,9 +54,8 @@ export default () => {
           } finally {
             setLoading(false);
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormLegend style={{ paddingBottom: "0" }}>Handicap et pathologies chroniques</FormLegend>
             <div>
@@ -72,10 +70,9 @@ export default () => {
               values={values}
               handleChange={handleChange}
               errors={errors}
-              touched={touched}
-            >
+              touched={touched}>
               <div>
-                <a href="https://www.service-public.fr/particuliers/vosdroits/F33865" target="_blank">
+                <a href="https://www.service-public.fr/particuliers/vosdroits/F33865" target="_blank" rel="noreferrer">
                   En savoir plus
                 </a>
               </div>
@@ -86,10 +83,9 @@ export default () => {
               values={values}
               handleChange={handleChange}
               errors={errors}
-              touched={touched}
-            >
+              touched={touched}>
               <div>
-                <a href="https://www.service-public.fr/particuliers/vosdroits/F21392" target="_blank">
+                <a href="https://www.service-public.fr/particuliers/vosdroits/F21392" target="_blank" rel="noreferrer">
                   En savoir plus
                 </a>
               </div>
@@ -98,13 +94,13 @@ export default () => {
               <>
                 <FormRadioLabelTrueFalse
                   title="Avez-vous besoin d'un aménagement spécifique ?"
-                  children="(accompagnement professionnel, participation de jour, activités adaptées...)"
                   name="specificAmenagment"
                   values={values}
                   handleChange={handleChange}
                   errors={errors}
-                  touched={touched}
-                />
+                  touched={touched}>
+                  (accompagnement professionnel, participation de jour, activités adaptées...)
+                </FormRadioLabelTrueFalse>
                 <FormRadioLabelTrueFalse
                   title="Avez-vous besoin d’un aménagement pour mobilité réduite ?"
                   name="reducedMobilityAccess"
@@ -158,7 +154,7 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 40px;
@@ -183,25 +179,5 @@ const Heading = styled.div`
   p {
     color: #161e2e;
     margin: 0;
-  }
-`;
-
-const Label = styled.div`
-  color: #374151;
-  margin-bottom: 10px;
-  font-size: 1em;
-  font-weight: 500;
-  a {
-    color: #5145cd;
-    margin-top: 5px;
-    font-size: 0.875rem;
-    font-weight: 400;
-    text-decoration: underline;
-  }
-  span {
-    color: #6b7280;
-    margin-top: 5px;
-    font-size: 0.875rem;
-    font-weight: 400;
   }
 `;

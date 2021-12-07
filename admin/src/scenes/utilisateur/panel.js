@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { translate, ROLES, ES_NO_LIMIT, copyToClipboard, canUpdateReferent } from "../../utils";
@@ -11,7 +10,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import styled from "styled-components";
 
-export default ({ onChange, value }) => {
+export default function UserPanel({ onChange, value }) {
   if (!value) return <div />;
   const [structure, setStructure] = useState();
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
@@ -73,7 +72,7 @@ export default ({ onChange, value }) => {
   const handleImpersonate = async () => {
     try {
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${value._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
       history.push("/dashboard");
       if (token) api.setToken(token);
       if (data) dispatch(setUser(data));
@@ -189,7 +188,7 @@ export default ({ onChange, value }) => {
       </div> */}
     </Panel>
   );
-};
+}
 
 const Button = styled.button`
   margin: 0 0.5rem;

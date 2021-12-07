@@ -15,7 +15,7 @@ import DownloadContractButton from "../../../components/buttons/DownloadContract
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 
-export default ({ application, index }) => {
+export default function Application({ application, index }) {
   const [value, setValue] = useState(application);
   const [contract, setContract] = useState(null);
   const young = useSelector((state) => state.Auth.young);
@@ -79,6 +79,16 @@ export default ({ application, index }) => {
               <TagContainer>
                 <Tag color={APPLICATION_STATUS_COLORS[value.status]}>{translate(value.status)}</Tag>
                 {value.statusComment ? <StatusComment>{value.statusComment}</StatusComment> : null}
+                {value.status === APPLICATION_STATUS.WAITING_VALIDATION && value?.mission?.placesTotal > 0 ? (
+                  value?.mission?.placesLeft > 0 ? (
+                    <StatusComment>
+                      Place{value?.mission?.placesLeft > 1 ? "s" : ""} disponible{value?.mission?.placesLeft > 1 ? "s" : ""} : {value?.mission?.placesLeft}/
+                      {value?.mission?.placesTotal}
+                    </StatusComment>
+                  ) : (
+                    <StatusComment>Plus de places disponibles</StatusComment>
+                  )
+                ) : null}
               </TagContainer>
             </Col>
           </Card>
@@ -88,7 +98,9 @@ export default ({ application, index }) => {
               {contractHasAllValidation(contract, young) ? (
                 <div style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500", marginBottom: "1rem" }}>
                   <ContractInfoContainer>
-                    <DownloadContractButton children={"Télécharger le contrat"} young={young} uri={contract._id} />
+                    <DownloadContractButton young={young} uri={contract._id}>
+                      Télécharger le contrat
+                    </DownloadContractButton>
                     <SendContractByMail young={young} contractId={contract._id} missionName={contract.missionName} />
                   </ContractInfoContainer>
                 </div>
@@ -108,7 +120,7 @@ export default ({ application, index }) => {
       )}
     </Draggable>
   );
-};
+}
 
 function SendContractByMail({ young, contractId, missionName }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -134,7 +146,6 @@ function SendContractByMail({ young, contractId, missionName }) {
     <>
       <LoadingButton
         style={{ marginLeft: "1rem" }}
-        children="Envoyer le contrat par mail"
         loading={loading}
         onClick={() =>
           setModal({
@@ -143,8 +154,9 @@ function SendContractByMail({ young, contractId, missionName }) {
             title: "Envoie du document par mail",
             message: `Vous allez recevoir le document par mail à l'adresse ${young.email}.`,
           })
-        }
-      />
+        }>
+        Envoyer le contrat par mail
+      </LoadingButton>
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -163,7 +175,7 @@ function ContractInfo({ contract, young }) {
   const isYoungAdult = getAge(young.birthdateAt) >= 18;
   return (
     <>
-      <div style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500" }}>Signatures du contrat d'engagement de la mission d'intérêt général</div>
+      <div style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500" }}>Signatures du contrat d&apos;engagement de la mission d&apos;intérêt général</div>
       <ContractInfoContainer>
         <ContractStatus contract={contract} property="projectManagerStatus" name="Représentant de l'Etat" />
         <ContractStatus contract={contract} property="structureManagerStatus" name="Représentant structure" />
@@ -249,8 +261,7 @@ const Footer = ({ application, tutor, onChange }) => {
                     "Êtes vous sûr de vouloir abandonner cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
                   onConfirm: () => setStatus(APPLICATION_STATUS.ABANDON),
                 })
-              }
-            >
+              }>
               Abandonner la mission
             </div>
           </ContainerFooter>
@@ -271,8 +282,7 @@ const Footer = ({ application, tutor, onChange }) => {
                     "Êtes vous sûr de vouloir annuler cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
                   onConfirm: () => setStatus(APPLICATION_STATUS.CANCEL),
                 })
-              }
-            >
+              }>
               Annuler cette candidature
             </div>
           </ContainerFooter>
@@ -291,8 +301,7 @@ const Footer = ({ application, tutor, onChange }) => {
                   message: "Êtes vous sûr de vouloir décliner cette offre ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
                   onConfirm: () => setStatus(APPLICATION_STATUS.CANCEL),
                 })
-              }
-            >
+              }>
               Décliner cette proposition
             </div>
             <div
@@ -307,8 +316,7 @@ const Footer = ({ application, tutor, onChange }) => {
                     setStatus(status);
                   },
                 })
-              }
-            >
+              }>
               Accepter cette proposition
             </div>
           </ContainerFooter>

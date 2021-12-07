@@ -8,7 +8,7 @@ import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
-export default ({ keys, values, handleChange, errors, touched, departAndRegionVisible = true, placeholder = "Commencez à tapez votre adresse" }) => {
+export default function AddressInput({ keys, values, handleChange, errors, touched, departAndRegionVisible = true, placeholder = "Commencez à tapez votre adresse" }) {
   const [str, setStr] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [noResultMode, setNoResultMode] = useState(false);
@@ -156,8 +156,7 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
                   // filter and preselect the region
                   setRegionListFiltered(value ? [department2region[value]] : regionList);
                   handleChange({ target: { name: keys.region, value: department2region[value] || "" } });
-                }}
-              >
+                }}>
                 <option label=""></option>
                 {departmentListFiltered.map((d) => (
                   <option key={d} value={d}>
@@ -182,8 +181,7 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
                   handleChange({ target: { name: keys.region, value } });
                   // filter departments
                   setDepartmentListFiltered(value ? region2department[value] : departmentList);
-                }}
-              >
+                }}>
                 <option label=""></option>
                 {regionListFiltered.map((r) => (
                   <option key={r} value={r}>
@@ -198,7 +196,7 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
       </Row>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   .react-autosuggest__container {

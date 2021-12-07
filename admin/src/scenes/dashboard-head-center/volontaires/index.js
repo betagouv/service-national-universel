@@ -7,7 +7,7 @@ import MultiSelect from "../../dashboard/components/MultiSelect";
 import Status from "./status";
 import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
 
-export default () => {
+export default function Index() {
   const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
 
@@ -56,7 +56,7 @@ export default () => {
       {filter && <Status filter={filter} />}
     </>
   );
-};
+}
 
 // Title line with filters
 const Title = styled.h2`

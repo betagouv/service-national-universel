@@ -12,13 +12,13 @@ import api from "../../../services/api";
 import { apiURL } from "../../../config";
 import { HeroContainer, Hero } from "../../../components/Content";
 
-export default () => {
+export default function WaitingRealisation() {
   const young = useSelector((state) => state.Auth.young) || {};
   const [programs, setPrograms] = useState([]);
 
   useEffect(() => {
     (async () => {
-      const { data, ok, code } = await api.get("/program");
+      const { data, ok } = await api.get("/program");
       if (!ok) return toastr.error("Une erreur est survenue.");
       setPrograms(data);
     })();
@@ -40,7 +40,7 @@ export default () => {
       </Hero>
       <TransparentHero>
         <Heading>
-          <h2>Parmi les possibilités d'engagement</h2>
+          <h2>Parmi les possibilités d&apos;engagement</h2>
           <p>Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
         </Heading>
         <Row>
@@ -50,7 +50,7 @@ export default () => {
             </Col>
           ))}
         </Row>
-        <SeeMore to="/les-programmes">Tous les programmes d'engagement →</SeeMore>
+        <SeeMore to="/les-programmes">Tous les programmes d&apos;engagement →</SeeMore>
         <hr style={{ margin: "40px 0", opacity: 0.8 }} />
       </TransparentHero>
       <TransparentHero>
@@ -79,7 +79,7 @@ export default () => {
       </TransparentHero>
     </HeroContainer>
   );
-};
+}
 
 const Heading = styled.div`
   margin-top: 40px;

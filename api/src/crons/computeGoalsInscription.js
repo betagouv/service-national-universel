@@ -23,7 +23,7 @@ const getGoalAndComputeFillingRates = async ({ department, values }) => {
       if (inscriptionGoal.max) {
         const fillingRate = ((values[inscriptionGoal.cohort] || 0) / (inscriptionGoal.max || 0)) * 100;
         inscriptionGoal.set({ fillingRate });
-        console.log({ department, cohort: inscriptionGoal.cohort, fillingRate });
+        // console.log({ department, cohort: inscriptionGoal.cohort, fillingRate });
         await inscriptionGoal.save();
       }
     });

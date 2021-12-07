@@ -6,7 +6,7 @@ import Details from "./details";
 import Missions from "./missions";
 import Historic from "./history";
 
-export default ({ ...props }) => {
+export default function Index({ ...props }) {
   const [structure, setStructure] = useState();
 
   useEffect(() => {
@@ -26,4 +26,4 @@ export default ({ ...props }) => {
       <Route path="/structure/:id" component={() => <Details structure={structure} />} />
     </Switch>
   );
-};
+}

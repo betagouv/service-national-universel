@@ -18,6 +18,7 @@ const {
   CELLAR_KEYID,
   CELLAR_KEYSECRET,
   BUCKET_NAME,
+  PUBLIC_BUCKET_NAME,
   ENVIRONMENT,
   API_ASSOCIATION_CELLAR_ENDPOINT,
   API_ASSOCIATION_CELLAR_KEYID,
@@ -51,6 +52,24 @@ function uploadFile(path, file) {
       Body: file.data,
       ContentEncoding: file.encoding,
       ContentType: file.mimetype,
+      Metadata: { "Cache-Control": "max-age=31536000" },
+    };
+    s3bucket.upload(params, function (err, data) {
+      if (err) return reject(`error in callback:${err}`);
+      resolve(data);
+    });
+  });
+}
+
+function uploadPublicPicture(path, file) {
+  return new Promise((resolve, reject) => {
+    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const params = {
+      Bucket: PUBLIC_BUCKET_NAME,
+      Key: path,
+      Body: file.data,
+      ContentType: file.mimetype,
+      ACL: "public-read",
       Metadata: { "Cache-Control": "max-age=31536000" },
     };
     s3bucket.upload(params, function (err, data) {
@@ -501,6 +520,7 @@ const ERRORS = {
 
 module.exports = {
   uploadFile,
+  uploadPublicPicture,
   getFile,
   fileExist,
   validatePassword,
