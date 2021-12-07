@@ -54,7 +54,7 @@
     "express": "^4.17.1",
     "fetch-retry": "^5.0.1",
     "file-saver": "^2.0.5",
-    "forcedomain": "^2.2.2",
+    "forcedomain": "2.2.11",
     "formik": "2.2.9",
     "helmet": "^4.6.0",
     "hsts": "^2.2.0",
