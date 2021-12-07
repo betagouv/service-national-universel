@@ -31,8 +31,8 @@ export default function StatusIndex({ filter }) {
   const [statusApplication, setStatusApplication] = useState({});
 
   useEffect(() => {
-    const listTab = ["global", "phase1", "phase2", "phase3", "centres"];
-    if (!listTab.includes(currentSubtab)) history.push(`/dashboard/volontaires/global`);
+    const listTab = ["général", "phase1", "phase2", "phase3", "centres"];
+    if (!listTab.includes(currentSubtab)) history.push(`/dashboard/volontaires/général`);
   }, [currentSubtab]);
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function StatusIndex({ filter }) {
     <>
       <TabNavigation>
         <TabNavigationList>
-          <TabItem onClick={() => history.push(`/dashboard/volontaires/global`)} isActive={currentSubtab === "global"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/général`)} isActive={currentSubtab === "général"}>
             Général
           </TabItem>
           <TabItem onClick={() => history.push(`/dashboard/volontaires/phase1`)} isActive={currentSubtab === "phase1"}>
@@ -119,7 +119,7 @@ export default function StatusIndex({ filter }) {
         </TabNavigationList>
       </TabNavigation>
       <Wrapper>
-        {currentSubtab === "global" && (
+        {currentSubtab === "général" && (
           <>
             <SubTitle>En quelques chiffres</SubTitle>
             <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} filter={filter} getLink={getLink} />
