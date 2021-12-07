@@ -33,6 +33,12 @@ const FILTERS = [
   "MEDICAL_FILE_RECEIVED",
   "COHESION_PRESENCE",
   "MILITARY_PREPARATION_FILES_STATUS",
+  "PPS",
+  "PAI",
+  "QPV",
+  "HANDICAP",
+  "ZRR",
+  "GRADE",
 ];
 
 export default function VolontaireList() {
@@ -371,6 +377,90 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut documents Préparation Militaire")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Classe"
+                  componentId="GRADE"
+                  dataField="grade.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "GRADE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Cohorte"
+                  componentId="COHORT"
+                  dataField="cohort.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="PPS"
+                  componentId="PPS"
+                  dataField="ppsBeneficiary.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PPS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "PPS", "PPS")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="PAI"
+                  componentId="PAI"
+                  dataField="paiBeneficiary.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PAI") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "PAI", "PAI")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="QPV"
+                  componentId="QPV"
+                  dataField="qpv.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "QPV") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "QPV", "QPV")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="HANDICAP"
+                  componentId="HANDICAP"
+                  dataField="handicap.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "HANDICAP") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
                 />
                 <Help onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)}>
                   {infosClick ? <LockIcon src={LockedSvg} /> : <LockIcon src={UnlockedSvg} />}
