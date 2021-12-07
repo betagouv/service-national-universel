@@ -21,7 +21,7 @@
   "dependencies": {
     "@babel/preset-env": "^7.14.2",
     "@elastic/elasticsearch": "^7.14.0",
-    "@selego/mongoose-elastic": "^1.4.0",
+    "@selego/mongoose-elastic": "^2.0.0",
     "@sentry/node": "^5.30.0",
     "aws-sdk": "^2.729.0",
     "aws4": "^1.10.1",
