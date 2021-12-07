@@ -55,7 +55,7 @@
     "fetch-retry": "^5.0.1",
     "file-saver": "^2.0.5",
     "forcedomain": "^2.2.2",
-    "formik": "^2.1.5",
+    "formik": "2.2.9",
     "helmet": "^4.6.0",
     "hsts": "^2.2.0",
     "i18n-iso-countries": "^7.0.0",
