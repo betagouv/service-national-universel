@@ -45,8 +45,8 @@
   },
   "dependencies": {
     "@appbaseio/reactivesearch": "^3.18.0",
-    "@sentry/react": "^6.13.3",
-    "@sentry/tracing": "^6.13.3",
+    "@sentry/react": "6.15.0",
+    "@sentry/tracing": "6.15.0",
     "babel-loader": "8.2.3",
     "bootstrap": "4.6.1",
     "core-js": "3.19.3",
