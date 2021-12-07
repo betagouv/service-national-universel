@@ -6,8 +6,7 @@ const TagModel = require("../models/tag");
 const { formatDistance } = require('date-fns');
 const { fr } = require('date-fns/locale');
 
-(async () => {
-  console.log("AM I HERE ???");
+const ZammadScript = async () => {
   // Mes étapes
   // 1. Récupérer les différentes tables et les filtrer pour récupérer les champs intéressants
   const tickets = await dataMapper.getAllTickets();
@@ -32,13 +31,13 @@ const { fr } = require('date-fns/locale');
       console.log("TAG ALREADY EXISTS !");
       if (tagExisting.name !== tag.name) {
         await tagExisting.save({ name: tag.name });
-      } continue;
-    } const SNUtag = await TagModel.create({ zammadId: tag.id, name: tag.name });
-    console.log("TAG CREATED", SNUtag);
+      }
+      continue;
+    }
+    const SNUtag = await TagModel.create({ zammadId: tag.id, name: tag.name });
   }
 
   for (let ticket of tickets) {
-    console.log("I'm here !!");
     let priority = await ticketPriorities.filter((priority) => ticket.priority_id === priority.id)[0].name;
     if (priority === "1 low") priority = "LOW";
     if (priority === "2 normal") priority = "NORMAL";
@@ -85,7 +84,6 @@ const { fr } = require('date-fns/locale');
     let timeUntilFirstResponse;
     if (firstResponseAt) {
       timeUntilFirstResponse = formatDistance(ticket.created_at, firstResponseAt, { locale: fr });
-      console.log("TIME ?", timeUntilFirstResponse);
     }
 
     const tags = ticketTags.filter((tag) => tag.o_id === ticket.id);
@@ -120,7 +118,7 @@ const { fr } = require('date-fns/locale');
     // 7. Rassembler toutes les données et créer une nouvelle instance dans ma table Ticket ou update une instance déjà présente
     const ticketExisting = await TicketModel.findOne({ zammadId: ticket.id });
     if (ticketExisting) {
-      console.log("TICKET EXISTING !");
+      console.log("TICKET ALREADY EXISTS !");
       await ticketExisting.save({
         zammadId: ticket.id,
         number: ticket.number,
@@ -189,4 +187,4 @@ const { fr } = require('date-fns/locale');
       console.log("TICKET CREATED", ticketCreated.title);
     }
   }
-});
+};
