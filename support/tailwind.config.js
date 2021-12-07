@@ -27,6 +27,11 @@ module.exports = {
         "screen-1/2": "50vw",
         "screen-3/4": "75vw",
       },
+      height: {
+        "screen-1/4": "25vw",
+        "screen-1/2": "50vw",
+        "screen-3/4": "75vw",
+      },
     },
     maxHeight: {
       0: "0",

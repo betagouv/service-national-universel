@@ -52,18 +52,18 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
           )}
         </header>
       )}
-      <main className="grid grid-cols-3 gap-4 md:gap-6 h-full w-full py-12 flex-shrink overflow-y-auto">
-        <section className="flex flex-col col-span-2">
+      <main className="flex h-full w-fullmax-w-screen-2xl flex-shrink overflow-y-auto">
+        <section className="flex flex-col flex-grow flex-shrink-0 border-r-2 pt-12 px-12">
           <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
             Articles
             <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="article" />
           </h3>
-          <div ref={gridAnswersRef} id="answers" className="flex flex-col flex-wrap h-full w-full flex-shrink overflow-y-auto">
+          <div ref={gridAnswersRef} id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
             {answers.map(KnowledgeBaseCardArticle)}
-            {!answers.length && <span className="self-center w-full p-10 text-gray-400 block">Pas d'article</span>}
+            {!answers.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
           </div>
         </section>
-        <section className="flex flex-col col-span-1">
+        <section className="flex flex-col w-72 flex-shrink-0  pt-12 mx-12">
           <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
             Rubriques
             <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="section" />

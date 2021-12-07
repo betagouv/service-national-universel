@@ -3,12 +3,12 @@ import isHotkey from "is-hotkey";
 import { Editable, withReact, useSlate, Slate } from "slate-react";
 import { Editor, Transforms, createEditor, Element as SlateElement } from "slate";
 import { withHistory } from "slate-history";
-
-import { Button, Icon, Spacer, Toolbar } from "./components";
-import API from "../../services/api";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
+
+import API from "../../services/api";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import { Button, Icon, Spacer, Toolbar } from "./components";
 import EmojiPicker from "../EmojiPicker";
 
 const HOTKEYS = {

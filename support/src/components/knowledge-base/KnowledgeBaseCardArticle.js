@@ -4,7 +4,7 @@ import Tags from "../Tags";
 const KnowledgeBaseCardArticle = ({ _id, position, title, slug, allowedRoles = [] }) => {
   return (
     <Link key={_id} href={`/admin/knowledge-base/${slug}`} passHref>
-      <a href="#" data-position={position} data-id={_id} className="my-1 px-1 w-full flex-shrink-0 flex-grow-0 lg:my-4 lg:px-4 ">
+      <a href="#" data-position={position} data-id={_id} className="my-1 w-full flex-shrink-0 flex-grow-0 lg:my-4">
         <article className="flex items-center overflow-hidden rounded-lg shadow-lg bg-white py-3">
           <div className="flex flex-col flex-grow">
             <header className="flex items-center justify-between leading-tight px-8">
