@@ -16,6 +16,7 @@ const MultiSelect = ({ disabled, label, value = [], onChange, options, placehold
           clearIndicator: (provided) => ({ ...provided, cursor: "pointer" }),
           dropdownIndicator: (provided) => ({ ...provided, cursor: "pointer" }),
           multiValueRemove: (provided) => ({ ...provided, cursor: "pointer" }),
+          indicatorsContainer: (provided) => ({ ...provided, flexDirection: "row-reverse" }),
           option: (provided, state) => {
             return {
               ...provided,
