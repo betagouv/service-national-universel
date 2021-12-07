@@ -317,6 +317,7 @@ function validateYoung(young, user) {
     phase3Token: Joi.string().allow(null, ""),
     address: Joi.string().allow(null, ""),
     complementAddress: Joi.string().allow(null, ""),
+    addressVerified: Joi.string().allow(null, ""),
     zip: Joi.string().allow(null, ""),
     city: Joi.string().allow(null, ""),
     cityCode: Joi.string().allow(null, ""),
