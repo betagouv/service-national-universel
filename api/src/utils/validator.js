@@ -51,6 +51,7 @@ function validateMission(mission) {
         lat: Joi.number().allow(null),
         lon: Joi.number().allow(null),
       }),
+      addressVerified: Joi.string().allow(null, ""),
       remote: Joi.string().allow(null, ""),
       isMilitaryPreparation: Joi.string().allow(null, ""),
     })

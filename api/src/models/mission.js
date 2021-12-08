@@ -223,6 +223,12 @@ const Schema = new mongoose.Schema({
       type: Number,
     },
   },
+  addressVerified: {
+    type: String,
+    documentation: {
+      description: "L'adresse a été vérifiée",
+    },
+  },
   remote: {
     type: String,
     documentation: {

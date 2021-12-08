@@ -480,7 +480,7 @@ export default function Edit(props) {
                   <Wrapper>
                     <BoxTitle>Lieu où se déroule la mission</BoxTitle>
                     <AddressInput
-                      keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
+                      keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", addressVerified: "addressVerified" }}
                       values={values}
                       handleChange={handleChange}
                       errors={errors}

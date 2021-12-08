@@ -10,14 +10,25 @@ countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
 // eslint-disable-next-line prettier/prettier
-export default function AddressInputV2({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => {}, countryByDefault = "" }) {
+export default function AddressInputV2({
+  keys,
+  values,
+  handleChange,
+  errors,
+  touched,
+  validateField,
+  countryVisible = false,
+  onChangeCountry = () => {},
+  countryByDefault = "",
+  required = false,
+}) {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
   const [addressVerified, , addressVerifiedHelpers] = useField({
     value: values[keys.addressVerified],
     name: "addressVerified",
-    validate: (v) => v !== "true" && addressInFrance && "Il est obligatoire de vérifier l'adresse",
+    validate: (v) => v !== "true" && addressInFrance && required && "Il est obligatoire de vérifier l'adresse",
   });
 
   useEffect(() => {
@@ -30,7 +41,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
 
   useEffect(() => {
     setAddressInFrance(values[keys.country] === undefined || values[keys.country] === "France");
-    if (values[keys.country] === undefined) addressVerifiedHelpers.setValue("false");
+    if (keys.country && values[keys.country] === undefined) addressVerifiedHelpers.setValue("false");
   }, [values[keys.country]]);
 
   const onSuggestionSelected = () => {
