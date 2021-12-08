@@ -31,10 +31,21 @@ module.exports = {
         "screen-1/2": "50vw",
         "screen-3/4": "75vw",
       },
+      maxWidth: {
+        "screen-1/4": "25vw",
+        "screen-1/2": "50vw",
+        "screen-3/4": "75vw",
+        "screen-80": "80vw",
+        "screen-85": "85vw",
+        "screen-90": "90vw",
+        "screen-95": "95vw",
+      },
       height: {
         "screen-1/4": "25vw",
         "screen-1/2": "50vw",
         "screen-3/4": "75vw",
+        84: "21rem",
+        88: "22rem",
       },
     },
     maxHeight: {
