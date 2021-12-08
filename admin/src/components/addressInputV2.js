@@ -25,7 +25,7 @@ export default function AddressInputV2({
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [addressVerified, , addressVerifiedHelpers] = useField({
+  const [addressVerified, _, addressVerifiedHelpers] = useField({
     value: values[keys.addressVerified],
     name: "addressVerified",
     validate: (v) => v !== "true" && addressInFrance && required && "Il est obligatoire de vérifier l'adresse",
@@ -57,9 +57,10 @@ export default function AddressInputV2({
     handleChange({ target: { name: keys.zip, value: suggestion.properties.postcode } });
     handleChange({ target: { name: keys.address, value: suggestion.properties.name } });
     handleChange({ target: { name: keys.location, value: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] } } });
-    handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
-    handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
-
+    if (values?.cohort !== "2020") {
+      handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
+      handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
+    }
     if (keys.cityCode) {
       handleChange({ target: { name: keys.cityCode, value: suggestion.properties.citycode } });
     }
@@ -104,7 +105,7 @@ export default function AddressInputV2({
               <Label>Pays</Label>
               <Field
                 as="select"
-                validate={(v) => !v && requiredMessage}
+                validate={(v) => required && !v && requiredMessage}
                 className="form-control"
                 placeholder="Pays"
                 name={keys.country}
@@ -131,7 +132,7 @@ export default function AddressInputV2({
           <Col md={12} style={{ marginTop: 15 }}>
             <Label>Adresse</Label>
             <Field
-              validate={(v) => !v && requiredMessage}
+              validate={(v) => required && !v && requiredMessage}
               className="form-control"
               placeholder="Adresse"
               name={keys.address}
@@ -147,7 +148,7 @@ export default function AddressInputV2({
           <Col md={6} style={{ marginTop: 15 }}>
             <Label>Code postal</Label>
             <Field
-              validate={(v) => !v && requiredMessage}
+              validate={(v) => required && !v && requiredMessage}
               className="form-control"
               placeholder="Code postal"
               name={keys.zip}
@@ -163,7 +164,7 @@ export default function AddressInputV2({
           <Col md={6} style={{ marginTop: 15 }}>
             <Label>Ville</Label>
             <Field
-              validate={(v) => !v && requiredMessage}
+              validate={(v) => required && !v && requiredMessage}
               className="form-control"
               placeholder="Ville"
               name={keys.city}
