@@ -28,7 +28,7 @@ export default function AddressInputV2({
   const [addressVerified, _, addressVerifiedHelpers] = useField({
     value: values[keys.addressVerified],
     name: "addressVerified",
-    validate: (v) => v !== "true" && addressInFrance && required && "Il est obligatoire de vérifier l'adresse",
+    validate: (v) => v !== "true" && (values[keys.address] || values[keys.zip] || values[keys.city]) && addressInFrance && "Il est obligatoire de vérifier l'adresse",
   });
 
   useEffect(() => {
