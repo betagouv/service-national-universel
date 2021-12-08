@@ -73,7 +73,7 @@
     "react-multi-select-component": "3.0.7",
     "react-redux": "7.2.6",
     "react-redux-toastr": "7.6.6",
-    "react-router-dom": "5.3.0",
+    "react-router-dom": "6.0.2",
     "react-select": "4.3.1",
     "reactstrap": "8.10.1",
     "redux": "4.1.2",
