@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { SUPPORT_ROLES } from "snu-lib/roles";
-import Image from "next/image";
 import { toast } from "react-toastify";
 import API from "../../services/api";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import InputWithEmojiPicker from "../InputWithEmojiPicker";
-import IconsPicker from "../IconsPicker";
+import IconsPicker, { RedIcon } from "../IconsPicker";
 
 const KnowledgeBaseItemMetadata = ({ visible }) => {
   const router = useRouter();
@@ -24,6 +23,7 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
     const formData = new FormData(event.currentTarget);
     const body = { allowedRoles: [] };
     for (let [key, value] of formData.entries()) {
+      if (key === "imageSrc") continue;
       if (key.includes(".")) {
         // allowedRole in fieldset
         const [checkboxFieldset, checkboxName] = key.split(".");
@@ -36,6 +36,7 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
     if (response.error) return toast.error(response.error);
     mutate();
     router.replace(`/admin/knowledge-base/${response.data.slug}`);
+    toast.success("Élément enregistré !");
   };
 
   const onDelete = async () => {
@@ -72,6 +73,12 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
   };
 
   const onChooseIcon = () => setShowIconChooser(true);
+  const onSelectIcon = async (icon) => {
+    const response = await API.put({ path: `/support-center/knowledge-base/${item._id}`, body: { icon } });
+    if (response.error) return toast.error(response.error);
+    mutate();
+    setShowIconChooser(false);
+  };
 
   return (
     <aside className={`flex-grow-0 flex-shrink-0 border-l-2 shadow-lg z-10 resize-x dir-rtl overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
@@ -86,6 +93,10 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
           name="title"
           defaultValue={item.title}
         />
+        <label className="font-bold" htmlFor="group">
+          Groupe (option)
+        </label>
+        <InputWithEmojiPicker inputClassName="p-2" className="border-2 mb-5 bg-white w-full" placeholder="Phase 1, Phase 2, Mon Compte..." name="group" defaultValue={item.group} />
         <label className="font-bold" htmlFor="slug">
           Slug (Url)
         </label>
@@ -116,10 +127,11 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
             <label className="font-bold" htmlFor="imageSrc">
               Icon (option - sera remplacée par l'image si elle existe)
             </label>
+            {!!item.icon && <RedIcon icon={item.icon} showText={false} />}
             <button type="button" className="bg-white mt-2 mb-5 !border-2 border-snu-purple-300  !text-snu-purple-300" onClick={onChooseIcon}>
               Choisir
             </button>
-            <IconsPicker isOpen={showIconChooser} onRequestClose={() => setShowIconChooser(false)} />
+            <IconsPicker isOpen={showIconChooser} onRequestClose={() => setShowIconChooser(false)} onSelect={onSelectIcon} />
           </>
         )}
         <label htmlFor="description">Description</label>

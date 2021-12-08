@@ -71,12 +71,13 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
           <div ref={gridSectionsRef} id="sections" className="flex flex-wrap h-full w-full flex-shrink overflow-y-auto">
             {sections.map((section) => (
               <KnowledgeBaseCardSection
-                _id={section._id}
                 key={section._id}
-                imageSrc={section.imageSrc}
+                _id={section._id}
                 position={section.position}
-                imageAlt={section.imageAlt}
+                imageSrc={section.imageSrc}
+                icon={section.icon}
                 title={section.title}
+                group={section.group}
                 createdAt={section.createdAt}
                 slug={section.slug}
                 allowedRoles={section.allowedRoles}
