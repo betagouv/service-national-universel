@@ -86,7 +86,7 @@ export default function Wrapper({ children, young, tab }) {
                 <PanelActionButton icon="pencil" title="Modifier" />
               </Link>
               <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
-              <ActionButtonArchive young={young} />
+              {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
             </Row>
           </Col>
         </Row>

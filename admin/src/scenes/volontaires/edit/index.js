@@ -84,7 +84,7 @@ export default function VolontaireEdit(props) {
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
               <div style={{ display: "flex" }}>
-                <ActionButtonArchive young={values} />
+                {user.role === ROLES.ADMIN ? <ActionButtonArchive young={values} /> : null}
                 <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
                   <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                 </a>

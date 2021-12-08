@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, getAge, YOUNG_STATUS } from "../../utils";
+import { translate as t, isInRuralArea, getAge, YOUNG_STATUS, ROLES } from "../../utils";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
 import PatchHistoric from "../../components/views/PatchHistoric";
@@ -14,6 +15,7 @@ import ActionButtonArchive from "../../components/buttons/ActionButtonArchive";
 
 export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -67,7 +69,7 @@ export default function InscriptionPanel({ onChange, value }) {
           <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>
-          <ActionButtonArchive young={value} />
+          {user.role === ROLES.ADMIN ? <ActionButtonArchive young={value} /> : null}
         </div>
       </div>
       {value.status === YOUNG_STATUS.WAITING_CORRECTION && value.inscriptionCorrectionMessage ? (

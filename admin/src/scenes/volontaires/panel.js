@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate, getLabelWithdrawnReason } from "../../utils";
+import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate, getLabelWithdrawnReason, ROLES } from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -14,6 +15,7 @@ import ActionButtonArchive from "../../components/buttons/ActionButtonArchive";
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -63,7 +65,7 @@ export default function VolontairePanel({ onChange, value }) {
           <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>
-          <ActionButtonArchive young={young} />
+          {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
         </div>
         <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
       </div>
