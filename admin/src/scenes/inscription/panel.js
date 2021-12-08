@@ -10,6 +10,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import { appURL } from "../../config";
 import Badge from "../../components/Badge";
+import ActionButtonArchive from "../../components/buttons/ActionButtonArchive";
 
 export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
@@ -66,6 +67,7 @@ export default function InscriptionPanel({ onChange, value }) {
           <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>
+          <ActionButtonArchive young={value} />
         </div>
       </div>
       {value.status === YOUNG_STATUS.WAITING_CORRECTION && value.inscriptionCorrectionMessage ? (
