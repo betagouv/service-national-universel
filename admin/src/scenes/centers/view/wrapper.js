@@ -28,11 +28,9 @@ export default function Wrapper({ center: centerDefault, tab, children }) {
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
       <Header>
         <div style={{ flex: 1 }}>
-          <Title>{center.name}</Title>
-
           <TabList>
-            <Tab isActive={tab === "details"} onClick={() => history.push(`/centre/${center._id}`)}>
-              Détails
+            <Tab isActive={tab === "equipe"} onClick={() => history.push(`/centre/${center._id}`)}>
+              Équipe
             </Tab>
             <Tab isActive={tab === "volontaires"} onClick={() => history.push(`/centre/${center._id}/volontaires`)}>
               Volontaires

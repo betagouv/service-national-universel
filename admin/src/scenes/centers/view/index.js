@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Switch, Route, useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
+import Team from "./team";
 import Details from "./details";
 import Youngs from "./youngs";
 import Affectation from "./affectation";
@@ -38,7 +39,15 @@ export default function Index({ ...props }) {
       <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} />} />
       <Route path="/centre/:id/volontaires" component={() => <Youngs center={center} updateCenter={updateCenter} />} />
       <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} />} />
-      <Route path="/centre/:id" component={() => <Details center={center} />} />
+      <Route
+        path="/centre/:id"
+        component={() => (
+          <>
+            <Details center={center} />
+            <Team center={center} />
+          </>
+        )}
+      />
     </Switch>
   );
 }
