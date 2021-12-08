@@ -26,8 +26,6 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
       excludedZip: [],
       includedBirthdate: { begin: "2004-06-25", end: "2007-06-11" },
       stringDate: "12 au 24 juin 2022",
-      info: "Veuillez vous assurer d’être disponible sur l’ensemble de la période. Pourquoi je ne vois pas tous les séjours ? En savoir plus sur l’éligibilité",
-      url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/181-suis-je-eligible-a-un-sejour-de-cohesion-en-2022",
       buffer: 1.25,
       id: "Juin 2022",
     },
@@ -37,7 +35,6 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
       excludedZip: [],
       includedBirthdate: { begin: "2004-07-16", end: "2007-07-02" },
       stringDate: "3 au 15 juillet 2022",
-      info: "Veuillez vous assurer d'être disponible sur l'ensemble de la période.",
       buffer: 1.25,
       id: "Juillet 2022",
     },
@@ -54,7 +51,7 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
   });
 
   try {
-    for (session of sessions) {
+    for (let session of sessions) {
       const goal = await InscriptionGoalModel.findOne({ department: young.department, cohort: session.id });
       if (!goal || !goal.max) {
         session.goalReached = false;
