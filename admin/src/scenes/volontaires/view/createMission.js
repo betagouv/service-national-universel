@@ -494,7 +494,7 @@ export default function CreateMission({ young, onSend }) {
                 <Wrapper>
                   <Legend>Lieu où se déroule la mission</Legend>
                   <AddressInput
-                    keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
+                    keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", addressVerified: "addressVerified" }}
                     values={values}
                     handleChange={handleChange}
                     errors={errors}
