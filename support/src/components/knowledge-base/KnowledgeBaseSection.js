@@ -63,12 +63,12 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
             {!answers.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
           </div>
         </section>
-        <section className="flex flex-col w-72 flex-shrink-0  pt-12 mx-12">
+        <section className="flex flex-col w-96 flex-shrink-0  pt-12 ">
           <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
             Rubriques
             <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="section" />
           </h3>
-          <div ref={gridSectionsRef} id="sections" className="flex flex-wrap h-full w-full flex-shrink overflow-y-auto">
+          <div ref={gridSectionsRef} id="sections" className="flex flex-wrap h-full w-full flex-shrink overflow-y-auto px-12">
             {sections.map((section) => (
               <KnowledgeBaseCardSection
                 key={section._id}

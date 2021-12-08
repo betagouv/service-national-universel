@@ -53,7 +53,7 @@ const useKnowledgeBaseData = ({ debug = false } = {}) => {
     } else {
       setItem(itemTree);
     }
-  }, [flattenedData, slug]);
+  }, [slug]);
 
   return {
     tree,

@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Header from "../../../components/Header";
 import KnowledgeBaseArticle from "../../../components/knowledge-base/KnowledgeBaseArticle";
 import KnowledgeBaseBreadcrumb from "../../../components/knowledge-base/KnowledgeBaseBreadcrumb";
@@ -42,6 +42,13 @@ const KnowledgeBase = () => {
 
   const isRoot = router.pathname === "/admin/knowledge-base";
 
+  const isLoading = useMemo(() => {
+    if (!isRoot && !slug) return true;
+    if (!isRoot && item.type === "root") return true;
+    if (!item) return true;
+    return false;
+  }, [isRoot, slug, item]);
+
   return (
     <Layout title="Base de connaissances" className="flex flex-col">
       <Header>
@@ -58,7 +65,7 @@ const KnowledgeBase = () => {
           )}
         </div>
       </Header>
-      {(!isRoot && !slug) || !item ? (
+      {isLoading ? (
         <Loader />
       ) : (
         <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
@@ -76,6 +83,7 @@ const KnowledgeBase = () => {
 };
 
 const Content = ({ item }) => {
+  console.log({ item });
   if (!item) return null;
   if (["root", "section"].includes(item?.type)) return <KnowledgeBaseSection key={item._id} section={item} isRoot={item?.type === "root"} />;
   if (item?.type === "article") return <KnowledgeBaseArticle article={item} />;
