@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RedIcon } from "../IconsPicker";
 import Tags from "../Tags";
 
 const contentSummary = (sectionChildren) => {
@@ -12,19 +13,30 @@ const contentSummary = (sectionChildren) => {
   return `${answersSummary} \u00A0\u2022\u00A0 ${sectionsSummary}`;
 };
 
-const KnowledgeBaseCardSection = ({ _id, imageSrc, position, imageAlt, title, slug, allowedRoles, sectionChildren }) => {
+const KnowledgeBaseCardSection = ({ _id, imageSrc, position, title, group, icon, slug, allowedRoles, sectionChildren }) => {
   return (
     <Link key={_id} href={`/admin/knowledge-base/${slug}`} passHref>
-      <a href="#" data-position={position} data-id={_id} className="my-1 px-1 w-full flex-shrink-0 flex-grow-0 lg:my-4 lg:px-4 ">
+      <a href="#" data-position={position} data-id={_id} className="my-1 w-full flex-shrink-0 flex-grow-0 lg:my-4 ">
         <article className="overflow-hidden rounded-lg shadow-lg bg-white">
-          <div className="h-40 w-full bg-gray-300 flex items-center justify-center overflow-hidden">
-            {!!imageSrc ? <img alt={imageAlt} className="block h-auto w-full" src={imageSrc} /> : <span className="text-gray-400">Pas d'image</span>}
-          </div>
-          <header className="flex items-center justify-between leading-tight p-2 md:p-4">
-            <h3 className="text-lg text-black">{title}</h3>
+          {!!imageSrc ? (
+            <div className="h-40 w-full bg-gray-300 flex items-center justify-center overflow-hidden">
+              <img alt={title.title} className="relative h-40 w-full bg-gray-300 flex-shrink-0 object-contain" src={imageSrc} />
+            </div>
+          ) : !!icon ? (
+            <div className="w-full flex items-center overflow-hidden px-8 pt-8">
+              <RedIcon icon={icon} showText={false} className="!m-0" />
+            </div>
+          ) : (
+            <div className="h-40 w-full bg-gray-300 flex items-center justify-center overflow-hidden">
+              <span className="text-gray-400">Pas d'image</span>
+            </div>
+          )}
+          <header className="flex flex-col items-start justify-start leading-tight mt-4 mb-2 px-8 ">
+            {!!group && <h4 className="text-sm text-red-500 font-bold uppercase text-left mb-2">{group}</h4>}
+            <h3 className="text-xl text-black font-bold">{title}</h3>
           </header>
-          <p className="px-2 md:px-4  flex flex-wrap text-coolGray-500">{contentSummary(sectionChildren)}</p>
-          <footer className="flex flex-col items-start justify-between leading-none p-2 md:p-4 ">
+          <p className="flex flex-wrap text-coolGray-500 px-8  mb-2">{contentSummary(sectionChildren)}</p>
+          <footer className="flex flex-col items-start justify-between leading-none px-8 mb-4 -ml-2">
             <p className="flex flex-wrap">
               <Tags tags={allowedRoles} />
             </p>

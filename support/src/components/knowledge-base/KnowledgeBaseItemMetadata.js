@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { SUPPORT_ROLES } from "snu-lib/roles";
-import Image from "next/image";
 import { toast } from "react-toastify";
 import API from "../../services/api";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import InputWithEmojiPicker from "../InputWithEmojiPicker";
+import IconsPicker, { RedIcon } from "../IconsPicker";
 
 const KnowledgeBaseItemMetadata = ({ visible }) => {
   const router = useRouter();
+  const [showIconChooser, setShowIconChooser] = useState(false);
 
   const [slug, setSlug] = useState(router.query?.slug || "");
   useEffect(() => {
@@ -22,6 +23,7 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
     const formData = new FormData(event.currentTarget);
     const body = { allowedRoles: [] };
     for (let [key, value] of formData.entries()) {
+      if (key === "imageSrc") continue;
       if (key.includes(".")) {
         // allowedRole in fieldset
         const [checkboxFieldset, checkboxName] = key.split(".");
@@ -34,6 +36,7 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
     if (response.error) return toast.error(response.error);
     mutate();
     router.replace(`/admin/knowledge-base/${response.data.slug}`);
+    toast.success("Élément enregistré !");
   };
 
   const onDelete = async () => {
@@ -61,10 +64,28 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
     toast.success("Fichier téléversé");
   };
 
+  const onDeleteImage = async () => {
+    if (window.confirm("Voulez-vous vraiment supprimer cet image ? Cette opération est définitive")) {
+      const response = await API.put({ path: `/support-center/knowledge-base/${item._id}`, body: { imageSrc: null } });
+      if (response.error) return toast.error(response.error);
+      mutate();
+    }
+  };
+
+  const onChooseIcon = () => setShowIconChooser(true);
+  const onSelectIcon = async (icon) => {
+    const response = await API.put({ path: `/support-center/knowledge-base/${item._id}`, body: { icon } });
+    if (response.error) return toast.error(response.error);
+    mutate();
+    setShowIconChooser(false);
+  };
+
   return (
     <aside className={`flex-grow-0 flex-shrink-0 border-l-2 shadow-lg z-10 resize-x dir-rtl overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
       <form onSubmit={onSubmit} className="flex-grow-0 flex-shrink-0  px-4 py-6 flex flex-col w-full overflow-scroll h-full dir-ltr items-start" key={item._id}>
-        <label htmlFor="title">Titre</label>
+        <label className="font-bold" htmlFor="title">
+          Titre
+        </label>
         <InputWithEmojiPicker
           inputClassName="p-2"
           className="border-2 mb-5 bg-white w-full"
@@ -72,24 +93,45 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
           name="title"
           defaultValue={item.title}
         />
-        <label htmlFor="slug">Slug (Url)</label>
+        <label className="font-bold" htmlFor="group">
+          Groupe (option)
+        </label>
+        <InputWithEmojiPicker inputClassName="p-2" className="border-2 mb-5 bg-white w-full" placeholder="Phase 1, Phase 2, Mon Compte..." name="group" defaultValue={item.group} />
+        <label className="font-bold" htmlFor="slug">
+          Slug (Url)
+        </label>
         <input className="p-2 border-2 mb-5 w-full" placeholder={`Slug ${item.type === "section" ? "de la rubrique" : "de l'article"}`} name="slug" defaultValue={item.slug} />
         {item.type === "section" && (
           <>
-            {!!item.imageSrc && (
-              <div className="relative h-40 w-full bg-gray-300 flex-shrink-0 ">
-                <Image alt={item.title} className="block h-auto w-full object-cover" src={item.imageSrc} layout="fill" />
-              </div>
-            )}
-            <label htmlFor="imageSrc">Image (option)</label>
+            <label className="font-bold" htmlFor="imageSrc">
+              Image (option)
+            </label>
             <input
-              className="p-2 border-2 mb-5 w-full flex-shrink-0"
+              className={`p-2 border-2 mb-2 w-full flex-shrink-0 ${!item.imageSrc ? "mb-5" : ""}`}
               accept="image/jpeg,image/png"
               name="imageSrc"
               type="file"
               onChange={onUploadImage}
               placeholder="Choisissez un fichier"
             />
+            {!!item.imageSrc && (
+              <div className="relative h-40 w-full mb-5 bg-gray-300 flex-shrink-0 flex items-center justify-center overflow-hidden show-button-on-hover rounded-t-lg ">
+                <img alt={item.title} className="relative h-40 w-full bg-gray-300 flex-shrink-0 object-contain" src={item.imageSrc} />
+                <div className="w-full h-full absolute flex items-center justify-center button-container bg-gray-800 bg-opacity-80 transition-opacity">
+                  <button className="absolute m-auto bg-white mt-2 mb-5 !border-2 border-red-500  text-red-500" onClick={onDeleteImage}>
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            )}
+            <label className="font-bold" htmlFor="imageSrc">
+              Icon (option - sera remplacée par l'image si elle existe)
+            </label>
+            {!!item.icon && <RedIcon icon={item.icon} showText={false} />}
+            <button type="button" className="bg-white mt-2 mb-5 !border-2 border-snu-purple-300  !text-snu-purple-300" onClick={onChooseIcon}>
+              Choisir
+            </button>
+            <IconsPicker isOpen={showIconChooser} onRequestClose={() => setShowIconChooser(false)} onSelect={onSelectIcon} />
           </>
         )}
         <label htmlFor="description">Description</label>

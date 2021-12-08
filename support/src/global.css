@@ -53,6 +53,16 @@
   direction: ltr;
 }
 
+.show-button-on-hover:hover .button-container {
+  opacity: 1;
+  pointer-events: initial;
+}
+
+.show-button-on-hover .button-container {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /*
 
 SLATEJS
