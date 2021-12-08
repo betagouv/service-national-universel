@@ -73,7 +73,7 @@ const KnowledgeBase = () => {
           <Content key={slug} item={item} />
           {!isRoot && (
             <>
-              <KnowledgeBaseItemMetadata visible={metadataVisible} />
+              <KnowledgeBaseItemMetadata key={item?._id} visible={metadataVisible} />
             </>
           )}
         </div>
@@ -83,7 +83,6 @@ const KnowledgeBase = () => {
 };
 
 const Content = ({ item }) => {
-  console.log({ item });
   if (!item) return null;
   if (["root", "section"].includes(item?.type)) return <KnowledgeBaseSection key={item._id} section={item} isRoot={item?.type === "root"} />;
   if (item?.type === "article") return <KnowledgeBaseArticle article={item} />;

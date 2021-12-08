@@ -12,12 +12,7 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
   const router = useRouter();
   const [showIconChooser, setShowIconChooser] = useState(false);
 
-  const [slug, setSlug] = useState(router.query?.slug || "");
-  useEffect(() => {
-    setSlug(router.query?.slug || "");
-  }, [router.query?.slug]);
-
-  const { flattenedData, item, mutate } = useKnowledgeBaseData({ slug });
+  const { flattenedData, item, mutate } = useKnowledgeBaseData();
 
   // need to listen to title change to propose updated slug
   const [title, setTitle] = useState(item.title);
@@ -73,6 +68,7 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
     }
   };
 
+  const [itemImageSrc, setItemImageSrc] = useState(item.imageSrc);
   const onUploadImage = async (event) => {
     const imageRes = await API.uploadFile("/support-center/knowledge-base/picture", event.target.files);
     if (imageRes.code === "FILE_CORRUPTED") {
@@ -84,6 +80,7 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
     const response = await API.put({ path: `/support-center/knowledge-base/${item._id}`, body: { imageSrc: imageRes.data } });
     if (response.code) return toast.error(response.code);
     mutate();
+    setItemImageSrc(response.data.imageSrc);
     toast.success("Fichier téléversé");
   };
 
@@ -95,11 +92,17 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
     }
   };
 
+  useEffect(() => {
+    setItemSlug(item.slug);
+  }, [item.slug]);
+
+  const [itemIcon, setItemIcon] = useState(item.icon);
   const onChooseIcon = () => setShowIconChooser(true);
   const onSelectIcon = async (icon) => {
     const response = await API.put({ path: `/support-center/knowledge-base/${item._id}`, body: { icon } });
     if (response.code) return toast.error(response.code);
     mutate();
+    setItemIcon(response.data.icon);
     setShowIconChooser(false);
   };
 
@@ -162,14 +165,14 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
               Image (option)
             </label>
             <input
-              className={`p-2 border-2 mb-2 w-full flex-shrink-0 ${!item.imageSrc ? "mb-5" : ""}`}
+              className={`p-2 border-2 mb-2 w-full flex-shrink-0 ${!itemImageSrc ? "mb-5" : ""}`}
               accept="image/jpeg,image/png"
               name="imageSrc"
               type="file"
               onChange={onUploadImage}
               placeholder="Choisissez un fichier"
             />
-            {!!item.imageSrc && (
+            {!!itemImageSrc && (
               <div className="relative h-40 w-full mb-5 bg-gray-300 flex-shrink-0 flex items-center justify-center overflow-hidden show-button-on-hover rounded-t-lg ">
                 <img alt={item.title} className="relative h-40 w-full bg-gray-300 flex-shrink-0 object-contain" src={item.imageSrc} />
                 <div className="w-full h-full absolute flex items-center justify-center button-container bg-gray-800 bg-opacity-80 transition-opacity">
@@ -182,7 +185,7 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
             <label className="font-bold" htmlFor="imageSrc">
               Icon (option - sera remplacée par l'image si elle existe)
             </label>
-            {!!item.icon && <RedIcon icon={item.icon} showText={false} />}
+            {!!itemIcon && <RedIcon icon={itemIcon} showText={false} />}
             <button type="button" className="bg-white mt-2 mb-5 !border-2 border-snu-purple-300  !text-snu-purple-300" onClick={onChooseIcon}>
               Choisir
             </button>

@@ -53,9 +53,9 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
         </header>
       )}
       <main className="flex h-full w-fullmax-w-screen-2xl flex-shrink overflow-y-auto">
-        <section className="flex flex-col flex-grow flex-shrink-0 border-r-2 pt-12 px-12">
-          <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
-            Articles
+        <section className="flex flex-col flex-grow flex-shrink-0 border-r-2 pt-6 px-12">
+          <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
+            Sujets
             <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="article" />
           </h3>
           <div ref={gridAnswersRef} id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
@@ -63,9 +63,9 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
             {!answers.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
           </div>
         </section>
-        <section className="flex flex-col w-96 flex-shrink-0  pt-12 ">
-          <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
-            Rubriques
+        <section className="flex flex-col w-96 flex-shrink-0  pt-6 ">
+          <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
+            Catégories
             <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="section" />
           </h3>
           <div ref={gridSectionsRef} id="sections" className="flex flex-wrap h-full w-full flex-shrink overflow-y-auto px-12">
@@ -73,6 +73,7 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
               <KnowledgeBaseCardSection
                 key={section._id}
                 _id={section._id}
+                path="/admin/knowledge-base"
                 position={section.position}
                 imageSrc={section.imageSrc}
                 icon={section.icon}

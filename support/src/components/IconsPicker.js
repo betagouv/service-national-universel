@@ -15,7 +15,7 @@ const IconsPicker = ({ isOpen, onRequestClose, onSelect }) => {
               {forSearch
                 .filter(({ synonyms, icon }) => icon.includes(search) || synonyms.includes(search))
                 .map(({ icon }) => (
-                  <RedIcon icon={icon} key={icon} onClick={() => onSelect(icon)} showText />
+                  <RedIcon icon={icon} key={icon} onSelect={() => onSelect(icon)} showText />
                 ))}
             </div>
           </div>

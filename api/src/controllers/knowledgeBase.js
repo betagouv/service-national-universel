@@ -226,33 +226,54 @@ router.get("/all", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/:slug", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/all-slugs", async (req, res) => {
   try {
-    if (!req.params.slug) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const data = await KnowledgeBaseObject.find()
+
+    return res.status(200).send({ ok: true, data: data.map(item => item.slug) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/:slug", async (req, res) => {
+  try {
     const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug })
       .populate({
         path: "author",
         select: "_id firstName lastName role",
       })
       .lean(); // to json
+
     if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (req.query.withParents === "true") {
-      const parents = await findParents(existingKb);
-      existingKb.parents = parents;
-    }
+    const parents = await findParents(existingKb);
+    existingKb.parents = parents;
 
-    if (req.query.withTree === "true") {
-      const tree = await buildTree(existingKb);
-      return res.status(200).send({ ok: true, data: tree });
-    }
-
-    if (req.query.withDirectChildren === "true" || req.query.withAllChildren === "true") {
-      const children = findChildren(existingKb, req.query.withAllChildren === "true");
+    if (existingKb.type === "section") {
+      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id })
+        .sort({ type: -1, position: 1 })
+        .populate({ path: "author", select: "_id firstName lastName role" })
+        .lean(); // to json;
       existingKb.children = children;
     }
 
     return res.status(200).send({ ok: true, data: existingKb });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const children = await KnowledgeBaseObject.find({ parentId: null })
+    .sort({ type: -1, position: 1 })
+    .populate({ path: "author", select: "_id firstName lastName role" })
+    .lean(); // to json;
+
+    return res.status(200).send({ ok: true, data: children });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
