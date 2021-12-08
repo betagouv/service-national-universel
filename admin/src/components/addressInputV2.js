@@ -40,7 +40,7 @@ export default function AddressInputV2({
   }, []);
 
   useEffect(() => {
-    setAddressInFrance(values[keys.country] === undefined || values[keys.country] === "France");
+    setAddressInFrance(!values[keys.country] || values[keys.country] === "France");
     if (keys.country && values[keys.country] === undefined) addressVerifiedHelpers.setValue("false");
   }, [values[keys.country]]);
 
@@ -129,7 +129,7 @@ export default function AddressInputV2({
               <ErrorMessage errors={errors} touched={touched} name={keys.country} />
             </Col>
           )}
-          <Col md={12} style={{ marginTop: 15 }}>
+          <Col md={12} style={{ marginTop: countryVisible ? 15 : 0 }}>
             <Label>Adresse</Label>
             <Field
               validate={(v) => required && !v && requiredMessage}
