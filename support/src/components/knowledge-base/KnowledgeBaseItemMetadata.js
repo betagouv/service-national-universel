@@ -33,25 +33,6 @@ const KnowledgeBaseItemMetadata = ({ visible }) => {
     setItemSlug(item.slug);
   }, [item.slug]);
 
-  // need to listen to title change to propose updated slug
-  const [title, setTitle] = useState(item.title);
-  const onTitleChange = (event) => {
-    setTitle(event.target.value);
-  };
-
-  useEffect(() => {
-    setTitle(item.title);
-  }, [item.title]);
-
-  const [itemSlug, setItemSlug] = useState(item.slug);
-  const onItemSlugChange = (event) => {
-    setItemSlug(event.target.value);
-  };
-
-  useEffect(() => {
-    setItemSlug(item.slug);
-  }, [item.slug]);
-
   const onSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
