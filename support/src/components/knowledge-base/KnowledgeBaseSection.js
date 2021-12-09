@@ -59,7 +59,17 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
             <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="article" />
           </h3>
           <div ref={gridAnswersRef} id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
-            {answers.map(KnowledgeBaseCardArticle)}
+            {answers.map((answer) => (
+              <KnowledgeBaseCardArticle
+                key={answer._id}
+                _id={answer._id}
+                position={answer.position}
+                title={answer.title}
+                slug={answer.slug}
+                allowedRoles={answer.allowedRoles}
+                path="/admin/knowledge-base"
+              />
+            ))}
             {!answers.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
           </div>
         </section>

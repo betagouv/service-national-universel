@@ -51,17 +51,3 @@ const KnowledgeBaseCardSection = ({ _id, imageSrc, position, title, group, icon,
 };
 
 export default KnowledgeBaseCardSection;
-
-const Card = ({ title, small, imgSrc, to }) => (
-  <Link href={to}>
-    <div className="flex flex-col overflow-hidden bg-white rounded-lg shadow-lg flex-shrink-0 flex-grow w-60 h-full cursor-pointer">
-      <div className="h-1/2 flex-shrink-0 flex-grow-0">
-        <img className="object-cover w-full h-full" src={`/assets/${imgSrc}`} alt={title} />
-      </div>
-      <div className="flex flex-col gap-2 p-6 pb-12">
-        <span className="text-[#C93D38] text-xs lg:text-sm uppercase font-bold">{small}</span>
-        <span className="text-lg font-bold text-gray-900 lg:text-2xl md:text-xl">{title}</span>
-      </div>
-    </div>
-  </Link>
-);

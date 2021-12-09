@@ -20,7 +20,7 @@ const HOTKEYS = {
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey }) => {
+const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly }) => {
   const router = useRouter();
 
   const [value, setValue] = useState(JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || empty);
@@ -78,27 +78,30 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey }) => {
 
   return (
     <div className="flex-grow flex-shrink flex flex-col  overflow-hidden">
-      <div className="px-8 mt-6 pt-2 flex-grow flex-shrink flex flex-col bg-white  overflow-hidden">
+      <div className={`px-8 mt-6 pt-2 flex-grow flex-shrink flex flex-col ${!readOnly ? "bg-white" : ""}  overflow-hidden`}>
         <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
-          <Toolbar>
-            <Button>
-              <EmojiPicker size={10} className="text-2xl my-1.5 !mr-0 !h-5 !w-5" insertEmoji={editor.insertText} />
-            </Button>
-            <MarkButton format="bold" icon="format_bold" />
-            <MarkButton format="italic" icon="format_italic" />
-            <MarkButton format="underline" icon="format_underlined" />
-            <BlockButton format="block-quote" icon="format_quote" />
-            {/* <MarkButton format="code" icon="code" /> */}
-            <Spacer />
-            <BlockButton format="heading-one" icon="looks_one" />
-            <BlockButton format="heading-two" icon="looks_two" />
-            <BlockButton format="heading-three" icon="looks_3" />
-            <Spacer />
-            <BlockButton format="numbered-list" icon="format_list_numbered" />
-            <BlockButton format="bulleted-list" icon="format_list_bulleted" />
-          </Toolbar>
+          {!readOnly && (
+            <Toolbar>
+              <Button>
+                <EmojiPicker size={10} className="text-2xl my-1.5 !mr-0 !h-5 !w-5" insertEmoji={editor.insertText} />
+              </Button>
+              <MarkButton format="bold" icon="format_bold" />
+              <MarkButton format="italic" icon="format_italic" />
+              <MarkButton format="underline" icon="format_underlined" />
+              <BlockButton format="block-quote" icon="format_quote" />
+              {/* <MarkButton format="code" icon="code" /> */}
+              <Spacer />
+              <BlockButton format="heading-one" icon="looks_one" />
+              <BlockButton format="heading-two" icon="looks_two" />
+              <BlockButton format="heading-three" icon="looks_3" />
+              <Spacer />
+              <BlockButton format="numbered-list" icon="format_list_numbered" />
+              <BlockButton format="bulleted-list" icon="format_list_bulleted" />
+            </Toolbar>
+          )}
           <div id="text-editor" className="overflow-auto flex-shrink flex-grow">
             <Editable
+              readOnly={readOnly}
               renderElement={renderElement}
               renderLeaf={renderLeaf}
               placeholder="Commencez à écrire votre article..."
@@ -117,14 +120,16 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey }) => {
           </div>
         </Slate>
       </div>
-      <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
-        <button onClick={onSave} disabled={!isSaveable} className="px-8 py-2 box-border">
-          Enregistrer
-        </button>
-        <button onClick={onCancel} disabled={!isSaveable} className="px-8 py-2 box-border">
-          Rétablir la dernière version
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
+          <button onClick={onSave} disabled={!isSaveable} className="px-8 py-2 box-border">
+            Enregistrer
+          </button>
+          <button onClick={onCancel} disabled={!isSaveable} className="px-8 py-2 box-border">
+            Rétablir la dernière version
+          </button>
+        </div>
+      )}
     </div>
   );
 };
