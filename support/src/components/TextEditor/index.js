@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import isHotkey from "is-hotkey";
-import { Editable, withReact, useSlate, Slate } from "slate-react";
+import { Editable, withReact, useSlate, Slate, useSlateStatic, useSelected, ReactEditor, useFocused } from "slate-react";
 import { Editor, Transforms, createEditor, Element as SlateElement } from "slate";
 import { withHistory } from "slate-history";
 import { toast } from "react-toastify";
@@ -27,7 +27,7 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
   const [isSaveable, setIsSaveable] = useState(!!localStorage.getItem(`snu-kb-content-${_id}`));
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+  const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), []);
 
   const { mutate } = useKnowledgeBaseData();
 
@@ -97,6 +97,8 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
               <Spacer />
               <BlockButton format="numbered-list" icon="format_list_numbered" />
               <BlockButton format="bulleted-list" icon="format_list_bulleted" />
+              <Spacer />
+              <InsertImageButton />
             </Toolbar>
           )}
           <div id="text-editor" className="overflow-auto flex-shrink flex-grow">
@@ -132,6 +134,47 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
       )}
     </div>
   );
+};
+
+const withImages = (editor) => {
+  const { insertData, isVoid } = editor;
+
+  editor.isVoid = (element) => {
+    return element.type === "image" ? true : isVoid(element);
+  };
+
+  editor.insertData = (data) => {
+    const text = data.getData("text/plain");
+    const { files } = data;
+
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const reader = new FileReader();
+        const [mime] = file.type.split("/");
+
+        if (mime === "image") {
+          reader.addEventListener("load", () => {
+            const url = reader.result;
+            insertImage(editor, url);
+          });
+
+          reader.readAsDataURL(file);
+        }
+      }
+    } else if (isImageUrl(text)) {
+      insertImage(editor, text);
+    } else {
+      insertData(data);
+    }
+  };
+
+  return editor;
+};
+
+const insertImage = (editor, url) => {
+  const text = { text: "" };
+  const image = { type: "image", url, children: [text] };
+  Transforms.insertNodes(editor, image);
 };
 
 const toggleBlock = (editor, format) => {
@@ -180,7 +223,8 @@ const isMarkActive = (editor, format) => {
   return marks ? marks[format] === true : false;
 };
 
-const Element = ({ attributes, children, element }) => {
+const Element = (props) => {
+  const { attributes, children, element } = props;
   switch (element.type) {
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>;
@@ -196,6 +240,8 @@ const Element = ({ attributes, children, element }) => {
       return <li {...attributes}>{children}</li>;
     case "numbered-list":
       return <ol {...attributes}>{children}</ol>;
+    case "image":
+      return <Image {...props} />;
     default:
       return <p {...attributes}>{children}</p>;
   }
@@ -219,6 +265,25 @@ const Leaf = ({ attributes, children, leaf }) => {
   }
 
   return <span {...attributes}>{children}</span>;
+};
+
+const Image = ({ attributes, children, element }) => {
+  const editor = useSlateStatic();
+  const path = ReactEditor.findPath(editor, element);
+
+  const selected = useSelected();
+  const focused = useFocused();
+  return (
+    <div {...attributes}>
+      {children}
+      <div contentEditable={false} className="relative">
+        <img src={element.url} className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`} />
+        <Button active onClick={() => Transforms.removeNodes(editor, { at: path })} className={`absolute top-2 left-2 bg-white ${selected && focused ? "inlinde" : "none"}`}>
+          <Icon>delete</Icon>
+        </Button>
+      </div>
+    </div>
+  );
 };
 
 const BlockButton = ({ format, icon }) => {
@@ -249,6 +314,41 @@ const MarkButton = ({ format, icon }) => {
       <Icon>{icon}</Icon>
     </Button>
   );
+};
+
+const InsertImageButton = () => {
+  const inputFileRef = useRef(null);
+  const editor = useSlateStatic();
+  const onUploadImage = async (event) => {
+    const imageRes = await API.uploadFile("/support-center/knowledge-base/picture", event.target.files);
+    if (imageRes.code === "FILE_CORRUPTED") {
+      return toast.error("Le fichier semble corrompu", "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support", {
+        timeOut: 0,
+      });
+    }
+    if (!imageRes.ok) return toast.error("Une erreur s'est produite lors du téléversement de votre fichier");
+    toast.success("Fichier téléversé");
+    insertImage(editor, imageRes.data);
+  };
+  return (
+    <Button
+      onMouseDown={(event) => {
+        event.preventDefault();
+        inputFileRef.current.click();
+      }}
+    >
+      <Icon>image</Icon>
+      <input type="file" ref={inputFileRef} onChange={onUploadImage} className="hidden" />
+    </Button>
+  );
+};
+
+const isImageUrl = (url) => {
+  if (!url) return false;
+  if (!url.includes("cellar-c2.services.clever-cloud.com/")) return false;
+  if (!url.startsWith("https://")) return false;
+  const ext = new URL(url).pathname.split(".").pop();
+  return ["png", "jpg", "jpeg"].includes(ext);
 };
 
 const empty = [{ type: "paragraph", children: [{ text: "" }] }];
