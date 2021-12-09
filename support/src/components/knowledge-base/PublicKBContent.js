@@ -60,8 +60,8 @@ const PublicKBContent = ({ item }) => {
             <Breadcrumb parents={item?.parents || []} path="/help" />
             <div className="wrapper">
               {<h5 className="text-snu-purple-100 max-w-3xl pb-2 text-base md:text-lg uppercase">{group}</h5>}
-              <h1 className="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">{item.title}</h1>
-              <h6 className="text-snu-purple-100 text-base md:text-lg lg:text-xl">{item.description}</h6>
+              <h1 className="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">{item?.title}</h1>
+              <h6 className="text-snu-purple-100 text-base md:text-lg lg:text-xl">{item?.description}</h6>
             </div>
           </div>
         </div>
