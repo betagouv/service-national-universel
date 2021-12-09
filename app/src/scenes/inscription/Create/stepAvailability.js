@@ -39,13 +39,13 @@ export default function StepAvailability() {
 
   useEffect(() => {
     (async () => {
-      if (availability?.length === 0) await api.put("/young", { ...young, status: YOUNG_STATUS.NOT_ELIGIBLE });
+      if (availability?.length === 0) await api.put("/young", { status: YOUNG_STATUS.NOT_ELIGIBLE });
     })();
   }, [availability]);
 
   const submit = async (cohort) => {
     try {
-      const { ok, code, data } = await api.put("/young", { ...young, cohort, inscriptionStep: STEPS.PARTICULIERES });
+      const { ok, code, data } = await api.put("/young", { cohort, inscriptionStep: STEPS.PARTICULIERES });
       if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(data));
       history.push("/inscription/particulieres");

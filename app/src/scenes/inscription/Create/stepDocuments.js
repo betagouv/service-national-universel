@@ -50,7 +50,6 @@ export default () => {
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            values.inscriptionStep = STEPS.AVAILABILITY;
             const { ok, code, data } = await api.put("/young", { ...values, inscriptionStep: STEPS.DONE });
             if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(data));
@@ -62,7 +61,7 @@ export default () => {
             setLoading(false);
           }
         }}>
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormRow>
               <Col md={4}>

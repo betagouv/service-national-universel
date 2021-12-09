@@ -60,6 +60,9 @@ export default function InscriptionDrawer({ step }) {
             <Element status={getStatus(STEPS.COORDONNEES)}>
               <a onClick={() => handleClick(STEPS.COORDONNEES)}>Coordonnées</a>
             </Element>
+            <Element status={getStatus(STEPS.AVAILABILITY)}>
+              <a onClick={() => handleClick(STEPS.AVAILABILITY)}>Disponibilités</a>
+            </Element>
             <Element status={getStatus(STEPS.PARTICULIERES)}>
               <a onClick={() => handleClick(STEPS.PARTICULIERES)}>Situations particulières</a>
             </Element>
@@ -71,9 +74,6 @@ export default function InscriptionDrawer({ step }) {
             </Element>
             <Element status={getStatus(STEPS.DOCUMENTS)}>
               <a onClick={() => handleClick(STEPS.DOCUMENTS)}>Pièces justificatives</a>
-            </Element>
-            <Element status={getStatus(STEPS.AVAILABILITY)}>
-              <a onClick={() => handleClick(STEPS.AVAILABILITY)}>Disponibilités</a>
             </Element>
           </ul>
         </li>
