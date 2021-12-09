@@ -36,9 +36,12 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
 
   useEffect(() => {
     sortableSections.current = new SortableJS(gridSectionsRef.current, { animation: 150, group: "sections", onEnd: () => onListChange("sections") });
-    sortableAnswers.current = new SortableJS(gridAnswersRef.current, { animation: 150, group: "answers", onEnd: () => onListChange("answers") });
+    if (!isRoot) {
+      sortableAnswers.current = new SortableJS(gridAnswersRef.current, { animation: 150, group: "answers", onEnd: () => onListChange("answers") });
+    }
   }, []);
 
+  console.log({ isRoot });
   return (
     <article className="container bg-coolGray-100 mx-auto flex flex-col flex-grow h-full relative w-full flex-shrink overflow-hidden">
       {!isRoot && (
@@ -53,48 +56,52 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
         </header>
       )}
       <main className="flex h-full w-fullmax-w-screen-2xl flex-shrink overflow-y-auto">
-        <section className="flex flex-col flex-grow flex-shrink-0 border-r-2 pt-6 px-12">
-          <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
-            Sujets
-            <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="article" />
-          </h3>
-          <div ref={gridAnswersRef} id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
-            {answers.map((answer) => (
-              <KnowledgeBaseCardArticle
-                key={answer._id}
-                _id={answer._id}
-                position={answer.position}
-                title={answer.title}
-                slug={answer.slug}
-                allowedRoles={answer.allowedRoles}
-                path="/admin/knowledge-base"
-              />
-            ))}
-            {!answers.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
-          </div>
-        </section>
-        <section className="flex flex-col w-96 flex-shrink-0  pt-6 ">
+        {!isRoot && (
+          <section className="flex flex-col flex-grow flex-shrink-0 border-r-2 pt-6 px-12">
+            <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
+              Sujets
+              <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="article" />
+            </h3>
+            <div ref={gridAnswersRef} id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
+              {answers.map((answer) => (
+                <KnowledgeBaseCardArticle
+                  key={answer._id}
+                  _id={answer._id}
+                  position={answer.position}
+                  title={answer.title}
+                  slug={answer.slug}
+                  allowedRoles={answer.allowedRoles}
+                  path="/admin/knowledge-base"
+                />
+              ))}
+              {!answers.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
+            </div>
+          </section>
+        )}
+        <section className={`flex flex-col ${isRoot ? "w-full" : "w-96"} flex-shrink-0  pt-6`}>
           <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
             Catégories
             <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="section" />
           </h3>
-          <div ref={gridSectionsRef} id="sections" className="flex flex-wrap h-full w-full flex-shrink overflow-y-auto px-12">
+          <div ref={gridSectionsRef} id="sections" className={`flex ${isRoot ? "justify-center" : ""} flex-wrap h-full w-full flex-shrink overflow-y-auto px-12`}>
             {sections.map((section) => (
-              <KnowledgeBaseCardSection
-                key={section._id}
-                _id={section._id}
-                path="/admin/knowledge-base"
-                position={section.position}
-                imageSrc={section.imageSrc}
-                icon={section.icon}
-                title={section.title}
-                group={section.group}
-                createdAt={section.createdAt}
-                slug={section.slug}
-                allowedRoles={section.allowedRoles}
-                // a section has `children`, reserved prop in React: don't spread the whole section as props for a component or it will bug !
-                sectionChildren={section.children}
-              />
+              <React.Fragment key={section._id}>
+                <KnowledgeBaseCardSection
+                  _id={section._id}
+                  path="/admin/knowledge-base"
+                  position={section.position}
+                  imageSrc={section.imageSrc}
+                  icon={section.icon}
+                  title={section.title}
+                  group={section.group}
+                  createdAt={section.createdAt}
+                  slug={section.slug}
+                  allowedRoles={section.allowedRoles}
+                  // a section has `children`, reserved prop in React: don't spread the whole section as props for a component or it will bug !
+                  sectionChildren={section.children}
+                />
+                {!!isRoot && <div className="mr-4" />}
+              </React.Fragment>
             ))}
             {!sections.length && <span className="w-full p-10 text-gray-400 block">Pas de rubrique</span>}
           </div>
