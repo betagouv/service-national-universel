@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Tags from "../Tags";
 
-const KnowledgeBaseCardArticle = ({ _id, position, title, slug, path, allowedRoles = [] }) => {
+const KBArticleCard = ({ _id, position, title, slug, path, allowedRoles = [] }) => {
   return (
     <Link key={_id} href={`${path}/${slug}`} passHref>
       <a href="#" data-position={position} data-id={_id} className="my-1 w-full flex-shrink-0 flex-grow-0 lg:my-4">
@@ -28,4 +28,4 @@ const KnowledgeBaseCardArticle = ({ _id, position, title, slug, path, allowedRol
   );
 };
 
-export default KnowledgeBaseCardArticle;
+export default KBArticleCard;

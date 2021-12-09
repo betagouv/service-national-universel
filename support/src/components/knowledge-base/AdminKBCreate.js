@@ -7,7 +7,7 @@ import API from "../../services/api";
 import InputWithEmojiPicker from "../InputWithEmojiPicker";
 import Modal from "../Modal";
 
-const KnowledgeBaseCreate = ({ type, position, parentId = null }) => {
+const AdminKBCreate = ({ type, position, parentId = null }) => {
   const [open, setOpen] = useState(null);
 
   const router = useRouter();
@@ -91,4 +91,4 @@ const KnowledgeBaseCreate = ({ type, position, parentId = null }) => {
   );
 };
 
-export default KnowledgeBaseCreate;
+export default AdminKBCreate;
