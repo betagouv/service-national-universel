@@ -8,6 +8,7 @@ import Loader from "react-loader-spinner";
 import KnowledgeBaseCardArticle from "../../components/knowledge-base/KnowledgeBaseCardArticle";
 import Breadcrumb from "../../components/BreadCrumb";
 import KnowledgeBaseArticle from "../../components/knowledge-base/KnowledgeBaseArticle";
+import TextEditor from "../../components/TextEditor";
 
 const Section = ({ item }) => {
   const sections = item.children?.filter((c) => c.type === "section");
@@ -83,7 +84,11 @@ const Content = () => {
           </div>
         </div>
       </div>
-      {item.type === "article" && <KnowledgeBaseArticle article={item} readOnly />}
+      {item.type === "article" && (
+        <div className="container bg-coolGray-100  mx-auto flex flex-col px-8 pt-3 flex-grow flex-shrink overflow-hidden w-full">
+          <TextEditor readOnly content={item.content} _id={item._id} slug={item.slug} />
+        </div>
+      )}
       {item.type === "section" && <Section item={item} />}
     </>
   );

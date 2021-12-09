@@ -1,9 +1,22 @@
-import { useState } from "react";
+import { toast } from "react-toastify";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import API from "../../services/api";
 import Tags from "../Tags";
 import TextEditor from "../TextEditor";
 
 const KnowledgeBaseArticle = ({ article, readOnly = false }) => {
-  const [forceUpdateKey, setForceUpdateKey] = useState(0);
+  const { mutate } = useKnowledgeBaseData();
+
+  const onSave = async (content) => {
+    const response = await API.put({ path: `/support-center/knowledge-base/${_id}`, body: { content } });
+    if (!response.ok) {
+      if (response.error) return toast.error(response.error);
+      return false;
+    }
+    toast.success("Article mis-à-jour !");
+    mutate();
+    return true;
+  };
 
   return (
     <div className="container bg-coolGray-100  mx-auto flex flex-col px-8 pt-3 flex-grow flex-shrink overflow-hidden w-full">
@@ -19,15 +32,7 @@ const KnowledgeBaseArticle = ({ article, readOnly = false }) => {
           )}
         </header>
       )}
-      <TextEditor
-        readOnly={readOnly}
-        key={article._id + article.slug}
-        content={article.content}
-        _id={article._id}
-        slug={article.slug}
-        forceUpdateKey={forceUpdateKey}
-        setForceUpdateKey={setForceUpdateKey}
-      />
+      <TextEditor readOnly={readOnly} key={article._id + article.slug} content={article.content} _id={article._id} slug={article.slug} onSave={onSave} />
     </div>
   );
 };

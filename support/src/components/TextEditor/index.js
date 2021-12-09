@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 
 import API from "../../services/api";
-import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import { Button, Icon, Spacer, Toolbar } from "./components";
 import EmojiPicker from "../EmojiPicker";
 
@@ -20,16 +19,16 @@ const HOTKEYS = {
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly }) => {
+const TextEditor = ({ content, _id, readOnly, onSave }) => {
   const router = useRouter();
 
   const [value, setValue] = useState(JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || empty);
   const [isSaveable, setIsSaveable] = useState(!!localStorage.getItem(`snu-kb-content-${_id}`));
-  const renderElement = useCallback((props) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
-  const editor = useMemo(() => withImages(withHistory(withReact(createEditor()))), []);
+  const [forceUpdateKey, setForceUpdateKey] = useState(0);
 
-  const { mutate } = useKnowledgeBaseData();
+  const renderElement = useCallback((props) => <Element {...props} readOnly={readOnly} />, []);
+  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+  const editor = useMemo(() => withHistory(withEmbeds(withImages(withReact(createEditor())))), []);
 
   const onChange = (value) => {
     setValue(value);
@@ -52,14 +51,9 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
     }
   };
 
-  const onSave = async () => {
-    const response = await API.put({ path: `/support-center/knowledge-base/${_id}`, body: { content: value } });
-    if (!response.ok) {
-      if (response.error) return toast.error(response.error);
-      return;
-    }
-    toast.success("Article mis-à-jour !");
-    mutate();
+  const onSaveRequest = async () => {
+    const success = await onSave(value);
+    if (!success) return;
     localStorage.removeItem(`snu-kb-content-${_id}`);
     setIsSaveable(false);
   };
@@ -67,7 +61,7 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
   const onBeforeUnload = () => {
     if (localStorage.getItem(`snu-kb-content-${_id}`)) {
       if (window.confirm("Voulez-vous enregistrer vos changements ?")) {
-        onSave();
+        onSaveRequest();
       }
     }
   };
@@ -99,6 +93,7 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
               <BlockButton format="bulleted-list" icon="format_list_bulleted" />
               <Spacer />
               <InsertImageButton />
+              <InsertVideoButton />
             </Toolbar>
           )}
           <div id="text-editor" className="overflow-auto flex-shrink flex-grow">
@@ -124,7 +119,7 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
       </div>
       {!readOnly && (
         <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
-          <button onClick={onSave} disabled={!isSaveable} className="px-8 py-2 box-border">
+          <button onClick={onSaveRequest} disabled={!isSaveable} className="px-8 py-2 box-border">
             Enregistrer
           </button>
           <button onClick={onCancel} disabled={!isSaveable} className="px-8 py-2 box-border">
@@ -168,6 +163,12 @@ const withImages = (editor) => {
     }
   };
 
+  return editor;
+};
+
+const withEmbeds = (editor) => {
+  const { isVoid } = editor;
+  editor.isVoid = (element) => (element.type === "video" ? true : isVoid(element));
   return editor;
 };
 
@@ -242,6 +243,8 @@ const Element = (props) => {
       return <ol {...attributes}>{children}</ol>;
     case "image":
       return <Image {...props} />;
+    case "video":
+      return <VideoElement {...props} />;
     default:
       return <p {...attributes}>{children}</p>;
   }
@@ -267,7 +270,7 @@ const Leaf = ({ attributes, children, leaf }) => {
   return <span {...attributes}>{children}</span>;
 };
 
-const Image = ({ attributes, children, element }) => {
+const Image = ({ attributes, children, element, readOnly }) => {
   const editor = useSlateStatic();
   const path = ReactEditor.findPath(editor, element);
 
@@ -278,11 +281,58 @@ const Image = ({ attributes, children, element }) => {
       {children}
       <div contentEditable={false} className="relative">
         <img src={element.url} className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`} />
-        <Button active onClick={() => Transforms.removeNodes(editor, { at: path })} className={`absolute top-2 left-2 bg-white ${selected && focused ? "inlinde" : "none"}`}>
+        <Button
+          active
+          onClick={() => Transforms.removeNodes(editor, { at: path })}
+          className={`absolute top-2 left-2 bg-white ${selected && focused && !readOnly ? "inline" : "none"} ${readOnly ? "none" : ""}`}
+        >
           <Icon>delete</Icon>
         </Button>
       </div>
     </div>
+  );
+};
+
+const VideoElement = ({ attributes, children, element }) => {
+  const editor = useSlateStatic();
+  const { url } = element;
+  return (
+    <div {...attributes}>
+      <div contentEditable={false}>
+        <div className="pl-[75%] relative">
+          <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute inset-0" />
+        </div>
+        <UrlInput
+          url={url}
+          onChange={(val) => {
+            const path = ReactEditor.findPath(editor, element);
+            const newProperties = {
+              url: val,
+            };
+            Transforms.setNodes(editor, newProperties, {
+              at: path,
+            });
+          }}
+        />
+      </div>
+      {children}
+    </div>
+  );
+};
+
+const UrlInput = ({ url, onChange }) => {
+  const [value, setValue] = React.useState(url);
+  return (
+    <input
+      value={value}
+      onClick={(e) => e.stopPropagation()}
+      className="mt-1 box-border"
+      onChange={(e) => {
+        const newUrl = e.target.value;
+        setValue(newUrl);
+        onChange(newUrl);
+      }}
+    />
   );
 };
 
@@ -349,6 +399,23 @@ const isImageUrl = (url) => {
   if (!url.startsWith("https://")) return false;
   const ext = new URL(url).pathname.split(".").pop();
   return ["png", "jpg", "jpeg"].includes(ext);
+};
+
+const InsertVideoButton = () => {
+  const editor = useSlateStatic();
+  return (
+    <Button
+      onMouseDown={(event) => {
+        event.preventDefault();
+        const url = window.prompt("Entrez l'url de la vidéo (Viméo seulement pour le moment)");
+        const text = { text: "" };
+        const video = { type: "video", url, children: [text] };
+        Transforms.insertNodes(editor, video);
+      }}
+    >
+      <Icon>video</Icon>
+    </Button>
+  );
 };
 
 const empty = [{ type: "paragraph", children: [{ text: "" }] }];

@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
@@ -24,7 +24,7 @@ const findChildrenRecursive = async (section, allChildren, findAll = false) => {
 const findParents = async (item) => {
   const fromRootToItem = [{ ...item }]; // we spread item to avoid circular reference in item.parents = parents
   let currentItem = item;
-  while (!!currentItem.parentId) {
+  while (currentItem.parentId) {
     const parent = await KnowledgeBaseObject.findById(currentItem.parentId).lean(); // to json;
     fromRootToItem.unshift(parent);
     currentItem = parent;
@@ -49,9 +49,8 @@ const buildTree = async (root) => {
   return root;
 };
 
-router.post('/picture', passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/picture", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
     let file = files[0];
     // If multiple file with same names are provided, file is an array. We just take the latest.
@@ -62,7 +61,7 @@ router.post('/picture', passport.authenticate("referent", { session: false, fail
     if (!["image/jpeg", "image/png"].includes(mimetype)) return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
 
     const resultingFile = { mimetype: "image/png", data };
-    const filename = slugify(`kn/${Date.now()}-${name.replace('.png', '').replace('.jpg', '').replace('.jpeg', '')}`, {
+    const filename = slugify(`kn/${Date.now()}-${name.replace(".png", "").replace(".jpg", "").replace(".jpeg", "")}`, {
       replacement: "-",
       remove: /[*+~.()'"!?:@]/g,
       lower: true, // convert to lower case, defaults to `false`
@@ -77,7 +76,7 @@ router.post('/picture', passport.authenticate("referent", { session: false, fail
     if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
-})
+});
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -106,8 +105,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         trim: true, // trim leading and trailing replacement chars, defaults to `true`
       });
       let itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug });
-      while (!!itemWithSameSlug) {
-        slug = `${slug}-${new Date().toISOString().split('T')[0]}`
+      while (itemWithSameSlug) {
+        slug = `${slug}-${new Date().toISOString().split("T")[0]}`;
         itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug });
       }
       kb.slug = slug;
@@ -134,7 +133,7 @@ router.put("/reorder", passport.authenticate("referent", { session: false, failW
         await KnowledgeBaseObject.findByIdAndUpdate(item._id, { position: item.position, parentId: item.parentId || null });
       }
     });
-    const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" })
+    const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -217,7 +216,7 @@ router.get("/tree", passport.authenticate(["referent", "young"], { session: fals
 
 router.get("/all", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" })
+    const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" });
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -228,9 +227,9 @@ router.get("/all", passport.authenticate(["referent", "young"], { session: false
 
 router.get("/all-slugs", async (req, res) => {
   try {
-    const data = await KnowledgeBaseObject.find()
+    const data = await KnowledgeBaseObject.find();
 
-    return res.status(200).send({ ok: true, data: data.map(item => item.slug) });
+    return res.status(200).send({ ok: true, data: data.map((item) => item.slug) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -268,10 +267,7 @@ router.get("/:slug", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const children = await KnowledgeBaseObject.find({ parentId: null })
-    .sort({ type: -1, position: 1 })
-    .populate({ path: "author", select: "_id firstName lastName role" })
-    .lean(); // to json;
+    const children = await KnowledgeBaseObject.find({ parentId: null }).sort({ type: -1, position: 1 }).populate({ path: "author", select: "_id firstName lastName role" }).lean(); // to json;
 
     return res.status(200).send({ ok: true, data: children });
   } catch (error) {
