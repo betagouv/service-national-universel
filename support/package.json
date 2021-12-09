@@ -25,7 +25,7 @@
     "slate": "0.72.0",
     "slate-history": "0.66.0",
     "slate-react": "0.72.0",
-    "react-icons": "^4.3.1",
+    "slugify": "^1.6.3",
     "snu-lib": "file:../lib",
     "sortablejs": "1.14.0",
     "swr": "1.1.0",
@@ -42,5 +42,10 @@
     "postcss": "8.4.4",
     "prettier": "2.5.1",
     "tailwindcss": "2.2.19"
+  },
+  "engines": {
+    "node": "^16.10",
+    "npm": "^8.0",
+    "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   }
 }

@@ -17,6 +17,7 @@ if (environment === "production") {
 
 const S3PREFIX = "";
 const SENTRY_URL = "https://415a2c2d9246422fa05cd5e96dd39c23@o348403.ingest.sentry.io/5557988";
+const IMAGE_SRC = "https://415a2c2d9246422fa05cd5e96dd39c23@o348403.ingest.sentry.io/5557988";
 
 let franceConnectUrl = "https://fcp.integ01.dev-franceconnect.fr/api/v1";
 

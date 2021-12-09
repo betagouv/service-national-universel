@@ -15,7 +15,7 @@ const IconsPicker = ({ isOpen, onRequestClose, onSelect }) => {
               {forSearch
                 .filter(({ synonyms, icon }) => icon.includes(search) || synonyms.includes(search))
                 .map(({ icon }) => (
-                  <RedIcon icon={icon} key={icon} onClick={() => onSelect(icon)} showText />
+                  <RedIcon icon={icon} key={icon} onSelect={() => onSelect(icon)} showText />
                 ))}
             </div>
           </div>
@@ -26,7 +26,7 @@ const IconsPicker = ({ isOpen, onRequestClose, onSelect }) => {
 };
 
 export const RedIcon = ({ icon, onSelect, showText, className }) => (
-  <div key={icon} className={`flex-col inline-flex w-12 my-5 mx-10 items-center ${!!onSelect ? "cursor-pointer" : ""} ${className || ""}`} onClick={() => onSelect(icon)}>
+  <div key={icon} className={`flex-col inline-flex w-12 my-5 mx-10 items-center ${!!onSelect ? "cursor-pointer" : ""} ${className || ""}`} onClick={() => onSelect?.(icon)}>
     <span className={`material-icons flex justify-center items-center mb-2 rounded-md text-2xl text-center w-12 h-12 bg-red-600 text-white`}>{icon}</span>
     {!!showText && <span className={`align-text-bottom text-xs`}>{icon}</span>}
   </div>

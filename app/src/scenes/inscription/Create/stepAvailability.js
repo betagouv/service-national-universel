@@ -102,11 +102,7 @@ export default function StepAvailability() {
                 )}
                 <h3>Séjour de cohésion à venir</h3>
                 <h1>Etes-vous disponible du {availability[indexAvailability].stringDate} ?</h1>
-                {availability[indexAvailability].url ? (
-                  <AlerteInfo url={availability[indexAvailability].url}>{availability[indexAvailability].info}</AlerteInfo>
-                ) : (
-                  <AlerteInfo>{availability[indexAvailability].info}</AlerteInfo>
-                )}
+                {availability[indexAvailability].info ? <AlerteInfo url={availability[indexAvailability].url}>{availability[indexAvailability].info}</AlerteInfo> : null}
                 <Infos
                   href="https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/181-suis-je-eligible-a-un-sejour-de-cohesion-en-2022"
                   target="_blank"

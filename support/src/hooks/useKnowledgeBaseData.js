@@ -53,7 +53,12 @@ const useKnowledgeBaseData = ({ debug = false } = {}) => {
     } else {
       setItem(itemTree);
     }
-  }, [flattenedData, slug]);
+  }, [slug]);
+
+  // init
+  useEffect(() => {
+    if (!slug) setItem(tree);
+  }, [tree, slug]);
 
   return {
     tree,
