@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useParams, useHistory } from "react-router-dom";
 import styled from "styled-components";
 import {
   region2department,
@@ -18,7 +19,9 @@ import StatusMap from "./statusMap";
 import Participation from "./participation";
 
 export default function StatusIndex({ filter }) {
-  const [currentTab, setCurrentTab] = useState("global");
+  const { currentSubtab } = useParams();
+  const history = useHistory();
+
   const [status, setStatus] = useState({});
   const [statusPhase1, setStatusPhase1] = useState({});
   const [statusPhase2, setStatusPhase2] = useState({});
@@ -26,6 +29,11 @@ export default function StatusIndex({ filter }) {
   const [statusPhase3, setStatusPhase3] = useState({});
   const [cohesionStayPresence, setCohesionStayPresence] = useState({});
   const [statusApplication, setStatusApplication] = useState({});
+
+  useEffect(() => {
+    const listTab = ["général", "phase1", "phase2", "phase3", "centres"];
+    if (!listTab.includes(currentSubtab)) history.push(`/dashboard/volontaires/général`);
+  }, [currentSubtab]);
 
   useEffect(() => {
     (async () => {
@@ -96,28 +104,28 @@ export default function StatusIndex({ filter }) {
     <>
       <TabNavigation>
         <TabNavigationList>
-          <TabItem onClick={() => setCurrentTab("global")} isActive={currentTab === "global"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/général`)} isActive={currentSubtab === "général"}>
             Général
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("phase1")} isActive={currentTab === "phase1"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase1`)} isActive={currentSubtab === "phase1"}>
             Phase 1
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("phase2")} isActive={currentTab === "phase2"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase2`)} isActive={currentSubtab === "phase2"}>
             Phase 2
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("phase3")} isActive={currentTab === "phase3"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase3`)} isActive={currentSubtab === "phase3"}>
             Phase 3
           </TabItem>
         </TabNavigationList>
       </TabNavigation>
       <Wrapper>
-        {currentTab === "global" && (
+        {currentSubtab === "général" && (
           <>
             <SubTitle>En quelques chiffres</SubTitle>
             <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} filter={filter} getLink={getLink} />
           </>
         )}
-        {currentTab === "phase1" && (
+        {currentSubtab === "phase1" && (
           <>
             <StatusMap
               sectionTitle="Phase 1"
@@ -132,7 +140,7 @@ export default function StatusIndex({ filter }) {
             <Participation data={cohesionStayPresence} filter={filter} getLink={getLink} />
           </>
         )}
-        {currentTab === "phase2" && (
+        {currentSubtab === "phase2" && (
           <>
             <StatusMap
               sectionTitle="Phase 2"
@@ -164,7 +172,7 @@ export default function StatusIndex({ filter }) {
             />
           </>
         )}
-        {currentTab === "phase3" && (
+        {currentSubtab === "phase3" && (
           <>
             <StatusMap
               sectionTitle="Phase 3"

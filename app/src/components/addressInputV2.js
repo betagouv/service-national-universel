@@ -10,13 +10,14 @@ countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
 // eslint-disable-next-line prettier/prettier
-export default function AddressInputV2({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => { }, countryByDefault = "" }) {
+export default function AddressInputV2({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => {}, countryByDefault = "" }) {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
   const [addressVerified, , addressVerifiedHelpers] = useField({
+    value: values[keys.addressVerified],
     name: "addressVerified",
-    validate: (v) => !v && addressInFrance && "Il est obligatoire de vérifier l'adresse",
+    validate: (v) => v !== "true" && addressInFrance && "Il est obligatoire de vérifier l'adresse",
   });
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
 
   useEffect(() => {
     setAddressInFrance(values[keys.country] === undefined || values[keys.country] === "France");
-    if (values[keys.country] === undefined) addressVerifiedHelpers.setValue(false);
+    if (values[keys.country] === undefined) addressVerifiedHelpers.setValue("false");
   }, [values[keys.country]]);
 
   const onSuggestionSelected = () => {
@@ -56,7 +57,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
     }
 
     setSuggestion({});
-    addressVerifiedHelpers.setValue(true);
+    addressVerifiedHelpers.setValue("true");
     addressVerifiedHelpers.setError("");
     return;
   };
@@ -77,7 +78,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
 
     setLoading(false);
     if (arr.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
-    else addressVerifiedHelpers.setValue(true);
+    else addressVerifiedHelpers.setValue("true");
   };
 
   // keys is not defined at first load ??
@@ -127,7 +128,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
               onChange={(e) => {
                 const value = e.target.value;
                 handleChange({ target: { name: keys.address, value } });
-                addressVerifiedHelpers.setValue(false);
+                addressVerifiedHelpers.setValue("false");
               }}
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.address} />
@@ -143,7 +144,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
               onChange={(e) => {
                 const value = e.target.value;
                 handleChange({ target: { name: keys.zip, value } });
-                addressVerifiedHelpers.setValue(false);
+                addressVerifiedHelpers.setValue("false");
               }}
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.zip} />
@@ -159,7 +160,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
               onChange={(e) => {
                 const value = e.target.value;
                 handleChange({ target: { name: keys.city, value } });
-                addressVerifiedHelpers.setValue(false);
+                addressVerifiedHelpers.setValue("false");
               }}
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.city} />
@@ -167,7 +168,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
           {addressInFrance ? (
             <>
               <Col md={12} style={{ display: "flex", alignItems: "flex-end" }}>
-                {!addressVerified.value ? (
+                {addressVerified.value !== "true" ? (
                   <PrimaryButton style={{ marginLeft: "auto" }} onClick={() => getSuggestions(`${values[keys.address]}, ${values[keys.city]} ${values[keys.zip]}`)}>
                     {!loading ? "Vérifier" : <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
                   </PrimaryButton>
@@ -193,7 +194,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
               <SecondaryButton
                 onClick={() => {
                   setSuggestion({});
-                  addressVerifiedHelpers.setValue(true);
+                  addressVerifiedHelpers.setValue("true");
                 }}>
                 Non
               </SecondaryButton>

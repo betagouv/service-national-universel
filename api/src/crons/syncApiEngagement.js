@@ -39,7 +39,7 @@ const cleanData = async () => {
   // slack.info({ title: "sync with missions api-engagement", text: "I'm cleaning the outdated missions !" });
   try {
     await MissionApiModel.deleteMany({ lastSyncAt: { $lte: startTime } });
-    slack.success({ title: "sync with missions api-engagement", text: "I'm done !" });
+    slack.success({ title: "sync with missions api-engagement" });
   } catch (error) {
     slack.error({ title: "sync with missions api-engagement", text: "Error while deleting outdated missions !" });
     capture("ERROR WHILE DELETING OUTDATED", error);

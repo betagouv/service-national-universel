@@ -39,6 +39,7 @@ export default function Coordonnees({ values, handleChange, required = {}, error
               location: "location",
               department: "department",
               region: "region",
+              addressVerified: "addressVerified",
             }}
             values={values}
             departAndRegionVisible={departmentAndRegionDisabled}

@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 
 import MultiSelect from "../../components/Multiselect";
-import AddressInput from "../../components/addressInput";
+import AddressInput from "../../components/addressInputV2";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import {
   translate,
@@ -197,7 +197,7 @@ export default function Edit(props) {
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
       }}>
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'une mission"}</Title>
@@ -480,13 +480,14 @@ export default function Edit(props) {
                   <Wrapper>
                     <BoxTitle>Lieu où se déroule la mission</BoxTitle>
                     <AddressInput
-                      keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
+                      keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", addressVerified: "addressVerified" }}
                       values={values}
                       handleChange={handleChange}
                       errors={errors}
                       touched={touched}
+                      validateField={validateField}
+                      required={true}
                     />
-                    <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la ville.</p>
                   </Wrapper>
                 </Col>
               </Row>
@@ -536,8 +537,9 @@ export default function Edit(props) {
                 <Loader />
               )
             ) : null}
-
-            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
+            {Object.values(errors).filter((e) => !!e).length ? (
+              <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3>
+            ) : null}
             <Header style={{ justifyContent: "flex-end" }}>
               {!defaultValue ? (
                 <LoadingButton

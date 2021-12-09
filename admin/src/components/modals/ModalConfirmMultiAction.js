@@ -8,7 +8,7 @@ import RoundWarning from "../../assets/RoundWarning";
 
 export default function ModalConfirm({
   isOpen,
-  showHeaderText = true,
+  showHeaderText = "true",
   headerText = "alerte",
   showHeaderIcon = false,
   title,
@@ -17,15 +17,11 @@ export default function ModalConfirm({
   onCancel,
   onConfirm,
   confirmText = "Confirmer",
+  onConfirm2,
+  confirmText2 = "Confirmer",
   cancelText = "Annuler",
 }) {
-  const [sending, setSending] = useState(false);
-
-  const submit = async () => {
-    setSending(true);
-    onConfirm();
-    setSending(false);
-  };
+  const [{ sending1, sending2 }, setSending] = useState({ sending1: false, sending2: false });
 
   return (
     <Modal centered isOpen={isOpen} toggle={onCancel || onChange}>
@@ -38,10 +34,30 @@ export default function ModalConfirm({
           <p>{message}</p>
         </Content>
         <Footer>
-          <ModalButton loading={sending} disabled={sending} onClick={submit} primary>
+          <ModalButton
+            loading={sending1}
+            disabled={sending1 || sending2}
+            onClick={() => {
+              setSending((e) => ({ ...e, sending1: true }));
+              onConfirm();
+              setSending((e) => ({ ...e, sending1: false }));
+            }}
+            primary>
             {confirmText}
           </ModalButton>
-          <ModalButton disabled={sending} onClick={onCancel || onChange}>
+          {onConfirm2 ? (
+            <ModalButton
+              loading={sending2}
+              disabled={sending1 || sending2}
+              onClick={() => {
+                setSending((e) => ({ ...e, sending2: true }));
+                onConfirm2();
+                setSending((e) => ({ ...e, sending2: false }));
+              }}>
+              {confirmText2}
+            </ModalButton>
+          ) : null}
+          <ModalButton disabled={sending1 || sending2} onClick={onCancel || onChange}>
             {cancelText}
           </ModalButton>
         </Footer>

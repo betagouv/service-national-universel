@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
 const logger = require("morgan");
+const passport = require("passport");
 require("./mongo");
 
 const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, ENVIRONMENT } = require("./config.js");
@@ -25,6 +26,7 @@ if (ENVIRONMENT === "development") {
   app.use(logger("dev"));
 }
 
+// eslint-disable-next-line no-unused-vars
 function handleError(err, req, res, next) {
   const output = {
     error: {
@@ -47,6 +49,8 @@ require("./crons");
 app.use(cookieParser());
 app.use(fileUpload({ limits: { fileSize: 10 * 1024 * 1024 } })); // 10 Mo
 app.use(express.static(__dirname + "/../public"));
+
+app.use(passport.initialize());
 
 app.use("/es", require("./controllers/es"));
 app.use("/mission", require("./controllers/mission"));
@@ -75,6 +79,6 @@ app.get("/", async (req, res) => {
   res.status(200).send("SNU " + d.toLocaleString());
 });
 
-require("./passport")(app);
+require("./passport")();
 
 app.listen(PORT, () => console.log("Listening on port " + PORT));

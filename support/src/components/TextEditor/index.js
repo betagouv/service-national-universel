@@ -1,14 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import isHotkey from "is-hotkey";
-import { Editable, withReact, useSlate, Slate } from "slate-react";
+import { Editable, withReact, useSlate, Slate, useSlateStatic, useSelected, ReactEditor, useFocused } from "slate-react";
 import { Editor, Transforms, createEditor, Element as SlateElement } from "slate";
 import { withHistory } from "slate-history";
-
-import { Button, Icon, Spacer, Toolbar } from "./components";
-import API from "../../services/api";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
-import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+
+import API from "../../services/api";
+import { Button, Icon, Spacer, Toolbar } from "./components";
 import EmojiPicker from "../EmojiPicker";
 
 const HOTKEYS = {
@@ -20,16 +19,16 @@ const HOTKEYS = {
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey }) => {
+const TextEditor = ({ content, _id, readOnly, onSave }) => {
   const router = useRouter();
 
   const [value, setValue] = useState(JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || empty);
   const [isSaveable, setIsSaveable] = useState(!!localStorage.getItem(`snu-kb-content-${_id}`));
-  const renderElement = useCallback((props) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+  const [forceUpdateKey, setForceUpdateKey] = useState(0);
 
-  const { mutate } = useKnowledgeBaseData();
+  const renderElement = useCallback((props) => <Element {...props} readOnly={readOnly} />, []);
+  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+  const editor = useMemo(() => withHistory(withEmbeds(withImages(withReact(createEditor())))), []);
 
   const onChange = (value) => {
     setValue(value);
@@ -52,14 +51,9 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey }) => {
     }
   };
 
-  const onSave = async () => {
-    const response = await API.put({ path: `/support-center/knowledge-base/${_id}`, body: { content: value } });
-    if (!response.ok) {
-      if (response.error) return toast.error(response.error);
-      return;
-    }
-    toast.success("Article mis-à-jour !");
-    mutate();
+  const onSaveRequest = async () => {
+    const success = await onSave(value);
+    if (!success) return;
     localStorage.removeItem(`snu-kb-content-${_id}`);
     setIsSaveable(false);
   };
@@ -67,7 +61,7 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey }) => {
   const onBeforeUnload = () => {
     if (localStorage.getItem(`snu-kb-content-${_id}`)) {
       if (window.confirm("Voulez-vous enregistrer vos changements ?")) {
-        onSave();
+        onSaveRequest();
       }
     }
   };
@@ -78,27 +72,33 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey }) => {
 
   return (
     <div className="flex-grow flex-shrink flex flex-col  overflow-hidden">
-      <div className="px-8 mt-6 pt-2 flex-grow flex-shrink flex flex-col bg-white  overflow-hidden">
+      <div className={`px-8 mt-6 pt-2 flex-grow flex-shrink flex flex-col ${!readOnly ? "bg-white" : ""}  overflow-hidden`}>
         <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
-          <Toolbar>
-            <Button>
-              <EmojiPicker size={10} className="text-2xl my-1.5 !mr-0 !h-5 !w-5" insertEmoji={editor.insertText} />
-            </Button>
-            <MarkButton format="bold" icon="format_bold" />
-            <MarkButton format="italic" icon="format_italic" />
-            <MarkButton format="underline" icon="format_underlined" />
-            <BlockButton format="block-quote" icon="format_quote" />
-            {/* <MarkButton format="code" icon="code" /> */}
-            <Spacer />
-            <BlockButton format="heading-one" icon="looks_one" />
-            <BlockButton format="heading-two" icon="looks_two" />
-            <BlockButton format="heading-three" icon="looks_3" />
-            <Spacer />
-            <BlockButton format="numbered-list" icon="format_list_numbered" />
-            <BlockButton format="bulleted-list" icon="format_list_bulleted" />
-          </Toolbar>
+          {!readOnly && (
+            <Toolbar>
+              <Button>
+                <EmojiPicker size={10} className="text-2xl my-1.5 !mr-0 !h-5 !w-5" insertEmoji={editor.insertText} />
+              </Button>
+              <MarkButton format="bold" icon="format_bold" />
+              <MarkButton format="italic" icon="format_italic" />
+              <MarkButton format="underline" icon="format_underlined" />
+              <BlockButton format="block-quote" icon="format_quote" />
+              {/* <MarkButton format="code" icon="code" /> */}
+              <Spacer />
+              <BlockButton format="heading-one" icon="looks_one" />
+              <BlockButton format="heading-two" icon="looks_two" />
+              <BlockButton format="heading-three" icon="looks_3" />
+              <Spacer />
+              <BlockButton format="numbered-list" icon="format_list_numbered" />
+              <BlockButton format="bulleted-list" icon="format_list_bulleted" />
+              <Spacer />
+              <InsertImageButton />
+              <InsertVideoButton />
+            </Toolbar>
+          )}
           <div id="text-editor" className="overflow-auto flex-shrink flex-grow">
             <Editable
+              readOnly={readOnly}
               renderElement={renderElement}
               renderLeaf={renderLeaf}
               placeholder="Commencez à écrire votre article..."
@@ -117,16 +117,65 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey }) => {
           </div>
         </Slate>
       </div>
-      <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
-        <button onClick={onSave} disabled={!isSaveable} className="px-8 py-2 box-border">
-          Enregistrer
-        </button>
-        <button onClick={onCancel} disabled={!isSaveable} className="px-8 py-2 box-border">
-          Rétablir la dernière version
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
+          <button onClick={onSaveRequest} disabled={!isSaveable} className="px-8 py-2 box-border">
+            Enregistrer
+          </button>
+          <button onClick={onCancel} disabled={!isSaveable} className="px-8 py-2 box-border">
+            Rétablir la dernière version
+          </button>
+        </div>
+      )}
     </div>
   );
+};
+
+const withImages = (editor) => {
+  const { insertData, isVoid } = editor;
+
+  editor.isVoid = (element) => {
+    return element.type === "image" ? true : isVoid(element);
+  };
+
+  editor.insertData = (data) => {
+    const text = data.getData("text/plain");
+    const { files } = data;
+
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const reader = new FileReader();
+        const [mime] = file.type.split("/");
+
+        if (mime === "image") {
+          reader.addEventListener("load", () => {
+            const url = reader.result;
+            insertImage(editor, url);
+          });
+
+          reader.readAsDataURL(file);
+        }
+      }
+    } else if (isImageUrl(text)) {
+      insertImage(editor, text);
+    } else {
+      insertData(data);
+    }
+  };
+
+  return editor;
+};
+
+const withEmbeds = (editor) => {
+  const { isVoid } = editor;
+  editor.isVoid = (element) => (element.type === "video" ? true : isVoid(element));
+  return editor;
+};
+
+const insertImage = (editor, url) => {
+  const text = { text: "" };
+  const image = { type: "image", url, children: [text] };
+  Transforms.insertNodes(editor, image);
 };
 
 const toggleBlock = (editor, format) => {
@@ -175,7 +224,8 @@ const isMarkActive = (editor, format) => {
   return marks ? marks[format] === true : false;
 };
 
-const Element = ({ attributes, children, element }) => {
+const Element = (props) => {
+  const { attributes, children, element } = props;
   switch (element.type) {
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>;
@@ -191,6 +241,10 @@ const Element = ({ attributes, children, element }) => {
       return <li {...attributes}>{children}</li>;
     case "numbered-list":
       return <ol {...attributes}>{children}</ol>;
+    case "image":
+      return <Image {...props} />;
+    case "video":
+      return <VideoElement {...props} />;
     default:
       return <p {...attributes}>{children}</p>;
   }
@@ -214,6 +268,72 @@ const Leaf = ({ attributes, children, leaf }) => {
   }
 
   return <span {...attributes}>{children}</span>;
+};
+
+const Image = ({ attributes, children, element, readOnly }) => {
+  const editor = useSlateStatic();
+  const path = ReactEditor.findPath(editor, element);
+
+  const selected = useSelected();
+  const focused = useFocused();
+  return (
+    <div {...attributes}>
+      {children}
+      <div contentEditable={false} className="relative">
+        <img src={element.url} className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`} />
+        <Button
+          active
+          onClick={() => Transforms.removeNodes(editor, { at: path })}
+          className={`absolute top-2 left-2 bg-white ${selected && focused && !readOnly ? "inline" : "none"} ${readOnly ? "none" : ""}`}
+        >
+          <Icon>delete</Icon>
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+const VideoElement = ({ attributes, children, element }) => {
+  const editor = useSlateStatic();
+  const { url } = element;
+  return (
+    <div {...attributes}>
+      <div contentEditable={false}>
+        <div className="pl-[75%] relative">
+          <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute inset-0" />
+        </div>
+        <UrlInput
+          url={url}
+          onChange={(val) => {
+            const path = ReactEditor.findPath(editor, element);
+            const newProperties = {
+              url: val,
+            };
+            Transforms.setNodes(editor, newProperties, {
+              at: path,
+            });
+          }}
+        />
+      </div>
+      {children}
+    </div>
+  );
+};
+
+const UrlInput = ({ url, onChange }) => {
+  const [value, setValue] = React.useState(url);
+  return (
+    <input
+      value={value}
+      onClick={(e) => e.stopPropagation()}
+      className="mt-1 box-border"
+      onChange={(e) => {
+        const newUrl = e.target.value;
+        setValue(newUrl);
+        onChange(newUrl);
+      }}
+    />
+  );
 };
 
 const BlockButton = ({ format, icon }) => {
@@ -242,6 +362,58 @@ const MarkButton = ({ format, icon }) => {
       }}
     >
       <Icon>{icon}</Icon>
+    </Button>
+  );
+};
+
+const InsertImageButton = () => {
+  const inputFileRef = useRef(null);
+  const editor = useSlateStatic();
+  const onUploadImage = async (event) => {
+    const imageRes = await API.uploadFile("/support-center/knowledge-base/picture", event.target.files);
+    if (imageRes.code === "FILE_CORRUPTED") {
+      return toast.error("Le fichier semble corrompu", "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support", {
+        timeOut: 0,
+      });
+    }
+    if (!imageRes.ok) return toast.error("Une erreur s'est produite lors du téléversement de votre fichier");
+    toast.success("Fichier téléversé");
+    insertImage(editor, imageRes.data);
+  };
+  return (
+    <Button
+      onMouseDown={(event) => {
+        event.preventDefault();
+        inputFileRef.current.click();
+      }}
+    >
+      <Icon>image</Icon>
+      <input type="file" ref={inputFileRef} onChange={onUploadImage} className="hidden" />
+    </Button>
+  );
+};
+
+const isImageUrl = (url) => {
+  if (!url) return false;
+  if (!url.includes("cellar-c2.services.clever-cloud.com/")) return false;
+  if (!url.startsWith("https://")) return false;
+  const ext = new URL(url).pathname.split(".").pop();
+  return ["png", "jpg", "jpeg"].includes(ext);
+};
+
+const InsertVideoButton = () => {
+  const editor = useSlateStatic();
+  return (
+    <Button
+      onMouseDown={(event) => {
+        event.preventDefault();
+        const url = window.prompt("Entrez l'url de la vidéo (Viméo seulement pour le moment)");
+        const text = { text: "" };
+        const video = { type: "video", url, children: [text] };
+        Transforms.insertNodes(editor, video);
+      }}
+    >
+      <Icon>video</Icon>
     </Button>
   );
 };

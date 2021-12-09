@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
@@ -6,7 +6,7 @@ const slugify = require("slugify");
 
 const { capture } = require("../sentry");
 const KnowledgeBaseObject = require("../models/knowledgeBase");
-const { ERRORS } = require("../utils/index.js");
+const { uploadPublicPicture, ERRORS } = require("../utils/index.js");
 const { validateId } = require("../utils/validator");
 
 const findChildrenRecursive = async (section, allChildren, findAll = false) => {
@@ -24,7 +24,7 @@ const findChildrenRecursive = async (section, allChildren, findAll = false) => {
 const findParents = async (item) => {
   const fromRootToItem = [{ ...item }]; // we spread item to avoid circular reference in item.parents = parents
   let currentItem = item;
-  while (!!currentItem.parentId) {
+  while (currentItem.parentId) {
     const parent = await KnowledgeBaseObject.findById(currentItem.parentId).lean(); // to json;
     fromRootToItem.unshift(parent);
     currentItem = parent;
@@ -48,6 +48,35 @@ const buildTree = async (root) => {
   root.children = children;
   return root;
 };
+
+router.post("/picture", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const files = Object.keys(req.files || {}).map((e) => req.files[e]);
+    let file = files[0];
+    // If multiple file with same names are provided, file is an array. We just take the latest.
+    if (Array.isArray(file)) {
+      file = file[file.length - 1];
+    }
+    const { name, data, mimetype } = file;
+    if (!["image/jpeg", "image/png"].includes(mimetype)) return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+
+    const resultingFile = { mimetype: "image/png", data };
+    const filename = slugify(`kn/${Date.now()}-${name.replace(".png", "").replace(".jpg", "").replace(".jpeg", "")}`, {
+      replacement: "-",
+      remove: /[*+~.()'"!?:@]/g,
+      lower: true, // convert to lower case, defaults to `false`
+      strict: true, // strip special characters except replacement, defaults to `false`
+      locale: "fr", // language code of the locale to use
+      trim: true, // trim leading and trailing replacement chars, defaults to `true`
+    });
+    const result = await uploadPublicPicture(`${filename}.png`, resultingFile);
+    return res.status(200).send({ data: result.Location, ok: true });
+  } catch (error) {
+    capture(error);
+    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -76,8 +105,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         trim: true, // trim leading and trailing replacement chars, defaults to `true`
       });
       let itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug });
-      while (!!itemWithSameSlug) {
-        slug = `${slug}-${new Date().toISOString().split('T')[0]}`
+      while (itemWithSameSlug) {
+        slug = `${slug}-${new Date().toISOString().split("T")[0]}`;
         itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug });
       }
       kb.slug = slug;
@@ -104,7 +133,7 @@ router.put("/reorder", passport.authenticate("referent", { session: false, failW
         await KnowledgeBaseObject.findByIdAndUpdate(item._id, { position: item.position, parentId: item.parentId || null });
       }
     });
-    const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" })
+    const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -143,6 +172,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     if (req.body.hasOwnProperty("imageSrc")) updateKb.imageSrc = req.body.imageSrc;
     if (req.body.hasOwnProperty("imageAlt")) updateKb.imageAlt = req.body.imageAlt;
+    if (req.body.hasOwnProperty("icon")) updateKb.icon = req.body.icon;
+    if (req.body.hasOwnProperty("group")) updateKb.group = req.body.group;
     if (req.body.hasOwnProperty("content")) updateKb.content = req.body.content;
     if (req.body.hasOwnProperty("description")) updateKb.description = req.body.description;
     if (req.body.hasOwnProperty("allowedRoles")) updateKb.allowedRoles = req.body.allowedRoles;
@@ -185,7 +216,7 @@ router.get("/tree", passport.authenticate(["referent", "young"], { session: fals
 
 router.get("/all", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" })
+    const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" });
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -194,33 +225,51 @@ router.get("/all", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/:slug", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/all-slugs", async (req, res) => {
   try {
-    if (!req.params.slug) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const data = await KnowledgeBaseObject.find();
+
+    return res.status(200).send({ ok: true, data: data.map((item) => item.slug) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/:slug", async (req, res) => {
+  try {
     const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug })
       .populate({
         path: "author",
         select: "_id firstName lastName role",
       })
       .lean(); // to json
+
     if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (req.query.withParents === "true") {
-      const parents = await findParents(existingKb);
-      existingKb.parents = parents;
-    }
+    const parents = await findParents(existingKb);
+    existingKb.parents = parents;
 
-    if (req.query.withTree === "true") {
-      const tree = await buildTree(existingKb);
-      return res.status(200).send({ ok: true, data: tree });
-    }
-
-    if (req.query.withDirectChildren === "true" || req.query.withAllChildren === "true") {
-      const children = findChildren(existingKb, req.query.withAllChildren === "true");
+    if (existingKb.type === "section") {
+      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id })
+        .sort({ type: -1, position: 1 })
+        .populate({ path: "author", select: "_id firstName lastName role" })
+        .lean(); // to json;
       existingKb.children = children;
     }
 
     return res.status(200).send({ ok: true, data: existingKb });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const children = await KnowledgeBaseObject.find({ parentId: null }).sort({ type: -1, position: 1 }).populate({ path: "author", select: "_id firstName lastName role" }).lean(); // to json;
+
+    return res.status(200).send({ ok: true, data: children });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

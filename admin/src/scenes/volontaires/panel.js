@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate, getLabelWithdrawnReason } from "../../utils";
+import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate, getLabelWithdrawnReason, ROLES } from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
+import ActionButtonArchive from "../../components/buttons/ActionButtonArchive";
 
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -52,17 +55,18 @@ export default function VolontairePanel({ onChange, value }) {
             à {young.birthZip} {young.birthCity}, {young.birthCountry}
           </div>
         ) : null}
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", flexWrap: "wrap" }}>
           <Link to={`/volontaire/${young._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
           <Link to={`/volontaire/${young._id}/edit`}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
+          <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
+            <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+          </a>
+          {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
         </div>
-        <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
-          <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-        </a>
         <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
       </div>
       {young.status === YOUNG_STATUS.WITHDRAWN ? (

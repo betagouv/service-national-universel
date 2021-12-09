@@ -51,6 +51,7 @@ function validateMission(mission) {
         lat: Joi.number().allow(null),
         lon: Joi.number().allow(null),
       }),
+      addressVerified: Joi.string().allow(null, ""),
       remote: Joi.string().allow(null, ""),
       isMilitaryPreparation: Joi.string().allow(null, ""),
     })
@@ -317,6 +318,7 @@ function validateYoung(young, user) {
     phase3Token: Joi.string().allow(null, ""),
     address: Joi.string().allow(null, ""),
     complementAddress: Joi.string().allow(null, ""),
+    addressVerified: Joi.string().allow(null, ""),
     zip: Joi.string().allow(null, ""),
     city: Joi.string().allow(null, ""),
     cityCode: Joi.string().allow(null, ""),

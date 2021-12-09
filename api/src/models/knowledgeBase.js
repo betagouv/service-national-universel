@@ -30,6 +30,13 @@ const Schema = new mongoose.Schema(
         description: "Position d'un élément au sein de sa section",
       },
     },
+    group: {
+      type: String,
+      trim: true,
+      documentation: {
+        description: "Phase 1, Phase 2, Mon compte...",
+      },
+    },
     title: {
       type: String,
       trim: true,
@@ -68,6 +75,12 @@ const Schema = new mongoose.Schema(
       type: String,
       documentation: {
         description: "Description de l'image",
+      },
+    },
+    icon: {
+      type: String,
+      documentation: {
+        description: "Icône si pas d'image",
       },
     },
     allowedRoles: {

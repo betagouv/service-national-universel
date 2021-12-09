@@ -41,8 +41,8 @@ export default function Signin() {
             <Formik
               initialValues={{ email: "", password: "" }}
               onSubmit={async ({ email, password }, actions) => {
-                const { user, token } = await api.post(`/referent/signin`, { email, password });
                 try {
+                  const { user, token } = await api.post(`/referent/signin`, { email, password });
                   if (token) api.setToken(token);
                   if (user) {
                     dispatch(setUser(user));
