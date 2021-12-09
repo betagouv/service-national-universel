@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 
 import { HeroContainer, Hero } from "../../components/Content";
 
-export default () => {
+export default function WaitingList() {
   const young = useSelector((state) => state.Auth.young);
 
   return (
@@ -24,4 +24,4 @@ export default () => {
       </HeroContainer>
     </>
   );
-};
+}

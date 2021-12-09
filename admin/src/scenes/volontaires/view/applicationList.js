@@ -19,7 +19,7 @@ import ExportComponent from "../../../components/ExportXlsx";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-export default ({ young, onChangeApplication }) => {
+export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
   const [createMissionVisible, setCreateMissionVisible] = useState(false);
   const getExportQuery = () => ({ query: { bool: { filter: { term: { "youngId.keyword": young._id } } } }, sort: [{ "priority.keyword": "asc" }], size: ES_NO_LIMIT });
@@ -57,7 +57,7 @@ export default ({ young, onChangeApplication }) => {
           </>
         </tbody>
       </Table>
-      {applications.length ? null : <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>}
+      {applications.length ? null : <NoResult>Aucune candidature n&apos;est liée à ce volontaire.</NoResult>}
       <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ marginTop: "1rem" }}>
           <ExportComponent
@@ -110,8 +110,7 @@ export default ({ young, onChangeApplication }) => {
         title="Créer une mission personnalisée pour le volontaire"
         onClick={() => {
           setCreateMissionVisible(!createMissionVisible);
-        }}
-      >
+        }}>
         <CreateMission
           young={young}
           onSend={() => {
@@ -122,7 +121,7 @@ export default ({ young, onChangeApplication }) => {
       </ToggleBloc>
     </>
   );
-};
+}
 
 const Hit = ({ hit, index, young, onChangeApplication }) => {
   const [mission, setMission] = useState();
@@ -181,16 +180,15 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
           <ContractLink
             onClick={() => {
               history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
-            }}
-          >
-            Contrat d'engagement &gt;
+            }}>
+            Contrat d&apos;engagement &gt;
           </ContractLink>
         ) : null}
         {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
           <div>
             <div style={{ textAlign: "center" }}>
               {!hit.missionDuration ? (
-                <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Indiquer un nombre d'heure</ModifyDurationLink>
+                <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Indiquer un nombre d&apos;heure</ModifyDurationLink>
               ) : (
                 <span>
                   Durée : {hit.missionDuration}h - <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Modifier</ModifyDurationLink>
@@ -240,8 +238,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
                     }
                   },
                 });
-              }}
-            >
+              }}>
               ✉️ Renvoyer un mail à la structure
             </CopyLink>
             <ModalConfirm
@@ -274,8 +271,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
                     }
                   },
                 });
-              }}
-            >
+              }}>
               ✉️ Envoyer un rappel au volontaire
             </CopyLink>
             <ModalConfirm
@@ -303,8 +299,7 @@ const ToggleBloc = ({ children, title, borderBottom, borderRight, borderLeft, di
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}
-    >
+      }}>
       <Wrapper>
         <div onClick={onClick} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
           <Legend>{title}</Legend>

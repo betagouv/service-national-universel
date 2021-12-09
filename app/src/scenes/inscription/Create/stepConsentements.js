@@ -7,7 +7,6 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
 import { setYoung } from "../../../redux/auth/actions";
-import DndFileInput from "../../../components/dndFileInput";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { STEPS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
@@ -15,7 +14,7 @@ import FormFooter from "../../../components/form/FormFooter";
 import api from "../../../services/api";
 import { translate, getAge } from "../../../utils";
 
-export default () => {
+export default function StepConsentements() {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const isPlural = useSelector((state) => state.Auth.young?.parent1Status && state.Auth.young?.parent2Status);
@@ -64,9 +63,8 @@ export default () => {
           } finally {
             setLoading(false);
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormRow>
               <Col md={4}>
@@ -115,7 +113,7 @@ export default () => {
                   <div>
                     {isPlural ? "autorisons" : "autorise"}
                     <strong>{` ${young.firstName} ${young.lastName}`}</strong> à participer à la session 2022 du Service National Universel qui comprend la participation au séjour
-                    de cohésion puis la réalisation d'une mission d'intérêt général.
+                    de cohésion puis la réalisation d&apos;une mission d&apos;intérêt général.
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment2" />
@@ -129,7 +127,7 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural ? "nous engageons" : "m'engage"}à renseigner le consentement relatif aux droits à l'image* <strong>avant le début du séjour de cohésion</strong>
+                    {isPlural ? "nous engageons" : "m'engage"}à renseigner le consentement relatif aux droits à l&apos;image* <strong>avant le début du séjour de cohésion</strong>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment7" />
@@ -147,10 +145,13 @@ export default () => {
                       <div>
                         <div>
                           {isPlural ? "acceptons " : "accepte "}
-                          la collecte et le traitement des données personnelles de <strong>{` ${young.firstName} ${young.lastName}`}</strong> par l'administration dans le cadre de
-                          l'inscription au SNU.
+                          la collecte et le traitement des données personnelles de <strong>{` ${young.firstName} ${young.lastName}`}</strong> par l&apos;administration dans le
+                          cadre de l&apos;inscription au SNU.
                         </div>
-                        <a href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans" target="_blank">
+                        <a
+                          href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans"
+                          target="_blank"
+                          rel="noreferrer">
                           En savoir plus {">"}
                         </a>
                       </div>
@@ -169,7 +170,7 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural ? "nous engageons" : "m’engage"} à renseigner l'utilisation d'autotest COVID* <b>avant le début du séjour de cohésion.</b>
+                    {isPlural ? "nous engageons" : "m’engage"} à renseigner l&apos;utilisation d&apos;autotest COVID* <b>avant le début du séjour de cohésion.</b>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment3" />
@@ -199,13 +200,13 @@ export default () => {
                   />
                   <div>
                     {isPlural ? "nous engageons" : "m’engage"} à ce que <strong>{` ${young.firstName} ${young.lastName}`}</strong> soit à jour de ses vaccinations obligatoires*,
-                    c'est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre jaune.
+                    c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre jaune.
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment5" />
                 <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
-                  * Les informations relatives au formulaire du droit à l'image, à l'utilisation d'autotest COVID, à la fiche de sanitaire et aux vaccinations seront disponibles
-                  dès la confirmation de l'inscription dans l'espace personnel de <strong>{young.firstName}</strong>.
+                  * Les informations relatives au formulaire du droit à l&apos;image, à l&apos;utilisation d&apos;autotest COVID, à la fiche de sanitaire et aux vaccinations seront
+                  disponibles dès la confirmation de l&apos;inscription dans l&apos;espace personnel de <strong>{young.firstName}</strong>.
                 </div>
               </Col>
             </FormRow>
@@ -226,8 +227,8 @@ export default () => {
                         ? `${young.parent1FirstName} ${young.parent1LastName} et ${young.parent2FirstName} ${young.parent2LastName}`
                         : `${young.parent1FirstName} ${young.parent1LastName}`}
                     </strong>
-                    , pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion puis la réalisation d'une mission d'intérêt
-                    général.
+                    , pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion puis la réalisation d&apos;une mission
+                    d&apos;intérêt général.
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="consentment1" />
@@ -236,8 +237,11 @@ export default () => {
                     <RadioLabel>
                       <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment2} type="checkbox" name="consentment2" onChange={handleChange} />
                       <div>
-                        <div>accepte la collecte et le traitement de mes données personnelles par l'administration dans le cadre de l'inscription au SNU.</div>
-                        <a href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans" target="_blank">
+                        <div>accepte la collecte et le traitement de mes données personnelles par l&apos;administration dans le cadre de l&apos;inscription au SNU.</div>
+                        <a
+                          href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans"
+                          target="_blank"
+                          rel="noreferrer">
                           En savoir plus {">"}
                         </a>
                       </div>
@@ -253,7 +257,7 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 40px;

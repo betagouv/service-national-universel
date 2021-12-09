@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 
-import { Field, Formik } from "formik";
+import { Formik } from "formik";
 import { Col } from "reactstrap";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
@@ -15,9 +15,9 @@ import api from "../../../services/api";
 import FormFooter from "../../../components/form/FormFooter";
 import { STEPS } from "../utils";
 import { setYoung } from "../../../redux/auth/actions";
-import { getAge } from "../../../utils";
+import { getAge, translate } from "../../../utils";
 
-export default () => {
+export default function StepDocuments() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -65,8 +65,8 @@ export default () => {
           <>
             <FormRow>
               <Col md={4}>
-                <Label>Pièce d'identité du volontaire</Label>
-                <AlerteInfo>Carte nationale d'identité RECTO-VERSO ou passeport dans un format lisible</AlerteInfo>
+                <Label>Pièce d&apos;identité du volontaire</Label>
+                <AlerteInfo>Carte nationale d&apos;identité RECTO-VERSO ou passeport dans un format lisible</AlerteInfo>
               </Col>
               <Col>
                 <DndFileInput
@@ -134,7 +134,7 @@ export default () => {
                   <FormRow>
                     <Col md={4}>
                       <Label>Accord à la collecte et au traitement des données personnelles des moins de 15 ans</Label>
-                      <AlerteInfo>Merci de télécharger l'accord, le compléter, le dater, le signer, le photographier ou le scanner et le déposer ici.</AlerteInfo>
+                      <AlerteInfo>Merci de télécharger l&apos;accord, le compléter, le dater, le signer, le photographier ou le scanner et le déposer ici.</AlerteInfo>
                     </Col>
                     <Col>
                       <>
@@ -173,7 +173,7 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const AlerteInfo = ({ children }) => (
   <div style={{ display: "flex", color: "#32257f", backgroundColor: "#edecfc", padding: "1rem", borderRadius: "6px" }}>
@@ -193,7 +193,7 @@ const DownloadFormButton = ({ url }) => (
       boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.05)",
       margin: "20px 0",
     }}>
-    <a href={url} target="_blank" style={{ decoration: "none", color: "#22252A" }}>
+    <a href={url} target="_blank" style={{ decoration: "none", color: "#22252A" }} rel="noreferrer">
       Télécharger le modèle obligatoire
     </a>
   </div>

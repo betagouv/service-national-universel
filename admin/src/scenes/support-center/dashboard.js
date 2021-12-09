@@ -17,7 +17,6 @@ import { referentArticles, adminArticles, structureArticles } from "./articles";
 const Dashboard = () => {
   const [userTickets, setUserTickets] = useState(null);
   const [articles, setArticles] = useState(null);
-  const [link, setLink] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
   dayjs.extend(relativeTime).locale("fr");
@@ -25,13 +24,10 @@ const Dashboard = () => {
   useEffect(() => {
     if (user.role === "responsible" || user.role === "supervisor") {
       setArticles(structureArticles);
-      setLink("2-responsable-de-structure");
     } else if (user.role === "referent_department" || user.role === "referent_region") {
       setArticles(referentArticles);
-      setLink("1-referent");
     } else {
       setArticles(adminArticles);
-      setLink("");
     }
     const fetchTickets = async () => {
       try {

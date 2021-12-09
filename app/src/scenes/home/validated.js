@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { translate, PHASE_STATUS_COLOR } from "../../utils";
 import { HeroContainer, Hero, Content, Alert } from "../../components/Content";
-import Badge from "../../components/Badge";
 import { Link } from "react-router-dom";
 
-export default () => {
+export default function Validated() {
   const young = useSelector((state) => state.Auth.young);
   const is2020 = young.cohort === "2020";
   const [showAlert, setShowAlert] = useState(!is2020);
@@ -29,7 +27,7 @@ export default () => {
           <IconContainer>
             <svg width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0 24C0 10.745 10.745 0 24 0s24 10.745 24 24-10.745 24-24 24S0 37.255 0 24z" fill="#D1FAE5" />
-              <path d="M17 25l4 4 10-10" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M17 25l4 4 10-10" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <p style={{ color: "#000" }}>
               <strong>Félicitations, vous allez pouvoir débuter prochainement votre parcours SNU.</strong>
@@ -56,7 +54,7 @@ export default () => {
       </Hero>
     </HeroContainer>
   );
-};
+}
 
 const IconContainer = styled.div`
   display: flex;

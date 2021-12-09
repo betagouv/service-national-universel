@@ -163,6 +163,12 @@ const Schema = new mongoose.Schema({
       description: "Date de dernière modification d'un statut",
     },
   },
+  withdrawnReason: {
+    type: String,
+    documentation: {
+      description: "Motif lors de l'abandon du SNU.",
+    },
+  },
   withdrawnMessage: {
     type: String,
     documentation: {
@@ -399,6 +405,12 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Ville pendant le snu du volontaire",
+    },
+  },
+  addressVerified: {
+    type: String,
+    documentation: {
+      description: "Adresse validée",
     },
   },
   cityCode: {

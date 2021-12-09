@@ -77,3 +77,11 @@ a:hover {
     overflow: hidden;
   }
 }
+
+.modal-backdrop  {
+  background-color: #382F79;
+}
+
+.modal-backdrop.show  {
+  opacity: 0.88;
+}

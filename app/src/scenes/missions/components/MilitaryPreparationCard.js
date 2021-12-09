@@ -3,17 +3,19 @@ import styled from "styled-components";
 import { Container } from "reactstrap";
 import { Link } from "react-router-dom";
 
-export default ({ onClose, title, message }) => (
-  <Alert>
-    <div className="text">
-      <Link to="/ma-preparation-militaire">
-        <strong>{title}</strong>
-        <p>{message}</p>
-      </Link>
-    </div>
-    {onClose ? <img src={require("../../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} /> : null}
-  </Alert>
-);
+export default function MilitaryPreparationCard({ onClose, title, message }) {
+  return (
+    <Alert>
+      <div className="text">
+        <Link to="/ma-preparation-militaire">
+          <strong>{title}</strong>
+          <p>{message}</p>
+        </Link>
+      </div>
+      {onClose ? <img src={require("../../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} /> : null}
+    </Alert>
+  );
+}
 
 const Alert = styled(Container)`
   border-radius: 8px;

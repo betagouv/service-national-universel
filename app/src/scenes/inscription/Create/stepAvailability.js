@@ -68,13 +68,15 @@ export default function StepAvailability() {
               <Info>
                 <h3>INSCRIPTION NON-RECEVABLE</h3>
                 <h1 style={{ marginBottom: "1rem" }}>Malheureusement votre situation ne vous permet pas de participer à la session 2022 du SNU.</h1>
-                <a
-                  style={{ fontSize: ".85rem", color: "#4f46e5" }}
+                <Infos
                   href="https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/181-suis-je-eligible-a-un-sejour-de-cohesion-en-2022"
                   target="_blank"
                   rel="noreferrer">
-                  Pourquoi je ne vois aucun séjour ? <span style={{ fontWeight: "500", textDecoration: "underline" }}> Vérifier mon éligibilité</span>
-                </a>
+                  <InfoIcon color="#32257F" />
+                  <p>
+                    <i>Pourquoi je ne vois aucun séjour ?</i> En savoir plus sur l&apos;éligibilité
+                  </p>
+                </Infos>
                 <div className="btns">
                   <Button backgroundColor="#4f46e5" dark>
                     <a
@@ -105,6 +107,21 @@ export default function StepAvailability() {
                 ) : (
                   <AlerteInfo>{availability[indexAvailability].info}</AlerteInfo>
                 )}
+                <Infos
+                  href="https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/181-suis-je-eligible-a-un-sejour-de-cohesion-en-2022"
+                  target="_blank"
+                  rel="noreferrer">
+                  <InfoIcon color="#32257F" />
+                  <p>
+                    Veuillez vous assurer d&apos;être disponible sur l&apos;ensemble de la période.
+                    {availability?.length < 3 ? (
+                      <>
+                        <br />
+                        <i>Pourquoi je ne vois pas tous les séjours ?</i> En savoir plus sur l&apos;éligibilité
+                      </>
+                    ) : null}
+                  </p>
+                </Infos>
                 <div className="btns">
                   <Button backgroundColor="#4f46e5" dark onClick={() => submit(availability[indexAvailability].id)}>
                     Je suis disponible pour la session de {availability[indexAvailability].month}
@@ -219,5 +236,29 @@ const Container = styled.div`
       -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
       clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
     }
+  }
+`;
+
+const Infos = styled.a`
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+  background: rgba(79, 70, 229, 0.1);
+  padding: 1rem;
+  color: #32257f;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  svg {
+    margin-top: 4px;
+  }
+  p {
+    flex: 1;
+    margin: 0;
+  }
+  :hover {
+    color: #32257f;
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
   }
 `;

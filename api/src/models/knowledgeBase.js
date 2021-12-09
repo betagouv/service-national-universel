@@ -11,7 +11,7 @@ const Schema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ["section", "answer"],
+      enum: ["section", "article"],
       documentation: {
         description: "Une section peut contenir des réponses et d'autres sections, une réponse est inclue dans une section",
       },
@@ -30,6 +30,13 @@ const Schema = new mongoose.Schema(
         description: "Position d'un élément au sein de sa section",
       },
     },
+    group: {
+      type: String,
+      trim: true,
+      documentation: {
+        description: "Phase 1, Phase 2, Mon compte...",
+      },
+    },
     title: {
       type: String,
       trim: true,
@@ -41,6 +48,7 @@ const Schema = new mongoose.Schema(
     slug: {
       type: String,
       required: true,
+      unique: true,
       documentation: {
         description: "Le slug pour l'url de l'élément'",
       },
@@ -67,6 +75,12 @@ const Schema = new mongoose.Schema(
       type: String,
       documentation: {
         description: "Description de l'image",
+      },
+    },
+    icon: {
+      type: String,
+      documentation: {
+        description: "Icône si pas d'image",
       },
     },
     allowedRoles: {

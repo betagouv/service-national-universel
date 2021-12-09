@@ -12,7 +12,7 @@ import AssignMeetingPoint from "../components/AssignMeetingPoint";
 import { translate, canAssignMeetingPoint, colors } from "../../../utils";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-export default ({ values, handleChange, handleSubmit }) => {
+export default function MeetingPointView({ values, handleChange, handleSubmit }) {
   const [meetingPoint, setMeetingPoint] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const user = useSelector((state) => state.Auth.user);
@@ -34,7 +34,7 @@ export default ({ values, handleChange, handleSubmit }) => {
 
   const onConfirmCancel = async () => {
     try {
-      const { data, code, ok } = await api.put(`/young/${values._id}/meeting-point/cancel`);
+      const { code, ok } = await api.put(`/young/${values._id}/meeting-point/cancel`);
       if (!ok) return toastr.error("error", translate(code));
       handleChange({ target: { name: "deplacementPhase1Autonomous", value: undefined } });
       handleChange({ target: { name: "meetingPointId", value: undefined } });
@@ -74,8 +74,7 @@ export default ({ values, handleChange, handleSubmit }) => {
                       handleChange({ target: { name: "meetingPointId", value: undefined } });
                       handleChange({ target: { name: "deplacementPhase1Autonomous", value: "true" } });
                       handleSubmit();
-                    }}
-                  >
+                    }}>
                     {values.firstName} se rendra au centre de cohésion par ses propres moyens.
                   </CancelButton>
                 ) : null}
@@ -96,7 +95,7 @@ export default ({ values, handleChange, handleSubmit }) => {
       />
     </>
   );
-};
+}
 
 const MeetingPoint = ({ value }) => {
   return (

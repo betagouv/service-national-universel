@@ -7,7 +7,7 @@ import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
 
-export default ({ meetingPoint, meetingPointId, onClick, selected, ...props }) => {
+export default function MeetingPointCard({ meetingPoint, meetingPointId, onClick, selected, ...props }) {
   const young = useSelector((state) => state.Auth.young);
 
   const [data, setData] = useState(meetingPoint);
@@ -43,7 +43,7 @@ export default ({ meetingPoint, meetingPointId, onClick, selected, ...props }) =
       <Time>retour : {data?.returnAtString}</Time>
     </HeroStyle>
   );
-};
+}
 
 const Time = styled.div`
   text-transform: uppercase;
@@ -52,6 +52,7 @@ const Time = styled.div`
   text-align: center;
   font-weight: 500;
 `;
+
 const Title = styled.div`
   color: #2e2e2e;
   text-align: center;

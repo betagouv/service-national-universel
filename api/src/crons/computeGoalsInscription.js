@@ -23,7 +23,7 @@ const getGoalAndComputeFillingRates = async ({ department, values }) => {
       if (inscriptionGoal.max) {
         const fillingRate = ((values[inscriptionGoal.cohort] || 0) / (inscriptionGoal.max || 0)) * 100;
         inscriptionGoal.set({ fillingRate });
-        console.log({ department, cohort: inscriptionGoal.cohort, fillingRate });
+        // console.log({ department, cohort: inscriptionGoal.cohort, fillingRate });
         await inscriptionGoal.save();
       }
     });
@@ -37,10 +37,10 @@ exports.handler = async () => {
       const values = await getCount({ department });
       await getGoalAndComputeFillingRates({ department, values });
     }
-    slack.success({ title: "computeGoalsInscription", text: "I'm done !" });
+    slack.success({ title: "filling rates computed" });
   } catch (e) {
     capture(`ERROR`, JSON.stringify(e));
     capture(e);
-    slack.error({ title: "computeGoalsInscription", text: "An error occured 😢" });
+    slack.error({ title: "computeGoalsInscription", text: JSON.stringify(e) });
   }
 };

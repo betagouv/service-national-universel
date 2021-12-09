@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { translate, PHASE_STATUS_COLOR } from "../../utils";
-import { HeroContainer, Hero, Content, Alert } from "../../components/Content";
+import { HeroContainer, Hero, Content } from "../../components/Content";
 import Badge from "../../components/Badge";
 import { Link } from "react-router-dom";
 
-export default () => {
+export default function HomeDefault() {
   const young = useSelector((state) => state.Auth.young);
   return (
     <HeroContainer>
@@ -25,7 +25,7 @@ export default () => {
           </WrapperItem>
           <WrapperItem to="/phase2">
             <div className="title">
-              <span className="link">2. Une première mission d'intérêt général</span>{" "}
+              <span className="link">2. Une première mission d&apos;intérêt général</span>{" "}
               <Badge style={{ margin: 0 }} text={translate(young.statusPhase2)} color={PHASE_STATUS_COLOR[young.statusPhase2]} />
             </div>
           </WrapperItem>
@@ -40,7 +40,7 @@ export default () => {
       </Hero>
     </HeroContainer>
   );
-};
+}
 
 const WrapperItem = styled(Link)`
   .title {

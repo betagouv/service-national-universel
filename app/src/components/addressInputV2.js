@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
+import { Row, Col, Spinner } from "reactstrap";
 import { Field, useField } from "formik";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
 import { department2region, departmentLookUp, departmentToAcademy } from "../utils";
 import InfoIcon from "./InfoIcon";
-import { Spinner } from "reactstrap";
 import countries from "i18n-iso-countries";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
-export default ({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => {}, countryByDefault = "" }) => {
+// eslint-disable-next-line prettier/prettier
+export default function AddressInputV2({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => {}, countryByDefault = "" }) {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [addressVerified, addressVerifiedMeta, addressVerifiedHelpers] = useField({
+  const [addressVerified, , addressVerifiedHelpers] = useField({
+    value: values[keys.addressVerified],
     name: "addressVerified",
-    validate: (v) => !v && addressInFrance && "Il est obligatoire de vérifier l'adresse",
+    validate: (v) => v !== "true" && addressInFrance && "Il est obligatoire de vérifier l'adresse",
   });
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
 
   useEffect(() => {
     setAddressInFrance(values[keys.country] === undefined || values[keys.country] === "France");
-    if (values[keys.country] === undefined) addressVerifiedHelpers.setValue(false);
+    if (values[keys.country] === undefined) addressVerifiedHelpers.setValue("false");
   }, [values[keys.country]]);
 
   const onSuggestionSelected = () => {
@@ -56,7 +57,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
     }
 
     setSuggestion({});
-    addressVerifiedHelpers.setValue(true);
+    addressVerifiedHelpers.setValue("true");
     addressVerifiedHelpers.setError("");
     return;
   };
@@ -77,7 +78,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
 
     setLoading(false);
     if (arr.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
-    else addressVerifiedHelpers.setValue(true);
+    else addressVerifiedHelpers.setValue("true");
   };
 
   // keys is not defined at first load ??
@@ -101,8 +102,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                   const value = e.target.value;
                   handleChange({ target: { name: keys.country, value } });
                   onChangeCountry();
-                }}
-              >
+                }}>
                 <option value="" label="Sélectionner un pays" disabled>
                   Sélectionner un pays
                 </option>
@@ -128,7 +128,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
               onChange={(e) => {
                 const value = e.target.value;
                 handleChange({ target: { name: keys.address, value } });
-                addressVerifiedHelpers.setValue(false);
+                addressVerifiedHelpers.setValue("false");
               }}
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.address} />
@@ -144,7 +144,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
               onChange={(e) => {
                 const value = e.target.value;
                 handleChange({ target: { name: keys.zip, value } });
-                addressVerifiedHelpers.setValue(false);
+                addressVerifiedHelpers.setValue("false");
               }}
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.zip} />
@@ -160,7 +160,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
               onChange={(e) => {
                 const value = e.target.value;
                 handleChange({ target: { name: keys.city, value } });
-                addressVerifiedHelpers.setValue(false);
+                addressVerifiedHelpers.setValue("false");
               }}
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.city} />
@@ -168,14 +168,14 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
           {addressInFrance ? (
             <>
               <Col md={12} style={{ display: "flex", alignItems: "flex-end" }}>
-                {!addressVerified.value ? (
+                {addressVerified.value !== "true" ? (
                   <PrimaryButton style={{ marginLeft: "auto" }} onClick={() => getSuggestions(`${values[keys.address]}, ${values[keys.city]} ${values[keys.zip]}`)}>
                     {!loading ? "Vérifier" : <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
                   </PrimaryButton>
                 ) : (
                   <div style={{ display: "flex", color: "#32257f", backgroundColor: "#edecfc", padding: "1rem", borderRadius: "6px", width: "100%", marginTop: "10px" }}>
                     <InfoIcon color="#32257F" style={{ flex: "none" }} />
-                    <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>L'adresse a été vérifiée</div>
+                    <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>L&apos;adresse a été vérifiée</div>
                   </div>
                 )}
               </Col>
@@ -186,7 +186,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
       ) : (
         <Row>
           <Col md={12} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <b style={{ marginBottom: "16px" }}>Est-ce que c'est la bonne adresse ?</b>
+            <b style={{ marginBottom: "16px" }}>Est-ce que c&apos;est la bonne adresse ?</b>
             <p>{suggestion.properties.name}</p>
             <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
             <p>France</p>
@@ -194,9 +194,8 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
               <SecondaryButton
                 onClick={() => {
                   setSuggestion({});
-                  addressVerifiedHelpers.setValue(true);
-                }}
-              >
+                  addressVerifiedHelpers.setValue("true");
+                }}>
                 Non
               </SecondaryButton>
               <PrimaryButton onClick={onSuggestionSelected}>Oui</PrimaryButton>
@@ -207,7 +206,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
       )}
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   .react-autosuggest__container {

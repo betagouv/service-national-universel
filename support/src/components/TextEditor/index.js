@@ -1,35 +1,35 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import isHotkey, { compareHotkey, parseHotkey } from "is-hotkey";
+import isHotkey from "is-hotkey";
 import { Editable, withReact, useSlate, Slate } from "slate-react";
 import { Editor, Transforms, createEditor, Element as SlateElement } from "slate";
 import { withHistory } from "slate-history";
-
-import { Button, Icon, Toolbar } from "./components";
-import API from "../../services/api";
 import { toast } from "react-toastify";
-import { useSWRConfig } from "swr";
 import { useRouter } from "next/router";
+
+import API from "../../services/api";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import { Button, Icon, Spacer, Toolbar } from "./components";
+import EmojiPicker from "../EmojiPicker";
 
 const HOTKEYS = {
   "mod+b": "bold",
   "mod+i": "italic",
   "mod+u": "underline",
-  "mod+`": "code",
+  // "mod+`": "code",
 };
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-const TextEditor = ({ content, slug, _id }) => {
+const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey }) => {
   const router = useRouter();
 
-  const [value, setValue] = useState(JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || initialValue);
+  const [value, setValue] = useState(JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || empty);
   const [isSaveable, setIsSaveable] = useState(!!localStorage.getItem(`snu-kb-content-${_id}`));
-  const [forceUpdateKey, setForceUpdateKey] = useState(0);
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
-  const { mutate } = useSWRConfig();
+  const { mutate } = useKnowledgeBaseData();
 
   const onChange = (value) => {
     setValue(value);
@@ -44,10 +44,12 @@ const TextEditor = ({ content, slug, _id }) => {
   };
 
   const onCancel = () => {
-    setValue(content || initialValue);
-    localStorage.removeItem(`snu-kb-content-${_id}`);
-    setIsSaveable(false);
-    setForceUpdateKey((k) => k + 1);
+    if (window.confirm("Êtes-vous sûr(e) ? Toutes les modifications seront alors perdues définitivement.")) {
+      setValue(content || empty);
+      localStorage.removeItem(`snu-kb-content-${_id}`);
+      setIsSaveable(false);
+      setForceUpdateKey((k) => k + 1);
+    }
   };
 
   const onSave = async () => {
@@ -57,12 +59,12 @@ const TextEditor = ({ content, slug, _id }) => {
       return;
     }
     toast.success("Article mis-à-jour !");
-    mutate(API.getUrl({ path: `/support-center/knowledge-base/${slug}`, query: { withTree: true, withParents: true } }));
+    mutate();
     localStorage.removeItem(`snu-kb-content-${_id}`);
     setIsSaveable(false);
   };
 
-  const onBeforeUnload = (event) => {
+  const onBeforeUnload = () => {
     if (localStorage.getItem(`snu-kb-content-${_id}`)) {
       if (window.confirm("Voulez-vous enregistrer vos changements ?")) {
         onSave();
@@ -75,39 +77,47 @@ const TextEditor = ({ content, slug, _id }) => {
   });
 
   return (
-    <div className="px-8 pt-8 flex-grow flex-shrink flex flex-col overflow-hidden">
-      <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
-        <Toolbar>
-          <MarkButton format="bold" icon="format_bold" />
-          <MarkButton format="italic" icon="format_italic" />
-          <MarkButton format="underline" icon="format_underlined" />
-          <MarkButton format="code" icon="code" />
-          <BlockButton format="heading-one" icon="looks_one" />
-          <BlockButton format="heading-two" icon="looks_two" />
-          <BlockButton format="block-quote" icon="format_quote" />
-          <BlockButton format="numbered-list" icon="format_list_numbered" />
-          <BlockButton format="bulleted-list" icon="format_list_bulleted" />
-        </Toolbar>
-        <div className="overflow-auto flex-shrink flex-grow">
-          <Editable
-            renderElement={renderElement}
-            renderLeaf={renderLeaf}
-            placeholder="Commencez à écrire votre réponse..."
-            spellCheck
-            autoFocus
-            onKeyDown={(event) => {
-              for (const hotkey in HOTKEYS) {
-                if (isHotkey(hotkey, event)) {
-                  event.preventDefault();
-                  const mark = HOTKEYS[hotkey];
-                  toggleMark(editor, mark);
+    <div className="flex-grow flex-shrink flex flex-col  overflow-hidden">
+      <div className="px-8 mt-6 pt-2 flex-grow flex-shrink flex flex-col bg-white  overflow-hidden">
+        <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
+          <Toolbar>
+            <Button>
+              <EmojiPicker size={10} className="text-2xl my-1.5 !mr-0 !h-5 !w-5" insertEmoji={editor.insertText} />
+            </Button>
+            <MarkButton format="bold" icon="format_bold" />
+            <MarkButton format="italic" icon="format_italic" />
+            <MarkButton format="underline" icon="format_underlined" />
+            <BlockButton format="block-quote" icon="format_quote" />
+            {/* <MarkButton format="code" icon="code" /> */}
+            <Spacer />
+            <BlockButton format="heading-one" icon="looks_one" />
+            <BlockButton format="heading-two" icon="looks_two" />
+            <BlockButton format="heading-three" icon="looks_3" />
+            <Spacer />
+            <BlockButton format="numbered-list" icon="format_list_numbered" />
+            <BlockButton format="bulleted-list" icon="format_list_bulleted" />
+          </Toolbar>
+          <div id="text-editor" className="overflow-auto flex-shrink flex-grow">
+            <Editable
+              renderElement={renderElement}
+              renderLeaf={renderLeaf}
+              placeholder="Commencez à écrire votre article..."
+              spellCheck
+              autoFocus
+              onKeyDown={(event) => {
+                for (const hotkey in HOTKEYS) {
+                  if (isHotkey(hotkey, event)) {
+                    event.preventDefault();
+                    const mark = HOTKEYS[hotkey];
+                    toggleMark(editor, mark);
+                  }
                 }
-              }
-            }}
-          />
-        </div>
-      </Slate>
-      <div className="py-2 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
+              }}
+            />
+          </div>
+        </Slate>
+      </div>
+      <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
         <button onClick={onSave} disabled={!isSaveable} className="px-8 py-2 box-border">
           Enregistrer
         </button>
@@ -175,6 +185,8 @@ const Element = ({ attributes, children, element }) => {
       return <h1 {...attributes}>{children}</h1>;
     case "heading-two":
       return <h2 {...attributes}>{children}</h2>;
+    case "heading-three":
+      return <h3 {...attributes}>{children}</h3>;
     case "list-item":
       return <li {...attributes}>{children}</li>;
     case "numbered-list":
@@ -189,9 +201,9 @@ const Leaf = ({ attributes, children, leaf }) => {
     children = <strong>{children}</strong>;
   }
 
-  if (leaf.code) {
-    children = <code>{children}</code>;
-  }
+  // if (leaf.code) {
+  //   children = <code>{children}</code>;
+  // }
 
   if (leaf.italic) {
     children = <em>{children}</em>;
@@ -234,17 +246,6 @@ const MarkButton = ({ format, icon }) => {
   );
 };
 
-const initialValue = [
-  {
-    type: "paragraph",
-    children: [
-      { text: "Commencez à " },
-      { text: "écrire", bold: true },
-      { text: " votre réponse, " },
-      { text: "avec tous ", italic: true },
-      { text: " les styles que vous voulez " },
-    ],
-  },
-];
+const empty = [{ type: "paragraph", children: [{ text: "" }] }];
 
 export default TextEditor;

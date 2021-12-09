@@ -6,6 +6,7 @@ import api from "../../services/api";
 import { SENDINBLUE_TEMPLATES } from "../../utils";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
+import CloseSvg from "../../assets/Close";
 
 export default function ModalCorrection({ isOpen, value, onChange, onSend, topTitle = "alerte" }) {
   const [message, setMessage] = useState();
@@ -26,9 +27,9 @@ export default function ModalCorrection({ isOpen, value, onChange, onSend, topTi
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={onChange}>
+    <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
-        <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
+        <CloseSvg className="close-icon" height={10} onClick={onChange} />
         <Header>{topTitle}</Header>
         <Content>
           <h1>Veuillez éditer le message ci-dessous pour préciser les corrections à apporter avant de l&apos;envoyer :</h1>

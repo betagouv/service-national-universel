@@ -5,7 +5,7 @@ import DateInput from "../../../components/dateInput";
 import { translate } from "../../../utils";
 import Error, { requiredMessage } from "../../../components/errorMessage";
 
-export default ({ title, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) => {
+export default function Item({ title, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) {
   const renderInput = () => {
     if (type === "date") {
       return (
@@ -44,4 +44,4 @@ export default ({ title, values, name, handleChange, type = "text", disabled = f
       <Col md={8}>{renderInput()}</Col>
     </Row>
   );
-};
+}

@@ -25,7 +25,6 @@ import Goal from "./scenes/goal";
 import Center from "./scenes/centers";
 import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
-import Bug from "./scenes/bug";
 import SupportCenter from "./scenes/support-center";
 import Association from "./scenes/association";
 import Inbox from "./scenes/inbox";
@@ -122,7 +121,6 @@ const Home = () => {
           }}
         />
         <Switch>
-          <Route path="/bug" component={Bug} />
           <Route path="/auth" component={Auth} />
           <RestrictedRoute path="/structure" component={Structure} />
           <RestrictedRoute path="/settings" component={Settings} />
@@ -138,6 +136,8 @@ const Home = () => {
           <RestrictedRoute path="/association" component={Association} />
           <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
           <RestrictedRoute path="/boite-de-reception" component={Inbox} />
+          <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
+          <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
           <RestrictedRoute path="/" component={renderDashboard} />
         </Switch>
       </ContentContainer>

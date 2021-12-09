@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
 
-export default () => {
+//! À supprimer dans une autre PR maintenant qu'on a le formulaire maison
+
+export default function ZammadButton() {
   useEffect(() => {
     if (!window || !window.$) return;
 
@@ -16,8 +18,8 @@ export default () => {
       });
     });
   }, [window?.$]);
-  return <LinkButton id="feedback-form">Contacter quelqu'un</LinkButton>;
-};
+  return <LinkButton id="feedback-form">Contacter quelqu&apos;un</LinkButton>;
+}
 
 const LinkButton = styled.button`
   max-width: 230px;

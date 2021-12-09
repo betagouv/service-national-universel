@@ -4,17 +4,16 @@ import styled from "styled-components";
 
 import { departmentList, regionList, department2region, departmentLookUp, colors } from "../../../utils";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
-import Item from "../components/Item";
 import Select from "../components/Select";
 import AddressInput from "../../../components/addressInputV2";
 
-export default ({ values, handleChange, required = {}, errors, touched, validateField }) => {
+export default function Coordonnees({ values, handleChange, required = {}, errors, touched, validateField }) {
   const [departmentAndRegionDisabled, setDepartmentAndRegionDisabled] = React.useState(true);
 
   useEffect(() => {
     const zip = values.zip;
     if (values.cohort === "2020") return;
-    if (zip.length < 2) return;
+    if (!zip || zip.length < 2) return;
     let departmentCode = zip.substr(0, 2);
     if (["97", "98"].includes(departmentCode)) {
       departmentCode = zip.substr(0, 3);
@@ -40,6 +39,7 @@ export default ({ values, handleChange, required = {}, errors, touched, validate
               location: "location",
               department: "department",
               region: "region",
+              addressVerified: "addressVerified",
             }}
             values={values}
             departAndRegionVisible={departmentAndRegionDisabled}
@@ -53,8 +53,8 @@ export default ({ values, handleChange, required = {}, errors, touched, validate
           {values.cohort === "2020" ? (
             <Info>
               <i>
-                Les volontaires de la cohorte <b>2020</b> sont rattaché(e)s au département de leur établissement scolaire au jour de l'inscription. Il n'est pas modifié en fonction
-                de leur adresse postale. Si vous voulez quand-même le modifier,{" "}
+                Les volontaires de la cohorte <b>2020</b> sont rattaché(e)s au département de leur établissement scolaire au jour de l&apos;inscription. Il n&apos;est pas modifié
+                en fonction de leur adresse postale. Si vous voulez quand-même le modifier,{" "}
                 <span className="link" onClick={() => setDepartmentAndRegionDisabled(false)}>
                   Cliquez-ici
                 </span>
@@ -94,7 +94,7 @@ export default ({ values, handleChange, required = {}, errors, touched, validate
       </Box>
     </Col>
   );
-};
+}
 
 const Info = styled.div`
   font-size: 0.8rem;

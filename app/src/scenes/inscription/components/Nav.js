@@ -8,7 +8,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { STEPS } from "../utils";
 import BackIcon from "../../../components/BackIcon";
 
-export default ({ step }) => {
+export default function Nav({ step }) {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -124,18 +124,7 @@ export default ({ step }) => {
       </Topbar>
     </>
   );
-};
-
-const Divider = styled.div`
-  flex-grow: 1;
-  border-bottom: 2px solid;
-  border-color: ${(props) => {
-    if (props.status === "done") return "#362F78";
-    return "#7F8591";
-  }};
-  margin: 5px;
-  align-self: center;
-`;
+}
 
 const HeaderNav = styled.div`
   display: flex;
@@ -154,6 +143,17 @@ const HeaderNav = styled.div`
       display: none;
     }
   }
+`;
+
+const Divider = styled.div`
+  flex-grow: 1;
+  border-bottom: 2px solid;
+  border-color: ${(props) => {
+    if (props.status === "done") return "#362F78";
+    return "#7F8591";
+  }};
+  margin: 5px;
+  align-self: center;
 `;
 
 const Button = styled.button`

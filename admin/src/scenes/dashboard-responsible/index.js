@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Col, Container, Row } from "reactstrap";
-import { Link } from "react-router-dom";
+import { useHistory, useParams, Link } from "react-router-dom";
+import { Container } from "reactstrap";
 
 import Volontaires from "./volontaires";
 import Missions from "./missions";
 import { useSelector } from "react-redux";
-import { apiURL } from "../../config";
 import api from "../../services/api";
-import { DEFAULT_STRUCTURE_NAME, MISSION_STATUS } from "../../utils";
+import { MISSION_STATUS } from "../../utils";
 
-export default () => {
-  const [currentTab, setCurrentTab] = useState("volontaires");
+export default function Index() {
+  const history = useHistory();
+  const { currentTab } = useParams();
   const [showAlert, setShowAlert] = useState(false);
   const [structure, setStructure] = useState();
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -35,15 +35,20 @@ export default () => {
     })();
   }, []);
 
+  useEffect(() => {
+    const listTab = ["missions", "volontaires"];
+    if (!listTab.includes(currentTab)) history.push(`/dashboard/volontaires`);
+  }, [currentTab]);
+
   return (
     <>
       {showAlert ? <AlertBox onClose={() => setShowAlert(false)} /> : null}
       <TabNavigation>
         <TabNavigationList>
-          <TabItem onClick={() => setCurrentTab("volontaires")} isActive={currentTab === "volontaires"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires`)} isActive={currentTab === "volontaires"}>
             Volontaires
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("missions")} isActive={currentTab === "missions"}>
+          <TabItem onClick={() => history.push(`/dashboard/missions`)} isActive={currentTab === "missions"}>
             Missions
           </TabItem>
         </TabNavigationList>
@@ -54,16 +59,16 @@ export default () => {
       </Wrapper>
     </>
   );
-};
+}
 
-const AlertBox = ({ onClose }) => {
+const AlertBox = () => {
   const user = useSelector((state) => state.Auth.user);
   return (
     <Link to={`/structure/${user.structureId}/edit`}>
       <Alert>
         <img src={require("../../assets/information.svg")} height={15} />
         <div className="text">
-          <strong>Vous n'avez pas terminé l'inscription de votre structure !</strong>
+          <strong>Vous n&apos;avez pas terminé l&apos;inscription de votre structure !</strong>
           <p>Cliquez ici pour renseigner toutes ses informations.</p>
         </div>
         {/* <img src={require("../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }}/> */}

@@ -14,7 +14,7 @@ import AddressInput from "../components/addressInput";
 import ModalConfirm from "../components/modals/ModalConfirm";
 import PasswordEye from "../components/PasswordEye";
 
-export default () => {
+export default function Account() {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -49,15 +49,18 @@ export default () => {
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+            if (!ok) {
+              if (code === "USER_ALREADY_REGISTERED")
+                return toastr.error("Cet identifiant est déjà utilisé, pour plus d'informations contactez le support : contact@snu.gouv.fr ", { timeOut: 10000 });
+              return toastr.error("Une erreur s'est produite :", translate(code));
+            }
             dispatch(setYoung(young));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
-        }}
-      >
+        }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
             <Title>Email</Title>
@@ -93,8 +96,7 @@ export default () => {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour du mot de passe :", translate(e.code));
           }
-        }}
-      >
+        }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
             <Title>Mot de passe</Title>
@@ -105,6 +107,7 @@ export default () => {
                 validate={getPasswordErrorMessage}
                 placeholder=""
                 name="password"
+                // eslint-disable-next-line react/jsx-no-duplicate-props
                 validate={(v) => !v && requiredMessage}
                 value={values.password}
                 onChange={handleChange}
@@ -146,9 +149,8 @@ export default () => {
               onConfirm: async () => updateYoung(values),
             });
           } else updateYoung(values);
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
             <Title>Mon profil</Title>
             <FormRow>
@@ -267,7 +269,7 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Item = ({ title, name, values, handleChange, errors, touched, validate, type, children, ...props }) => {
   return (

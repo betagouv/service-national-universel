@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { useParams, useHistory } from "react-router-dom";
 
 import Inscription from "./inscription";
 import Volontaire from "./volontaire";
@@ -11,47 +12,54 @@ import VioletButton from "../../components/buttons/VioletButton";
 import ExportAll from "./inscription/ExportAll";
 import { ROLES } from "../../utils";
 
-export default () => {
-  const [currentTab, setCurrentTab] = useState("inscriptions");
+export default function Dashboard() {
+  const history = useHistory();
+  const { currentTab } = useParams();
   const user = useSelector((state) => state.Auth.user);
+  const [filter, setFilter] = useState({});
+
+  useEffect(() => {
+    const listTab = ["inscriptions", "volontaires", "structures", "missions", "centres"];
+    if (!listTab.includes(currentTab)) history.push(`/dashboard/inscriptions`);
+  }, [currentTab]);
 
   return (
     <>
       <TabNavigation>
         <TabNavigationList>
-          <TabItem onClick={() => setCurrentTab("inscriptions")} isActive={currentTab === "inscriptions"}>
+          <TabItem onClick={() => history.push(`/dashboard/inscriptions`)} isActive={currentTab === "inscriptions"}>
             Inscriptions
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("volontaires")} isActive={currentTab === "volontaires"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires`)} isActive={currentTab === "volontaires"}>
             Volontaires
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("structures")} isActive={currentTab === "structures"}>
+          <TabItem onClick={() => history.push(`/dashboard/structures`)} isActive={currentTab === "structures"}>
             Structures
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("missions")} isActive={currentTab === "missions"}>
+          <TabItem onClick={() => history.push(`/dashboard/missions`)} isActive={currentTab === "missions"}>
             Missions
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("centers")} isActive={currentTab === "centers"}>
+          <TabItem onClick={() => history.push(`/dashboard/centres`)} isActive={currentTab === "centres"}>
             Centres
           </TabItem>
         </TabNavigationList>
         <div style={{ display: "flex", marginTop: "1rem" }}>
-          {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll /> : null}
+          {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll filter={filter} /> : null}
           <VioletButton onClick={() => print()}>
             <p>Exporter les statistiques</p>
           </VioletButton>
         </div>
       </TabNavigation>
       <Wrapper>
-        {currentTab === "inscriptions" && <Inscription />}
+        {currentTab === "inscriptions" && <Inscription onChangeFilter={setFilter} />}
         {currentTab === "volontaires" && <Volontaire />}
         {currentTab === "structures" && <Structure />}
         {currentTab === "missions" && <Mission />}
-        {currentTab === "centers" && <Center />}
+        {currentTab === "centres" && <Center />}
       </Wrapper>
     </>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 1.5rem;

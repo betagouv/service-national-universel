@@ -18,7 +18,7 @@ import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
 import InfoIcon from "../../../components/InfoIcon";
 
-export default () => {
+export default function StepCoordonnees() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -203,6 +203,7 @@ export default () => {
                       value="true"
                       checked={values.livesInFrance === "true"}
                       onChange={handleChange}
+                      // eslint-disable-next-line react/jsx-no-duplicate-props
                       onChange={(e) => {
                         const value = e.target.value;
                         handleChange({ target: { name: "livesInFrance", value } });
@@ -230,7 +231,7 @@ export default () => {
                         cleanAllAddressInformation(handleChange);
                       }}
                     />
-                    Je réside à l'étranger
+                    Je réside à l&apos;étranger
                   </RadioLabel>
                 </Col>
               </FormRow>
@@ -254,6 +255,7 @@ export default () => {
                         region: "region",
                         cityCode: "cityCode",
                         academy: "academy",
+                        addressVerified: "addressVerified",
                       }}
                       values={values}
                       handleChange={handleChange}
@@ -269,7 +271,7 @@ export default () => {
                 <>
                   <FormRow>
                     <Col md={4}>
-                      <Label>Adresse à l'étranger</Label>
+                      <Label>Adresse à l&apos;étranger</Label>
                     </Col>
                     <Col>
                       <AddressInputV2
@@ -293,7 +295,7 @@ export default () => {
                   </FormRow>
                   <FormRow>
                     <Col md={4}>
-                      <Label>Identité et adresse de l'hébergeur en France</Label>
+                      <Label>Identité et adresse de l&apos;hébergeur en France</Label>
                       <Infos>
                         <InfoIcon color="#32257F" />
                         <p>Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).</p>
@@ -303,7 +305,7 @@ export default () => {
                       </Note>
                     </Col>
                     <Col>
-                      <SecondLabel>Nom de l'hébergeur</SecondLabel>
+                      <SecondLabel>Nom de l&apos;hébergeur</SecondLabel>
                       <Row>
                         <Col>
                           <Field
@@ -328,7 +330,7 @@ export default () => {
                           <ErrorMessage errors={errors} touched={touched} name="hostFirstName" />
                         </Col>
                       </Row>
-                      <SecondLabel style={{ marginTop: 15 }}>Lien avec l'hébergeur</SecondLabel>
+                      <SecondLabel style={{ marginTop: 15 }}>Lien avec l&apos;hébergeur</SecondLabel>
                       <Field
                         as="select"
                         validate={(v) => !v && requiredMessage}
@@ -337,7 +339,7 @@ export default () => {
                         value={values.hostRelationship}
                         onChange={handleChange}>
                         <option value={""} disabled>
-                          Précisez votre lien avec l'hébergeur
+                          Précisez votre lien avec l&apos;hébergeur
                         </option>
                         {[
                           { label: "Parent", value: "Parent" },
@@ -365,6 +367,7 @@ export default () => {
                           region: "region",
                           cityCode: "cityCode",
                           academy: "academy",
+                          addressVerified: "addressVerified",
                         }}
                         values={values}
                         departAndRegionVisible={false}
@@ -664,7 +667,7 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 40px;

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { YOUNG_STATUS_COLORS } from "../../../../utils";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage } from "../../../../components/dashboard";
 
-export default ({ status, statusPhase1, statusPhase2, statusPhase3, filter, getLink }) => {
+export default function Status({ status, statusPhase1, statusPhase2, statusPhase3, filter, getLink }) {
   const total = Object.keys(status).reduce((acc, a) => acc + status[a], 0);
 
   return (
@@ -86,4 +86,4 @@ export default ({ status, statusPhase1, statusPhase2, statusPhase3, filter, getL
       </Row>
     </React.Fragment>
   );
-};
+}

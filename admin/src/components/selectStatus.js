@@ -5,35 +5,31 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, /* isEndOfInscriptionManagement2021, ROLES, */ colors, SENDINBLUE_TEMPLATES } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, /* isEndOfInscriptionManagement2021, ROLES, */ colors, SENDINBLUE_TEMPLATES, WITHRAWN_REASONS } from "../utils";
 import { toastr } from "react-redux-toastr";
 
 import ModalCorrection from "./modals/ModalCorrection";
 import ModalRefused from "./modals/ModalRefused";
 import ModalWithdrawn from "./modals/ModalWithdrawn";
-import ModalGoal from "./modals/ModalGoal";
 import Chevron from "./Chevron";
 import ModalConfirm from "./modals/ModalConfirm";
+import ModalConfirmMultiAction from "./modals/ModalConfirmMultiAction";
 
 export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => {} }) {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
+  const [modalGoal, setModalGoal] = useState({ isOpen: false, onConfirm: null });
 
-  // const getInscriptions = async (department) => {
-  //   const { data } = await api.get(`/inscription-goal/${department}/current`);
-  //   return data;
-  // };
-
-  // const getInscriptionGoalReachedNormalized = async (departement) => {
-  //   const { data, ok, code } = await api.get("/inscription-goal");
-  //   let max = 0;
-  //   if (data) max = data.filter((d) => d.department === departement)[0]?.max;
-  //   if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
-  //   const nbYoungs = await getInscriptions(departement);
-  //   return max > 0 && { ...nbYoungs, max };
-  // };
+  const getInscriptionGoalReachedNormalized = async ({ department, cohort }) => {
+    const { data, ok, code } = await api.get(`/inscription-goal/${encodeURIComponent(cohort)}/department/${encodeURIComponent(department)}`);
+    if (!ok) {
+      toastr.error("Oups, une erreur s'est produite", translate(code));
+      return null;
+    }
+    return data;
+  };
 
   useEffect(() => {
     (async () => {
@@ -49,13 +45,22 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
   const handleClickStatus = async (status) => {
     setModalConfirm({
       isOpen: true,
-      onConfirm: () => {
+      onConfirm: async () => {
         if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
-        // if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-        //   const youngs = await getInscriptionGoalReachedNormalized(young.department);
-        //   const ratioRegistered = youngs.registered / youngs.max;
-        //   if (ratioRegistered >= 1) return setModal("goal");
-        // }
+        if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
+          const fillingRate = await getInscriptionGoalReachedNormalized({ department: young.department, cohort: young.cohort });
+          if (fillingRate >= 1)
+            return setModalGoal({
+              isOpen: true,
+              onConfirm: () => setStatus(YOUNG_STATUS.WAITING_LIST),
+              confirmText: "Placer en liste complémentaire",
+              onConfirm2: () => setStatus(YOUNG_STATUS.VALIDATED),
+              confirmText2: "Valider quand même",
+              title: "Jauge de candidats atteinte",
+              message:
+                "Attention, vous avez atteint la jauge, merci de placer le candidat sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider la candidature.",
+            });
+        }
         setStatus(status);
       },
       title: "Modification de statut",
@@ -63,16 +68,27 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
     });
   };
 
-  const setStatus = async (status, note) => {
+  const setStatus = async (status, values) => {
     const prevStatus = young.status;
-    young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
+    if (status === "WITHDRAWN") {
+      young.historic.push({
+        phase,
+        userName: `${user.firstName} ${user.lastName}`,
+        userId: user._id,
+        status,
+        note: WITHRAWN_REASONS.find((r) => r.value === values?.withdrawnReason)?.label + " " + values?.withdrawnMessage,
+      });
+    } else young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note: values?.note });
     young[statusName] = status;
     const now = new Date();
     young.lastStatusAt = now.toISOString();
     if (statusName === "statusPhase2") young.statusPhase2UpdatedAt = now.toISOString();
-    if (status === "WITHDRAWN" && note) young.withdrawnMessage = note;
-    if (status === "WAITING_CORRECTION" && note) young.inscriptionCorrectionMessage = note;
-    if (status === "REFUSED" && note) young.inscriptionRefusedMessage = note;
+    if (status === "WITHDRAWN" && (values?.withdrawnReason || values?.withdrawnMessage)) {
+      young.withdrawnReason = values?.withdrawnReason;
+      young.withdrawnMessage = values?.withdrawnMessage || "";
+    }
+    if (status === "WAITING_CORRECTION" && values?.note) young.inscriptionCorrectionMessage = values?.note;
+    if (status === "REFUSED" && values?.note) young.inscriptionRefusedMessage = values?.note;
     if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION) young.phase = YOUNG_PHASE.CONTINUE;
     try {
       // we decided to let the validated youngs in the INSCRIPTION phase
@@ -83,7 +99,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
       //   young.phase = YOUNG_PHASE.COHESION_STAY;
       // }
 
-      const { lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase, inscriptionCorrectionMessage, inscriptionRefusedMessage } = young;
+      const { lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase, inscriptionCorrectionMessage, inscriptionRefusedMessage, withdrawnReason } = young;
 
       const {
         ok,
@@ -97,6 +113,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         phase,
         inscriptionCorrectionMessage,
         inscriptionRefusedMessage,
+        withdrawnReason,
       });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
@@ -122,6 +139,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         isOpen={modalConfirm?.isOpen}
         title={modalConfirm?.title}
         message={modalConfirm?.message}
+        headerText="Confirmation"
         onCancel={() => setModalConfirm({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
           modalConfirm?.onConfirm?.();
@@ -132,8 +150,8 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         isOpen={modal === YOUNG_STATUS.WAITING_CORRECTION}
         value={young}
         onChange={() => setModal(false)}
-        onSend={(msg) => {
-          setStatus(YOUNG_STATUS.WAITING_CORRECTION, msg);
+        onSend={(note) => {
+          setStatus(YOUNG_STATUS.WAITING_CORRECTION, { note });
           setModal(null);
         }}
       />
@@ -141,29 +159,42 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         isOpen={modal === YOUNG_STATUS.REFUSED}
         value={young}
         onChange={() => setModal(false)}
-        onSend={(msg) => {
-          setStatus(YOUNG_STATUS.REFUSED, msg);
+        onSend={(note) => {
+          setStatus(YOUNG_STATUS.REFUSED, { note });
           setModal(null);
         }}
       />
       <ModalWithdrawn
         isOpen={modal === YOUNG_STATUS.WITHDRAWN}
-        value={young}
+        title="Desistement du SNU"
+        message="Précisez la raison du désistement"
+        placeholder="Précisez en quelques mots les raisons du désistement du volontaire"
         onChange={() => setModal(false)}
-        onSend={(msg) => {
-          setStatus(YOUNG_STATUS.WITHDRAWN, msg);
+        onConfirm={(values) => {
+          setStatus(YOUNG_STATUS.WITHDRAWN, values);
           setModal(null);
         }}
       />
-      <ModalGoal
-        isOpen={modal === "goal"}
-        onChange={() => setModal(false)}
-        onValidate={() => {
-          setStatus(YOUNG_STATUS.VALIDATED);
+      <ModalConfirmMultiAction
+        showHeaderIcon={true}
+        showHeaderText={false}
+        isOpen={modalGoal?.isOpen}
+        title={modalGoal?.title}
+        message={modalGoal?.message}
+        confirmText={modalGoal?.confirmText}
+        confirmText2={modalGoal?.confirmText2}
+        onConfirm={() => {
+          modalGoal?.onConfirm?.();
+          setModalGoal({ isOpen: false, onConfirm: null });
           setModal(null);
         }}
-        callback={() => {
-          setStatus(YOUNG_STATUS.WAITING_LIST);
+        onConfirm2={() => {
+          modalGoal?.onConfirm2?.();
+          setModalGoal({ isOpen: false, onConfirm: null });
+          setModal(null);
+        }}
+        onCancel={() => {
+          setModalGoal({ isOpen: false, onConfirm: null });
           setModal(null);
         }}
       />

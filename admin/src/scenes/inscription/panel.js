@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, getAge, YOUNG_STATUS } from "../../utils";
+import { translate as t, isInRuralArea, getAge, YOUNG_STATUS, ROLES } from "../../utils";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
+import PatchHistoric from "../../components/views/PatchHistoric";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import { appURL } from "../../config";
 import Badge from "../../components/Badge";
+import ActionButtonArchive from "../../components/buttons/ActionButtonArchive";
 
 export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -65,11 +69,12 @@ export default function InscriptionPanel({ onChange, value }) {
           <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>
+          {user.role === ROLES.ADMIN ? <ActionButtonArchive young={value} /> : null}
         </div>
       </div>
       {value.status === YOUNG_STATUS.WAITING_CORRECTION && value.inscriptionCorrectionMessage ? (
-        <Info title="Demande de correction :" id={value._id}>
-          {value.inscriptionCorrectionMessage}
+        <Info title="Demande de correction en cours :" id={value._id}>
+          <PatchHistoric value={value} model="young" field="inscriptionCorrectionMessage" previewNumber={1} />
         </Info>
       ) : null}
       {value.status === YOUNG_STATUS.REFUSED && value.inscriptionRefusedMessage ? (
@@ -77,7 +82,11 @@ export default function InscriptionPanel({ onChange, value }) {
           {value.inscriptionRefusedMessage}
         </Info>
       ) : null}
-      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
+      {young?.historic?.length > 0 && (
+        <Info title="Historique des statuts" id={value._id}>
+          <Historic value={young.historic} />
+        </Info>
+      )}
       <Info title="Pièce d’identité" id={value._id}>
         {(value.cniFiles || []).map((e, i) => (
           <DownloadButton
@@ -181,6 +190,10 @@ export default function InscriptionPanel({ onChange, value }) {
           <Details title="Région" value={value.parent2Region} />
         </Info>
       )}
+      <Info title="Consentements">
+        <Details title={`Consentements validés par ${value.firstName} ${value.lastName}`} value={t(value.consentment || "false")} />
+        <Details title="Consentements validés par ses représentants légaux" value={t(value.parentConsentment || "false")} />
+      </Info>
       {value.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>

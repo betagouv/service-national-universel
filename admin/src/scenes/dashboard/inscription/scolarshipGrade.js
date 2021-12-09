@@ -2,13 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import CircularProgress from "../components/CircularProgress";
 import api from "../../../services/api";
-import { translate } from "../../../utils";
+import { translate, getLink } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import { Link } from "react-router-dom";
-import { getLink } from "../../../utils";
 
-export default ({ filter }) => {
+export default function ScholarshipsGrade({ filter }) {
   const [value, setValue] = useState(null);
 
   useEffect(() => {
@@ -59,4 +58,4 @@ export default ({ filter }) => {
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );
-};
+}

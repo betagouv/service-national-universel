@@ -4,7 +4,7 @@ import { Col, Row } from "reactstrap";
 import { YOUNG_STATUS_COLORS } from "../../../utils";
 import { CardSection, Subtitle, CardComponent } from "../../../components/dashboard";
 
-export default ({ data, getLink }) => {
+export default function Phase1({ data, getLink }) {
   return (
     <>
       <Row>
@@ -41,4 +41,4 @@ export default ({ data, getLink }) => {
       </Row>
     </>
   );
-};
+}
