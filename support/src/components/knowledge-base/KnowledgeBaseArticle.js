@@ -8,7 +8,7 @@ const KnowledgeBaseArticle = ({ article, readOnly = false }) => {
   const { mutate } = useKnowledgeBaseData();
 
   const onSave = async (content) => {
-    const response = await API.put({ path: `/support-center/knowledge-base/${_id}`, body: { content } });
+    const response = await API.put({ path: `/support-center/knowledge-base/${article._id}`, body: { content } });
     if (!response.ok) {
       if (response.error) return toast.error(response.error);
       return false;

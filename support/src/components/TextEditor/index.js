@@ -31,6 +31,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
   const editor = useMemo(() => withHistory(withEmbeds(withImages(withReact(createEditor())))), []);
 
   const onChange = (value) => {
+    if (readOnly) return;
     setValue(value);
 
     const isAstChange = editor.operations.some((op) => "set_selection" !== op.type);
@@ -43,6 +44,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
   };
 
   const onCancel = () => {
+    if (readOnly) return;
     if (window.confirm("Êtes-vous sûr(e) ? Toutes les modifications seront alors perdues définitivement.")) {
       setValue(content || empty);
       localStorage.removeItem(`snu-kb-content-${_id}`);
@@ -52,6 +54,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
   };
 
   const onSaveRequest = async () => {
+    if (readOnly) return;
     const success = await onSave(value);
     if (!success) return;
     localStorage.removeItem(`snu-kb-content-${_id}`);
@@ -59,6 +62,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
   };
 
   const onBeforeUnload = () => {
+    if (readOnly) return;
     if (localStorage.getItem(`snu-kb-content-${_id}`)) {
       if (window.confirm("Voulez-vous enregistrer vos changements ?")) {
         onSaveRequest();
@@ -66,8 +70,10 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
     }
   };
   useEffect(() => {
-    router.events.on("routeChangeStart", onBeforeUnload);
-    return () => router.events.off("routeChangeStart", onBeforeUnload);
+    if (!readOnly) {
+      router.events.on("routeChangeStart", onBeforeUnload);
+      return () => router.events.off("routeChangeStart", onBeforeUnload);
+    }
   });
 
   return (
@@ -293,27 +299,29 @@ const Image = ({ attributes, children, element, readOnly }) => {
   );
 };
 
-const VideoElement = ({ attributes, children, element }) => {
+const VideoElement = ({ attributes, children, element, readOnly }) => {
   const editor = useSlateStatic();
   const { url } = element;
   return (
     <div {...attributes}>
       <div contentEditable={false}>
-        <div className="pl-[75%] relative">
-          <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute inset-0" />
+        <div className="pb-[56.25%] h-0 relative">
+          <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 h-full w-full left-0" />
         </div>
-        <UrlInput
-          url={url}
-          onChange={(val) => {
-            const path = ReactEditor.findPath(editor, element);
-            const newProperties = {
-              url: val,
-            };
-            Transforms.setNodes(editor, newProperties, {
-              at: path,
-            });
-          }}
-        />
+        {!readOnly && (
+          <UrlInput
+            url={url}
+            onChange={(val) => {
+              const path = ReactEditor.findPath(editor, element);
+              const newProperties = {
+                url: val,
+              };
+              Transforms.setNodes(editor, newProperties, {
+                at: path,
+              });
+            }}
+          />
+        )}
       </div>
       {children}
     </div>
@@ -326,7 +334,8 @@ const UrlInput = ({ url, onChange }) => {
     <input
       value={value}
       onClick={(e) => e.stopPropagation()}
-      className="mt-1 box-border"
+      id="text-editor-video-url"
+      className="mt-1 box-border p-2 border-2 mb-5 w-full relative"
       onChange={(e) => {
         const newUrl = e.target.value;
         setValue(newUrl);
@@ -413,7 +422,7 @@ const InsertVideoButton = () => {
         Transforms.insertNodes(editor, video);
       }}
     >
-      <Icon>video</Icon>
+      <Icon>tv</Icon>
     </Button>
   );
 };

@@ -162,6 +162,12 @@ body {
   margin-left: 2rem;
 }
 
+#text-editor-video-url::after {
+  content: "(Ce lien n'apparaitra pas dans l'article publié)";
+  position: absolute;
+  top: 2rem;
+}
+
 .debug * {
   border: 2px solid black;
 }
