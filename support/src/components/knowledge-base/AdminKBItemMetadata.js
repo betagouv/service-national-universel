@@ -159,6 +159,10 @@ const AdminKBItemMetadata = ({ visible }) => {
           name="description"
           defaultValue={item.description}
         />
+        <label className="font-bold" htmlFor="description">
+          Mots clés
+        </label>
+        <input className="p-2 border-2 mb-5 w-full flex-shrink-0" placeholder="Mots clés" name="description" defaultValue={item.keywords} />
         {item.type === "section" && (
           <>
             <label className="font-bold" htmlFor="imageSrc">
