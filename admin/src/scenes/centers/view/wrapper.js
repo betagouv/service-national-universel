@@ -1,15 +1,13 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { translate, canAssignCohesionCenter, ROLES } from "../../../utils";
+import { translate, canAssignCohesionCenter } from "../../../utils";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
-import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
 export default function Wrapper({ center: centerDefault, tab, children }) {
   const history = useHistory();
@@ -45,45 +43,21 @@ export default function Wrapper({ center: centerDefault, tab, children }) {
             ) : null}
           </TabList>
         </div>
-        <Row style={{ minWidth: "20%" }}>
-          <Col>
-            <BoxPlaces onClick={up}>
-              <table>
-                <tbody>
-                  <tr>
-                    <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{Math.max(0, center.placesLeft)}</td>
-                    <td>
-                      <b>Places restantes</b>
-                      <br />
-                      <span style={{ color: "#999" }}>
-                        {center.placesTotal - center.placesLeft} / {center.placesTotal}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </BoxPlaces>
-          </Col>
-          {user.role === ROLES.ADMIN ? (
-            <Col>
-              <Link to={`/centre/${center._id}/edit`}>
-                <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />
-              </Link>
-            </Col>
-          ) : null}
-        </Row>
+        <BoxPlaces>
+          <DetailCardTitle>Taux d&apos;occupation</DetailCardTitle>
+          <DetailCardContent>{`${center.placesTotal ? (((center.placesTotal - center.placesLeft) * 100) / center.placesTotal).toFixed(2) : 0} %`}</DetailCardContent>
+        </BoxPlaces>
+        <BoxPlaces onClick={up}>
+          <DetailCardTitle>{Math.max(0, center.placesLeft)} places restantes</DetailCardTitle>
+          <DetailCardContent>
+            {center.placesTotal - center.placesLeft} / {center.placesTotal}
+          </DetailCardContent>
+        </BoxPlaces>
       </Header>
       {children}
     </div>
   );
 }
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 10px;
-`;
 
 const Header = styled.div`
   padding: 0 25px 0;
@@ -101,8 +75,11 @@ const Box = styled.div`
 `;
 
 const BoxPlaces = styled(Box)`
+  max-width: 200px;
+  background: none;
   padding: 0 1rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
   min-height: 5rem;
   h1 {
@@ -117,4 +94,13 @@ const BoxPlaces = styled(Box)`
       color: #777;
     }
   }
+`;
+
+const DetailCardTitle = styled.div`
+  color: #7c7c7c;
+`;
+const DetailCardContent = styled.div`
+  color: #000;
+  font-size: 1.5rem;
+  font-weight: 600;
 `;
