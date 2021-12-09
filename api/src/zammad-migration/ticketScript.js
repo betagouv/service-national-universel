@@ -1,4 +1,7 @@
-const dataMapper = require("../dataMapper/dataMapper");
+require("dotenv").config({ path: "./../../.env-staging" });
+require("../mongo");
+const client = require('./database');
+const dataMapper = require("./dataMapper");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");
 const TicketModel = require("../models/ticket");
@@ -6,20 +9,21 @@ const TagModel = require("../models/tag");
 const { formatDistance } = require('date-fns');
 const { fr } = require('date-fns/locale');
 
-(async () => {
+// function call, because eslint is yelling
+const migrateTickets = async () => {
   console.log("AM I HERE ???");
   // Mes étapes
   // 1. Récupérer les différentes tables et les filtrer pour récupérer les champs intéressants
-  const tickets = await dataMapper.getAllTickets();
-  const ticketArticles = await dataMapper.getAllTicketArticles();
-  const ticketStates = await dataMapper.getAllTicketStates();
-  const ticketPriorities = await dataMapper.getAllTicketPriorities();
-  const ticketArticleTypes = await dataMapper.getAllTicketArticleTypes();
-  const ticketArticleSenders = await dataMapper.getAllTicketArticleSenders();
-  const ticketTags = await dataMapper.getAllTags();
-  const tagItems = await dataMapper.getAllTagItems();
-  const groups = await dataMapper.getAllGroups();
-  const users = await dataMapper.getAllUsers();
+  const tickets = (await client("SELECT * from tickets limit 5")).rows
+  const ticketArticles = (await client("SELECT * from ticket_articles")).rows;
+  const ticketStates = (await client("SELECT * from ticket_states")).rows;
+  const ticketPriorities = (await client("SELECT * from ticket_priorities")).rows;
+  const ticketArticleTypes = (await client("SELECT * from ticket_article_types")).rows;
+  const ticketArticleSenders = (await client("SELECT * from ticket_article_senders")).rows;
+  const ticketTags = (await client("SELECT * from tags")).rows;
+  const tagItems = (await client("SELECT * from tag_items")).rows;
+  const groups = (await client("SELECT * from groups")).rows;
+  const users = (await client("SELECT * from users")).rows;
 
   function findZammadUser(id) {
     return users.filter((user) => id === user.id)[0];
@@ -117,76 +121,48 @@ const { fr } = require('date-fns/locale');
       }
     }
 
-    // 7. Rassembler toutes les données et créer une nouvelle instance dans ma table Ticket ou update une instance déjà présente
+    // 7. Rassembler toutes les données et créer un nouveau document dans ma table Ticket ou update un document existant
+    const ticketBody = {
+      zammadId: ticket.id,
+      number: ticket.number,
+      title: ticket.title,
+      category,
+      subject,
+      emitterUserId: emitterUser?._id || null,
+      emitterYoungId: emitterYoung?._id || null,
+      emitterZammadId: ticket.created_by_id,
+      emitterExternal,
+      emitterDepartment: department || emitterUser?.department || emitterYoung?.department || "",
+      emitterRegion: region || emitterUser?.region || emitterYoung?.region || "",
+      addressedToAgents,
+      fromCanal,
+      group: groups.filter((group) => ticket.group_id === group.id)[0].name,
+      priority,
+      status: ticketStates.filter((state) => ticket.state_id === state.id)[0].name,
+      createdAt: ticket.created_at,
+      updatedAt: ticket.updated_at,
+      closedAt: ticket.close_at,
+      firstResponseAt: ticket.first_response_at,
+      timeUntilFirstResponse,
+      lastContactEmitterAt: ticket.last_contact_customer_at,
+      lastContactAgentAt: ticket.last_contact_agent_at,
+      tagIds: [],
+      tags: tagsIds,
+      messages: messagesArray,
+      agentInChargeId,
+      agentInChargeZammadId: ticket.owner_id,
+      lastAgentInChargeUpdateAt: ticket.last_owner_update_at,
+      lastUpdateById: ticket.updated_by_id,
+    }
     const ticketExisting = await TicketModel.findOne({ zammadId: ticket.id });
     if (ticketExisting) {
       console.log("TICKET EXISTING !");
-      await ticketExisting.save({
-        zammadId: ticket.id,
-        number: ticket.number,
-        title: ticket.title,
-        category,
-        subject,
-        emitterUserId: emitterUser?._id || null,
-        emitterYoungId: emitterYoung?._id || null,
-        emitterZammadId: ticket.created_by_id,
-        emitterExternal,
-        emitterDepartment: department || emitterUser?.department || emitterYoung?.department || "",
-        emitterRegion: region || emitterUser?.region || emitterYoung?.region || "",
-        addressedToAgents,
-        fromCanal,
-        group: groups.filter((group) => ticket.group_id === group.id)[0].name,
-        priority,
-        status: ticketStates.filter((state) => ticket.state_id === state.id)[0].name,
-        createdAt: ticket.created_at,
-        updatedAt: ticket.updated_at,
-        closedAt: ticket.close_at,
-        firstResponseAt: ticket.first_response_at,
-        timeUntilFirstResponse,
-        lastContactEmitterAt: ticket.last_contact_customer_at,
-        lastContactAgentAt: ticket.last_contact_agent_at,
-        tagIds: [],
-        tags: tagsIds,
-        messages: messagesArray,
-        agentInChargeId,
-        agentInChargeZammadId: ticket.owner_id,
-        lastAgentInChargeUpdateAt: ticket.last_owner_update_at,
-        lastUpdateById: ticket.updated_by_id,
-      });
+      await ticketExisting.save(ticketBody);
     } else {
-      const ticketCreated = await TicketModel.create({
-        zammadId: ticket.id,
-        number: ticket.number,
-        title: ticket.title,
-        category,
-        subject,
-        emitterUserId: emitterUser?._id || null,
-        emitterYoungId: emitterYoung?._id || null,
-        emitterZammadId: ticket.created_by_id,
-        emitterExternal,
-        emitterDepartment: department || emitterUser?.department || emitterYoung?.department || "",
-        emitterRegion: region || emitterUser?.region || emitterYoung?.region || "",
-        addressedToAgents,
-        fromCanal,
-        group: groups.filter((group) => ticket.group_id === group.id)[0].name,
-        priority,
-        status: ticketStates.filter((state) => ticket.state_id === state.id)[0].name,
-        createdAt: ticket.created_at,
-        updatedAt: ticket.updated_at,
-        closedAt: "",
-        firstResponseAt: ticket.first_response_at,
-        timeUntilFirstResponse,
-        lastContactEmitterAt: ticket.last_contact_customer_at,
-        lastContactAgentAt: ticket.last_contact_agent_at,
-        tagIds: [],
-        tags: tagsIds,
-        messages: messagesArray,
-        agentInChargeId,
-        agentInChargeZammadId: ticket.owner_id,
-        lastAgentInChargeUpdateAt: ticket.last_owner_update_at,
-        lastUpdateById: ticket.updated_by_id,
-      });
+      const ticketCreated = await TicketModel.create(ticketBody);
       console.log("TICKET CREATED", ticketCreated.title);
     }
   }
-});
+};
+
+// migrateTickets()

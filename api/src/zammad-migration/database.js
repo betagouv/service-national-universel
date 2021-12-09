@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ path: "./../../.env-staging" });
 var pg = require("pg"),
   { Client } = require("ssh2");
 var pgHost = "localhost",
@@ -8,17 +8,11 @@ var pgHost = "localhost",
 
 var proxy = require("net").createServer(function (sock) {
   if (!ready) return sock.destroy();
-  c.forwardOut(
-    sock.remoteAddress,
-    sock.remotePort,
-    pgHost,
-    pgPort,
-    function (err, stream) {
-      if (err) return sock.destroy();
-      sock.pipe(stream);
-      stream.pipe(sock);
-    }
-  );
+  c.forwardOut(sock.remoteAddress, sock.remotePort, pgHost, pgPort, function (err, stream) {
+    if (err) return sock.destroy();
+    sock.pipe(stream);
+    stream.pipe(sock);
+  });
 });
 proxy.listen(proxyPort, "127.0.0.1");
 
@@ -43,14 +37,7 @@ function clientCreated(query) {
     });
     c.on("ready", function () {
       ready = true;
-      var conString =
-        "postgres://" +
-        process.env.PGUSER +
-        ":" +
-        process.env.PGPASS +
-        "@127.0.0.1:" +
-        proxyPort +
-        "/zammad",
+      var conString = "postgres://" + process.env.PGUSER + ":" + process.env.PGPASS + "@127.0.0.1:" + proxyPort + "/zammad",
         client = new pg.Client(conString);
       client.connect(function (err) {
         if (err) {

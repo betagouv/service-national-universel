@@ -10,15 +10,6 @@ let ZAMMAD_IP = process.env.ZAMMAD_IP || "";
 let ZAMMAD_PLATEFORME_USER = process.env.ZAMMAD_PLATEFORME_USER || "";
 let ZAMMAD_PLATEFORME_USER_ID = process.env.ZAMMAD_PLATEFORME_USER_ID || "";
 
-let PG_URL = process.env.PG_URL || "";
-let PG_PORT = process.env.PG_PORT || "";
-let PROXY_PORT = process.env.PROXY_PORT || "";
-let ZAMMAD_SERVER_HOST = process.env.ZAMMAD_SERVER_HOST || "";
-let ZAMMAD_SERVER_USER = process.env.ZAMMAD_SERVER_USER || "";
-let PRIVATE_KEY_PATH = process.env.PRIVATE_KEY_PATH || "";
-let ZAMMAD_DB_USER = process.env.ZAMMAD_DB_USER || "";
-let ZAMMAD_DB_PASSWORD = process.env.ZAMMAD_DB_PASSWORD || "";
-
 const ES_ENDPOINT = process.env.ES_ENDPOINT || "";
 
 const SENDINBLUEKEY = process.env.SENDINBLUEKEY || "";
@@ -80,14 +71,6 @@ module.exports = {
   API_ASSOCIATION_CELLAR_KEYSECRET,
   SLACK_BOT_TOKEN,
   SLACK_BOT_CHANNEL,
-  PG_URL,
-  PG_PORT,
-  PROXY_PORT,
-  ZAMMAD_SERVER_HOST,
-  ZAMMAD_SERVER_USER,
-  PRIVATE_KEY_PATH,
-  ZAMMAD_DB_USER,
-  ZAMMAD_DB_PASSWORD,
 };
 
 function getEnvironment() {
