@@ -1,20 +1,19 @@
-require("dotenv").config({ path: "./../../.env-staging" });
+require("dotenv").config();
 require("../mongo");
-const client = require('./database');
-const dataMapper = require("./dataMapper");
+const client = require("./database");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");
 const TicketModel = require("../models/ticket");
 const TagModel = require("../models/tag");
-const { formatDistance } = require('date-fns');
-const { fr } = require('date-fns/locale');
+const { formatDistance } = require("date-fns");
+const { fr } = require("date-fns/locale");
 
 // function call, because eslint is yelling
 const migrateTickets = async () => {
   console.log("AM I HERE ???");
   // Mes étapes
   // 1. Récupérer les différentes tables et les filtrer pour récupérer les champs intéressants
-  const tickets = (await client("SELECT * from tickets limit 5")).rows
+  const tickets = (await client("SELECT * from tickets limit 5")).rows;
   const ticketArticles = (await client("SELECT * from ticket_articles")).rows;
   const ticketStates = (await client("SELECT * from ticket_states")).rows;
   const ticketPriorities = (await client("SELECT * from ticket_priorities")).rows;
@@ -27,7 +26,7 @@ const migrateTickets = async () => {
 
   function findZammadUser(id) {
     return users.filter((user) => id === user.id)[0];
-  };
+  }
 
   // 2. Créer / mettre à jour ma table Tag avec toutes les occurences
   for (let tag of tagItems) {
@@ -36,8 +35,10 @@ const migrateTickets = async () => {
       console.log("TAG ALREADY EXISTS !");
       if (tagExisting.name !== tag.name) {
         await tagExisting.save({ name: tag.name });
-      } continue;
-    } const SNUtag = await TagModel.create({ zammadId: tag.id, name: tag.name });
+      }
+      continue;
+    }
+    const SNUtag = await TagModel.create({ zammadId: tag.id, name: tag.name });
     console.log("TAG CREATED", SNUtag);
   }
 
@@ -117,7 +118,7 @@ const migrateTickets = async () => {
         const tagId = await TagModel.findOne({ zammadId: tag.tag_item_id });
         if (!tagId) continue;
         tagsIds.push(tagId.zammadId);
-        subject.concat(', ', tagName);
+        subject.concat(", ", tagName);
       }
     }
 
@@ -153,7 +154,7 @@ const migrateTickets = async () => {
       agentInChargeZammadId: ticket.owner_id,
       lastAgentInChargeUpdateAt: ticket.last_owner_update_at,
       lastUpdateById: ticket.updated_by_id,
-    }
+    };
     const ticketExisting = await TicketModel.findOne({ zammadId: ticket.id });
     if (ticketExisting) {
       console.log("TICKET EXISTING !");
@@ -165,4 +166,4 @@ const migrateTickets = async () => {
   }
 };
 
-// migrateTickets()
+// migrateTickets();

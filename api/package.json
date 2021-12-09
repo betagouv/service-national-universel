@@ -36,7 +36,6 @@
     "express-fileupload": "^1.2.0",
     "express-rate-limit": "^5.3.0",
     "file-type": "^16.2.0",
-    "fs": "^0.0.1-security",
     "gm": "^1.23.1",
     "helmet": "^4.5.0",
     "http-aws-es": "^6.0.0",
@@ -54,12 +53,9 @@
     "passport": "^0.5.0",
     "passport-jwt": "^4.0.0",
     "password-validator": "^5.1.0",
-    "pg": "^8.7.1",
     "puppeteer": "^10.2.0",
     "slugify": "^1.6.2",
     "snu-lib": "file:../lib",
-    "ssh2": "^1.5.0",
-    "ssh2-promise": "^1.0.2",
     "validator": "^13.5.2"
   },
   "devDependencies": {
@@ -74,11 +70,11 @@
     "faker": "5.5.3",
     "jest": "27.4.3",
     "jest-cli": "27.4.3",
+    "lodash": "^4.17.21",
     "pg": "^8.7.1",
     "prettier": "2.5.1",
     "regenerator-runtime": "0.13.9",
     "ssh2": "^1.5.0",
-    "ssh2-promise": "^1.0.2",
     "supertest": "6.1.6"
   }
 }
