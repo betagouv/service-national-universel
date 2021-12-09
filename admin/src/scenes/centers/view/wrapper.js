@@ -5,9 +5,8 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { translate, canAssignCohesionCenter } from "../../../utils";
+import { translate, canAssignCohesionCenter, colors } from "../../../utils";
 import TabList from "../../../components/views/TabList";
-import Tab from "../../../components/views/Tab";
 
 export default function Wrapper({ center: centerDefault, tab, children }) {
   const history = useHistory();
@@ -27,23 +26,34 @@ export default function Wrapper({ center: centerDefault, tab, children }) {
       <Header>
         <div style={{ flex: 1 }}>
           <TabList>
-            <Tab isActive={tab === "equipe"} onClick={() => history.push(`/centre/${center._id}`)}>
+            <Tab isActive={tab === "equipe"} first onClick={() => history.push(`/centre/${center._id}`)} style={{ borderRadius: "0.5rem 0 0 0.5rem" }}>
               Équipe
             </Tab>
-            <Tab isActive={tab === "volontaires"} onClick={() => history.push(`/centre/${center._id}/volontaires`)}>
-              Volontaires
-            </Tab>
-            <Tab isActive={tab === "waiting_list"} onClick={() => history.push(`/centre/${center._id}/liste-attente`)}>
-              Liste d&apos;attente
-            </Tab>
             {canAssignCohesionCenter(user) ? (
-              <Tab isActive={tab === "affectation"} onClick={() => history.push(`/centre/${center._id}/affectation`)}>
-                Affectation manuelle
+              <>
+                <Tab
+                  isActive={tab === "volontaires"}
+                  middle
+                  onClick={() => history.push(`/centre/${center._id}/volontaires`)}
+                  style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRight: "1px solid rgba(0,0,0,0.1)" }}>
+                  Volontaires
+                </Tab>
+                <Tab isActive={tab === "affectation"} last onClick={() => history.push(`/centre/${center._id}/affectation`)} style={{ borderRadius: "0 0.5rem 0.5rem 0" }}>
+                  Affectation manuelle
+                </Tab>
+              </>
+            ) : (
+              <Tab
+                isActive={tab === "volontaires"}
+                last
+                onClick={() => history.push(`/centre/${center._id}/volontaires`)}
+                style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRadius: "0 0.5rem 0.5rem 0" }}>
+                Volontaires
               </Tab>
-            ) : null}
+            )}
           </TabList>
         </div>
-        <BoxPlaces>
+        <BoxPlaces style={{ borderRight: "1px solid rgba(0,0,0,0.2)", borderRadius: "0" }}>
           <DetailCardTitle>Taux d&apos;occupation</DetailCardTitle>
           <DetailCardContent>{`${center.placesTotal ? (((center.placesTotal - center.placesLeft) * 100) / center.placesTotal).toFixed(2) : 0} %`}</DetailCardContent>
         </BoxPlaces>
@@ -81,7 +91,6 @@ const BoxPlaces = styled(Box)`
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 5rem;
   h1 {
     font-size: 3rem;
     margin: 0;
@@ -103,4 +112,62 @@ const DetailCardContent = styled.div`
   color: #000;
   font-size: 1.5rem;
   font-weight: 600;
+`;
+
+const Tab = styled.li`
+  width: 100%;
+  max-width: 300px;
+  height: 40px;
+  background-color: #fff;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  position: relative;
+  font-size: 0.86rem;
+  color: #979797;
+  cursor: pointer;
+  font-weight: 300;
+  :hover {
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
+  }
+
+  ${({ isActive }) =>
+    isActive &&
+    `
+    color: #222;
+    font-weight: 500;
+    &:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 1px;
+      right: 0;
+      height: 4px;
+      background-color: ${colors.purple};
+    }
+  `}
+  ${({ disabled }) => disabled && "color: #bbb;cursor: not-allowed;"}
+  ${({ first }) =>
+    first &&
+    `
+    &:after {
+      border-bottom-left-radius: 4px;
+    }
+  `}
+  ${({ middle }) =>
+    middle &&
+    `
+    &:after {
+      border-radius: 0;
+      left: -0.5px;
+      right: -0.5px
+    }
+  `}
+  ${({ last }) =>
+    last &&
+    `
+    &:after {
+      border-bottom-right-radius: 4px;
+      left: -0.5px;
+    }
+  `}
 `;
