@@ -3,13 +3,13 @@ import SortableJS from "sortablejs";
 import { toast } from "react-toastify";
 import withAuth from "../../hocs/withAuth";
 import API from "../../services/api";
-import KnowledgeBaseCardSection from "./KnowledgeBaseCardSection";
-import KnowledgeBaseCardArticle from "./KnowledgeBaseCardArticle";
-import KnowledgeBaseCreate from "./KnowledgeBaseCreate";
+import KBSectionCard from "./KBSectionCard";
+import KBArticleCard from "./KBArticleCard";
+import AdminKBCreate from "./AdminKBCreate";
 import Tags from "../Tags";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
-const KnowledgeBaseSection = ({ section, isRoot }) => {
+const AdminKBSection = ({ section, isRoot }) => {
   const { mutate } = useKnowledgeBaseData();
   const gridSectionsRef = useRef(null);
   const gridAnswersRef = useRef(null);
@@ -41,7 +41,6 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
     }
   }, []);
 
-  console.log({ isRoot });
   return (
     <article className="container bg-coolGray-100 mx-auto flex flex-col flex-grow h-full relative w-full flex-shrink overflow-hidden">
       {!isRoot && (
@@ -60,11 +59,11 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
           <section className="flex flex-col flex-grow flex-shrink-0 border-r-2 pt-6 px-12">
             <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
               Sujets
-              <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="article" />
+              <AdminKBCreate position={section.children.length + 1} parentId={section._id} type="article" />
             </h3>
             <div ref={gridAnswersRef} id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
               {answers.map((answer) => (
-                <KnowledgeBaseCardArticle
+                <KBArticleCard
                   key={answer._id}
                   _id={answer._id}
                   position={answer.position}
@@ -81,12 +80,12 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
         <section className={`flex flex-col ${isRoot ? "w-full" : "w-96"} flex-shrink-0  pt-6`}>
           <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
             Catégories
-            <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="section" />
+            <AdminKBCreate position={section.children.length + 1} parentId={section._id} type="section" />
           </h3>
           <div ref={gridSectionsRef} id="sections" className={`flex ${isRoot ? "justify-center" : ""} flex-wrap h-full w-full flex-shrink overflow-y-auto px-12`}>
             {sections.map((section) => (
               <React.Fragment key={section._id}>
-                <KnowledgeBaseCardSection
+                <KBSectionCard
                   _id={section._id}
                   path="/admin/knowledge-base"
                   position={section.position}
@@ -111,4 +110,4 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
   );
 };
 
-export default withAuth(KnowledgeBaseSection);
+export default withAuth(AdminKBSection);

@@ -8,7 +8,7 @@ import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import InputWithEmojiPicker from "../InputWithEmojiPicker";
 import IconsPicker, { RedIcon } from "../IconsPicker";
 
-const KnowledgeBaseItemMetadata = ({ visible }) => {
+const AdminKBItemMetadata = ({ visible }) => {
   const router = useRouter();
   const [showIconChooser, setShowIconChooser] = useState(false);
 
@@ -235,4 +235,4 @@ const makeTitleSlug = (title) =>
     trim: true, // trim leading and trailing replacement chars, defaults to `true`
   });
 
-export default KnowledgeBaseItemMetadata;
+export default AdminKBItemMetadata;
