@@ -66,7 +66,7 @@ export default function Details({ center }) {
             </section>
             <section>
               <div className="detail">
-                <div className="detail-title-second">Capacité maximale</div>
+                <div className="detail-title-second">Capacité maximale :</div>
                 <div className="detail-text">{center.placesTotal} places</div>
               </div>
               <div className="detail">
@@ -75,7 +75,9 @@ export default function Details({ center }) {
               </div>
               <div className="detail">
                 <div className="detail-title-second">Séjour(s) de cohésion concerné(s) par le centre :</div>
-                <div className="detail-text">Février 2022</div>
+                <div className="detail-text">
+                  <p className="detail-badge">Février 2022</p>
+                </div>
               </div>
             </section>
           </Container>
@@ -94,7 +96,7 @@ const Wrapper = styled.div`
     text-align: left;
     margin-top: 1rem;
     &-title-first {
-      width: 150px;
+      width: 130px;
       margin-right: 1rem;
       font-weight: bold;
     }
@@ -104,6 +106,7 @@ const Wrapper = styled.div`
       font-weight: bold;
     }
     &-text {
+      margin-left: 1rem;
       color: rgba(26, 32, 44);
       a {
         color: #5245cc;
@@ -111,6 +114,12 @@ const Wrapper = styled.div`
           text-decoration: underline;
         }
       }
+    }
+    &-badge {
+      background-color: #ede9fe;
+      color: #5b21b6;
+      border-radius: 4px;
+      padding: 0.2rem 1rem;
     }
   }
 `;

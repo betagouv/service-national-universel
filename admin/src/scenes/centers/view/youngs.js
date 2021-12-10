@@ -10,7 +10,7 @@ import Panel from "../../volontaires/panel";
 import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFRTimezoneUTC, isInRuralArea, formatLongDateFR, getAge, colors } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
-import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
+import { Filter, ResultTable, Table, MultiLine } from "../../../components/list";
 import DownloadAllAttestation from "../../../components/buttons/DownloadAllAttestation";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -180,7 +180,7 @@ export default function Youngs({ center, updateCenter }) {
             </div>
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
               <div style={{ flex: 1, position: "relative" }}>
-                <Filter>
+                <Filter style={{ display: "flex", padding: "0" }}>
                   <DataSearch
                     showIcon={false}
                     placeholder="Rechercher par prénom, nom, email, ville, code postal..."
@@ -188,12 +188,25 @@ export default function Youngs({ center, updateCenter }) {
                     dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
                     react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                     // fuzziness={2}
-                    style={{ flex: 2 }}
+                    style={{ width: "80%", marginRight: "0.5rem" }}
                     innerClass={{ input: "searchbox" }}
                     autosuggest={false}
                     queryFormat="and"
                   />
-                  <FilterRow>
+                  <MultiDropdownList
+                    className="dropdown-filter"
+                    componentId="STATUS"
+                    dataField="status.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Statut de l'affectation")}
+                  />
+                  {/* <FilterRow>
                     <MultiDropdownList
                       className="dropdown-filter"
                       componentId="STATUS"
@@ -220,9 +233,9 @@ export default function Youngs({ center, updateCenter }) {
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
                     />
-                  </FilterRow>
+                  </FilterRow> */}
                 </Filter>
-                <ResultTable>
+                <ResultTable style={{ borderRadius: "6px", boxShadow: "0px 3px 2px #edf2f7" }}>
                   <ReactiveListComponent
                     react={{ and: FILTERS }}
                     dataField="lastName.keyword"
@@ -231,6 +244,7 @@ export default function Youngs({ center, updateCenter }) {
                       <Table>
                         <thead>
                           <tr>
+                            <th>#</th>
                             <th width="70%">Volontaire</th>
                             <th>Affectation</th>
                           </tr>
@@ -262,6 +276,9 @@ export default function Youngs({ center, updateCenter }) {
 const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
+      <td>
+        <p>{hit._id}</p>
+      </td>
       <td>
         <MultiLine>
           <h2>{`${hit.firstName} ${hit.lastName}`}</h2>

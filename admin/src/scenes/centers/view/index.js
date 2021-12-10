@@ -35,19 +35,14 @@ export default function Index({ ...props }) {
 
   if (!center) return <div />;
   return (
-    <Switch>
-      <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} />} />
-      <Route path="/centre/:id/volontaires" component={() => <Youngs center={center} updateCenter={updateCenter} />} />
-      <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} />} />
-      <Route
-        path="/centre/:id"
-        component={() => (
-          <>
-            <Details center={center} />
-            <Team center={center} />
-          </>
-        )}
-      />
-    </Switch>
+    <>
+      <Details center={center} />
+      <Switch>
+        <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} />} />
+        <Route path="/centre/:id/volontaires" component={() => <Youngs center={center} updateCenter={updateCenter} />} />
+        <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} />} />
+        <Route path="/centre/:id" component={() => <Team center={center} />} />
+      </Switch>
+    </>
   );
 }
