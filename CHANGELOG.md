@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/betagouv/service-national-universel/compare/v1.1.0...v1.1.1) (2021-12-10)
+
+
+### Bug Fixes
+
+* destructure tags ([431755f](https://github.com/betagouv/service-national-universel/commit/431755fd9f960c3900e48c9cff22cce94b67e368))
+
 # [1.1.0](https://github.com/betagouv/service-national-universel/compare/v1.0.2...v1.1.0) (2021-12-10)
 
 
