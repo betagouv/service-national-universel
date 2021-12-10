@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/betagouv/service-national-universel/compare/v1.0.1...v1.0.2) (2021-12-10)
+
+
+### Bug Fixes
+
+* **ci:** deploy api ([df820f1](https://github.com/betagouv/service-national-universel/commit/df820f1235563ac2d0bd0e3c323e18e87ad0f9a0))
+
 ## [1.0.1](https://github.com/betagouv/service-national-universel/compare/v1.0.0...v1.0.1) (2021-12-10)
 
 
