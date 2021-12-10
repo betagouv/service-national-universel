@@ -7,6 +7,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import ComboBoxYoungs from "../components/ComboBoxYoungs";
 import Panel from "../../volontaires/panel";
 import { canAssignCohesionCenter } from "../../../utils";
+import Details from "./details";
 
 export default function Affectation({ center, updateCenter }) {
   const [young, setYoung] = useState(null);
@@ -16,14 +17,17 @@ export default function Affectation({ center, updateCenter }) {
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <CenterView center={center} tab="affectation">
-        <Box style={{ minHeight: 0 }}>
-          <BoxHeadTitle>Affectez un volontaire au centre</BoxHeadTitle>
-          <BoxContent>
-            <ComboBoxYoungs center={center} onAffect={updateCenter} onClick={setYoung} />
-          </BoxContent>
-        </Box>
-      </CenterView>
+      <div style={{ displey: "flex", flexDirection: "column", flex: "1" }}>
+        <Details center={center} />
+        <CenterView center={center} tab="affectation">
+          <Box style={{ minHeight: 0 }}>
+            <BoxHeadTitle>Affectez un volontaire au centre</BoxHeadTitle>
+            <BoxContent>
+              <ComboBoxYoungs center={center} onAffect={updateCenter} onClick={setYoung} />
+            </BoxContent>
+          </Box>
+        </CenterView>
+      </div>
       <Panel value={young} onChange={() => setYoung(null)} />
     </div>
   );

@@ -48,7 +48,7 @@ export default function Wrapper({ center: centerDefault, tab, children }) {
                     isActive={tab === "affectation"}
                     last
                     onClick={() => history.push(`/centre/${center._id}/affectation`)}
-                    style={{ borderRadius: "0 0.5rem 0.5rem 0", minWidth: "163px" }}>
+                    style={{ borderRadius: "0 0.5rem 0.5rem 0", minWidth: "168px" }}>
                     Affectation manuelle
                   </Tab>
                 </>
