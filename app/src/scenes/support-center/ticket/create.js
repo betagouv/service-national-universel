@@ -36,7 +36,7 @@ export default function TicketCreate() {
                 title: `${step1?.label} - ${step2?.label}`,
                 message,
                 // eslint-disable-next-line no-unsafe-optional-chaining
-                tags: [...new Set([...tags, ...[step1?.tags || []], ...[step2?.tags || []]])], // we use this dirty hack to remove duplicates
+                tags: [...new Set([...tags, ...(step1?.tags || []), ...(step2?.tags || [])])], // we use this dirty hack to remove duplicates
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
