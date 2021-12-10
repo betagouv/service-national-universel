@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/betagouv/service-national-universel/compare/v1.0.2...v1.1.0) (2021-12-10)
+
+
+### Features
+
+* add slack notification on technical ticket ([293a418](https://github.com/betagouv/service-national-universel/commit/293a41810201f26c8753e118773683cceaaf40d7))
+
 ## [1.0.2](https://github.com/betagouv/service-national-universel/compare/v1.0.1...v1.0.2) (2021-12-10)
 
 
