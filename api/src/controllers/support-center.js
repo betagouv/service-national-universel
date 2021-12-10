@@ -5,6 +5,7 @@ const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const zammad = require("../zammad");
+const slack = require("../slack");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
 const { ERRORS, isYoung } = require("../utils");
@@ -197,6 +198,8 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       }),
     });
     if (!response.id) return res.status(400).send({ ok: false });
+    if (tags.includes("AGENT_Startup_Technique"))
+      slack.info({ title: `🔧 ${response.id} - ${ticketTitle}`, text: `subject: ${subject}\nmessage: ${message}\ntags: ${tags?.join(",")}\ncustomer_id: ${customer_id}` });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
@@ -245,6 +248,8 @@ router.post("/public/ticket", async (req, res) => {
       }),
     });
     if (!response.id) return res.status(400).send({ ok: false, message: response });
+    if (req.body.tags?.includes("AGENT_Startup_Technique"))
+      slack.info({ title: `🔧 ${response.id} - ${title}`, text: `subject: ${subject}\nmessage: ${message}\ntags: ${req.body.tags?.join(",")}\ncustomer_id: offline` });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);

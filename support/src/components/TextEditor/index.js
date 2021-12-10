@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import isHotkey from "is-hotkey";
-import { Editable, withReact, useSlate, Slate } from "slate-react";
-import { Editor, Transforms, createEditor, Element as SlateElement } from "slate";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import isHotkey, { isKeyHotkey } from "is-hotkey";
+import isUrl from "is-url";
+import { Editable, withReact, useSlate, Slate, useSlateStatic, useSelected, ReactEditor, useFocused } from "slate-react";
+import { Editor, Transforms, createEditor, Element as SlateElement, Range } from "slate";
 import { withHistory } from "slate-history";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 
 import API from "../../services/api";
-import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import { Button, Icon, Spacer, Toolbar } from "./components";
 import EmojiPicker from "../EmojiPicker";
 
@@ -20,18 +20,19 @@ const HOTKEYS = {
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly }) => {
+const TextEditor = ({ content, _id, readOnly, onSave }) => {
   const router = useRouter();
 
   const [value, setValue] = useState(JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || empty);
   const [isSaveable, setIsSaveable] = useState(!!localStorage.getItem(`snu-kb-content-${_id}`));
-  const renderElement = useCallback((props) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+  const [forceUpdateKey, setForceUpdateKey] = useState(0);
 
-  const { mutate } = useKnowledgeBaseData();
+  const renderElement = useCallback((props) => <Element {...props} readOnly={readOnly} />, []);
+  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+  const editor = useMemo(() => withHistory(withInlines(withEmbeds(withImages(withReact(createEditor()))))), []);
 
   const onChange = (value) => {
+    if (readOnly) return;
     setValue(value);
 
     const isAstChange = editor.operations.some((op) => "set_selection" !== op.type);
@@ -44,6 +45,7 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
   };
 
   const onCancel = () => {
+    if (readOnly) return;
     if (window.confirm("Êtes-vous sûr(e) ? Toutes les modifications seront alors perdues définitivement.")) {
       setValue(content || empty);
       localStorage.removeItem(`snu-kb-content-${_id}`);
@@ -52,29 +54,59 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
     }
   };
 
-  const onSave = async () => {
-    const response = await API.put({ path: `/support-center/knowledge-base/${_id}`, body: { content: value } });
-    if (!response.ok) {
-      if (response.error) return toast.error(response.error);
-      return;
-    }
-    toast.success("Article mis-à-jour !");
-    mutate();
+  const onSaveRequest = async () => {
+    if (readOnly) return;
+    const success = await onSave(value);
+    if (!success) return;
     localStorage.removeItem(`snu-kb-content-${_id}`);
     setIsSaveable(false);
   };
 
   const onBeforeUnload = () => {
+    if (readOnly) return;
     if (localStorage.getItem(`snu-kb-content-${_id}`)) {
       if (window.confirm("Voulez-vous enregistrer vos changements ?")) {
-        onSave();
+        onSaveRequest();
       }
     }
   };
   useEffect(() => {
-    router.events.on("routeChangeStart", onBeforeUnload);
-    return () => router.events.off("routeChangeStart", onBeforeUnload);
+    if (!readOnly) {
+      router.events.on("routeChangeStart", onBeforeUnload);
+      return () => router.events.off("routeChangeStart", onBeforeUnload);
+    }
   });
+
+  const onKeyDown = (event) => {
+    const { selection } = editor;
+
+    // Default left/right behavior is unit:'character'.
+    // This fails to distinguish between two cursor positions, such as
+    // <inline>foo<cursor/></inline> vs <inline>foo</inline><cursor/>.
+    // Here we modify the behavior to unit:'offset'.
+    // This lets the user step into and out of the inline without stepping over characters.
+    // You may wish to customize this further to only use unit:'offset' in specific cases.
+    for (const hotkey in HOTKEYS) {
+      if (isHotkey(hotkey, event)) {
+        event.preventDefault();
+        const mark = HOTKEYS[hotkey];
+        toggleMark(editor, mark);
+      }
+    }
+    if (selection && Range.isCollapsed(selection)) {
+      const { nativeEvent } = event;
+      if (isKeyHotkey("left", nativeEvent)) {
+        event.preventDefault();
+        Transforms.move(editor, { unit: "offset", reverse: true });
+        return;
+      }
+      if (isKeyHotkey("right", nativeEvent)) {
+        event.preventDefault();
+        Transforms.move(editor, { unit: "offset" });
+        return;
+      }
+    }
+  };
 
   return (
     <div className="flex-grow flex-shrink flex flex-col  overflow-hidden">
@@ -91,12 +123,18 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
               <BlockButton format="block-quote" icon="format_quote" />
               {/* <MarkButton format="code" icon="code" /> */}
               <Spacer />
+              <AddLinkButton />
+              <RemoveLinkButton />
+              <Spacer />
               <BlockButton format="heading-one" icon="looks_one" />
               <BlockButton format="heading-two" icon="looks_two" />
               <BlockButton format="heading-three" icon="looks_3" />
               <Spacer />
               <BlockButton format="numbered-list" icon="format_list_numbered" />
               <BlockButton format="bulleted-list" icon="format_list_bulleted" />
+              <Spacer />
+              <InsertImageButton />
+              <InsertVideoButton />
             </Toolbar>
           )}
           <div id="text-editor" className="overflow-auto flex-shrink flex-grow">
@@ -107,22 +145,14 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
               placeholder="Commencez à écrire votre article..."
               spellCheck
               autoFocus
-              onKeyDown={(event) => {
-                for (const hotkey in HOTKEYS) {
-                  if (isHotkey(hotkey, event)) {
-                    event.preventDefault();
-                    const mark = HOTKEYS[hotkey];
-                    toggleMark(editor, mark);
-                  }
-                }
-              }}
+              onKeyDown={onKeyDown}
             />
           </div>
         </Slate>
       </div>
       {!readOnly && (
         <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
-          <button onClick={onSave} disabled={!isSaveable} className="px-8 py-2 box-border">
+          <button onClick={onSaveRequest} disabled={!isSaveable} className="px-8 py-2 box-border">
             Enregistrer
           </button>
           <button onClick={onCancel} disabled={!isSaveable} className="px-8 py-2 box-border">
@@ -131,6 +161,138 @@ const TextEditor = ({ content, _id, forceUpdateKey, setForceUpdateKey, readOnly 
         </div>
       )}
     </div>
+  );
+};
+
+const withImages = (editor) => {
+  const { insertData, isVoid } = editor;
+
+  editor.isVoid = (element) => {
+    return element.type === "image" ? true : isVoid(element);
+  };
+
+  editor.insertData = (data) => {
+    const text = data.getData("text/plain");
+    const { files } = data;
+
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const reader = new FileReader();
+        const [mime] = file.type.split("/");
+
+        if (mime === "image") {
+          reader.addEventListener("load", () => {
+            const url = reader.result;
+            insertImage(editor, url);
+          });
+
+          reader.readAsDataURL(file);
+        }
+      }
+    } else if (isImageUrl(text)) {
+      insertImage(editor, text);
+    } else {
+      insertData(data);
+    }
+  };
+
+  return editor;
+};
+
+const withEmbeds = (editor) => {
+  const { isVoid } = editor;
+  editor.isVoid = (element) => (element.type === "video" ? true : isVoid(element));
+  return editor;
+};
+
+const withInlines = (editor) => {
+  const { insertData, insertText, isInline } = editor;
+
+  editor.isInline = (element) => ["link"].includes(element.type) || isInline(element);
+
+  editor.insertText = (text) => {
+    if (text && isUrl(text)) {
+      wrapLink(editor, text);
+    } else {
+      insertText(text);
+    }
+  };
+
+  editor.insertData = (data) => {
+    const text = data.getData("text/plain");
+
+    if (text && isUrl(text)) {
+      wrapLink(editor, text);
+    } else {
+      insertData(data);
+    }
+  };
+
+  return editor;
+};
+
+const insertImage = (editor, url) => {
+  const text = { text: "" };
+  const image = { type: "image", url, children: [text] };
+  Transforms.insertNodes(editor, image);
+};
+
+const insertLink = (editor, url) => {
+  if (editor.selection) {
+    wrapLink(editor, url);
+  }
+};
+
+const isLinkActive = (editor) => {
+  const [link] = Editor.nodes(editor, {
+    match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === "link",
+  });
+  return link;
+};
+
+const unwrapLink = (editor) => {
+  Transforms.unwrapNodes(editor, {
+    match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === "link",
+  });
+};
+
+const wrapLink = (editor, url) => {
+  if (isLinkActive(editor)) {
+    unwrapLink(editor);
+  }
+
+  const { selection } = editor;
+  const isCollapsed = selection && Range.isCollapsed(selection);
+  const link = {
+    type: "link",
+    url,
+    children: isCollapsed ? [{ text: url }] : [],
+  };
+
+  if (isCollapsed) {
+    Transforms.insertNodes(editor, link);
+  } else {
+    Transforms.wrapNodes(editor, link, { split: true });
+    Transforms.collapse(editor, { edge: "end" });
+  }
+};
+
+// Put this at the start and end of an inline component to work around this Chromium bug:
+// https://bugs.chromium.org/p/chromium/issues/detail?id=1249405
+const InlineChromiumBugfix = () => (
+  <span contentEditable={false} className="text-0">
+    ${String.fromCodePoint(160) /* Non-breaking space */}
+  </span>
+);
+
+const LinkComponent = ({ attributes, children, element }) => {
+  const selected = useSelected();
+  return (
+    <a {...attributes} href={element.url} className={`${selected ? "border-2" : ""} underline text-blue-900`}>
+      <InlineChromiumBugfix />
+      {children}
+      <InlineChromiumBugfix />
+    </a>
   );
 };
 
@@ -180,7 +342,8 @@ const isMarkActive = (editor, format) => {
   return marks ? marks[format] === true : false;
 };
 
-const Element = ({ attributes, children, element }) => {
+const Element = (props) => {
+  const { attributes, children, element } = props;
   switch (element.type) {
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>;
@@ -196,6 +359,12 @@ const Element = ({ attributes, children, element }) => {
       return <li {...attributes}>{children}</li>;
     case "numbered-list":
       return <ol {...attributes}>{children}</ol>;
+    case "image":
+      return <Image {...props} />;
+    case "video":
+      return <VideoElement {...props} />;
+    case "link":
+      return <LinkComponent {...props} />;
     default:
       return <p {...attributes}>{children}</p>;
   }
@@ -219,6 +388,75 @@ const Leaf = ({ attributes, children, leaf }) => {
   }
 
   return <span {...attributes}>{children}</span>;
+};
+
+const Image = ({ attributes, children, element, readOnly }) => {
+  const editor = useSlateStatic();
+  const path = ReactEditor.findPath(editor, element);
+
+  const selected = useSelected();
+  const focused = useFocused();
+  return (
+    <div {...attributes}>
+      {children}
+      <div contentEditable={false} className="relative">
+        <img src={element.url} className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`} />
+        <Button
+          active
+          onClick={() => Transforms.removeNodes(editor, { at: path })}
+          className={`absolute top-2 left-2 bg-white ${selected && focused && !readOnly ? "inline" : "none"} ${readOnly ? "none" : ""}`}
+        >
+          <Icon>delete</Icon>
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+const VideoElement = ({ attributes, children, element, readOnly }) => {
+  const editor = useSlateStatic();
+  const { url } = element;
+  return (
+    <div {...attributes}>
+      <div contentEditable={false}>
+        <div className="pb-[56.25%] h-0 relative">
+          <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 h-full w-full left-0" />
+        </div>
+        {!readOnly && (
+          <UrlInput
+            url={url}
+            onChange={(val) => {
+              const path = ReactEditor.findPath(editor, element);
+              const newProperties = {
+                url: val,
+              };
+              Transforms.setNodes(editor, newProperties, {
+                at: path,
+              });
+            }}
+          />
+        )}
+      </div>
+      {children}
+    </div>
+  );
+};
+
+const UrlInput = ({ url, onChange }) => {
+  const [value, setValue] = React.useState(url);
+  return (
+    <input
+      value={value}
+      onClick={(e) => e.stopPropagation()}
+      id="text-editor-video-url"
+      className="mt-1 box-border p-2 border-2 mb-5 w-full relative"
+      onChange={(e) => {
+        const newUrl = e.target.value;
+        setValue(newUrl);
+        onChange(newUrl);
+      }}
+    />
+  );
 };
 
 const BlockButton = ({ format, icon }) => {
@@ -247,6 +485,92 @@ const MarkButton = ({ format, icon }) => {
       }}
     >
       <Icon>{icon}</Icon>
+    </Button>
+  );
+};
+
+const InsertImageButton = () => {
+  const inputFileRef = useRef(null);
+  const editor = useSlateStatic();
+  const onUploadImage = async (event) => {
+    const imageRes = await API.uploadFile("/support-center/knowledge-base/picture", event.target.files);
+    if (imageRes.code === "FILE_CORRUPTED") {
+      return toast.error("Le fichier semble corrompu", "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support", {
+        timeOut: 0,
+      });
+    }
+    if (!imageRes.ok) return toast.error("Une erreur s'est produite lors du téléversement de votre fichier");
+    toast.success("Fichier téléversé");
+    insertImage(editor, imageRes.data);
+  };
+  return (
+    <Button
+      onMouseDown={(event) => {
+        event.preventDefault();
+        inputFileRef.current.click();
+      }}
+    >
+      <Icon>image</Icon>
+      <input type="file" ref={inputFileRef} onChange={onUploadImage} className="hidden" />
+    </Button>
+  );
+};
+
+const isImageUrl = (url) => {
+  if (!url) return false;
+  if (!url.includes("cellar-c2.services.clever-cloud.com/")) return false;
+  if (!url.startsWith("https://")) return false;
+  const ext = new URL(url).pathname.split(".").pop();
+  return ["png", "jpg", "jpeg"].includes(ext);
+};
+
+const InsertVideoButton = () => {
+  const editor = useSlateStatic();
+  return (
+    <Button
+      onMouseDown={(event) => {
+        event.preventDefault();
+        const url = window.prompt("Entrez l'url de la vidéo (Viméo seulement pour le moment)");
+        const text = { text: "" };
+        const video = { type: "video", url, children: [text] };
+        Transforms.insertNodes(editor, video);
+      }}
+    >
+      <Icon>tv</Icon>
+    </Button>
+  );
+};
+
+const AddLinkButton = () => {
+  const editor = useSlate();
+  return (
+    <Button
+      active={isLinkActive(editor)}
+      onMouseDown={(event) => {
+        event.preventDefault();
+        const url = window.prompt("Entrez l'URL du lien:", isLinkActive(editor)?.[0]?.url);
+        if (!url) return;
+        insertLink(editor, url);
+      }}
+    >
+      <Icon>link</Icon>
+    </Button>
+  );
+};
+
+const RemoveLinkButton = () => {
+  const editor = useSlate();
+
+  return (
+    <Button
+      active={isLinkActive(editor)}
+      onMouseDown={() => {
+        if (isLinkActive(editor)) {
+          unwrapLink(editor);
+        }
+      }}
+    >
+      <Icon>link_off</Icon>
     </Button>
   );
 };
