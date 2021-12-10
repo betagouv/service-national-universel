@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/betagouv/service-national-universel/compare/v1.0.0...v1.0.1) (2021-12-10)
+
+
+### Bug Fixes
+
+* **ci:** fix changleog ([#972](https://github.com/betagouv/service-national-universel/issues/972)) ([86d81f0](https://github.com/betagouv/service-national-universel/commit/86d81f0f819eb6c7e8b3463ad5c89c68b182fa99))
+
 # 1.0.0 (2021-12-10)
 
 
