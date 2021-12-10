@@ -25,7 +25,7 @@ export default function Details({ center }) {
     })();
   }, [center]);
   return (
-    <div style={{ display: "flex", flexDirection: "column", padding: "2rem" }}>
+    <div style={{ display: "flex", flexDirection: "column", padding: "2rem 3rem" }}>
       <h1 style={{ marginBottom: "2rem" }}>{center.name}</h1>
       <Box>
         <Wrapper>

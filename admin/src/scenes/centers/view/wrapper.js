@@ -41,10 +41,14 @@ export default function Wrapper({ center: centerDefault, tab, children }) {
                     isActive={tab === "volontaires"}
                     middle
                     onClick={() => history.push(`/centre/${center._id}/volontaires`)}
-                    style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRight: "1px solid rgba(0,0,0,0.1)" }}>
+                    style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRight: "1px solid rgba(0,0,0,0.1)", minWidth: "110px" }}>
                     Volontaires
                   </Tab>
-                  <Tab isActive={tab === "affectation"} last onClick={() => history.push(`/centre/${center._id}/affectation`)} style={{ borderRadius: "0 0.5rem 0.5rem 0" }}>
+                  <Tab
+                    isActive={tab === "affectation"}
+                    last
+                    onClick={() => history.push(`/centre/${center._id}/affectation`)}
+                    style={{ borderRadius: "0 0.5rem 0.5rem 0", minWidth: "163px" }}>
                     Affectation manuelle
                   </Tab>
                 </>
@@ -93,7 +97,6 @@ export default function Wrapper({ center: centerDefault, tab, children }) {
 }
 
 const Header = styled.div`
-  padding: 0 25px 0;
   display: flex;
   margin: 2rem 0 1rem 0;
   align-items: flex-start;
@@ -141,6 +144,7 @@ const Tab = styled.li`
   width: 100%;
   max-width: 300px;
   height: 40px;
+  overflow: hidden;
   background-color: #fff;
   text-align: center;
   padding: 0.5rem 1rem;

@@ -235,7 +235,7 @@ export default function Youngs({ center, updateCenter }) {
                     />
                   </FilterRow> */}
                 </Filter>
-                <ResultTable style={{ borderRadius: "6px", boxShadow: "0px 3px 2px #edf2f7" }}>
+                <ResultTable style={{ borderRadius: "8px", boxShadow: "0px 3px 2px #edf2f7" }}>
                   <ReactiveListComponent
                     react={{ and: FILTERS }}
                     dataField="lastName.keyword"
