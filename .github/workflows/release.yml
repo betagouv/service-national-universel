@@ -3,7 +3,7 @@ name: Release
 on:
   workflow_dispatch:
   push:
-    branches: [master, alpha, beta, next]
+    branches: [main, alpha, beta, next]
 
 jobs:
   release:
@@ -27,7 +27,7 @@ jobs:
         branches: |
           [
             '+([0-9])?(.{+([0-9]),x}).x',
-            'master', 
+            'main', 
             'next', 
             {name: 'beta', prerelease: true}, 
             {name: 'alpha', prerelease: true}
