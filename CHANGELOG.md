@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/betagouv/service-national-universel/compare/v1.1.3...v1.1.4) (2021-12-13)
+
+
+### Bug Fixes
+
+* **patches:** referents can see patches ([a7e50e9](https://github.com/betagouv/service-national-universel/commit/a7e50e9d290e01ba942cecc0767c4b632b0185ad))
+
 ## [1.1.3](https://github.com/betagouv/service-national-universel/compare/v1.1.2...v1.1.3) (2021-12-13)
 
 
