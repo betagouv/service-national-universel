@@ -1,3 +1,10 @@
+## [1.1.8](https://github.com/betagouv/service-national-universel/compare/v1.1.7...v1.1.8) (2021-12-13)
+
+
+### Bug Fixes
+
+* **address:** update department, region and academy with zip ([e48588a](https://github.com/betagouv/service-national-universel/commit/e48588a5a6cd398a3fa43d024cfb8d311f08e020))
+
 ## [1.1.7](https://github.com/betagouv/service-national-universel/compare/v1.1.6...v1.1.7) (2021-12-13)
 
 
