@@ -55,10 +55,6 @@ async function sync(doc, modelName) {
       role = ROLE.ADMIN;
     } else {
       role = ROLE.VOLONTAIRE;
-      // Searching referent phase 2
-      //const { ok, data } = await fetch(`/referent/manager_phase2/${doc.department}`);
-      //const referentPhase2 = `<p><b>Référent phase 2 :</b> ${ok ? data : "Non trouvé"}</p><br/>`;
-      // Infos in user's note
       note = `<a href=${`https://admin.snu.gouv.fr/volontaire/${doc._id}`}>Profil volontaire</a><br/><br/>
       <p><b>Phase 1 :</b> ${translate(doc.statusPhase1)}</p><br/><p><b>Phase 2 :</b> ${translate(doc.statusPhase2)}</p><br/><p><b>Phase 3 :</b> ${translate(
         doc.statusPhase3,
