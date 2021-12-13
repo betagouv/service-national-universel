@@ -68,7 +68,6 @@ async function sync(doc, modelName) {
         body: JSON.stringify({ email: doc.email, firstname: doc.firstName, lastname: doc.lastName, role_ids: [role] }),
       });
     } else {
-      console.log("WE'RE HERE");
       //Update a user
       const response = await api(`/users/${res[0].id}`, {
         method: "PUT",
