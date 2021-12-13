@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/betagouv/service-national-universel/compare/v1.1.8...v1.2.0) (2021-12-13)
+
+
+### Features
+
+* **inscription:** changement ordre étape inscription ([#839](https://github.com/betagouv/service-national-universel/issues/839)) ([675b93e](https://github.com/betagouv/service-national-universel/commit/675b93ed38c81051e26257eea680ad3b6b207c50))
+
 ## [1.1.8](https://github.com/betagouv/service-national-universel/compare/v1.1.7...v1.1.8) (2021-12-13)
 
 
