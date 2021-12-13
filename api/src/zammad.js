@@ -81,7 +81,6 @@ async function sync(doc, modelName) {
           role_ids: [role],
         }),
       });
-      console.log("RESPONSE ?", response);
     }
   } catch (e) {
     capture(e);
