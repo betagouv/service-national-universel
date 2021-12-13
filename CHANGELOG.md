@@ -1,3 +1,10 @@
+## [1.1.6](https://github.com/betagouv/service-national-universel/compare/v1.1.5...v1.1.6) (2021-12-13)
+
+
+### Bug Fixes
+
+* **support:** add name in slack notification ([fdded54](https://github.com/betagouv/service-national-universel/commit/fdded5402e7be3e6dca572bc000cee13d01806f9))
+
 ## [1.1.5](https://github.com/betagouv/service-national-universel/compare/v1.1.4...v1.1.5) (2021-12-13)
 
 
