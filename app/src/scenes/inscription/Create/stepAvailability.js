@@ -80,8 +80,8 @@ export default function StepAvailability() {
         <>
           <ModalConfirm
             isOpen={modal?.isOpen}
-            title="Attention cette action est irréversible"
-            message="Voulez-vous changer de séjour de cohésion"
+            title="Attention, cette action est irréversible"
+            message="Vous êtes sur le point d'annuler votre choix de séjour de cohésion."
             onCancel={() => setModal({ isOpen: false })}
             onConfirm={resetCohort}
           />
@@ -90,7 +90,10 @@ export default function StepAvailability() {
               <>
                 <Info>
                   <h3>INSCRIPTION</h3>
-                  <h1 style={{ marginBottom: "1rem" }}>Vous êtes inscrits au séjour {young.cohort}</h1>
+                  <h1 style={{ marginBottom: "1rem" }}>
+                    Vous avez sélectionné le séjour :<br />
+                    {young.cohort}
+                  </h1>
                   <div className="btns">
                     <Button borderColor="#D1D5DB" onClick={() => setModal({ isOpen: true })}>
                       Changer de séjour

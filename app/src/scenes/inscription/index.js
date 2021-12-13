@@ -13,7 +13,7 @@ import Availability from "./Create/stepAvailability";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
 import { useSelector } from "react-redux";
-import { colors } from "../../utils";
+import { colors, YOUNG_STATUS } from "../../utils";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
@@ -42,7 +42,7 @@ const Step = ({ step }) => {
         <div className="help-button-container">
           <HelpButton to="/public-besoin-d-aide" color="#362f78" />
         </div>
-        {young && young?.status !== "IN_PROGRESS" ? (
+        {young && ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young?.status) ? (
           <a className="back-button" onClick={() => history.push("/")}>
             {"<"} Retour à mon espace
           </a>
