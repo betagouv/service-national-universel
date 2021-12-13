@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/betagouv/service-national-universel/compare/v1.2.0...v1.3.0) (2021-12-13)
+
+
+### Features
+
+* **zammad:** add infos in user's profile ([#978](https://github.com/betagouv/service-national-universel/issues/978)) ([78b3a4d](https://github.com/betagouv/service-national-universel/commit/78b3a4d1af013af6842e95fb8fe1e38f2889494f))
+
 # [1.2.0](https://github.com/betagouv/service-national-universel/compare/v1.1.8...v1.2.0) (2021-12-13)
 
 
