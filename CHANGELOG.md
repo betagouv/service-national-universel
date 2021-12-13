@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/betagouv/service-national-universel/compare/v1.1.2...v1.1.3) (2021-12-13)
+
+
+### Bug Fixes
+
+* **young edition:** change birthdate - january ([eba06c2](https://github.com/betagouv/service-national-universel/commit/eba06c206258d6f5caa3e20e80e6fd0a4e9bd37b))
+
 ## [1.1.2](https://github.com/betagouv/service-national-universel/compare/v1.1.1...v1.1.2) (2021-12-13)
 
 
