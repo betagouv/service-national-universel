@@ -98,10 +98,7 @@ const Note = ({ value }) => {
 
   return (
     <div>
-      « {renderText()} »
-      <div className="see-more" onClick={() => setExpandNote((e) => !e)}>
-        {rest ? (expandNote ? "  VOIR MOINS" : "  VOIR PLUS") : null}
-      </div>
+      « {renderText()} »<ToggleButton onClick={() => setExpandNote((e) => !e)}>{rest ? (expandNote ? "  VOIR MOINS" : "  VOIR PLUS") : null}</ToggleButton>
     </div>
   );
 };
