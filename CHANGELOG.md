@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/betagouv/service-national-universel/compare/v1.1.1...v1.1.2) (2021-12-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency slate-react to v0.72.1 ([#974](https://github.com/betagouv/service-national-universel/issues/974)) ([9b3a7cb](https://github.com/betagouv/service-national-universel/commit/9b3a7cbdeb2876d17b961a45d50cdd24f2f48a6c))
+
 ## [1.1.1](https://github.com/betagouv/service-national-universel/compare/v1.1.0...v1.1.1) (2021-12-10)
 
 
