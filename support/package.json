@@ -25,7 +25,7 @@
     "react-toastify": "8.1.0",
     "slate": "0.72.0",
     "slate-history": "0.66.0",
-    "slate-react": "0.72.0",
+    "slate-react": "0.72.1",
     "slugify": "1.6.3",
     "snu-lib": "file:../lib",
     "sortablejs": "1.14.0",
@@ -40,7 +40,7 @@
     "eslint-plugin-prettier": "4.0.0",
     "eslint-plugin-react": "7.27.1",
     "eslint-plugin-react-hooks": "4.3.0",
-    "postcss": "8.4.4",
+    "postcss": "8.4.5",
     "prettier": "2.5.1",
     "tailwindcss": "2.2.19"
   },

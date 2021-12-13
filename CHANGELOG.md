@@ -1,3 +1,45 @@
+## [1.1.7](https://github.com/betagouv/service-national-universel/compare/v1.1.6...v1.1.7) (2021-12-13)
+
+
+### Bug Fixes
+
+* **support:** redirect if not connected ([27e2a76](https://github.com/betagouv/service-national-universel/commit/27e2a763dba42dcd50371d7e8951ae8664d1416d))
+
+## [1.1.6](https://github.com/betagouv/service-national-universel/compare/v1.1.5...v1.1.6) (2021-12-13)
+
+
+### Bug Fixes
+
+* **support:** add name in slack notification ([fdded54](https://github.com/betagouv/service-national-universel/commit/fdded5402e7be3e6dca572bc000cee13d01806f9))
+
+## [1.1.5](https://github.com/betagouv/service-national-universel/compare/v1.1.4...v1.1.5) (2021-12-13)
+
+
+### Bug Fixes
+
+* **patches:** style see more button ([5f0aa5f](https://github.com/betagouv/service-national-universel/commit/5f0aa5fcf36b8ec4b86b0daafdc24cd26b79a6ee))
+
+## [1.1.4](https://github.com/betagouv/service-national-universel/compare/v1.1.3...v1.1.4) (2021-12-13)
+
+
+### Bug Fixes
+
+* **patches:** referents can see patches ([a7e50e9](https://github.com/betagouv/service-national-universel/commit/a7e50e9d290e01ba942cecc0767c4b632b0185ad))
+
+## [1.1.3](https://github.com/betagouv/service-national-universel/compare/v1.1.2...v1.1.3) (2021-12-13)
+
+
+### Bug Fixes
+
+* **young edition:** change birthdate - january ([eba06c2](https://github.com/betagouv/service-national-universel/commit/eba06c206258d6f5caa3e20e80e6fd0a4e9bd37b))
+
+## [1.1.2](https://github.com/betagouv/service-national-universel/compare/v1.1.1...v1.1.2) (2021-12-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency slate-react to v0.72.1 ([#974](https://github.com/betagouv/service-national-universel/issues/974)) ([9b3a7cb](https://github.com/betagouv/service-national-universel/commit/9b3a7cbdeb2876d17b961a45d50cdd24f2f48a6c))
+
 ## [1.1.1](https://github.com/betagouv/service-national-universel/compare/v1.1.0...v1.1.1) (2021-12-10)
 
 
