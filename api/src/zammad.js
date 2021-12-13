@@ -4,6 +4,7 @@ const fetch = require("node-fetch");
 
 const { ZAMMAD_TOKEN, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
+const { translate } = require("snu-lib/translation");
 
 const ROLE = {
   ADMIN: 1,
@@ -39,16 +40,29 @@ const api = async (path, options = {}) => {
 
 async function sync(doc, modelName) {
   try {
-    if (ENVIRONMENT !== "production") return;
+    //if (ENVIRONMENT !== "production") return;
     let role;
+    let note;
     if (doc.role === "referent" || doc.role === "referent_department" || doc.role === "referent_region") {
       role = ROLE.REFERENT;
+      note = `<p><b>Rôle :</b> ${translate(doc.role)}</p><br/>${doc.subRole && `<p><b>Fonction :</b> ${translate(doc.subRole)}</p><br/>`}${
+        doc.role === "referent_department" && `<p><b>Département :</b> ${doc.department}</p>`
+      }
+      ${doc.role === "referent_region" && `<p><b>Région :</b> ${doc.region}</p>`}`;
     } else if (doc.role === "responsible" || doc.role === "supervisor") {
       role = ROLE.STRUCTURE;
     } else if (doc.role === "admin") {
       role = ROLE.ADMIN;
     } else {
       role = ROLE.VOLONTAIRE;
+      // Searching referent phase 2
+      //const { ok, data } = await fetch(`/referent/manager_phase2/${doc.department}`);
+      //const referentPhase2 = `<p><b>Référent phase 2 :</b> ${ok ? data : "Non trouvé"}</p><br/>`;
+      // Infos in user's note
+      note = `<a href=${`https://admin.snu.gouv.fr/volontaire/${doc._id}`}>Profil volontaire</a><br/><br/>
+      <p><b>Phase 1 :</b> ${translate(doc.statusPhase1)}</p><br/><p><b>Phase 2 :</b> ${translate(doc.statusPhase2)}</p><br/><p><b>Phase 3 :</b> ${translate(
+        doc.statusPhase3,
+      )}</p><br/><p><b>Cohorte :</b> ${doc.cohort}</p><br/><a href=${`https://admin.snu.gouv.fr/volontaire/${doc._id}/phase2`}>Candidatures</a>`;
     }
     const res = await api(`/users/search?query=email:${doc.email}&limit=1`, { method: "GET" });
     if (!res.length) {
@@ -58,11 +72,21 @@ async function sync(doc, modelName) {
         body: JSON.stringify({ email: doc.email, firstname: doc.firstName, lastname: doc.lastName, role_ids: [role] }),
       });
     } else {
+      console.log("WE'RE HERE");
       //Update a user
-      await api(`/users/${res[0].id}`, {
+      const response = await api(`/users/${res[0].id}`, {
         method: "PUT",
-        body: JSON.stringify({ email: doc.email, firstname: doc.firstName, lastname: doc.lastName, role_ids: [role] }),
+        body: JSON.stringify({
+          email: doc.email,
+          firstname: doc.firstName,
+          lastname: doc.lastName,
+          department: doc.department,
+          address: `${doc.zip} ${doc.city}`,
+          note: note ? note : "",
+          role_ids: [role],
+        }),
       });
+      console.log("RESPONSE ?", response);
     }
   } catch (e) {
     capture(e);
