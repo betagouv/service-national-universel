@@ -15,12 +15,9 @@ const debug = (...e) => {
 
 async function handler() {
   try {
-    slack.info({ title: `recap inscription referent department`, text: `Mmmh, let me check the data... ` });
     let count = 0;
-
     let textDepartments = [];
-    // Test first for the 5 first departments
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < departmentList.length; i++) {
       const department = departmentList[i];
       debug("> start department :", department);
       const referents = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department });
@@ -49,8 +46,7 @@ async function handler() {
         count++;
       }
     }
-    slack.info({ title: `recap inscription referent department`, text: textDepartments.join("\n") });
-    slack.success({ title: `recap inscription referent department`, text: `${count} mails sent` });
+    slack.success({ title: `recap inscription referent department`, text: `${count} mails sent\n\n${textDepartments.join("\n")}` });
   } catch (e) {
     capture(e);
     slack.error({ title: `recap inscription referent department`, text: `Aie ! An error occured !` });
