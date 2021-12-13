@@ -25,7 +25,7 @@
     "react-toastify": "8.1.0",
     "slate": "0.72.0",
     "slate-history": "0.66.0",
-    "slate-react": "0.72.0",
+    "slate-react": "0.72.1",
     "slugify": "1.6.3",
     "snu-lib": "file:../lib",
     "sortablejs": "1.14.0",
