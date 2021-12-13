@@ -1,3 +1,10 @@
+## [1.1.7](https://github.com/betagouv/service-national-universel/compare/v1.1.6...v1.1.7) (2021-12-13)
+
+
+### Bug Fixes
+
+* **support:** redirect if not connected ([27e2a76](https://github.com/betagouv/service-national-universel/commit/27e2a763dba42dcd50371d7e8951ae8664d1416d))
+
 ## [1.1.6](https://github.com/betagouv/service-national-universel/compare/v1.1.5...v1.1.6) (2021-12-13)
 
 
