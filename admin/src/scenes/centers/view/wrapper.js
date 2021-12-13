@@ -31,6 +31,22 @@ export default function Wrapper({ center: centerDefault, tab, children }) {
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <Header>
           <div style={{ flex: 1, display: "flex" }}>
+            {/* TODO : connect center sessions */}
+            <Filter style={{ padding: "0 1rem 0 0" }}>
+              <MultiDropdownList
+                className="dropdown-filter"
+                placeholder="Séjour"
+                componentId="COHORT"
+                dataField="cohort.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
+                title=""
+                URLParams={true}
+                showSearch={false}
+              />
+            </Filter>
             <TabList style={{ width: "100%" }}>
               <Tab isActive={tab === "equipe"} first onClick={() => history.push(`/centre/${center._id}`)} style={{ borderRadius: "0.5rem 0 0 0.5rem" }}>
                 Équipe
@@ -62,22 +78,6 @@ export default function Wrapper({ center: centerDefault, tab, children }) {
                 </Tab>
               )}
             </TabList>
-            {/* Pas encore connecté, à voir ce qu'on met dedans */}
-            <Filter>
-              <MultiDropdownList
-                className="dropdown-filter"
-                placeholder="Séjour"
-                componentId="COHORT"
-                dataField="cohort.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-                renderItem={(e, count) => {
-                  return `${translate(e)} (${count})`;
-                }}
-                title=""
-                URLParams={true}
-                showSearch={false}
-              />
-            </Filter>
           </div>
           <BoxPlaces style={{ borderRight: "1px solid rgba(0,0,0,0.2)", borderRadius: "0" }}>
             <DetailCardTitle>Taux d&apos;occupation</DetailCardTitle>
