@@ -124,6 +124,21 @@ export default function Status({ filter }) {
           </Card>
         </Link>
       </Col>
+      {user.role === ROLES.ADMIN && (
+        <Col md={6} xl={2}>
+          <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"NOT_ELIGIBLE"%5D'] })}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.NOT_ELIGIBLE} style={{ minHeight: "180px" }}>
+              <CardTitle>Non éligible</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{status.NOT_ELIGIBLE || 0}</CardValue>
+                <CardPercentage>
+                  <CardArrow />
+                </CardPercentage>
+              </CardValueWrapper>
+            </Card>
+          </Link>
+        </Col>
+      )}
     </Row>
   );
 }
