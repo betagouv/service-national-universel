@@ -34,7 +34,7 @@ export default function DateInput({ value, onChange }) {
   };
 
   useEffect(() => {
-    if (!day || !month || !year) return;
+    if (!day || !Object.keys(MONTH).includes(month.toString()) || !year) return;
     const date = new Date(Date.UTC(parseInt(year), parseInt(month), parseInt(day)));
     const dateFormat = date.toISOString();
     onChange(dateFormat);
