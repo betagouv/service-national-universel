@@ -40,7 +40,7 @@ const api = async (path, options = {}) => {
 
 async function sync(doc, modelName) {
   try {
-    //if (ENVIRONMENT !== "production") return;
+    if (ENVIRONMENT !== "production") return;
     let role;
     let note;
     if (doc.role === "referent" || doc.role === "referent_department" || doc.role === "referent_region") {
