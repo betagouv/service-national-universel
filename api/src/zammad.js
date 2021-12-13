@@ -42,15 +42,16 @@ async function sync(doc, modelName) {
   try {
     if (ENVIRONMENT !== "production") return;
     let role;
-    let note;
+    let note = "";
     if (doc.role === "referent" || doc.role === "referent_department" || doc.role === "referent_region") {
       role = ROLE.REFERENT;
-      note = `<p><b>Rôle :</b> ${translate(doc.role)}</p><br/>${doc.subRole && `<p><b>Fonction :</b> ${translate(doc.subRole)}</p><br/>`}${
-        doc.role === "referent_department" && `<p><b>Département :</b> ${doc.department}</p>`
-      }
+      note = `<a href=${`https://admin.snu.gouv.fr/user/${doc._id}`}>Profil référent</a><br/><br/><p><b>Rôle :</b> ${translate(doc.role)}</p><br/>${
+        doc.subRole && `<p><b>Fonction :</b> ${translate(doc.subRole)}</p><br/>`
+      }${doc.role === "referent_department" && `<p><b>Département :</b> ${doc.department}</p>`}
       ${doc.role === "referent_region" && `<p><b>Région :</b> ${doc.region}</p>`}`;
     } else if (doc.role === "responsible" || doc.role === "supervisor") {
       role = ROLE.STRUCTURE;
+      note = `<a href=${`https://admin.snu.gouv.fr/user/${doc._id}`}>Profil responsable</a>`;
     } else if (doc.role === "admin") {
       role = ROLE.ADMIN;
     } else {
@@ -69,7 +70,7 @@ async function sync(doc, modelName) {
       });
     } else {
       //Update a user
-      const response = await api(`/users/${res[0].id}`, {
+      await api(`/users/${res[0].id}`, {
         method: "PUT",
         body: JSON.stringify({
           email: doc.email,
@@ -77,7 +78,7 @@ async function sync(doc, modelName) {
           lastname: doc.lastName,
           department: doc.department,
           address: `${doc.zip} ${doc.city}`,
-          note: note ? note : "",
+          note,
           role_ids: [role],
         }),
       });
