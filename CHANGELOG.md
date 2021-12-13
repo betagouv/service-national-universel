@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/betagouv/service-national-universel/compare/v1.3.0...v1.3.1) (2021-12-13)
+
+
+### Bug Fixes
+
+* **deps:** update sentry-javascript monorepo to v6.16.1 ([#938](https://github.com/betagouv/service-national-universel/issues/938)) ([1531c34](https://github.com/betagouv/service-national-universel/commit/1531c34b74d348934213258b4e22b893f5e62a5d))
+
 # [1.3.0](https://github.com/betagouv/service-national-universel/compare/v1.2.0...v1.3.0) (2021-12-13)
 
 
