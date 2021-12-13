@@ -11,11 +11,12 @@
     "printWidth": 180
   },
   "dependencies": {
-    "@headlessui/react": "^1.4.2",
+    "@headlessui/react": "1.4.2",
     "@sentry/nextjs": "6.15.0",
     "dayjs": "1.10.7",
     "emoji-mart": "3.0.1",
     "is-hotkey": "0.2.0",
+    "is-url": "1.2.4",
     "next": "latest",
     "react": "17.0.2",
     "react-dom": "17.0.2",
@@ -24,8 +25,8 @@
     "react-toastify": "8.1.0",
     "slate": "0.72.0",
     "slate-history": "0.66.0",
-    "slate-react": "0.72.0",
-    "slugify": "^1.6.3",
+    "slate-react": "0.72.1",
+    "slugify": "1.6.3",
     "snu-lib": "file:../lib",
     "sortablejs": "1.14.0",
     "swr": "1.1.0",
@@ -39,7 +40,7 @@
     "eslint-plugin-prettier": "4.0.0",
     "eslint-plugin-react": "7.27.1",
     "eslint-plugin-react-hooks": "4.3.0",
-    "postcss": "8.4.4",
+    "postcss": "8.4.5",
     "prettier": "2.5.1",
     "tailwindcss": "2.2.19"
   },

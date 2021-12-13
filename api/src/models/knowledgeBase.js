@@ -65,6 +65,12 @@ const Schema = new mongoose.Schema(
         description: "Description de l'élément",
       },
     },
+    keywords: {
+      type: String,
+      documentation: {
+        description: "Mots clés",
+      },
+    },
     imageSrc: {
       type: String,
       documentation: {
@@ -118,7 +124,7 @@ const Schema = new mongoose.Schema(
       },
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 Schema.virtual("fromUser").set(function (fromUser) {

@@ -43,14 +43,9 @@ const getDataInscriptions = async ({ department, region }) => {
   return obj;
 };
 
-const departmentListTest = ["Ain", "Loire"];
-const regionListTest = ["Auvergne-Rhône-Alpes", "Bretagne"];
-
 module.exports = {
   getMinusDate,
   getDataInscriptions,
-  departmentListTest,
   departmentList,
-  regionListTest,
   regionList,
 };

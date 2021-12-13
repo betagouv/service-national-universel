@@ -32,7 +32,7 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
               email,
               message,
               // eslint-disable-next-line no-unsafe-optional-chaining
-              tags: [...new Set([...tags, ...[step1?.tags || []], ...[step2?.tags || []]])], // we use this dirty hack to remove duplicates
+              tags: [...new Set([...tags, ...(step1?.tags || []), ...(step2?.tags || [])])], // we use this dirty hack to remove duplicates
             });
             setLoading(false);
             setOpen(false);
