@@ -1,6 +1,7 @@
 # API
 
-L'API de la [Plateforme du SNU](https://snu.gouv.fr). Elle fournit un accès aux données à [l'interface publique](https://github.com/betagouv/service-national-universel/tree/master/app) et [l'interface de gestion](https://github.com/betagouv/service-national-universel/tree/master/admin). Elle est développée en Javascript, utilise le framework [Express](https://expressjs.com) et une base de données [MongoDB](https://www.mongodb.com/). La recherche de données est rendue possible grâce à [Elasticsearch](https://www.elastic.co/fr/products/elasticsearch).
+L'API de la [Plateforme du SNU](https://snu.gouv.fr).
+Elle fournit un accès aux données à [l'interface publique](https://github.com/betagouv/service-national-universel/tree/master/app) et [l'interface de gestion](https://github.com/betagouv/service-national-universel/tree/master/admin). Elle est développée en Javascript, utilise le framework [Express](https://expressjs.com) et une base de données [MongoDB](https://www.mongodb.com/). La recherche de données est rendue possible grâce à [Elasticsearch](https://www.elastic.co/fr/products/elasticsearch).
 
 ## Installation
 
