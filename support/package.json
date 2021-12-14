@@ -29,7 +29,7 @@
     "slugify": "1.6.3",
     "snu-lib": "file:../lib",
     "sortablejs": "1.14.0",
-    "swr": "1.1.0",
+    "swr": "1.1.1",
     "urijs": "1.19.7"
   },
   "devDependencies": {
