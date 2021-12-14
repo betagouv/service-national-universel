@@ -44,6 +44,22 @@ export default function AddressInputV2({
     if (keys.country && values[keys.country] === undefined) addressVerifiedHelpers.setValue("false");
   }, [values[keys.country]]);
 
+  useEffect(() => {
+    const zip = values[keys.zip];
+    if (!zip || zip.length < 2) return;
+    if (values?.cohort === "2020") return;
+    let departmentCode = zip.substr(0, 2);
+    if (["97", "98"].includes(departmentCode)) {
+      departmentCode = zip.substr(0, 3);
+    }
+    if (departmentCode === "20") {
+      if (!["2A", "2B"].includes(departmentCode)) departmentCode = "2B";
+    }
+    handleChange({ target: { name: keys.department, value: departmentLookUp[departmentCode] } });
+    handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[departmentCode]] } });
+    if (keys.academy) handleChange({ target: { name: keys.academy, value: departmentToAcademy[departmentLookUp[departmentCode]] } });
+  }, [values[keys.zip]]);
+
   const onSuggestionSelected = () => {
     let depart = suggestion.properties.postcode.substr(0, 2);
     if (["97", "98"].includes(depart)) {
