@@ -1,21 +1,84 @@
-require("dotenv").config({ path: "./../../.env-staging" });
 require("../mongo");
 const esClient = require("../es");
 
 const { capture } = require("../sentry");
-const Mission = require("../models/mission");
-const Referent = require("../models/referent");
+const Young = require("../models/young");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { ADMIN_URL } = require("../config");
+const { SENDINBLUE_TEMPLATES, translate, formatStringDate } = require("snu-lib");
+const { APP_URL } = require("../config");
 
 exports.handler = async () => {
   try {
+    let countTotal = 0;
+    let countSent = 0;
+    let countMissionSent = {};
+    const cursor = Young.find({ _id: "5ffc77c153676907c5cc4b0b", status: "VALIDATED", statusPhase1: "DONE" }).cursor();
+    await cursor.eachAsync(async function (young) {
+      countTotal++;
+      // if (countTotal % 200 === 0) console.log(countTotal);
+      const esMissions = await getMissions({ young });
+
+      // console.log("-----");
+      // console.log("✍️ ~ young", young._id, young.department, young.region, young.location);
+      // esMissions?.map((mission) => console.log("✍️ ~ mission", mission._id, mission._source.department, mission._source.region, mission._source.location));
+
+      const missions = esMissions?.map((mission) => ({
+        structureName: mission._source.structureName?.toUpperCase(),
+        name: mission._source.name,
+        startAt: formatStringDate(mission._source.startAt),
+        endAt: formatStringDate(mission._source.endAt),
+        address: `${mission._source.city}, ${mission._source.zip}`,
+        domains: mission._source.domains?.map(translate)?.join(", "),
+        cta: `${APP_URL}/mission/${mission._id}`,
+      }));
+
+      if (missions?.length > 0) {
+        countSent++;
+        countMissionSent[missions?.length] = (countMissionSent[missions?.length] || 0) + 1;
+        // send a mail to the young
+        sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO, {
+          emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+          params: {
+            missions,
+            cta: `${APP_URL}/mission`,
+          },
+        });
+
+        // stock the list in young
+        const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id })));
+        young.set({ missionsInMail });
+        await young.save();
+      }
+    });
+    slack.success({
+      title: "noticePushMission",
+      text: `${countSent}/${countTotal} (${((countSent / countTotal) * 100).toFixed(2)}%) jeunes notifié(e)s.\nmissions proposées : ${JSON.stringify(countMissionSent)}`,
+    });
+  } catch (e) {
+    capture(e);
+  }
+};
+
+const getMissions = async ({ young }) => {
+  if (!young || !young.location || !young.location.lat || !young.location.lon) return;
+  try {
+    const excludedMissionIds = young?.missionsInMail?.map((m) => m.missionId);
+
     const header = { index: "mission", type: "_doc" };
     const query = {
       bool: {
+        must_not: [
+          {
+            ids: {
+              values: excludedMissionIds,
+            },
+          },
+        ],
         filter: [
+          // only validated missions...
+          { term: { "status.keyword": "VALIDATED" } },
+          //... that didn't reach their deadline...
           {
             range: {
               endAt: {
@@ -23,7 +86,7 @@ exports.handler = async () => {
               },
             },
           },
-          { term: { "status.keyword": "VALIDATED" } },
+          //... that have places left...
           {
             range: {
               placesLeft: {
@@ -31,15 +94,34 @@ exports.handler = async () => {
               },
             },
           },
+          //... that is in 20 km radius...
+          {
+            geo_distance: {
+              distance: "20km",
+              location: young.location,
+            },
+          },
         ],
       },
     };
+
+    const sort = [
+      {
+        _geo_distance: {
+          location: [young.location.lon, young.location.lat],
+          order: "asc",
+          unit: "km",
+          mode: "min",
+        },
+      },
+    ];
 
     const body = [
       header,
       {
         query,
-        size: 100,
+        sort,
+        size: 3,
       },
     ]
       .map((e) => `${JSON.stringify(e)}\n`)
@@ -48,10 +130,10 @@ exports.handler = async () => {
       index: "mission",
       body,
     });
-    console.log("✍️ ~ response", response?.body?.responses[0]?.hits?.hits);
+    return response?.body?.responses[0]?.hits?.hits;
   } catch (e) {
     capture(`ERROR`, JSON.stringify(e));
     capture(e);
-    slack.error({ title: "outdated mission", text: "An error occured 😢" });
+    slack.success({ title: "noticePushMission", text: JSON.stringify(e) });
   }
 };
