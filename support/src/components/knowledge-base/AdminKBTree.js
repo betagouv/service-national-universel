@@ -142,7 +142,7 @@ const findChildrenRecursive = async (section, allItems) => {
   }
 };
 
-const getElementsNewState = (root, flattenedData) => {
+const getElementsNewState = (root) => {
   const allItems = [];
   findChildrenRecursive(root, allItems);
   return allItems;
