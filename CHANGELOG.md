@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/betagouv/service-national-universel/compare/v1.4.0...v1.4.1) (2021-12-14)
+
+
+### Bug Fixes
+
+* **addressInput:** fix update depart and region onChange zip ([7b8000b](https://github.com/betagouv/service-national-universel/commit/7b8000b549f441b20985d7b732de98b6cea9017e))
+
 # [1.4.0](https://github.com/betagouv/service-national-universel/compare/v1.3.3...v1.4.0) (2021-12-14)
 
 
