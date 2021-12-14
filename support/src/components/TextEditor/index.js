@@ -109,8 +109,8 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
   };
 
   return (
-    <div className="flex-grow flex-shrink flex flex-col  overflow-hidden">
-      <div className={`px-8 mt-6 pt-2 flex-grow flex-shrink flex flex-col ${!readOnly ? "bg-white" : ""}  overflow-hidden`}>
+    <>
+      <div className={`py-2 flex-grow flex-shrink flex flex-col ${!readOnly ? "bg-white" : ""}  overflow-hidden`}>
         <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
           {!readOnly && (
             <Toolbar>
@@ -151,7 +151,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
         </Slate>
       </div>
       {!readOnly && (
-        <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
+        <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 border-t-2 overflow-hidden flex items-center justify-around">
           <button onClick={onSaveRequest} disabled={!isSaveable} className="px-8 py-2 box-border">
             Enregistrer
           </button>
@@ -160,7 +160,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
           </button>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
@@ -171,26 +171,28 @@ const withImages = (editor) => {
     return element.type === "image" ? true : isVoid(element);
   };
 
-  editor.insertData = (data) => {
+  editor.insertData = async (data) => {
     const text = data.getData("text/plain");
     const { files } = data;
 
     if (files && files.length > 0) {
-      for (const file of files) {
-        const reader = new FileReader();
-        const [mime] = file.type.split("/");
+      const file = files[0];
+      const [mime] = file.type.split("/");
 
-        if (mime === "image") {
-          reader.addEventListener("load", () => {
-            const url = reader.result;
-            insertImage(editor, url);
-          });
-
-          reader.readAsDataURL(file);
-        }
+      if (mime === "image") {
+        const [imageUrl, imageAlt] = await uploadImage(files);
+        if (!!imageUrl && !!imageAlt) insertImage(editor, imageUrl, imageAlt);
       }
     } else if (isImageUrl(text)) {
-      insertImage(editor, text);
+      const imageAlt = await new Promise((resolve) => {
+        const alt = window.prompt("Veuillez saisir la description de l'image (accessibilité personne mal-voyante) :");
+        resolve(alt);
+      });
+      if (!imageAlt) {
+        toast.error("Désolé, une description est obligatoire !");
+      } else {
+        insertImage(editor, text, imageAlt);
+      }
     } else {
       insertData(data);
     }
@@ -231,9 +233,9 @@ const withInlines = (editor) => {
   return editor;
 };
 
-const insertImage = (editor, url) => {
+const insertImage = (editor, url, alt) => {
   const text = { text: "" };
-  const image = { type: "image", url, children: [text] };
+  const image = { type: "image", url, alt, children: [text] };
   Transforms.insertNodes(editor, image);
 };
 
@@ -400,7 +402,7 @@ const Image = ({ attributes, children, element, readOnly }) => {
     <div {...attributes}>
       {children}
       <div contentEditable={false} className="relative">
-        <img src={element.url} className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`} />
+        <img src={element.url} alt={element.alt} className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`} />
         <Button
           active
           onClick={() => Transforms.removeNodes(editor, { at: path })}
@@ -409,6 +411,22 @@ const Image = ({ attributes, children, element, readOnly }) => {
           <Icon>delete</Icon>
         </Button>
       </div>
+      {!readOnly && (
+        <MetaDataInput
+          initValue={element.alt}
+          label="Description"
+          name="alt"
+          onChange={(val) => {
+            const path = ReactEditor.findPath(editor, element);
+            const newProperties = {
+              alt: val,
+            };
+            Transforms.setNodes(editor, newProperties, {
+              at: path,
+            });
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -423,8 +441,10 @@ const VideoElement = ({ attributes, children, element, readOnly }) => {
           <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 h-full w-full left-0" />
         </div>
         {!readOnly && (
-          <UrlInput
-            url={url}
+          <MetaDataInput
+            initValue={url}
+            label="Url"
+            name="url"
             onChange={(val) => {
               const path = ReactEditor.findPath(editor, element);
               const newProperties = {
@@ -442,20 +462,26 @@ const VideoElement = ({ attributes, children, element, readOnly }) => {
   );
 };
 
-const UrlInput = ({ url, onChange }) => {
-  const [value, setValue] = React.useState(url);
+const MetaDataInput = ({ initValue, onChange, label, name }) => {
+  const [value, setValue] = React.useState(initValue);
   return (
-    <input
-      value={value}
-      onClick={(e) => e.stopPropagation()}
-      id="text-editor-video-url"
-      className="mt-1 box-border p-2 border-2 mb-5 w-full relative"
-      onChange={(e) => {
-        const newUrl = e.target.value;
-        setValue(newUrl);
-        onChange(newUrl);
-      }}
-    />
+    <>
+      <label className="text-xs text-gray-400" htmlFor={name}>
+        {label} <span className="italic">(Champ visible seulement en mode édition)</span>
+      </label>
+      <input
+        value={value}
+        name={name}
+        onClick={(e) => e.stopPropagation()}
+        id="text-editor-metadata-input"
+        className="mt-1 box-border p-2 border-2 mb-5 w-full relative"
+        onChange={(e) => {
+          const newUrl = e.target.value;
+          setValue(newUrl);
+          onChange(newUrl);
+        }}
+      />
+    </>
   );
 };
 
@@ -489,19 +515,35 @@ const MarkButton = ({ format, icon }) => {
   );
 };
 
+const uploadImage = async (files) => {
+  const imageAlt = await new Promise((resolve) => {
+    const alt = window.prompt("Veuillez saisir la description de l'image (accessibilité personne mal-voyante) :");
+    resolve(alt);
+  });
+  if (!imageAlt) {
+    toast.error("Désolé, une description est obligatoire !");
+    return [null, null];
+  }
+  const imageRes = await API.uploadFile("/support-center/knowledge-base/picture", files);
+  if (imageRes.code === "FILE_CORRUPTED") {
+    return toast.error("Le fichier semble corrompu", "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support", {
+      timeOut: 0,
+    });
+  }
+  if (!imageRes.ok) return toast.error("Une erreur s'est produite lors du téléversement de votre fichier");
+  toast.success("Fichier téléversé");
+  return [imageRes.data, imageAlt];
+};
+
 const InsertImageButton = () => {
+  const [reloadKey, setReloadKey] = useState(0);
   const inputFileRef = useRef(null);
   const editor = useSlateStatic();
   const onUploadImage = async (event) => {
-    const imageRes = await API.uploadFile("/support-center/knowledge-base/picture", event.target.files);
-    if (imageRes.code === "FILE_CORRUPTED") {
-      return toast.error("Le fichier semble corrompu", "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support", {
-        timeOut: 0,
-      });
-    }
-    if (!imageRes.ok) return toast.error("Une erreur s'est produite lors du téléversement de votre fichier");
-    toast.success("Fichier téléversé");
-    insertImage(editor, imageRes.data);
+    const [imageUrl, imageAlt] = await uploadImage(event.target.files);
+    if (!!imageUrl && !!imageAlt) insertImage(editor, imageUrl, imageAlt);
+    // if no reload key, you can't upload the same file twice.
+    setReloadKey((k) => k + 1);
   };
   return (
     <Button
@@ -511,7 +553,7 @@ const InsertImageButton = () => {
       }}
     >
       <Icon>image</Icon>
-      <input type="file" ref={inputFileRef} onChange={onUploadImage} className="hidden" />
+      <input key={reloadKey} type="file" ref={inputFileRef} onChange={onUploadImage} className="hidden" />
     </Button>
   );
 };
@@ -530,10 +572,11 @@ const InsertVideoButton = () => {
     <Button
       onMouseDown={(event) => {
         event.preventDefault();
-        const url = window.prompt("Entrez l'url de la vidéo (Viméo seulement pour le moment)");
-        const text = { text: "" };
-        const video = { type: "video", url, children: [text] };
+        const videoId = window.prompt("Entrez l'id Viméo de la vidéo - Viméo seulement pour le moment");
+        if (isNaN(videoId)) return;
+        const video = { type: "video", url: `https://player.vimeo.com/video/${videoId}`, children: [{ text: "" }] };
         Transforms.insertNodes(editor, video);
+        Transforms.insertNodes(editor, { type: "paragraph", children: [{ text: "" }] });
       }}
     >
       <Icon>tv</Icon>

@@ -16,7 +16,7 @@ export default function Index() {
   }
 
   useEffect(() => {
-    const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
+    const status = Object.keys(YOUNG_STATUS).filter((e) => !["IN_PROGRESS", "NOT_ELIGIBLE"].includes(e));
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
       updateFilter({ department: [user.department], status });
     } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {

@@ -48,7 +48,7 @@ export default function InscriptionDrawer({ step }) {
               </a>
             </Logos>
           </Header>
-          {young && young?.status !== "IN_PROGRESS" ? (
+          {young && ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young?.status) ? (
             <a className="back-button" onClick={() => history.push("/")}>
               {"<"} Retour à mon espace
             </a>
@@ -59,6 +59,9 @@ export default function InscriptionDrawer({ step }) {
             </Element>
             <Element status={getStatus(STEPS.COORDONNEES)}>
               <a onClick={() => handleClick(STEPS.COORDONNEES)}>Coordonnées</a>
+            </Element>
+            <Element status={getStatus(STEPS.AVAILABILITY)}>
+              <a onClick={() => handleClick(STEPS.AVAILABILITY)}>Disponibilités</a>
             </Element>
             <Element status={getStatus(STEPS.PARTICULIERES)}>
               <a onClick={() => handleClick(STEPS.PARTICULIERES)}>Situations particulières</a>
@@ -72,14 +75,12 @@ export default function InscriptionDrawer({ step }) {
             <Element status={getStatus(STEPS.DOCUMENTS)}>
               <a onClick={() => handleClick(STEPS.DOCUMENTS)}>Pièces justificatives</a>
             </Element>
-            <Element status={getStatus(STEPS.AVAILABILITY)}>
-              <a onClick={() => handleClick(STEPS.AVAILABILITY)}>Disponibilités</a>
-            </Element>
           </ul>
         </li>
       </MainNav>
       <HelpButton to="/public-besoin-d-aide" />
-      {young && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) ? (
+      {young &&
+      [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) ? (
         <DrawerButton>
           <DeleteAccountButton young={young} />
         </DrawerButton>

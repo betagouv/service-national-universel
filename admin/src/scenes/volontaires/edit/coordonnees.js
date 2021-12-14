@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Col } from "reactstrap";
 import styled from "styled-components";
 
-import { departmentList, regionList, department2region, departmentLookUp, colors } from "../../../utils";
+import { departmentList, regionList, department2region, departmentLookUp, colors, departmentToAcademy } from "../../../utils";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Select from "../components/Select";
 import AddressInput from "../../../components/addressInputV2";
@@ -23,6 +23,7 @@ export default function Coordonnees({ values, handleChange, required = {}, error
     }
     handleChange({ target: { name: "department", value: departmentLookUp[departmentCode] } });
     handleChange({ target: { name: "region", value: department2region[departmentLookUp[departmentCode]] } });
+    handleChange({ target: { name: "academy", value: departmentToAcademy[departmentLookUp[departmentCode]] } });
   }, [values.zip]);
 
   return (

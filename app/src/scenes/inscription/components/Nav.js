@@ -111,11 +111,11 @@ export default function Nav({ step }) {
       <Topbar>
         <Step stepId={STEPS.PROFIL} stepName="Profil" stepNumber="1" />
         <Step stepId={STEPS.COORDONNEES} stepName="Coordonnées" stepNumber="2" />
-        <Step stepId={STEPS.PARTICULIERES} stepName="Situations particulières" stepNumber="3" />
-        <Step stepId={STEPS.REPRESENTANTS} stepName="Représentants légaux" stepNumber="4" />
-        <Step stepId={STEPS.CONSENTEMENTS} stepName="Consentements" stepNumber="5" />
-        <Step stepId={STEPS.DOCUMENTS} stepName="Pièces justificatives" stepNumber="6" />
-        <Step stepId={STEPS.AVAILABILITY} stepName="Disponibilités" stepNumber="7" />
+        <Step stepId={STEPS.AVAILABILITY} stepName="Disponibilités" stepNumber="3" />
+        <Step stepId={STEPS.PARTICULIERES} stepName="Situations particulières" stepNumber="4" />
+        <Step stepId={STEPS.REPRESENTANTS} stepName="Représentants légaux" stepNumber="5" />
+        <Step stepId={STEPS.CONSENTEMENTS} stepName="Consentements" stepNumber="6" />
+        <Step stepId={STEPS.DOCUMENTS} stepName="Pièces justificatives" stepNumber="7" />
         {window.innerWidth > 1240 && (
           <Element onClick={() => handleClick(STEPS.DONE)} style={{ flexGrow: 0 }}>
             <div className="logo" />

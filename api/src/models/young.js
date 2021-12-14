@@ -100,7 +100,7 @@ const Schema = new mongoose.Schema({
   status: {
     type: String,
     default: "IN_PROGRESS",
-    enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "WITHDRAWN", "DELETED", "WAITING_LIST"],
+    enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "WITHDRAWN", "DELETED", "WAITING_LIST", "NOT_ELIGIBLE"],
     documentation: {
       description: "Statut général du volontaire",
     },

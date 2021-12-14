@@ -1,3 +1,45 @@
+## [1.3.3](https://github.com/betagouv/service-national-universel/compare/v1.3.2...v1.3.3) (2021-12-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency swr to v1.1.1 ([#976](https://github.com/betagouv/service-national-universel/issues/976)) ([4194073](https://github.com/betagouv/service-national-universel/commit/4194073dab0ea0c3aa7e0cddb5092df8e163737d))
+
+## [1.3.2](https://github.com/betagouv/service-national-universel/compare/v1.3.1...v1.3.2) (2021-12-14)
+
+
+### Bug Fixes
+
+* **support:** knowledge base review ([#981](https://github.com/betagouv/service-national-universel/issues/981)) ([5ec3767](https://github.com/betagouv/service-national-universel/commit/5ec37675afcdcb1a393dfa2b392066db71d4df32))
+
+## [1.3.1](https://github.com/betagouv/service-national-universel/compare/v1.3.0...v1.3.1) (2021-12-13)
+
+
+### Bug Fixes
+
+* **deps:** update sentry-javascript monorepo to v6.16.1 ([#938](https://github.com/betagouv/service-national-universel/issues/938)) ([1531c34](https://github.com/betagouv/service-national-universel/commit/1531c34b74d348934213258b4e22b893f5e62a5d))
+
+# [1.3.0](https://github.com/betagouv/service-national-universel/compare/v1.2.0...v1.3.0) (2021-12-13)
+
+
+### Features
+
+* **zammad:** add infos in user's profile ([#978](https://github.com/betagouv/service-national-universel/issues/978)) ([78b3a4d](https://github.com/betagouv/service-national-universel/commit/78b3a4d1af013af6842e95fb8fe1e38f2889494f))
+
+# [1.2.0](https://github.com/betagouv/service-national-universel/compare/v1.1.8...v1.2.0) (2021-12-13)
+
+
+### Features
+
+* **inscription:** changement ordre étape inscription ([#839](https://github.com/betagouv/service-national-universel/issues/839)) ([675b93e](https://github.com/betagouv/service-national-universel/commit/675b93ed38c81051e26257eea680ad3b6b207c50))
+
+## [1.1.8](https://github.com/betagouv/service-national-universel/compare/v1.1.7...v1.1.8) (2021-12-13)
+
+
+### Bug Fixes
+
+* **address:** update department, region and academy with zip ([e48588a](https://github.com/betagouv/service-national-universel/commit/e48588a5a6cd398a3fa43d024cfb8d311f08e020))
+
 ## [1.1.7](https://github.com/betagouv/service-national-universel/compare/v1.1.6...v1.1.7) (2021-12-13)
 
 

@@ -93,10 +93,10 @@ export default function StepCoordonnees() {
   const onSubmit = async (values) => {
     setLoading(true);
     try {
-      const { ok, code, data } = await api.put("/young", { ...values, inscriptionStep: STEPS.PARTICULIERES });
+      const { ok, code, data } = await api.put("/young", { ...values, inscriptionStep: STEPS.AVAILABILITY });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(data));
-      history.push("/inscription/particulieres");
+      history.push("/inscription/availability");
     } catch (e) {
       console.log(e);
       toastr.error("Erreur !");
