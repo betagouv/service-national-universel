@@ -13,10 +13,12 @@ exports.handler = async () => {
     let countTotal = 0;
     let countSent = 0;
     let countMissionSent = {};
-    const cursor = Young.find({ _id: "5ffc77c153676907c5cc4b0b", status: "VALIDATED", statusPhase1: "DONE" }).cursor();
+
+    const buffer = [];
+
+    const cursor = Young.find({ status: "VALIDATED", statusPhase1: "DONE", statusPhase2: { $ne: "VALIDATED" } }).cursor();
     await cursor.eachAsync(async function (young) {
       countTotal++;
-      // if (countTotal % 200 === 0) console.log(countTotal);
       const esMissions = await getMissions({ young });
 
       // console.log("-----");
@@ -33,27 +35,37 @@ exports.handler = async () => {
         cta: `${APP_URL}/mission/${mission._id}`,
       }));
 
+      countMissionSent[missions?.length] = (countMissionSent[missions?.length] || 0) + 1;
       if (missions?.length > 0) {
         countSent++;
-        countMissionSent[missions?.length] = (countMissionSent[missions?.length] || 0) + 1;
+
         // send a mail to the young
-        sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO, {
-          emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-          params: {
-            missions,
-            cta: `${APP_URL}/mission`,
-          },
-        });
+
+        // sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO, {
+        //   emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        //   params: {
+        //     missions,
+        //     cta: `${APP_URL}/mission`,
+        //   },
+        // });
 
         // stock the list in young
-        const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id })));
-        young.set({ missionsInMail });
-        await young.save();
+        const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
+        // young.set({ missionsInMail });
+        // await young.save();
+
+        if (countSent < 15) {
+          buffer.push(`👉 ${young._id} - ${JSON.stringify(missions)}\n${JSON.stringify(missionsInMail)}`);
+        }
       }
     });
-    slack.success({
-      title: "noticePushMission",
+    slack.info({
+      title: "TEST - noticePushMission",
       text: `${countSent}/${countTotal} (${((countSent / countTotal) * 100).toFixed(2)}%) jeunes notifié(e)s.\nmissions proposées : ${JSON.stringify(countMissionSent)}`,
+    });
+    slack.info({
+      title: "TEST - noticePushMission - batch",
+      text: `batch\n${JSON.stringify(buffer?.join("\n"))}`,
     });
   } catch (e) {
     capture(e);
