@@ -48,21 +48,22 @@ const buildTree = async (root, { lean = true } = {}) => {
   return root;
 };
 
-const consolidateAllowedRoles = async (initSection = { type: "section" }) => {
+const consolidateAllowedRoles = async (initSection = { type: "section" }, newAllowedRoles = []) => {
   const tree = await buildTree(initSection, { lean: true });
   const checkAllowedRoles = async (section) => {
     if (!section?.children?.length) return;
     for (const child of section.children) {
       const unallowedRoles = child.allowedRoles.filter((role) => !section.allowedRoles.includes(role));
-      if (unallowedRoles.length) {
-        await KnowledgeBaseObject.findByIdAndUpdate(child._id, { allowedRoles: child.allowedRoles.filter((role) => section.allowedRoles.includes(role)) });
+      const childNewAllowedRoles = newAllowedRoles.filter((role) => !child.allowedRoles.includes(role));
+      if (unallowedRoles.length || childNewAllowedRoles.length) {
+        await KnowledgeBaseObject.findByIdAndUpdate(child._id, {
+          allowedRoles: [...child.allowedRoles.filter((role) => section.allowedRoles.includes(role)), ...childNewAllowedRoles],
+        });
       }
       await checkAllowedRoles(child);
     }
   };
-
   checkAllowedRoles(tree);
-  console.log("DONE");
 };
 
 router.post("/picture", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -155,6 +156,7 @@ router.put("/reorder", passport.authenticate("referent", { session: false, failW
     await session.withTransaction(async () => {
       for (const item of itemsToReorder) {
         await KnowledgeBaseObject.findByIdAndUpdate(item._id, { position: item.position, parentId: item.parentId || null });
+        await consolidateAllowedRoles(item, item.allowedRoles);
       }
     });
     const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" });
@@ -171,7 +173,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const updateKb = {};
-    let updateChildrenAllwedRoles = false;
+    let updateChildrenAllowedRoles = false;
+    let newAllowedRoles = [];
 
     if (req.body.hasOwnProperty("type")) updateKb.type = req.body.type;
     if (req.body.hasOwnProperty("parentId")) updateKb.parentId = req.body.parentId;
@@ -210,7 +213,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
             updateKb.allowedRoles = req.body.allowedRoles.filter((role) => parent.allowedRoles.includes(role));
           }
         }
-        updateChildrenAllwedRoles = true;
+        newAllowedRoles = updateKb.allowedRoles.filter((role) => !existingKb.allowedRoles.includes(role));
+        updateChildrenAllowedRoles = true;
       }
     }
     if (req.body.hasOwnProperty("status")) updateKb.status = req.body.status;
@@ -220,8 +224,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     existingKb.set(updateKb);
     await existingKb.save();
 
-    if (updateChildrenAllwedRoles) {
-      await consolidateAllowedRoles(existingKb);
+    if (updateChildrenAllowedRoles) {
+      await consolidateAllowedRoles(existingKb, newAllowedRoles);
     }
 
     return res.status(200).send({
