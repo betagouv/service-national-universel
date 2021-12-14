@@ -9,15 +9,14 @@ const KnowledgeBaseObject = require("../models/knowledgeBase");
 const { uploadPublicPicture, ERRORS } = require("../utils/index.js");
 const { validateId } = require("../utils/validator");
 
-const findChildrenRecursive = async (section, allChildren, findAll = false) => {
+const findChildrenRecursive = async (section, allChildren, { findAll = false, lean = true }) => {
   if (section.type !== "section") return;
-  const children = await KnowledgeBaseObject.find({ parentId: section._id })
-    .sort({ type: -1, position: 1 })
-    .populate({ path: "author", select: "_id firstName lastName role" })
-    .lean(); // to json;
+  const children = lean
+    ? await KnowledgeBaseObject.find({ parentId: section._id }).sort({ type: -1, position: 1 }).populate({ path: "author", select: "_id firstName lastName role" }).lean() // to json;
+    : await KnowledgeBaseObject.find({ parentId: section._id }).sort({ type: -1, position: 1 });
   for (const child of children) {
     allChildren.push(child);
-    if (findAll) await findChildrenRecursive(child, allChildren, findAll);
+    if (findAll) await findChildrenRecursive(child, allChildren, { findAll, lean });
   }
 };
 
@@ -34,19 +33,36 @@ const findParents = async (item) => {
 
 const findChildren = async (section, findAll = false) => {
   const allChildren = [];
-  await findChildrenRecursive(section, allChildren, findAll);
+  await findChildrenRecursive(section, allChildren, { findAll });
   return allChildren;
 };
 
-const buildTree = async (root) => {
+const buildTree = async (root, { lean = true } = {}) => {
   root.children = [];
   const children = [];
-  await findChildrenRecursive(root, children);
+  await findChildrenRecursive(root, children, { lean });
   for (const child of children) {
     await buildTree(child);
   }
   root.children = children;
   return root;
+};
+
+const consolidateAllowedRoles = async (initSection = { type: "section" }) => {
+  const tree = await buildTree(initSection, { lean: true });
+  const checkAllowedRoles = async (section) => {
+    if (!section?.children?.length) return;
+    for (const child of section.children) {
+      const unallowedRoles = child.allowedRoles.filter((role) => !section.allowedRoles.includes(role));
+      if (unallowedRoles.length) {
+        await KnowledgeBaseObject.findByIdAndUpdate(child._id, { allowedRoles: child.allowedRoles.filter((role) => section.allowedRoles.includes(role)) });
+      }
+      await checkAllowedRoles(child);
+    }
+  };
+
+  checkAllowedRoles(tree);
+  console.log("DONE");
 };
 
 router.post("/picture", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -111,7 +127,15 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       }
       kb.slug = slug;
     }
-    if (req.body.hasOwnProperty("allowedRoles")) kb.allowedRoles = req.body.allowedRoles;
+    if (req.body.hasOwnProperty("allowedRoles")) {
+      kb.allowedRoles = req.body.allowedRoles;
+      if (kb.parentId) {
+        const parent = await KnowledgeBaseObject.findById(kb.parentId);
+        if (parent) {
+          kb.allowedRoles = req.body.allowedRoles.filter((role) => parent.allowedRoles.includes(role));
+        }
+      }
+    }
     if (req.body.hasOwnProperty("status")) kb.status = req.body.status;
 
     const newKb = await KnowledgeBaseObject.create(kb);
@@ -147,6 +171,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const updateKb = {};
+    let updateChildrenAllwedRoles = false;
 
     if (req.body.hasOwnProperty("type")) updateKb.type = req.body.type;
     if (req.body.hasOwnProperty("parentId")) updateKb.parentId = req.body.parentId;
@@ -176,13 +201,28 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (req.body.hasOwnProperty("group")) updateKb.group = req.body.group;
     if (req.body.hasOwnProperty("content")) updateKb.content = req.body.content;
     if (req.body.hasOwnProperty("description")) updateKb.description = req.body.description;
-    if (req.body.hasOwnProperty("allowedRoles")) updateKb.allowedRoles = req.body.allowedRoles;
+    if (req.body.hasOwnProperty("allowedRoles")) {
+      updateKb.allowedRoles = req.body.allowedRoles;
+      if (JSON.stringify(existingKb.allowedRoles) !== JSON.stringify(updateKb.allowedRoles)) {
+        if (existingKb.parentId) {
+          const parent = await KnowledgeBaseObject.findById(existingKb.parentId);
+          if (parent) {
+            updateKb.allowedRoles = req.body.allowedRoles.filter((role) => parent.allowedRoles.includes(role));
+          }
+        }
+        updateChildrenAllwedRoles = true;
+      }
+    }
     if (req.body.hasOwnProperty("status")) updateKb.status = req.body.status;
     if (req.body.hasOwnProperty("author")) updateKb.author = req.body.author;
     if (req.body.hasOwnProperty("read")) updateKb.read = req.body.read;
 
     existingKb.set(updateKb);
     await existingKb.save();
+
+    if (updateChildrenAllwedRoles) {
+      await consolidateAllowedRoles(existingKb);
+    }
 
     return res.status(200).send({
       ok: true,
