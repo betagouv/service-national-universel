@@ -171,3 +171,8 @@ body {
 .debug * {
   border: 2px solid black;
 }
+
+.with-emoji {
+  font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji", -apple-system, BlinkMacSystemFont,
+    Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important ;
+}
