@@ -162,7 +162,7 @@ body {
   margin-left: 2rem;
 }
 
-#text-editor-video-url::after {
+#text-editor-metadata-input::after {
   content: "(Ce lien n'apparaitra pas dans l'article publié)";
   position: absolute;
   top: 2rem;
