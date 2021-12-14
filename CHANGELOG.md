@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/betagouv/service-national-universel/compare/v1.3.1...v1.3.2) (2021-12-14)
+
+
+### Bug Fixes
+
+* **support:** knowledge base review ([#981](https://github.com/betagouv/service-national-universel/issues/981)) ([5ec3767](https://github.com/betagouv/service-national-universel/commit/5ec37675afcdcb1a393dfa2b392066db71d4df32))
+
 ## [1.3.1](https://github.com/betagouv/service-national-universel/compare/v1.3.0...v1.3.1) (2021-12-13)
 
 
