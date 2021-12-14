@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/betagouv/service-national-universel/compare/v1.3.2...v1.3.3) (2021-12-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency swr to v1.1.1 ([#976](https://github.com/betagouv/service-national-universel/issues/976)) ([4194073](https://github.com/betagouv/service-national-universel/commit/4194073dab0ea0c3aa7e0cddb5092df8e163737d))
+
 ## [1.3.2](https://github.com/betagouv/service-national-universel/compare/v1.3.1...v1.3.2) (2021-12-14)
 
 
