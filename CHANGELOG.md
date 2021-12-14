@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/betagouv/service-national-universel/compare/v1.4.1...v1.5.0) (2021-12-14)
+
+
+### Features
+
+* **support:** allowed roles ([#984](https://github.com/betagouv/service-national-universel/issues/984)) ([89d425f](https://github.com/betagouv/service-national-universel/commit/89d425f4742bc64e1fa8af4813bf4acde64ab26f))
+
 ## [1.4.1](https://github.com/betagouv/service-national-universel/compare/v1.4.0...v1.4.1) (2021-12-14)
 
 
