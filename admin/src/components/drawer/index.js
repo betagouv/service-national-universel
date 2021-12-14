@@ -9,10 +9,14 @@ import MailCloseIcon from "../MailCloseIcon";
 import SuccessIcon from "../SuccessIcon";
 import QuestionMark from "../../assets/QuestionMark";
 import api from "../../services/api";
+import Badge from "../Badge";
 
-const DrawerTab = ({ title, to, onClick }) => (
+const DrawerTab = ({ title, to, onClick, beta }) => (
   <li onClick={onClick}>
-    <NavLink to={to}>{title}</NavLink>
+    <NavLink to={to}>
+      {title}
+      {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
+    </NavLink>
   </li>
 );
 
@@ -82,7 +86,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
-      <DrawerTab to="/centre" title="Centres" onClick={onClick} />
+      <DrawerTab to="/centre" title="Centres" onClick={onClick} beta />
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
@@ -121,7 +125,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
-      <DrawerTab to="/centre" title="Centres" onClick={onClick} />
+      {/* <DrawerTab to="/centre" title="Centres" onClick={onClick} /> */}
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
       <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
