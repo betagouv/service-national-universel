@@ -76,6 +76,14 @@ export default function VolontaireViewDetails({ young }) {
             </Bloc>
           </Box>
         ) : null}
+        {young.status === YOUNG_STATUS.WITHDRAWN && (young.withdrawnMessage || young.withdrawnReason) ? (
+          <Box>
+            <Bloc title="Désistement">
+              {young.withdrawnReason ? <div className="quote">{getLabelWithdrawnReason(young.withdrawnReason)}</div> : null}
+              <div className="quote">Précision : {young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
+            </Bloc>
+          </Box>
+        ) : null}
         <Box>
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
@@ -250,12 +258,6 @@ export default function VolontaireViewDetails({ young }) {
                 <Details title="Consentements validés par ses représentants légaux" value={t(young.parentConsentment || "false")} style={{ border: "none" }} />
                 <ExpandComponent>{parentsConsentmentText}</ExpandComponent>
               </Bloc>
-              {young.status === YOUNG_STATUS.WITHDRAWN && (young.withdrawnMessage || young.withdrawnReason) ? (
-                <Bloc title="Désistement">
-                  {young.withdrawnReason ? <div className="quote">{getLabelWithdrawnReason(young.withdrawnReason)}</div> : null}
-                  <div className="quote">Précision : {young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
-                </Bloc>
-              ) : null}
             </Col>
           </Row>
         </Box>
