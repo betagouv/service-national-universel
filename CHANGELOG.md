@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/betagouv/service-national-universel/compare/v1.5.0...v1.5.1) (2021-12-14)
+
+
+### Bug Fixes
+
+* availability non-eligible ([6c43a00](https://github.com/betagouv/service-national-universel/commit/6c43a003a61a4d5270f7e1a3f3733e3c8f040f95))
+
 # [1.5.0](https://github.com/betagouv/service-national-universel/compare/v1.4.1...v1.5.0) (2021-12-14)
 
 
