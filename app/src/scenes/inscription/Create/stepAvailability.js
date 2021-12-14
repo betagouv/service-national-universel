@@ -30,7 +30,6 @@ export default function StepAvailability() {
   useEffect(() => {
     (async () => {
       const { ok, code, data } = await api.get(`/cohort-session/availability/2022`);
-      setAvailability([]);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue", code);
       } else {
