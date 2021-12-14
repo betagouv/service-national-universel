@@ -156,6 +156,7 @@ export default function Youngs({ center, updateCenter }) {
                         "Statut Phase 2": translate(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
                         "Dernier statut le": formatLongDateFR(data.lastStatusAt),
+                        "Raison du desistement": data.withdrawnReason,
                         "Message de desistement": data.withdrawnMessage,
                         "ID centre": center._id || "",
                         "Code centre": center.code || "",
