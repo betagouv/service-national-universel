@@ -29,8 +29,16 @@ const useIsActive = ({ slug }, onIsActive) => {
 
 const horizontalSpacing = 2;
 
-const Branch = ({ section, level, onIsActive, position, parentId, onListChange, isDragging, onStartDrag }) => {
-  const [open, setIsOpen] = useState(section.type === "root");
+const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions, parentId, onListChange, onIsActive, onToggleOpen }) => {
+  const [open, setIsOpen] = useState(initShowOpen);
+  useEffect(() => {
+    if (!!isMounted) onToggleOpen(open);
+  }, [open]);
+
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    if (!isMounted) setIsMounted(true);
+  }, []);
 
   const isActive = useIsActive(section, onIsActive);
   useEffect(() => {
@@ -46,17 +54,15 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange, 
   const gridRef = useRef(null);
   const sortable = useRef(null);
   useEffect(() => {
-    sortable.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange, onStart: onStartDrag });
+    sortable.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
   }, []);
 
   let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " 🔴 " : " ";
 
-  // const showOpen = isDragging || open;
-  const showOpen = open;
-
   return (
     <div
       data-position={position}
+      data-open={open}
       data-parentid={parentId || "root"}
       data-id={section._id || "root"}
       data-type="section"
@@ -64,11 +70,11 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange, 
     >
       <span className={` text-warmGray-500  max-w-full inline-block overflow-hidden overflow-ellipsis whitespace-nowrap ${isActive ? "font-bold" : ""}`}>
         <small className="text-trueGray-400 mr-1 w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
-          {showOpen ? "\u25BC" : "\u25B6"}
+          {open ? "\u25BC" : "\u25B6"}
         </small>
         <Link href={`/admin/knowledge-base/${section.slug || ""}`} passHref>
           {section.title ? (
-            `${showOpen ? "📂" : "📁"}${isDraft}${section.title} (${section.children?.length || 0})`
+            `${open ? "📂" : "📁"}${isDraft}${section.title} (${section.children?.length || 0})`
           ) : (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline -mt-2 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -81,7 +87,7 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange, 
           )}
         </Link>
       </span>
-      <div ref={gridRef} id={`child-container-${section._id || "root"}`} className={`flex flex-col ${!showOpen ? "hidden" : ""}`}>
+      <div ref={gridRef} id={`child-container-${section._id || "root"}`} className={`flex flex-col ${!open ? "hidden" : ""}`}>
         {section.children?.map((child) =>
           child.type === "section" ? (
             <Branch
@@ -90,10 +96,11 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange, 
               key={child._id}
               section={child}
               level={level + 1}
-              isDragging={isDragging}
               onIsActive={onChildIsActive}
               onListChange={onListChange}
-              onStartDrag={onStartDrag}
+              onToggleOpen={onToggleOpen}
+              initShowOpen={!!cachedOpenedPositions.find((item) => item._id === child._id && !!item.initShowOpen)}
+              cachedOpenedPositions={cachedOpenedPositions}
             />
           ) : (
             <Answer parentId={child.parentId} position={child.position} key={child._id} article={child} level={level + 1} onIsActive={onChildIsActive} />
@@ -106,7 +113,6 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange, 
 
 const Answer = ({ article, level, onIsActive, position, parentId }) => {
   const isActive = useIsActive(article, onIsActive);
-  const icon = article.status === "DRAFT" ? "📝 🔴 " : "📃 ";
   return (
     <Link key={article._id} href={`/admin/knowledge-base/${article.slug}`} passHref>
       <a
@@ -116,7 +122,7 @@ const Answer = ({ article, level, onIsActive, position, parentId }) => {
         href="#"
         className={`text-warmGray-500  overflow-hidden overflow-ellipsis whitespace-nowrap block ml-${level * horizontalSpacing} ${isActive ? "font-bold" : ""}`}
       >
-        {`${icon}  ${article.title}`}
+        {"📃 "} <span className={`${article.status === "DRAFT" ? "italic opacity-40" : ""}`}>{article.title}</span>
       </a>
     </Link>
   );
@@ -129,19 +135,17 @@ const findChildrenRecursive = async (section, allItems) => {
       position: Number(index) + 1,
       parentId: section.dataset.id === "root" ? null : section.dataset.id,
       _id: child.dataset.id,
+      initShowOpen: child.dataset.open === "false" ? false : true,
     };
     allItems.push(updatedChild);
     if (child.dataset.type === "section") findChildrenRecursive(child, allItems);
   }
 };
 
-const getReorderedTree = (root, flattenedData) => {
+const getElementsNewState = (root, flattenedData) => {
   const allItems = [];
   findChildrenRecursive(root, allItems);
-  return allItems.filter((newItem) => {
-    const originalItem = flattenedData.find((original) => original._id === newItem._id);
-    return originalItem.position !== newItem.position || originalItem.parentId !== newItem.parentId;
-  });
+  return allItems;
 };
 
 const KnowledgeBaseTree = ({ visible }) => {
@@ -149,27 +153,37 @@ const KnowledgeBaseTree = ({ visible }) => {
 
   // reloadTreeKey to prevent error `Failed to execute 'removeChild' on 'Node'` from sortablejs after updating messy tree
   const [reloadTreeKey, setReloadeTreeKey] = useState(0);
-  // const [isDragging, setIsDragging] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [cachedOpenedPositions, setCachedOpenedPositions] = useState(JSON.parse(localStorage.getItem("snu-support-kb-tree-positions-cached") || "[]"));
+  useEffect(() => {
+    localStorage.setItem("snu-support-kb-tree-positions-cached", JSON.stringify(cachedOpenedPositions));
+  }, [cachedOpenedPositions]);
 
   const rootRef = useRef(null);
-  const onStartDrag = () => {
-    // setIsDragging(true);
-  };
 
   const onListChange = async () => {
     setIsSaving(true);
-    // setIsDragging(false);
-    const body = getReorderedTree(rootRef.current.children[0], flattenedData);
-    const response = await API.put({ path: "/support-center/knowledge-base/reorder", body });
+    const elementsNewState = getElementsNewState(rootRef.current.children[0]);
+    setCachedOpenedPositions(elementsNewState);
+    const response = await API.put({
+      path: "/support-center/knowledge-base/reorder",
+      body: elementsNewState.filter((newItem) => {
+        const originalItem = flattenedData.find((original) => original._id === newItem._id);
+        return originalItem.position !== newItem.position || originalItem.parentId !== newItem.parentId;
+      }),
+    });
     if (!response.ok) {
       setIsSaving(false);
       return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
     }
     mutate(response);
-    // setIsDragging(false);
     setReloadeTreeKey((k) => k + 1);
     setIsSaving(false);
+  };
+
+  const onToggleOpen = () => {
+    const elementsNewState = getElementsNewState(rootRef.current.children[0]);
+    setCachedOpenedPositions(elementsNewState);
   };
 
   return (
@@ -177,8 +191,8 @@ const KnowledgeBaseTree = ({ visible }) => {
       {/* TODO find a way for tailwind to not filter margins from compiling,
        because things like `ml-${level}` are not compiled */}
       <div className="hidden ml-2 ml-3 ml-4 ml-5 ml-6 ml-7 ml-8 ml-9 ml-10 ml-11 ml-12 ml-13 ml-14 ml-15 ml-16"></div>
-      <div ref={rootRef} key={reloadTreeKey} className="overflow-auto">
-        <Branch section={tree} level={0} onListChange={onListChange} onStartDrag={onStartDrag} />
+      <div ref={rootRef} key={reloadTreeKey} className="overflow-auto pb-10">
+        <Branch section={tree} level={0} onListChange={onListChange} onToggleOpen={onToggleOpen} initShowOpen cachedOpenedPositions={cachedOpenedPositions} />
       </div>
       {!!isSaving && (
         <div className="absolute w-full h-full top-0 left-0 bg-gray-500 opacity-25 pointer-events-none">

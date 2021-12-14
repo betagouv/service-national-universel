@@ -50,7 +50,7 @@ export const Portal = ({ children }) => {
 };
 
 export const Toolbar = React.forwardRef(({ className, ...props }, ref) => (
-  <Menu {...props} ref={ref} className={`relative pt-1 px-5 mb-5 -mx-5 border-2 flex flex-shrink-0 ${className || ""}`} />
+  <Menu {...props} ref={ref} className={`relative pt-1 px-5 mb-5 border-2 flex flex-shrink-0 ${className || ""}`} />
 ));
 
 export const Spacer = React.forwardRef(({ className, ...props }, ref) => <div {...props} ref={ref} className={`relative w-6 ${className || ""}`} />);

@@ -162,7 +162,7 @@ body {
   margin-left: 2rem;
 }
 
-#text-editor-video-url::after {
+#text-editor-metadata-input::after {
   content: "(Ce lien n'apparaitra pas dans l'article publié)";
   position: absolute;
   top: 2rem;
@@ -170,4 +170,9 @@ body {
 
 .debug * {
   border: 2px solid black;
+}
+
+.with-emoji {
+  font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji", -apple-system, BlinkMacSystemFont,
+    Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important ;
 }
