@@ -109,8 +109,8 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
   };
 
   return (
-    <div className="flex-grow flex-shrink flex flex-col  overflow-hidden">
-      <div className={`px-8 mt-6 pt-2 flex-grow flex-shrink flex flex-col ${!readOnly ? "bg-white" : ""}  overflow-hidden`}>
+    <>
+      <div className={`py-2 flex-grow flex-shrink flex flex-col ${!readOnly ? "bg-white" : ""}  overflow-hidden`}>
         <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
           {!readOnly && (
             <Toolbar>
@@ -151,7 +151,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
         </Slate>
       </div>
       {!readOnly && (
-        <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
+        <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 border-t-2 overflow-hidden flex items-center justify-around">
           <button onClick={onSaveRequest} disabled={!isSaveable} className="px-8 py-2 box-border">
             Enregistrer
           </button>
@@ -160,7 +160,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
           </button>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
@@ -530,10 +530,11 @@ const InsertVideoButton = () => {
     <Button
       onMouseDown={(event) => {
         event.preventDefault();
-        const url = window.prompt("Entrez l'url de la vidéo (Viméo seulement pour le moment)");
-        const text = { text: "" };
-        const video = { type: "video", url, children: [text] };
+        const videoId = window.prompt("Entrez l'id Viméo de la vidéo - Viméo seulement pour le moment");
+        if (isNaN(videoId)) return;
+        const video = { type: "video", url: `https://player.vimeo.com/video/${videoId}`, children: [{ text: "" }] };
         Transforms.insertNodes(editor, video);
+        Transforms.insertNodes(editor, { type: "paragraph", children: [{ text: "" }] });
       }}
     >
       <Icon>tv</Icon>
