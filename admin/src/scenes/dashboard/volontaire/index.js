@@ -23,7 +23,7 @@ export default function Index() {
 
   useEffect(() => {
     const cohort = ["2021"];
-    const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
+    const status = Object.keys(YOUNG_STATUS).filter((e) => !["IN_PROGRESS", "NOT_ELIGIBLE"].includes(e));
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
       updateFilter({ department: [user.department], status, cohort });
     } else if (user.role === ROLES.REFERENT_REGION) {

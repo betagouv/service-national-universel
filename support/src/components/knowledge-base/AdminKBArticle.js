@@ -23,9 +23,9 @@ const AdminKBArticle = ({ article }) => {
   };
 
   return (
-    <div className="container bg-coolGray-100  mx-auto flex flex-col px-8 pt-3 flex-grow flex-shrink overflow-hidden w-full">
+    <div className="container bg-coolGray-100  mx-auto flex flex-col px-6 pt-3 flex-grow flex-shrink overflow-hidden w-full">
       {!readOnly && (
-        <header className="flex w-full justify-between">
+        <header className="flex w-full justify-between px-2">
           <h2 className="flex flex-col text-lg">
             <span className="font-bold">{article.title}</span>
             {!!article.description?.length && <p className="mt-1 text-sm italic">{article.description}</p>}
@@ -41,7 +41,9 @@ const AdminKBArticle = ({ article }) => {
           </button>
         </header>
       )}
-      <TextEditor key={article._id + article.slug} content={article.content} _id={article._id} slug={article.slug} onSave={onSave} />
+      <div className="bg-white px-2 flex-grow flex-shrink flex flex-col  overflow-hidden">
+        <TextEditor key={article._id + article.slug} content={article.content} _id={article._id} slug={article.slug} onSave={onSave} />
+      </div>
       <Modal
         fullScreen
         isOpen={readOnly}

@@ -39,6 +39,7 @@ const useKnowledgeBaseData = ({ debug = false } = {}) => {
       return initItemTree;
     }
   });
+  const [parent, setParent] = useState(flattenedData.find((i) => i._id === item.parentId) || null);
 
   useEffect(() => {
     setFlattenedData(response?.data || []);
@@ -50,8 +51,10 @@ const useKnowledgeBaseData = ({ debug = false } = {}) => {
     if (!itemTree) {
       router.push("/admin/knowledge-base/");
       setItem(tree);
+      setParent(null);
     } else {
       setItem(itemTree);
+      setParent(flattenedData.find((i) => i._id === itemTree.parentId));
     }
   }, [slug]);
 
@@ -64,6 +67,7 @@ const useKnowledgeBaseData = ({ debug = false } = {}) => {
     tree,
     flattenedData,
     item,
+    parent,
     mutate,
   };
 };

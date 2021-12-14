@@ -12,7 +12,7 @@ const AdminKBItemMetadata = ({ visible }) => {
   const router = useRouter();
   const [showIconChooser, setShowIconChooser] = useState(false);
 
-  const { flattenedData, item, mutate } = useKnowledgeBaseData();
+  const { flattenedData, item, parent, mutate } = useKnowledgeBaseData();
 
   // need to listen to title change to propose updated slug
   const [title, setTitle] = useState(item.title);
@@ -197,16 +197,27 @@ const AdminKBItemMetadata = ({ visible }) => {
           </>
         )}
         <fieldset className="mb-5">
-          <legend className="mb-2">Visible par:</legend>
+          <legend className="">Visible par:</legend>
+          <span className="mb-2 text-xs italic text-gray-500 leading-none block">Note: seul les rôles autorisés par l'entité parent sont disponibles</span>
           <div className="flex flex-col ml-4">
-            {Object.keys(SUPPORT_ROLES).map((role) => (
-              <div className="flex items-center" key={role}>
-                <input className="mr-4" id={`allowedRoles.${role}`} type="checkbox" name={`allowedRoles.${role}`} defaultChecked={item.allowedRoles?.includes(role)} />
-                <label className="mr-2" id={role} htmlFor={`allowedRoles.${role}`}>
-                  {SUPPORT_ROLES[role]}
-                </label>
-              </div>
-            ))}
+            {Object.keys(SUPPORT_ROLES).map((role) => {
+              const disabled = !!parent && !parent?.allowedRoles.includes(role);
+              return (
+                <div className="flex items-center" key={role}>
+                  <input
+                    className="mr-4"
+                    id={`allowedRoles.${role}`}
+                    disabled={disabled}
+                    type="checkbox"
+                    name={`allowedRoles.${role}`}
+                    defaultChecked={item.allowedRoles?.includes(role)}
+                  />
+                  <label className={`mr-2 ${disabled ? "text-gray-300 italic" : ""}`} id={role} disabled={disabled} htmlFor={`allowedRoles.${role}`}>
+                    {SUPPORT_ROLES[role]}
+                  </label>
+                </div>
+              );
+            })}
           </div>
         </fieldset>
         <div className="flex justify-start items-center">

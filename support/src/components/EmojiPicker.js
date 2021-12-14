@@ -87,8 +87,8 @@ const EmojiPicker = ({ insertEmoji, className }) => {
       >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
-      <div className="fixed z-10" style={pickerPosition}>
-        {!!showEmojiPicker && <Picker i18n={i18n} set="apple" enableFrequentEmojiSort onSelect={onSelect} native theme={theme} title="SNU" />}
+      <div className="fixed z-10 with-emoji" style={pickerPosition}>
+        {!!showEmojiPicker && <Picker i18n={i18n} set="emojione" enableFrequentEmojiSort onSelect={onSelect} native theme={theme} title="SNU" />}
       </div>
     </>
   );
