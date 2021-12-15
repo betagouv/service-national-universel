@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./../../.env-staging" });
+require("dotenv").config({ path: "../../.env-prod" });
 var pg = require("pg"),
   { Client } = require("ssh2");
 var pgHost = "localhost",
