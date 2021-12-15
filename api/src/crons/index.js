@@ -25,8 +25,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   //   sendRecapRegion();
   // });
 
-  // every monday at 0800
-  cron.schedule("@hourly", function () {
+  cron.schedule("30 * * * *", function () {
     noticePushMission.handler();
   });
 
