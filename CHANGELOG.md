@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/betagouv/service-national-universel/compare/v1.6.0...v1.6.1) (2021-12-15)
+
+
+### Bug Fixes
+
+* **cron:** add count by cohort ([4dc1342](https://github.com/betagouv/service-national-universel/commit/4dc1342d607ab173b0de2ccafe8fdd0d4607fef9))
+
 # [1.6.0](https://github.com/betagouv/service-national-universel/compare/v1.5.1...v1.6.0) (2021-12-15)
 
 
