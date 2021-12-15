@@ -72,8 +72,8 @@ export default function InscriptionPanel({ onChange, value }) {
           {user.role === ROLES.ADMIN ? <ActionButtonArchive young={value} /> : null}
         </div>
       </div>
-      {value.status === YOUNG_STATUS.WAITING_CORRECTION && value.inscriptionCorrectionMessage ? (
-        <Info title="Demande de correction en cours :" id={value._id}>
+      {[YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(value.status) && value.inscriptionCorrectionMessage ? (
+        <Info title="Demande(s) de correction :" id={value._id}>
           <PatchHistoric value={value} model="young" field="inscriptionCorrectionMessage" previewNumber={1} />
         </Info>
       ) : null}

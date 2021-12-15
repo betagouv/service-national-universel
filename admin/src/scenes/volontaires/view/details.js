@@ -69,9 +69,9 @@ export default function VolontaireViewDetails({ young }) {
             </Bloc>
           </Box>
         ) : null}
-        {young.status === YOUNG_STATUS.WAITING_CORRECTION && young.inscriptionCorrectionMessage ? (
+        {[YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && young.inscriptionCorrectionMessage ? (
           <Box>
-            <Bloc title="Message de demande de correction :" id={young._id}>
+            <Bloc title="Demande(s) de correction :" id={young._id}>
               <PatchHistoric value={young} model="young" field="inscriptionCorrectionMessage" previewNumber={1} />
             </Bloc>
           </Box>
