@@ -1,16 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
+import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, translate, WITHRAWN_REASONS } from "../../utils";
-import ComponentConfirm from "./components/ComponentConfirm";
-import ComponentWithdrawn from "./components/ComponentWithdrawn";
 import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
 import { Link } from "react-router-dom";
-import { Container, Content } from "./Container";
-import ModalButton from "../../../components/buttons/ModalButton";
-import RoundWarning from "../../../assets/RoundWarning";
+//import { Container, Content } from "./Container";
+import ModalButton from "../../components/buttons/ModalButton";
+import RoundWarning from "../../assets/RoundWarning";
 
 export default function Desistement() {
   const young = useSelector((state) => state.Auth.young);
@@ -63,3 +62,133 @@ export default function Desistement() {
     </>
   );
 }
+
+function ComponentConfirm({ title, message, onConfirm, confirmText = "Confirmer", cancelText = "Annuler" }) {
+  const [sending, setSending] = useState(false);
+
+  const submit = async () => {
+    setSending(true);
+    onConfirm();
+    setSending(false);
+  };
+
+  return (
+    <div>
+      <Container>
+        <RoundWarning style={{ marginBottom: "1.5rem" }} />
+        <Content>
+          <h1>{title}</h1>
+          <p>{message}</p>
+        </Content>
+        <footer>
+          <ModalButton loading={sending} disabled={sending} onClick={submit} primary>
+            {confirmText}
+          </ModalButton>
+          <ModalButton>
+            <Link to="/" style={{ color: "rgb(81, 69, 205)", width: "100%" }}>
+              {cancelText}
+            </Link>
+          </ModalButton>
+        </footer>
+      </Container>
+    </div>
+  );
+}
+
+function ComponentWithdrawn({ title, message, onConfirm, placeholder = "Votre message..." }) {
+  const [withdrawnMessage, setWithdrawnMessage] = useState();
+  const [withdrawnReason, setWithdrawnReason] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const submit = async () => {
+    setSending(true);
+    onConfirm({ withdrawnReason, withdrawnMessage });
+  };
+
+  return (
+    <div>
+      <Container>
+        <RoundWarning style={{ marginBottom: "1.5rem" }} />
+        <Content>
+          <h1>{title}</h1>
+          <p style={{ marginBottom: "1rem" }}>{message}</p>
+          <select style={{ marginBottom: "1rem" }} className="form-control" value={withdrawnReason} onChange={(e) => setWithdrawnReason(e.target.value)}>
+            <option disabled value="" label="Choisir">
+              Choisir
+            </option>
+            {WITHRAWN_REASONS.map((reason) => (
+              <option key={reason.value} value={reason.value} label={reason.label}>
+                {reason.label}
+              </option>
+            ))}
+          </select>
+          {withdrawnReason ? (
+            <textarea
+              className="form-control"
+              placeholder={placeholder + (withdrawnReason === "other" ? " (obligatoire)" : " (facultatif)")}
+              rows="8"
+              value={withdrawnMessage}
+              onChange={(e) => setWithdrawnMessage(e.target.value)}
+            />
+          ) : null}
+        </Content>
+        <footer>
+          <ModalButton loading={sending} disabled={sending || !withdrawnReason || (withdrawnReason === "other" && !withdrawnMessage)} onClick={submit} primary>
+            Confirmer
+          </ModalButton>
+          <ModalButton>
+            <Link to="/" style={{ color: "rgb(81, 69, 205)", width: "100%" }}>
+              Annuler
+            </Link>
+          </ModalButton>
+        </footer>
+      </Container>
+    </div>
+  );
+}
+
+const Container = styled.div`
+  margin: 1rem auto;
+  max-width: 900px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding-top: 2rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+  }
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  padding-top: 0;
+  h1 {
+    font-size: 2rem;
+    color: #000;
+  }
+  p {
+    font-size: 1rem;
+    margin: 0;
+    color: #6e757c;
+  }
+  textarea {
+    padding: 1rem;
+    line-height: 1.5;
+    border-radius: 0.5rem;
+    border: 1px solid #ced4da;
+    min-width: 100%;
+    margin-bottom: 2rem;
+  }
+`;
