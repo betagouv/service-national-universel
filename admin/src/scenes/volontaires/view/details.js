@@ -1,7 +1,6 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason, colors } from "../../../utils";

@@ -18,6 +18,7 @@ import {
   getAge,
   confirmMessageChangePhase1Presence,
   ES_NO_LIMIT,
+  getLabelWithdrawnReason,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
@@ -185,7 +186,7 @@ export default function List() {
                         "Statut Phase 2": translate(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
                         "Dernier statut le": formatLongDateFR(data.lastStatusAt),
-                        "Raison du desistement": data.withdrawnReason,
+                        "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
                         "Message de desistement": data.withdrawnMessage,
                         "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
                         "se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),

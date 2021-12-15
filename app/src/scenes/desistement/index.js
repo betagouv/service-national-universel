@@ -7,6 +7,10 @@ import ComponentConfirm from "./components/ComponentConfirm";
 import ComponentWithdrawn from "./components/ComponentWithdrawn";
 import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
+import { Link } from "react-router-dom";
+import { Container, Content } from "./Container";
+import ModalButton from "../../../components/buttons/ModalButton";
+import RoundWarning from "../../../assets/RoundWarning";
 
 export default function Desistement() {
   const young = useSelector((state) => state.Auth.young);
