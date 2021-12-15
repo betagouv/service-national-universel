@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/betagouv/service-national-universel/compare/v1.5.1...v1.6.0) (2021-12-15)
+
+
+### Features
+
+* **cron:** push mission(s) to youngs ([#987](https://github.com/betagouv/service-national-universel/issues/987)) ([80dcc67](https://github.com/betagouv/service-national-universel/commit/80dcc67263eb996ad45179939e32fad0adfb6077))
+
 ## [1.5.1](https://github.com/betagouv/service-national-universel/compare/v1.5.0...v1.5.1) (2021-12-14)
 
 
