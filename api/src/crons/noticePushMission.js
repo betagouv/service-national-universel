@@ -65,7 +65,7 @@ exports.handler = async () => {
     });
     slack.info({
       title: "TEST - noticePushMission",
-      text: `${countSent}/${countTotal} (${((countSent / countTotal) * 100).toFixed(2)}%) jeunes notifié(e)s.\nmissions proposées : ${JSON.stringify(countMissionSent)}`,
+      text: `${countSent}/${countTotal} (${((countSent / countTotal) * 100).toFixed(2)}%) jeunes notifié(e)s.\nmissions proposées : ${JSON.stringify(countMissionSent)}\ncohortes : ${JSON.stringify(countMissionSentCohort)}`,
     });
     slack.info({
       title: "TEST - noticePushMission - batch",
