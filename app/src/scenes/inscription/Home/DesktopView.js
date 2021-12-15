@@ -188,9 +188,9 @@ const Wrapper = styled.div`
       padding: 0.5rem;
     }
     padding: 0 1rem;
-  }
-  .infos_container_section {
-    display: grid;
+    &_section {
+      display: grid;
+    }
   }
   .text_section {
     padding-top: 1.5rem;
