@@ -3,10 +3,31 @@ import styled from "styled-components";
 import StopIcon from "../components/stopIcon";
 import TickIcon from "../components/tickIcon";
 import conditions from "./conditions";
+import informations from "./informations";
 
 export default function MobileView() {
   return (
     <Points>
+      <div className="infos_container">
+        <section className="infos_container_section icon_section">
+          {informations.map((info) => (
+            <IconContainer key={info.title} icon={info.icon} title={info.title} text={info.text} />
+          ))}
+        </section>
+        <section className="infos_container_section text_section">
+          <p>
+            Et cette année, les lycéens de 2de générale, technologique et professionnelle, dont l&apos;inscription est validée, sont de plein droit autorisés à participer au séjour
+            de cohésion y compris sur le temps scolaire (février ou juin). Le séjour de cohésion, c&apos;est vivre une{" "}
+            <b>expérience inédite et faire des rencontres inoubliables</b>.
+          </p>
+          <p>
+            <strong>Et après le séjour ?</strong>
+            <br /> Vous recevez votre certificat individuel de participation à la JDC et un accès gratuit à une plateforme d&apos;apprentissage du code de la route.
+            <br />
+            Qu&apos;attendez-vous pour vous inscrire ?
+          </p>
+        </section>
+      </div>
       <div className="points-title">Conditions d&apos;inscription</div>
       <ul>
         <li>
@@ -123,6 +144,16 @@ export default function MobileView() {
   );
 }
 
+function IconContainer({ icon, title, text }) {
+  return (
+    <div className="icon_container">
+      <span>{icon}</span>
+      <h5>{title}</h5>
+      <p>{text}</p>
+    </div>
+  );
+}
+
 const FAQ = styled.a`
   width: 100%;
   padding: 1rem;
@@ -154,6 +185,44 @@ const Points = styled.div`
   position: relative;
   max-width: 575px;
   margin: 40px auto;
+  .icon_container {
+    padding: 1rem;
+    span {
+      box-shadow: 0px 3px 14px rgba(0, 0, 0, 0.1);
+      background: #fff;
+      padding: 0.7rem;
+      border-radius: 0.5rem;
+    }
+    h5 {
+      color: #111827;
+      margin-top: 1.5rem;
+      margin-bottom: 0;
+    }
+  }
+  .infos_container {
+    margin: 4.5rem auto 2rem auto;
+    max-width: 1300px;
+    p {
+      color: #6b7280;
+      margin: 0;
+      padding: 0.5rem;
+    }
+    padding: 0 1rem;
+  }
+  .text_section {
+    padding-top: 1.5rem;
+    border-top: 0.5px solid #dfdfdf;
+    p {
+      text-align: left;
+      padding: 1rem;
+      strong {
+        color: #111827;
+      }
+    }
+  }
+  .icon_section {
+    margin-bottom: 1.5rem;
+  }
   .points-title {
     text-transform: uppercase;
     display: inline-block;
