@@ -7,6 +7,8 @@ const missionOutdated = require("./missionOutdated");
 const computeGoalsInscription = require("./computeGoalsInscription");
 const noticePushMission = require("./noticePushMission");
 
+// doubt ? -> https://crontab.guru/
+
 // dev : */5 * * * * * (every 5 secs)
 // prod : 0 8 * * 1 (every monday at 0800)
 const EVERY_MINUTE = "* * * * *";
@@ -24,7 +26,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // });
 
   // every monday at 0800
-  cron.schedule("0 8 * * 1", function () {
+  cron.schedule("@hourly", function () {
     noticePushMission.handler();
   });
 
