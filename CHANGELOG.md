@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/betagouv/service-national-universel/compare/v1.6.3...v1.7.0) (2021-12-15)
+
+
+### Features
+
+* **patches:** add patches on contract ([4473050](https://github.com/betagouv/service-national-universel/commit/4473050d131f72fefd4bd3e409d5811e81e24e60))
+
 ## [1.6.3](https://github.com/betagouv/service-national-universel/compare/v1.6.2...v1.6.3) (2021-12-15)
 
 
