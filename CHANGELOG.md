@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/betagouv/service-national-universel/compare/v1.7.0...v1.8.0) (2021-12-15)
+
+
+### Features
+
+*  app inscription infos ([#991](https://github.com/betagouv/service-national-universel/issues/991)) ([a205941](https://github.com/betagouv/service-national-universel/commit/a20594167d95b4f2bd004dd016733b5f7bde8ee6))
+
 # [1.7.0](https://github.com/betagouv/service-national-universel/compare/v1.6.3...v1.7.0) (2021-12-15)
 
 
