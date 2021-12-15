@@ -1,3 +1,10 @@
+## [1.6.3](https://github.com/betagouv/service-national-universel/compare/v1.6.2...v1.6.3) (2021-12-15)
+
+
+### Bug Fixes
+
+* display correctionMessage if young is waiting_validation ([e708e2e](https://github.com/betagouv/service-national-universel/commit/e708e2ef7e68c3173ea163df3d6a9789680b28d8))
+
 ## [1.6.2](https://github.com/betagouv/service-national-universel/compare/v1.6.1...v1.6.2) (2021-12-15)
 
 
