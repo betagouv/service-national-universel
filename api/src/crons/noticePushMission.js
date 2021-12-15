@@ -13,6 +13,7 @@ exports.handler = async () => {
     let countTotal = 0;
     let countSent = 0;
     let countMissionSent = {};
+    let countMissionSentCohort = {};
 
     const buffer = [];
 
@@ -36,6 +37,9 @@ exports.handler = async () => {
       }));
 
       countMissionSent[missions?.length] = (countMissionSent[missions?.length] || 0) + 1;
+      if (!missions) return;
+      countMissionSentCohort[young?.cohort] = (countMissionSentCohort[young?.cohort] || 0) + 1;
+
       if (missions?.length > 0) {
         countSent++;
 
