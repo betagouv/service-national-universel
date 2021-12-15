@@ -5,6 +5,9 @@ const mailRecapDepartment = require("./mailRecap/cron_hebdo_department");
 const apiEngagement = require("./syncApiEngagement");
 const missionOutdated = require("./missionOutdated");
 const computeGoalsInscription = require("./computeGoalsInscription");
+const noticePushMission = require("./noticePushMission");
+
+// doubt ? -> https://crontab.guru/
 
 // dev : */5 * * * * * (every 5 secs)
 // prod : 0 8 * * 1 (every monday at 0800)
@@ -21,6 +24,10 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   //   capture("START CRON RECAP REGION");
   //   sendRecapRegion();
   // });
+
+  cron.schedule("30 * * * *", function () {
+    noticePushMission.handler();
+  });
 
   // every tuesday at 0900
   cron.schedule("0 8 * * 2", function () {

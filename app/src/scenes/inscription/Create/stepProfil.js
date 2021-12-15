@@ -294,7 +294,7 @@ export default function StepProfil() {
                             onChange={handleChange}>
                             <option selected={values.birthCity === undefined || values.birthCity === ""}>Ville de naissance</option>
                             {suggestions.map((el) => (
-                              <option key={el} value={el}>
+                              <option key={el} value={el} label={el}>
                                 {el}
                               </option>
                             ))}

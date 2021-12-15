@@ -488,6 +488,7 @@ function validateYoung(young, user) {
     militaryPreparationFilesAuthorization: Joi.array().items(Joi.string().allow(null, "")),
     militaryPreparationFilesCertificate: Joi.array().items(Joi.string().allow(null, "")),
     statusMilitaryPreparationFiles: Joi.string().allow(null, ""),
+    missionsInMail: Joi.array().items(Joi.any().allow(null, "")),
   };
 
   if (!isYoung(user)) {

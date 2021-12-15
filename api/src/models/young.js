@@ -1237,6 +1237,18 @@ const Schema = new mongoose.Schema({
     enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
   },
 
+  missionsInMail: {
+    type: [
+      {
+        missionId: String,
+        date: { type: Date, default: Date.now },
+      },
+    ],
+    documentation: {
+      description: "Liste des missions pour lesquelles le volontaire a déjà été notifié (identifiant + date de notification)",
+    },
+  },
+
   // TODO : clean interests
   defenseInterest: { type: String },
   defenseTypeInterest: { type: String },
