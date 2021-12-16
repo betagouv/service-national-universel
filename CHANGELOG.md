@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/betagouv/service-national-universel/compare/v1.8.0...v1.8.1) (2021-12-16)
+
+
+### Bug Fixes
+
+* desistement url ([#986](https://github.com/betagouv/service-national-universel/issues/986)) ([238971d](https://github.com/betagouv/service-national-universel/commit/238971d25defd122eb0ffe29d03f15af32a54c71))
+
 # [1.8.0](https://github.com/betagouv/service-national-universel/compare/v1.7.0...v1.8.0) (2021-12-15)
 
 
