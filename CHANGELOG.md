@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/betagouv/service-national-universel/compare/v1.8.5...v1.9.0) (2021-12-16)
+
+
+### Features
+
+* **support:** zammad first migration ([#994](https://github.com/betagouv/service-national-universel/issues/994)) ([bb8ce0f](https://github.com/betagouv/service-national-universel/commit/bb8ce0fb4f0b5ea621b0b1a7648f5d5103aac2d9))
+
 ## [1.8.5](https://github.com/betagouv/service-national-universel/compare/v1.8.4...v1.8.5) (2021-12-16)
 
 
