@@ -78,8 +78,14 @@ export default function VolontaireViewDetails({ young }) {
         {young.status === YOUNG_STATUS.WITHDRAWN && (young.withdrawnMessage || young.withdrawnReason) ? (
           <Box>
             <Bloc title="Désistement">
-              {young.withdrawnReason ? <div className="quote">{getLabelWithdrawnReason(young.withdrawnReason)}</div> : null}
-              <div className="quote">Précision : {young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
+              {young.withdrawnReason ? (
+                <div className="quote">
+                  <b>{getLabelWithdrawnReason(young.withdrawnReason)}</b>
+                </div>
+              ) : null}
+              <div className="quote">
+                <i>Précision : {young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</i>
+              </div>
             </Bloc>
           </Box>
         ) : null}

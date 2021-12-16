@@ -22,7 +22,7 @@ export default function Desistement() {
       userName: `${young.firstName} ${young.lastName}`,
       userId: young._id,
       status,
-      note: WITHRAWN_REASONS.find((r) => r.value === values.withdrawnReason)?.label + " " + values.withdrawnMessage,
+      note: values ? WITHRAWN_REASONS.find((r) => r.value === values?.withdrawnReason)?.label + " " + values?.withdrawnMessage : null,
     });
     try {
       const { ok, code } = await api.put(`/young`, { ...values, status, lastStatusAt: Date.now() });

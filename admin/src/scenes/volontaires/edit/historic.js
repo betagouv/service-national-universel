@@ -15,9 +15,15 @@ export default function HistoricView({ young }) {
         </div>
         <BoxContent direction="column">
           {young.status === YOUNG_STATUS.WITHDRAWN && (young.withdrawnMessage || young.withdrawnReason) && (
-            <Info title="Motif du désistement">
-              {young.withdrawnReason ? <div className="quote">{getLabelWithdrawnReason(young.withdrawnReason)}</div> : null}
-              <div className="quote">Précision : {young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
+            <Info>
+              {young.withdrawnReason ? (
+                <div className="quote">
+                  <b>{getLabelWithdrawnReason(young.withdrawnReason)}</b>
+                </div>
+              ) : null}
+              <div className="quote">
+                <i>Précision : {young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</i>
+              </div>
             </Info>
           )}
           {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
