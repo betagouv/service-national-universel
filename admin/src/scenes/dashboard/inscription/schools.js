@@ -39,7 +39,8 @@ export default function Schools({ filter }) {
         const arr = responses[0].aggregations.names.buckets.map((e) => {
           const schoolInfo = e.firstUser?.hits?.hits[0]?._source;
           const total = e.doc_count;
-          const inDepartment = (e.departments?.buckets?.find((f) => f.key === schoolInfo.schoolDepartment) || {}).doc_count || 0;
+          const isThereDep = e.departments?.buckets?.find((f) => f.key === schoolInfo.department) || {};
+          const inDepartment = isThereDep.doc_count || 0;
 
           return {
             id: e.key,
