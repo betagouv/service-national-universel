@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/betagouv/service-national-universel/compare/v1.9.0...v1.9.1) (2021-12-16)
+
+
+### Bug Fixes
+
+* add uai in export young ([9640013](https://github.com/betagouv/service-national-universel/commit/9640013b423385dda45ed23b2b7133fb6833634f))
+
 # [1.9.0](https://github.com/betagouv/service-national-universel/compare/v1.8.5...v1.9.0) (2021-12-16)
 
 
