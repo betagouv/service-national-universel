@@ -13,7 +13,19 @@ import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, isInRuralArea, formatDateFRTimezoneUTC, formatLongDateFR, ES_NO_LIMIT, ROLES, colors } from "../../utils";
+import {
+  translate,
+  getFilterLabel,
+  formatStringLongDate,
+  YOUNG_STATUS,
+  isInRuralArea,
+  formatDateFRTimezoneUTC,
+  formatLongDateFR,
+  ES_NO_LIMIT,
+  ROLES,
+  colors,
+  departmentLookUp,
+} from "../../utils";
 import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL", "COHORT", "PPS", "PAI", "QPV", "HANDICAP", "ZRR", "GRADE", "ACADEMY"];
@@ -47,7 +59,19 @@ export default function Inscription() {
                   exportTitle="Candidatures"
                   index="young"
                   react={{ and: FILTERS }}
-                  transform={(all) => {
+                  transform={async (data) => {
+                    let all = data;
+                    const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                    if (schoolsId?.length) {
+                      const { responses } = await api.esQuery("school", {
+                        query: { bool: { must: { ids: { values: schoolsId } } } },
+                        size: ES_NO_LIMIT,
+                      });
+                      if (responses.length) {
+                        const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                        all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                      }
+                    }
                     return all.map((data) => {
                       return {
                         _id: data._id,
@@ -65,12 +89,13 @@ export default function Inscription() {
                         Région: data.region,
                         Académie: data.academy,
                         Situation: translate(data.situation),
-                        "Type d'établissement": data.schoolType,
-                        "Nom de l'établissement": data.schoolName,
                         Niveau: data.grade,
-                        "Code postal de l'établissement": data.schoolZip,
-                        "Ville de l'établissement": data.schoolCity,
-                        "Département de l'établissement": data.schoolDepartment,
+                        "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                        "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                        "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                        "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                        "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                        "UAI de l'établissement": data.esSchool?.uai,
                         "Quartier Prioritaire de la ville": translate(data.qpv),
                         "Zone Rurale": translate(isInRuralArea(data)),
                         Handicap: translate(data.handicap),
