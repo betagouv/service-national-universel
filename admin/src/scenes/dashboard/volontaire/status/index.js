@@ -153,7 +153,7 @@ export default function StatusIndex({ filter }) {
               getLink={getLink}
             />
             <StatusMap
-              title="Statut sur des contrats d'engagement"
+              title="Statut des contrats d'engagement"
               obj={CONTRACT_STATUS}
               filterName="CONTRACT_STATUS"
               colors={CONTRACT_STATUS_COLORS}
