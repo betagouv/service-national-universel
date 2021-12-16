@@ -257,6 +257,20 @@ function validateUpdateCohesionCenter(application) {
     .validate(application, { stripUnknown: true });
 }
 
+const sessionPhase1Keys = {
+  cohesionCenterId: Joi.string().allow(null, ""),
+  cohort: Joi.string().allow(null, ""),
+  userId: Joi.string().allow(null, ""),
+  team: Joi.array().items(Joi.any().allow(null, "")),
+  waitingList: Joi.array().items(Joi.string().allow(null, "")),
+  placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+  placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+};
+
+function validateSessionPhase1(session) {
+  return Joi.object().keys(sessionPhase1Keys).validate(session, { stripUnknown: true });
+}
+
 function validateYoung(young, user) {
   const keys = {
     firstName: Joi.string().allow(null, ""),
@@ -602,4 +616,5 @@ module.exports = {
   validateContract,
   validateOptionalId,
   validateEvent,
+  validateSessionPhase1
 };
