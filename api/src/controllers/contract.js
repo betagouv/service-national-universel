@@ -334,7 +334,7 @@ router.post("/token/:token", async (req, res) => {
     if (token === data.structureManagerToken) data.structureManagerStatus = "VALIDATED";
     if (token === data.youngContractToken) data.youngContractStatus = "VALIDATED";
 
-    await contract.save({ fromUser:req.user });
+    await contract.save({ fromUser: req.user });
 
     const young = await YoungObject.findById(data.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
