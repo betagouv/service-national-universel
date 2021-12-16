@@ -1,3 +1,10 @@
+## [1.8.5](https://github.com/betagouv/service-national-universel/compare/v1.8.4...v1.8.5) (2021-12-16)
+
+
+### Bug Fixes
+
+* **inscription:** add infos residence outre mer ([176f2e0](https://github.com/betagouv/service-national-universel/commit/176f2e02c156c16893ac9579519f4ce0696b49ee))
+
 ## [1.8.4](https://github.com/betagouv/service-national-universel/compare/v1.8.3...v1.8.4) (2021-12-16)
 
 
