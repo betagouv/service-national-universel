@@ -2,17 +2,25 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { useHistory, Link } from "react-router-dom";
 
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, translate, WITHRAWN_REASONS } from "../../utils";
 import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
-import { Link } from "react-router-dom";
-//import { Container, Content } from "./Container";
 import ModalButton from "../../components/buttons/ModalButton";
 import RoundWarning from "../../assets/RoundWarning";
 
 export default function Desistement() {
+  const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
+
+  // in /inscription/desistement, we do not check if the young is logged in
+  // so we need to double check here
+  if (!young) {
+    history.push("/");
+    return null;
+  }
+
   const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
   const dispatch = useDispatch();
 
@@ -36,6 +44,7 @@ export default function Desistement() {
 
   async function logout() {
     await api.post(`/young/logout`);
+    history.push("/");
     dispatch(setYoung(null));
   }
 

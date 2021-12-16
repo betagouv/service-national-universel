@@ -12,6 +12,8 @@ import Documents from "./Create/stepDocuments";
 import Availability from "./Create/stepAvailability";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
+import Desistement from "../../scenes/desistement";
+
 import { useSelector } from "react-redux";
 import { colors, YOUNG_STATUS } from "../../utils";
 
@@ -69,6 +71,7 @@ export default function Index() {
       <Route path="/inscription/availability" component={() => <Step step={STEPS.AVAILABILITY} />} />
       <Route path="/inscription/done" component={() => <Step step={STEPS.DONE} />} />
       <Route path="/inscription/france-connect-callback" component={() => <FranceConnectCallback />} />
+      <Route path="/inscription/desistement" component={Desistement} />
       <Route path="/inscription" component={Home} />
     </Switch>
   );
