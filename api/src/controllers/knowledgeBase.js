@@ -95,6 +95,14 @@ router.post("/picture", passport.authenticate("referent", { session: false, fail
   }
 });
 
+// (async () => {
+//   const zammads = await KnowledgeBaseObject.find({ zammadId: { $exists: true }, type: "article", status: "DRAFT" });
+//   for (const zammad of zammads) {
+//     await KnowledgeBaseObject.findByIdAndDelete(zammad._id);
+//   }
+//   console.log("DELETED");
+// })();
+
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const kb = {};
@@ -102,7 +110,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     kb.author = req.user._id;
     kb.status = "DRAFT";
 
-    if (!req.body.hasOwnProperty("title")) {
+    if (!req.body.hasOwnProperty("title") || !req.body.title.trim()) {
       return res.status(400).send({
         ok: false,
         error: "Un titre est obligatoire !",
@@ -138,6 +146,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       }
     }
     if (req.body.hasOwnProperty("status")) kb.status = req.body.status;
+    if (req.body.hasOwnProperty("keywords")) kb.keywords = req.body.keywords;
+    if (req.body.hasOwnProperty("zammadId")) kb.zammadId = req.body.zammadId;
+    if (req.body.hasOwnProperty("zammadParentId")) kb.zammadParentId = req.body.zammadParentId;
+    if (req.body.hasOwnProperty("content")) kb.content = req.body.content;
 
     const newKb = await KnowledgeBaseObject.create(kb);
 
@@ -202,6 +214,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (req.body.hasOwnProperty("imageAlt")) updateKb.imageAlt = req.body.imageAlt;
     if (req.body.hasOwnProperty("icon")) updateKb.icon = req.body.icon;
     if (req.body.hasOwnProperty("group")) updateKb.group = req.body.group;
+    if (req.body.hasOwnProperty("keywords")) updateKb.keywords = req.body.keywords;
     if (req.body.hasOwnProperty("content")) updateKb.content = req.body.content;
     if (req.body.hasOwnProperty("description")) updateKb.description = req.body.description;
     if (req.body.hasOwnProperty("allowedRoles")) {
@@ -271,7 +284,7 @@ router.get("/all", passport.authenticate(["referent", "young"], { session: false
 
 router.get("/all-slugs", async (req, res) => {
   try {
-    const data = await KnowledgeBaseObject.find();
+    const data = await KnowledgeBaseObject.find(req.query || {});
 
     return res.status(200).send({ ok: true, data: data.map((item) => item.slug) });
   } catch (error) {

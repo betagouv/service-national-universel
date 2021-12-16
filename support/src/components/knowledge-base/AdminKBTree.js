@@ -57,7 +57,7 @@ const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions,
     sortable.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
   }, []);
 
-  let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " 🔴 " : " ";
+  let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " " : " ";
 
   return (
     <div
@@ -88,11 +88,11 @@ const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions,
         </Link>
       </span>
       <div ref={gridRef} id={`child-container-${section._id || "root"}`} className={`flex flex-col ${!open ? "hidden" : ""}`}>
-        {section.children?.map((child) =>
+        {section.children?.map((child, index) =>
           child.type === "section" ? (
             <Branch
               parentId={child.parentId}
-              position={child.position}
+              position={child.position || index + 1}
               key={child._id}
               section={child}
               level={level + 1}

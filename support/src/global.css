@@ -11,6 +11,8 @@
 
 * {
   font-family: Ubuntu, sans-serif;
+  font-smooth: always;
+  -webkit-font-smoothing: antialiased;
 }
 
 @layer base {
@@ -112,6 +114,10 @@ body {
   padding-left: 0;
   padding-right: 10px;
   border-right: 2px solid #ddd;
+}
+
+#text-editor h3 {
+  font-size: 1.2em;
 }
 
 #text-editor table {

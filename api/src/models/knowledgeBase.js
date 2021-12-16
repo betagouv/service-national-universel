@@ -123,6 +123,9 @@ const Schema = new mongoose.Schema(
         description: "Nombre de vues d'une réponse",
       },
     },
+    // temp
+    zammadId: { type: Number, unique: true },
+    zammadParentId: Number,
   },
   { timestamps: true },
 );
