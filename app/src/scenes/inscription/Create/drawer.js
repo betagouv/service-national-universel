@@ -1,15 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
-import { useHistory } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
-import { useSelector, useDispatch } from "react-redux";
+import { useHistory, Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import { STEPS } from "../utils";
 import HelpButton from "../../../components/buttons/HelpButton";
-import { YOUNG_STATUS, translate } from "../../../utils";
-import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
-import api from "../../../services/api";
-import { setYoung } from "../../../redux/auth/actions";
+import { YOUNG_STATUS } from "../../../utils";
 
 export default function InscriptionDrawer({ step }) {
   const history = useHistory();
@@ -82,55 +78,12 @@ export default function InscriptionDrawer({ step }) {
       {young &&
       [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) ? (
         <DrawerButton>
-          <DeleteAccountButton young={young} />
+          <Link to="/inscription/desistement">Se désister du SNU</Link>
         </DrawerButton>
       ) : null}
     </Sidebar>
   );
 }
-
-const DeleteAccountButton = ({ young }) => {
-  const history = useHistory();
-  const [modalConfirmWithMessage, setModalConfirmWithMessage] = useState({ isOpen: false, onConfirm: null });
-  const dispatch = useDispatch();
-
-  const onConfirm = async (status, note) => {
-    young.status = status;
-    if (note) young.withdrawnMessage = note;
-    young.lastStatusAt = Date.now();
-    try {
-      const { ok, code } = await api.put(`/young`, young);
-      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
-      toastr.success("Votre désistement a bien été pris en compte.");
-      logout();
-    } catch (e) {
-      console.log(e);
-      toastr.error("Oups, une erreur est survenue :", translate(e.code));
-    }
-  };
-
-  async function logout() {
-    await api.post(`/young/logout`);
-    dispatch(setYoung(null));
-    history.push("/");
-  }
-
-  return (
-    <>
-      <div onClick={() => setModalConfirmWithMessage({ isOpen: true })}>Se désister du SNU</div>
-      <ModalConfirmWithMessage
-        isOpen={modalConfirmWithMessage.isOpen}
-        title="Désistement du SNU"
-        message="Veuillez précisez le motif de votre désistement ci-dessous avant de valider."
-        onChange={() => setModalConfirmWithMessage({ isOpen: false, data: null })}
-        onConfirm={(msg) => {
-          onConfirm(YOUNG_STATUS.WITHDRAWN, msg);
-          setModalConfirmWithMessage({ isOpen: false, onConfirm: null });
-        }}
-      />
-    </>
-  );
-};
 
 const Logos = styled.div`
   cursor: pointer;
@@ -381,6 +334,7 @@ const DrawerButton = styled.div`
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
       background-color: ${({ color }) => (color ? "transparent" : "#5145cd")};
       border: ${({ color }) => (color ? "" : "none")};
+      color: ${({ color }) => (color ? color : "#fff")};
     }
     &.disabled {
       cursor: default;
