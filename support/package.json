@@ -28,7 +28,7 @@
     "slate-hyperscript": "^0.67.0",
     "slate-paste-linkify": "^0.7.0",
     "slate-react": "0.72.1",
-    "slugify": "1.6.3",
+    "slugify": "1.6.4",
     "snu-lib": "file:../lib",
     "sortablejs": "1.14.0",
     "swr": "1.1.1",
