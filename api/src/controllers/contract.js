@@ -42,7 +42,7 @@ async function updateYoungStatusPhase2Contract(young, fromUser) {
   await young.save({ fromUser });
 }
 
-async function createContract(data) {
+async function createContract(data, fromUser) {
   const { sendMessage } = data;
   const contract = await ContractObject.create(data);
 
@@ -70,16 +70,16 @@ async function createContract(data) {
   }
 
   if (sendMessage) contract.invitationSent = "true";
-  await contract.save();
+  await contract.save({ fromUser });
   return contract;
 }
 
-async function updateContract(id, data) {
+async function updateContract(id, data, fromUser) {
   const { sendMessage } = data;
   const previous = await ContractObject.findById(id);
   const contract = await ContractObject.findById(id);
   contract.set(data);
-  await contract.save();
+  await contract.save({ fromUser });
 
   // When we update, we have to send mail again to validated.
   if (
@@ -127,7 +127,7 @@ async function updateContract(id, data) {
   }
 
   if (sendMessage) contract.invitationSent = "true";
-  await contract.save();
+  await contract.save({ fromUser });
   return contract;
 }
 
@@ -218,7 +218,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
 
     // Create or update contract.
-    const contract = id ? await updateContract(id, data) : await createContract(data);
+    const contract = id ? await updateContract(id, data, req.user) : await createContract(data, req.user);
 
     // Update the application.
     const application = await ApplicationObject.findById(contract.applicationId);
@@ -334,7 +334,7 @@ router.post("/token/:token", async (req, res) => {
     if (token === data.structureManagerToken) data.structureManagerStatus = "VALIDATED";
     if (token === data.youngContractToken) data.youngContractStatus = "VALIDATED";
 
-    await data.save();
+    await data.save({ fromUser: req.user });
 
     const young = await YoungObject.findById(data.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
