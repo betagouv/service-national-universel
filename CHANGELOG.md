@@ -1,3 +1,10 @@
+## [1.8.3](https://github.com/betagouv/service-national-universel/compare/v1.8.2...v1.8.3) (2021-12-16)
+
+
+### Bug Fixes
+
+* **patches:**  add from user (contract) ([#990](https://github.com/betagouv/service-national-universel/issues/990)) ([53b5495](https://github.com/betagouv/service-national-universel/commit/53b5495e7f436c427921bc3683b5d6776bca9f24))
+
 ## [1.8.2](https://github.com/betagouv/service-national-universel/compare/v1.8.1...v1.8.2) (2021-12-16)
 
 
