@@ -1,3 +1,10 @@
+## [1.9.2](https://github.com/betagouv/service-national-universel/compare/v1.9.1...v1.9.2) (2021-12-16)
+
+
+### Bug Fixes
+
+* **admin:** 2 steps finding departments ([#999](https://github.com/betagouv/service-national-universel/issues/999)) ([3b76648](https://github.com/betagouv/service-national-universel/commit/3b76648162d615437dbb6053c68ebd459226462c))
+
 ## [1.9.1](https://github.com/betagouv/service-national-universel/compare/v1.9.0...v1.9.1) (2021-12-16)
 
 
