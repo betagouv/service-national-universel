@@ -1,3 +1,10 @@
+## [1.8.4](https://github.com/betagouv/service-national-universel/compare/v1.8.3...v1.8.4) (2021-12-16)
+
+
+### Bug Fixes
+
+* wording dashboard ([19c4eca](https://github.com/betagouv/service-national-universel/commit/19c4ecab49520d22aedda8526f5353fe91a666b8))
+
 ## [1.8.3](https://github.com/betagouv/service-national-universel/compare/v1.8.2...v1.8.3) (2021-12-16)
 
 
