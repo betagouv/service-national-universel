@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
 
-import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFRTimezoneUTC, isInRuralArea, formatLongDateFR, getAge, colors } from "../../../utils";
+import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFRTimezoneUTC, isInRuralArea, formatLongDateFR, getAge, colors, getLabelWithdrawnReason } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
 import { Filter, ResultTable, Table, MultiLine } from "../../../components/list";
@@ -159,6 +159,7 @@ export default function Youngs({ center, updateCenter }) {
                           "Statut Phase 2": translate(data.statusPhase2),
                           "Statut Phase 3": translate(data.statusPhase3),
                           "Dernier statut le": formatLongDateFR(data.lastStatusAt),
+                          "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
                           "Message de desistement": data.withdrawnMessage,
                           "ID centre": center._id || "",
                           "Code centre": center.code || "",

@@ -33,6 +33,7 @@ import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
+import Desistement from "./scenes/desistement";
 
 import api from "./services/api";
 import { SENTRY_URL, environment } from "./config";
@@ -127,6 +128,7 @@ const Espace = () => {
             <Route path="/preferences" component={Preferences} />
             <Route path="/mission" component={Missions} />
             <Route path="/candidature" component={Applications} />
+            <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />

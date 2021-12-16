@@ -1,7 +1,6 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason, colors } from "../../../utils";
@@ -73,6 +72,20 @@ export default function VolontaireViewDetails({ young }) {
           <Box>
             <Bloc title="Demande(s) de correction :" id={young._id}>
               <PatchHistoric value={young} model="young" field="inscriptionCorrectionMessage" previewNumber={1} />
+            </Bloc>
+          </Box>
+        ) : null}
+        {young.status === YOUNG_STATUS.WITHDRAWN && (young.withdrawnMessage || young.withdrawnReason) ? (
+          <Box>
+            <Bloc title="Désistement">
+              {young.withdrawnReason ? (
+                <div className="quote">
+                  <b>{getLabelWithdrawnReason(young.withdrawnReason)}</b>
+                </div>
+              ) : null}
+              <div className="quote">
+                <i>Précision : {young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</i>
+              </div>
             </Bloc>
           </Box>
         ) : null}
@@ -250,12 +263,6 @@ export default function VolontaireViewDetails({ young }) {
                 <Details title="Consentements validés par ses représentants légaux" value={t(young.parentConsentment || "false")} style={{ border: "none" }} />
                 <ExpandComponent>{parentsConsentmentText}</ExpandComponent>
               </Bloc>
-              {young.withdrawnMessage === YOUNG_STATUS.WITHDRAWN && (young.withdrawnMessage || young.withdrawnReason) ? (
-                <Bloc title="Désistement">
-                  {young.withdrawnReason ? <div className="quote">{getLabelWithdrawnReason(young.withdrawnReason)}</div> : null}
-                  <div className="quote">Précision : {young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
-                </Bloc>
-              ) : null}
             </Col>
           </Row>
         </Box>

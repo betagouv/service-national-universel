@@ -13,7 +13,19 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
-import { translate, getFilterLabel, YOUNG_STATUS_COLORS, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT, ROLES, formatDateFRTimezoneUTC, colors } from "../../utils";
+import {
+  translate,
+  getFilterLabel,
+  YOUNG_STATUS_COLORS,
+  isInRuralArea,
+  formatLongDateFR,
+  getAge,
+  ES_NO_LIMIT,
+  ROLES,
+  formatDateFRTimezoneUTC,
+  colors,
+  getLabelWithdrawnReason,
+} from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
@@ -199,6 +211,7 @@ export default function VolontaireList() {
                       "Statut Phase 2": translate(data.statusPhase2),
                       "Statut Phase 3": translate(data.statusPhase3),
                       "Dernier statut le": formatLongDateFR(data.lastStatusAt),
+                      "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
                       "Message de desistement": data.withdrawnMessage,
                       "ID centre": center._id || "",
                       "Code centre": center.code || "",
