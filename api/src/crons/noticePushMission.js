@@ -47,18 +47,18 @@ exports.handler = async () => {
         // send a mail to the young
         if (countSent < 15) {
           countSent++;
-          // sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO, {
-          //   emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-          //   params: {
-          //     missions,
-          //     cta: `${APP_URL}/mission`,
-          //   },
-          // });
+          sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO, {
+            emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+            params: {
+              missions,
+              cta: `${APP_URL}/mission`,
+            },
+          });
 
           // stock the list in young
           const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
-          // young.set({ missionsInMail });
-          // await young.save();
+          young.set({ missionsInMail });
+          await young.save();
 
           buffer.push(`👉 ${young._id}`, JSON.stringify(missions), JSON.stringify(missionsInMail));
         }
@@ -66,11 +66,11 @@ exports.handler = async () => {
     });
     slack.info({
       title: "subBatch - noticePushMission",
-      text: `${countHit}/${countTotal} (${((countSent / countTotal) * 100).toFixed(2)}%) jeunes ciblé(e)s.\nmails envoyés: ${countSent}\nmissions proposées : ${JSON.stringify(countMissionSent)}\ncohortes (si missions proposées) : ${JSON.stringify(countMissionSentCohort)}`,
+      text: `${countHit}/${countTotal} (${((countHit / countTotal) * 100).toFixed(2)}%) jeunes ciblé(e)s.\nmails envoyés: ${countSent}\nmissions proposées : ${JSON.stringify(countMissionSent)}\ncohortes (si missions proposées) : ${JSON.stringify(countMissionSentCohort)}`,
     });
     slack.info({
       title: "TEST - noticePushMission - batch",
-      text: JSON.stringify(buffer?.join("\n")),
+      text: buffer?.join("\n"),
     });
   } catch (e) {
     capture(e);
