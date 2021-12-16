@@ -28,12 +28,7 @@ async function handler() {
 
       const { all, february, june, july } = dataInscriptions;
 
-      textDepartments.push(`Département ${department} 👇`);
-      textDepartments.push(`• global : ${JSON.stringify(all)}`);
-      textDepartments.push(`• février : ${JSON.stringify(february)}`);
-      textDepartments.push(`• juin : ${JSON.stringify(june)}`);
-      textDepartments.push(`• juillet : ${JSON.stringify(july)}`);
-      textDepartments.push("---");
+      textDepartments.push(`Département ${department} 👉 février : ${JSON.stringify(february)}`);
 
       for (let j = 0; j < referents.length; j++) {
         const ref = referents[j];
