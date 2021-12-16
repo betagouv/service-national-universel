@@ -193,7 +193,7 @@ export default function StepCoordonnees() {
                 <Col md={4}>
                   <Label>Lieu de résidence</Label>
                 </Col>
-                <Col>
+                <Col sm={12} md={4}>
                   <RadioLabel>
                     <Field
                       validate={(v) => !v && requiredMessage}
@@ -211,11 +211,11 @@ export default function StepCoordonnees() {
                         cleanAllAddressInformation(handleChange);
                       }}
                     />
-                    Je réside en France
+                    Je réside en France métropolitaine ou d&apos;Outre-Mer
                   </RadioLabel>
                   <ErrorMessage errors={errors} touched={touched} name="livesInFrance" />
                 </Col>
-                <Col>
+                <Col sm={12} md={4}>
                   <RadioLabel>
                     <Field
                       validate={(v) => !v && requiredMessage}
@@ -272,6 +272,15 @@ export default function StepCoordonnees() {
                   <FormRow>
                     <Col md={4}>
                       <Label>Adresse à l&apos;étranger</Label>
+                      <Infos>
+                        <InfoIcon color="#32257F" />
+                        <p>
+                          Si vous résidez en France d&apos;Outre-Mer, merci de sélectionner:{" "}
+                          <b>
+                            <i>&quot;Je réside en France métropolitaine ou d&apos;Outre-Mer&quot;</i>
+                          </b>
+                        </p>
+                      </Infos>
                     </Col>
                     <Col>
                       <AddressInputV2
