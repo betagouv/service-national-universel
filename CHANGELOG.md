@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/betagouv/service-national-universel/compare/v1.8.1...v1.8.2) (2021-12-16)
+
+
+### Bug Fixes
+
+* **app:** withdrawn in inscription ([3bda83a](https://github.com/betagouv/service-national-universel/commit/3bda83ac1cab077a69b826b5adcb0a6a83569b0f))
+
 ## [1.8.1](https://github.com/betagouv/service-national-universel/compare/v1.8.0...v1.8.1) (2021-12-16)
 
 
