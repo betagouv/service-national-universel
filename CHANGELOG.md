@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/betagouv/service-national-universel/compare/v1.9.2...v1.10.0) (2021-12-16)
+
+
+### Features
+
+* **api:** add model sessionPhase1 ([#997](https://github.com/betagouv/service-national-universel/issues/997)) ([c1bf8ac](https://github.com/betagouv/service-national-universel/commit/c1bf8ac7e1f971fb88e4943acd3b9045fa46e28f))
+
 ## [1.9.2](https://github.com/betagouv/service-national-universel/compare/v1.9.1...v1.9.2) (2021-12-16)
 
 
