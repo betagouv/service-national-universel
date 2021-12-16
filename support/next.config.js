@@ -7,6 +7,7 @@ const { withSentryConfig } = require("@sentry/nextjs");
 
 const moduleExports = {
   // Your existing module.exports
+  optimizeFonts: false,
   images: {
     domains: ["snu-bucket-staging.cellar-c2.services.clever-cloud.com"],
   },

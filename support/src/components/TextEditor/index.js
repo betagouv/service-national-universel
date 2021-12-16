@@ -6,10 +6,12 @@ import { Editor, Transforms, createEditor, Element as SlateElement, Range } from
 import { withHistory } from "slate-history";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
+import PasteLinkify from "slate-paste-linkify";
 
 import API from "../../services/api";
 import { Button, Icon, Spacer, Toolbar } from "./components";
 import EmojiPicker from "../EmojiPicker";
+import { deserialize } from "./importHtml";
 
 const HOTKEYS = {
   "mod+b": "bold",
@@ -17,6 +19,8 @@ const HOTKEYS = {
   "mod+u": "underline",
   // "mod+`": "code",
 };
+
+const plugins = [PasteLinkify()];
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
@@ -29,7 +33,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
 
   const renderElement = useCallback((props) => <Element {...props} readOnly={readOnly} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
-  const editor = useMemo(() => withHistory(withInlines(withEmbeds(withImages(withReact(createEditor()))))), []);
+  const editor = useMemo(() => withPlugins(withHistory(withReact(createEditor()))), []);
 
   const onChange = (value) => {
     if (readOnly) return;
@@ -77,6 +81,10 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
     }
   });
 
+  useEffect(() => {
+    if (!value.length) setValue(empty);
+  }, [value]);
+
   const onKeyDown = (event) => {
     const { selection } = editor;
 
@@ -86,6 +94,13 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
     // Here we modify the behavior to unit:'offset'.
     // This lets the user step into and out of the inline without stepping over characters.
     // You may wish to customize this further to only use unit:'offset' in specific cases.
+    if (event.key === "Enter" && event.shiftKey === true) {
+      console.log("SOFT ");
+      event.preventDefault();
+      editor.insertText("\n");
+      return;
+    }
+
     for (const hotkey in HOTKEYS) {
       if (isHotkey(hotkey, event)) {
         event.preventDefault();
@@ -107,6 +122,8 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
       }
     }
   };
+
+  console.log(value);
 
   return (
     <>
@@ -133,6 +150,9 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
               <BlockButton format="numbered-list" icon="format_list_numbered" />
               <BlockButton format="bulleted-list" icon="format_list_bulleted" />
               <Spacer />
+              {/* <MarkButton format="indent-increase" icon="format_indent_increase" />
+              <MarkButton format="indent-decrease" icon="format_indent_decrease" /> */}
+              <Spacer />
               <InsertImageButton />
               <InsertVideoButton />
             </Toolbar>
@@ -146,6 +166,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
               spellCheck
               autoFocus
               onKeyDown={onKeyDown}
+              plugins={plugins}
             />
           </div>
         </Slate>
@@ -164,51 +185,15 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
   );
 };
 
-const withImages = (editor) => {
-  const { insertData, isVoid } = editor;
+const withPlugins = (editor) => {
+  const { insertData, isVoid, insertText, isInline } = editor;
 
   editor.isVoid = (element) => {
-    return element.type === "image" ? true : isVoid(element);
+    // images
+    if (element.type === "image") return true;
+    if (element.type === "video") return true;
+    return isVoid(element);
   };
-
-  editor.insertData = async (data) => {
-    const text = data.getData("text/plain");
-    const { files } = data;
-
-    if (files && files.length > 0) {
-      const file = files[0];
-      const [mime] = file.type.split("/");
-
-      if (mime === "image") {
-        const [imageUrl, imageAlt] = await uploadImage(files);
-        if (!!imageUrl && !!imageAlt) insertImage(editor, imageUrl, imageAlt);
-      }
-    } else if (isImageUrl(text)) {
-      const imageAlt = await new Promise((resolve) => {
-        const alt = window.prompt("Veuillez saisir la description de l'image (accessibilité personne mal-voyante) :");
-        resolve(alt);
-      });
-      if (!imageAlt) {
-        toast.error("Désolé, une description est obligatoire !");
-      } else {
-        insertImage(editor, text, imageAlt);
-      }
-    } else {
-      insertData(data);
-    }
-  };
-
-  return editor;
-};
-
-const withEmbeds = (editor) => {
-  const { isVoid } = editor;
-  editor.isVoid = (element) => (element.type === "video" ? true : isVoid(element));
-  return editor;
-};
-
-const withInlines = (editor) => {
-  const { insertData, insertText, isInline } = editor;
 
   editor.isInline = (element) => ["link"].includes(element.type) || isInline(element);
 
@@ -220,14 +205,45 @@ const withInlines = (editor) => {
     }
   };
 
-  editor.insertData = (data) => {
+  editor.insertData = async (data) => {
     const text = data.getData("text/plain");
+    const { files } = data;
+    const html = data.getData("text/html");
 
+    // images
+    if (files && files.length > 0) {
+      const file = files[0];
+      const [mime] = file.type.split("/");
+
+      if (mime === "image") {
+        const [imageUrl, imageAlt] = await uploadImage(files);
+        if (!!imageUrl && !!imageAlt) insertImage(editor, imageUrl, imageAlt);
+      }
+      return;
+    }
+    if (text && isImageUrl(text)) {
+      const imageAlt = await new Promise((resolve) => {
+        const alt = window.prompt("Veuillez saisir la description de l'image (accessibilité personne mal-voyante) :");
+        resolve(alt);
+      });
+      if (!imageAlt) {
+        toast.error("Désolé, une description est obligatoire !");
+      } else {
+        insertImage(editor, text, imageAlt);
+      }
+      return;
+    }
     if (text && isUrl(text)) {
       wrapLink(editor, text);
-    } else {
-      insertData(data);
+      return;
     }
+    if (html) {
+      const parsed = new DOMParser().parseFromString(html, "text/html");
+      const fragment = deserialize(parsed.body);
+      Transforms.insertFragment(editor, fragment);
+      return;
+    }
+    insertData(data);
   };
 
   return editor;

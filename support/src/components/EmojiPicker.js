@@ -57,7 +57,7 @@ const EmojiPicker = ({ insertEmoji, className }) => {
     }
   }, []);
 
-  const onSelect = ({ unified }) => {
+  const onSelect = ({ native }) => {
     /*
   "id": "heart_eyes",
     "name": "Smiling Face with Heart-Shaped Eyes",
@@ -70,7 +70,8 @@ const EmojiPicker = ({ insertEmoji, className }) => {
     "skin": null,
     "native": "😍"
   */
-    insertEmoji(String.fromCodePoint(parseInt(Number(`0x${unified}`), 10)));
+    // insertEmoji(String.fromCodePoint(parseInt(Number(`0x${unified}`), 10)));
+    insertEmoji(native);
     setShowEmojiPicker(!showEmojiPicker);
   };
 

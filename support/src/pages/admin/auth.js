@@ -69,6 +69,7 @@ const Auth = () => {
               <input
                 type="email"
                 name="email"
+                autoComplete="email"
                 className="w-full rounded-[5px] border-[#e2e8f0] border px-5 py-2 text-base text-[#495057] placeholder-[#798fb0] focus:outline-none focus:border-gray-400 transition-colors"
                 placeholder="Adresse e-mail"
               />
@@ -78,6 +79,7 @@ const Auth = () => {
               <input
                 type="password"
                 name="password"
+                autoComplete="password"
                 className="w-full rounded-[5px] border-[#e2e8f0] border px-5 py-2 text-base text-[#495057] placeholder-[#798fb0] focus:outline-none focus:border-gray-400 transition-colors"
                 placeholder="Tapez votre mot de passe"
               />
