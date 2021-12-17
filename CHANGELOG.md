@@ -1,3 +1,10 @@
+## [1.10.2](https://github.com/betagouv/service-national-universel/compare/v1.10.1...v1.10.2) (2021-12-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency i18n-iso-countries to v7.2.0 ([#982](https://github.com/betagouv/service-national-universel/issues/982)) ([b110354](https://github.com/betagouv/service-national-universel/commit/b110354d9842eb148e97f7c8b5adbf9e0a5170ec))
+
 ## [1.10.1](https://github.com/betagouv/service-national-universel/compare/v1.10.0...v1.10.1) (2021-12-17)
 
 
