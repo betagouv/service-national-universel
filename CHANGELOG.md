@@ -1,3 +1,11 @@
+## [1.10.3](https://github.com/betagouv/service-national-universel/compare/v1.10.2...v1.10.3) (2021-12-17)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([#995](https://github.com/betagouv/service-national-universel/issues/995)) ([5aef953](https://github.com/betagouv/service-national-universel/commit/5aef953a480ca124314dde4d04f471a32e4250b1))
+* **deps:** update dependency express to v4.17.2 ([#1000](https://github.com/betagouv/service-national-universel/issues/1000)) ([fdeaf72](https://github.com/betagouv/service-national-universel/commit/fdeaf7212acbb8b33ea1926570a7a512bf069d5a))
+
 ## [1.10.2](https://github.com/betagouv/service-national-universel/compare/v1.10.1...v1.10.2) (2021-12-17)
 
 
