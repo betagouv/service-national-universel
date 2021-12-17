@@ -1,3 +1,11 @@
+## [1.10.1](https://github.com/betagouv/service-national-universel/compare/v1.10.0...v1.10.1) (2021-12-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency core-js to v3.20.0 ([#992](https://github.com/betagouv/service-national-universel/issues/992)) ([caa78ac](https://github.com/betagouv/service-national-universel/commit/caa78ac6e4997760cd778b60217347a0473d860d))
+* **deps:** update dependency slugify to v1.6.4 ([#996](https://github.com/betagouv/service-national-universel/issues/996)) ([bbba92a](https://github.com/betagouv/service-national-universel/commit/bbba92abd0ed36e44bc25612480bce9cb19b0a1a))
+
 # [1.10.0](https://github.com/betagouv/service-national-universel/compare/v1.9.2...v1.10.0) (2021-12-16)
 
 
