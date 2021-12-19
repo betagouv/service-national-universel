@@ -17,7 +17,7 @@ const Section = ({ item }) => {
           <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">Sujets</h3>
           <div id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
             {answers.map((answer) => (
-              <KBArticleCard key={answer._id} _id={answer._id} position={answer.position} title={answer.title} slug={answer.slug} path="/help" />
+              <KBArticleCard key={answer._id} _id={answer._id} position={answer.position} title={answer.title} slug={answer.slug} path="/base-de-connaissance" />
             ))}
           </div>
         </section>
@@ -30,7 +30,7 @@ const Section = ({ item }) => {
               <KBSectionCard
                 key={section._id}
                 _id={section._id}
-                path="/help"
+                path="/base-de-connaissance"
                 position={section.position}
                 imageSrc={section.imageSrc}
                 icon={section.icon}
@@ -57,7 +57,7 @@ const PublicKBContent = ({ item }) => {
       <div className="flex flex-col">
         <div className="bg-snu-purple-900 ">
           <div className="h-full wrapper">
-            <Breadcrumb parents={item?.parents || []} path="/help" />
+            <Breadcrumb parents={item?.parents || []} path="/base-de-connaissance" />
             <div className="py-4">
               {<h5 className="text-snu-purple-100 max-w-3xl pb-2 text-base md:text-lg uppercase">{group}</h5>}
               <h1 className="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">{item?.title}</h1>

@@ -10,6 +10,7 @@ import PasteLinkify from "slate-paste-linkify";
 
 import API from "../../services/api";
 import { Button, Icon, Spacer, Toolbar } from "./components";
+import { wrapLink, AddLinkButton, RemoveLinkButton } from "./urls";
 import EmojiPicker from "../EmojiPicker";
 import { deserialize } from "./importHtml";
 
@@ -253,46 +254,6 @@ const insertImage = (editor, url, alt) => {
   const text = { text: "" };
   const image = { type: "image", url, alt, children: [text] };
   Transforms.insertNodes(editor, image);
-};
-
-const insertLink = (editor, url) => {
-  if (editor.selection) {
-    wrapLink(editor, url);
-  }
-};
-
-const isLinkActive = (editor) => {
-  const [link] = Editor.nodes(editor, {
-    match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === "link",
-  });
-  return link;
-};
-
-const unwrapLink = (editor) => {
-  Transforms.unwrapNodes(editor, {
-    match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === "link",
-  });
-};
-
-const wrapLink = (editor, url) => {
-  if (isLinkActive(editor)) {
-    unwrapLink(editor);
-  }
-
-  const { selection } = editor;
-  const isCollapsed = selection && Range.isCollapsed(selection);
-  const link = {
-    type: "link",
-    url,
-    children: isCollapsed ? [{ text: url }] : [],
-  };
-
-  if (isCollapsed) {
-    Transforms.insertNodes(editor, link);
-  } else {
-    Transforms.wrapNodes(editor, link, { split: true });
-    Transforms.collapse(editor, { edge: "end" });
-  }
 };
 
 // Put this at the start and end of an inline component to work around this Chromium bug:
@@ -596,40 +557,6 @@ const InsertVideoButton = () => {
       }}
     >
       <Icon>tv</Icon>
-    </Button>
-  );
-};
-
-const AddLinkButton = () => {
-  const editor = useSlate();
-  return (
-    <Button
-      active={isLinkActive(editor)}
-      onMouseDown={(event) => {
-        event.preventDefault();
-        const url = window.prompt("Entrez l'URL du lien:", isLinkActive(editor)?.[0]?.url);
-        if (!url) return;
-        insertLink(editor, url);
-      }}
-    >
-      <Icon>link</Icon>
-    </Button>
-  );
-};
-
-const RemoveLinkButton = () => {
-  const editor = useSlate();
-
-  return (
-    <Button
-      active={isLinkActive(editor)}
-      onMouseDown={() => {
-        if (isLinkActive(editor)) {
-          unwrapLink(editor);
-        }
-      }}
-    >
-      <Icon>link_off</Icon>
     </Button>
   );
 };

@@ -124,7 +124,7 @@ const Schema = new mongoose.Schema(
       },
     },
     // temp
-    zammadId: { type: Number, unique: true },
+    zammadId: Number,
     zammadParentId: Number,
   },
   { timestamps: true },

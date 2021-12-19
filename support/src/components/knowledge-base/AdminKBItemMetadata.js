@@ -57,9 +57,16 @@ const AdminKBItemMetadata = ({ visible }) => {
     toast.success("Élément enregistré !");
   };
 
-  const onDelete = async () => {
+  const onDelete = async (event) => {
+    event.preventDefault();
     if (window.confirm("Voulez-vous vraiment supprimer cet élément ? Cette opération est définitive")) {
       const response = await API.delete({ path: `/support-center/knowledge-base/${item._id}` });
+      if (response.error) {
+        for (const string of [...response.error.split("\n")].reverse()) {
+          toast.error(string, { autoClose: false, draggable: true, closeOnClick: false });
+        }
+        return;
+      }
       if (response.code) return toast.error(response.code);
       toast.success("Élément supprimé !");
       const parent = flattenedData.find((otherItems) => otherItems._id === item.parentId);

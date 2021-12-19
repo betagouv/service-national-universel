@@ -6,6 +6,8 @@ import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import API from "../../services/api";
 import InputWithEmojiPicker from "../InputWithEmojiPicker";
 import Modal from "../Modal";
+// import { onImportSections } from "../TextEditor/importHtml";
+// import zammad from "../../../../../migration-zammad/kb-zammad.json";
 
 const AdminKBCreate = ({ type, position, parentId = null }) => {
   const [open, setOpen] = useState(null);
@@ -39,6 +41,9 @@ const AdminKBCreate = ({ type, position, parentId = null }) => {
     <>
       <Modal isOpen={!!open} onRequestClose={() => setOpen(false)}>
         <form onSubmit={onSubmit} className="flex flex-col w-screen-3/4 items-start">
+          {/* <button type="button" onClick={onImportSections(API, zammad)}>
+            Import all sections
+          </button> */}
           <h2 className="font-bold ml-4 mb-4 text-xl">Créer {type === "section" ? "une rubrique" : "un article"}</h2>
           <div className="flex w-full">
             <div className="flex flex-col flex-grow">
