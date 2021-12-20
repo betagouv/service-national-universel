@@ -12,6 +12,7 @@ import Validate from "./scenes/validate";
 import Profil from "./scenes/profil";
 import Settings from "./scenes/settings";
 import Dashboard from "./scenes/dashboard";
+import DashboardVisitor from "./scenes/dashboard-visitor";
 import DashboardResponsible from "./scenes/dashboard-responsible";
 import DashboardHeadCenter from "./scenes/dashboard-head-center";
 import Structure from "./scenes/structure";
@@ -102,6 +103,7 @@ const Home = () => {
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsible />;
     if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenter />;
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <Dashboard />;
+    if (user?.role === ROLES.VISITOR) return <DashboardVisitor />;
     return null;
   };
   const renderVolontaire = () => {

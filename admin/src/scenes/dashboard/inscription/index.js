@@ -21,7 +21,7 @@ import PriorityArea from "./priorityArea";
 import RuralArea from "./ruralArea";
 import { YOUNG_STATUS, translate, ROLES, academyList } from "../../../utils";
 
-export default function Index({ onChangeFilter }) {
+export default function Index({ onChangeFilter = () => {} }) {
   const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
 
@@ -36,7 +36,7 @@ export default function Index({ onChangeFilter }) {
     const status = Object.keys(YOUNG_STATUS).filter((e) => !["IN_PROGRESS", "NOT_ELIGIBLE"].includes(e));
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
       updateFilter({ department: [user.department], status });
-    } else if (user.role === ROLES.REFERENT_REGION) {
+    } else if (user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR) {
       updateFilter({ region: [user.region], status });
     } else {
       updateFilter();
@@ -68,7 +68,11 @@ export default function Index({ onChangeFilter }) {
                   onChange={(academy) => updateFilter({ academy })}
                 />
               ) : null}
-              <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} />
+              {user.role !== ROLES.VISITOR ? (
+                <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} />
+              ) : (
+                <div style={{ alignSelf: "center", fontSize: "0.8rem" }}>Région {filter.region}</div>
+              )}
               <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
               <MultiSelect
                 label="Cohorte(s)"

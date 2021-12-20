@@ -4,7 +4,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
-const { SUB_ROLES_LIST, ROLES_LIST } = require("snu-lib/roles");
+const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib/roles");
 const zammad = require("../zammad");
 
 const MODELNAME = "referent";
@@ -117,7 +117,7 @@ const Schema = new mongoose.Schema({
   },
   subRole: {
     type: String,
-    enum: SUB_ROLES_LIST,
+    enum: [...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST],
   },
   cohesionCenterId: {
     type: String,
