@@ -1,6 +1,9 @@
 import { useRouter } from "next/router";
 import { toast, ToastContainer } from "react-toastify";
+import { useState } from "react/cjs/react.development";
+import { Button } from "../../components/Buttons";
 import Loader from "../../components/Loader";
+import { adminURL, appURL } from "../../config";
 import useUser from "../../hooks/useUser";
 import API from "../../services/api";
 
@@ -8,8 +11,10 @@ const Auth = () => {
   const { isLoading, mutate } = useUser({ redirectOnLoggedIn: "/admin" });
   const router = useRouter();
 
+  const [isLogging, setIsLogging] = useState(false);
   const onSubmit = async (event) => {
     event.preventDefault();
+    setIsLogging(true);
     const formData = new FormData(event.currentTarget);
     const body = {};
     for (let [key, value] of formData.entries()) {
@@ -17,12 +22,15 @@ const Auth = () => {
     }
     const response = await API.post({ path: "/referent/signin", body });
     if (!response.ok) {
-      if (response.code === "USER_NOT_EXISTS") {
-        toast.error("Cet utilisateur n'existe pas");
-      } else {
-        toast.error("Désolé, une erreur est survenue, veuillez réessayer");
+      setIsLogging(false);
+      if (response.status === 401) {
+        const res = await response.json();
+        if (res.code === "USER_NOT_EXISTS") {
+          toast.error("Cet utilisateur n'existe pas");
+          return;
+        }
       }
-      return;
+      toast.error("Désolé, une erreur est survenue, veuillez réessayer");
     }
     if (response.user) {
       mutate(response);
@@ -44,10 +52,7 @@ const Auth = () => {
           <a className="p-4 text-center w-full text-[0.8rem] uppercase text-[#6e757c] hover:bg-[#f1f1f1] hover:text-[#0056b3] transition-colors" href="">
             espace administrateur
           </a>
-          <a
-            className="p-4 text-center w-full text-[0.8rem] uppercase text-[#6e757c] hover:bg-[#f1f1f1] hover:text-[#0056b3] transition-colors"
-            href="https://moncompte.snu.gouv.fr/"
-          >
+          <a className="p-4 text-center w-full text-[0.8rem] uppercase text-[#6e757c] hover:bg-[#f1f1f1] hover:text-[#0056b3] transition-colors" href={appURL}>
             espace volontaire
           </a>
         </div>
@@ -87,13 +92,9 @@ const Auth = () => {
             <a href="" className="text-[#5145cd] text-sm">
               Mot de passe perdu ?
             </a>
-            <button
-              className="bg-[#5145cd] py-2 px-12 text-white font-bold rounded-[10px] text-base hover:bg-[#382f79] transition-colors w-max border-0"
-              type="=
-            submit"
-            >
+            <Button className="py-2 px-12 transition-colors w-max" type="submit" loading={isLogging}>
               Se connecter
-            </button>
+            </Button>
           </form>
 
           <ToastContainer
@@ -112,7 +113,7 @@ const Auth = () => {
           <hr className="mt-12 mb-6 border-black opacity-10" />
           <span className="text-[#6e757c] text-center text-base">
             Vous êtes une structure ?{" "}
-            <a href="https://admin.snu.gouv.fr/auth/signup" className="font-medium text-[#32267f]">
+            <a href={`${adminURL}/auth/signup`} className="font-medium text-[#32267f]">
               Publiez vos missions
             </a>
           </span>
@@ -131,10 +132,10 @@ const Auth = () => {
             <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" className="text-[#6f7f98] hover:text-gray-700 transition-colors text-sm">
               Données personnelles et cookies
             </a>
-            <a href="https://admin.snu.gouv.fr/conditions-generales-utilisation" className="text-[#6f7f98] hover:text-gray-700 transition-colors text-sm">
+            <a href={`${adminURL}/conditions-generales-utilisation`} className="text-[#6f7f98] hover:text-gray-700 transition-colors text-sm">
               Conditions générales d'utilisation
             </a>
-            <a href="https://admin.snu.gouv.fr/public-besoin-d-aide" className="text-[#6f7f98] hover:text-gray-700 transition-colors text-sm">
+            <a href={`${adminURL}/public-besoin-d-aide`} className="text-[#6f7f98] hover:text-gray-700 transition-colors text-sm">
               Besoin d'aide
             </a>
           </div>

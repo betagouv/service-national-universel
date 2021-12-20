@@ -10,7 +10,7 @@ const Sections = () => {
   const [sections, setSections] = useState(response?.data || []);
   useEffect(() => {
     setSections(response?.data || []);
-  }, response?.data);
+  }, [response?.data]);
 
   return <PublicKBSection item={{ children: sections }} />;
 };

@@ -176,6 +176,7 @@ const KnowledgeBaseTree = ({ visible }) => {
       setIsSaving(false);
       return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
     }
+    setReloadeTreeKey((k) => k + 1);
     mutate(response);
     setReloadeTreeKey((k) => k + 1);
     setIsSaving(false);
@@ -185,7 +186,6 @@ const KnowledgeBaseTree = ({ visible }) => {
     const elementsNewState = getElementsNewState(rootRef.current.children[0]);
     setCachedOpenedPositions(elementsNewState);
   };
-
   return (
     <aside className={`relative flex flex-col flex-grow-0 flex-shrink-0 border-r-2 shadow-lg z-10 resize-x p-2 overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
       {/* TODO find a way for tailwind to not filter margins from compiling,

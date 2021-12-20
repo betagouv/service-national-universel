@@ -36,6 +36,9 @@
     opacity: 1;
     cursor: pointer;
   }
+  button.loading {
+    color: transparent;
+  }
   button:disabled {
     opacity: 0.5;
     pointer-events: none;

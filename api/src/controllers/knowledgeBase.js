@@ -220,6 +220,7 @@ router.put("/reorder", passport.authenticate("referent", { session: false, failW
         await consolidateAllowedRoles(item, item.allowedRoles);
       }
     });
+    session.endSession();
     const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -330,6 +331,7 @@ router.get("/all-slugs", async (req, res) => {
   }
 });
 
+// this is for the public-access part of the knowledge base (not the admin part)
 router.get("/:slug", async (req, res) => {
   try {
     const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug })
