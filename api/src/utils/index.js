@@ -184,6 +184,31 @@ const updatePlacesCenter = async (center) => {
   return center;
 };
 
+// first iteration
+// duplicate of updatePlacesCenter
+// we'll remove the updatePlacesCenter function once the migration is done
+const updatePlacesSessionPhase1 = async (sessionPhase1) => {
+  console.log(`update place sessionPhase1 ${sessionPhase1?._id}`);
+  try {
+    const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
+    const placesTaken = youngs.filter(
+      (young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED"
+    ).length;
+    const placesLeft = Math.max(0, sessionPhase1.placesTotal - placesTaken);
+    if (sessionPhase1.placesLeft !== placesLeft) {
+      console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left from ${sessionPhase1.placesLeft} to ${placesLeft}`);
+      sessionPhase1.set({ placesLeft });
+      await sessionPhase1.save();
+      await sessionPhase1.index();
+    } else {
+      console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left not changed ${sessionPhase1.placesLeft}`);
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  return sessionPhase1;
+};
+
 const updateCenterDependencies = async (center) => {
   const youngs = await YoungModel.find({ cohesionCenterId: center._id });
   youngs.forEach(async (young) => {
@@ -527,6 +552,7 @@ module.exports = {
   ERRORS,
   getSignedUrl,
   updatePlacesCenter,
+  updatePlacesSessionPhase1,
   updateCenterDependencies,
   deleteCenterDependencies,
   assignNextYoungFromWaitingList,
