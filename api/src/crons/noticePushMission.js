@@ -11,21 +11,14 @@ const { APP_URL } = require("../config");
 exports.handler = async () => {
   try {
     let countTotal = 0;
-    let countSent = 0;
     let countHit = 0;
     let countMissionSent = {};
     let countMissionSentCohort = {};
-
-    const buffer = [];
 
     const cursor = Young.find({ cohort: { $nin: ['2019', '2020'] }, status: "VALIDATED", statusPhase1: "DONE", statusPhase2: { $ne: "VALIDATED" } }).cursor();
     await cursor.eachAsync(async function (young) {
       countTotal++;
       const esMissions = await getMissions({ young });
-
-      // console.log("-----");
-      // console.log("✍️ ~ young", young._id, young.department, young.region, young.location);
-      // esMissions?.map((mission) => console.log("✍️ ~ mission", mission._id, mission._source.department, mission._source.region, mission._source.location));
 
       const missions = esMissions?.map((mission) => ({
         structureName: mission._source.structureName?.toUpperCase(),
@@ -45,32 +38,23 @@ exports.handler = async () => {
         countHit++;
 
         // send a mail to the young
-        if (countSent < 15) {
-          countSent++;
-          sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO, {
-            emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-            params: {
-              missions,
-              cta: `${APP_URL}/mission`,
-            },
-          });
+        sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO, {
+          emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+          params: {
+            missions,
+            cta: `${APP_URL}/mission`,
+          },
+        });
 
-          // stock the list in young
-          const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
-          young.set({ missionsInMail });
-          await young.save();
-
-          buffer.push(`👉 ${young._id}`, JSON.stringify(missions), JSON.stringify(missionsInMail));
-        }
+        // stock the list in young
+        const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
+        young.set({ missionsInMail });
+        await young.save();
       }
     });
     slack.info({
-      title: "subBatch - noticePushMission",
-      text: `${countHit}/${countTotal} (${((countHit / countTotal) * 100).toFixed(2)}%) jeunes ciblé(e)s.\nmails envoyés: ${countSent}\nmissions proposées : ${JSON.stringify(countMissionSent)}\ncohortes (si missions proposées) : ${JSON.stringify(countMissionSentCohort)}`,
-    });
-    slack.info({
-      title: "TEST - noticePushMission - batch",
-      text: buffer?.join("\n"),
+      title: "noticePushMission",
+      text: `${countHit}/${countTotal} (${((countHit / countTotal) * 100).toFixed(2)}%) jeunes ciblé(e)s.\nmails envoyés: ${countHit}\nnombre de missions proposées / mail : ${JSON.stringify(countMissionSent)}\ncohortes (si missions proposées) : ${JSON.stringify(countMissionSentCohort)}`,
     });
   } catch (e) {
     capture(e);
