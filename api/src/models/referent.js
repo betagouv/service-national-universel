@@ -119,6 +119,13 @@ const Schema = new mongoose.Schema({
     type: String,
     enum: SUB_ROLES_LIST,
   },
+  sessionPhase1Id: {
+    type: String,
+    documentation: {
+      description: "Id de la session de cohésion d'accueil pour la phase 1",
+    },
+  },
+  // *** START LEGACY COHESION CENTER ***
   cohesionCenterId: {
     type: String,
     documentation: {
@@ -131,6 +138,7 @@ const Schema = new mongoose.Schema({
       description: "Nom du centre de cohésion d'accueil pour la phase 1",
     },
   },
+  // *** END LEGACY COHESION CENTER ***
   phone: {
     type: String,
     documentation: {

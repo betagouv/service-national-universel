@@ -18,7 +18,7 @@ const Schema = new mongoose.Schema({
       description: "Cohorte",
     },
   },
-  userId: {
+  headCenterId: {
     type: String,
     documentation: {
       description: "Id de l'utilisateur responsable, le chef de centre"
