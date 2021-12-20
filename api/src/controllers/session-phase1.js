@@ -5,7 +5,7 @@ const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
-const { ERRORS } = require("../utils");
+const { ERRORS,updatePlacesSessionPhase1 } = require("../utils");
 const { ROLES, canCreateOrUpdateSessionPhase1 } = require("snu-lib/roles");
 const { serializeSessionPhase1 } = require("../utils/serializer");
 const { validateSessionPhase1 } = require("../utils/validator");
@@ -63,12 +63,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     sessionPhase1.set(value);
     await sessionPhase1.save();
 
-    // todo updatePlacesCenter
-    // const data = await updatePlacesCenter(sessionPhase1);
-    // todo : updateCenterDependencies
-    // await updateCenterDependencies(center);
-
-    res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionPhase1) });
+    const data = await updatePlacesSessionPhase1(sessionPhase1);
+    res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -86,8 +82,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     await sessionPhase1.remove();
-    //todo : deleteCenterDependencies
-    // await deleteCenterDependencies({ _id: id });
+
     console.log(`sessionPhase1 ${id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
