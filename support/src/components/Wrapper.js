@@ -1,6 +1,7 @@
 // import { useState } from "react";
 import Link from "next/link";
 import { Popover } from "@headlessui/react";
+import { appURL, supportURL } from "../config";
 
 const Wrapper = ({ children }) => {
   // toggle this state for change the header
@@ -57,7 +58,7 @@ const Header = ({ isLogin }) => {
             <Link href="/admin">
               <span className="text-sm font-medium text-gray-500 transition-colors cursor-pointer hover:text-gray-600">Espace admin</span>
             </Link>
-            <Link href="/admin">
+            <Link href={`${appURL}/auth?redirect=${supportURL}/base-de-connaissance`}>
               <span className="text-sm font-medium text-gray-500 transition-colors cursor-pointer hover:text-gray-600">Espace volontaire</span>
             </Link>
           </div>

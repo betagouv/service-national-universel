@@ -33,7 +33,7 @@ class ApiService {
       if (credentials) options.credentials = credentials;
 
       const url = this.getUrl({ path, query });
-      console.log("url", url);
+      // console.log("url", url);
       const response = await fetch(url, options);
 
       if (!response.ok && response.status === 401) {

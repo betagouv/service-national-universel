@@ -9,11 +9,12 @@ const KnowledgeBaseObject = require("../models/knowledgeBase");
 const { uploadPublicPicture, ERRORS } = require("../utils/index.js");
 const { validateId } = require("../utils/validator");
 
-const findChildrenRecursive = async (section, allChildren, { findAll = false, lean = true }) => {
+const findChildrenRecursive = async (section, allChildren, { findAll = false }) => {
   if (section.type !== "section") return;
-  const children = lean
-    ? await KnowledgeBaseObject.find({ parentId: section._id }).sort({ type: -1, position: 1 }).populate({ path: "author", select: "_id firstName lastName role" }).lean() // to json;
-    : await KnowledgeBaseObject.find({ parentId: section._id }).sort({ type: -1, position: 1 });
+  const children = await KnowledgeBaseObject.find({ parentId: section._id })
+    .sort({ type: -1, position: 1 })
+    .populate({ path: "author", select: "_id firstName lastName role" })
+    .lean(); // to json;
   for (const child of children) {
     allChildren.push(child);
     if (findAll) await findChildrenRecursive(child, allChildren, { findAll, lean });
@@ -66,6 +67,60 @@ const consolidateAllowedRoles = async (initSection = { type: "section" }, newAll
   checkAllowedRoles(tree);
 };
 
+const findArticlesWithSlug = (slug, content) => {
+  for (const item of content) {
+    if (item.type === "link") {
+      if (item.url.includes(slug)) {
+        console.log("YES");
+        return true;
+      }
+    }
+    if (item.children) {
+      const hasSlug = findArticlesWithSlug(slug, item.children);
+      if (hasSlug) return true;
+    }
+  }
+  return false;
+};
+
+const findAndUpdateArticlesWithLinksWithSlug = async (oldSlug, newSlug) => {
+  const articles = await KnowledgeBaseObject.find({ type: "article", slug: { $ne: newSlug } });
+  const findAndUpdateLink = (item) => {
+    if (item.type === "link") {
+      if (item.url.includes(oldSlug)) {
+        const url = `/base-de-connaissance/${newSlug}`;
+        return {
+          ...item,
+          url,
+        };
+      }
+      return item;
+    }
+    if (item.children) {
+      return {
+        ...item,
+        children: item.children.map(findAndUpdateLink),
+      };
+    }
+    return item;
+  };
+  for (const article of articles) {
+    const { content } = article;
+    if (JSON.stringify(content).includes(oldSlug)) {
+      article.set({ content: content.map(findAndUpdateLink) });
+      await article.save();
+    }
+  }
+};
+
+// (async () => {
+//   const zammads = await KnowledgeBaseObject.find({ zammadId: { $exists: true } });
+//   for (const zammad of zammads) {
+//     await KnowledgeBaseObject.findByIdAndDelete(zammad._id);
+//   }
+//   console.log("DELETED");
+// })();
+
 router.post("/picture", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
@@ -94,14 +149,6 @@ router.post("/picture", passport.authenticate("referent", { session: false, fail
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-// (async () => {
-//   const zammads = await KnowledgeBaseObject.find({ zammadId: { $exists: true }, type: "article", status: "DRAFT" });
-//   for (const zammad of zammads) {
-//     await KnowledgeBaseObject.findByIdAndDelete(zammad._id);
-//   }
-//   console.log("DELETED");
-// })();
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -156,11 +203,13 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const data = await KnowledgeBaseObject.findById(newKb._id).populate({ path: "author", select: "_id firstName lastName role" }).lean();
     return res.status(200).send({ ok: true, data });
   } catch (error) {
+    console.log(error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
+// this is when reordering by drag and drop, in the tree or in a section
 router.put("/reorder", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const itemsToReorder = req.body;
@@ -186,6 +235,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const updateKb = {};
     let updateChildrenAllowedRoles = false;
+    let oldSlugToUpdate = null;
     let newAllowedRoles = [];
 
     if (req.body.hasOwnProperty("type")) updateKb.type = req.body.type;
@@ -201,6 +251,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       updateKb.title = req.body.title;
     }
     if (req.body.hasOwnProperty("slug")) {
+      oldSlugToUpdate = existingKb.slug;
       updateKb.slug = slugify(req.body.slug.trim(), {
         replacement: "-",
         remove: /[*+~.()'"!?:@]/g,
@@ -241,6 +292,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       await consolidateAllowedRoles(existingKb, newAllowedRoles);
     }
 
+    if (oldSlugToUpdate) {
+      await findAndUpdateArticlesWithLinksWithSlug(oldSlugToUpdate, existingKb.slug);
+    }
+
     return res.status(200).send({
       ok: true,
       data: await KnowledgeBaseObject.findById(existingKb._id).populate({ path: "author", select: "_id firstName lastName role" }).lean(), // to json,
@@ -251,29 +306,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.get("/tree", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const rootKbs = await KnowledgeBaseObject.find({ parentId: { $in: [undefined, null] } })
-      .sort({ type: -1, position: 1 })
-      .populate({
-        path: "author",
-        select: "_id firstName lastName role",
-      })
-      .lean(); // to json;
-    if (!rootKbs) return res.status(200).send({ ok: true, data: [] });
-
-    const tree = await Promise.all(rootKbs.map(buildTree));
-
-    return res.status(200).send({ ok: true, data: { type: "root", children: tree } });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
+// this is for admin: we download all in once so that we can build the tree and navigate quickly
 router.get("/all", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" });
+    const data = await KnowledgeBaseObject.find(req.query || {}).populate({ path: "author", select: "_id firstName lastName role" });
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -282,9 +318,10 @@ router.get("/all", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
+// this is to build static files from next-js
 router.get("/all-slugs", async (req, res) => {
   try {
-    const data = await KnowledgeBaseObject.find(req.query || {});
+    const data = await KnowledgeBaseObject.find();
 
     return res.status(200).send({ ok: true, data: data.map((item) => item.slug) });
   } catch (error) {
@@ -342,6 +379,28 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (!kb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const childrenToDelete = await findChildren(kb, true);
+    // check if there is no reference of existing article/section in links
+    const slugs = [kb, ...childrenToDelete].map((item) => item.slug);
+    const articlesReferingItemsToDelete = [];
+    const articlesNotToDelete = await KnowledgeBaseObject.find({ type: "article", _id: { $nin: [kb, ...childrenToDelete].map((item) => item._id) } });
+    for (const slug of slugs) {
+      for (const article of articlesNotToDelete) {
+        const hasSlug = findArticlesWithSlug(slug, article.content);
+        if (hasSlug) articlesReferingItemsToDelete.push(article);
+      }
+    }
+
+    if (articlesReferingItemsToDelete.length) {
+      return res.status(400).send({
+        ok: true,
+        data: articlesReferingItemsToDelete,
+        error: `Il y a une référence de l'élément que vous souhaitez supprimer dans d'autres articles, veuillez les mettre à jour: ${articlesReferingItemsToDelete.map(
+          (article) => `\n${article.title}`,
+        )}`,
+      });
+    }
+
+    // delete items
     for (const child of [kb, ...childrenToDelete]) {
       await KnowledgeBaseObject.findByIdAndDelete(child._id);
     }
