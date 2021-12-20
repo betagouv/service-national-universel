@@ -1,8 +1,8 @@
 import useSWR, { SWRConfig } from "swr";
 import Wrapper from "../../components/Wrapper";
-import KBSectionCard from "../../components/knowledge-base/KBSectionCard";
 import API from "../../services/api";
 import { useEffect, useState } from "react";
+import PublicKBSection from "../../components/knowledge-base/PubliKBSection";
 
 const Sections = () => {
   const { data: response } = useSWR(API.getUrl({ path: "/support-center/knowledge-base" }));
@@ -12,13 +12,7 @@ const Sections = () => {
     setSections(response?.data || []);
   }, response?.data);
 
-  return (
-    <div className="md:px-10 px-6 flex lg:flex flex-col lg:flex-nowrap overflow-hidden max-w-screen-95 mx-auto flex-wrap grid-cols-2 md:grid md:flex-row row-span-2 row-start-2 col-span-full gap-2.5 h-84">
-      {sections.map((section) => (
-        <KBSectionCard key={section._id} title={section.title} group={section.group} imageSrc={section.imageSrc} slug={section.slug} path="/base-de-connaissance" />
-      ))}
-    </div>
-  );
+  return <PublicKBSection item={{ children: sections }} />;
 };
 
 const Home = ({ fallback }) => (
