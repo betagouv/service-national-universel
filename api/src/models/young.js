@@ -293,6 +293,14 @@ const Schema = new mongoose.Schema({
       description: "La fiche sanitaire a été reçu par le SNU",
     },
   },
+  sessionPhase1Id: {
+    type: String,
+    documentation: {
+      description: "Id de la session de cohésion d'accueil pour la phase 1",
+    },
+  },
+  // *** START LEGACY COHESION CENTER ***
+  // phase1 legacy infos, we keep it for retrocompatibility, can be deleted in the future
   cohesionCenterId: {
     type: String,
     documentation: {
@@ -317,6 +325,7 @@ const Schema = new mongoose.Schema({
       description: "Nom du centre de cohésion d'accueil pour la phase 1",
     },
   },
+  // *** END LEGACY COHESION CENTER ***
 
   autoAffectationPhase1ExpiresAt: {
     type: Date,
