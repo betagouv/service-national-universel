@@ -3,7 +3,8 @@ import { useMemo } from "react";
 import Loader from "react-loader-spinner";
 import Breadcrumb from "../BreadCrumb";
 import TextEditor from "../TextEditor";
-import PublicKBSection from "./PubliKBSection";
+import PublicKBSection from "./PublicKBSection";
+import PublicKBNoAnswer from "./PublicKBNoAnswer";
 
 export const Article = ({ item }) => {
   return (
@@ -40,7 +41,7 @@ const PublicKBContent = ({ item }) => {
           </>
         )}
       </div>
-      <button className="bg-white text-[#4F46E5] my-[70px] text-base shadow-base rounded-md py-3.5 px-5 mx-auto">Je n’ai pas trouvé réponse à ma question</button>
+      <PublicKBNoAnswer />
     </Wrapper>
   );
 };
