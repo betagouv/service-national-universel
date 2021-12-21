@@ -9,7 +9,6 @@ const { anyAuth } = require("../passport");
 const KnowledgeBaseObject = require("../models/knowledgeBase");
 const { uploadPublicPicture, ERRORS } = require("../utils/index.js");
 const { validateId } = require("../utils/validator");
-const { mapRoleToKBAccess } = require("snu-lib/roles");
 
 const findChildrenRecursive = async (section, allChildren, { findAll = false }) => {
   if (section.type !== "section") return;
@@ -332,6 +331,25 @@ router.get("/all-slugs", async (req, res) => {
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
+
+const mapRoleToKBAccess = (user) => {
+  if (!user.constructor.modelName) return "public";
+  if (user.constructor.modelName === "young") return "young";
+  switch (user.role) {
+    case ROLES.ADMIN:
+      return "admin";
+    case ROLES.REFERENT_DEPARTMENT:
+    case ROLES.REFERENT_REGION:
+      return "referent";
+    case ROLES.RESPONSIBLE:
+    case ROLES.SUPERVISOR:
+      return "structure";
+    case ROLES.HEAD_CENTER:
+      return "head_center";
+    default:
+      return "public";
+  }
+};
 
 // this is for the public-access part of the knowledge base (not the admin part)
 router.get("/:slug", anyAuth, async (req, res) => {
