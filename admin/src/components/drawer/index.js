@@ -166,6 +166,15 @@ function headCenter({ onClick }) {
   );
 }
 
+function visitor({ onClick }) {
+  return (
+    <>
+      <BlankSeparator />
+      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
+    </>
+  );
+}
+
 const Drawer = (props) => {
   const user = useSelector((state) => state.Auth.user);
   const newTickets = useSelector((state) => state.Tickets.new);
@@ -210,6 +219,7 @@ const Drawer = (props) => {
     if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
     if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
     if (user.role === ROLES.HEAD_CENTER) return "espace chef de centre";
+    if (user.role === ROLES.VISITOR) return "Espace visiteur";
     return "";
   }
 
@@ -238,6 +248,7 @@ const Drawer = (props) => {
         {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
         {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
         {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+        {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
       </ul>
     </Sidebar>
   );

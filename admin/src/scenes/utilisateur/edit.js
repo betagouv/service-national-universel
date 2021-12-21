@@ -12,7 +12,7 @@ import ReactSelect from "react-select";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, department2region, translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, colors } from "../../utils";
+import { departmentList, regionList, department2region, translate, ROLES, VISITOR_SUBROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, colors } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../components/Loader";
@@ -73,11 +73,8 @@ export default function Edit(props) {
     handleChange({ target: { name: "department", value: "" } });
   };
 
-  const getSubRole = (role) => {
-    let subRole = [];
-    if (role === ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
-    if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
-    return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
+  const getSubRoleOptions = (subRoles) => {
+    return Object.keys(subRoles).map((e) => ({ value: e, label: translate(subRoles[e]) }));
   };
 
   async function modifyStructure() {
@@ -225,10 +222,12 @@ export default function Edit(props) {
                         }}
                         allowEmpty={false}
                         title="Rôle"
-                        options={[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].map((key) => ({
-                          value: key,
-                          label: translate(key),
-                        }))}
+                        options={[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR].map(
+                          (key) => ({
+                            value: key,
+                            label: translate(key),
+                          }),
+                        )}
                       />
                       {values.role === ROLES.HEAD_CENTER ? (
                         centers ? (
@@ -261,9 +260,16 @@ export default function Edit(props) {
                           <Loader />
                         )
                       ) : null}
-                      {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(values.role) ? (
-                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
+                      {values.role === ROLES.REFERENT_DEPARTMENT ? (
+                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
                       ) : null}
+                      {values.role === ROLES.REFERENT_REGION ? (
+                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
+                      ) : null}
+                      {values.role === ROLES.VISITOR ? (
+                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(VISITOR_SUBROLES)} />
+                      ) : null}
+
                       {values.role === ROLES.REFERENT_DEPARTMENT ? (
                         <Select
                           disabled={currentUser.role !== ROLES.ADMIN}

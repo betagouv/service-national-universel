@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { ROLES_LIST, SUB_ROLES_LIST } = require("snu-lib/roles");
+const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib/roles");
 const { isYoung } = require("../utils");
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
@@ -555,7 +555,7 @@ function validateReferent(referent) {
       department: Joi.string().allow(null, ""),
       subRole: Joi.string()
         .allow(null, "")
-        .valid(...SUB_ROLES_LIST),
+        .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST),
       sessionPhase1Id: Joi.string().allow(null, ""),
       cohesionCenterId: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
@@ -618,5 +618,5 @@ module.exports = {
   validateContract,
   validateOptionalId,
   validateEvent,
-  validateSessionPhase1
+  validateSessionPhase1,
 };

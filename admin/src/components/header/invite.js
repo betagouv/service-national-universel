@@ -16,6 +16,7 @@ import {
   REFERENT_REGION_SUBROLE,
   ROLES,
   SENDINBLUE_TEMPLATES,
+  VISITOR_SUBROLES,
 } from "../../utils";
 
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -36,12 +37,10 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
     })();
   }, []);
 
-  const getSubRole = (role) => {
-    let subRole = [];
-    if (role === ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
-    if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
-    return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
+  const getSubRoleOptions = (subRoles) => {
+    return Object.keys(subRoles).map((e) => ({ value: e, label: translate(subRoles[e]) }));
   };
+
   return (
     <Invitation style={{ marginBottom: 10, textAlign: "right" }}>
       <Modal isOpen={open} toggle={() => setOpen(false)} size="lg">
@@ -108,39 +107,63 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       </FormGroup>
                     </Col>
                   </Row>
-                  {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER].includes(values.role) ? (
+                  {values.role === ROLES.REFERENT_REGION && (
                     <Row>
-                      <>
-                        <Col md={6}>
-                          {values.role === ROLES.REFERENT_DEPARTMENT ? (
-                            <FormGroup>
-                              <div>Département</div>
-                              <ChooseDepartment validate={(v) => !v} value={values.department} onChange={handleChange} />
-                            </FormGroup>
-                          ) : null}
-                          {values.role === ROLES.REFERENT_REGION ? (
-                            <FormGroup>
-                              <div>Région</div>
-                              <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
-                            </FormGroup>
-                          ) : null}
-                          {values.role === ROLES.HEAD_CENTER ? (
-                            <FormGroup>
-                              <ChooseCenter validate={(v) => !v} value={values} onChange={handleChange} centers={centers} />
-                            </FormGroup>
-                          ) : null}
-                        </Col>
-                        {values.role !== ROLES.HEAD_CENTER && (
-                          <Col md={6}>
-                            <FormGroup>
-                              <div>Fonction</div>
-                              <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRole(values.role)} />
-                            </FormGroup>
-                          </Col>
-                        )}
-                      </>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Région</div>
+                          <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Fonction</div>
+                          <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
+                        </FormGroup>
+                      </Col>
                     </Row>
-                  ) : null}
+                  )}
+                  {values.role === ROLES.REFERENT_DEPARTMENT && (
+                    <Row>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Département</div>
+                          <ChooseDepartment validate={(v) => !v} value={values.department} onChange={handleChange} />
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Fonction</div>
+                          <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  )}
+                  {values.role === ROLES.VISITOR && (
+                    <Row>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Région</div>
+                          <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Fonction</div>
+                          <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRoleOptions(VISITOR_SUBROLES)} />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  )}
+                  {values.role === ROLES.HEAD_CENTER && (
+                    <Row>
+                      <Col md={6}>
+                        <FormGroup>
+                          <ChooseCenter validate={(v) => !v} value={values} onChange={handleChange} centers={centers} />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  )}
                   <br />
                   <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
                     Envoyer l&apos;invitation
@@ -254,6 +277,7 @@ const ChooseRole = ({ value, onChange, validate }) => {
   return (
     <Field as="select" validate={validate} className="form-control" placeholder="Rôle" name="role" value={value} onChange={onChange}>
       <option value=""></option>
+      <option value={ROLES.VISITOR}>{translate(ROLES.VISITOR)}</option>
       <option value={ROLES.HEAD_CENTER}>{translate(ROLES.HEAD_CENTER)}</option>
       <option value={ROLES.REFERENT_DEPARTMENT}>{translate(ROLES.REFERENT_DEPARTMENT)}</option>
       {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_REGION ? <option value={ROLES.REFERENT_REGION}>{translate(ROLES.REFERENT_REGION)}</option> : null}
@@ -261,6 +285,7 @@ const ChooseRole = ({ value, onChange, validate }) => {
     </Field>
   );
 };
+
 const ChooseSubRole = ({ value, onChange, options }) => {
   return (
     <Input type="select" name="subRole" value={value} onChange={onChange}>

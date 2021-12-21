@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import CircularProgress from "../components/CircularProgress";
 import api from "../../../services/api";
-import { translate, getLink } from "../../../utils";
+import { translate, getLink, ROLES } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function ScholarshipsGrade({ filter }) {
   const [value, setValue] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -40,6 +42,13 @@ export default function ScholarshipsGrade({ filter }) {
     return (
       <Row style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         {Object.keys(value).map((e, i) => {
+          if (user.role === ROLES.VISITOR) {
+            return (
+              <Col style={{ marginTop: "15px" }} key={i}>
+                <CircularProgress circleProgressColor="#1B7BBF" percentage={((value[e] * 100) / total).toFixed(1)} title={value[e]} subtitle={translate(e || "non renseigné")} />
+              </Col>
+            );
+          }
           return (
             <Link key={i} to={getLink({ base: `/inscription`, filter, filtersUrl: [`GRADE=%5B"${e}"%5D`] })}>
               <Col style={{ marginTop: "15px" }} key={i}>
