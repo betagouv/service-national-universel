@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import SortableJS from "sortablejs";
 import { toast } from "react-toastify";
 import withAuth from "../../hocs/withAuth";
@@ -8,6 +8,7 @@ import KBArticleCard from "./KBArticleCard";
 import AdminKBCreate from "./AdminKBCreate";
 import Tags from "../Tags";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import Loader from "../Loader";
 
 const AdminKBSection = ({ section, isRoot }) => {
   const { mutate } = useKnowledgeBaseData();
@@ -16,7 +17,10 @@ const AdminKBSection = ({ section, isRoot }) => {
   const sortableSections = useRef(null);
   const sortableAnswers = useRef(null);
 
+  const [isSaving, setIsSaving] = useState(false);
+  const [reloadSortKey, setReloadSortKey] = useState(0);
   const onListChange = async (list) => {
+    setIsSaving(true);
     const gridRef = list === "sections" ? gridSectionsRef : gridAnswersRef;
     const newSort = [...gridRef.current.children]
       .map((i) => i.dataset.id)
@@ -27,8 +31,13 @@ const AdminKBSection = ({ section, isRoot }) => {
       path: "/support-center/knowledge-base/reorder",
       body: newSort.map(({ _id, position, title }) => ({ _id, position, title, parentId: section._id })),
     });
-    if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
+    if (!response.ok) {
+      setIsSaving(false);
+      toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
+      return;
+    }
     mutate();
+    setIsSaving(false);
   };
 
   const sections = section.children.filter((c) => c.type === "section");
@@ -105,6 +114,11 @@ const AdminKBSection = ({ section, isRoot }) => {
             {!sections.length && <span className="w-full p-10 text-gray-400 block">Pas de rubrique</span>}
           </div>
         </section>
+        {!!isSaving && (
+          <div className="absolute w-full h-full top-0 left-0 bg-gray-500 opacity-25 pointer-events-none">
+            <Loader color="#bbbbbb" size={100} />
+          </div>
+        )}
       </main>
     </article>
   );

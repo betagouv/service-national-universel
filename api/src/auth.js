@@ -15,9 +15,7 @@ class Auth {
   }
 
   async signin(req, res) {
-    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() })
-      .unknown()
-      .validate(req.body);
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() }).unknown().validate(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_AND_PASSWORD_REQUIRED });
 
     const { password, email } = value;

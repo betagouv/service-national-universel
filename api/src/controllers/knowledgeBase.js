@@ -113,6 +113,26 @@ const findAndUpdateArticlesWithLinksWithSlug = async (oldSlug, newSlug) => {
   }
 };
 
+const getSlug = async (title) => {
+  const slug = slugify(title.trim(), {
+    replacement: "-",
+    remove: /[*+~.()'"!?:@]/g,
+    lower: true, // convert to lower case, defaults to `false`
+    strict: true, // strip special characters except replacement, defaults to `false`
+    locale: "fr", // language code of the locale to use
+    trim: true, // trim leading and trailing replacement chars, defaults to `true`
+  });
+  let itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug });
+  let inc = 0;
+  let newSlug = slug;
+  while (itemWithSameSlug) {
+    inc++;
+    newSlug = `${slug}-${inc}`;
+    itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug: newSlug });
+  }
+  return newSlug;
+};
+
 // (async () => {
 //   const zammads = await KnowledgeBaseObject.find({ zammadId: { $exists: true } });
 //   for (const zammad of zammads) {
@@ -168,20 +188,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (req.body.hasOwnProperty("position")) kb.position = req.body.position;
     if (req.body.hasOwnProperty("title")) {
       kb.title = req.body.title.trim();
-      let slug = slugify(req.body.title.trim(), {
-        replacement: "-",
-        remove: /[*+~.()'"!?:@]/g,
-        lower: true, // convert to lower case, defaults to `false`
-        strict: true, // strip special characters except replacement, defaults to `false`
-        locale: "fr", // language code of the locale to use
-        trim: true, // trim leading and trailing replacement chars, defaults to `true`
-      });
-      let itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug });
-      while (itemWithSameSlug) {
-        slug = `${slug}-${new Date().toISOString().split("T")[0]}`;
-        itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug });
-      }
-      kb.slug = slug;
+      kb.slug = await getSlug(req.body.title);
     }
     if (req.body.hasOwnProperty("allowedRoles")) {
       kb.allowedRoles = req.body.allowedRoles;
@@ -220,6 +227,7 @@ router.put("/reorder", passport.authenticate("referent", { session: false, failW
         await consolidateAllowedRoles(item, item.allowedRoles);
       }
     });
+    session.endSession();
     const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -252,14 +260,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     if (req.body.hasOwnProperty("slug")) {
       oldSlugToUpdate = existingKb.slug;
-      updateKb.slug = slugify(req.body.slug.trim(), {
-        replacement: "-",
-        remove: /[*+~.()'"!?:@]/g,
-        lower: true, // convert to lower case, defaults to `false`
-        strict: true, // strip special characters except replacement, defaults to `false`
-        locale: "fr", // language code of the locale to use
-        trim: true, // trim leading and trailing replacement chars, defaults to `true`
-      });
+      updateKb.slug = await getSlug(req.body.slug.trim());
     }
     if (req.body.hasOwnProperty("imageSrc")) updateKb.imageSrc = req.body.imageSrc;
     if (req.body.hasOwnProperty("imageAlt")) updateKb.imageAlt = req.body.imageAlt;
@@ -330,6 +331,7 @@ router.get("/all-slugs", async (req, res) => {
   }
 });
 
+// this is for the public-access part of the knowledge base (not the admin part)
 router.get("/:slug", async (req, res) => {
   try {
     const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug })

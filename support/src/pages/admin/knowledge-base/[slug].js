@@ -69,7 +69,9 @@ const KnowledgeBase = () => {
         <Loader />
       ) : (
         <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
-          <AdminKBTree visible={treeVisible} setVisible={setTreeVisible} />
+          <aside className={`relative flex flex-col flex-grow-0 flex-shrink-0 border-r-2 shadow-lg z-10 resize-x p-2 overflow-hidden ${treeVisible ? "w-80" : "w-0 hidden"}`}>
+            <AdminKBTree isSortable onClick={(slug) => router.push(`/admin/knowledge-base/${slug || ""}`)} />
+          </aside>
           <Content key={slug} item={item} />
           {!isRoot && (
             <>

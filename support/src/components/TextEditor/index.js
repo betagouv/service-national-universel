@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import isHotkey, { isKeyHotkey } from "is-hotkey";
 import isUrl from "is-url";
 import { Editable, withReact, useSlate, Slate, useSlateStatic, useSelected, ReactEditor, useFocused } from "slate-react";
@@ -9,8 +9,8 @@ import { useRouter } from "next/router";
 import PasteLinkify from "slate-paste-linkify";
 
 import API from "../../services/api";
-import { Button, Icon, Spacer, Toolbar } from "./components";
-import { wrapLink, AddLinkButton, RemoveLinkButton } from "./urls";
+import { TextEditorButton, Icon, Spacer, Toolbar } from "./components";
+import { wrapLink, AddLinkButton, RemoveLinkButton } from "./links";
 import EmojiPicker from "../EmojiPicker";
 import { deserialize } from "./importHtml";
 
@@ -34,7 +34,9 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
 
   const renderElement = useCallback((props) => <Element {...props} readOnly={readOnly} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
-  const editor = useMemo(() => withPlugins(withHistory(withReact(createEditor()))), []);
+  const editorRef = useRef();
+  if (!editorRef.current) editorRef.current = withPlugins(withHistory(withReact(createEditor())));
+  const editor = editorRef.current;
 
   const onChange = (value) => {
     if (readOnly) return;
@@ -132,9 +134,9 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
         <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
           {!readOnly && (
             <Toolbar>
-              <Button>
+              <TextEditorButton>
                 <EmojiPicker size={10} className="text-2xl my-1.5 !mr-0 !h-5 !w-5" insertEmoji={editor.insertText} />
-              </Button>
+              </TextEditorButton>
               <MarkButton format="bold" icon="format_bold" />
               <MarkButton format="italic" icon="format_italic" />
               <MarkButton format="underline" icon="format_underlined" />
@@ -380,13 +382,13 @@ const Image = ({ attributes, children, element, readOnly }) => {
       {children}
       <div contentEditable={false} className="relative">
         <img src={element.url} alt={element.alt} className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`} />
-        <Button
+        <TextEditorButton
           active
           onClick={() => Transforms.removeNodes(editor, { at: path })}
           className={`absolute top-2 left-2 bg-white ${selected && focused && !readOnly ? "inline" : "none"} ${readOnly ? "none" : ""}`}
         >
           <Icon>delete</Icon>
-        </Button>
+        </TextEditorButton>
       </div>
       {!readOnly && (
         <MetaDataInput
@@ -465,7 +467,7 @@ const MetaDataInput = ({ initValue, onChange, label, name }) => {
 const BlockButton = ({ format, icon }) => {
   const editor = useSlate();
   return (
-    <Button
+    <TextEditorButton
       active={isBlockActive(editor, format)}
       onMouseDown={(event) => {
         event.preventDefault();
@@ -473,14 +475,14 @@ const BlockButton = ({ format, icon }) => {
       }}
     >
       <Icon>{icon}</Icon>
-    </Button>
+    </TextEditorButton>
   );
 };
 
 const MarkButton = ({ format, icon }) => {
   const editor = useSlate();
   return (
-    <Button
+    <TextEditorButton
       active={isMarkActive(editor, format)}
       onMouseDown={(event) => {
         event.preventDefault();
@@ -488,7 +490,7 @@ const MarkButton = ({ format, icon }) => {
       }}
     >
       <Icon>{icon}</Icon>
-    </Button>
+    </TextEditorButton>
   );
 };
 
@@ -523,7 +525,7 @@ const InsertImageButton = () => {
     setReloadKey((k) => k + 1);
   };
   return (
-    <Button
+    <TextEditorButton
       onMouseDown={(event) => {
         event.preventDefault();
         inputFileRef.current.click();
@@ -531,7 +533,7 @@ const InsertImageButton = () => {
     >
       <Icon>image</Icon>
       <input key={reloadKey} type="file" ref={inputFileRef} onChange={onUploadImage} className="hidden" />
-    </Button>
+    </TextEditorButton>
   );
 };
 
@@ -546,7 +548,7 @@ const isImageUrl = (url) => {
 const InsertVideoButton = () => {
   const editor = useSlateStatic();
   return (
-    <Button
+    <TextEditorButton
       onMouseDown={(event) => {
         event.preventDefault();
         const videoId = window.prompt("Entrez l'id Viméo de la vidéo - Viméo seulement pour le moment");
@@ -557,7 +559,7 @@ const InsertVideoButton = () => {
       }}
     >
       <Icon>tv</Icon>
-    </Button>
+    </TextEditorButton>
   );
 };
 

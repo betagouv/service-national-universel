@@ -29,7 +29,7 @@ const useIsActive = ({ slug }, onIsActive) => {
 
 const horizontalSpacing = 2;
 
-const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions, parentId, onListChange, onIsActive, onToggleOpen }) => {
+const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions, parentId, onListChange, onIsActive, onToggleOpen, isSortable, onClick }) => {
   const [open, setIsOpen] = useState(initShowOpen);
   useEffect(() => {
     if (!!isMounted) onToggleOpen(open);
@@ -52,10 +52,12 @@ const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions,
   };
 
   const gridRef = useRef(null);
-  const sortable = useRef(null);
+  const sortableRef = useRef(null);
   useEffect(() => {
-    sortable.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
-  }, []);
+    if (isSortable) {
+      sortableRef.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
+    }
+  }, [isSortable]);
 
   let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " " : " ";
 
@@ -72,7 +74,7 @@ const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions,
         <small className="text-trueGray-400 mr-1 w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
           {open ? "\u25BC" : "\u25B6"}
         </small>
-        <Link href={`/admin/knowledge-base/${section.slug || ""}`} passHref>
+        <a onClick={() => onClick(section.slug || "")} className="cursor-pointer">
           {section.title ? (
             `${open ? "📂" : "📁"}${isDraft}${section.title} (${section.children?.length || 0})`
           ) : (
@@ -85,7 +87,7 @@ const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions,
               />
             </svg>
           )}
-        </Link>
+        </a>
       </span>
       <div ref={gridRef} id={`child-container-${section._id || "root"}`} className={`flex flex-col ${!open ? "hidden" : ""}`}>
         {section.children?.map((child, index) =>
@@ -101,9 +103,11 @@ const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions,
               onToggleOpen={onToggleOpen}
               initShowOpen={!!cachedOpenedPositions.find((item) => item._id === child._id && !!item.initShowOpen)}
               cachedOpenedPositions={cachedOpenedPositions}
+              isSortable={isSortable}
+              onClick={onClick}
             />
           ) : (
-            <Answer parentId={child.parentId} position={child.position} key={child._id} article={child} level={level + 1} onIsActive={onChildIsActive} />
+            <Answer parentId={child.parentId} position={child.position} key={child._id} article={child} level={level + 1} onIsActive={onChildIsActive} onClick={onClick} />
           )
         )}
       </div>
@@ -111,20 +115,20 @@ const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions,
   );
 };
 
-const Answer = ({ article, level, onIsActive, position, parentId }) => {
+const Answer = ({ article, level, onIsActive, position, parentId, onClick }) => {
   const isActive = useIsActive(article, onIsActive);
   return (
-    <Link key={article._id} href={`/admin/knowledge-base/${article.slug}`} passHref>
-      <a
-        data-position={position}
-        data-parentid={parentId}
-        data-id={article._id}
-        href="#"
-        className={`text-warmGray-500  overflow-hidden overflow-ellipsis whitespace-nowrap block ml-${level * horizontalSpacing} ${isActive ? "font-bold" : ""}`}
-      >
-        {"📃 "} <span className={`${article.status === "DRAFT" ? "italic opacity-40" : ""}`}>{article.title}</span>
-      </a>
-    </Link>
+    <a
+      key={article._id}
+      data-position={position}
+      data-parentid={parentId}
+      data-id={article._id}
+      href="#"
+      onClick={() => onClick(article.slug)}
+      className={`text-warmGray-500 cursor-pointer  overflow-hidden overflow-ellipsis whitespace-nowrap block ml-${level * horizontalSpacing} ${isActive ? "font-bold" : ""}`}
+    >
+      {"📃 "} <span className={`${article.status === "DRAFT" ? "italic opacity-40" : ""}`}>{article.title}</span>
+    </a>
   );
 };
 
@@ -148,7 +152,7 @@ const getElementsNewState = (root) => {
   return allItems;
 };
 
-const KnowledgeBaseTree = ({ visible }) => {
+const AdminKBTree = ({ isSortable, onClick }) => {
   const { tree, flattenedData, mutate } = useKnowledgeBaseData();
 
   // reloadTreeKey to prevent error `Failed to execute 'removeChild' on 'Node'` from sortablejs after updating messy tree
@@ -176,6 +180,7 @@ const KnowledgeBaseTree = ({ visible }) => {
       setIsSaving(false);
       return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
     }
+    setReloadeTreeKey((k) => k + 1);
     mutate(response);
     setReloadeTreeKey((k) => k + 1);
     setIsSaving(false);
@@ -185,22 +190,30 @@ const KnowledgeBaseTree = ({ visible }) => {
     const elementsNewState = getElementsNewState(rootRef.current.children[0]);
     setCachedOpenedPositions(elementsNewState);
   };
-
   return (
-    <aside className={`relative flex flex-col flex-grow-0 flex-shrink-0 border-r-2 shadow-lg z-10 resize-x p-2 overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
+    <>
       {/* TODO find a way for tailwind to not filter margins from compiling,
        because things like `ml-${level}` are not compiled */}
       <div className="hidden ml-2 ml-3 ml-4 ml-5 ml-6 ml-7 ml-8 ml-9 ml-10 ml-11 ml-12 ml-13 ml-14 ml-15 ml-16"></div>
       <div ref={rootRef} key={reloadTreeKey} className="overflow-auto pb-10">
-        <Branch section={tree} level={0} onListChange={onListChange} onToggleOpen={onToggleOpen} initShowOpen cachedOpenedPositions={cachedOpenedPositions} />
+        <Branch
+          section={tree}
+          level={0}
+          onListChange={onListChange}
+          onToggleOpen={onToggleOpen}
+          initShowOpen
+          cachedOpenedPositions={cachedOpenedPositions}
+          isSortable={isSortable}
+          onClick={onClick}
+        />
       </div>
       {!!isSaving && (
         <div className="absolute w-full h-full top-0 left-0 bg-gray-500 opacity-25 pointer-events-none">
           <Loader color="#bbbbbb" size={40} />
         </div>
       )}
-    </aside>
+    </>
   );
 };
 
-export default KnowledgeBaseTree;
+export default AdminKBTree;

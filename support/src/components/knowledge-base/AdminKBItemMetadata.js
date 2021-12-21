@@ -7,6 +7,7 @@ import API from "../../services/api";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import InputWithEmojiPicker from "../InputWithEmojiPicker";
 import IconsPicker, { RedIcon } from "../IconsPicker";
+import { Button, CancelButton } from "../Buttons";
 
 const AdminKBItemMetadata = ({ visible }) => {
   const router = useRouter();
@@ -33,8 +34,10 @@ const AdminKBItemMetadata = ({ visible }) => {
     setItemSlug(item.slug);
   }, [item.slug]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const onSubmit = async (event) => {
     event.preventDefault();
+    setIsSubmitting(true);
     const formData = new FormData(event.currentTarget);
     const body = { allowedRoles: [] };
     for (let [key, value] of formData.entries()) {
@@ -48,6 +51,7 @@ const AdminKBItemMetadata = ({ visible }) => {
       }
     }
     const response = await API.put({ path: `/support-center/knowledge-base/${item._id}`, body });
+    setIsSubmitting(false);
     if (response.code) return toast.error(response.code);
     if (itemSlug !== item.slug) {
       await mutate({ ok: true, data: flattenedData.map((i) => (i._id === item._id ? response.data : i)) }, false);
@@ -57,10 +61,13 @@ const AdminKBItemMetadata = ({ visible }) => {
     toast.success("Élément enregistré !");
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
   const onDelete = async (event) => {
     event.preventDefault();
+    setIsDeleting(true);
     if (window.confirm("Voulez-vous vraiment supprimer cet élément ? Cette opération est définitive")) {
       const response = await API.delete({ path: `/support-center/knowledge-base/${item._id}` });
+      setIsDeleting(false);
       if (response.error) {
         for (const string of [...response.error.split("\n")].reverse()) {
           toast.error(string, { autoClose: false, draggable: true, closeOnClick: false });
@@ -73,27 +80,35 @@ const AdminKBItemMetadata = ({ visible }) => {
       mutate();
       router.replace(`/admin/knowledge-base/${parent?.slug || ""}`);
     }
+    setIsDeleting(false);
   };
 
   const [itemImageSrc, setItemImageSrc] = useState(item.imageSrc);
+  const [isSettingImg, setIsSettingImg] = useState(false);
   const onUploadImage = async (event) => {
+    setIsSettingImg(true);
     const imageRes = await API.uploadFile("/support-center/knowledge-base/picture", event.target.files);
     if (imageRes.code === "FILE_CORRUPTED") {
+      setIsSettingImg(false);
       return toast.error("Le fichier semble corrompu", "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support", {
         timeOut: 0,
       });
     }
     if (!imageRes.ok) return toast.error("Une erreur s'est produite lors du téléversement de votre fichier");
     const response = await API.put({ path: `/support-center/knowledge-base/${item._id}`, body: { imageSrc: imageRes.data } });
+    setIsSettingImg(false);
     if (response.code) return toast.error(response.code);
     mutate();
     setItemImageSrc(response.data.imageSrc);
     toast.success("Fichier téléversé");
   };
 
+  const [isDeletingImg, setIsDeletingImg] = useState(false);
   const onDeleteImage = async () => {
     if (window.confirm("Voulez-vous vraiment supprimer cet image ? Cette opération est définitive")) {
+      setIsDeletingImg(true);
       const response = await API.put({ path: `/support-center/knowledge-base/${item._id}`, body: { imageSrc: null } });
+      setIsDeletingImg(false);
       if (response.code) return toast.error(response.code);
       mutate();
     }
@@ -104,9 +119,12 @@ const AdminKBItemMetadata = ({ visible }) => {
   }, [item.slug]);
 
   const [itemIcon, setItemIcon] = useState(item.icon);
+  const [isSettingIcon, setIsSettingIcon] = useState(false);
   const onChooseIcon = () => setShowIconChooser(true);
   const onSelectIcon = async (icon) => {
+    setIsSettingIcon(true);
     const response = await API.put({ path: `/support-center/knowledge-base/${item._id}`, body: { icon } });
+    setIsSettingIcon(false);
     if (response.code) return toast.error(response.code);
     mutate();
     setItemIcon(response.data.icon);
@@ -182,14 +200,15 @@ const AdminKBItemMetadata = ({ visible }) => {
               type="file"
               onChange={onUploadImage}
               placeholder="Choisissez un fichier"
+              disabled={isSettingImg}
             />
             {!!itemImageSrc && (
               <div className="relative h-40 w-full mb-5 bg-gray-300 flex-shrink-0 flex items-center justify-center overflow-hidden show-button-on-hover rounded-t-lg ">
                 <img alt={item.title} className="relative h-40 w-full bg-gray-300 flex-shrink-0 object-contain" src={item.imageSrc} />
                 <div className="w-full h-full absolute flex items-center justify-center button-container bg-gray-800 bg-opacity-80 transition-opacity">
-                  <button className="absolute m-auto bg-white mt-2 mb-5 !border-2 border-red-500  text-red-500" onClick={onDeleteImage}>
+                  <CancelButton className="absolute m-auto" onClick={onDeleteImage} loading={isDeletingImg} disabled={isDeletingImg}>
                     Supprimer
-                  </button>
+                  </CancelButton>
                 </div>
               </div>
             )}
@@ -197,9 +216,15 @@ const AdminKBItemMetadata = ({ visible }) => {
               Icon (option - sera remplacée par l'image si elle existe)
             </label>
             {!!itemIcon && <RedIcon icon={itemIcon} showText={false} />}
-            <button type="button" className="bg-white mt-2 mb-5 !border-2 border-snu-purple-300  !text-snu-purple-300" onClick={onChooseIcon}>
+            <Button
+              type="button"
+              className="bg-white mt-2 mb-5 !border-2 border-snu-purple-300  !text-snu-purple-300"
+              onClick={onChooseIcon}
+              loading={isSettingIcon}
+              disabled={isSettingIcon}
+            >
               Choisir
-            </button>
+            </Button>
             <IconsPicker isOpen={showIconChooser} onRequestClose={() => setShowIconChooser(false)} onSelect={onSelectIcon} />
           </>
         )}
@@ -236,12 +261,12 @@ const AdminKBItemMetadata = ({ visible }) => {
         </div>
         <span>ZammadId: {item.zammadId}</span>
         <div className="flex flex-wrap justify-around items-center mt-8 mb-2 w-full">
-          <button type="submit" className="mb-2">
+          <Button type="submit" className="mb-2" loading={isSubmitting} disabled={isSubmitting || isDeleting}>
             Enregistrer
-          </button>
-          <button className="bg-white mb-2 !border-2 border-red-500  text-red-500" onClick={onDelete}>
+          </Button>
+          <Button className="mb-2" onClick={onDelete} loading={isDeleting} disabled={isSubmitting || isDeleting}>
             Supprimer
-          </button>
+          </Button>
         </div>
       </form>
     </aside>
