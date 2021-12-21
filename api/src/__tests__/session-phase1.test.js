@@ -65,8 +65,8 @@ describe("Session Phase 1", () => {
 
   describe("PUT /session-phase1/:id", () => {
     it("should return 404 when session-phase1 is not found", async () => {
-      const res = await request(getAppHelper()).put("/session-phase1/").send({
-        _id: notExistingSessionPhase1Id,
+      const res = await request(getAppHelper()).put("/session-phase1/" + notExistingSessionPhase1Id).send({
+        cohort: '2020'
       });
       expect(res.status).toBe(404);
     });
