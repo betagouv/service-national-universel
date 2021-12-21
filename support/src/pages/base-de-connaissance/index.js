@@ -1,12 +1,16 @@
 import useSWR, { SWRConfig } from "swr";
+import { useEffect, useState } from "react";
+import useUser from "../../hooks/useUser";
 import Wrapper from "../../components/Wrapper";
 import API from "../../services/api";
-import { useEffect, useState } from "react";
 import PublicKBSection from "../../components/knowledge-base/PublicKBSection";
 import PublicKBNoAnswer from "../../components/knowledge-base/PublicKBNoAnswer";
+import PublicKBContent from "../../components/knowledge-base/PublicKBContent";
 
 const Sections = () => {
-  const { data: response } = useSWR(API.getUrl({ path: "/support-center/knowledge-base" }));
+  const { user } = useUser(); // find the user in some way, with the cookie ?
+
+  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${user.restriction}` }));
 
   const [sections, setSections] = useState(response?.data || []);
   useEffect(() => {
@@ -14,6 +18,14 @@ const Sections = () => {
   }, [response?.data]);
 
   return <PublicKBSection item={{ children: sections }} />;
+};
+
+const AuthSections = () => {
+  const { isLoading } = useUser(); // find the user in some way, with the cookie ?
+
+  if (isLoading) return <PublicKBContent isLoading />;
+
+  return <Sections />;
 };
 
 const Home = ({ fallback }) => (
@@ -30,7 +42,7 @@ const Home = ({ fallback }) => (
             </div>
           </div>
         </div>
-        <Sections />
+        <AuthSections />
       </div>
       <PublicKBNoAnswer />
     </Wrapper>

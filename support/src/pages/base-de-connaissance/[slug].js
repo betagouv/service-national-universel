@@ -3,6 +3,7 @@ import useSWR, { SWRConfig } from "swr";
 import API from "../../services/api";
 import { useRouter } from "next/router";
 import PublicKBContent from "../../components/knowledge-base/PublicKBContent";
+import useUser from "../../hooks/useUser";
 
 const Content = () => {
   const router = useRouter();
@@ -12,9 +13,9 @@ const Content = () => {
     setSlug(router.query?.slug || "");
   }, [router.query?.slug]);
 
-  const user = {}; // find the user in some way, with the cookie ?
+  const { user } = useUser(); // find the user in some way, with the cookie ?
 
-  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${!user ? "public" : user.role ? "referent" : "young"}/${slug}` }));
+  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${user.restriction}/${slug}` }));
   const [item, setItem] = useState(response?.data || {});
 
   useEffect(() => {
@@ -24,9 +25,17 @@ const Content = () => {
   return <PublicKBContent item={item} />;
 };
 
+const AuthContent = () => {
+  const { isLoading } = useUser(); // find the user in some way, with the cookie ?
+
+  if (isLoading) return <PublicKBContent isLoading />;
+
+  return <Content />;
+};
+
 const Home = ({ fallback }) => (
   <SWRConfig value={{ fallback }}>
-    <Content />
+    <AuthContent />
   </SWRConfig>
 );
 

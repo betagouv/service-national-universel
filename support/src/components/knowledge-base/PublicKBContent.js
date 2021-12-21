@@ -14,7 +14,7 @@ export const Article = ({ item }) => {
   );
 };
 
-const PublicKBContent = ({ item }) => {
+const PublicKBContent = ({ item, isLoading }) => {
   const group = useMemo(() => {
     return item?.group || item?.parents?.[0].group;
   }, [item]);
@@ -32,7 +32,7 @@ const PublicKBContent = ({ item }) => {
             </div>
           </div>
         </div>
-        {!item ? (
+        {!item || isLoading ? (
           <Loader />
         ) : (
           <>

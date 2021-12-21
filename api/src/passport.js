@@ -51,3 +51,5 @@ module.exports = function () {
     }),
   );
 };
+
+module.exports.getToken = getToken;

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { Popover } from "@headlessui/react";
 import { appURL, supportURL } from "../config";
+import useUser from "../hooks/useUser";
 
 const Wrapper = ({ children }) => {
   // toggle this state for change the header
@@ -9,14 +10,18 @@ const Wrapper = ({ children }) => {
 
   return (
     <div className="flex flex-col w-full min-h-screen">
-      <Header isLogin={false} />
+      <Header />
       <main className="flex-1 bg-[#F3F4F6]">{children}</main>
       <Footer />
     </div>
   );
 };
 
-const Header = ({ isLogin }) => {
+const Header = () => {
+  const { user } = useUser();
+
+  console.log({ user });
+
   return (
     <header className="flex-none bg-white">
       <div className="flex flex-wrap items-center gap-4 lg:gap-8 wrapper">
@@ -35,20 +40,20 @@ const Header = ({ isLogin }) => {
             <span className="material-icons absolute text-xl text-gray-400 left-3">search</span>
           </div>
         </div>
-        {isLogin ? (
+        {user.isLoggedIn ? (
           <Popover className="relative flex justify-end flex-1 order-2 w-auto md:flex-none lg:w-1/3">
             <Popover.Button className="flex items-start justify-center gap-3 p-0 text-left bg-white border-none rounded-none shadow-none">
               <div className="rounded-full h-9 w-9 bg-snu-purple-300"></div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">Baptiste</span>
-                <span className="text-xs font-medium text-gray-500">Modérateur</span>
+              <div className="flex flex-col justify-center h-full">
+                <span className="text-sm font-medium text-gray-700">{user.firstName}</span>
+                {!!user.role && <span className="text-xs font-medium text-gray-500">{user.role}</span>}
               </div>
             </Popover.Button>
 
             <Popover.Panel className="absolute right-0 min-w-[208px] lg:min-w-0 z-10 top-10">
               <div className="flex flex-col gap-4 px-4 py-3 bg-white border border-gray-300 rounded-md">
                 <a href="/analytics" className="text-sm font-medium text-gray-700">
-                  Déconnection
+                  Déconnexion
                 </a>
               </div>
             </Popover.Panel>

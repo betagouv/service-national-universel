@@ -1,4 +1,3 @@
-"use strict";
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
@@ -325,25 +324,31 @@ router.get("/all-slugs", async (req, res) => {
 });
 
 const setAllowedRole = (req, res, next) => {
-  req.allowedRole = (() => {
-    if (!req.user.constructor.modelName) return "public";
-    if (req.user.constructor.modelName === "young") return "young";
-    switch (req.user.role) {
-      case ROLES.ADMIN:
-        return "admin";
-      case ROLES.REFERENT_DEPARTMENT:
-      case ROLES.REFERENT_REGION:
-        return "referent";
-      case ROLES.RESPONSIBLE:
-      case ROLES.SUPERVISOR:
-        return "structure";
-      case ROLES.HEAD_CENTER:
-        return "head_center";
-      default:
-        return "public";
-    }
-  })();
-  next();
+  try {
+    req.allowedRole = (() => {
+      if (!req.user) return "public";
+      if (!req.user.constructor.modelName) return "public";
+      if (req.user.constructor.modelName === "young") return "young";
+      switch (req.user.role) {
+        case ROLES.ADMIN:
+          return "admin";
+        case ROLES.REFERENT_DEPARTMENT:
+        case ROLES.REFERENT_REGION:
+          return "referent";
+        case ROLES.RESPONSIBLE:
+        case ROLES.SUPERVISOR:
+          return "structure";
+        case ROLES.HEAD_CENTER:
+          return "head_center";
+        default:
+          return "public";
+      }
+    })();
+    next();
+  } catch (e) {
+    console.log(e);
+    next(e);
+  }
 };
 // this is for the public-access part of the knowledge base (not the admin part)
 const getSlugRoute = async (req, res) => {
@@ -370,6 +375,7 @@ const getSlugRoute = async (req, res) => {
 
     return res.status(200).send({ ok: true, data: existingKb });
   } catch (error) {
+    console.log(error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
@@ -382,6 +388,7 @@ const getRootRoute = async (req, res) => {
 
     return res.status(200).send({ ok: true, data: children });
   } catch (error) {
+    console.log(error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
