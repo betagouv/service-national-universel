@@ -1,3 +1,19 @@
+# [1.11.0](https://github.com/betagouv/service-national-universel/compare/v1.10.3...v1.11.0) (2021-12-21)
+
+
+### Bug Fixes
+
+* **applicationStatus:** remove option CANCEL ([e30b6e1](https://github.com/betagouv/service-national-universel/commit/e30b6e196b8eadaf3e6954cde05ad991e22565e6))
+* **cron:** activate the pushMission cron for everyone ([8ea831b](https://github.com/betagouv/service-national-universel/commit/8ea831bdaf1c92ff4474d7033af2c56915b36bb9))
+* **phase1:** exclude all dom toms for february session ([35f570b](https://github.com/betagouv/service-national-universel/commit/35f570bc51aa892f758771101ed3c7184cc4ca61))
+
+
+### Features
+
+* add field sessionPhase1Id in models ([#1006](https://github.com/betagouv/service-national-universel/issues/1006)) ([2e9414f](https://github.com/betagouv/service-national-universel/commit/2e9414f1939144caa332b890079f479e6d7d5828))
+* controller session phase 1 ([#1005](https://github.com/betagouv/service-national-universel/issues/1005)) ([c521880](https://github.com/betagouv/service-national-universel/commit/c521880829c4450cec42ab4417270b9aa5ac6fe0))
+* **support:** zammad migration ([#1004](https://github.com/betagouv/service-national-universel/issues/1004)) ([7dadba0](https://github.com/betagouv/service-national-universel/commit/7dadba095a121d765707c05f299bde3d3af6a691))
+
 ## [1.10.3](https://github.com/betagouv/service-national-universel/compare/v1.10.2...v1.10.3) (2021-12-17)
 
 
