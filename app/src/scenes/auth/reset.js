@@ -26,7 +26,7 @@ export default function Reset() {
         <Title>
           <span>Mon espace volontaire</span>
         </Title>
-        <Subtitle>Récupérer mon mot de passe</Subtitle>
+        <Subtitle>Réinitialiser mon mot de passe</Subtitle>
         <Formik
           initialValues={{ password: "" }}
           validateOnChange={false}
