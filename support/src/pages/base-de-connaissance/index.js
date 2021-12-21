@@ -2,7 +2,8 @@ import useSWR, { SWRConfig } from "swr";
 import Wrapper from "../../components/Wrapper";
 import API from "../../services/api";
 import { useEffect, useState } from "react";
-import PublicKBSection from "../../components/knowledge-base/PubliKBSection";
+import PublicKBSection from "../../components/knowledge-base/PublicKBSection";
+import PublicKBNoAnswer from "../../components/knowledge-base/PublicKBNoAnswer";
 
 const Sections = () => {
   const { data: response } = useSWR(API.getUrl({ path: "/support-center/knowledge-base" }));
@@ -31,7 +32,7 @@ const Home = ({ fallback }) => (
         </div>
         <Sections />
       </div>
-      <button className="bg-white text-[#4F46E5] my-[70px] text-base shadow-base rounded-md py-3.5 px-5 mx-auto">Je n’ai pas trouvé réponse à ma question</button>
+      <PublicKBNoAnswer />
     </Wrapper>
   </SWRConfig>
 );

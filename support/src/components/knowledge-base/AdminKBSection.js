@@ -54,7 +54,7 @@ const AdminKBSection = ({ section, isRoot }) => {
     <article className="container bg-coolGray-100 mx-auto flex flex-col flex-grow h-full relative w-full flex-shrink overflow-hidden">
       {!isRoot && (
         <header className="px-8 py-3 flex flex-col">
-          <h2 className={`font-bold text-lg`}>{section.title}</h2>
+          <h2 className="font-bold text-lg">{section.title}</h2>
           {!!section.description?.length && <p className="mt-1 text-sm italic">{section.description}</p>}
           {!!section.allowedRoles?.length && (
             <p className="flex flex-wrap mt-3.5  text-sm">
