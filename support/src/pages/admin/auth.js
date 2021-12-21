@@ -4,11 +4,11 @@ import { useState } from "react/cjs/react.development";
 import { Button } from "../../components/Buttons";
 import Loader from "../../components/Loader";
 import { adminURL, appURL } from "../../config";
-import useUser from "../../hooks/useUser";
+import useAdminUser from "../../hooks/useAdminUser";
 import API from "../../services/api";
 
 const Auth = () => {
-  const { isLoading, mutate } = useUser({ redirectOnLoggedIn: "/admin" });
+  const { isLoading, mutate } = useAdminUser({ redirectOnLoggedIn: "/admin" });
   const router = useRouter();
 
   const [isLogging, setIsLogging] = useState(false);

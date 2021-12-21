@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import useSWR, { useSWRConfig } from "swr";
 import API from "../services/api";
 
-const useUser = ({ redirectOnLoggedOut = "", redirectOnLoggedIn } = {}) => {
+const useAdminUser = ({ redirectOnLoggedOut = "", redirectOnLoggedIn } = {}) => {
   const { cache } = useSWRConfig();
   const { data, mutate, error } = useSWR(API.getUrl({ path: "/referent/signin_token" }));
   const router = useRouter();
@@ -29,4 +29,4 @@ const useUser = ({ redirectOnLoggedOut = "", redirectOnLoggedIn } = {}) => {
   };
 };
 
-export default useUser;
+export default useAdminUser;
