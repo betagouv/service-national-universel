@@ -40,7 +40,7 @@ import Zammad from "./components/Zammad";
 import api from "./services/api";
 
 import { SENTRY_URL, environment } from "./config";
-import { ROLES } from "./utils";
+import { ROLES, ROLES_LIST } from "./utils";
 
 import "./index.css";
 
@@ -130,7 +130,7 @@ const Home = () => {
           <RestrictedRoute path="/inscription" component={Inscription} />
           <RestrictedRoute path="/user" component={Utilisateur} />
           <RestrictedRoute path="/contenu" component={Content} />
-          <RestrictedRoute path="/objectifs" component={Goal} />
+          <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
           <RestrictedRoute path="/centre" component={Center} />
           <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
           <RestrictedRoute path="/association" component={Association} />
@@ -145,11 +145,14 @@ const Home = () => {
   );
 };
 
-const RestrictedRoute = ({ component: Component, ...rest }) => {
+const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
   const user = useSelector((state) => state.Auth.user);
   if (!user) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
     return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
+  }
+  if (!roles.includes(user.role)) {
+    return <Redirect to="/dashboard" />;
   }
   return <Route {...rest} render={(props) => <Component {...props} />} />;
 };
