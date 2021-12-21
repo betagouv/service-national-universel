@@ -15,6 +15,7 @@ function getAppHelper() {
   app.use("/application", require("../../controllers/application"));
   app.use("/bus", require("../../controllers/bus"));
   app.use("/cohesion-center", require("../../controllers/cohesion-center"));
+  app.use("/session-phase1", require("../../controllers/session-phase1"));
   app.use("/department-service", require("../../controllers/department-service"));
   app.use("/diagoriente", require("../../controllers/diagoriente"));
   app.use("/email", require("../../controllers/email"));
