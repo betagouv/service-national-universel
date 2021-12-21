@@ -9,7 +9,6 @@ import api from "../../../services/api";
 
 export default function Status({ filter }) {
   const [status, setStatus] = useState({});
-
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -45,100 +44,119 @@ export default function Status({ filter }) {
     <Row>
       {user.role === ROLES.ADMIN && (
         <Col md={6} xl={2}>
-          <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] })}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={{ minHeight: "180px" }}>
-              <CardTitle>En cours</CardTitle>
-              <CardSubtitle>Inscriptions en cours</CardSubtitle>
-              <CardValueWrapper>
-                <CardValue>{status.IN_PROGRESS || 0}</CardValue>
-                <CardPercentage>
-                  <CardArrow />
-                </CardPercentage>
-              </CardValueWrapper>
-            </Card>
-          </Link>
+          <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] })} color={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+            <CardTitle>En cours</CardTitle>
+            <CardSubtitle>Inscriptions en cours</CardSubtitle>
+            <CardValueWrapper>
+              <CardValue>{status.IN_PROGRESS || 0}</CardValue>
+              <CardPercentage>
+                <CardArrow />
+              </CardPercentage>
+            </CardValueWrapper>
+          </LinkCard>
         </Col>
       )}
       <Col md={6} xl={2}>
-        <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] })}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_VALIDATION} style={{ minHeight: "180px" }}>
-            <CardTitle>En attente de validation</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{status.WAITING_VALIDATION || 0}</CardValue>
-              <CardPercentage>
-                <CardArrow />
-              </CardPercentage>
-            </CardValueWrapper>
-          </Card>
-        </Link>
+        <LinkCard
+          disabled={user.role === ROLES.VISITOR}
+          link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] })}
+          color={YOUNG_STATUS_COLORS.WAITING_VALIDATION}>
+          <CardTitle>En attente de validation</CardTitle>
+          <CardValueWrapper>
+            <CardValue>{status.WAITING_VALIDATION || 0}</CardValue>
+            <CardPercentage>
+              <CardArrow />
+            </CardPercentage>
+          </CardValueWrapper>
+        </LinkCard>
       </Col>
       <Col md={6} xl={2}>
-        <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] })}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_CORRECTION} style={{ minHeight: "180px" }}>
-            <CardTitle>En attente de correction</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{status.WAITING_CORRECTION || 0}</CardValue>
-              <CardPercentage>
-                <CardArrow />
-              </CardPercentage>
-            </CardValueWrapper>
-          </Card>
-        </Link>
+        <LinkCard
+          disabled={user.role === ROLES.VISITOR}
+          link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] })}
+          color={YOUNG_STATUS_COLORS.WAITING_CORRECTION}>
+          <CardTitle>En attente de correction</CardTitle>
+          <CardValueWrapper>
+            <CardValue>{status.WAITING_CORRECTION || 0}</CardValue>
+            <CardPercentage>
+              <CardArrow />
+            </CardPercentage>
+          </CardValueWrapper>
+        </LinkCard>
       </Col>
       <Col md={6} xl={2}>
-        <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] })}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED} style={{ minHeight: "180px" }}>
-            <CardTitle>Validées</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{status.VALIDATED || 0}</CardValue>
-              <CardPercentage>
-                <CardArrow />
-              </CardPercentage>
-            </CardValueWrapper>
-          </Card>
-        </Link>
+        <LinkCard
+          disabled={user.role === ROLES.VISITOR}
+          link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] })}
+          color={YOUNG_STATUS_COLORS.VALIDATED}>
+          <CardTitle>Validées</CardTitle>
+          <CardValueWrapper>
+            <CardValue>{status.VALIDATED || 0}</CardValue>
+            <CardPercentage>
+              <CardArrow />
+            </CardPercentage>
+          </CardValueWrapper>
+        </LinkCard>
       </Col>
       <Col md={6} xl={2}>
-        <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"REFUSED"%5D'] })}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.REFUSED} style={{ minHeight: "180px" }}>
-            <CardTitle>Refusées</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{status.REFUSED || 0}</CardValue>
-              <CardPercentage>
-                <CardArrow />
-              </CardPercentage>
-            </CardValueWrapper>
-          </Card>
-        </Link>
+        <LinkCard
+          disabled={user.role === ROLES.VISITOR}
+          link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"REFUSED"%5D'] })}
+          color={YOUNG_STATUS_COLORS.REFUSED}>
+          <CardTitle>Refusées</CardTitle>
+          <CardValueWrapper>
+            <CardValue>{status.REFUSED || 0}</CardValue>
+            <CardPercentage>
+              <CardArrow />
+            </CardPercentage>
+          </CardValueWrapper>
+        </LinkCard>
       </Col>
       <Col md={6} xl={2}>
-        <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] })}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_LIST} style={{ minHeight: "180px" }}>
-            <CardTitle>Liste complémentaire</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{status.WAITING_LIST || 0}</CardValue>
-              <CardPercentage>
-                <CardArrow />
-              </CardPercentage>
-            </CardValueWrapper>
-          </Card>
-        </Link>
+        <LinkCard
+          disabled={user.role === ROLES.VISITOR}
+          link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] })}
+          color={YOUNG_STATUS_COLORS.WAITING_LIST}>
+          <CardTitle>Liste complémentaire</CardTitle>
+          <CardValueWrapper>
+            <CardValue>{status.WAITING_LIST || 0}</CardValue>
+            <CardPercentage>
+              <CardArrow />
+            </CardPercentage>
+          </CardValueWrapper>
+        </LinkCard>
       </Col>
       {user.role === ROLES.ADMIN && (
         <Col md={6} xl={2}>
-          <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"NOT_ELIGIBLE"%5D'] })}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.NOT_ELIGIBLE} style={{ minHeight: "180px" }}>
-              <CardTitle>Non éligible</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{status.NOT_ELIGIBLE || 0}</CardValue>
-                <CardPercentage>
-                  <CardArrow />
-                </CardPercentage>
-              </CardValueWrapper>
-            </Card>
-          </Link>
+          <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"NOT_ELIGIBLE"%5D'] })} color={YOUNG_STATUS_COLORS.NOT_ELIGIBLE}>
+            <CardTitle>Non éligible</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{status.NOT_ELIGIBLE || 0}</CardValue>
+              <CardPercentage>
+                <CardArrow />
+              </CardPercentage>
+            </CardValueWrapper>
+          </LinkCard>
         </Col>
       )}
     </Row>
+  );
+}
+
+function LinkCard({ children, link, color, disabled = false }) {
+  if (disabled) {
+    return (
+      <Card borderBottomColor={color} style={{ minHeight: "180px" }}>
+        {children}
+      </Card>
+    );
+  }
+
+  return (
+    <Link to={link}>
+      <Card borderBottomColor={color} style={{ minHeight: "180px" }}>
+        {children}
+      </Card>
+    </Link>
   );
 }

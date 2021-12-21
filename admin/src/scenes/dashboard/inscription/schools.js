@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
-import { getLink, replaceSpaces } from "../../../utils";
+import { getLink, replaceSpaces, ROLES } from "../../../utils";
+import { useSelector } from "react-redux";
 
 function round1Decimal(num) {
   return Math.round((num + Number.EPSILON) * 10) / 10;
@@ -12,6 +13,7 @@ function round1Decimal(num) {
 export default function Schools({ filter }) {
   const [schools, setSchools] = useState([]);
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -84,7 +86,11 @@ export default function Schools({ filter }) {
         <tbody>
           {schools.map((e, i) => {
             return (
-              <TableRow key={i} onClick={() => handleClick(getLink({ base: `/inscription`, filter, filtersUrl: [`SCHOOL=%5B"${replaceSpaces(e.name)}"%5D`] }))}>
+              <TableRow
+                key={i}
+                onClick={() =>
+                  user.role === ROLES.VISITOR ? null : handleClick(getLink({ base: `/inscription`, filter, filtersUrl: [`SCHOOL=%5B"${replaceSpaces(e.name)}"%5D`] }))
+                }>
                 <TableCell>
                   {e.name}
                   <div>

@@ -10,7 +10,7 @@ export default function FilterRegion({ value = [], onChange }) {
 
   if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) return <div />;
 
-  if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+  if (user.role === REFERENT_ROLES.REFERENT_REGION || user.role === REFERENT_ROLES.VISITOR) {
     return <MultiSelect disabled label="Région(s)" options={options} onChange={onChange} value={value} />;
   }
   return <MultiSelect label="Région(s)" options={options} onChange={onChange} value={value} />;

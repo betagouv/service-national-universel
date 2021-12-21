@@ -68,11 +68,8 @@ export default function Index({ onChangeFilter = () => {} }) {
                   onChange={(academy) => updateFilter({ academy })}
                 />
               ) : null}
-              {user.role !== ROLES.VISITOR ? (
-                <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} />
-              ) : (
-                <div style={{ alignSelf: "center", fontSize: "0.8rem" }}>Région {filter.region}</div>
-              )}
+              <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} />
+
               <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
               <MultiSelect
                 label="Cohorte(s)"

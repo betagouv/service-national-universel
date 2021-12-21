@@ -7,10 +7,12 @@ import CircularProgress from "../components/CircularProgress";
 import api from "../../../services/api";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
-import { getLink } from "../../../utils";
+import { getLink, ROLES } from "../../../utils";
+import { useSelector } from "react-redux";
 
 export default function PriorityArea({ filter }) {
   const [value, setValue] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -41,6 +43,15 @@ export default function PriorityArea({ filter }) {
     const yes = value.true || 0;
     const noPercent = ((no * 100) / (no + yes)).toFixed(1);
     const yesPercent = ((yes * 100) / (no + yes)).toFixed(1);
+
+    if (user.role === ROLES.VISITOR) {
+      return (
+        <Content>
+          <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non" />
+          <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="Oui" />
+        </Content>
+      );
+    }
 
     return (
       <Content>
