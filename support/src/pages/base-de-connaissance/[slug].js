@@ -12,7 +12,9 @@ const Content = () => {
     setSlug(router.query?.slug || "");
   }, [router.query?.slug]);
 
-  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${slug}` }));
+  const user = {}; // find the user in some way, with the cookie ?
+
+  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${!user ? "public" : user.role ? "referent" : "young"}/${slug}` }));
   const [item, setItem] = useState(response?.data || {});
 
   useEffect(() => {

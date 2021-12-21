@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const slugify = require("slugify");
+const { ROLES } = require("snu-lib/roles");
 
 const { capture } = require("../sentry");
 const KnowledgeBaseObject = require("../models/knowledgeBase");
@@ -323,8 +324,29 @@ router.get("/all-slugs", async (req, res) => {
   }
 });
 
+const setAllowedRole = (req, res, next) => {
+  req.allowedRole = (() => {
+    if (!req.user.constructor.modelName) return "public";
+    if (req.user.constructor.modelName === "young") return "young";
+    switch (req.user.role) {
+      case ROLES.ADMIN:
+        return "admin";
+      case ROLES.REFERENT_DEPARTMENT:
+      case ROLES.REFERENT_REGION:
+        return "referent";
+      case ROLES.RESPONSIBLE:
+      case ROLES.SUPERVISOR:
+        return "structure";
+      case ROLES.HEAD_CENTER:
+        return "head_center";
+      default:
+        return "public";
+    }
+  })();
+  next();
+};
 // this is for the public-access part of the knowledge base (not the admin part)
-router.get("/:slug", async (req, res) => {
+const getSlugRoute = async (req, res) => {
   try {
     const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug })
       .populate({
@@ -351,9 +373,10 @@ router.get("/:slug", async (req, res) => {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
-});
+};
 
-router.get("/", async (req, res) => {
+// this is for the public-access part of the knowledge base (not the admin part)
+const getRootRoute = async (req, res) => {
   try {
     const children = await KnowledgeBaseObject.find({ parentId: null }).sort({ type: -1, position: 1 }).populate({ path: "author", select: "_id firstName lastName role" }).lean(); // to json;
 
@@ -362,7 +385,15 @@ router.get("/", async (req, res) => {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
-});
+};
+
+router.get("/referent/:slug", setAllowedRole, getSlugRoute);
+router.get("/young/:slug", setAllowedRole, getSlugRoute);
+router.get("/public/:slug", setAllowedRole, getSlugRoute);
+
+router.get("/referent", setAllowedRole, getRootRoute);
+router.get("/young", setAllowedRole, getRootRoute);
+router.get("/public", setAllowedRole, getRootRoute);
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
