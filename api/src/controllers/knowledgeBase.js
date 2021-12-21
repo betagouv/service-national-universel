@@ -5,9 +5,11 @@ const passport = require("passport");
 const slugify = require("slugify");
 
 const { capture } = require("../sentry");
+const { anyAuth } = require("../passport");
 const KnowledgeBaseObject = require("../models/knowledgeBase");
 const { uploadPublicPicture, ERRORS } = require("../utils/index.js");
 const { validateId } = require("../utils/validator");
+const { mapRoleToKBAccess } = require("snu-lib/roles");
 
 const findChildrenRecursive = async (section, allChildren, { findAll = false }) => {
   if (section.type !== "section") return;
@@ -332,9 +334,10 @@ router.get("/all-slugs", async (req, res) => {
 });
 
 // this is for the public-access part of the knowledge base (not the admin part)
-router.get("/:slug", async (req, res) => {
+router.get("/:slug", anyAuth, async (req, res) => {
   try {
-    const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug })
+    const role = mapRoleToKBAccess(req.user);
+    const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug, allowedRoles: role })
       .populate({
         path: "author",
         select: "_id firstName lastName role",
@@ -361,9 +364,14 @@ router.get("/:slug", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
+// this is for the public-access part of the knowledge base (not the admin part)
+router.get("/", anyAuth, async (req, res) => {
   try {
-    const children = await KnowledgeBaseObject.find({ parentId: null }).sort({ type: -1, position: 1 }).populate({ path: "author", select: "_id firstName lastName role" }).lean(); // to json;
+    const role = mapRoleToKBAccess(req.user);
+    const children = await KnowledgeBaseObject.find({ parentId: null, allowedRoles: role })
+      .sort({ type: -1, position: 1 })
+      .populate({ path: "author", select: "_id firstName lastName role" })
+      .lean(); // to json;
 
     return res.status(200).send({ ok: true, data: children });
   } catch (error) {

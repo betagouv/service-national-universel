@@ -50,4 +50,33 @@ module.exports = function () {
       return done(null, false);
     }),
   );
+
+  passport.use(
+    "any",
+    new JwtStrategy(opts, async function (jwtPayload, done) {
+      try {
+        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        if (error) return done(null, false);
+        console.log("any");
+        const referent = await Referent.findById(value._id);
+        if (referent) return done(null, referent);
+        const young = await Young.findById(value._id);
+        if (young) return done(null, young);
+      } catch (error) {
+        capture(error);
+      }
+      return done(null, false);
+    }),
+  );
+};
+
+module.exports.anyAuth = (req, res, next) => {
+  const token = getToken(req);
+  console.log({ token });
+  if (!token) {
+    req.user = {};
+    next();
+  } else {
+    passport.authenticate("any", { session: false })(req, res, next);
+  }
 };
