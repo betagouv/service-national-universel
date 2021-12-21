@@ -56,7 +56,13 @@ const Step = ({ step }) => {
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
+  // if it is a young from an old cohort, they cant access to the inscription
   if (young?.cohort && !["", "Juillet 2022", "Juin 2022", "Février 2022", "2022"].includes(young?.cohort)) {
+    return <Redirect to={{ pathname: "/" }} />;
+  }
+
+  // if it is a young from the 2022 february cohort, they are not WAITING_VALIDATION or WAITING_CORRECTION, they cant access to the inscription
+  if (young?.cohort === "Février 2022" && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young?.status)) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
