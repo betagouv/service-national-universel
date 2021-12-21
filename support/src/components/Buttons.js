@@ -10,7 +10,7 @@ export const Button = ({ loading, children, className, onClick, disabled, type =
 };
 
 export const CancelButton = ({ loading, onClick, type, children, disabled, className = "" }) => (
-  <Button className={`bg-white mb-2 !border-2 border-red-500  text-red-500 ${className}`} disabled={disabled} onClick={onClick} type={type} loading={loading}>
+  <Button className={`bg-white !border-2 border-red-500  text-red-500 ${className}`} disabled={disabled} onClick={onClick} type={type} loading={loading}>
     {children}
   </Button>
 );

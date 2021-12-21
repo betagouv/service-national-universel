@@ -264,7 +264,7 @@ const AdminKBItemMetadata = ({ visible }) => {
           <Button type="submit" className="mb-2" loading={isSubmitting} disabled={isSubmitting || isDeleting}>
             Enregistrer
           </Button>
-          <Button className="bg-white mb-2 !border-2 border-red-500  text-red-500" onClick={onDelete} loading={isDeleting} disabled={isSubmitting || isDeleting}>
+          <Button className="mb-2" onClick={onDelete} loading={isDeleting} disabled={isSubmitting || isDeleting}>
             Supprimer
           </Button>
         </div>
