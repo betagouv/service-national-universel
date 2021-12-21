@@ -3,11 +3,17 @@ const router = express.Router();
 const passport = require("passport");
 const slugify = require("slugify");
 const { ROLES } = require("snu-lib/roles");
+const Joi = require("joi");
+const jwt = require("jsonwebtoken");
 
+const config = require("../config");
 const { capture } = require("../sentry");
 const KnowledgeBaseObject = require("../models/knowledgeBase");
 const { uploadPublicPicture, ERRORS } = require("../utils/index.js");
 const { validateId } = require("../utils/validator");
+const { getToken } = require("../passport");
+const Young = require("../models/young");
+const Referent = require("../models/referent");
 
 const findChildrenRecursive = async (section, allChildren, { findAll = false }) => {
   if (section.type !== "section") return;
@@ -70,10 +76,7 @@ const consolidateAllowedRoles = async (initSection = { type: "section" }, newAll
 const findArticlesWithSlug = (slug, content) => {
   for (const item of content) {
     if (item.type === "link") {
-      if (item.url.includes(slug)) {
-        console.log("YES");
-        return true;
-      }
+      if (item.url.includes(slug)) return true;
     }
     if (item.children) {
       const hasSlug = findArticlesWithSlug(slug, item.children);
@@ -202,7 +205,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const data = await KnowledgeBaseObject.findById(newKb._id).populate({ path: "author", select: "_id firstName lastName role" }).lean();
     return res.status(200).send({ ok: true, data });
   } catch (error) {
-    console.log(error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
@@ -300,7 +302,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 // this is for admin: we download all in once so that we can build the tree and navigate quickly
-router.get("/all", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await KnowledgeBaseObject.find(req.query || {}).populate({ path: "author", select: "_id firstName lastName role" });
 
@@ -323,37 +325,58 @@ router.get("/all-slugs", async (req, res) => {
   }
 });
 
-const setAllowedRole = (req, res, next) => {
+// this is a middleware to set proper role and then filter knowledge-base by allowed role
+const setAllowedRoleMiddleWare = async (req, res, next) => {
   try {
-    req.allowedRole = (() => {
-      if (!req.user) return "public";
-      if (!req.user.constructor.modelName) return "public";
-      if (req.user.constructor.modelName === "young") return "young";
-      switch (req.user.role) {
-        case ROLES.ADMIN:
-          return "admin";
-        case ROLES.REFERENT_DEPARTMENT:
-        case ROLES.REFERENT_REGION:
-          return "referent";
-        case ROLES.RESPONSIBLE:
-        case ROLES.SUPERVISOR:
-          return "structure";
-        case ROLES.HEAD_CENTER:
-          return "head_center";
-        default:
-          return "public";
-      }
-    })();
+    req.allowedRole = "public";
+    const token = getToken(req);
+    if (!token) return next();
+    const jwtPayload = await new Promise((resolve, reject) => {
+      jwt.verify(token, config.secret, function (err, decoded) {
+        if (err) reject(err);
+        resolve(decoded);
+      });
+    });
+    if (!jwtPayload) return next();
+    const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+    if (error) return next();
+
+    const young = await Young.findById(value._id);
+    if (young) {
+      req.user = young;
+      req.allowedRole = "young";
+      return next();
+    }
+    const referent = await Referent.findById(value._id);
+    if (referent) {
+      req.user = young;
+      req.allowedRole = (() => {
+        switch (referent.role) {
+          case ROLES.ADMIN:
+            return "admin";
+          case ROLES.REFERENT_DEPARTMENT:
+          case ROLES.REFERENT_REGION:
+            return "referent";
+          case ROLES.RESPONSIBLE:
+          case ROLES.SUPERVISOR:
+            return "structure";
+          case ROLES.HEAD_CENTER:
+            return "head_center";
+          default:
+            return "public";
+        }
+      })();
+    }
     next();
   } catch (e) {
-    console.log(e);
     next(e);
   }
 };
+
 // this is for the public-access part of the knowledge base (not the admin part)
-const getSlugRoute = async (req, res) => {
+const getKnowledgeBaseWithSlugMiddleware = async (req, res) => {
   try {
-    const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug })
+    const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug, allowedRoles: req.allowedRole })
       .populate({
         path: "author",
         select: "_id firstName lastName role",
@@ -375,32 +398,33 @@ const getSlugRoute = async (req, res) => {
 
     return res.status(200).send({ ok: true, data: existingKb });
   } catch (error) {
-    console.log(error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 };
 
 // this is for the public-access part of the knowledge base (not the admin part)
-const getRootRoute = async (req, res) => {
+const getKnowledgeBaseRootMiddleware = async (req, res) => {
   try {
-    const children = await KnowledgeBaseObject.find({ parentId: null }).sort({ type: -1, position: 1 }).populate({ path: "author", select: "_id firstName lastName role" }).lean(); // to json;
+    const children = await KnowledgeBaseObject.find({ parentId: null, allowedRoles: req.allowedRole })
+      .sort({ type: -1, position: 1 })
+      .populate({ path: "author", select: "_id firstName lastName role" })
+      .lean(); // to json;
 
     return res.status(200).send({ ok: true, data: children });
   } catch (error) {
-    console.log(error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 };
 
-router.get("/referent/:slug", setAllowedRole, getSlugRoute);
-router.get("/young/:slug", setAllowedRole, getSlugRoute);
-router.get("/public/:slug", setAllowedRole, getSlugRoute);
+router.get("/referent/:slug", setAllowedRoleMiddleWare, getKnowledgeBaseWithSlugMiddleware);
+router.get("/young/:slug", setAllowedRoleMiddleWare, getKnowledgeBaseWithSlugMiddleware);
+router.get("/public/:slug", setAllowedRoleMiddleWare, getKnowledgeBaseWithSlugMiddleware);
 
-router.get("/referent", setAllowedRole, getRootRoute);
-router.get("/young", setAllowedRole, getRootRoute);
-router.get("/public", setAllowedRole, getRootRoute);
+router.get("/referent", setAllowedRoleMiddleWare, getKnowledgeBaseRootMiddleware);
+router.get("/young", setAllowedRoleMiddleWare, getKnowledgeBaseRootMiddleware);
+router.get("/public", setAllowedRoleMiddleWare, getKnowledgeBaseRootMiddleware);
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {

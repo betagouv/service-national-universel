@@ -14,15 +14,15 @@ const { capture } = require("../sentry");
 router.get("/signin_token", async (req, res) => {
   try {
     const token = getToken(req);
+    if (!token) return res.status(200).send({ ok: false, user: { restriction: "public" } });
     const jwtPayload = await new Promise((resolve, reject) => {
       jwt.verify(token, config.secret, function (err, decoded) {
-        if (err) reject(null);
+        if (err) reject(err);
         resolve(decoded);
       });
     });
-    if (!jwtPayload) return res.status(200).send({ ok: true, user: { restriction: "public" } });
+    if (!jwtPayload) return res.status(200).send({ ok: false, user: { restriction: "public" } });
     const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
-    console.log({ error, value });
     if (error) return res.status(200).send({ ok: true, user: { restriction: "public" } });
 
     const young = await Young.findById(value._id);
@@ -37,9 +37,8 @@ router.get("/signin_token", async (req, res) => {
       await referent.save();
       return res.status(200).send({ ok: true, user: { ...serializeReferent(referent, referent), restriction: "referent" } });
     }
-    return res.status(200).send({ ok: true, user: { restriction: "public" } });
+    return res.status(200).send({ ok: false, user: { restriction: "public" } });
   } catch (error) {
-    console.log(error);
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, user: null });
   }

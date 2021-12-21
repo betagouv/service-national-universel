@@ -2,17 +2,9 @@ import Wrapper from "../Wrapper";
 import { useMemo } from "react";
 import Loader from "react-loader-spinner";
 import Breadcrumb from "../BreadCrumb";
-import TextEditor from "../TextEditor";
 import PublicKBSection from "./PublicKBSection";
 import PublicKBNoAnswer from "./PublicKBNoAnswer";
-
-export const Article = ({ item }) => {
-  return (
-    <div className="wrapper bg-coolGray-100  mx-auto flex flex-col flex-grow flex-shrink overflow-hidden w-full">
-      <TextEditor readOnly content={item.content} _id={item._id} slug={item.slug} />
-    </div>
-  );
-};
+import PublicKBArticle from "./PublicKBArticle";
 
 const PublicKBContent = ({ item, isLoading }) => {
   const group = useMemo(() => {
@@ -36,7 +28,7 @@ const PublicKBContent = ({ item, isLoading }) => {
           <Loader />
         ) : (
           <>
-            {item.type === "article" && <Article item={item} />}
+            {item.type === "article" && <PublicKBArticle item={item} />}
             {item.type === "section" && <PublicKBSection item={item} />}
           </>
         )}

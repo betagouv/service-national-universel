@@ -56,13 +56,13 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }) {
   // params contains the post `id`.
   // If the route is like /posts/1, then params.id is 1
-  const response = await API.getasync({ path: `/support-center/knowledge-base/${params.slug}` });
+  const response = await API.getasync({ path: `/support-center/knowledge-base/public/${params.slug}` });
 
   // Pass post data to the page via props
   return {
     props: {
       fallback: {
-        [`/support-center/knowledge-base/${params.slug}`]: response,
+        [`/support-center/knowledge-base/public/${params.slug}`]: response,
       },
     }, // will be passed to the page component as props
   };

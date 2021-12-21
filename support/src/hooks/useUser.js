@@ -10,8 +10,6 @@ const useUser = ({ redirectOnLoggedOut = "/base-de-connaissance" } = {}) => {
   const isLoading = !error && !data;
   const user = data && data.ok ? { ...data.user, isLoggedIn: true } : { restriction: "public", isLoggedIn: false };
 
-  console.log({ data, user, isLoading });
-
   useEffect(() => {
     if (redirectOnLoggedOut && !isLoading && !user.isLoggedIn) {
       router.push(redirectOnLoggedOut);
