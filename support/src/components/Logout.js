@@ -13,7 +13,7 @@ const Logout = () => {
   };
 
   return (
-    <NavLink href="#">
+    <NavLink href="/admin/auth">
       <a className="h-full w-full" onClick={onLogout}>
         Se déconnecter
       </a>

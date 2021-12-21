@@ -34,11 +34,15 @@ export default function Forgot() {
             <Subtitle>
               <span>{mail}</span>
             </Subtitle>
-            <Text>Cet e-mail contient un lien permettant de réinitialiser ton mot de passe.</Text>
+            <Text>
+              Cet email contient un lien permettant de réinitialiser votre mot de passe.
+              <br />
+              Vous allez le recevoir d&apos;ici quelques minutes, pensez à vérifier vos spams et courriers indésirables.
+            </Text>
           </>
         ) : (
           <>
-            <Subtitle>Récupérer mon mot de passe</Subtitle>
+            <Subtitle>Réinitialiser mon mot de passe</Subtitle>
 
             <Formik
               initialValues={{ email: "" }}
@@ -68,12 +72,12 @@ export default function Forgot() {
                           onChange={handleChange}
                           placeholder="Adresse e-mail"
                         />
-                        <label htmlFor="email">Ton e-mail</label>
+                        <label htmlFor="email">E-mail</label>
                       </div>
                       <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
                     </StyledFormGroup>
                     <Submit type="submit" color="success" loading={isSubmitting}>
-                      Recevoir mon mot de passe
+                      M&apos;envoyer le lien de réinitialisation
                     </Submit>
                   </form>
                 );

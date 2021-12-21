@@ -309,6 +309,7 @@ function validateYoung(young, user) {
     cniFiles: Joi.array().items(Joi.string().allow(null, "")),
     cohesionStayPresence: Joi.string().allow(null, ""),
     cohesionStayMedicalFileReceived: Joi.string().allow(null, ""),
+    sessionPhase1Id: Joi.string().allow(null, ""),
     cohesionCenterId: Joi.string().allow(null, ""),
     cohesionCenterName: Joi.string().allow(null, ""),
     cohesionCenterZip: Joi.string().allow(null, ""),
@@ -555,6 +556,7 @@ function validateReferent(referent) {
       subRole: Joi.string()
         .allow(null, "")
         .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST),
+      sessionPhase1Id: Joi.string().allow(null, ""),
       cohesionCenterId: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
       phone: Joi.string().allow(null, ""),

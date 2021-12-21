@@ -15,7 +15,7 @@ const moduleExports = {
     return [
       {
         source: "/",
-        destination: "/help",
+        destination: "/base-de-connaissance",
         permanent: true,
       },
     ];

@@ -4,8 +4,11 @@ import { toast } from "react-toastify";
 import { SUPPORT_ROLES } from "snu-lib/roles";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import API from "../../services/api";
+import { Button, CancelButton } from "../Buttons";
 import InputWithEmojiPicker from "../InputWithEmojiPicker";
 import Modal from "../Modal";
+// import { onImportSections } from "../TextEditor/importHtml";
+// import zammad from "../../../../../migration-zammad/kb-zammad.json";
 
 const AdminKBCreate = ({ type, position, parentId = null }) => {
   const [open, setOpen] = useState(null);
@@ -13,8 +16,10 @@ const AdminKBCreate = ({ type, position, parentId = null }) => {
   const router = useRouter();
   const { mutate, flattenedData } = useKnowledgeBaseData();
 
+  const [isCreating, setIsCreating] = useState(false);
   const onSubmit = async (event) => {
     event.preventDefault();
+    setIsCreating(true);
     const formData = new FormData(event.currentTarget);
     const body = { type, position, parentId, allowedRoles: [] };
     for (let [key, value] of formData.entries()) {
@@ -27,6 +32,7 @@ const AdminKBCreate = ({ type, position, parentId = null }) => {
       }
     }
     const response = await API.post({ path: "/support-center/knowledge-base", body });
+    setIsCreating(false);
     if (response.error) return toast.error(response.error);
     if (response.data) {
       mutate({ ok: true, data: [...flattenedData, response.data] });
@@ -39,6 +45,9 @@ const AdminKBCreate = ({ type, position, parentId = null }) => {
     <>
       <Modal isOpen={!!open} onRequestClose={() => setOpen(false)}>
         <form onSubmit={onSubmit} className="flex flex-col w-screen-3/4 items-start">
+          {/* <button type="button" onClick={onImportSections(API, zammad)}>
+            Import all sections
+          </button> */}
           <h2 className="font-bold ml-4 mb-4 text-xl">Créer {type === "section" ? "une rubrique" : "un article"}</h2>
           <div className="flex w-full">
             <div className="flex flex-col flex-grow">
@@ -75,12 +84,12 @@ const AdminKBCreate = ({ type, position, parentId = null }) => {
             </div>
           </div>
           <div className="flex justify-evenly mt-3.5 w-full">
-            <button type="submit" className="w-auto">
+            <Button type="submit" className="w-auto" disabled={isCreating} loading={isCreating}>
               Créer
-            </button>
-            <button type="reset" onClick={() => setOpen(null)}>
+            </Button>
+            <CancelButton type="reset" onClick={() => setOpen(null)}>
               Annuler
-            </button>
+            </CancelButton>
           </div>
         </form>
       </Modal>

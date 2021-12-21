@@ -3,7 +3,7 @@ import { NavLink, useLocation, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, permissionPhase1, permissionPhase2, permissionPhase3 } from "../../utils";
+import { YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, permissionPhase1, permissionPhase2, permissionPhase3 } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 import SubMenuPhase2 from "./SubMenuPhase2";
@@ -43,7 +43,7 @@ export default function Drawer(props) {
     if (young.status !== YOUNG_STATUS.VALIDATED) return;
 
     young.statusPhase1 && setStatus1(young.statusPhase1);
-    if (young.phase === YOUNG_PHASE.COHESION_STAY || young.phase === YOUNG_PHASE.INSCRIPTION) return;
+    if (![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.CANCEL, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) return;
 
     young.statusPhase2 && setStatus2(young.statusPhase2);
     if (young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED) return;

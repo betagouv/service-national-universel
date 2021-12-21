@@ -3,7 +3,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-export const Button = React.forwardRef(({ className, active, reversed, ...props }, ref) => (
+export const TextEditorButton = React.forwardRef(({ className, active, reversed, ...props }, ref) => (
   <span
     {...props}
     ref={ref}
@@ -19,16 +19,7 @@ export const EditorValue = React.forwardRef(({ className, value, ...props }, ref
   return (
     <div ref={ref} {...props} className={`mt-8 -mx-5 ${className || ""}`}>
       <div className={`text-sm py-1 px-5 text-gray-600 border-2 bg-gray-200 ${className}`}>Slate's value as text</div>
-      <div
-        className={`text-xs font-mono whitespace-pre-wrap py-3 px-5 text-gray-600 border-2 bg-gray-200 ${className || ""}`}
-        // className={css`
-        //   div {
-        //     margin: 0 0 0.5em;
-        //   }
-        // `}
-      >
-        {textLines}
-      </div>
+      <div className={`text-xs font-mono whitespace-pre-wrap py-3 px-5 text-gray-600 border-2 bg-gray-200 ${className || ""}`}>{textLines}</div>
     </div>
   );
 });
@@ -55,7 +46,7 @@ export const Toolbar = React.forwardRef(({ className, ...props }, ref) => (
 
 export const Spacer = React.forwardRef(({ className, ...props }, ref) => <div {...props} ref={ref} className={`relative w-6 ${className || ""}`} />);
 
-Button.displayName = "Button";
+TextEditorButton.displayName = "TextEditorButton";
 EditorValue.displayName = "EditorValue";
 Icon.displayName = "Icon";
 Instruction.displayName = "Instruction";
