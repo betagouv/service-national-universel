@@ -135,7 +135,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
           {!readOnly && (
             <Toolbar>
               <TextEditorButton>
-                <EmojiPicker size={10} className="text-2xl my-1.5 !mr-0 !h-5 !w-5" insertEmoji={editor.insertText} />
+                <EmojiPicker size={10} className="text-2xl my-[5px] !mr-0 !h-5 !w-5" insertEmoji={editor.insertText} />
               </TextEditorButton>
               <MarkButton format="bold" icon="format_bold" />
               <MarkButton format="italic" icon="format_italic" />
@@ -154,8 +154,8 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
               <BlockButton format="bulleted-list" icon="format_list_bulleted" />
               <Spacer />
               {/* <MarkButton format="indent-increase" icon="format_indent_increase" />
-              <MarkButton format="indent-decrease" icon="format_indent_decrease" /> */}
-              <Spacer />
+              <MarkButton format="indent-decrease" icon="format_indent_decrease" />
+              <Spacer /> */}
               <InsertImageButton />
               <InsertVideoButton />
             </Toolbar>
