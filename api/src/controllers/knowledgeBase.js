@@ -374,7 +374,7 @@ const setAllowedRoleMiddleWare = async (req, res, next) => {
 };
 
 // this is for the public-access part of the knowledge base (not the admin part)
-const getKnowledgeBaseWithSlugMiddleware = async (req, res) => {
+router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWare, async (req, res) => {
   try {
     const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug, allowedRoles: req.allowedRole })
       .populate({
@@ -401,10 +401,10 @@ const getKnowledgeBaseWithSlugMiddleware = async (req, res) => {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
-};
+});
 
 // this is for the public-access part of the knowledge base (not the admin part)
-const getKnowledgeBaseRootMiddleware = async (req, res) => {
+router.get("/:allowedRole(referent|young|public)", setAllowedRoleMiddleWare, async (req, res) => {
   try {
     const children = await KnowledgeBaseObject.find({ parentId: null, allowedRoles: req.allowedRole })
       .sort({ type: -1, position: 1 })
@@ -416,15 +416,7 @@ const getKnowledgeBaseRootMiddleware = async (req, res) => {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
-};
-
-router.get("/referent/:slug", setAllowedRoleMiddleWare, getKnowledgeBaseWithSlugMiddleware);
-router.get("/young/:slug", setAllowedRoleMiddleWare, getKnowledgeBaseWithSlugMiddleware);
-router.get("/public/:slug", setAllowedRoleMiddleWare, getKnowledgeBaseWithSlugMiddleware);
-
-router.get("/referent", setAllowedRoleMiddleWare, getKnowledgeBaseRootMiddleware);
-router.get("/young", setAllowedRoleMiddleWare, getKnowledgeBaseRootMiddleware);
-router.get("/public", setAllowedRoleMiddleWare, getKnowledgeBaseRootMiddleware);
+});
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
