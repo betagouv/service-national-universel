@@ -372,6 +372,7 @@ const Leaf = ({ attributes, children, leaf }) => {
 };
 
 const Image = ({ attributes, children, element, readOnly }) => {
+  const [showDelete, setShowDelete] = useState(false);
   const editor = useSlateStatic();
 
   const selected = useSelected();
@@ -379,17 +380,39 @@ const Image = ({ attributes, children, element, readOnly }) => {
   return (
     <div {...attributes}>
       <div contentEditable={false} className="relative" style={{ userSelect: "none" }}>
-        <img src={element.url} alt={element.alt} className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`} />
-        <TextEditorButton
-          active
-          onClick={() => {
-            const path = ReactEditor.findPath(editor, element);
-            Transforms.removeNodes(editor, { at: path });
+        <img
+          src={element.url}
+          alt={element.alt}
+          onMouseEnter={() => {
+            console.log("plaf");
+            setShowDelete(true);
           }}
-          className={`absolute top-2 left-2 bg-white ${selected && focused && !readOnly ? "inline" : "none"} ${readOnly ? "none" : ""}`}
-        >
-          <Icon>delete</Icon>
-        </TextEditorButton>
+          onMouseLeave={() => {
+            console.log("plaf");
+            setShowDelete(false);
+          }}
+          className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`}
+        />
+        {!readOnly && !!showDelete && (
+          <TextEditorButton
+            active
+            onMouseEnter={() => {
+              console.log("plaf");
+              setShowDelete(true);
+            }}
+            onMouseLeave={() => {
+              console.log("plaf");
+              setShowDelete(false);
+            }}
+            onClick={() => {
+              const path = ReactEditor.findPath(editor, element);
+              Transforms.removeNodes(editor, { at: path });
+            }}
+            className={`absolute top-2 left-2 bg-white ${selected && focused && !readOnly ? "inline" : "none"} ${readOnly ? "none" : ""}`}
+          >
+            <Icon>delete</Icon>
+          </TextEditorButton>
+        )}
         {!readOnly && (
           <MetaDataInput
             initValue={element.alt}
