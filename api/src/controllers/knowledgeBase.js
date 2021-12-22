@@ -322,7 +322,7 @@ router.get("/all", passport.authenticate(["referent", "young"], { session: false
 // this is to build static files from next-js
 router.get("/all-slugs", async (req, res) => {
   try {
-    const data = await KnowledgeBaseObject.find();
+    const data = await KnowledgeBaseObject.find({ allowedRoles: "public" });
 
     return res.status(200).send({ ok: true, data: data.map((item) => item.slug) });
   } catch (error) {

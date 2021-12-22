@@ -1,13 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSlate } from "slate-react";
+import isUrl from "is-url";
 import { Editor, Transforms, Element as SlateElement, Range } from "slate";
 import { TextEditorButton, Icon } from "./components";
 import Modal from "../Modal";
 import { Button, CancelButton } from "../Buttons";
 import AdminKBTree from "../knowledge-base/AdminKBTree";
-import { useEffect } from "react/cjs/react.development";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
-import isUrl from "is-url";
 
 export const isLinkActive = (editor) => {
   const [link] = Editor.nodes(editor, {
