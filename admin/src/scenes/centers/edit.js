@@ -13,6 +13,7 @@ import Item from "./components/Item";
 import Select from "./components/Select";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import AddressInput from "../../components/addressInputV2";
+import MultiSelect from "../../components/MultiSelect";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -86,6 +87,14 @@ export default function Edit(props) {
                       errors={errors}
                       touched={touched}
                     />
+                    <MultiSelectWithTitle
+                      title="Séjour(s) de cohésion concerné(s)"
+                      value={values.cohorts}
+                      onChange={handleChange}
+                      name="cohorts"
+                      options={["Juillet 2022", "Juin 2022", "Février 2022", "2021", "2020", "2019"]}
+                      placeholder="Sélectionner un ou plusieurs séjour de cohésion"
+                    />
                   </BoxContent>
                 </Box>
               </Col>
@@ -128,6 +137,18 @@ export default function Edit(props) {
     </Formik>
   );
 }
+const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder }) => {
+  return (
+    <Row className="detail">
+      <Col md={4}>
+        <label>{title}</label>
+      </Col>
+      <Col md={8}>
+        <MultiSelect value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} />
+      </Col>
+    </Row>
+  );
+};
 
 const Wrapper = styled.div`
   padding: 2rem;

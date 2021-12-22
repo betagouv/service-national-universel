@@ -75,9 +75,11 @@ export default function Details({ center }) {
               </div>
               <div className="detail">
                 <div className="detail-title-second">Séjour(s) de cohésion concerné(s) par le centre :</div>
-                <div className="detail-text">
-                  <p className="detail-badge">Février 2022</p>
-                </div>
+                {center.cohorts?.map((cohort) => (
+                  <div key={cohort} className="detail-text">
+                    <p className="detail-badge">{cohort}</p>
+                  </div>
+                ))}
               </div>
             </section>
           </Container>

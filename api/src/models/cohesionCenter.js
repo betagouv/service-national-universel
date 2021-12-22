@@ -102,6 +102,12 @@ const Schema = new mongoose.Schema({
       description: "Accessibilité aux personnes à mobilité réduite",
     },
   },
+  cohorts: {
+    type: [String],
+    documentation: {
+      description: "Liste des cohortes concernées par ce centre de cohésion",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

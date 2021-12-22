@@ -246,6 +246,7 @@ const cohesionCenterKeys = {
   observations: Joi.string().allow(null, ""),
   waitingList: Joi.array().items(Joi.string().allow(null, "")),
   pmr: Joi.string().allow(null, ""),
+  cohorts: Joi.array().items(Joi.string().allow(null, "")),
 };
 
 function validateNewCohesionCenter(application) {
