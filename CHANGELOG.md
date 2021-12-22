@@ -1,3 +1,19 @@
+# [1.12.0](https://github.com/betagouv/service-national-universel/compare/v1.11.0...v1.12.0) (2021-12-22)
+
+
+### Bug Fixes
+
+* **app-drawer:** fix subtitle phase status ([b6e232e](https://github.com/betagouv/service-national-universel/commit/b6e232e6a22fc2a7d890e342dfe895cb904ae77b))
+* **auth:** change forgot password wording ([d76cfd1](https://github.com/betagouv/service-national-universel/commit/d76cfd18412469c7c40157fc53d1c3ded11600b4))
+
+
+### Features
+
+* **admin:** add roles control on dashboard ([#1012](https://github.com/betagouv/service-national-universel/issues/1012)) ([1dd7a01](https://github.com/betagouv/service-national-universel/commit/1dd7a01ba682e4efb82fb91bca96879f9060fe86))
+* **admin:** add visitor role ([#1003](https://github.com/betagouv/service-national-universel/issues/1003)) ([b9f7266](https://github.com/betagouv/service-national-universel/commit/b9f7266b53f2c8c481d1cefd8133b8f04b1e4a20))
+* **support:** add loaders ([#1007](https://github.com/betagouv/service-national-universel/issues/1007)) ([7df0b36](https://github.com/betagouv/service-national-universel/commit/7df0b3688a04cd62f0dcbb7c26fe2c88a9fc4083))
+* **support:** redirect to google form if no answer ([#1013](https://github.com/betagouv/service-national-universel/issues/1013)) ([d54e197](https://github.com/betagouv/service-national-universel/commit/d54e1973e62c77bb3bc2157f49a647b72468c669))
+
 # [1.11.0](https://github.com/betagouv/service-national-universel/compare/v1.10.3...v1.11.0) (2021-12-21)
 
 
