@@ -373,39 +373,42 @@ const Leaf = ({ attributes, children, leaf }) => {
 
 const Image = ({ attributes, children, element, readOnly }) => {
   const editor = useSlateStatic();
-  const path = ReactEditor.findPath(editor, element);
 
   const selected = useSelected();
   const focused = useFocused();
   return (
     <div {...attributes}>
-      {children}
-      <div contentEditable={false} className="relative">
+      <div contentEditable={false} className="relative" style={{ userSelect: "none" }}>
         <img src={element.url} alt={element.alt} className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`} />
         <TextEditorButton
           active
-          onClick={() => Transforms.removeNodes(editor, { at: path })}
+          onClick={() => {
+            const path = ReactEditor.findPath(editor, element);
+            Transforms.removeNodes(editor, { at: path });
+          }}
           className={`absolute top-2 left-2 bg-white ${selected && focused && !readOnly ? "inline" : "none"} ${readOnly ? "none" : ""}`}
         >
           <Icon>delete</Icon>
         </TextEditorButton>
+        {!readOnly && (
+          <MetaDataInput
+            initValue={element.alt}
+            label="Description"
+            name="alt"
+            onChange={(val) => {
+              const path = ReactEditor.findPath(editor, element);
+              const newProperties = {
+                ...element,
+                alt: val,
+              };
+              Transforms.setNodes(editor, newProperties, {
+                at: path,
+              });
+            }}
+          />
+        )}
       </div>
-      {!readOnly && (
-        <MetaDataInput
-          initValue={element.alt}
-          label="Description"
-          name="alt"
-          onChange={(val) => {
-            const path = ReactEditor.findPath(editor, element);
-            const newProperties = {
-              alt: val,
-            };
-            Transforms.setNodes(editor, newProperties, {
-              at: path,
-            });
-          }}
-        />
-      )}
+      {children}
     </div>
   );
 };
