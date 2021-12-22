@@ -1,3 +1,16 @@
+## [1.12.1](https://github.com/betagouv/service-national-universel/compare/v1.12.0...v1.12.1) (2021-12-22)
+
+
+### Bug Fixes
+
+* **api:** base-de-connaissance.snu.gouv.fr ([#1019](https://github.com/betagouv/service-national-universel/issues/1019)) ([6c876ad](https://github.com/betagouv/service-national-universel/commit/6c876ad48f9d0c8578083156e5377b567638c6b0))
+* **availability:** enable 1ere CAP for fevrier and juin ([ddfbf28](https://github.com/betagouv/service-national-universel/commit/ddfbf2804ec43013a4b272c18652ca96ed9b9782))
+* **invite:** only admin can invite visitor ([4f9bc8e](https://github.com/betagouv/service-national-universel/commit/4f9bc8e42f405c6be0bab8fa0e7a9c1091dc3894))
+* **support:** image alt ([#1020](https://github.com/betagouv/service-national-universel/issues/1020)) ([697e9ed](https://github.com/betagouv/service-national-universel/commit/697e9ed89c5e3b749913173115e0f7953e2fcb6e))
+* **support:** image delete button appears only on hover ([#1021](https://github.com/betagouv/service-national-universel/issues/1021)) ([d94a271](https://github.com/betagouv/service-national-universel/commit/d94a2711d31878764e1a719ea338809dfba554e6))
+* **support:** next build ([#1018](https://github.com/betagouv/service-national-universel/issues/1018)) ([7b7e3a9](https://github.com/betagouv/service-national-universel/commit/7b7e3a92a705535a6f17c30f1e9773d383bd4645))
+* **support:** small design fixes ([#1023](https://github.com/betagouv/service-national-universel/issues/1023)) ([1fe6168](https://github.com/betagouv/service-national-universel/commit/1fe6168a13e6c061f10a1a114a548b0a9ac31773))
+
 # [1.12.0](https://github.com/betagouv/service-national-universel/compare/v1.11.0...v1.12.0) (2021-12-22)
 
 
