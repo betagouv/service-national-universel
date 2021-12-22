@@ -12,6 +12,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import Item from "./components/Item";
 import Select from "./components/Select";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import AddressInput from "../../components/addressInputV2";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -54,7 +55,7 @@ export default function Edit(props) {
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre", e?.error?.message);
         }
       }}>
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'un centre"}</Title>
@@ -87,11 +88,26 @@ export default function Edit(props) {
               </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxHeadTitle>Coordonnées</BoxHeadTitle>
+                  <BoxHeadTitle>Adresse du centre</BoxHeadTitle>
                   <BoxContent direction="column">
-                    <Item title="Adresse" values={values} name={"address"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item title="Ville" values={values} name={"city"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item title="Code Postal" values={values} name={"zip"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    <AddressInput
+                      keys={{
+                        country: "country",
+                        city: "city",
+                        zip: "zip",
+                        address: "address",
+                        location: "location",
+                        department: "department",
+                        region: "region",
+                        addressVerified: "addressVerified",
+                      }}
+                      values={values}
+                      departAndRegionVisible={true}
+                      handleChange={handleChange}
+                      errors={errors}
+                      touched={touched}
+                      validateField={validateField}
+                    />
                     <Select
                       handleChange={handleChange}
                       name="department"
