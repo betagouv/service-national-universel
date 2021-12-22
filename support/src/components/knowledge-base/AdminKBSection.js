@@ -18,7 +18,6 @@ const AdminKBSection = ({ section, isRoot }) => {
   const sortableAnswers = useRef(null);
 
   const [isSaving, setIsSaving] = useState(false);
-  const [reloadSortKey, setReloadSortKey] = useState(0);
   const onListChange = async (list) => {
     setIsSaving(true);
     const gridRef = list === "sections" ? gridSectionsRef : gridAnswersRef;

@@ -65,11 +65,7 @@ export const AddLinkButton = () => {
         active={isLinkActive(editor)}
         onMouseDown={(event) => {
           event.preventDefault();
-          const link = isLinkActive(editor);
           setIsOpen(true);
-          // const url = window.prompt("Entrez l'URL du lien:", link?.[0]?.url);
-          // if (!url) return;
-          // insertLink(editor, url);
         }}
       >
         <Icon>link</Icon>
