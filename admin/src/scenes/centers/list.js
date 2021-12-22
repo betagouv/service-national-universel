@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
@@ -20,12 +20,39 @@ const FILTERS = ["SEARCH", "PLACES", "COHORT"];
 export default function List() {
   const [center, setCenter] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
+  // List of sessionPhase1 IDS currently displayed in results
+  const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
+  // List of cohesionCenter associated to the sessionPhase1
+  const [cohesionCenters, setCohesionCenters] = useState([]);
+
   const user = useSelector((state) => state.Auth.user);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
     return { query: { match_all: {} } };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
+
+  useEffect(() => {
+    (async () => {
+      if (cohesionCenterIds?.length) {
+        const { responses } = await api.esQuery("cohesioncenter", {
+          size: ES_NO_LIMIT,
+          query: {
+            bool: {
+              must: {
+                ids: {
+                  values: cohesionCenterIds,
+                },
+              },
+            },
+          },
+        });
+        if (responses.length) {
+          setCohesionCenters(responses[0]?.hits?.hits || []);
+        }
+      }
+    })();
+  }, [cohesionCenterIds]);
 
   return (
     <div>
@@ -127,6 +154,9 @@ export default function List() {
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
+                onData={({ rawData }) => {
+                  if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._source.cohesionCenterId));
+                }}
                 render={({ data }) => (
                   <Table>
                     <thead>
@@ -139,7 +169,13 @@ export default function List() {
                     </thead>
                     <tbody>
                       {data.map((hit) => (
-                        <Hit key={hit._id} hit={hit} onClick={() => setCenter(hit)} selected={center?._id === hit._id} />
+                        <Hit
+                          key={hit._id}
+                          hit={hit}
+                          cohesionCenter={cohesionCenters.find((e) => e._id === hit.cohesionCenterId)}
+                          onClick={() => setCenter(hit)}
+                          selected={center?._id === hit._id}
+                        />
                       ))}
                     </tbody>
                   </Table>
@@ -154,14 +190,13 @@ export default function List() {
   );
 }
 
-const Hit = ({ hit, onClick, selected }) => {
-  // console.log("h", hit);
+const Hit = ({ hit, onClick, selected, cohesionCenter }) => {
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
         <MultiLine>
-          <h2>{hit.name}</h2>
-          <p>{`${hit.city || ""} • ${hit.department || ""}`}</p>
+          <h2>{cohesionCenter?._source?.name}</h2>
+          <p>{`${cohesionCenter?._source?.city || ""} • ${cohesionCenter?._source?.department || ""}`}</p>
         </MultiLine>
       </td>
       <td>
