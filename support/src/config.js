@@ -15,7 +15,7 @@ if (environment === "production") {
   apiURL = "https://api.snu.gouv.fr";
   adminURL = "https://admin.snu.gouv.fr";
   appURL = "https://moncompte.snu.gouv.fr";
-  supportURL = "https://support.snu.gouv.fr";
+  supportURL = "https://base-de-connaissance.snu.gouv.fr";
 }
 
 const S3PREFIX = "";
