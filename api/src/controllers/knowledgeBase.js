@@ -133,14 +133,6 @@ const getSlug = async (title) => {
   return newSlug;
 };
 
-// (async () => {
-//   const zammads = await KnowledgeBaseObject.find({ zammadId: { $exists: true } });
-//   for (const zammad of zammads) {
-//     await KnowledgeBaseObject.findByIdAndDelete(zammad._id);
-//   }
-//   console.log("DELETED");
-// })();
-
 router.post("/picture", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
@@ -322,7 +314,7 @@ router.get("/all", passport.authenticate(["referent", "young"], { session: false
 // this is to build static files from next-js
 router.get("/all-slugs", async (req, res) => {
   try {
-    const data = await KnowledgeBaseObject.find();
+    const data = await KnowledgeBaseObject.find({ allowedRoles: "public" });
 
     return res.status(200).send({ ok: true, data: data.map((item) => item.slug) });
   } catch (error) {

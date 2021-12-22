@@ -1,6 +1,6 @@
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { toast, ToastContainer } from "react-toastify";
-import { useState } from "react/cjs/react.development";
 import { Button } from "../../components/Buttons";
 import Loader from "../../components/Loader";
 import { adminURL, appURL } from "../../config";

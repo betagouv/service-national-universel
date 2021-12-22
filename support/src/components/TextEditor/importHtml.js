@@ -68,6 +68,7 @@ export const deserialize = (el) => {
     return children;
   } catch (e) {
     console.log("ERROR DESERIALIZE", e);
+    console.log(el);
   }
   return null;
 };
@@ -114,6 +115,14 @@ export const onImportSections = (API, zammad) => async (event) => {
       if (s1.zammadParentId < s2.zammadParentId) return -1;
       return 1;
     });
+  sections.unshift({
+    zammadId: 0,
+    title: "Zammad",
+    zammadParentId: null,
+    type: "section",
+    createdAt: "2021-08-27T05:03:45.883Z",
+    updatedAt: "2021-09-02T06:56:55.624Z",
+  });
   console.log(sections);
   for (const section of sections) {
     try {
