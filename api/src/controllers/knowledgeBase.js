@@ -17,7 +17,7 @@ const findChildrenRecursive = async (section, allChildren, { findAll = false }) 
     .lean(); // to json;
   for (const child of children) {
     allChildren.push(child);
-    if (findAll) await findChildrenRecursive(child, allChildren, { findAll, lean });
+    if (findAll) await findChildrenRecursive(child, allChildren, { findAll });
   }
 };
 
