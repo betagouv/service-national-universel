@@ -50,6 +50,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await CohesionCenterModel.create(value);
+    // todo create sessionPhase1
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
   } catch (error) {
     capture(error);
