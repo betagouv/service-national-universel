@@ -15,7 +15,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from 
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE"];
+const FILTERS = ["SEARCH", "PLACES", "COHORT"];
 
 export default function List() {
   const [center, setCenter] = useState(null);
@@ -29,7 +29,7 @@ export default function List() {
 
   return (
     <div>
-      <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+      <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
           <div style={{ flex: 2, position: "relative" }}>
             <Header>
@@ -97,18 +97,17 @@ export default function List() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  componentId="STATUS"
-                  dataField="status.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                  componentId="COHORT"
+                  dataField="cohort.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut")}
+                  renderLabel={(items) => getFilterLabel(items, "Séjour", "Séjour")}
                 />
-
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -120,6 +119,7 @@ export default function List() {
                   URLParams={true}
                   sortBy="asc"
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
                 />
               </FilterRow>
             </Filter>
@@ -132,8 +132,9 @@ export default function List() {
                     <thead>
                       <tr>
                         <th style={{ width: "40%" }}>Centres</th>
-                        <th style={{ width: "30%" }}>Places</th>
-                        <th style={{ width: "30%" }}>Disponibilité</th>
+                        <th style={{ width: "20%" }}>Séjour</th>
+                        <th style={{ width: "20%" }}>Places</th>
+                        <th style={{ width: "20%" }}>Disponibilité</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -162,6 +163,9 @@ const Hit = ({ hit, onClick, selected }) => {
           <h2>{hit.name}</h2>
           <p>{`${hit.city || ""} • ${hit.department || ""}`}</p>
         </MultiLine>
+      </td>
+      <td>
+        <Badge text={hit.cohort} />
       </td>
       <td>
         <MultiLine>
