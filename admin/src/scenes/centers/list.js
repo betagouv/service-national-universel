@@ -93,7 +93,7 @@ export default function List() {
                 }}
               />
               {user.role === ROLES.ADMIN ? (
-                <Link to={`/centre/create`}>
+                <Link to={`/centre/nouveau`}>
                   <VioletButton>
                     <p>Créer un nouveau centre</p>
                   </VioletButton>

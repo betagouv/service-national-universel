@@ -95,6 +95,13 @@ const Schema = new mongoose.Schema({
       description: "Liste ordonnée des jeunes en liste d'attente sur ce cente de cohésion",
     },
   },
+  pmr: {
+    type: String,
+    enum: ["true", "false", ""],
+    documentation: {
+      description: "Accessibilité aux personnes à mobilité réduite",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

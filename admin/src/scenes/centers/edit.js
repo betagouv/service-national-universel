@@ -67,11 +67,21 @@ export default function Edit(props) {
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxHeadTitle>Informations générales</BoxHeadTitle>
+                  <BoxHeadTitle>Informations générales sur le centre</BoxHeadTitle>
                   <BoxContent direction="column">
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Item title="Code" values={values} name={"code"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Item title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    <Select
+                      name="pmr"
+                      values={values}
+                      handleChange={handleChange}
+                      title="Accessibilité aux personnes à mobilité réduite"
+                      options={[
+                        { value: "true", label: "Oui" },
+                        { value: "false", label: "Non" },
+                      ]}
+                    />
                   </BoxContent>
                 </Box>
               </Col>

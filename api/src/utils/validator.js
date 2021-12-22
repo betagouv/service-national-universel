@@ -245,6 +245,7 @@ const cohesionCenterKeys = {
   outfitDelivered: Joi.string().allow(null, ""),
   observations: Joi.string().allow(null, ""),
   waitingList: Joi.array().items(Joi.string().allow(null, "")),
+  pmr: Joi.string().allow(null, ""),
 };
 
 function validateNewCohesionCenter(application) {

@@ -24,7 +24,7 @@ export default function CenterIndex() {
         <p> Chantier en cours...</p>⚠️
       </Infos>
       <Switch>
-        <Route path="/centre/create" component={Edit} />
+        <Route path="/centre/nouveau" component={Edit} />
         <Route path="/centre/:id/edit" component={Edit} />
         <Route path="/centre/:id" component={View} />
         <Route path="/centre" component={List} />
