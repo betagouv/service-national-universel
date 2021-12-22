@@ -71,7 +71,7 @@ export default function Details({ center }) {
               </div>
               <div className="detail">
                 <div className="detail-title-second">Accessibilité aux personnes à mobilité réduite (PMR) :</div>
-                <div className="detail-text">OUI</div>
+                <div className="detail-text">{translate(center.pmr)}</div>
               </div>
               <div className="detail">
                 <div className="detail-title-second">Séjour(s) de cohésion concerné(s) par le centre :</div>

@@ -82,6 +82,9 @@ export default function Edit(props) {
                         { value: "true", label: "Oui" },
                         { value: "false", label: "Non" },
                       ]}
+                      required
+                      errors={errors}
+                      touched={touched}
                     />
                   </BoxContent>
                 </Box>
@@ -107,58 +110,11 @@ export default function Edit(props) {
                       errors={errors}
                       touched={touched}
                       validateField={validateField}
-                    />
-                    <Select
-                      handleChange={handleChange}
-                      name="department"
-                      values={values}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        handleChange({ target: { name: "department", value } });
-                        const region = department2region[value];
-                        handleChange({ target: { name: "region", value: region } });
-                      }}
-                      title="Département"
-                      options={departmentList.map((d) => ({ value: d, label: d }))}
-                      errors={errors}
-                      touched={touched}
-                      required
-                    />
-                    <Select
-                      handleChange={handleChange}
-                      name="region"
-                      values={values}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        handleChange({ target: { name: "region", value } });
-                        handleChange({ target: { name: "department", value: "" } });
-                      }}
-                      title="Région"
-                      options={regionList.map((r) => ({ value: r, label: r }))}
-                      errors={errors}
-                      touched={touched}
                       required
                     />
                   </BoxContent>
                 </Box>
               </Col>
-              {/* <Col md={6} style={{ marginBottom: "20px" }}>
-                <Box>
-                  <BoxHeadTitle>Informations complémentaires</BoxHeadTitle>
-                  <BoxContent direction="column">
-                    <Select
-                      name="outfitDelivered"
-                      values={values}
-                      handleChange={handleChange}
-                      title="Tenue livrées"
-                      options={[
-                        { value: "true", label: "Oui" },
-                        { value: "false", label: "Non" },
-                      ]}
-                    />
-                  </BoxContent>
-                </Box>
-              </Col> */}
             </Row>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
