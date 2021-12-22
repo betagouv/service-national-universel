@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate, ROLES } from "../../../utils";
+import { translate, ROLES, getDepartmentNumber } from "../../../utils";
 import api from "../../../services/api";
 import { Box } from "../../../components/box";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
@@ -50,7 +50,7 @@ export default function Details({ center }) {
               <div className="detail">
                 <div className="detail-title-first">Dép :</div>
                 <div className="detail-text">
-                  {center.department} ({center.departmentCode})
+                  {center.department} ({getDepartmentNumber(center.department)})
                 </div>
               </div>
               <div className="detail">
