@@ -133,7 +133,7 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Séjour", "Séjour")}
+                  renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -162,7 +162,7 @@ export default function List() {
                     <thead>
                       <tr>
                         <th style={{ width: "40%" }}>Centres</th>
-                        <th style={{ width: "20%" }}>Séjour</th>
+                        <th style={{ width: "20%" }}>Cohorte</th>
                         <th style={{ width: "20%" }}>Places</th>
                         <th style={{ width: "20%" }}>Disponibilité</th>
                       </tr>
@@ -195,7 +195,11 @@ const Hit = ({ hit, onClick, selected, cohesionCenter }) => {
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
         <MultiLine>
-          <h2>{cohesionCenter?._source?.name}</h2>
+          <h2>
+            {cohesionCenter?._source?.name}
+            <span style={{ color: "#9C9C9C" }}>#{cohesionCenter?._source?.code}</span>
+          </h2>
+
           <p>{`${cohesionCenter?._source?.city || ""} • ${cohesionCenter?._source?.department || ""}`}</p>
         </MultiLine>
       </td>
