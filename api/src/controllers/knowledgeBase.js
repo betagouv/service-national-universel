@@ -133,14 +133,6 @@ const getSlug = async (title) => {
   return newSlug;
 };
 
-// (async () => {
-//   const zammads = await KnowledgeBaseObject.find({ zammadId: { $exists: true } });
-//   for (const zammad of zammads) {
-//     await KnowledgeBaseObject.findByIdAndDelete(zammad._id);
-//   }
-//   console.log("DELETED");
-// })();
-
 router.post("/picture", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
