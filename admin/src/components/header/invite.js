@@ -277,7 +277,7 @@ const ChooseRole = ({ value, onChange, validate }) => {
   return (
     <Field as="select" validate={validate} className="form-control" placeholder="Rôle" name="role" value={value} onChange={onChange}>
       <option value=""></option>
-      <option value={ROLES.VISITOR}>{translate(ROLES.VISITOR)}</option>
+      {user.role === ROLES.ADMIN ? <option value={ROLES.VISITOR}>{translate(ROLES.VISITOR)}</option> : null}
       <option value={ROLES.HEAD_CENTER}>{translate(ROLES.HEAD_CENTER)}</option>
       <option value={ROLES.REFERENT_DEPARTMENT}>{translate(ROLES.REFERENT_DEPARTMENT)}</option>
       {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_REGION ? <option value={ROLES.REFERENT_REGION}>{translate(ROLES.REFERENT_REGION)}</option> : null}
