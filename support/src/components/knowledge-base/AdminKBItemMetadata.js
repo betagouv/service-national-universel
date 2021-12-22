@@ -259,7 +259,6 @@ const AdminKBItemMetadata = ({ visible }) => {
             <option value="DRAFT">Brouillon</option>
           </select>
         </div>
-        <span>ZammadId: {item.zammadId}</span>
         <div className="flex flex-wrap justify-around items-center mt-8 mb-2 w-full">
           <Button type="submit" className="mb-2" loading={isSubmitting} disabled={isSubmitting || isDeleting}>
             Enregistrer
