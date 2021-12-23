@@ -254,30 +254,30 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     center.set(newCenter);
     await center.save();
 
-    const addedCohorts = (newCenter.cohorts || []).filter((cohort) => !previousCohorts.includes(cohort));
-    let deletedCohorts = [];
+    // if we change the cohorts, we need to update the sessionPhase1
     if (newCenter?.cohorts?.length) {
-      deletedCohorts = previousCohorts.filter((cohort) => !newCenter.cohorts.includes(cohort));
-    }
+      const addedCohorts = newCenter.cohorts.filter((cohort) => !previousCohorts.includes(cohort));
+      const deletedCohorts = previousCohorts.filter((cohort) => !newCenter.cohorts.includes(cohort));
 
-    // add sessionPhase1 documents linked to this cohesion center
-    if (addedCohorts?.length > 0) {
-      for (let cohort of addedCohorts) {
-        const cohesionCenterId = center._id;
-        const placesTotal = center.placesTotal;
-        const placesLeft = center.placesTotal;
-        // :warning: peut etre creation de doublons ?
-        // il faudrait peut etre check si une session existe deja pour ce centre et cette cohorte avant de creer une nouvelle
-        await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft });
+      // add sessionPhase1 documents linked to this cohesion center
+      if (addedCohorts?.length > 0) {
+        for (let cohort of addedCohorts) {
+          const cohesionCenterId = center._id;
+          const placesTotal = center.placesTotal;
+          const placesLeft = center.placesTotal;
+          // :warning: peut etre creation de doublons ?
+          // il faudrait peut etre check si une session existe deja pour ce centre et cette cohorte avant de creer une nouvelle
+          await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft });
+        }
       }
-    }
 
-    // ! MAYBE DANGEROUS ?
-    // delete sessionPhase1 documents linked to this cohesion center
-    if (deletedCohorts?.length > 0) {
-      for (let cohort of deletedCohorts) {
-        const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort });
-        await sessionPhase1.remove();
+      // ! MAYBE DANGEROUS ?
+      // delete sessionPhase1 documents linked to this cohesion center
+      if (deletedCohorts?.length > 0) {
+        for (let cohort of deletedCohorts) {
+          const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort });
+          await sessionPhase1.remove();
+        }
       }
     }
 
