@@ -42,6 +42,7 @@ import { SENTRY_URL, environment } from "./config";
 import "./index.css";
 import { YOUNG_STATUS, ENABLE_PM } from "./utils";
 import Zammad from "./components/Zammad";
+import GoogleTags from "./components/GoogleTags";
 
 if (environment === "production") {
   Sentry.init({
@@ -83,6 +84,7 @@ export default function App() {
     <Router>
       <ScrollToTop />
       <Zammad />
+      <GoogleTags />
       <div className="main">
         <Switch>
           <Route path="/bug" component={Bug} />
