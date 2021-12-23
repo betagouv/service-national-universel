@@ -240,6 +240,7 @@ const cohesionCenterKeys = {
   zip: Joi.string().allow(null, ""),
   department: Joi.string().allow(null, ""),
   region: Joi.string().allow(null, ""),
+  addressVerified: Joi.string().allow(null, ""),
   placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
   placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
   outfitDelivered: Joi.string().allow(null, ""),
