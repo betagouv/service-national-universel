@@ -127,6 +127,28 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
   }
 });
 
+// young-having-school-in-department is a special index (that uses a young index)
+// used by REFERENT_DEPARTMENT to get youngs having a school in their department.
+router.post("/young-having-school-in-department/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    if (user.role !== ROLES.REFERENT_DEPARTMENT) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const filter = [
+      { term: { "schoolDepartment.keyword": user.department } },
+      { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
+    ];
+
+    const response = await allRecords("young", applyFilterOnQuery(body.query, filter));
+    return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, error: error.message });
+  }
+});
+
 // cohesionyoung is a special index, so we need to use the index "young" and specify a center ID.
 router.post("/cohesionyoung/:id/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
