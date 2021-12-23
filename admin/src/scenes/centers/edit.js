@@ -13,7 +13,7 @@ import Item from "./components/Item";
 import Select from "./components/Select";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import AddressInput from "../../components/addressInputV2";
-import MultiSelect from "../../components/MultiSelect";
+import MultiSelect from "../../components/Multiselect";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
