@@ -72,7 +72,7 @@ export default function Edit(props) {
                   <BoxHeadTitle>Informations générales sur le centre</BoxHeadTitle>
                   <BoxContent direction="column">
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item title="Code" values={values} name={"code"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    {values._id ? <Item disabled title="Code" values={values} name="_id" /> : null}
                     <Item title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Select
                       name="pmr"
