@@ -314,3 +314,7 @@ export const ActionBox = styled.div`
     }
   }
 `;
+
+export const SubTd = styled.div`
+  padding: 0.5rem;
+`;

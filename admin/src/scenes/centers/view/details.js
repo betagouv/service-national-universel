@@ -31,7 +31,7 @@ export default function Details({ center }) {
         <Wrapper>
           <Header>
             <h4>
-              <strong>Centre</strong> <span style={{ color: "#9C9C9C" }}>#{center.code}</span>
+              <strong>Centre</strong> <span style={{ color: "#9C9C9C" }}>#{center._id}</span>
             </h4>
             {user.role === ROLES.ADMIN ? (
               <div style={{ flexBasis: "0" }}>

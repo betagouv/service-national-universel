@@ -11,11 +11,11 @@ import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES } from 
 import VioletButton from "../../components/buttons/VioletButton";
 import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine, SubTd } from "../../components/list";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
-const FILTERS = ["SEARCH", "PLACES", "COHORT"];
+const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION"];
 
 export default function List() {
   const [center, setCenter] = useState(null);
@@ -23,7 +23,7 @@ export default function List() {
   // List of sessionPhase1 IDS currently displayed in results
   const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
   // List of cohesionCenter associated to the sessionPhase1
-  const [cohesionCenters, setCohesionCenters] = useState([]);
+  const [sessionsPhase1, setSessionsPhase1] = useState([]);
 
   const user = useSelector((state) => state.Auth.user);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
@@ -35,20 +35,12 @@ export default function List() {
   useEffect(() => {
     (async () => {
       if (cohesionCenterIds?.length) {
-        const { responses } = await api.esQuery("cohesioncenter", {
+        const { responses } = await api.esQuery("sessionphase1", {
           size: ES_NO_LIMIT,
-          query: {
-            bool: {
-              must: {
-                ids: {
-                  values: cohesionCenterIds,
-                },
-              },
-            },
-          },
+          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohesionCenterId.keyword": cohesionCenterIds } }] } },
         });
         if (responses.length) {
-          setCohesionCenters(responses[0]?.hits?.hits || []);
+          setSessionsPhase1(responses[0]?.hits?.hits || []);
         }
       }
     })();
@@ -56,7 +48,7 @@ export default function List() {
 
   return (
     <div>
-      <ReactiveBase url={`${apiURL}/es`} app="sessionphase1" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+      <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
           <div style={{ flex: 2, position: "relative" }}>
             <Header>
@@ -155,14 +147,14 @@ export default function List() {
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
                 onData={({ rawData }) => {
-                  if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._source.cohesionCenterId));
+                  if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._id));
                 }}
                 render={({ data }) => (
                   <Table>
                     <thead>
                       <tr>
-                        <th style={{ width: "40%" }}>Centres</th>
-                        <th style={{ width: "20%" }}>Cohorte</th>
+                        <th style={{ width: "40%" }}>Centre</th>
+                        <th style={{ width: "20%" }}>Cohorte(s)</th>
                         <th style={{ width: "20%" }}>Places</th>
                         <th style={{ width: "20%" }}>Disponibilité</th>
                       </tr>
@@ -172,7 +164,7 @@ export default function List() {
                         <Hit
                           key={hit._id}
                           hit={hit}
-                          cohesionCenter={cohesionCenters.find((e) => e._id === hit.cohesionCenterId)}
+                          sessionsPhase1={sessionsPhase1.filter((e) => e?._source?.cohesionCenterId === hit._id).map((e) => e._source)}
                           onClick={() => setCenter(hit)}
                           selected={center?._id === hit._id}
                         />
@@ -190,33 +182,41 @@ export default function List() {
   );
 }
 
-const Hit = ({ hit, onClick, selected, cohesionCenter }) => {
+const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>
-            {cohesionCenter?._source?.name}
-            <span style={{ color: "#9C9C9C" }}>#{cohesionCenter?._source?.code}</span>
+            {hit?.name}
+            {/* <span style={{ fontSize: ".7rem", color: "#9C9C9C" }}> #{hit?._id}</span> */}
           </h2>
 
-          <p>{`${cohesionCenter?._source?.city || ""} • ${cohesionCenter?._source?.department || ""}`}</p>
+          <p>{`${hit?.city || ""} • ${hit?.department || ""}`}</p>
         </MultiLine>
       </td>
       <td>
-        <Badge text={hit.cohort} />
+        {sessionsPhase1.map((sessionPhase1) => (
+          <SubTd key={sessionPhase1._id}>
+            <Badge text={sessionPhase1.cohort} />
+          </SubTd>
+        ))}
       </td>
       <td>
-        <MultiLine>
-          <h2>{hit.placesLeft} places disponibles</h2>
-          <p>sur {hit.placesTotal} places proposées</p>
-        </MultiLine>
-        {/* {hit.placesTotal <= 1 ? `${hit.placesTotal} place` : `${hit.placesTotal} places`}
-        <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
-          {hit.placesTotal - hit.placesLeft} / {hit.placesTotal}
-        </div> */}
+        {sessionsPhase1.map((sessionPhase1) => (
+          <SubTd key={sessionPhase1._id}>
+            <MultiLine>
+              <h2>{sessionPhase1.placesLeft} places disponibles</h2>
+              <p>sur {sessionPhase1.placesTotal} places proposées</p>
+            </MultiLine>
+          </SubTd>
+        ))}
       </td>
-      <td>{hit.placesLeft > 0 ? <Badge text="Places disponibles" color="#6CC763" /> : <Badge text="Complet" />}</td>
+      <td>
+        {sessionsPhase1.map((sessionPhase1) => (
+          <SubTd key={sessionPhase1._id}>{sessionPhase1.placesLeft > 0 ? <Badge text="Places disponibles" color="#6CC763" /> : <Badge text="Complet" />}</SubTd>
+        ))}
+      </td>
     </tr>
   );
 };
