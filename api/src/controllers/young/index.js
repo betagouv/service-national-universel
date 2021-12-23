@@ -23,11 +23,11 @@ const {
   validatePassword,
   updatePlacesCenter,
   signinLimiter,
-  assignNextYoungFromWaitingList,
+  // assignNextYoungFromWaitingList,
   ERRORS,
   inSevenDays,
   isYoung,
-  updateApplicationsWithYoungOrMission,
+  // updateApplicationsWithYoungOrMission,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -314,6 +314,7 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    // eslint-disable-next-line no-unused-vars
     const { id, ...values } = value;
     values.phase3Token = crypto.randomBytes(20).toString("hex");
 
@@ -442,6 +443,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    // eslint-disable-next-line no-unused-vars
     const { id, template, message, prevStatus, missionName, structureName, cta } = value;
 
     const young = await YoungObject.findById(id);
