@@ -1,3 +1,16 @@
+# [1.13.0](https://github.com/betagouv/service-national-universel/compare/v1.12.1...v1.13.0) (2021-12-23)
+
+
+### Bug Fixes
+
+* **admin:**  cohesion center listing ([#1022](https://github.com/betagouv/service-national-universel/issues/1022)) ([2de9afc](https://github.com/betagouv/service-national-universel/commit/2de9afc851e7b83e4035d00fe7b1d632e101128e))
+* **api,test:** jest should work locally ([#1029](https://github.com/betagouv/service-national-universel/issues/1029)) ([4385e8f](https://github.com/betagouv/service-national-universel/commit/4385e8f060f6467564b6bd0a523c05a4873db1cb))
+
+
+### Features
+
+* **admin:** add export young school in department for referent department ([#1025](https://github.com/betagouv/service-national-universel/issues/1025)) ([e5d4963](https://github.com/betagouv/service-national-universel/commit/e5d4963c24942897462a2b0783ec6e1390ec556a))
+
 ## [1.12.1](https://github.com/betagouv/service-national-universel/compare/v1.12.0...v1.12.1) (2021-12-22)
 
 
