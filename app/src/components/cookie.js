@@ -25,7 +25,7 @@ export default function Cookie() {
           </div>
           <Title style={{ textAlign: "center", color: "#1D4094", marginBottom: "30px", fontWeight: "600" }}>Gestion de vos cookies</Title>
           <TextBigModal style={{ fontWeight: "500" }}>
-            L&apos;Assurance Maladie s&apos;engage, dans le cadre des missions qui lui sont confiées, à assurer la protection, la confidentialité et la sécurité de l&apos;ensemble
+            Le Service National Universel s'engage, dans le cadre des missions qui lui sont confiées, à assurer la protection, la confidentialité et la sécurité de l&apos;ensemble
             de vos données personnelles dans le respect de votre vie privée. Lorsque vous naviguez sur notre site, nous pouvons être amenés à déposer différents types de cookies
             sur votre terminal. Ils ont des finalités différentes décrites ci-dessous. Cette page vous permet de les accepter ou de les refuser de manière globale ou au cas par
             cas.
@@ -37,8 +37,8 @@ export default function Cookie() {
           <hr />
           <Subtitle>Nécessaires au bon fonctionnement du site</Subtitle>
           <TextModal>
-            Ces cookies permettent de garantir des fonctionnalités importantes du site comme la sélection de votre caisse à travers la saisie de votre code postal, la mémorisation
-            de l&apos;espace visité ou la personnalisation de l&apos;affichage (version contrastée). Le site web ne pouvant fonctionner correctement sans eux, ils ne peuvent être
+            Ces cookies permettent de garantir des fonctionnalités importantes du site comme la mémorisation
+            de l&apos;espace visité. Le site web ne pouvant fonctionner correctement sans eux, ils ne peuvent être
             désactivés.
           </TextModal>
           <hr />
@@ -54,20 +54,6 @@ export default function Cookie() {
           <hr />
           <Subtitle>Mesure d&apos;audience</Subtitle>
           <TextModal>Les services de mesure d&apos;audience permettent de générer des statistiques de fréquentation utiles à l&apos;amélioration du site.</TextModal>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "40px 0 10px 0" }}>
-            <ButtonModalBlue>ACCEPTER</ButtonModalBlue>
-            <ButtonModalRed>REFUSER</ButtonModalRed>
-          </div>
-          <hr />
-          <Subtitle>Vidéos</Subtitle>
-          <TextModal>Ces cookies déposés via le service de partage de vidéos Vimeo vous permettent de visionner les contenus multimédia.</TextModal>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "40px 0 10px 0" }}>
-            <ButtonModalBlue>ACCEPTER</ButtonModalBlue>
-            <ButtonModalRed>REFUSER</ButtonModalRed>
-          </div>
-          <hr />
-          <Subtitle>Réseaux sociaux</Subtitle>
-          <TextModal>Ces cookies déposés via les boutons réseaux sociaux permettent de faciliter le partage des contenus du site sur Facebook, Twitter ou LinkedIn.</TextModal>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "40px 0 10px 0" }}>
             <ButtonModalBlue>ACCEPTER</ButtonModalBlue>
             <ButtonModalRed>REFUSER</ButtonModalRed>
