@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container, Modal } from "reactstrap";
 import styled from "styled-components";
 import { useCookies } from "react-cookie";
+import CloseSvg from "../assets/Close";
 
 export default function Cookie() {
   const [cookies, setCookie] = useCookies(["accept-cookie"]);
@@ -19,6 +20,9 @@ export default function Cookie() {
     <CookieContainer>
       <Modal size="lg" isOpen={open} scrollable={true} toggle={() => setOpen(false)}>
         <ModalContainer>
+          <div style={{display: "flex", width: "100%", justifyContent: "end", cursor: "pointer"}}>
+          <CloseSvg className="close-icon" height={15} onClick={()=>setOpen(false)} />
+          </div>
           <Title style={{ textAlign: "center", color: "#1D4094", marginBottom: "30px", fontWeight: "600" }}>Gestion de vos cookies</Title>
           <TextBigModal style={{ fontWeight: "500" }}>
             L&apos;Assurance Maladie s&apos;engage, dans le cadre des missions qui lui sont confiées, à assurer la protection, la confidentialité et la sécurité de l&apos;ensemble
@@ -102,7 +106,7 @@ export default function Cookie() {
 }
 
 const ModalContainer = styled.footer`
-  padding: 50px;
+  padding: 30px;
   overflow: scroll;
   @media (max-width: 768px) {
     padding: 10px;
