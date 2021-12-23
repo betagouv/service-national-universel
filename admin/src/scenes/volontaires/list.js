@@ -55,6 +55,8 @@ const FILTERS = [
 ];
 
 export default function VolontaireList() {
+  const user = useSelector((state) => state.Auth.user);
+
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
@@ -92,157 +94,203 @@ export default function VolontaireList() {
               <div>
                 <Title>Volontaires</Title>
               </div>
-              <ExportComponent
-                title="Exporter les volontaires"
-                defaultQuery={getExportQuery}
-                exportTitle="Volontaires"
-                index="young"
-                react={{ and: FILTERS }}
-                transform={async (data) => {
-                  let all = data;
-                  const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-                  if (schoolsId?.length) {
-                    const { responses } = await api.esQuery("school", {
-                      query: { bool: { must: { ids: { values: schoolsId } } } },
-                      size: ES_NO_LIMIT,
+              <div style={{ display: "flex", flexWrap: "wrap", gap: ".25rem", justifyContent: "flex-end" }}>
+                <ExportComponent
+                  title="Exporter les volontaires"
+                  defaultQuery={getExportQuery}
+                  exportTitle="Volontaires"
+                  index="young"
+                  react={{ and: FILTERS }}
+                  transform={async (data) => {
+                    let all = data;
+                    const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                    if (schoolsId?.length) {
+                      const { responses } = await api.esQuery("school", {
+                        query: { bool: { must: { ids: { values: schoolsId } } } },
+                        size: ES_NO_LIMIT,
+                      });
+                      if (responses.length) {
+                        const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                        all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                      }
+                    }
+                    return all.map((data) => {
+                      let center = {};
+                      if (data.cohesionCenterId && centers) {
+                        center = centers.find((c) => c._id === data.cohesionCenterId);
+                        if (!center) center = {};
+                      }
+                      let meetingPoint = {};
+                      if (data.meetingPointId && meetingPoints) {
+                        meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
+                        if (!meetingPoint) meetingPoint = {};
+                      }
+                      return {
+                        _id: data._id,
+                        Cohorte: data.cohort,
+                        Prénom: data.firstName,
+                        Nom: data.lastName,
+                        "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
+                        "Pays de naissance": data.birthCountry || "France",
+                        "Ville de naissance": data.birthCity,
+                        "Code postal de naissance": data.birthCityZip,
+                        Sexe: translate(data.gender),
+                        Email: data.email,
+                        Téléphone: data.phone,
+                        "Adresse postale": data.address,
+                        "Code postal": data.zip,
+                        Ville: data.city,
+                        Département: data.department,
+                        Région: data.region,
+                        Académie: data.academy,
+                        Situation: translate(data.situation),
+                        Niveau: translate(data.grade),
+                        "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                        "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                        "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                        "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                        "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                        "UAI de l'établissement": data.esSchool?.uai,
+                        "Quartier Prioritaire de la ville": translate(data.qpv),
+                        "Zone Rurale": translate(isInRuralArea(data)),
+                        Handicap: translate(data.handicap),
+                        "Bénéficiaire d'un PPS": translate(data.ppsBeneficiary),
+                        "Bénéficiaire d'un PAI": translate(data.paiBeneficiary),
+                        "Structure médico-sociale": translate(data.medicosocialStructure),
+                        "Nom de la structure médico-sociale": data.medicosocialStructureName,
+                        "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
+                        "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
+                        "Ville de la structure médico-sociale": data.medicosocialStructureCity,
+                        "Aménagement spécifique": translate(data.specificAmenagment),
+                        "Nature de l'aménagement spécifique": translate(data.specificAmenagmentType),
+                        "Aménagement pour mobilité réduite": translate(data.reducedMobilityAccess),
+                        "Besoin d'être affecté(e) dans le département de résidence": translate(data.handicapInSameDepartment),
+                        "Allergies ou intolérances alimentaires": translate(data.allergies),
+                        "Activité de haut-niveau": translate(data.highSkilledActivity),
+                        "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
+                        "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
+                        "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
+                        "Consentement des représentants légaux": translate(data.parentConsentment),
+                        "Droit à l'image": translate(data.imageRight),
+                        "Autotest PCR": translate(data.autoTestPCR),
+                        "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
+                        "Présent au séjour de cohésion": translate(data.cohesionStayPresence),
+                        "Statut représentant légal 1": translate(data.parent1Status),
+                        "Prénom représentant légal 1": data.parent1FirstName,
+                        "Nom représentant légal 1": data.parent1LastName,
+                        "Email représentant légal 1": data.parent1Email,
+                        "Téléphone représentant légal 1": data.parent1Phone,
+                        "Adresse représentant légal 1": data.parent1Address,
+                        "Code postal représentant légal 1": data.parent1Zip,
+                        "Ville représentant légal 1": data.parent1City,
+                        "Département représentant légal 1": data.parent1Department,
+                        "Région représentant légal 1": data.parent1Region,
+                        "Statut représentant légal 2": translate(data.parent2Status),
+                        "Prénom représentant légal 2": data.parent2FirstName,
+                        "Nom représentant légal 2": data.parent2LastName,
+                        "Email représentant légal 2": data.parent2Email,
+                        "Téléphone représentant légal 2": data.parent2Phone,
+                        "Adresse représentant légal 2": data.parent2Address,
+                        "Code postal représentant légal 2": data.parent2Zip,
+                        "Ville représentant légal 2": data.parent2City,
+                        "Département représentant légal 2": data.parent2Department,
+                        "Région représentant légal 2": data.parent2Region,
+                        "Motivations à participer au SNU": data.motivations,
+                        "Domaine de MIG 1": data.domains[0],
+                        "Domaine de MIG 2": data.domains[1],
+                        "Domaine de MIG 3": data.domains[2],
+                        "Projet professionnel": translate(data.professionnalProject),
+                        "Information supplémentaire sur le projet professionnel": data.professionnalProjectPrecision,
+                        "Période privilégiée pour réaliser des missions": data.period,
+                        "Choix 1 période": translate(data.periodRanking[0]),
+                        "Choix 2 période": translate(data.periodRanking[1]),
+                        "Choix 3 période": translate(data.periodRanking[2]),
+                        "Choix 4 période": translate(data.periodRanking[3]),
+                        "Choix 5 période": translate(data.periodRanking[4]),
+                        "Mobilité aux alentours de son établissement": translate(data.mobilityNearSchool),
+                        "Mobilité aux alentours de son domicile": translate(data.mobilityNearHome),
+                        "Mobilité aux alentours d'un de ses proches": translate(data.mobilityNearRelative),
+                        "Informations du proche":
+                          data.mobilityNearRelative &&
+                          [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity]
+                            .filter((e) => e)
+                            ?.join(", "),
+                        "Mode de transport": data.mobilityTransport?.map((t) => translate(t)).join(", "),
+                        "Autre mode de transport": data.mobilityTransportOther,
+                        "Format de mission": translate(data.missionFormat),
+                        "Engagement dans une structure en dehors du SNU": translate(data.engaged),
+                        "Description engagement ": data.engagedDescription,
+                        "Souhait MIG": data.desiredLocation,
+                        Phase: translate(data.phase),
+                        "Créé lé": formatLongDateFR(data.createdAt),
+                        "Mis à jour le": formatLongDateFR(data.updatedAt),
+                        "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
+                        Statut: translate(data.status),
+                        "Statut Phase 1": translate(data.statusPhase1),
+                        "Statut Phase 2": translate(data.statusPhase2),
+                        "Statut Phase 3": translate(data.statusPhase3),
+                        "Dernier statut le": formatLongDateFR(data.lastStatusAt),
+                        "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
+                        "Message de desistement": data.withdrawnMessage,
+                        "ID centre": center._id || "",
+                        "Code centre": center.code || "",
+                        "Nom du centre": center.name || "",
+                        "Ville du centre": data.cohesionCenterCity || "",
+                        "Département du centre": center.department || "",
+                        "Région du centre": center.region || "",
+                        "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
+                        "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
+                        "Bus n˚": meetingPoint?.busExcelId,
+                        "Adresse point de rassemblement": meetingPoint?.departureAddress,
+                        "Date aller": meetingPoint?.departureAtString,
+                        "Date retour": meetingPoint?.returnAtString,
+                      };
                     });
-                    if (responses.length) {
-                      const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                      all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-                    }
-                  }
-                  return all.map((data) => {
-                    let center = {};
-                    if (data.cohesionCenterId && centers) {
-                      center = centers.find((c) => c._id === data.cohesionCenterId);
-                      if (!center) center = {};
-                    }
-                    let meetingPoint = {};
-                    if (data.meetingPointId && meetingPoints) {
-                      meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
-                      if (!meetingPoint) meetingPoint = {};
-                    }
-                    return {
-                      _id: data._id,
-                      Cohorte: data.cohort,
-                      Prénom: data.firstName,
-                      Nom: data.lastName,
-                      "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
-                      "Pays de naissance": data.birthCountry || "France",
-                      "Ville de naissance": data.birthCity,
-                      "Code postal de naissance": data.birthCityZip,
-                      Sexe: translate(data.gender),
-                      Email: data.email,
-                      Téléphone: data.phone,
-                      "Adresse postale": data.address,
-                      "Code postal": data.zip,
-                      Ville: data.city,
-                      Département: data.department,
-                      Région: data.region,
-                      Académie: data.academy,
-                      Situation: translate(data.situation),
-                      Niveau: translate(data.grade),
-                      "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-                      "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-                      "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-                      "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-                      "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-                      "UAI de l'établissement": data.esSchool?.uai,
-                      "Quartier Prioritaire de la ville": translate(data.qpv),
-                      "Zone Rurale": translate(isInRuralArea(data)),
-                      Handicap: translate(data.handicap),
-                      "Bénéficiaire d'un PPS": translate(data.ppsBeneficiary),
-                      "Bénéficiaire d'un PAI": translate(data.paiBeneficiary),
-                      "Structure médico-sociale": translate(data.medicosocialStructure),
-                      "Nom de la structure médico-sociale": data.medicosocialStructureName,
-                      "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
-                      "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
-                      "Ville de la structure médico-sociale": data.medicosocialStructureCity,
-                      "Aménagement spécifique": translate(data.specificAmenagment),
-                      "Nature de l'aménagement spécifique": translate(data.specificAmenagmentType),
-                      "Aménagement pour mobilité réduite": translate(data.reducedMobilityAccess),
-                      "Besoin d'être affecté(e) dans le département de résidence": translate(data.handicapInSameDepartment),
-                      "Allergies ou intolérances alimentaires": translate(data.allergies),
-                      "Activité de haut-niveau": translate(data.highSkilledActivity),
-                      "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
-                      "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
-                      "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
-                      "Consentement des représentants légaux": translate(data.parentConsentment),
-                      "Droit à l'image": translate(data.imageRight),
-                      "Autotest PCR": translate(data.autoTestPCR),
-                      "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
-                      "Présent au séjour de cohésion": translate(data.cohesionStayPresence),
-                      "Statut représentant légal 1": translate(data.parent1Status),
-                      "Prénom représentant légal 1": data.parent1FirstName,
-                      "Nom représentant légal 1": data.parent1LastName,
-                      "Email représentant légal 1": data.parent1Email,
-                      "Téléphone représentant légal 1": data.parent1Phone,
-                      "Adresse représentant légal 1": data.parent1Address,
-                      "Code postal représentant légal 1": data.parent1Zip,
-                      "Ville représentant légal 1": data.parent1City,
-                      "Département représentant légal 1": data.parent1Department,
-                      "Région représentant légal 1": data.parent1Region,
-                      "Statut représentant légal 2": translate(data.parent2Status),
-                      "Prénom représentant légal 2": data.parent2FirstName,
-                      "Nom représentant légal 2": data.parent2LastName,
-                      "Email représentant légal 2": data.parent2Email,
-                      "Téléphone représentant légal 2": data.parent2Phone,
-                      "Adresse représentant légal 2": data.parent2Address,
-                      "Code postal représentant légal 2": data.parent2Zip,
-                      "Ville représentant légal 2": data.parent2City,
-                      "Département représentant légal 2": data.parent2Department,
-                      "Région représentant légal 2": data.parent2Region,
-                      "Motivations à participer au SNU": data.motivations,
-                      "Domaine de MIG 1": data.domains[0],
-                      "Domaine de MIG 2": data.domains[1],
-                      "Domaine de MIG 3": data.domains[2],
-                      "Projet professionnel": translate(data.professionnalProject),
-                      "Information supplémentaire sur le projet professionnel": data.professionnalProjectPrecision,
-                      "Période privilégiée pour réaliser des missions": data.period,
-                      "Choix 1 période": translate(data.periodRanking[0]),
-                      "Choix 2 période": translate(data.periodRanking[1]),
-                      "Choix 3 période": translate(data.periodRanking[2]),
-                      "Choix 4 période": translate(data.periodRanking[3]),
-                      "Choix 5 période": translate(data.periodRanking[4]),
-                      "Mobilité aux alentours de son établissement": translate(data.mobilityNearSchool),
-                      "Mobilité aux alentours de son domicile": translate(data.mobilityNearHome),
-                      "Mobilité aux alentours d'un de ses proches": translate(data.mobilityNearRelative),
-                      "Informations du proche":
-                        data.mobilityNearRelative &&
-                        [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity].filter((e) => e)?.join(", "),
-                      "Mode de transport": data.mobilityTransport?.map((t) => translate(t)).join(", "),
-                      "Autre mode de transport": data.mobilityTransportOther,
-                      "Format de mission": translate(data.missionFormat),
-                      "Engagement dans une structure en dehors du SNU": translate(data.engaged),
-                      "Description engagement ": data.engagedDescription,
-                      "Souhait MIG": data.desiredLocation,
-                      Phase: translate(data.phase),
-                      "Créé lé": formatLongDateFR(data.createdAt),
-                      "Mis à jour le": formatLongDateFR(data.updatedAt),
-                      "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                      Statut: translate(data.status),
-                      "Statut Phase 1": translate(data.statusPhase1),
-                      "Statut Phase 2": translate(data.statusPhase2),
-                      "Statut Phase 3": translate(data.statusPhase3),
-                      "Dernier statut le": formatLongDateFR(data.lastStatusAt),
-                      "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
-                      "Message de desistement": data.withdrawnMessage,
-                      "ID centre": center._id || "",
-                      "Code centre": center.code || "",
-                      "Nom du centre": center.name || "",
-                      "Ville du centre": data.cohesionCenterCity || "",
-                      "Département du centre": center.department || "",
-                      "Région du centre": center.region || "",
-                      "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
-                      "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
-                      "Bus n˚": meetingPoint?.busExcelId,
-                      "Adresse point de rassemblement": meetingPoint?.departureAddress,
-                      "Date aller": meetingPoint?.departureAtString,
-                      "Date retour": meetingPoint?.returnAtString,
-                    };
-                  });
-                }}
-              />
+                  }}
+                />
+                {user.role === ROLES.REFERENT_DEPARTMENT && (
+                  <ExportComponent
+                    title="Exporter les volontaires scolarisés dans le département"
+                    defaultQuery={getExportQuery}
+                    exportTitle="Volontaires"
+                    index="young-having-school-in-department"
+                    react={{ and: FILTERS }}
+                    transform={async (data) => {
+                      let all = data;
+                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                      if (schoolsId?.length) {
+                        const { responses } = await api.esQuery("school", {
+                          query: { bool: { must: { ids: { values: schoolsId } } } },
+                          size: ES_NO_LIMIT,
+                        });
+                        if (responses.length) {
+                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                        }
+                      }
+                      return all.map((data) => {
+                        return {
+                          _id: data._id,
+                          Cohorte: data.cohort,
+                          Prénom: data.firstName,
+                          Nom: data.lastName,
+                          Département: data.department,
+                          Situation: translate(data.situation),
+                          Niveau: translate(data.grade),
+                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                          "UAI de l'établissement": data.esSchool?.uai,
+                          Statut: translate(data.status),
+                          "Statut Phase 1": translate(data.statusPhase1),
+                        };
+                      });
+                    }}
+                  />
+                )}
+              </div>
             </Header>
             <Filter>
               <FilterRow visible>
