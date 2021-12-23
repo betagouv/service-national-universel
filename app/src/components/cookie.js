@@ -20,26 +20,35 @@ export default function Cookie() {
     <CookieContainer>
       <Modal size="lg" isOpen={open} scrollable={true} toggle={() => setOpen(false)}>
         <ModalContainer>
-          <div style={{display: "flex", width: "100%", justifyContent: "end", cursor: "pointer"}}>
-          <CloseSvg className="close-icon" height={15} onClick={()=>setOpen(false)} />
+          <div style={{ display: "flex", width: "100%", justifyContent: "end", cursor: "pointer" }}>
+            <CloseSvg className="close-icon" height={15} onClick={() => setOpen(false)} />
           </div>
           <Title style={{ textAlign: "center", color: "#1D4094", marginBottom: "30px", fontWeight: "600" }}>Gestion de vos cookies</Title>
           <TextBigModal style={{ fontWeight: "500" }}>
-            Le Service National Universel s'engage, dans le cadre des missions qui lui sont confiées, à assurer la protection, la confidentialité et la sécurité de l&apos;ensemble
-            de vos données personnelles dans le respect de votre vie privée. Lorsque vous naviguez sur notre site, nous pouvons être amenés à déposer différents types de cookies
-            sur votre terminal. Ils ont des finalités différentes décrites ci-dessous. Cette page vous permet de les accepter ou de les refuser de manière globale ou au cas par
-            cas.
+            Le Service National Universel s&apos;engage, dans le cadre des missions qui lui sont confiées, à assurer la protection, la confidentialité et la sécurité de
+            l&apos;ensemble de vos données personnelles dans le respect de votre vie privée. Lorsque vous naviguez sur notre site, nous pouvons être amenés à déposer différents
+            types de cookies sur votre terminal. Ils ont des finalités différentes décrites ci-dessous. Cette page vous permet de les accepter ou de les refuser de manière globale
+            ou au cas par cas.
           </TextBigModal>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-            <ButtonModalBlue>TOUT ACCEPTER</ButtonModalBlue>
-            <ButtonModalRed>TOUT REFUSER</ButtonModalRed>
+            <ButtonModalBlue
+              onClick={() => {
+                setCookie("accept-cookie", "true", { path: "/", maxAge: 60 * 60 * 24 * 365 });
+              }}>
+              TOUT ACCEPTER
+            </ButtonModalBlue>
+            <ButtonModalRed
+              onClick={() => {
+                setCookie("accept-cookie", "false", { path: "/", maxAge: 60 * 60 * 24 * 365 });
+              }}>
+              TOUT REFUSER
+            </ButtonModalRed>
           </div>
           <hr />
           <Subtitle>Nécessaires au bon fonctionnement du site</Subtitle>
           <TextModal>
-            Ces cookies permettent de garantir des fonctionnalités importantes du site comme la mémorisation
-            de l&apos;espace visité. Le site web ne pouvant fonctionner correctement sans eux, ils ne peuvent être
-            désactivés.
+            Ces cookies permettent de garantir des fonctionnalités importantes du site comme la mémorisation de l&apos;espace visité. Le site web ne pouvant fonctionner
+            correctement sans eux, ils ne peuvent être désactivés.
           </TextModal>
           <hr />
           <Subtitle>Campagnes</Subtitle>
@@ -48,15 +57,35 @@ export default function Cookie() {
             campagnes de communication, via Google Tag Manager, pour évaluer leur diffusion et leur efficacité.
           </TextModal>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "40px 0 10px 0" }}>
-            <ButtonModalBlue>ACCEPTER</ButtonModalBlue>
-            <ButtonModalRed>REFUSER</ButtonModalRed>
+            <ButtonModalBlue
+              onClick={() => {
+                setCookie("accept-cookie", "true", { path: "/", maxAge: 60 * 60 * 24 * 365 });
+              }}>
+              ACCEPTER
+            </ButtonModalBlue>
+            <ButtonModalRed
+              onClick={() => {
+                setCookie("accept-cookie", "false", { path: "/", maxAge: 60 * 60 * 24 * 365 });
+              }}>
+              REFUSER
+            </ButtonModalRed>
           </div>
           <hr />
           <Subtitle>Mesure d&apos;audience</Subtitle>
           <TextModal>Les services de mesure d&apos;audience permettent de générer des statistiques de fréquentation utiles à l&apos;amélioration du site.</TextModal>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "40px 0 10px 0" }}>
-            <ButtonModalBlue>ACCEPTER</ButtonModalBlue>
-            <ButtonModalRed>REFUSER</ButtonModalRed>
+            <ButtonModalBlue
+              onClick={() => {
+                setCookie("accept-cookie", "true", { path: "/", maxAge: 60 * 60 * 24 * 365 });
+              }}>
+              ACCEPTER
+            </ButtonModalBlue>
+            <ButtonModalRed
+              onClick={() => {
+                setCookie("accept-cookie", "false", { path: "/", maxAge: 60 * 60 * 24 * 365 });
+              }}>
+              REFUSER
+            </ButtonModalRed>
           </div>
           <hr />
         </ModalContainer>
@@ -83,7 +112,11 @@ export default function Cookie() {
             Personnaliser
           </Button>
         </div>
-        <a style={{ textDecoration: "underline", fontWeight: "200", cursor: "pointer" }} href={"https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23"} target="_blank">
+        <a
+          style={{ textDecoration: "underline", fontWeight: "200", cursor: "pointer" }}
+          href={"https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23"}
+          target="_blank"
+          rel="noreferrer">
           En savoir plus
         </a>
       </Container>
@@ -101,7 +134,7 @@ const ModalContainer = styled.footer`
 
 const Title = styled.footer`
   text-align: center;
-  color: #1D4094;
+  color: #1d4094;
   margin-bottom: 30px;
   font-weight: 600;
   font-size: xx-large;
@@ -132,7 +165,7 @@ const TextModal = styled.footer`
   }
 `;
 
-const ButtonModalBlue = styled.footer`
+const ButtonModalBlue = styled.button`
   padding: 4px 13px;
   border: 1px solid;
   background: #fff;
