@@ -19,7 +19,7 @@ const Schema = new mongoose.Schema(
     apiAdressObject: mongoose.Schema.Types.Mixed,
     csvObject: mongoose.Schema.Types.Mixed,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 Schema.plugin(mongooseElastic(esClient, { ignore: ["apiAdressObject", "csvObject"] }), MODELNAME);

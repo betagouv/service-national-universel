@@ -166,9 +166,7 @@ const updatePlacesCenter = async (center) => {
   console.log(`update place center ${center?._id} ${center?.name}`);
   try {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
-    const placesTaken = youngs.filter(
-      (young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED"
-    ).length;
+    const placesTaken = youngs.filter((young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED").length;
     const placesLeft = Math.max(0, center.placesTotal - placesTaken);
     if (center.placesLeft !== placesLeft) {
       console.log(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
@@ -191,9 +189,7 @@ const updatePlacesSessionPhase1 = async (sessionPhase1) => {
   console.log(`update place sessionPhase1 ${sessionPhase1?._id}`);
   try {
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
-    const placesTaken = youngs.filter(
-      (young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED"
-    ).length;
+    const placesTaken = youngs.filter((young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED").length;
     const placesLeft = Math.max(0, sessionPhase1.placesTotal - placesTaken);
     if (sessionPhase1.placesLeft !== placesLeft) {
       console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left from ${sessionPhase1.placesLeft} to ${placesLeft}`);
@@ -306,7 +302,7 @@ const sendAutoAffectationMail = async (nextYoung, center) => {
       .replace(/{{ctaAccept}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
       .replace(/{{ctaDocuments}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
       .replace(/{{ctaWithdraw}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1"),
-    { cc }
+    { cc },
   );
 };
 
@@ -326,7 +322,7 @@ const sendAutoCancelMeetingPoint = async (young) => {
       .replace(/{{firstName}}/, young.firstName)
       .replace(/{{lastName}}/, young.lastName)
       .replace(/{{cta}}/g, `${APP_URL}/auth/login?redirect=phase1`),
-    { cc }
+    { cc },
   );
 };
 
@@ -346,7 +342,7 @@ const sendAutoAffectationNotFoundMails = async (to, young, center) => {
       .replace(/{{youngFirstName}}/, young.firstName)
       .replace(/{{youngLastName}}/, young.lastName)
       .replace(/{{centerName}}/, center.name)
-      .replace(/{{cta}}/, `${ADMIN_URL}/auth?redirect=centre/${center._id}/affectation`)
+      .replace(/{{cta}}/, `${ADMIN_URL}/auth?redirect=centre/${center._id}/affectation`),
   );
 };
 
@@ -414,13 +410,13 @@ async function updateYoungPhase2Hours(young) {
       applications
         .filter((application) => application.status === "DONE")
         .map((application) => Number(application.missionDuration || 0))
-        .reduce((acc, current) => acc + current, 0)
+        .reduce((acc, current) => acc + current, 0),
     ),
     phase2NumberHoursEstimated: String(
       applications
         .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
         .map((application) => Number(application.missionDuration || 0))
-        .reduce((acc, current) => acc + current, 0)
+        .reduce((acc, current) => acc + current, 0),
     ),
   });
   await young.save();

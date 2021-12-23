@@ -1,8 +1,8 @@
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 const { FILE_ENCRYPTION_SECRET } = require("./config");
 
-const ALGO = 'aes-256-ctr';
+const ALGO = "aes-256-ctr";
 const KEY = crypto.createHash("sha256").update(FILE_ENCRYPTION_SECRET).digest("base64").substr(0, 32);
 
 const encrypt = (buffer) => {
@@ -21,4 +21,3 @@ const decrypt = (encrypted) => {
 };
 
 module.exports = { encrypt, decrypt };
-

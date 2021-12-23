@@ -8,8 +8,8 @@ const Schema = new mongoose.Schema({
   cohesionCenterId: {
     type: String,
     documentation: {
-      description: "Id du centre de cohésion"
-    }
+      description: "Id du centre de cohésion",
+    },
   },
   cohort: {
     type: String,
@@ -21,32 +21,34 @@ const Schema = new mongoose.Schema({
   headCenterId: {
     type: String,
     documentation: {
-      description: "Id de l'utilisateur responsable, le chef de centre"
+      description: "Id de l'utilisateur responsable, le chef de centre",
     },
   },
   team: {
-    type: [{
-      firstName: {
-        type: String,
-        description: "prénom du membre de l'équipe",
+    type: [
+      {
+        firstName: {
+          type: String,
+          description: "prénom du membre de l'équipe",
+        },
+        lastName: {
+          type: String,
+          description: "nom du membre de l'équipe",
+        },
+        role: {
+          type: String,
+          description: "role du membre de l'équipe",
+        },
+        email: {
+          type: String,
+          description: "email du membre de l'équipe",
+        },
+        phone: {
+          type: String,
+          description: "téléphone du membre de l'équipe",
+        },
       },
-      lastName: {
-        type: String,
-        description: "nom du membre de l'équipe",
-      },
-      role: {
-        type: String,
-        description: "role du membre de l'équipe",
-      },
-      email: {
-        type: String,
-        description: "email du membre de l'équipe",
-      },
-      phone: {
-        type: String,
-        description: "téléphone du membre de l'équipe",
-      },
-    }],
+    ],
     documentation: {
       description: "equipe d'encadrement pour le séjour",
     },
@@ -58,7 +60,6 @@ const Schema = new mongoose.Schema({
       description: "Liste  des jeunes en liste d'attente sur ce séjour de cohésion",
     },
   },
-
 
   placesTotal: {
     type: Number,

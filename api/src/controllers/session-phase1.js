@@ -5,7 +5,7 @@ const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
-const { ERRORS,updatePlacesSessionPhase1 } = require("../utils");
+const { ERRORS, updatePlacesSessionPhase1 } = require("../utils");
 const { ROLES, canCreateOrUpdateSessionPhase1 } = require("snu-lib/roles");
 const { serializeSessionPhase1 } = require("../utils/serializer");
 const { validateSessionPhase1 } = require("../utils/validator");

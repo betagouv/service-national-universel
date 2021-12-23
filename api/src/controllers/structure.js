@@ -134,11 +134,7 @@ router.get("/:id/mission", passport.authenticate("referent", { session: false, f
   }
 });
 
-router.get(
-  "/:id/patches",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req, res) => await patches.get(req, res, StructureObject)
-);
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, StructureObject));
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
