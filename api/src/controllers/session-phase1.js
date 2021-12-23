@@ -5,10 +5,10 @@ const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
-const { ERRORS,updatePlacesSessionPhase1 } = require("../utils");
+const { ERRORS, updatePlacesSessionPhase1 } = require("../utils");
 const { ROLES, canCreateOrUpdateSessionPhase1 } = require("snu-lib/roles");
 const { serializeSessionPhase1 } = require("../utils/serializer");
-const { validateSessionPhase1 } = require("../utils/validator");
+const { validateSessionPhase1, validateId } = require("../utils/validator");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -52,12 +52,15 @@ router.get("/", passport.authenticate("referent", { session: false, failWithErro
 
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = validateSessionPhase1({ ...req.body, ...req.params });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorId });
 
     if (!canCreateOrUpdateSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    
+    const { error, value } = validateSessionPhase1(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const sessionPhase1 = await SessionPhase1Model.findById(value.id);
+    const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     sessionPhase1.set(value);
