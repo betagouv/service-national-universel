@@ -11,10 +11,10 @@
   "scripts": {
     "dev": "nodemon ./src/index.js",
     "start": "node ./src/index.js",
-    "test": "jest --silent --runInBand",
+    "test": "jest --runInBand",
     "coverage": "jest --runInBand --coverage --silent",
-    "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint --ext .js,.jsx --fix",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint --ext .js --fix",
     "zammad-migrate:tickets": "node ./src/zammad-migration/ticketScript"
   },
   "author": "SELEGO",
@@ -59,20 +59,18 @@
     "validator": "^13.5.2"
   },
   "devDependencies": {
-    "babel-jest": "27.4.5",
     "csv-parser": "3.0.0",
     "eslint": "8.5.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-import": "2.25.3",
     "eslint-plugin-prettier": "4.0.0",
-    "eslint-plugin-react": "7.27.1",
-    "eslint-plugin-react-hooks": "4.3.0",
     "faker": "5.5.3",
     "jest": "27.4.5",
     "jest-cli": "27.4.5",
     "lodash": "4.17.21",
     "pg": "8.7.1",
     "prettier": "2.5.1",
+    "react-is": "^17.0.2",
     "regenerator-runtime": "0.13.9",
     "ssh2": "1.5.0",
     "supertest": "6.1.6"
