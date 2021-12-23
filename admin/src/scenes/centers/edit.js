@@ -12,6 +12,8 @@ import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import Item from "./components/Item";
 import Select from "./components/Select";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import AddressInput from "../../components/addressInputV2";
+import MultiSelect from "../../components/MultiSelect";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -54,7 +56,7 @@ export default function Edit(props) {
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre", e?.error?.message);
         }
       }}>
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'un centre"}</Title>
@@ -67,72 +69,61 @@ export default function Edit(props) {
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxHeadTitle>Informations générales</BoxHeadTitle>
+                  <BoxHeadTitle>Informations générales sur le centre</BoxHeadTitle>
                   <BoxContent direction="column">
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item title="Code" values={values} name={"code"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    {values._id ? <Item disabled title="Code" values={values} name="_id" /> : null}
                     <Item title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    <Select
+                      name="pmr"
+                      values={values}
+                      handleChange={handleChange}
+                      title="Accessibilité aux personnes à mobilité réduite"
+                      options={[
+                        { value: "true", label: "Oui" },
+                        { value: "false", label: "Non" },
+                      ]}
+                      required
+                      errors={errors}
+                      touched={touched}
+                    />
+                    <MultiSelectWithTitle
+                      title="Séjour(s) de cohésion concerné(s)"
+                      value={values.cohorts}
+                      onChange={handleChange}
+                      name="cohorts"
+                      options={["Juillet 2022", "Juin 2022", "Février 2022", "2021", "2020", "2019"]}
+                      placeholder="Sélectionner un ou plusieurs séjour de cohésion"
+                    />
                   </BoxContent>
                 </Box>
               </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxHeadTitle>Coordonnées</BoxHeadTitle>
+                  <BoxHeadTitle>Adresse du centre</BoxHeadTitle>
                   <BoxContent direction="column">
-                    <Item title="Adresse" values={values} name={"address"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item title="Ville" values={values} name={"city"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item title="Code Postal" values={values} name={"zip"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Select
-                      handleChange={handleChange}
-                      name="department"
-                      values={values}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        handleChange({ target: { name: "department", value } });
-                        const region = department2region[value];
-                        handleChange({ target: { name: "region", value: region } });
+                    <AddressInput
+                      keys={{
+                        country: "country",
+                        city: "city",
+                        zip: "zip",
+                        address: "address",
+                        location: "location",
+                        department: "department",
+                        region: "region",
+                        addressVerified: "addressVerified",
                       }}
-                      title="Département"
-                      options={departmentList.map((d) => ({ value: d, label: d }))}
+                      values={values}
+                      departAndRegionVisible={true}
+                      handleChange={handleChange}
                       errors={errors}
                       touched={touched}
-                      required
-                    />
-                    <Select
-                      handleChange={handleChange}
-                      name="region"
-                      values={values}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        handleChange({ target: { name: "region", value } });
-                        handleChange({ target: { name: "department", value: "" } });
-                      }}
-                      title="Région"
-                      options={regionList.map((r) => ({ value: r, label: r }))}
-                      errors={errors}
-                      touched={touched}
+                      validateField={validateField}
                       required
                     />
                   </BoxContent>
                 </Box>
               </Col>
-              {/* <Col md={6} style={{ marginBottom: "20px" }}>
-                <Box>
-                  <BoxHeadTitle>Informations complémentaires</BoxHeadTitle>
-                  <BoxContent direction="column">
-                    <Select
-                      name="outfitDelivered"
-                      values={values}
-                      handleChange={handleChange}
-                      title="Tenue livrées"
-                      options={[
-                        { value: "true", label: "Oui" },
-                        { value: "false", label: "Non" },
-                      ]}
-                    />
-                  </BoxContent>
-                </Box>
-              </Col> */}
             </Row>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
@@ -146,6 +137,18 @@ export default function Edit(props) {
     </Formik>
   );
 }
+const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder }) => {
+  return (
+    <Row className="detail">
+      <Col md={4}>
+        <label>{title}</label>
+      </Col>
+      <Col md={8}>
+        <MultiSelect value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} />
+      </Col>
+    </Row>
+  );
+};
 
 const Wrapper = styled.div`
   padding: 2rem;

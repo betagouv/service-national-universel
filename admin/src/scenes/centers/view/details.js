@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate, ROLES } from "../../../utils";
+import { translate, ROLES, getDepartmentNumber } from "../../../utils";
 import api from "../../../services/api";
 import { Box } from "../../../components/box";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
@@ -31,7 +31,7 @@ export default function Details({ center }) {
         <Wrapper>
           <Header>
             <h4>
-              <strong>Centre</strong> <span style={{ color: "#9C9C9C" }}>#{center.code}</span>
+              <strong>Centre</strong> <span style={{ color: "#9C9C9C" }}>#{center._id}</span>
             </h4>
             {user.role === ROLES.ADMIN ? (
               <div style={{ flexBasis: "0" }}>
@@ -50,7 +50,7 @@ export default function Details({ center }) {
               <div className="detail">
                 <div className="detail-title-first">Dép :</div>
                 <div className="detail-text">
-                  {center.department} ({center.departmentCode})
+                  {center.department} ({getDepartmentNumber(center.department)})
                 </div>
               </div>
               <div className="detail">
@@ -71,13 +71,15 @@ export default function Details({ center }) {
               </div>
               <div className="detail">
                 <div className="detail-title-second">Accessibilité aux personnes à mobilité réduite (PMR) :</div>
-                <div className="detail-text">OUI</div>
+                <div className="detail-text">{translate(center.pmr)}</div>
               </div>
               <div className="detail">
                 <div className="detail-title-second">Séjour(s) de cohésion concerné(s) par le centre :</div>
-                <div className="detail-text">
-                  <p className="detail-badge">Février 2022</p>
-                </div>
+                {center.cohorts?.map((cohort) => (
+                  <div key={cohort} className="detail-text">
+                    <p className="detail-badge">{cohort}</p>
+                  </div>
+                ))}
               </div>
             </section>
           </Container>

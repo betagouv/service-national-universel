@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Row, Col, Spinner } from "reactstrap";
 import { Field, useField } from "formik";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
-import { department2region, departmentLookUp, departmentToAcademy } from "../utils";
+import { department2region, departmentLookUp, departmentToAcademy, departmentList, regionList } from "../utils";
 import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
@@ -21,6 +21,7 @@ export default function AddressInputV2({
   onChangeCountry = () => {},
   countryByDefault = "",
   required = false,
+  departAndRegionVisible = false,
 }) {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
@@ -46,7 +47,11 @@ export default function AddressInputV2({
 
   useEffect(() => {
     const zip = values[keys.zip];
-    if (!zip || zip.length < 2) return;
+    if (!zip || zip.length < 2) {
+      handleChange({ target: { name: keys.department, value: "" } });
+      handleChange({ target: { name: keys.region, value: "" } });
+      return;
+    }
     if (values?.cohort === "2020") return;
     let departmentCode = zip.substr(0, 2);
     if (["97", "98"].includes(departmentCode)) {
@@ -193,6 +198,41 @@ export default function AddressInputV2({
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.city} />
           </Col>
+          {departAndRegionVisible ? (
+            <>
+              <Col md={6} style={{ marginTop: 15 }}>
+                <Label>Département</Label>
+                <Field
+                  as="select"
+                  validate={(v) => !v && requiredMessage}
+                  disabled
+                  className="form-control"
+                  placeholder="Département"
+                  name={keys.department}
+                  value={values[keys.department]}>
+                  <option label=""></option>
+                  {departmentList.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </Field>
+                <ErrorMessage errors={errors} touched={touched} name={keys.department} />
+              </Col>
+              <Col md={6} style={{ marginTop: 15 }}>
+                <Label>Région</Label>
+                <Field as="select" validate={(v) => !v && requiredMessage} disabled className="form-control" placeholder="Région" name={keys.region} value={values[keys.region]}>
+                  <option label=""></option>
+                  {regionList.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </Field>
+                <ErrorMessage errors={errors} touched={touched} name={keys.region} />
+              </Col>
+            </>
+          ) : null}
           {addressInFrance ? (
             <>
               <Col md={12} style={{ display: "flex", alignItems: "flex-end" }}>

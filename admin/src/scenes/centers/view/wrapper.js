@@ -27,7 +27,7 @@ export default function Wrapper({ center: centerDefault, tab, children }) {
 
   if (!center) return null;
   return (
-    <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
+    <div style={{ flex: 2, position: "relative", padding: "3rem" }}>
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <Header>
           <div style={{ flex: 1, display: "flex" }}>
