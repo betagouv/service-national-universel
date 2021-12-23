@@ -250,12 +250,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const center = await CohesionCenterModel.findById(checkedId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const previousCohorts = center.cohorts;
+    const previousCohorts = center.cohorts || [];
     center.set(newCenter);
     await center.save();
 
-    const addedCohorts = newCenter.cohorts.filter((cohort) => !previousCohorts.includes(cohort));
-    const deletedCohorts = previousCohorts.filter((cohort) => !newCenter.cohorts.includes(cohort));
+    const addedCohorts = (newCenter.cohorts || []).filter((cohort) => !previousCohorts.includes(cohort));
+    let deletedCohorts = [];
+    if (newCenter?.cohorts?.length) {
+      deletedCohorts = previousCohorts.filter((cohort) => !newCenter.cohorts.includes(cohort));
+    }
 
     // add sessionPhase1 documents linked to this cohesion center
     if (addedCohorts?.length > 0) {
@@ -269,6 +272,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
 
+    // ! MAYBE DANGEROUS ?
     // delete sessionPhase1 documents linked to this cohesion center
     if (deletedCohorts?.length > 0) {
       for (let cohort of deletedCohorts) {

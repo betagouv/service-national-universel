@@ -255,9 +255,7 @@ function validateNewCohesionCenter(application) {
 }
 
 function validateUpdateCohesionCenter(application) {
-  return Joi.object()
-    .keys({ ...cohesionCenterKeys, _id: Joi.string().required() })
-    .validate(application, { stripUnknown: true });
+  return Joi.object().keys(cohesionCenterKeys).validate(application, { stripUnknown: true });
 }
 
 const sessionPhase1Keys = {
