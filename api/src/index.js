@@ -73,7 +73,7 @@ app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
 app.use("/support-center", require("./controllers/support-center"));
 app.use("/support-center/knowledge-base", require("./controllers/knowledgeBase"));
-app.use("/", require("./controllers/signin"));
+app.use("/signin", require("./controllers/signin"));
 app.use(handleError);
 
 app.get("/", async (req, res) => {
