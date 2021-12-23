@@ -255,14 +255,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     await center.save();
 
     const addedCohorts = newCenter.cohorts.filter((cohort) => !previousCohorts.includes(cohort));
-    console.log("✍️ ~ addedCohorts", addedCohorts);
     const deletedCohorts = previousCohorts.filter((cohort) => !newCenter.cohorts.includes(cohort));
-    console.log("✍️ ~ deletedCohorts", deletedCohorts);
 
     // add sessionPhase1 documents linked to this cohesion center
     if (addedCohorts.length > 0) {
       for (let cohort of addedCohorts) {
-        console.log("✍️ ~ add cohort", cohort);
         const cohesionCenterId = center._id;
         const placesTotal = center.placesTotal;
         const placesLeft = center.placesTotal;
@@ -273,7 +270,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     // delete sessionPhase1 documents linked to this cohesion center
     if (deletedCohorts.length > 0) {
       for (let cohort of deletedCohorts) {
-        console.log("✍️ ~ delete cohort", cohort);
         const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort });
         await sessionPhase1.remove();
       }
