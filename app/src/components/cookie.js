@@ -19,13 +19,13 @@ export default function Cookie() {
     <CookieContainer>
       <Modal size="lg" isOpen={open} scrollable={true} toggle={() => setOpen(false)}>
         <ModalContainer>
-          <h2 style={{ textAlign: "center", color: "#1D4094", marginBottom: "30px", fontWeight: "600" }}>Gestion de vos cookies</h2>
-          <p style={{ fontWeight: "500" }}>
+          <Title style={{ textAlign: "center", color: "#1D4094", marginBottom: "30px", fontWeight: "600" }}>Gestion de vos cookies</Title>
+          <TextBigModal style={{ fontWeight: "500" }}>
             L&apos;Assurance Maladie s&apos;engage, dans le cadre des missions qui lui sont confiées, à assurer la protection, la confidentialité et la sécurité de l&apos;ensemble
             de vos données personnelles dans le respect de votre vie privée. Lorsque vous naviguez sur notre site, nous pouvons être amenés à déposer différents types de cookies
             sur votre terminal. Ils ont des finalités différentes décrites ci-dessous. Cette page vous permet de les accepter ou de les refuser de manière globale ou au cas par
             cas.
-          </p>
+          </TextBigModal>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
             <ButtonModalBlue>TOUT ACCEPTER</ButtonModalBlue>
             <ButtonModalRed>TOUT REFUSER</ButtonModalRed>
