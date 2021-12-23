@@ -66,7 +66,7 @@ export default function Cookie() {
           <Button onClick={() => console.log("TEST")}>Tout refuser</Button>
           <Button style={{background: "#4766A9", color: "#fff"}} onClick={() => setOpen(true)}>Personnaliser</Button>
         </div>
-        <a style={{textDecoration: "underline", fontWeight: "200", cursor: "pointer"}}>En savoir plus</a>
+        <a style={{textDecoration: "underline", fontWeight: "200", cursor: "pointer"}} href={"https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23"}>En savoir plus</a>
       </Container>
     </CookieContainer>
   );
