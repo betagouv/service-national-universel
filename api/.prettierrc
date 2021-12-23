@@ -4,6 +4,5 @@
   "semi": true,
   "doubleQuote": true,
   "tabWidth": 2,
-  "trailingComma": "all",
-  "jsxBracketSameLine": true
+  "trailingComma": "all"
 }
