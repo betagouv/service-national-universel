@@ -9,13 +9,13 @@ export default function Cookie() {
 
   return (
     <CookieContainer>
-      <Modal size="lg" isOpen={open} scrollable={true} toggle={()=>setOpen(false)}>
+      <Modal size="lg" isOpen={open} scrollable={true} toggle={() => setOpen(false)}>
         <ModalContainer>
-          <h2 style={{textAlign: "center", color: "#1D4094", marginBottom: "30px", fontWeight: "600"}}>Gestion de vos cookies</h2>
-          <p style={{fontWeight: "500"}}>L'Assurance Maladie s'engage, dans le cadre des missions qui lui sont confiées, à assurer la protection, la confidentialité et la sécurité de l'ensemble de vos
+          <Title>Gestion de vos cookies</Title>
+          <TextBigModal>L'Assurance Maladie s'engage, dans le cadre des missions qui lui sont confiées, à assurer la protection, la confidentialité et la sécurité de l'ensemble de vos
             données personnelles dans
             le respect de votre vie privée. Lorsque vous naviguez sur notre site, nous pouvons être amenés à déposer différents types de cookies sur votre terminal. Ils ont des finalités différentes
-            décrites ci-dessous. Cette page vous permet de les accepter ou de les refuser de manière globale ou au cas par cas.</p>
+            décrites ci-dessous. Cette page vous permet de les accepter ou de les refuser de manière globale ou au cas par cas.</TextBigModal>
           <div style={{display: "flex", justifyContent: "flex-end", gap: "10px"}}>
             <ButtonModalBlue>TOUT ACCEPTER</ButtonModalBlue>
             <ButtonModalRed>TOUT REFUSER</ButtonModalRed>
@@ -75,6 +75,20 @@ export default function Cookie() {
 const ModalContainer = styled.footer`
   padding: 50px;
   overflow: scroll;
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
+`;
+
+const Title = styled.footer`
+  text-align: center;
+  color: #1D4094;
+  margin-bottom: 30px;
+  font-weight: 600;
+  font-size: xx-large;
+  @media (max-width: 768px) {
+    font-size: x-large;
+  }
 `;
 
 const Subtitle = styled.footer`
@@ -83,9 +97,20 @@ const Subtitle = styled.footer`
   padding: 3px 0 20px 0;
 `;
 
+const TextBigModal = styled.footer`
+  font-weight: 500;
+  padding-bottom: 20px;
+  @media (max-width: 768px) {
+    font-size: small;
+  }
+`;
+
 const TextModal = styled.footer`
   font-size: smaller;
   font-weight: 500;
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+  }
 `;
 
 const ButtonModalBlue = styled.footer`
@@ -143,7 +168,7 @@ const CookieContainer = styled.footer`
   position: fixed;
   bottom: 0px;
   width: 100%;
-  z-index: 10;
+  z-index: 100;
 
   ul {
     margin: 10px 0;
@@ -152,9 +177,6 @@ const CookieContainer = styled.footer`
   li {
     display: inline-block;
     margin: 5px 10px;
-    @media (max-width: 768px) {
-      margin: 2px 5px;
-    }
   }
 
   a {
