@@ -94,7 +94,7 @@ export default function VolontaireList() {
               <div>
                 <Title>Volontaires</Title>
               </div>
-              <div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: ".25rem", justifyContent: "flex-end" }}>
                 <ExportComponent
                   title="Exporter les volontaires"
                   defaultQuery={getExportQuery}
@@ -269,16 +269,6 @@ export default function VolontaireList() {
                         }
                       }
                       return all.map((data) => {
-                        let center = {};
-                        if (data.cohesionCenterId && centers) {
-                          center = centers.find((c) => c._id === data.cohesionCenterId);
-                          if (!center) center = {};
-                        }
-                        let meetingPoint = {};
-                        if (data.meetingPointId && meetingPoints) {
-                          meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
-                          if (!meetingPoint) meetingPoint = {};
-                        }
                         return {
                           _id: data._id,
                           Cohorte: data.cohort,
