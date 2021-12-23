@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { colors } from "../../../utils";
 
 export default function HeaderComponent({ location }) {
   return (
@@ -13,34 +14,33 @@ export default function HeaderComponent({ location }) {
           <img src={require("../../../assets/logo-snu.png")} />
         </a>
       </Logos>
-      <AvatarContainer to={{ pathname: "/auth/login", search: location?.search }}>
-        <Avatar src={require("../../../assets/avatar.jpg")} />
-        <AvatarText>connexion</AvatarText>
-      </AvatarContainer>
+      <CTAContainer>
+        <AvatarText to={{ pathname: "/auth/login", search: location?.search }}>Se connecter</AvatarText>
+        <AvatarText to={{ pathname: "/inscription/profil" }}>S&apos;inscrire</AvatarText>
+      </CTAContainer>
     </Header>
   );
 }
 
-const AvatarContainer = styled(Link)`
+const CTAContainer = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-self: stretch;
+  justify-content: space-between;
+  align-items: flex-end;
 `;
 
-const AvatarText = styled.div`
+const AvatarText = styled(Link)`
   color: #aaa;
   text-transform: uppercase;
-  font-size: 0.8rem;
-`;
-
-const Avatar = styled.img`
-  width: 32px;
-  height: 32px;
-  background-color: #aaa;
-  border-radius: 50%;
-  object-fit: cover;
-  object-fit: contain;
+  font-size: 0.9rem;
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+  }
   cursor: pointer;
+  :hover {
+    color: ${colors.purple};
+  }
 `;
 
 const Header = styled.div`
