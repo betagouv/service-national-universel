@@ -83,7 +83,7 @@ export default function Cookie() {
             Personnaliser
           </Button>
         </div>
-        <a style={{ textDecoration: "underline", fontWeight: "200", cursor: "pointer" }} href={"https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23"}>
+        <a style={{ textDecoration: "underline", fontWeight: "200", cursor: "pointer" }} href={"https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23"} target="_blank">
           En savoir plus
         </a>
       </Container>
