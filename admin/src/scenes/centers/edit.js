@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { Formik } from "formik";
+import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 
 import { translate } from "../../utils";
@@ -14,6 +14,7 @@ import Select from "./components/Select";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import AddressInput from "../../components/addressInputV2";
 import MultiSelect from "../../components/Multiselect";
+import Error, { requiredMessage } from "../../components/errorMessage";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -88,6 +89,9 @@ export default function Edit(props) {
                       touched={touched}
                     />
                     <MultiSelectWithTitle
+                      required
+                      errors={errors}
+                      touched={touched}
                       title="Séjour(s) de cohésion concerné(s)"
                       value={values.cohorts}
                       onChange={handleChange}
@@ -137,14 +141,16 @@ export default function Edit(props) {
     </Formik>
   );
 }
-const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder }) => {
+const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder, required, errors, touched }) => {
   return (
     <Row className="detail">
       <Col md={4}>
         <label>{title}</label>
       </Col>
       <Col md={8}>
+        <Field hidden value={value} name={name} onChange={onChange} validate={(v) => required && !v?.length && requiredMessage} />
         <MultiSelect value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} />
+        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
       </Col>
     </Row>
   );
