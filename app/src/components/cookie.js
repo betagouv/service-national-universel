@@ -1,9 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Modal } from "reactstrap";
 import styled from "styled-components";
+import { useCookies } from "react-cookie";
 
 export default function Cookie() {
+  const [cookies, setCookie] = useCookies(["accept-cookie"]);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (cookies["accept-cookie"] === "true") {
+      //
+    }
+  }, [cookies]);
+
+  if (["true", "false"].includes(cookies["accept-cookie"])) return null;
 
   return (
     <CookieContainer>
@@ -67,8 +77,18 @@ export default function Cookie() {
           que de vous proposer des vidéos.
         </p>
         <div style={{ display: "flex", justifyContent: "center", gap: "15px", padding: "25px 0 15px 0" }}>
-          <Button onClick={() => console.log("TEST")}>Tout accepter</Button>
-          <Button onClick={() => console.log("TEST")}>Tout refuser</Button>
+          <Button
+            onClick={() => {
+              setCookie("accept-cookie", "true", { path: "/", maxAge: 60 * 60 * 24 * 365 });
+            }}>
+            Tout accepter
+          </Button>
+          <Button
+            onClick={() => {
+              setCookie("accept-cookie", "false", { path: "/", maxAge: 60 * 60 * 24 * 365 });
+            }}>
+            Tout refuser
+          </Button>
           <Button style={{ background: "#4766A9", color: "#fff" }} onClick={() => setOpen(true)}>
             Personnaliser
           </Button>
