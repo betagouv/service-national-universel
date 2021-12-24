@@ -3,7 +3,8 @@ import { Switch, Route, useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 import Team from "./team";
-import Details from "./details";
+import CenterInformations from "./CenterInformations";
+import Nav from "./Nav";
 import Youngs from "./youngs";
 import Affectation from "./affectation";
 import WaitingList from "./waitingList";
@@ -12,6 +13,8 @@ import { translate } from "../../../utils";
 
 export default function Index({ ...props }) {
   const [center, setCenter] = useState();
+  const [focusedCohort, setFocusedCohort] = useState();
+  const [focusedTab, setFocusedTab] = useState("equipe");
   const history = useHistory();
 
   useEffect(() => {
@@ -28,6 +31,11 @@ export default function Index({ ...props }) {
     })();
   }, [props.match.params.id]);
 
+  useEffect(() => {
+    if (!center) return;
+    setFocusedCohort(center.cohorts[0]);
+  }, [center]);
+
   const updateCenter = async () => {
     const { data, ok } = await api.get(`/cohesion-center/${center._id}`);
     if (ok) setCenter(data);
@@ -36,21 +44,24 @@ export default function Index({ ...props }) {
   if (!center) return <div />;
   return (
     <>
-      <Details center={center} />
-      <Switch>
-        {/* À virer celle-ci ? */}
-        <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} />} />
-        <Route path="/centre/:id/volontaires" component={() => <Youngs center={center} updateCenter={updateCenter} />} />
-        <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} />} />
-        <Route
-          path="/centre/:id"
-          component={() => (
-            <>
-              <Team center={center} />
-            </>
-          )}
-        />
-      </Switch>
+      <CenterInformations center={center} />
+      <div style={{ padding: "0 3rem" }}>
+        <Nav tab={focusedTab} center={center} onChangeCohort={setFocusedCohort} onChangeTab={setFocusedTab} />
+        <Switch>
+          {/* liste-attente reliquat ? */}
+          <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
+          <Route path="/centre/:id/volontaires" component={() => <Youngs center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
+          <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
+          <Route
+            path="/centre/:id"
+            component={() => (
+              <>
+                <Team center={center} focusedCohort={focusedCohort} />
+              </>
+            )}
+          />
+        </Switch>
+      </div>
     </>
   );
 }

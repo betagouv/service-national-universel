@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 import api from "../../../services/api";
-import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
 import { translate, getAge, canAssignCohesionCenter } from "../../../utils";
 import Loader from "../../../components/Loader";
@@ -62,42 +61,40 @@ export default function WaitingList({ center, updateCenter }) {
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <CenterView center={center} tab="waiting_list">
-        <div>
-          <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
-            <div style={{ flex: 1, position: "relative" }}>
-              <ResultTable>
-                {list.length === 0 ? (
-                  <NoResult>La liste d&apos;attente est vide</NoResult>
-                ) : (
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th width="70%">Volontaire</th>
-                        {canAssignCohesionCenter(user) ? <th>Affectation</th> : null}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {list.map((hit, i) => (
-                        <Hit
-                          key={hit._id}
-                          index={i}
-                          hit={hit}
-                          onClick={() => handleClick(hit)}
-                          onSend={() => handleAffectation(hit)}
-                          selected={young?._id === hit._id}
-                          onChangeYoung={updateCenter}
-                        />
-                      ))}
-                    </tbody>
-                  </Table>
-                )}
-              </ResultTable>
-            </div>
+      <div>
+        <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
+          <div style={{ flex: 1, position: "relative" }}>
+            <ResultTable>
+              {list.length === 0 ? (
+                <NoResult>La liste d&apos;attente est vide</NoResult>
+              ) : (
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th width="70%">Volontaire</th>
+                      {canAssignCohesionCenter(user) ? <th>Affectation</th> : null}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {list.map((hit, i) => (
+                      <Hit
+                        key={hit._id}
+                        index={i}
+                        hit={hit}
+                        onClick={() => handleClick(hit)}
+                        onSend={() => handleAffectation(hit)}
+                        selected={young?._id === hit._id}
+                        onChangeYoung={updateCenter}
+                      />
+                    ))}
+                  </tbody>
+                </Table>
+              )}
+            </ResultTable>
           </div>
         </div>
-      </CenterView>
+      </div>
       <Panel
         value={young}
         onChange={() => {

@@ -1,16 +1,13 @@
 import React from "react";
 
-import CenterView from "./wrapper";
 import { Box } from "../../../components/box";
 
-export default function Team({ center }) {
+export default function Team({ center, focusedCohort }) {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <CenterView center={center} tab="equipe">
-        <Box>
-          <div style={{ padding: "2rem" }}>Bientôt Disponible !</div>
-        </Box>
-      </CenterView>
+      <Box>
+        <div style={{ padding: "2rem" }}>Bientôt Disponible ! On y afficher l&nbsp;équipe de {focusedCohort}</div>
+      </Box>
     </div>
   );
 }
