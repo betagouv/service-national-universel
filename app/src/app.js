@@ -28,6 +28,7 @@ import Loader from "./components/Loader";
 import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
+import Cookie from "./components/cookie";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
@@ -41,6 +42,7 @@ import { SENTRY_URL, environment } from "./config";
 import "./index.css";
 import { YOUNG_STATUS, ENABLE_PM } from "./utils";
 import Zammad from "./components/Zammad";
+import GoogleTags from "./components/GoogleTags";
 
 if (environment === "production") {
   Sentry.init({
@@ -82,6 +84,7 @@ export default function App() {
     <Router>
       <ScrollToTop />
       <Zammad />
+      <GoogleTags />
       <div className="main">
         <Switch>
           <Route path="/bug" component={Bug} />
@@ -94,6 +97,7 @@ export default function App() {
           <Route path="/auth" component={Auth} />
           <Route path="/" component={Espace} />
         </Switch>
+        <Cookie />
         <Footer />
       </div>
     </Router>
