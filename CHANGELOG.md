@@ -1,3 +1,22 @@
+# [1.14.0](https://github.com/betagouv/service-national-universel/compare/v1.13.0...v1.14.0) (2021-12-24)
+
+
+### Bug Fixes
+
+* **admin,center:** filter by cohorts in list ([16f6623](https://github.com/betagouv/service-national-universel/commit/16f66238818a490c8d6f0741ea28c37013e3d894))
+* **admin,center:** refacto center ([4e1dab3](https://github.com/betagouv/service-national-universel/commit/4e1dab373b0ef4fad6dc7a77fab4727f5a56f7cd))
+* **admin,center:** refacto nav bar ([9f0768b](https://github.com/betagouv/service-national-universel/commit/9f0768b879f95746c5aee21f8b1b2c4142ba4db3))
+* **admin,center:** remove useless fetch hEAdCenTeR ([3137c4e](https://github.com/betagouv/service-national-universel/commit/3137c4e1e82a0a54696e1dbda4965bd047d6a269))
+* **deps:** pin dependency react-cookie to 4.1.1 ([#1034](https://github.com/betagouv/service-national-universel/issues/1034)) ([ced267a](https://github.com/betagouv/service-national-universel/commit/ced267a91c256a1aad8c6a8c33f1a8f1ec23f32e))
+
+
+### Features
+
+* **api:** add es route sessionPhase1 ([296f929](https://github.com/betagouv/service-national-universel/commit/296f929b71effe15a28e3600f28c52b5c72176af))
+* **api,test:** add test sessionPhase1 ([#1009](https://github.com/betagouv/service-national-universel/issues/1009)) ([69be56b](https://github.com/betagouv/service-national-universel/commit/69be56bb7796261d75be19cc2680b983d7322466))
+* **app:** add cookie bar and modal ([#1033](https://github.com/betagouv/service-national-universel/issues/1033)) ([b23e2d7](https://github.com/betagouv/service-national-universel/commit/b23e2d74fb5637d55bbef2470c061a6164ccb187))
+* **support:** restrict access to public db - v2 ([#1011](https://github.com/betagouv/service-national-universel/issues/1011)) ([00e716b](https://github.com/betagouv/service-national-universel/commit/00e716bd6e38e2b7e1a5e6d0e7a1fe910c807c62))
+
 # [1.13.0](https://github.com/betagouv/service-national-universel/compare/v1.12.1...v1.13.0) (2021-12-23)
 
 
