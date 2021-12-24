@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { Formik } from "formik";
 import { useHistory } from "react-router-dom";
 
-import { translate, departmentList, regionList, department2region } from "../../utils";
+import { translate } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";

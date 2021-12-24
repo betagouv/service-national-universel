@@ -1,29 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import { translate, ROLES, getDepartmentNumber } from "../../../utils";
-import api from "../../../services/api";
 import { Box } from "../../../components/box";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
 export default function Details({ center }) {
-  // eslint-disable-next-line no-unused-vars
-  const [headCenter, setHeadCenter] = useState();
   const user = useSelector((state) => state.Auth.user);
-  useEffect(() => {
-    console.log(center);
-    (async () => {
-      if (!center) return;
-      const { ok, data, code } = await api.get(`/cohesion-center/${center._id}/head`);
-      if (!ok) {
-        setHeadCenter(null);
-        toastr.error("Oups, une erreur est survenue lors de la récupération du chef de centre", translate(code));
-      } else setHeadCenter(data);
-    })();
-  }, [center]);
   return (
     <div style={{ display: "flex", flexDirection: "column", padding: "2rem 3rem" }}>
       <h1 style={{ marginBottom: "2rem" }}>{center.name}</h1>

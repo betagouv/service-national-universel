@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import { translate, ROLES } from "../../utils";
@@ -13,20 +12,8 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default function PanelCenter({ onChange, center }) {
   const history = useHistory();
-  const [headCenter, setHeadCenter] = useState();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-
-  useEffect(() => {
-    (async () => {
-      if (!center) return;
-      const { ok, data, code } = await api.get(`/cohesion-center/${center._id}/head`);
-      if (!ok) {
-        setHeadCenter(null);
-        toastr.error("Oups, une erreur est survenue lors de la récupération du chef de centre", translate(code));
-      } else setHeadCenter(data);
-    })();
-  }, [center]);
 
   const onClickDelete = () => {
     setModal({ isOpen: true, onConfirm: onConfirmDelete, title: "Êtes-vous sûr(e) de vouloir supprimer ce centre de cohésion ?", message: "Cette action est irréversible." });
@@ -49,7 +36,8 @@ export default function PanelCenter({ onChange, center }) {
     <Panel>
       <div className="info">
         <div style={{ display: "flex", marginBottom: "15px" }}>
-          <Subtitle>CENTRE</Subtitle>
+          <Subtitle>CENTRE </Subtitle>
+          <span style={{ color: "#9C9C9C" }}> #{center._id}</span>
           <div className="close" onClick={onChange} />
         </div>
         <div className="title">{center.name}</div>
@@ -69,7 +57,8 @@ export default function PanelCenter({ onChange, center }) {
           </div>
         ) : null}
       </div>
-      <Info title={`${center.placesTotal - center.placesLeft} volontaire(s) affecté(s)`}>
+      {/* TODO : revoir l'ux pour potentiellement afficher les dispos des différents sessionPhase1 ? */}
+      {/* <Info title={`${center.placesTotal - center.placesLeft} volontaire(s) affecté(s)`}>
         {center.placesTotal - center.placesLeft > 0 ? (
           <Link to={`/centre/${center._id}/volontaires`}>
             <PanelActionButton style={{ marginBottom: "1rem" }} icon="eye" title="Consulter tous les volontaires affectés" />
@@ -89,23 +78,15 @@ export default function PanelCenter({ onChange, center }) {
             </div>
           </Col>
         </Row>
-      </Info>
+      </Info> */}
       <Info title="À propos du centre">
-        <Details title="Code" value={center.code} copy />
+        <Details title="Capacité d'accueil" value={center.placesTotal} />
         <Details title="Adresse" value={center.address} />
         <Details title="Ville" value={center.city} />
         <Details title="Code postal" value={center.zip} />
         <Details title="Dép." value={center.department} />
         <Details title="Région" value={center.region} />
-        {headCenter ? (
-          <>
-            {/* <Link to={`/user/${headCenter._id}`}>{`${headCenter.firstName} ${headCenter.lastName}`}</Link> */}
-            <Details title="Chef" value={`${headCenter.firstName} ${headCenter.lastName}`} />
-            <Details title="E-mail" value={headCenter.email} copy />
-            <Details title="Tel. fixe" value={headCenter.phone} copy />
-            <Details title="Tel. mobile" value={headCenter.mobile} copy />
-          </>
-        ) : null}
+        <Details title="Accessibilité aux personnes à mobilité réduite" value={translate(center.pmr)} />
       </Info>
       <ModalConfirm
         isOpen={modal?.isOpen}
@@ -126,13 +107,4 @@ const Subtitle = styled.div`
   font-weight: 400;
   text-transform: uppercase;
   font-size: 0.9rem;
-`;
-
-const DetailCardTitle = styled.div`
-  color: #7c7c7c;
-`;
-const DetailCardContent = styled.div`
-  color: #000;
-  font-size: 1.5rem;
-  font-weight: 600;
 `;
