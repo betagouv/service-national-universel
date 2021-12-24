@@ -131,42 +131,38 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
-router.post(
-  "/:centerId/assign-young-waiting-list/:youngId",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req, res) => {
-    try {
-      const { error, value } = Joi.object({ youngId: Joi.string().required(), centerId: Joi.string().required() })
-        .unknown()
-        .validate({ ...req.params }, { stripUnknown: true });
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ youngId: Joi.string().required(), centerId: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-      const { youngId, centerId } = value;
-      const young = await YoungModel.findById(youngId);
-      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const center = await CohesionCenterModel.findById(centerId);
-      if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const { youngId, centerId } = value;
+    const young = await YoungModel.findById(youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const center = await CohesionCenterModel.findById(centerId);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      // update youngs infos
-      young.set({
-        statusPhase1: "WAITING_LIST",
-        cohesionCenterId: center._id,
-        cohesionCenterName: center.name,
-        cohesionCenterCity: center.city,
-        cohesionCenterZip: center.zip,
-      });
-      await young.save({ fromUser: req.user });
+    // update youngs infos
+    young.set({
+      statusPhase1: "WAITING_LIST",
+      cohesionCenterId: center._id,
+      cohesionCenterName: center.name,
+      cohesionCenterCity: center.city,
+      cohesionCenterZip: center.zip,
+    });
+    await young.save({ fromUser: req.user });
 
-      center.waitingList.push(young._id);
-      await center.save();
+    center.waitingList.push(young._id);
+    await center.save();
 
-      return res.status(200).send({ data: serializeCohesionCenter(center), ok: true });
-    } catch (error) {
-      capture(error);
-      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-    }
+    return res.status(200).send({ data: serializeCohesionCenter(center), ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
-);
+});
 
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -330,7 +326,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
         .replace(/{{COHESION_CENTER_NAME}}/g, young.cohesionCenterName || "")
         .replace(/{{COHESION_CENTER_LOCATION}}/g, COHESION_CENTER_LOCATION)
         .replace(/{{GENERAL_BG}}/g, template)
-        .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))
+        .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })),
     );
   }
 

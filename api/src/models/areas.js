@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const MODELNAME = "area";
 
-// This object is used to get the density of a city and assign it to a young 
+// This object is used to get the density of a city and assign it to a young
 
 const Schema = new mongoose.Schema({
   cityCode: {

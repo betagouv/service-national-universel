@@ -5,15 +5,18 @@ const esClient = require("../es");
 
 const MODELNAME = "tag";
 
-const Schema = new mongoose.Schema({
-  zammadId: {
-    type: String,
+const Schema = new mongoose.Schema(
+  {
+    zammadId: {
+      type: String,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
   },
-  name: {
-    type: String,
-    required: true,
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 

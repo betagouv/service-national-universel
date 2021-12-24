@@ -15,7 +15,7 @@ exports.handler = async () => {
     let countMissionSent = {};
     let countMissionSentCohort = {};
 
-    const cursor = Young.find({ cohort: { $nin: ['2019', '2020'] }, status: "VALIDATED", statusPhase1: "DONE", statusPhase2: { $ne: "VALIDATED" } }).cursor();
+    const cursor = Young.find({ cohort: { $nin: ["2019", "2020"] }, status: "VALIDATED", statusPhase1: "DONE", statusPhase2: { $ne: "VALIDATED" } }).cursor();
     await cursor.eachAsync(async function (young) {
       countTotal++;
       const esMissions = await getMissions({ young });
@@ -54,7 +54,11 @@ exports.handler = async () => {
     });
     slack.info({
       title: "noticePushMission",
-      text: `${countHit}/${countTotal} (${((countHit / countTotal) * 100).toFixed(2)}%) jeunes ciblé(e)s.\nmails envoyés: ${countHit}\nnombre de missions proposées / mail : ${JSON.stringify(countMissionSent)}\ncohortes (si missions proposées) : ${JSON.stringify(countMissionSentCohort)}`,
+      text: `${countHit}/${countTotal} (${((countHit / countTotal) * 100).toFixed(
+        2,
+      )}%) jeunes ciblé(e)s.\nmails envoyés: ${countHit}\nnombre de missions proposées / mail : ${JSON.stringify(
+        countMissionSent,
+      )}\ncohortes (si missions proposées) : ${JSON.stringify(countMissionSentCohort)}`,
     });
   } catch (e) {
     capture(e);

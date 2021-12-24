@@ -9,17 +9,9 @@ const { capture } = require("../../sentry");
 const { formatStringDate, formatStringDateTimezoneUTC } = require("snu-lib");
 
 const isFromDOMTOM = (young) => {
-  return [
-    "Guadeloupe",
-    "Martinique",
-    "Guyane",
-    "La Réunion",
-    "Saint-Pierre-et-Miquelon",
-    "Mayotte",
-    "Saint-Martin",
-    "Polynésie française",
-    "Nouvelle-Calédonie",
-  ].includes(young.department);
+  return ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
+    young.department,
+  );
 };
 
 function getBg(template = "default") {
@@ -99,10 +91,7 @@ const renderDOMTOM = async (young) => {
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, center.address)
       .replace(/{{COHESION_CENTER_ZIP}}/g, center.zip)
       .replace(/{{COHESION_CENTER_CITY}}/g, center.city)
-      .replace(
-        /{{MEETING_ADDRESS_DOMTOM}}/g,
-        "Merci de vous présenter impérativement à la date, à l'heure et au lieu qui vous auront été indiqués par votre service régional."
-      )
+      .replace(/{{MEETING_ADDRESS_DOMTOM}}/g, "Merci de vous présenter impérativement à la date, à l'heure et au lieu qui vous auront été indiqués par votre service régional.")
       .replace(/{{BASE_URL}}/g, getBaseUrl())
       .replace(/{{GENERAL_BG}}/g, getBg("domtom"));
   } catch (e) {

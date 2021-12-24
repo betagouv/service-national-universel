@@ -23,7 +23,7 @@ function checkStatusContract(contract) {
   if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
   // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
   const tokenKeys = ["parent1Token", "parent2Token", "projectManagerToken", "structureManagerToken", "youngContractToken"];
-  const tokenCount = tokenKeys.reduce((acc, current) => (Boolean(contract[current]) ? acc + 1 : acc), 0);
+  const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
   const validateKeys = ["parent1Status", "parent2Status", "projectManagerStatus", "structureManagerStatus", "youngContractStatus"];
   const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
   if (validatedCount >= tokenCount) {
@@ -82,28 +82,17 @@ async function updateContract(id, data, fromUser) {
   await contract.save({ fromUser });
 
   // When we update, we have to send mail again to validated.
-  if (
-    previous.invitationSent !== "true" ||
-    previous.projectManagerStatus === "VALIDATED" ||
-    previous.projectManagerEmail !== contract.projectManagerEmail
-  ) {
+  if (previous.invitationSent !== "true" || previous.projectManagerStatus === "VALIDATED" || previous.projectManagerEmail !== contract.projectManagerEmail) {
     contract.projectManagerStatus = "WAITING_VALIDATION";
     contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendProjectManagerContractEmail(contract, previous.projectManagerStatus === "VALIDATED");
   }
-  if (
-    previous.invitationSent !== "true" ||
-    previous.structureManagerStatus === "VALIDATED" ||
-    previous.structureManagerEmail !== contract.structureManagerEmail
-  ) {
+  if (previous.invitationSent !== "true" || previous.structureManagerStatus === "VALIDATED" || previous.structureManagerEmail !== contract.structureManagerEmail) {
     contract.structureManagerStatus = "WAITING_VALIDATION";
     contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendStructureManagerContractEmail(contract, previous.structureManagerStatus === "VALIDATED");
   }
-  if (
-    contract.isYoungAdult !== "true" &&
-    (previous.invitationSent !== "true" || previous.parent1Status === "VALIDATED" || previous.parent1Email !== contract.parent1Email)
-  ) {
+  if (contract.isYoungAdult !== "true" && (previous.invitationSent !== "true" || previous.parent1Status === "VALIDATED" || previous.parent1Email !== contract.parent1Email)) {
     contract.parent1Status = "WAITING_VALIDATION";
     contract.parent1Token = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendParent1ContractEmail(contract, previous.parent1Status === "VALIDATED");
@@ -117,10 +106,7 @@ async function updateContract(id, data, fromUser) {
     contract.parent2Token = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendParent2ContractEmail(contract, previous.parent2Status === "VALIDATED");
   }
-  if (
-    contract.isYoungAdult === "true" &&
-    (previous.invitationSent !== "true" || previous.youngContractStatus === "VALIDATED" || previous.youngEmail !== contract.youngEmail)
-  ) {
+  if (contract.isYoungAdult === "true" && (previous.invitationSent !== "true" || previous.youngContractStatus === "VALIDATED" || previous.youngEmail !== contract.youngEmail)) {
     contract.youngContractStatus = "WAITING_VALIDATION";
     contract.youngContractToken = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendYoungContractEmail(contract, previous.youngContractStatus === "VALIDATED");
@@ -248,10 +234,7 @@ router.post("/:id/send-email/:type", passport.authenticate(["referent"], { sessi
     const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
 
-    const { error: typeError, value: type } = Joi.string()
-      .valid("projectManager", "structureManager", "parent1", "parent2", "young")
-      .required()
-      .validate(req.params.type);
+    const { error: typeError, value: type } = Joi.string().valid("projectManager", "structureManager", "parent1", "parent2", "young").required().validate(req.params.type);
     if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: typeError.message });
 
     const contract = await ContractObject.findById(id);
@@ -295,13 +278,7 @@ router.get("/token/:token", async (req, res) => {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const data = await ContractObject.findOne({
-      $or: [
-        { youngContractToken: token },
-        { parent1Token: token },
-        { projectManagerToken: token },
-        { structureManagerToken: token },
-        { parent2Token: token },
-      ],
+      $or: [{ youngContractToken: token }, { parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
     });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -318,13 +295,7 @@ router.post("/token/:token", async (req, res) => {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const data = await ContractObject.findOne({
-      $or: [
-        { youngContractToken: token },
-        { parent1Token: token },
-        { projectManagerToken: token },
-        { structureManagerToken: token },
-        { parent2Token: token },
-      ],
+      $or: [{ youngContractToken: token }, { parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
     });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 

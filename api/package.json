@@ -14,7 +14,7 @@
     "test": "jest --silent --runInBand",
     "coverage": "jest --runInBand --coverage --silent",
     "lint": "eslint . --ext .js",
-    "lint:fix": "eslint --ext .js --fix",
+    "lint:fix": "eslint --ext .js --fix src",
     "zammad-migrate:tickets": "node ./src/zammad-migration/ticketScript"
   },
   "author": "SELEGO",

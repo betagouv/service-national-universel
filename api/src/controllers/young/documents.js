@@ -89,60 +89,56 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
   }
 });
-router.post(
-  "/:type/:template/send-email",
-  passport.authenticate(["young", "referent"], { session: false, failWithError: true }),
-  async (req, res) => {
-    try {
-      const { error, value } = Joi.object({
-        id: Joi.string().required(),
-        type: Joi.string().required(),
-        template: Joi.string().required(),
-        contract_id: Joi.string(),
-      })
-        .unknown()
-        .validate({ ...req.params, ...req.body, ...req.query }, { stripUnknown: true });
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      const { id, type, template, fileName, contract_id } = value;
+router.post("/:type/:template/send-email", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      type: Joi.string().required(),
+      template: Joi.string().required(),
+      contract_id: Joi.string(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body, ...req.query }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { id, type, template, fileName, contract_id } = value;
 
-      const young = await YoungObject.findById(id);
-      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      // A young can only send to them their own documents.
-      if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
-      if (isReferent(req.user) && !canSendFileByMail(req.user, young)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
-
-      let contract;
-      if (type === "contract") {
-        if (!contract_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-        contract = await ContractObject.findById(contract_id);
-        if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      }
-
-      // Create html
-      const html = await getHtmlTemplate(type, template, young, contract);
-      if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const { object, message } = getMailParams(type, template, young, contract);
-
-      const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
-      const content = buffer.toString("base64");
-
-      const mail = await sendTemplate(SENDINBLUE_TEMPLATES.young.DOCUMENT, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        attachment: [{ content, name: fileName }],
-        params: { object, message },
-      });
-      res.status(200).send({ ok: true, data: mail });
-    } catch (e) {
-      capture(e);
-      res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
+    // A young can only send to them their own documents.
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
+    if (isReferent(req.user) && !canSendFileByMail(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    let contract;
+    if (type === "contract") {
+      if (!contract_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+      contract = await ContractObject.findById(contract_id);
+      if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    // Create html
+    const html = await getHtmlTemplate(type, template, young, contract);
+    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const { object, message } = getMailParams(type, template, young, contract);
+
+    const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
+    const content = buffer.toString("base64");
+
+    const mail = await sendTemplate(SENDINBLUE_TEMPLATES.young.DOCUMENT, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      attachment: [{ content, name: fileName }],
+      params: { object, message },
+    });
+    res.status(200).send({ ok: true, data: mail });
+  } catch (e) {
+    capture(e);
+    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
   }
-);
+});
 
 module.exports = router;
