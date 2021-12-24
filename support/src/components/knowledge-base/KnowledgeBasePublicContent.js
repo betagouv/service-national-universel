@@ -1,20 +1,12 @@
 import Wrapper from "../Wrapper";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Loader from "react-loader-spinner";
 import Breadcrumb from "../BreadCrumb";
-import TextEditor from "../TextEditor";
-import PublicKBSection from "./PublicKBSection";
-import PublicKBNoAnswer from "./PublicKBNoAnswer";
+import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
+import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
+import KnowledgeBasePublicArticle from "./KnowledgeBasePublicArticle";
 
-export const Article = ({ item }) => {
-  return (
-    <div className="wrapper bg-coolGray-100  mx-auto flex flex-col flex-grow flex-shrink overflow-hidden w-full">
-      <TextEditor readOnly content={item.content} _id={item._id} slug={item.slug} />
-    </div>
-  );
-};
-
-const PublicKBContent = ({ item }) => {
+const KnowledgeBasePublicContent = ({ item, isLoading }) => {
   const group = useMemo(() => {
     return item?.group || item?.parents?.[0].group;
   }, [item]);
@@ -32,18 +24,18 @@ const PublicKBContent = ({ item }) => {
             </div>
           </div>
         </div>
-        {!item ? (
+        {!item || isLoading ? (
           <Loader />
         ) : (
           <>
-            {item.type === "article" && <Article item={item} />}
-            {item.type === "section" && <PublicKBSection item={item} />}
+            {item.type === "article" && <KnowledgeBasePublicArticle item={item} />}
+            {item.type === "section" && <KnowledgeBasePublicSection item={item} />}
           </>
         )}
       </div>
-      <PublicKBNoAnswer />
+      <KnowledgeBasePublicNoAnswer />
     </Wrapper>
   );
 };
 
-export default PublicKBContent;
+export default KnowledgeBasePublicContent;

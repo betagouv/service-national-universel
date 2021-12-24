@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import useSWR, { SWRConfig } from "swr";
 import API from "../../services/api";
 import { useRouter } from "next/router";
-import PublicKBContent from "../../components/knowledge-base/PublicKBContent";
+import KnowledgeBasePublicContent from "../../components/knowledge-base/KnowledgeBasePublicContent";
+import useUser from "../../hooks/useUser";
 
 const Content = () => {
   const router = useRouter();
@@ -12,19 +13,29 @@ const Content = () => {
     setSlug(router.query?.slug || "");
   }, [router.query?.slug]);
 
-  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${slug}` }));
+  const { user } = useUser();
+
+  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${user.restriction}/${slug}` }));
   const [item, setItem] = useState(response?.data || {});
 
   useEffect(() => {
     setItem(response?.data);
   }, [response?.data]);
 
-  return <PublicKBContent item={item} />;
+  return <KnowledgeBasePublicContent item={item} />;
+};
+
+const AuthContent = () => {
+  const { isLoading } = useUser();
+
+  if (isLoading) return <KnowledgeBasePublicContent isLoading />;
+
+  return <Content />;
 };
 
 const Home = ({ fallback }) => (
   <SWRConfig value={{ fallback }}>
-    <Content />
+    <AuthContent />
   </SWRConfig>
 );
 
@@ -45,13 +56,13 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }) {
   // params contains the post `id`.
   // If the route is like /posts/1, then params.id is 1
-  const response = await API.getasync({ path: `/support-center/knowledge-base/${params.slug}` });
+  const response = await API.getasync({ path: `/support-center/knowledge-base/public/${params.slug}` });
 
   // Pass post data to the page via props
   return {
     props: {
       fallback: {
-        [`/support-center/knowledge-base/${params.slug}`]: response,
+        [`/support-center/knowledge-base/public/${params.slug}`]: response,
       },
     }, // will be passed to the page component as props
   };

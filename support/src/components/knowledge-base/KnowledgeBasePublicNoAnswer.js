@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Modal from "../Modal";
 
-const PublicKBNoAnswer = () => {
+const KnowledgeBasePublicNoAnswer = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -30,4 +30,4 @@ const PublicKBNoAnswer = () => {
   );
 };
 
-export default PublicKBNoAnswer;
+export default KnowledgeBasePublicNoAnswer;

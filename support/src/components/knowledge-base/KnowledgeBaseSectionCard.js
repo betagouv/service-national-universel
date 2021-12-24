@@ -13,7 +13,7 @@ const contentSummary = (sectionChildren) => {
   return `${answersSummary} \u00A0\u2022\u00A0 ${sectionsSummary}`;
 };
 
-const KBSectionCard = ({ _id, imageSrc, position, title, group, icon, slug, allowedRoles, sectionChildren, path, isRoot }) => {
+const KnowledgeBaseSectionCard = ({ _id, imageSrc, position, title, group, icon, slug, allowedRoles, sectionChildren, path, isRoot }) => {
   return (
     <Link key={_id} href={`${path}/${slug}`} passHref>
       <a href="#" data-position={position} data-id={_id} className="my-1 w-72 flex flex-shrink flex-grow-0 lg:my-4 ">
@@ -50,4 +50,4 @@ const KBSectionCard = ({ _id, imageSrc, position, title, group, icon, slug, allo
   );
 };
 
-export default KBSectionCard;
+export default KnowledgeBaseSectionCard;

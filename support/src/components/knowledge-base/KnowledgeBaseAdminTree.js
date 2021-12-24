@@ -151,7 +151,7 @@ const getElementsNewState = (root) => {
   return allItems;
 };
 
-const AdminKBTree = ({ isSortable, onClick }) => {
+const KnowledgeBaseAdminTree = ({ isSortable, onClick }) => {
   const { tree, flattenedData, mutate } = useKnowledgeBaseData();
 
   // reloadTreeKey to prevent error `Failed to execute 'removeChild' on 'Node'` from sortablejs after updating messy tree
@@ -215,4 +215,4 @@ const AdminKBTree = ({ isSortable, onClick }) => {
   );
 };
 
-export default AdminKBTree;
+export default KnowledgeBaseAdminTree;

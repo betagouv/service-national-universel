@@ -8,7 +8,7 @@ import { Button, CancelButton } from "../Buttons";
 import InputWithEmojiPicker from "../InputWithEmojiPicker";
 import Modal from "../Modal";
 
-const AdminKBCreate = ({ type, position, parentId = null }) => {
+const KnowledgeBaseAdminItemCreate = ({ type, position, parentId = null }) => {
   const [open, setOpen] = useState(null);
 
   const router = useRouter();
@@ -95,4 +95,4 @@ const AdminKBCreate = ({ type, position, parentId = null }) => {
   );
 };
 
-export default AdminKBCreate;
+export default KnowledgeBaseAdminItemCreate;

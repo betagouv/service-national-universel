@@ -1,39 +1,33 @@
 import useSWR, { SWRConfig } from "swr";
-import Wrapper from "../../components/Wrapper";
-import API from "../../services/api";
 import { useEffect, useState } from "react";
-import PublicKBSection from "../../components/knowledge-base/PublicKBSection";
-import PublicKBNoAnswer from "../../components/knowledge-base/PublicKBNoAnswer";
+import useUser from "../../hooks/useUser";
+import API from "../../services/api";
+import KnowledgeBasePublicHome from "../../components/knowledge-base/KnowledgeBasePublicHome";
 
 const Sections = () => {
-  const { data: response } = useSWR(API.getUrl({ path: "/support-center/knowledge-base" }));
+  const { user } = useUser();
+
+  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${user.restriction}` }));
 
   const [sections, setSections] = useState(response?.data || []);
   useEffect(() => {
     setSections(response?.data || []);
   }, [response?.data]);
 
-  return <PublicKBSection item={{ children: sections }} />;
+  return <KnowledgeBasePublicHome item={{ children: sections }} />;
+};
+
+const AuthSections = () => {
+  const { isLoading } = useUser();
+
+  if (isLoading) return <KnowledgeBasePublicHome isLoading />;
+
+  return <Sections />;
 };
 
 const Home = ({ fallback }) => (
   <SWRConfig value={{ fallback }}>
-    <Wrapper>
-      <div className="grid grid-cols-1 grid-rows-[auto,180px,auto]">
-        <div className="row-span-2 row-start-1 bg-center bg-cover col-span-full" style={{ backgroundImage: `url('/assets/hero.png')` }}>
-          <div className="bg-snu-purple-900 bg-opacity-95 h-full">
-            <div className="pt-24 pb-[276px] wrapper">
-              <h1 className="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">Base de connaissance</h1>
-              <h6 className="text-snu-purple-100 max-w-3xl text-base md:text-lg lg:text-xl">
-                Retrouvez ici toutes les réponses aux questions et les tutoriels d’utilisation de la plateforme .
-              </h6>
-            </div>
-          </div>
-        </div>
-        <Sections />
-      </div>
-      <PublicKBNoAnswer />
-    </Wrapper>
+    <AuthSections />
   </SWRConfig>
 );
 
@@ -41,11 +35,11 @@ export default Home;
 
 // https://swr.vercel.app/docs/with-nextjs#pre-rendering-with-default-data
 export async function getStaticProps() {
-  const response = await API.getasync({ path: "/support-center/knowledge-base" });
+  const response = await API.getasync({ path: "/support-center/knowledge-base/public" });
   return {
     props: {
       fallback: {
-        "/support-center/knowledge-base": response,
+        "/support-center/knowledge-base/public": response,
       },
     }, // will be passed to the page component as props
   };
