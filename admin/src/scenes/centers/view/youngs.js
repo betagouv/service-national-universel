@@ -14,7 +14,6 @@ import { Filter, ResultTable, Table, MultiLine } from "../../../components/list"
 import DownloadAllAttestation from "../../../components/buttons/DownloadAllAttestation";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import Details from "./details";
 
 export default function Youngs({ center, updateCenter }) {
   const [young, setYoung] = useState();
@@ -37,7 +36,6 @@ export default function Youngs({ center, updateCenter }) {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <div style={{ display: "flex", flexDirection: "column", flex: "1" }}>
-        <Details center={center} />
         <CenterView center={center} tab="volontaires">
           <div>
             <ReactiveBase url={`${apiURL}/es`} app={`cohesionyoung/${center._id}`} headers={{ Authorization: `JWT ${api.getToken()}` }}>

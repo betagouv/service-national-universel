@@ -36,6 +36,7 @@ export default function Index({ ...props }) {
   if (!center) return <div />;
   return (
     <>
+      <Details center={center} />
       <Switch>
         {/* À virer celle-ci ? */}
         <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} />} />
@@ -45,7 +46,6 @@ export default function Index({ ...props }) {
           path="/centre/:id"
           component={() => (
             <>
-              <Details center={center} />
               <Team center={center} />
             </>
           )}

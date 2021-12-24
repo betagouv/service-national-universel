@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
+import React, { useState, useEffect } from "react";
+import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
@@ -11,12 +11,16 @@ import { translate, canAssignCohesionCenter, colors } from "../../../utils";
 import { Filter } from "../../../components/list";
 import TabList from "../../../components/views/TabList";
 
-const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
-
-export default function Wrapper({ center: centerDefault, tab, children }) {
+export default function Wrapper({ center: centerDefault, tab, children, onChangeCohort }) {
   const history = useHistory();
   const [center, setCenter] = useState(centerDefault);
+  const [cohort, setCohort] = useState(centerDefault);
   const user = useSelector((state) => state.Auth.user);
+
+  useEffect(() => {
+    if (!center) return;
+    setCohort(center.cohorts[0]);
+  }, [center]);
 
   const up = async () => {
     if (!center) return;
@@ -25,73 +29,73 @@ export default function Wrapper({ center: centerDefault, tab, children }) {
     setCenter(centerResponse.data);
   };
 
+  const handleChangeCohort = (e) => {
+    setCohort(e.target.value);
+    onChangeCohort(e.target.value);
+  };
+
   if (!center) return null;
   return (
     <div style={{ flex: 2, position: "relative", padding: "3rem" }}>
-      <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <Header>
-          <div style={{ flex: 1, display: "flex" }}>
-            {/* TODO : connect center sessions */}
-            <Filter style={{ padding: "0 1rem 0 0" }}>
-              <MultiDropdownList
-                className="dropdown-filter"
-                placeholder="Séjour"
-                componentId="COHORT"
-                dataField="cohort.keyword"
-                react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-                renderItem={(e, count) => {
-                  return `${translate(e)} (${count})`;
-                }}
-                title=""
-                URLParams={true}
-                showSearch={false}
-              />
-            </Filter>
-            <TabList style={{ width: "100%" }}>
-              <Tab isActive={tab === "equipe"} first onClick={() => history.push(`/centre/${center._id}`)} style={{ borderRadius: "0.5rem 0 0 0.5rem" }}>
-                Équipe
-              </Tab>
-              {canAssignCohesionCenter(user) ? (
-                <>
-                  <Tab
-                    isActive={tab === "volontaires"}
-                    middle
-                    onClick={() => history.push(`/centre/${center._id}/volontaires`)}
-                    style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRight: "1px solid rgba(0,0,0,0.1)", minWidth: "110px" }}>
-                    Volontaires
-                  </Tab>
-                  <Tab
-                    isActive={tab === "affectation"}
-                    last
-                    onClick={() => history.push(`/centre/${center._id}/affectation`)}
-                    style={{ borderRadius: "0 0.5rem 0.5rem 0", minWidth: "168px" }}>
-                    Affectation manuelle
-                  </Tab>
-                </>
-              ) : (
+      <Header>
+        <div style={{ flex: 1, display: "flex" }}>
+          {/* TODO : connect center sessions */}
+          <Filter style={{ padding: "0 1rem 0 0" }}>
+            <select className="form-control" value={cohort} onChange={handleChangeCohort}>
+              <option disabled value={null} label="Sélectionner une période">
+                Sélectionner une période
+              </option>
+              {center.cohorts.map((c) => (
+                <option key={c} value={c} label={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </Filter>
+          <TabList style={{ width: "100%" }}>
+            <Tab isActive={tab === "equipe"} first onClick={() => history.push(`/centre/${center._id}`)} style={{ borderRadius: "0.5rem 0 0 0.5rem" }}>
+              Équipe
+            </Tab>
+            {canAssignCohesionCenter(user) ? (
+              <>
                 <Tab
                   isActive={tab === "volontaires"}
-                  last
+                  middle
                   onClick={() => history.push(`/centre/${center._id}/volontaires`)}
-                  style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRadius: "0 0.5rem 0.5rem 0" }}>
+                  style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRight: "1px solid rgba(0,0,0,0.1)", minWidth: "110px" }}>
                   Volontaires
                 </Tab>
-              )}
-            </TabList>
-          </div>
-          <BoxPlaces style={{ borderRight: "1px solid rgba(0,0,0,0.2)", borderRadius: "0" }}>
-            <DetailCardTitle>Taux d&apos;occupation</DetailCardTitle>
-            <DetailCardContent>{`${center.placesTotal ? (((center.placesTotal - center.placesLeft) * 100) / center.placesTotal).toFixed(2) : 0} %`}</DetailCardContent>
-          </BoxPlaces>
-          <BoxPlaces onClick={up}>
-            <DetailCardTitle>{Math.max(0, center.placesLeft)} places restantes</DetailCardTitle>
-            <DetailCardContent>
-              {center.placesTotal - center.placesLeft} / {center.placesTotal}
-            </DetailCardContent>
-          </BoxPlaces>
-        </Header>
-        {children}
-      </ReactiveBase>
+                <Tab
+                  isActive={tab === "affectation"}
+                  last
+                  onClick={() => history.push(`/centre/${center._id}/affectation`)}
+                  style={{ borderRadius: "0 0.5rem 0.5rem 0", minWidth: "168px" }}>
+                  Affectation manuelle
+                </Tab>
+              </>
+            ) : (
+              <Tab
+                isActive={tab === "volontaires"}
+                last
+                onClick={() => history.push(`/centre/${center._id}/volontaires`)}
+                style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRadius: "0 0.5rem 0.5rem 0" }}>
+                Volontaires
+              </Tab>
+            )}
+          </TabList>
+        </div>
+        <BoxPlaces style={{ borderRight: "1px solid rgba(0,0,0,0.2)", borderRadius: "0" }}>
+          <DetailCardTitle>Taux d&apos;occupation</DetailCardTitle>
+          <DetailCardContent>{`${center.placesTotal ? (((center.placesTotal - center.placesLeft) * 100) / center.placesTotal).toFixed(2) : 0} %`}</DetailCardContent>
+        </BoxPlaces>
+        <BoxPlaces onClick={up}>
+          <DetailCardTitle>{Math.max(0, center.placesLeft)} places restantes</DetailCardTitle>
+          <DetailCardContent>
+            {center.placesTotal - center.placesLeft} / {center.placesTotal}
+          </DetailCardContent>
+        </BoxPlaces>
+      </Header>
+      {children}
     </div>
   );
 }
