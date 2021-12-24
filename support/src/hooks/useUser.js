@@ -4,7 +4,7 @@ import useSWR from "swr";
 import API from "../services/api";
 
 const useUser = ({ redirectOnLoggedOut = "/base-de-connaissance" } = {}) => {
-  const { data, mutate, error } = useSWR(API.getUrl({ path: "/signin_token" }));
+  const { data, mutate, error } = useSWR(API.getUrl({ path: "/signin/token" }));
   const router = useRouter();
 
   const isLoading = !error && !data;

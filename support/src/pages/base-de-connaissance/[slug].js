@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import useSWR, { SWRConfig } from "swr";
 import API from "../../services/api";
 import { useRouter } from "next/router";
-import PublicKBContent from "../../components/knowledge-base/PublicKBContent";
+import KnowledgeBasePublicContent from "../../components/knowledge-base/KnowledgeBasePublicContent";
 import useUser from "../../hooks/useUser";
 
 const Content = () => {
@@ -13,7 +13,7 @@ const Content = () => {
     setSlug(router.query?.slug || "");
   }, [router.query?.slug]);
 
-  const { user } = useUser(); // find the user in some way, with the cookie ?
+  const { user } = useUser();
 
   const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${user.restriction}/${slug}` }));
   const [item, setItem] = useState(response?.data || {});
@@ -22,13 +22,13 @@ const Content = () => {
     setItem(response?.data);
   }, [response?.data]);
 
-  return <PublicKBContent item={item} />;
+  return <KnowledgeBasePublicContent item={item} />;
 };
 
 const AuthContent = () => {
-  const { isLoading } = useUser(); // find the user in some way, with the cookie ?
+  const { isLoading } = useUser();
 
-  if (isLoading) return <PublicKBContent isLoading />;
+  if (isLoading) return <KnowledgeBasePublicContent isLoading />;
 
   return <Content />;
 };

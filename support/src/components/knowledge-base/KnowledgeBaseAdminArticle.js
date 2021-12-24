@@ -5,9 +5,9 @@ import API from "../../services/api";
 import Modal from "../Modal";
 import Tags from "../Tags";
 import TextEditor from "../TextEditor";
-import PublicKBContent from "./PublicKBContent";
+import KnowledgeBasePublicContent from "./KnowledgeBasePublicContent";
 
-const AdminKBArticle = ({ article }) => {
+const KnowledgeBaseAdminArticle = ({ article }) => {
   const [readOnly, setReadOnly] = useState(false);
   const { mutate } = useKnowledgeBaseData();
 
@@ -54,10 +54,10 @@ const AdminKBArticle = ({ article }) => {
           </button>
         }
       >
-        <PublicKBContent item={article} />
+        <KnowledgeBasePublicContent item={article} />
       </Modal>
     </div>
   );
 };
 
-export default AdminKBArticle;
+export default KnowledgeBaseAdminArticle;

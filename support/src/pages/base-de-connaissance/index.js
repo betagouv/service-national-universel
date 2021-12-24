@@ -2,10 +2,10 @@ import useSWR, { SWRConfig } from "swr";
 import { useEffect, useState } from "react";
 import useUser from "../../hooks/useUser";
 import API from "../../services/api";
-import PublicKBHome from "../../components/knowledge-base/PublicKBHome";
+import KnowledgeBasePublicHome from "../../components/knowledge-base/KnowledgeBasePublicHome";
 
 const Sections = () => {
-  const { user } = useUser(); // find the user in some way, with the cookie ?
+  const { user } = useUser();
 
   const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${user.restriction}` }));
 
@@ -14,13 +14,13 @@ const Sections = () => {
     setSections(response?.data || []);
   }, [response?.data]);
 
-  return <PublicKBHome item={{ children: sections }} />;
+  return <KnowledgeBasePublicHome item={{ children: sections }} />;
 };
 
 const AuthSections = () => {
-  const { isLoading } = useUser(); // find the user in some way, with the cookie ?
+  const { isLoading } = useUser();
 
-  if (isLoading) return <PublicKBHome isLoading />;
+  if (isLoading) return <KnowledgeBasePublicHome isLoading />;
 
   return <Sections />;
 };

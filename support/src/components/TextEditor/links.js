@@ -5,7 +5,7 @@ import { Editor, Transforms, Element as SlateElement, Range } from "slate";
 import { TextEditorButton, Icon } from "./components";
 import Modal from "../Modal";
 import { Button, CancelButton } from "../Buttons";
-import AdminKBTree from "../knowledge-base/AdminKBTree";
+import KnowledgeBaseAdminTree from "../knowledge-base/KnowledgeBaseAdminTree";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
 export const isLinkActive = (editor) => {
@@ -117,7 +117,7 @@ export const AddLinkModal = ({ isOpen, onRequestClose }) => {
           <input className="p-2 border-2" placeholder="https://snu.gouv.fr/ ?" name="url" value={url} onChange={onUrlChange} />
           <span className="text-red-500 text-xs mb-10 mt-1">{error}</span>
           <div className="overflow-auto">
-            <AdminKBTree visible onClick={onSlugChange} />
+            <KnowledgeBaseAdminTree visible onClick={onSlugChange} />
           </div>
         </div>
         <div className="flex justify-evenly mt-3.5 w-full">

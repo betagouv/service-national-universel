@@ -1,12 +1,12 @@
 import Wrapper from "../Wrapper";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Loader from "react-loader-spinner";
 import Breadcrumb from "../BreadCrumb";
-import PublicKBSection from "./PublicKBSection";
-import PublicKBNoAnswer from "./PublicKBNoAnswer";
-import PublicKBArticle from "./PublicKBArticle";
+import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
+import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
+import KnowledgeBasePublicArticle from "./KnowledgeBasePublicArticle";
 
-const PublicKBContent = ({ item, isLoading }) => {
+const KnowledgeBasePublicContent = ({ item, isLoading }) => {
   const group = useMemo(() => {
     return item?.group || item?.parents?.[0].group;
   }, [item]);
@@ -28,14 +28,14 @@ const PublicKBContent = ({ item, isLoading }) => {
           <Loader />
         ) : (
           <>
-            {item.type === "article" && <PublicKBArticle item={item} />}
-            {item.type === "section" && <PublicKBSection item={item} />}
+            {item.type === "article" && <KnowledgeBasePublicArticle item={item} />}
+            {item.type === "section" && <KnowledgeBasePublicSection item={item} />}
           </>
         )}
       </div>
-      <PublicKBNoAnswer />
+      <KnowledgeBasePublicNoAnswer />
     </Wrapper>
   );
 };
 
-export default PublicKBContent;
+export default KnowledgeBasePublicContent;

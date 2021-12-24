@@ -9,7 +9,7 @@ import InputWithEmojiPicker from "../InputWithEmojiPicker";
 import IconsPicker, { RedIcon } from "../IconsPicker";
 import { Button, CancelButton } from "../Buttons";
 
-const AdminKBItemMetadata = ({ visible }) => {
+const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
   const router = useRouter();
   const [showIconChooser, setShowIconChooser] = useState(false);
 
@@ -282,4 +282,4 @@ const makeTitleSlug = (title) =>
     trim: true, // trim leading and trailing replacement chars, defaults to `true`
   });
 
-export default AdminKBItemMetadata;
+export default KnowledgeBaseAdminItemMetadata;

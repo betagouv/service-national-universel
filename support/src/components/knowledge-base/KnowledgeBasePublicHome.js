@@ -1,10 +1,10 @@
 import Wrapper from "../../components/Wrapper";
-import PublicKBSection from "../../components/knowledge-base/PublicKBSection";
-import PublicKBNoAnswer from "../../components/knowledge-base/PublicKBNoAnswer";
+import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
+import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import Loader from "../../components/Loader";
 import { useEffect, useState } from "react";
 
-const PublicKBHome = ({ item, isLoading = false }) => {
+const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
   const [showLoading, setShowLoading] = useState(true);
   useEffect(() => {
     setShowLoading(isLoading);
@@ -22,11 +22,11 @@ const PublicKBHome = ({ item, isLoading = false }) => {
             </div>
           </div>
         </div>
-        {showLoading ? <Loader /> : <PublicKBSection item={item} />}
+        {showLoading ? <Loader /> : <KnowledgeBasePublicSection item={item} />}
       </div>
-      <PublicKBNoAnswer />
+      <KnowledgeBasePublicNoAnswer />
     </Wrapper>
   );
 };
 
-export default PublicKBHome;
+export default KnowledgeBasePublicHome;

@@ -1,12 +1,12 @@
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import Header from "../../../components/Header";
-import AdminKBArticle from "../../../components/knowledge-base/AdminKBArticle";
-import AdminKBBreadcrumb from "../../../components/knowledge-base/AdminKBBreadcrumb";
-import AdminKBCreate from "../../../components/knowledge-base/AdminKBCreate";
-import AdminKBItemMetadata from "../../../components/knowledge-base/AdminKBItemMetadata";
-import AdminKBSection from "../../../components/knowledge-base/AdminKBSection";
-import AdminKBTree from "../../../components/knowledge-base/AdminKBTree";
+import KnowledgeBaseAdminArticle from "../../../components/knowledge-base/KnowledgeBaseAdminArticle";
+import KnowledgeBaseAdminBreadcrumb from "../../../components/knowledge-base/KnowledgeBaseAdminBreadcrumb";
+import KnowledgeBaseAdminItemCreate from "../../../components/knowledge-base/KnowledgeBaseAdminItemCreate";
+import KnowledgeBaseAdminItemMetadata from "../../../components/knowledge-base/KnowledgeBaseAdminItemMetadata";
+import KnowledgeBaseAdminSection from "../../../components/knowledge-base/KnowledgeBaseAdminSection";
+import KnowledgeBaseAdminTree from "../../../components/knowledge-base/KnowledgeBaseAdminTree";
 import Layout from "../../../components/Layout";
 import Loader from "../../../components/Loader";
 import withAuth from "../../../hocs/withAuth";
@@ -53,7 +53,7 @@ const KnowledgeBase = () => {
     <Layout title="Base de connaissances" className="flex flex-col">
       <Header>
         Base de connaissances
-        <AdminKBBreadcrumb parents={item?.parents} />
+        <KnowledgeBaseAdminBreadcrumb parents={item?.parents} />
         <div id="breadcrumb" className="px-4 py-2 -ml-12 -mr-12 -mb-3 flex justify-between items-baseline flex-shrink-0 w-screen bg-snu-purple-900">
           <button onClick={() => setTreeVisible((v) => !v)} className="bg-transparent border-none hover:underline text-xs font-light p-0 m-0">
             {treeVisible ? "Masquer" : "Afficher"} l'arbre
@@ -70,12 +70,12 @@ const KnowledgeBase = () => {
       ) : (
         <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
           <aside className={`relative flex flex-col flex-grow-0 flex-shrink-0 border-r-2 shadow-lg z-10 resize-x p-2 overflow-hidden ${treeVisible ? "w-80" : "w-0 hidden"}`}>
-            <AdminKBTree isSortable onClick={(slug) => router.push(`/admin/knowledge-base/${slug || ""}`)} />
+            <KnowledgeBaseAdminTree isSortable onClick={(slug) => router.push(`/admin/knowledge-base/${slug || ""}`)} />
           </aside>
           <Content key={slug} item={item} />
           {!isRoot && (
             <>
-              <AdminKBItemMetadata key={item?._id} visible={metadataVisible} />
+              <KnowledgeBaseAdminItemMetadata key={item?._id} visible={metadataVisible} />
             </>
           )}
         </div>
@@ -86,10 +86,10 @@ const KnowledgeBase = () => {
 
 const Content = ({ item }) => {
   if (!item) return null;
-  if (["root", "section"].includes(item?.type)) return <AdminKBSection key={item._id} section={item} isRoot={item?.type === "root"} />;
-  if (item?.type === "article") return <AdminKBArticle article={item} />;
+  if (["root", "section"].includes(item?.type)) return <KnowledgeBaseAdminSection key={item._id} section={item} isRoot={item?.type === "root"} />;
+  if (item?.type === "article") return <KnowledgeBaseAdminArticle article={item} />;
   // return article
-  return <AdminKBCreate position={0} />;
+  return <KnowledgeBaseAdminItemCreate position={0} />;
 };
 
 export default withAuth(KnowledgeBase);

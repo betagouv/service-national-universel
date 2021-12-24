@@ -3,14 +3,14 @@ import SortableJS from "sortablejs";
 import { toast } from "react-toastify";
 import withAuth from "../../hocs/withAuth";
 import API from "../../services/api";
-import KBSectionCard from "./KBSectionCard";
-import KBArticleCard from "./KBArticleCard";
-import AdminKBCreate from "./AdminKBCreate";
+import KnowledgeBaseSectionCard from "./KnowledgeBaseSectionCard";
+import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
+import KnowledgeBaseAdminItemCreate from "./KnowledgeBaseAdminItemCreate";
 import Tags from "../Tags";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import Loader from "../Loader";
 
-const AdminKBSection = ({ section, isRoot }) => {
+const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
   const { mutate } = useKnowledgeBaseData();
   const gridSectionsRef = useRef(null);
   const gridAnswersRef = useRef(null);
@@ -67,11 +67,11 @@ const AdminKBSection = ({ section, isRoot }) => {
           <section className="flex flex-col flex-grow flex-shrink-0 border-r-2 pt-6 px-12">
             <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
               Sujets
-              <AdminKBCreate position={section.children.length + 1} parentId={section._id} type="article" />
+              <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="article" />
             </h3>
             <div ref={gridAnswersRef} id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
               {answers.map((answer) => (
-                <KBArticleCard
+                <KnowledgeBaseArticleCard
                   key={answer._id}
                   _id={answer._id}
                   position={answer.position}
@@ -88,12 +88,12 @@ const AdminKBSection = ({ section, isRoot }) => {
         <section className={`flex flex-col ${isRoot ? "w-full" : "w-96"} flex-shrink-0  pt-6`}>
           <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
             Catégories
-            <AdminKBCreate position={section.children.length + 1} parentId={section._id} type="section" />
+            <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="section" />
           </h3>
           <div ref={gridSectionsRef} id="sections" className={`flex ${isRoot ? "justify-center" : ""} flex-wrap h-full w-full flex-shrink overflow-y-auto px-12`}>
             {sections.map((section) => (
               <React.Fragment key={section._id}>
-                <KBSectionCard
+                <KnowledgeBaseSectionCard
                   _id={section._id}
                   path="/admin/knowledge-base"
                   position={section.position}
@@ -123,4 +123,4 @@ const AdminKBSection = ({ section, isRoot }) => {
   );
 };
 
-export default withAuth(AdminKBSection);
+export default withAuth(KnowledgeBaseAdminSection);
