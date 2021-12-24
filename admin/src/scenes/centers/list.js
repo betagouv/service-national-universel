@@ -25,6 +25,9 @@ export default function List() {
   // List of cohesionCenter associated to the sessionPhase1
   const [sessionsPhase1, setSessionsPhase1] = useState([]);
 
+  // list of cohorts selected, used for filtering the sessionPhase1 displayed inline
+  const [filterCohorts, setFilterConhorts] = useState([]);
+
   const user = useSelector((state) => state.Auth.user);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
@@ -107,17 +110,11 @@ export default function List() {
                   URLParams={true}
                   autosuggest={false}
                 />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
-                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
-              </FilterRow>
-
-              <FilterRow visible={filterVisible}>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="COHORT"
-                  dataField="cohort.keyword"
+                  dataField="cohorts.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
@@ -125,8 +122,14 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
+                  renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
+                  onValueChange={setFilterConhorts}
                 />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -164,7 +167,9 @@ export default function List() {
                         <Hit
                           key={hit._id}
                           hit={hit}
-                          sessionsPhase1={sessionsPhase1.filter((e) => e?._source?.cohesionCenterId === hit._id).map((e) => e._source)}
+                          sessionsPhase1={sessionsPhase1
+                            .filter((e) => e?._source?.cohesionCenterId === hit._id && (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)))
+                            .map((e) => e._source)}
                           onClick={() => setCenter(hit)}
                           selected={center?._id === hit._id}
                         />
