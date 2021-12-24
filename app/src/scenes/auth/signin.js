@@ -18,6 +18,20 @@ import ErrorLogin from "./components/ErrorLogin";
 import ModalInProgress from "../../components/modals/ModalInProgress";
 import { toastr } from "react-redux-toastr";
 
+/*
+
+About Redirect after signin
+
+we use this signin screen in the `app`, but also outside the app in `knowledge-base` which is not in the same origin
+
+-> signin and redirect within the app would be an url like http://localhost:8081/auth?redirect=/my-page
+|-> redirection is made with `if (young) return <Redirect to={"/" + (redirect || "")} />;`
+
+-> signin and redirect outside the app would be an url like http://localhost:8081/auth?redirect=http(s)://localhost:8083/
+|-> redirection is made with `if (redirect.startsWith('http')) return window.location.href = redirect;`
+
+*/
+
 export default function Signin() {
   const [modal, setModal] = useState(null);
   const dispatch = useDispatch();
