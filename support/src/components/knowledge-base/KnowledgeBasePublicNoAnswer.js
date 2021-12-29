@@ -14,7 +14,7 @@ const KnowledgeBasePublicNoAnswer = () => {
             <br />
             <br /> La base de connaissances du SNU se construit au fil des évolutions de la plateforme et également des besoins des utilisateurs. <br />
             Si vous n'avez pas trouvé de réponse à votre question, vous pouvez nous suggérer un sujet d'article{" "}
-            <a href="https://forms.gle/tUPfh6iZwYqV3Hws9" className="text-[#4F46E5] underline" target="_blank" rel="noreferrer">
+            <a href="https://forms.gle/tUPfh6iZwYqV3Hws9" className="text-snu-purple-200 underline" target="_blank" rel="noreferrer">
               {"en\u00A0cliquant\u00A0ici"}
             </a>
             <br />
@@ -23,7 +23,10 @@ const KnowledgeBasePublicNoAnswer = () => {
           </p>
         </div>
       </Modal>
-      <button onClick={() => setIsOpen(true)} className="bg-white text-[#4F46E5] my-[70px] text-base shadow-base rounded-md py-3.5 px-5 mx-auto">
+      <button
+        onClick={() => setIsOpen(true)}
+        className="bg-white hover:shadow-sm text-snu-purple-200 my-[70px] text-base font-normal shadow-base rounded-md border-0 py-3.5 px-5 mx-auto"
+      >
         Je n’ai pas trouvé réponse à ma question
       </button>
     </>
