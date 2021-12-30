@@ -130,7 +130,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
 
   return (
     <>
-      <div className={`py-2 flex-grow flex-shrink flex flex-col ${!readOnly ? "bg-white" : ""}  overflow-hidden`}>
+      <div className={`py-2 px-2 flex-grow flex-shrink flex flex-col ${!readOnly ? "bg-white" : ""}  overflow-hidden`}>
         <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
           {!readOnly && (
             <Toolbar>

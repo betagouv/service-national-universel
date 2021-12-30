@@ -16,8 +16,8 @@ const contentSummary = (sectionChildren) => {
 const KnowledgeBaseSectionCard = ({ _id, imageSrc, position, title, group, icon, slug, allowedRoles, sectionChildren, path, isRoot }) => {
   return (
     <Link key={_id} href={`${path}/${slug}`} passHref>
-      <a href="#" data-position={position} data-id={_id} className="m-2 w-72 flex flex-shrink flex-grow-0">
-        <article className="overflow-hidden rounded-lg shadow-lg flex flex-col flex-grow bg-white h-72">
+      <a href="#" data-position={position} data-id={_id} className="mx-2 my-4 w-72 flex flex-shrink flex-grow-0">
+        <article className="overflow-hidden rounded-lg shadow-lg flex flex-col flex-grow bg-white h-86">
           {!!imageSrc ? (
             <div className="h-32 w-full bg-gray-300 flex flex-shrink-0 items-center justify-center overflow-hidden">
               <img alt={title.title} className="relative h-40 w-full bg-gray-300 flex-shrink-0 object-cover" src={imageSrc} />

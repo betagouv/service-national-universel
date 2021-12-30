@@ -17,7 +17,7 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
             <div className="pt-24 pb-[276px] mr-auto ml-auto px-8 max-w-screen-95">
               <h1 className="mb-6 text-4xl font-bold text-white md:text-5xl lg:text-6xl">Base de connaissance</h1>
               <h6 className="text-snu-purple-100 max-w-3xl text-base md:text-lg lg:text-xl">
-                Retrouvez ici toutes les réponses aux questions et les tutoriels d&apos;utilisation de la plateforme .
+                Retrouvez ici toutes les réponses à vos questions et les tutoriels d&apos;utilisation de la plateforme.
               </h6>
             </div>
           </div>

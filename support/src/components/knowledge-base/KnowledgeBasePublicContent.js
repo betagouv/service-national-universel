@@ -1,5 +1,5 @@
 import Wrapper from "../Wrapper";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import Loader from "react-loader-spinner";
 import Breadcrumb from "../BreadCrumb";
 import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";

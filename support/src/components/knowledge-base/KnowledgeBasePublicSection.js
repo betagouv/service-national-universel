@@ -48,32 +48,18 @@ const KnowledgeBasePublicSection = ({ item }) => {
           <h3 className="px-4 lg:px-16 flex items-center font-bold uppercase text-sm text-snu-purple-900">Catégories</h3>
           <div id="sections" className="flex flex-col w-full overflow-y-auto sm:items-center md:flex-row md:justify-center md:flex-wrap md:flex-shrink md:px-4 md:pb-4 lg:px-12">
             {sections.map((section) => (
-              <>
-                <KnowledgeBaseSectionCard
-                  key={section._id}
-                  _id={section._id}
-                  path="/base-de-connaissance"
-                  position={section.position}
-                  imageSrc={section.imageSrc}
-                  icon={section.icon}
-                  title={section.title}
-                  group={section.group}
-                  createdAt={section.createdAt}
-                  slug={section.slug}
-                />
-                <KnowledgeBaseSectionCard
-                  key={section._id}
-                  _id={section._id}
-                  path="/base-de-connaissance"
-                  position={section.position}
-                  imageSrc={section.imageSrc}
-                  icon={section.icon}
-                  title={section.title}
-                  group={section.group}
-                  createdAt={section.createdAt}
-                  slug={section.slug}
-                />
-              </>
+              <KnowledgeBaseSectionCard
+                key={section._id}
+                _id={section._id}
+                path="/base-de-connaissance"
+                position={section.position}
+                imageSrc={section.imageSrc}
+                icon={section.icon}
+                title={section.title}
+                group={section.group}
+                createdAt={section.createdAt}
+                slug={section.slug}
+              />
             ))}
           </div>
         </section>
