@@ -65,7 +65,7 @@ export default function Signin() {
             try {
               const { user: young, token } = await api.post(`/young/signin`, { email, password });
               if (young) {
-                if (redirect.startsWith('http')) return window.location.href = redirect;
+                //if (redirect.startsWith("http")) return (window.location.href = redirect);
                 if (token) api.setToken(token);
                 dispatch(setYoung(young));
               }
