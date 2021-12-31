@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/betagouv/service-national-universel/compare/v1.14.0...v1.14.1) (2021-12-31)
+
+
+### Bug Fixes
+
+* **admin app:** change icon color ([a118287](https://github.com/betagouv/service-national-universel/commit/a118287f2c7e29b3acdd0f77c65d78885ba8499a))
+
 # [1.14.0](https://github.com/betagouv/service-national-universel/compare/v1.13.0...v1.14.0) (2021-12-24)
 
 
