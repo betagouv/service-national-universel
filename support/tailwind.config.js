@@ -8,6 +8,13 @@ module.exports = {
   },
   darkMode: false, // or 'media' or 'class'
   theme: {
+    minWidth: {
+      0: "0",
+      "1/4": "265px",
+      "1/2": "50%",
+      "3/4": "75%",
+      full: "100%",
+    },
     screens: {
       sm: "300px",
       // => @media (min-width: 300px) { ... }

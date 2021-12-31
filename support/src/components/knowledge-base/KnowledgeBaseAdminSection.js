@@ -90,7 +90,7 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
             Catégories
             <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="section" />
           </h3>
-          <div ref={gridSectionsRef} id="sections" className={`flex ${isRoot ? "justify-center" : ""} flex-wrap h-full w-full flex-shrink overflow-y-auto px-12`}>
+          <div ref={gridSectionsRef} id="sections" className={`flex ${isRoot ? "justify-center" : ""} flex-wrap w-full flex-shrink overflow-y-auto px-12`}>
             {sections.map((section) => (
               <React.Fragment key={section._id}>
                 <KnowledgeBaseSectionCard

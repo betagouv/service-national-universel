@@ -15,7 +15,7 @@ const KnowledgeBasePublicSection = ({ item }) => {
 
   if (!articles.length) {
     return (
-      <div className="md:px-10 lg:px-6 lg:flex flex-col lg:flex-nowrap lg:overflow-hidden lg:max-w-screen-95 mx-auto flex-wrap grid-cols-2 md:grid md:flex-row row-span-2 row-start-2 col-span-full gap-2.5 lg:h-84">
+      <div className="md:px-10 lg:px-6 lg:flex flex-col flex-wrap justify-center lg:overflow-hidden lg:max-w-screen-95 mx-auto grid-cols-2 md:grid md:flex-row row-span-2 row-start-2 col-span-full gap-2.5">
         {sections.map((section) => (
           <KnowledgeBaseSectionCard
             key={section._id}
