@@ -26,12 +26,11 @@ import Goal from "./scenes/goal";
 import Center from "./scenes/centers";
 import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
-//import SupportCenter from "./scenes/support-center";
+import SupportCenter from "./scenes/support-center";
 import Association from "./scenes/association";
-//import Inbox from "./scenes/inbox";
+import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
-//import PublicSupport from "./scenes/public-support-center";
-import SupportMaintenance from "./scenes/support-center-maintenance";
+import PublicSupport from "./scenes/public-support-center";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -86,7 +85,7 @@ export default function App() {
           <Route path="/validate" component={Validate} />
           <Route path="/conditions-generales-utilisation" component={CGU} />
           <Route path="/auth" component={Auth} />
-          <Route path="/public-besoin-d-aide" component={SupportMaintenance} />
+          <Route path="/public-besoin-d-aide" component={PublicSupport} />
           <Route path="/" component={Home} />
         </Switch>
         <Footer />
@@ -137,8 +136,8 @@ const Home = () => {
           <RestrictedRoute path="/centre" component={Center} />
           <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
           <RestrictedRoute path="/association" component={Association} />
-          <RestrictedRoute path="/besoin-d-aide" component={SupportMaintenance} />
-          <RestrictedRoute path="/boite-de-reception" component={SupportMaintenance} />
+          <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
+          <RestrictedRoute path="/boite-de-reception" component={Inbox} />
           <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
           <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
           <RestrictedRoute path="/" component={renderDashboard} />
