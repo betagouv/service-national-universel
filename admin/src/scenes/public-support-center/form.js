@@ -6,7 +6,7 @@ import { Formik, Field } from "formik";
 import close from "../../assets/cancel.png";
 
 import api from "../../services/api";
-import { translate, departmentList, regionList } from "../../utils";
+import { translate, departmentList, department2region } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { SelectTag, step1, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/workflow";
@@ -24,8 +24,8 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
         onSubmit={async (values) => {
           try {
             setLoading(true);
-            const { message, subject, name, email, step1, step2, department, region } = values;
-            const regionTags = [`DEPARTEMENT_${department}`, `REGION_${region}`];
+            const { message, subject, name, email, step1, step2, department } = values;
+            const regionTags = [`DEPARTEMENT_${department}`, `REGION_${department2region[department]}`];
             const { ok, code } = await api.post("/support-center/public/ticket", {
               title: `${step1?.label} - ${step2?.label} - ${subject}`,
               subject,
@@ -79,18 +79,6 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
               handleChange={handleChange}
               title="Département"
               options={departmentList.map((d) => ({ value: d, label: d }))}
-              errors={errors}
-              touched={touched}
-            />
-            <Item
-              name="region"
-              type="select"
-              placeholder="Sélectionnez votre région"
-              values={values}
-              value={values.region}
-              handleChange={handleChange}
-              title="Région"
-              options={regionList.map((r) => ({ value: r, label: r }))}
               errors={errors}
               touched={touched}
             />
