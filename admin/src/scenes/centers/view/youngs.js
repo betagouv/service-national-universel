@@ -20,7 +20,7 @@ import {
 } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
-import { Filter, ResultTable, Table, MultiLine } from "../../../components/list";
+import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
 import DownloadAllAttestation from "../../../components/buttons/DownloadAllAttestation";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -198,33 +198,20 @@ export default function Youngs({ center, updateCenter, focusedCohort }) {
             </div>
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
               <div style={{ flex: 1, position: "relative" }}>
-                <Filter style={{ display: "flex", padding: "0" }}>
-                  <DataSearch
-                    showIcon={false}
-                    placeholder="Rechercher par prénom, nom, email, ville, code postal..."
-                    componentId="SEARCH"
-                    dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
-                    react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                    // fuzziness={2}
-                    style={{ width: "80%", marginRight: "0.5rem" }}
-                    innerClass={{ input: "searchbox" }}
-                    autosuggest={false}
-                    queryFormat="and"
-                  />
-                  <MultiDropdownList
-                    className="dropdown-filter"
-                    componentId="STATUS"
-                    dataField="status.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                    renderItem={(e, count) => {
-                      return `${translate(e)} (${count})`;
-                    }}
-                    title=""
-                    URLParams={true}
-                    showSearch={false}
-                    renderLabel={(items) => getFilterLabel(items, "Statut de l'affectation")}
-                  />
-                  {/* <FilterRow>
+                <Filter>
+                  <FilterRow visible>
+                    <DataSearch
+                      showIcon={false}
+                      placeholder="Rechercher par prénom, nom, email, ville, code postal..."
+                      componentId="SEARCH"
+                      dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                      react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                      // fuzziness={2}
+                      style={{ flex: 1, marginRight: "1rem" }}
+                      innerClass={{ input: "searchbox" }}
+                      autosuggest={false}
+                      queryFormat="and"
+                    />
                     <MultiDropdownList
                       className="dropdown-filter"
                       componentId="STATUS"
@@ -236,7 +223,7 @@ export default function Youngs({ center, updateCenter, focusedCohort }) {
                       title=""
                       URLParams={true}
                       showSearch={false}
-                      renderLabel={(items) => getFilterLabel(items, "Statut")}
+                      renderLabel={(items) => getFilterLabel(items, "Statut de l'affectation")}
                     />
                     <MultiDropdownList
                       className="dropdown-filter"
@@ -251,7 +238,7 @@ export default function Youngs({ center, updateCenter, focusedCohort }) {
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
                     />
-                  </FilterRow> */}
+                  </FilterRow>
                 </Filter>
                 <ResultTable style={{ borderRadius: "8px", boxShadow: "0px 3px 2px #edf2f7" }}>
                   <ReactiveListComponent
@@ -263,7 +250,6 @@ export default function Youngs({ center, updateCenter, focusedCohort }) {
                       <Table>
                         <thead>
                           <tr>
-                            <th>#</th>
                             <th width="70%">Volontaire</th>
                             <th>Affectation</th>
                           </tr>
@@ -295,9 +281,6 @@ export default function Youngs({ center, updateCenter, focusedCohort }) {
 const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
-      <td>
-        <p>{hit._id}</p>
-      </td>
       <td>
         <MultiLine>
           <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
