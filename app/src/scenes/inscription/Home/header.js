@@ -15,7 +15,9 @@ export default function HeaderComponent({ location }) {
         </a>
       </Logos>
       <CTAContainer>
-        <AvatarText to={{ pathname: "/auth/login", search: location?.search }}>Se connecter</AvatarText>
+        <AvatarText onClick={() => plausible("Clic CTA - Connexion")} to={{ pathname: "/auth/login", search: location?.search }}>
+          Se connecter
+        </AvatarText>
         <AvatarText to={{ pathname: "/inscription/profil" }}>S&apos;inscrire</AvatarText>
       </CTAContainer>
     </Header>
