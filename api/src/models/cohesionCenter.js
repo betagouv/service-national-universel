@@ -65,6 +65,12 @@ const Schema = new mongoose.Schema({
       description: "Région du centre",
     },
   },
+  addressVerified: {
+    type: String,
+    documentation: {
+      description: "Adresse validée",
+    },
+  },
   placesTotal: {
     type: Number,
     documentation: {

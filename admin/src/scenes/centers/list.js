@@ -169,7 +169,7 @@ export default function List() {
                           hit={hit}
                           sessionsPhase1={sessionsPhase1
                             .filter((e) => e?._source?.cohesionCenterId === hit._id && (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)))
-                            .map((e) => e._source)}
+                            .map((e) => e)}
                           onClick={() => setCenter(hit)}
                           selected={center?._id === hit._id}
                         />
@@ -203,7 +203,7 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
       <td>
         {sessionsPhase1.map((sessionPhase1) => (
           <SubTd key={sessionPhase1._id}>
-            <Badge text={sessionPhase1.cohort} />
+            <Badge text={sessionPhase1._source.cohort} />
           </SubTd>
         ))}
       </td>
@@ -211,15 +211,15 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
         {sessionsPhase1.map((sessionPhase1) => (
           <SubTd key={sessionPhase1._id}>
             <MultiLine>
-              <h2>{sessionPhase1.placesLeft} places disponibles</h2>
-              <p>sur {sessionPhase1.placesTotal} places proposées</p>
+              <h2>{sessionPhase1._source.placesLeft} places disponibles</h2>
+              <p>sur {sessionPhase1._source.placesTotal} places proposées</p>
             </MultiLine>
           </SubTd>
         ))}
       </td>
       <td>
         {sessionsPhase1.map((sessionPhase1) => (
-          <SubTd key={sessionPhase1._id}>{sessionPhase1.placesLeft > 0 ? <Badge text="Places disponibles" color="#6CC763" /> : <Badge text="Complet" />}</SubTd>
+          <SubTd key={sessionPhase1._id}>{sessionPhase1._source.placesLeft > 0 ? <Badge text="Places disponibles" color="#6CC763" /> : <Badge text="Complet" />}</SubTd>
         ))}
       </td>
     </tr>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { Formik } from "formik";
+import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 
 import { translate } from "../../utils";
@@ -14,6 +14,7 @@ import Select from "./components/Select";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import AddressInput from "../../components/addressInputV2";
 import MultiSelect from "../../components/Multiselect";
+import Error, { requiredMessage } from "../../components/errorMessage";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -45,7 +46,7 @@ export default function Edit(props) {
           if (isNew) values.placesLeft = values.placesTotal;
           else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
 
-          const { ok, code, data } = values._id ? await api.put("/cohesion-center", values) : await api.post("/cohesion-center", values);
+          const { ok, code, data } = values._id ? await api.put(`/cohesion-center/${values._id}`, values) : await api.post("/cohesion-center", values);
 
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));
@@ -73,7 +74,7 @@ export default function Edit(props) {
                   <BoxContent direction="column">
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
                     {values._id ? <Item disabled title="Code" values={values} name="_id" /> : null}
-                    <Item title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    <Item type="number" title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Select
                       name="pmr"
                       values={values}
@@ -88,6 +89,9 @@ export default function Edit(props) {
                       touched={touched}
                     />
                     <MultiSelectWithTitle
+                      required
+                      errors={errors}
+                      touched={touched}
                       title="Séjour(s) de cohésion concerné(s)"
                       value={values.cohorts}
                       onChange={handleChange}
@@ -137,14 +141,16 @@ export default function Edit(props) {
     </Formik>
   );
 }
-const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder }) => {
+const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder, required, errors, touched }) => {
   return (
     <Row className="detail">
       <Col md={4}>
         <label>{title}</label>
       </Col>
       <Col md={8}>
+        <Field hidden value={value} name={name} onChange={onChange} validate={(v) => required && !v?.length && requiredMessage} />
         <MultiSelect value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} />
+        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
       </Col>
     </Row>
   );
