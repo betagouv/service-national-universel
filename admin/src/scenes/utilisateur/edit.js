@@ -12,7 +12,18 @@ import ReactSelect from "react-select";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, department2region, translate, ROLES, VISITOR_SUBROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, colors } from "../../utils";
+import {
+  departmentList,
+  regionList,
+  department2region,
+  translate,
+  ROLES,
+  VISITOR_SUBROLES,
+  REFERENT_DEPARTMENT_SUBROLE,
+  REFERENT_REGION_SUBROLE,
+  colors,
+  canDeleteReferent,
+} from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../components/Loader";
@@ -314,10 +325,7 @@ export default function Edit(props) {
           <HistoricComponent model="referent" value={user} />
         </Box>
       ) : null}
-      {currentUser.role === ROLES.ADMIN ||
-      ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) ? (
-        <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn>
-      ) : null}
+      {canDeleteReferent(currentUser, user) ? <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn> : null}
       {canModify(currentUser, user) && user.role === ROLES.REFERENT_DEPARTMENT && (
         <Formik
           initialValues={service || { department: user.department }}
