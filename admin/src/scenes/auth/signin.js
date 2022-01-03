@@ -108,6 +108,12 @@ export default function Signin() {
             <Register>
               Vous êtes une structure ? <Link to="/auth/signup">Publiez vos missions</Link>
             </Register>
+            <Register>
+              Vous avez besoin d&apos;aide ?{" "}
+              <Link to="/public-besoin-d-aide" target="_blank">
+                Cliquez ici
+              </Link>
+            </Register>
           </div>
         </LoginBox>
       </AuthWrapper>
