@@ -17,7 +17,7 @@ export default function Home({ location }) {
   };
   const registerEventPlausibleDesktop = (e, props) => {
     // eslint-disable-next-line no-undef
-    plausible(e, { ...props, device: "desktop" });
+    window.plausible?.(e, { ...props, device: "desktop" });
   };
 
   return (
