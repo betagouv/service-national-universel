@@ -5,6 +5,7 @@ import StopIcon from "../components/stopIcon";
 import TickIcon from "../components/tickIcon";
 import conditions from "./conditions";
 import informations from "./informations";
+import EligibilityModal from "../components/eligibilityModal";
 
 export default function DesktopView() {
   return (
@@ -31,6 +32,7 @@ export default function DesktopView() {
       </div>
       <Points backgroundColor="#fff">
         <div className="points-title">Conditions d&apos;inscription</div>
+        <EligibilityModal />
         <div className="first_container">
           <FirstSection>
             <div className="section_conditions">
@@ -42,7 +44,7 @@ export default function DesktopView() {
                 />
               </svg>
               <p>
-                J’aurai <strong>15, 16 ou 17 ans</strong> au moment de mon séjour de cohésion
+                J&apos;aurai <strong>15, 16 ou 17 ans</strong> au moment de mon séjour de cohésion
               </p>
             </div>
             <div className="section_conditions">
