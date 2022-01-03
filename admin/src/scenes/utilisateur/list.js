@@ -165,7 +165,7 @@ export default function List() {
                         <th>Rôle</th>
                         <th>Crée le</th>
                         <th>Dernière connexion le</th>
-                        {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && <th>Actions</th>}
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
