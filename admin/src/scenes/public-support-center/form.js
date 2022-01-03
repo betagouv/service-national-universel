@@ -146,7 +146,7 @@ const Item = ({ title, name, value, values, handleChange, errors, touched, valid
           <option disabled key={-1} value="" selected={!values[name]} label={placeholder}>
             {placeholder}
           </option>
-          {options.map((o, i) => (
+          {options?.map((o, i) => (
             <option key={i} value={o.value} label={o.label}>
               {o.label}
             </option>
