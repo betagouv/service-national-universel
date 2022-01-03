@@ -6,16 +6,25 @@ import { Spinner } from "reactstrap";
 import { setYoung } from "../../redux/auth/actions";
 import { saveYoung } from "../../scenes/inscription/utils";
 import { appURL } from "../../config";
+import { YOUNG_STATUS } from "../../utils";
 
 export default function FormFooter({ values, handleSubmit, errors, secondButton = "save", loading }) {
   const dispatch = useDispatch();
   const [loadingSaveBtn, setloadingSaveBtn] = useState(false);
+  const [loadingHardSaveBtn, setloadingHardSaveBtn] = useState(false);
 
   const handleSave = async () => {
     setloadingSaveBtn(true);
     const young = await saveYoung(values);
     if (young) dispatch(setYoung(young));
     setloadingSaveBtn(false);
+  };
+  const handleHardSave = async () => {
+    setloadingHardSaveBtn(true);
+    const young = await saveYoung({ ...values, status: YOUNG_STATUS.WAITING_VALIDATION });
+    if (young) dispatch(setYoung(young));
+    setloadingHardSaveBtn(false);
+    handleBackToHome();
   };
 
   const handleBackToHome = async () => {
@@ -26,6 +35,11 @@ export default function FormFooter({ values, handleSubmit, errors, secondButton 
     <>
       <Footer>
         <ButtonContainer>
+          {values.status === YOUNG_STATUS.WAITING_CORRECTION ? (
+            <SecondButton onClick={handleHardSave}>
+              {loadingHardSaveBtn ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "J'ai terminé la correction de mon dossier"}
+            </SecondButton>
+          ) : null}
           {secondButton === "save" ? (
             <SecondButton onClick={handleSave}> {loadingSaveBtn ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Enregistrer"}</SecondButton>
           ) : (
@@ -89,4 +103,8 @@ const SecondButton = styled(ContinueButton)`
   border: solid 2px;
   border-color: #e3e7ea;
   box-shadow: none;
+  :hover {
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0.9;
+  }
 `;
