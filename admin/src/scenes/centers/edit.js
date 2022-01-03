@@ -74,7 +74,7 @@ export default function Edit(props) {
                   <BoxContent direction="column">
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
                     {values._id ? <Item disabled title="Code" values={values} name="_id" /> : null}
-                    <Item title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    <Item type="number" title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Select
                       name="pmr"
                       values={values}

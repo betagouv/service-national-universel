@@ -267,7 +267,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
           const placesLeft = center.placesTotal;
           const session = await SessionPhase1.findOne({ cohesionCenterId, cohort });
           if (session) {
-            session.set({ placesTotal, placesLeft })
+            session.set({ placesTotal, placesLeft });
             await session.save();
           } else {
             await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft });
@@ -280,7 +280,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       if (deletedCohorts?.length > 0) {
         for (let cohort of deletedCohorts) {
           const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort });
-          await sessionPhase1.remove();
+          await sessionPhase1?.remove();
         }
       }
     }
