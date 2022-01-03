@@ -18,7 +18,7 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
     <Form>
       <img src={close} onClick={() => setOpen(false)} />
       <Formik
-        initialValues={{ step1: null, step2: null, message: "", subject: "", email: "", name: "", department: "", region: "" }}
+        initialValues={{ step1: null, step2: null, message: "", subject: "", email: "", name: "", department: "" }}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
