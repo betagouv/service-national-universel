@@ -265,9 +265,13 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
           const cohesionCenterId = center._id;
           const placesTotal = center.placesTotal;
           const placesLeft = center.placesTotal;
-          // :warning: peut etre creation de doublons ?
-          // il faudrait peut etre check si une session existe deja pour ce centre et cette cohorte avant de creer une nouvelle
-          await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft });
+          const session = await SessionPhase1.findOne({ cohesionCenterId, cohort });
+          if (session) {
+            session.set({ placesTotal, placesLeft })
+            await session.save();
+          } else {
+            await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft });
+          }
         }
       }
 
