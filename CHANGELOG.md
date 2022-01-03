@@ -1,3 +1,21 @@
+# [1.15.0](https://github.com/betagouv/service-national-universel/compare/v1.14.1...v1.15.0) (2022-01-03)
+
+
+### Bug Fixes
+
+* **admin,sessionPhase1:** list young filters ([37281fe](https://github.com/betagouv/service-national-universel/commit/37281fe85e06c3e57e337e645f426516f25f9013))
+* create/delete session phase1 ([#1026](https://github.com/betagouv/service-national-universel/issues/1026)) ([e2c67a0](https://github.com/betagouv/service-national-universel/commit/e2c67a000881882dbf7830226628368b6869a0b2))
+* **admin,list:** displayed results on incomplete list pages ([ba395fe](https://github.com/betagouv/service-national-universel/commit/ba395fe190aa5fa0b3dadf186a7dc27b8de15175))
+* **app,plausible:** fix props and add clic besoin d'aide ([debd1df](https://github.com/betagouv/service-national-universel/commit/debd1df09b70d56dffa166604efb803f45a6419a))
+
+
+### Features
+
+* **api,patches:** add patches on cohesionCenter ([c230a47](https://github.com/betagouv/service-national-universel/commit/c230a47395715cbf5f5d0e838979de8d646ca863))
+* add event goal plausible ([#1046](https://github.com/betagouv/service-national-universel/issues/1046)) ([35dae56](https://github.com/betagouv/service-national-universel/commit/35dae56d729847257428e938db0946691e3a74cf))
+* Ajouter bouton "J'ai terminé la correction de mon dossier" ([#1045](https://github.com/betagouv/service-national-universel/issues/1045)) ([0215459](https://github.com/betagouv/service-national-universel/commit/021545969d6e36497a56845e97b55d0001c9c8c0))
+* Ajouter bouton suppression de compte sur la fiche d'autres référents ([#1044](https://github.com/betagouv/service-national-universel/issues/1044)) ([dbdf3b1](https://github.com/betagouv/service-national-universel/commit/dbdf3b10e35034fcfe35bdd9681e953e15d1c552))
+
 ## [1.14.1](https://github.com/betagouv/service-national-universel/compare/v1.14.0...v1.14.1) (2021-12-31)
 
 
