@@ -13,7 +13,7 @@ export default function Home({ location }) {
 
   const registerEventPlausibleMobile = (e, props) => {
     // eslint-disable-next-line no-undef
-    plausible(e, { ...props, device: "mobile" });
+    window.plausible?.(e, { ...props, device: "mobile" });
   };
   const registerEventPlausibleDesktop = (e, props) => {
     // eslint-disable-next-line no-undef
