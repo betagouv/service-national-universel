@@ -223,7 +223,7 @@ export default function Youngs({ center, updateCenter, focusedCohort }) {
                       title=""
                       URLParams={true}
                       showSearch={false}
-                      renderLabel={(items) => getFilterLabel(items, "Statut de l'affectation")}
+                      renderLabel={(items) => getFilterLabel(items, "Statut")}
                     />
                     <MultiDropdownList
                       className="dropdown-filter"
