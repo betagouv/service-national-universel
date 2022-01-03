@@ -62,6 +62,7 @@ exports.handler = async () => {
     });
   } catch (e) {
     capture(e);
+    slack.error({ title: "noticePushMission", text: JSON.stringify(e) });
   }
 };
 
@@ -139,6 +140,6 @@ const getMissions = async ({ young }) => {
   } catch (e) {
     capture(`ERROR`, JSON.stringify(e));
     capture(e);
-    slack.success({ title: "noticePushMission", text: JSON.stringify(e) });
+    slack.error({ title: "noticePushMission", text: JSON.stringify(e) });
   }
 };
