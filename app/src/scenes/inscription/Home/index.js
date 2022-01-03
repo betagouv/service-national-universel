@@ -11,13 +11,12 @@ import DesktopView from "./DesktopView";
 export default function Home({ location }) {
   const history = useHistory();
 
-  const registerEventPlausibleMobile = (e, props) => {
-    // eslint-disable-next-line no-undef
-    window.plausible?.(e, { ...props, device: "mobile" });
+  const registerEventPlausibleMobile = (e) => {
+    window.plausible?.(e, { props: { device: "mobile" } });
   };
-  const registerEventPlausibleDesktop = (e, props) => {
-    // eslint-disable-next-line no-undef
-    window.plausible?.(e, { ...props, device: "desktop" });
+
+  const registerEventPlausibleDesktop = (e) => {
+    window.plausible?.(e, { props: { device: "desktop" } });
   };
 
   return (

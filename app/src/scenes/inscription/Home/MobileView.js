@@ -118,7 +118,10 @@ export default function MobileView() {
           </div>
         </li>
         <li style={{ padding: 0 }}>
-          <FAQ href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="blank">
+          <FAQ
+            onClick={() => window.plausible?.("Clic Besoin d'aide", { props: { device: "mobile" } })}
+            href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu"
+            target="blank">
             <p>Toutes les réponses à vos questions</p>
             <svg width="6" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
