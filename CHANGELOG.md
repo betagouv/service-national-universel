@@ -1,3 +1,18 @@
+# [1.16.0](https://github.com/betagouv/service-national-universel/compare/v1.15.0...v1.16.0) (2022-01-04)
+
+
+### Bug Fixes
+
+* **admin:** add country filter in inscription list ([b2af477](https://github.com/betagouv/service-national-universel/commit/b2af477d185f2e7137c74161418df793bec1234c))
+* **admin:** public support and visitor support ([#1048](https://github.com/betagouv/service-national-universel/issues/1048)) ([60f9b39](https://github.com/betagouv/service-national-universel/commit/60f9b39b0482b80c84019a7dd93df5675a517256))
+* **api,zammad:** stop sync only if there is a role and it is not authorized ([65d641d](https://github.com/betagouv/service-national-universel/commit/65d641d774c632c2ab887a0b9564bea49336047a))
+
+
+### Features
+
+* **support:**  support responsive ([#1038](https://github.com/betagouv/service-national-universel/issues/1038)) ([1a66cdc](https://github.com/betagouv/service-national-universel/commit/1a66cdcd142fae2f921b2c1d3ca2f9ee5c58fb06))
+* open center tab ([#1049](https://github.com/betagouv/service-national-universel/issues/1049)) ([7645159](https://github.com/betagouv/service-national-universel/commit/7645159e02e799a6b7f27f6200dea1cf5925938a))
+
 # [1.15.0](https://github.com/betagouv/service-national-universel/compare/v1.14.1...v1.15.0) (2022-01-03)
 
 
