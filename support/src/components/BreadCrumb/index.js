@@ -4,9 +4,9 @@ import Link from "next/link";
 
 const Breadcrumb = ({ parents, path }) => {
   return (
-    <div id="breadcrumb" className="py-2 text-sm font-normal flex-shrink-0 w-full bg-snu-purple-900">
+    <div id="breadcrumb" className="text-sm font-normal flex-shrink-0 w-full bg-snu-purple-900">
       <ul>
-        <Crumb href={path}>
+        <Crumb href={path} className="root">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
@@ -16,8 +16,8 @@ const Breadcrumb = ({ parents, path }) => {
             />
           </svg>
         </Crumb>
-        {parents.map(({ _id, slug, title }) => (
-          <Crumb key={_id} href={`${path}/${slug}`}>
+        {parents.map(({ _id, slug, title }, index) => (
+          <Crumb key={_id} href={`${path}/${slug}`} index={index}>
             {title}
           </Crumb>
         ))}
@@ -26,10 +26,19 @@ const Breadcrumb = ({ parents, path }) => {
   );
 };
 
-const Crumb = ({ href, children }) => (
-  <Link href={href} passHref>
-    <a href="#">{children}</a>
-  </Link>
+const Crumb = ({ href, children, index }) => (
+  <>
+    <Link href={href} passHref>
+      <a href="#" style={{ marginLeft: `${index + 0.5}rem` }} id="mobile">
+        {children}
+      </a>
+    </Link>
+    <Link href={href} passHref>
+      <a href="#" id="desktop">
+        {children}
+      </a>
+    </Link>
+  </>
 );
 
 export default Breadcrumb;

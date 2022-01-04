@@ -27,7 +27,7 @@ const Wrapper = ({ children }) => {
   return (
     <div className="flex flex-col w-full min-h-screen">
       <header className="flex-none bg-white">
-        <div className="flex flex-wrap items-center gap-4 lg:gap-8 wrapper">
+        <div className="flex flex-wrap items-center gap-4 lg:gap-8 py-4 mr-auto ml-auto px-8 max-w-screen-95">
           <div className="flex-none w-auto lg:w-1/6">
             <Link href="/">
               <img className="cursor-pointer w-9 h-9" src="/assets/logo-snu.png" alt="" />

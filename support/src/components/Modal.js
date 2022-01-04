@@ -10,7 +10,14 @@ const Modal = ({ children, isOpen, onRequestClose, fullScreen, closeButton, clas
       overlayClassName="bg-opacity-75	z-50 bg-black flex w-screen h-screen fixed inset-0 items-center justify-center"
       shouldCloseOnOverlayClick
       shouldCloseOnEsc
+      shouldFocusAfterRender={false}
       onRequestClose={onRequestClose}
+      onAfterOpen={() => {
+        document.getElementById("__next").style.overflow = "hidden";
+      }}
+      onAfterClose={() => {
+        document.getElementById("__next").style.overflow = "visible";
+      }}
     >
       {children}
       {closeButton ? (

@@ -8,6 +8,26 @@ module.exports = {
   },
   darkMode: false, // or 'media' or 'class'
   theme: {
+    minWidth: {
+      0: "0",
+      "1/4": "265px",
+      "1/2": "50%",
+      "3/4": "75%",
+      full: "100%",
+    },
+    screens: {
+      sm: "300px",
+      // => @media (min-width: 300px) { ... }
+      smmd: "351px",
+
+      md: "768px",
+
+      lg: "1024px",
+
+      xl: "1280px",
+
+      "2xl": "1536px",
+    },
     extend: {
       boxShadow: {
         one: "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px",
@@ -22,6 +42,7 @@ module.exports = {
         "snu-purple-800": "#3830a9",
         "snu-purple-600": "#43389b",
         "snu-purple-300": "#5145cc",
+        "snu-purple-200": "#4F46E5",
         "snu-purple-100": "#C7D2FE",
         warmGray: colors.warmGray,
         trueGray: colors.trueGray,
