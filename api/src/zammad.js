@@ -13,6 +13,7 @@ const ROLE = {
   VOLONTAIRE: 4, // volontaire
   REFERENT: 5, // referent
   STRUCTURE: 6,
+  VISITOR: 7,
 };
 
 // const ORGANISATION = {
@@ -54,6 +55,9 @@ async function sync(doc, { force } = { force: false }) {
     } else if (doc.role === "responsible" || doc.role === "supervisor") {
       role = ROLE.STRUCTURE;
       note = `<a href=${`https://admin.snu.gouv.fr/user/${doc._id}`}>Profil responsable</a>`;
+    } else if (doc.role === "visitor") {
+      role = ROLE.VISITOR;
+      note = `<a href=${`https://admin.snu.gouv.fr/user/${doc._id}`}>Profil visiteur</a>`;
     } else if (doc.role === "admin") {
       role = ROLE.ADMIN;
     } else if (!["referent_department", "referent_region", "responsible", "supervisor", "admin"].includes(doc.role)) {
