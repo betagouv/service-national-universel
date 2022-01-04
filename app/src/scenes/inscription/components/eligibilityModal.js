@@ -4,26 +4,32 @@ import styled from "styled-components";
 //import Modal from "./modal";
 import { Formik, Field } from "formik";
 import close from "../../../assets/cancel.png";
+import logo from "../../../assets/logo-snu.png";
+import tick from "../../../assets/tick.svg";
+import cross from "../../../assets/cross.png";
 
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 import { ModalContainer } from "../../../components/modals/Modal";
+import Note from "../../../components/Note";
 
 export default function EligibilityModal({ onChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isEligible, setIsEligible] = useState(null);
+  const [isEligible, setIsEligible] = useState(false);
+  const [display, setDisplay] = useState(false);
 
   return (
     <>
       <Modal centered isOpen={isOpen} toggle={onChange}>
         <Container>
-          <div>
-            <h2>Vérifiez rapidement votre éligibilité</h2>
+          <Header>
+            <img src={logo} />
+            <h4>Vérifiez rapidement votre éligibilité</h4>
             <p>Renseignez les informations ci-dessous</p>
-          </div>
+          </Header>
           <Form>
-            <img src={close} onClick={() => setIsOpen(false)} />
+            <img src={close} className="close_icon" onClick={() => setIsOpen(false)} />
             <Formik
               initialValues={{ birthDate: "", school: false, schoolLevel: "", address: "" }}
               validateOnChange={false}
@@ -31,11 +37,12 @@ export default function EligibilityModal({ onChange }) {
               onSubmit={async (values) => {
                 try {
                   setLoading(true);
-                  const { birthDate, schoolLevel, address } = values;
+                  let { birthDate, schoolLevel, address, school } = values;
+                  if (!school) schoolLevel = "";
                   let sessions = [
                     {
                       month: "Février",
-                      excludedGrade: ["3eme", "1ere", "Terminale", "Terminale CAP"],
+                      excludedGrade: ["3ème", "1ère", "Terminale", "Terminale CAP"],
                       // exclude all DOM-TOMs
                       excludedZip: ["971", "972", "973", "974", "975", "976", "978", "984", "986", "987", "988"],
                       includedBirthdate: { begin: "2004-02-26", end: "2007-02-12" },
@@ -64,7 +71,7 @@ export default function EligibilityModal({ onChange }) {
                     },
                   ].filter((el) => {
                     if (el.excludedGrade.includes(schoolLevel)) return false;
-                    else if (el.excludedZip.some((e) => new RegExp(`^${e}`).test(address))) return false;
+                    else if (el.excludedZip.some((e) => address.includes(e))) return false;
                     else if (
                       new Date(el.includedBirthdate.begin).getTime() <= new Date(birthDate).getTime() &&
                       new Date(birthDate).getTime() <= new Date(el.includedBirthdate.end).getTime()
@@ -73,9 +80,9 @@ export default function EligibilityModal({ onChange }) {
                     }
                     return false;
                   });
-                  console.log("SESSIONS", sessions.length);
-                  setIsEligible(!!sessions.length);
                   setLoading(false);
+                  setIsEligible(!!sessions.length);
+                  setDisplay(true);
                 } catch (e) {
                   console.log(e);
                 }
@@ -95,7 +102,7 @@ export default function EligibilityModal({ onChange }) {
                     touched={touched}
                     rows="2"
                   />
-                  <Checkbox>
+                  <CheckboxContainer>
                     <Field
                       type="checkbox"
                       className="checkbox_input"
@@ -107,7 +114,7 @@ export default function EligibilityModal({ onChange }) {
                       onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? true : false } })}
                     />
                     <Label className="checkbox_label">Je suis toujours scolarisé</Label>
-                  </Checkbox>
+                  </CheckboxContainer>
                   {values.school && (
                     <Item
                       name="schoolLevel"
@@ -134,14 +141,40 @@ export default function EligibilityModal({ onChange }) {
                   <LoadingButton loading={loading} type="submit" style={{ margin: "1.5rem auto 0 auto", width: "93%" }} onClick={handleSubmit} disabled={isSubmitting}>
                     Vérifier
                   </LoadingButton>
-                  {isEligible ? null : <p>NOPE</p>}
+                  {isEligible && display ? (
+                    <Note
+                      title="Félicitations, vous êtes bien éligible au SNU."
+                      text="Vous pouvez donc procéder à l'inscription."
+                      textLink="Commencer l’inscription ›"
+                      link="https://inscription.snu.gouv.fr/inscription/profil"
+                      icon={tick}
+                      backgroundColor="#ECFDF5"
+                      titleColor="#065F46"
+                      textColor="#047857"
+                      linkColor="#065F46"
+                    />
+                  ) : null}
+                  {!isEligible && display ? (
+                    <Note
+                      title="Malheureusement, vous n'êtes pas éligible au SNU."
+                      text="Vous pouvez découvrir d'autres formes d'engagement en "
+                      textLink="cliquant ici."
+                      link="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/7-les-autres-formes-d-engagement"
+                      icon={cross}
+                      backgroundColor="#FEF2F2"
+                      titleColor="#991B1B"
+                      textColor="#B91C1C"
+                      linkColor="#991B1B"
+                      linkInText={true}
+                    />
+                  ) : null}
                 </>
               )}
             </Formik>
           </Form>
         </Container>
       </Modal>
-      <button onClick={() => setIsOpen(true)}>Vérifier mon éligibilité</button>
+      <ModalButton onClick={() => setIsOpen(true)}>Vérifier votre éligibilité</ModalButton>
     </>
   );
 }
@@ -171,6 +204,29 @@ const Item = ({ title, subTitle, name, value, handleChange, errors, touched, val
   );
 };
 
+const ModalButton = styled.button`
+  background: transparent;
+  border: 0.1rem solid #32257f;
+  height: 3rem;
+  width: 18rem;
+  color: #32257f;
+  border-radius: 60px;
+`;
+
+const Header = styled.header`
+  text-align: center;
+  img {
+    width: 3rem;
+  }
+  h4 {
+    margin-top: 1rem;
+  }
+  p {
+    color: #6b7280;
+    margin: 0;
+  }
+`;
+
 const Label = styled.div`
   color: #374151;
   font-weight: 600;
@@ -186,16 +242,23 @@ const Subtitle = styled.p`
 
 const Form = styled.div`
   display: flex;
-  padding: 2rem;
   flex-direction: column;
   margin: 0 auto;
   width: 100%;
   @media (max-width: 767px) {
     width: 100%;
   }
+  .close_icon {
+    cursor: pointer;
+    position: absolute;
+    height: 1.5rem;
+    width: 1.5rem;
+    top: 1.5rem;
+    right: 1.5rem;
+  }
 `;
 
-const Checkbox = styled.section`
+const CheckboxContainer = styled.section`
   display: flex;
   padding: 1rem 1rem 0 1rem;
   align-items: baseline;
@@ -207,13 +270,5 @@ const Checkbox = styled.section`
 
 const Container = styled(ModalContainer)`
   position: relative;
-  padding: 1rem;
-  img {
-    cursor: pointer;
-    position: absolute;
-    height: 1.5rem;
-    width: 1.5rem;
-    top: 1.5rem;
-    right: 1.5rem;
-  }
+  padding: 2rem;
 `;

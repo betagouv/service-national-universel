@@ -31,8 +31,10 @@ export default function DesktopView() {
         </section>
       </div>
       <Points backgroundColor="#fff">
-        <div className="points-title">Conditions d&apos;inscription</div>
-        <EligibilityModal />
+        <TitleContainer>
+          <div className="points-title">Conditions d&apos;inscription</div>
+          <EligibilityModal />
+        </TitleContainer>
         <div className="first_container">
           <FirstSection>
             <div className="section_conditions">
@@ -213,6 +215,13 @@ const Wrapper = styled.div`
   @media (max-width: 767px) {
     display: none;
   }
+`;
+
+const TitleContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 1.5rem;
 `;
 
 const FAQ = styled.a`
