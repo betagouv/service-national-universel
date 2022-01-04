@@ -60,7 +60,7 @@ async function sync(doc, { force } = { force: false }) {
       note = `<a href=${`https://admin.snu.gouv.fr/user/${doc._id}`}>Profil visiteur</a>`;
     } else if (doc.role === "admin") {
       role = ROLE.ADMIN;
-    } else if (!["referent_department", "referent_region", "responsible", "supervisor", "admin"].includes(doc.role)) {
+    } else if (doc.role && !["referent_department", "referent_region", "responsible", "supervisor", "admin", "visitor"].includes(doc.role)) {
       console.log("NO AUTHORIZED ROLE");
       return;
     } else if (!doc.role) {
