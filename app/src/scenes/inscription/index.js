@@ -63,7 +63,12 @@ export default function Index() {
 
   // if it is a young from the 2022 february cohort, they are not WAITING_VALIDATION or WAITING_CORRECTION, they cant access to the inscription
   if (young?.cohort === "Février 2022" && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young?.status)) {
-    return <Redirect to={{ pathname: "/" }} />;
+    return (
+      <Switch>
+        <Route path="/inscription/desistement" component={Desistement} />
+        <Route path="/inscription" component={Home} />
+      </Switch>
+    );
   }
 
   return (
