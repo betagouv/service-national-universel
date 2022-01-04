@@ -20,4 +20,4 @@ Lancer la commande `npm run dev` pour accéder à l'application via l'URL `http:
 
 > En miroir, la startup d’Etat construit une interface de gestion permettant aux structures proposant les missions d’intérêt général de déposer des offres de missions et de les gérer et aux coordinateurs du service national universel (réseau de référents départementaux et régionaux) de se décharger des process administratifs afin de pouvoir être plus disponibles pour appuyer les jeunes qui en expriment le besoin.
 
-Source: https://beta.gouv.fr/startups/engagement-civique.html
+Source: https://beta.gouv.fr/startups/engagement-civique.html.
