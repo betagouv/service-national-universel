@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { translate, ROLES, getDepartmentNumber } from "../../../utils";
+import { translate, getDepartmentNumber, canCreateOrUpdateCohesionCenter } from "../../../utils";
 import { Box } from "../../../components/box";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
@@ -18,7 +18,7 @@ export default function Details({ center }) {
             <h4>
               <strong>Centre</strong> <span style={{ color: "#9C9C9C" }}>#{center._id}</span>
             </h4>
-            {user.role === ROLES.ADMIN ? (
+            {canCreateOrUpdateCohesionCenter(user) ? (
               <div style={{ flexBasis: "0" }}>
                 <Link to={`/centre/${center._id}/edit`}>
                   <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />
