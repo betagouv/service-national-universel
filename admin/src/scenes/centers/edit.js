@@ -96,7 +96,7 @@ export default function Edit(props) {
                       value={values.cohorts}
                       onChange={handleChange}
                       name="cohorts"
-                      options={["Juillet 2022", "Juin 2022", "Février 2022", "2021", "2020", "2019"]}
+                      options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
                       placeholder="Sélectionner un ou plusieurs séjour de cohésion"
                     />
                   </BoxContent>

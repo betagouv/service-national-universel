@@ -7,7 +7,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter } from "../../utils";
 import VioletButton from "../../components/buttons/VioletButton";
 import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
@@ -87,7 +87,7 @@ export default function List() {
                   });
                 }}
               />
-              {user.role === ROLES.ADMIN ? (
+              {canCreateOrUpdateCohesionCenter(user) ? (
                 <Link to={`/centre/nouveau`}>
                   <VioletButton>
                     <p>Créer un nouveau centre</p>

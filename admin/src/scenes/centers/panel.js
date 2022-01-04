@@ -4,7 +4,7 @@ import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate, ROLES } from "../../utils";
+import { translate, ROLES, canCreateOrUpdateCohesionCenter } from "../../utils";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import api from "../../services/api";
@@ -45,7 +45,7 @@ export default function PanelCenter({ onChange, center }) {
           <Link to={`/centre/${center._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
-          {user.role === ROLES.ADMIN ? (
+          {canCreateOrUpdateCohesionCenter(user) ? (
             <Link to={`/centre/${center._id}/edit`}>
               <PanelActionButton icon="pencil" title="Modifier" />
             </Link>
