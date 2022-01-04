@@ -60,3 +60,24 @@ export const adminArticles = [
     url: "https://support.snu.gouv.fr/help/fr-fr/3-volontaire/3-livret-d-accueil-volontaire",
   },
 ];
+
+export const visitorArticles = [
+  {
+    title: "Les phases du SNU",
+    emoji: "🏷️",
+    body: "Phase 0 : Les inscriptions. Les jeunes de 15 à 17 ans qui souhaitent...",
+    url: "https://support.snu.gouv.fr/help/fr-fr/1-referent/72-les-phases-du-snu",
+  },
+  {
+    title: "Phase 1 : l'organisation du séjour de cohésion",
+    emoji: "🌲",
+    body: "Lorsque l'inscription du volontaire est validée...",
+    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/169-phase-1-l-organisation-du-sejour-de-cohesion",
+  },
+  {
+    title: "Les status Phase 2 des volontaires",
+    emoji: "🚩",
+    body: "En attente de validation : La candidature...",
+    url: "https://support.snu.gouv.fr/help/fr-fr/2-responsable-de-structure/75-les-statuts-phase-2-des-volontaires",
+  },
+];

@@ -12,7 +12,7 @@ import { ticketStateNameById, colors, translateState } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
-import { referentArticles, adminArticles, structureArticles } from "./articles";
+import { referentArticles, adminArticles, structureArticles, visitorArticles } from "./articles";
 
 const Dashboard = () => {
   const [userTickets, setUserTickets] = useState(null);
@@ -26,6 +26,8 @@ const Dashboard = () => {
       setArticles(structureArticles);
     } else if (user.role === "referent_department" || user.role === "referent_region") {
       setArticles(referentArticles);
+    } else if (user.role === "visitor") {
+      setArticles(visitorArticles);
     } else {
       setArticles(adminArticles);
     }
