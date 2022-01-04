@@ -362,9 +362,6 @@ router.post("/sessionphase1/:action(_msearch|export)", passport.authenticate(["r
     const { user, body } = req;
     let filter = [];
 
-    if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
-    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
-
     if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
