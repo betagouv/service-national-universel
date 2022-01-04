@@ -313,18 +313,6 @@ router.get("/all", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-// this is to build static files from next-js
-router.get("/all-slugs", async (req, res) => {
-  try {
-    const data = await KnowledgeBaseObject.find({ allowedRoles: "public" });
-
-    return res.status(200).send({ ok: true, data: data.map((item) => item.slug) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
 // this is a middleware to set proper role and then filter knowledge-base by allowed role
 const setAllowedRoleMiddleWare = async (req, res, next) => {
   try {
@@ -389,7 +377,7 @@ router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWar
     existingKb.parents = parents;
 
     if (existingKb.type === "section") {
-      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id })
+      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id, allowedRoles: req.allowedRole })
         .sort({ type: -1, position: 1 })
         .populate({ path: "author", select: "_id firstName lastName role" })
         .lean(); // to json;

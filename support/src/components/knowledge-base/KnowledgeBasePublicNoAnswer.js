@@ -24,7 +24,10 @@ const KnowledgeBasePublicNoAnswer = () => {
         </div>
       </Modal>
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={(e) => {
+          e.preventDefault();
+          setIsOpen(true);
+        }}
         className="mx-2 bg-white hover:shadow-sm text-snu-purple-200 my-[70px] text-base font-normal shadow-base rounded-md border-0 py-3.5 px-5 smmd:mx-auto"
       >
         Je n’ai pas trouvé réponse à ma question

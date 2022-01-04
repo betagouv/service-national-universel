@@ -1,10 +1,10 @@
 import Wrapper from "../Wrapper";
 import { useMemo } from "react";
-import Loader from "react-loader-spinner";
 import Breadcrumb from "../BreadCrumb";
 import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import KnowledgeBasePublicArticle from "./KnowledgeBasePublicArticle";
+import Loader from "../Loader";
 
 const KnowledgeBasePublicContent = ({ item, isLoading }) => {
   const group = useMemo(() => {
@@ -13,7 +13,7 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
 
   return (
     <Wrapper>
-      <div className="flex flex-col">
+      <div className="flex flex-col min-h-screen md:min-h-full">
         <div className="bg-snu-purple-900 ">
           <div className="h-full wrapper">
             <Breadcrumb parents={item?.parents || []} path="/base-de-connaissance" />
@@ -25,15 +25,15 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
           </div>
         </div>
         {!item || isLoading ? (
-          <Loader />
+          <Loader className="mt-auto h-full border-2 flex-grow" />
         ) : (
           <>
             {item.type === "article" && <KnowledgeBasePublicArticle item={item} />}
             {item.type === "section" && <KnowledgeBasePublicSection item={item} />}
+            <KnowledgeBasePublicNoAnswer />
           </>
         )}
       </div>
-      <KnowledgeBasePublicNoAnswer />
     </Wrapper>
   );
 };
