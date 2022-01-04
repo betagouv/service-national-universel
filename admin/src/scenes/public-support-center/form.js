@@ -78,7 +78,7 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
               value={values.department}
               handleChange={handleChange}
               title="Département"
-              options={departmentList.map((d) => ({ value: d, label: d }))}
+              options={departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label))}
               errors={errors}
               touched={touched}
             />
