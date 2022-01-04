@@ -28,7 +28,7 @@ import {
 } from "../../utils";
 import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL", "COHORT", "PPS", "PAI", "QPV", "HANDICAP", "ZRR", "GRADE", "ACADEMY"];
+const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL", "COHORT", "PPS", "PAI", "QPV", "HANDICAP", "ZRR", "GRADE", "ACADEMY", "COUNTRY"];
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Badge from "../../components/Badge";
@@ -185,6 +185,20 @@ export default function Inscription() {
 
               <FilterRow visible={filterVisible}>
                 <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Pays"
+                  componentId="COUNTRY"
+                  dataField="country.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COUNTRY") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <MultiDropdownList
