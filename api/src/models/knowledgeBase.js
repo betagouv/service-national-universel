@@ -56,7 +56,13 @@ const Schema = new mongoose.Schema(
     content: {
       type: {},
       documentation: {
-        description: "Contenu d'un article",
+        description: "Contenu d'un article dans un format lisible par Slate.js",
+      },
+    },
+    contentAsText: {
+      type: String,
+      documentation: {
+        description: "Contenu d'un article en texte pur pour être requêté par elastic search",
       },
     },
     description: {

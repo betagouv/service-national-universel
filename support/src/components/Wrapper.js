@@ -5,6 +5,7 @@ import { appURL, supportURL } from "../config";
 import useUser from "../hooks/useUser";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
+import Search from "./Search";
 
 const Wrapper = ({ children }) => {
   const { user } = useUser();
@@ -34,14 +35,11 @@ const Wrapper = ({ children }) => {
             </Link>
           </div>
           <div className="order-3 w-full md:order-2 md:flex-1 md:w-1/2">
-            <div className="relative flex items-center w-full">
-              <input
-                className="pl-10 py-2.5 w-full pr-3 text-gray-500 transition-colors focus:outline-none text-sm border rounded-md border-gray-300 focus:border-gray-400"
-                type="text"
-                placeholder="Comment pouvons-nous vous aider ?"
-              />
-              <span className="material-icons absolute text-xl text-gray-400 left-3">search</span>
-            </div>
+            <Search
+              path="/base-de-connaissance"
+              showNoAnswerButton
+              noAnswer="Nous ne trouvons pas d'article correspondant à votre recherche... 😢 Vous pouvez essayer avec d'autres mots clés ou cliquer sur le bouton ci-dessous"
+            />
           </div>
           {isLoggedIn ? (
             <Popover className="relative flex justify-end flex-1 order-2 w-auto md:flex-none lg:w-1/3">
