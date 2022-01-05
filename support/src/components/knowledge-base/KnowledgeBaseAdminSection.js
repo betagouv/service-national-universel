@@ -70,14 +70,14 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
               <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="article" />
             </h3>
             <div ref={gridAnswersRef} id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
-              {answers.map((answer) => (
+              {answers.map((article) => (
                 <KnowledgeBaseArticleCard
-                  key={answer._id}
-                  _id={answer._id}
-                  position={answer.position}
-                  title={answer.title}
-                  slug={answer.slug}
-                  allowedRoles={answer.allowedRoles}
+                  key={article._id}
+                  _id={article._id}
+                  position={article.position}
+                  title={article.title}
+                  slug={article.slug}
+                  allowedRoles={article.allowedRoles}
                   path="/admin/knowledge-base"
                 />
               ))}

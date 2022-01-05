@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Modal from "../Modal";
 
-const KnowledgeBasePublicNoAnswer = () => {
+const KnowledgeBasePublicNoAnswer = ({ className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -28,7 +28,7 @@ const KnowledgeBasePublicNoAnswer = () => {
           e.preventDefault();
           setIsOpen(true);
         }}
-        className="mx-2 bg-white hover:shadow-sm text-snu-purple-200 my-[70px] text-base font-normal shadow-base rounded-md border-0 py-3.5 px-5 smmd:mx-auto"
+        className={`mx-2 bg-white hover:shadow-sm text-snu-purple-200 my-[70px] text-base font-normal shadow-base rounded-md border-0 py-3.5 px-5 smmd:mx-auto ${className}`}
       >
         Je n’ai pas trouvé réponse à ma question
       </button>

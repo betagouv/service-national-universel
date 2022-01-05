@@ -6,6 +6,7 @@ const { ROLES } = require("snu-lib/roles");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 
+const esClient = require("../es");
 const config = require("../config");
 const { capture } = require("../sentry");
 const KnowledgeBaseObject = require("../models/knowledgeBase");
@@ -136,6 +137,25 @@ const getSlug = async (title) => {
   return newSlug;
 };
 
+const getContentAsText = (content) => {
+  const getTextFromElement = (element, strings) => {
+    for (const key of Object.keys(element)) {
+      if (["text", "url"].includes(key)) strings.push(element[key].trim());
+      if (["children"].includes(key)) {
+        for (const childElement of element[key]) {
+          getTextFromElement(childElement, strings);
+        }
+      }
+    }
+  };
+  return content
+    .reduce((strings, element) => {
+      getTextFromElement(element, strings);
+      return strings;
+    }, [])
+    .join(" ");
+};
+
 router.post("/picture", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
@@ -198,7 +218,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (req.body.hasOwnProperty("keywords")) kb.keywords = req.body.keywords;
     if (req.body.hasOwnProperty("zammadId")) kb.zammadId = req.body.zammadId;
     if (req.body.hasOwnProperty("zammadParentId")) kb.zammadParentId = req.body.zammadParentId;
-    if (req.body.hasOwnProperty("content")) kb.content = req.body.content;
+    if (req.body.hasOwnProperty("content")) {
+      kb.content = req.body.content;
+      kb.contentAsText = getContentAsText(req.body.content);
+    }
 
     const newKb = await KnowledgeBaseObject.create(kb);
 
@@ -261,7 +284,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (req.body.hasOwnProperty("icon")) updateKb.icon = req.body.icon;
     if (req.body.hasOwnProperty("group")) updateKb.group = req.body.group;
     if (req.body.hasOwnProperty("keywords")) updateKb.keywords = req.body.keywords;
-    if (req.body.hasOwnProperty("content")) updateKb.content = req.body.content;
+    if (req.body.hasOwnProperty("content")) {
+      updateKb.content = req.body.content;
+      updateKb.contentAsText = getContentAsText(req.body.content);
+    }
     if (req.body.hasOwnProperty("description")) updateKb.description = req.body.description;
     if (req.body.hasOwnProperty("allowedRoles")) {
       updateKb.allowedRoles = req.body.allowedRoles;
@@ -360,6 +386,51 @@ const setAllowedRoleMiddleWare = async (req, res, next) => {
     next(e);
   }
 };
+
+router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMiddleWare, async (req, res) => {
+  try {
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html#multi-match-types
+    const response = await esClient.search({
+      index: "knowledgebase",
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                multi_match: {
+                  query: req.query.search,
+                  fields: ["title^3", "contentAsText"],
+                },
+              },
+            ],
+            filter: [
+              {
+                term: { "allowedRoles.keyword": req.allowedRole },
+              },
+            ],
+          },
+        },
+        size: 1000,
+      },
+    });
+    const hitsWithContent = await KnowledgeBaseObject.find({ _id: response.body.hits.hits.map((hit) => hit._id) });
+    return res.status(200).send({ ok: true, data: response.body.hits.hits.map((hit) => hitsWithContent.find((hitWithContent) => hitWithContent._id.equals(hit._id))) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+
+  // reset and redo es indexing
+  // (async () => {
+  //   let i = 0;
+  //   for await (const doc of KnowledgeBaseObject.find([{ $sort: { _id: 1 } }]).cursor()) {
+  //     await doc.index();
+  //     if (i % 100 === 0) console.log(i, doc._id);
+  //     i++;
+  //   }
+  //   console.log("DONE");
+  // })();
+});
 
 // this is for the public-access part of the knowledge base (not the admin part)
 router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWare, async (req, res) => {
