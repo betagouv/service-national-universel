@@ -75,29 +75,29 @@ const Wrapper = ({ children }) => {
       <footer className="flex flex-col gap-6 wrapper bg-white">
         <div className="flex flex-col gap-6 wrapper">
           <div className="flex flex-col items-center gap-4 md:flex-row">
-            <Link href="#">
+            {/* <Link href="#">
               <span className="text-[#6A6A6A] text-xs cursor-pointer">Plan du site</span>
             </Link>
+            <span className="text-[#E5E5E5] text-base hidden md:block">|</span> */}
+            <Link href="https://www.snu.gouv.fr/">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer">SNU</span>
+            </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
-            <Link href="#">
+            <Link href="https://www.snu.gouv.fr/accessibilite-du-site-24">
               <span className="text-[#6A6A6A] text-xs cursor-pointer">Accessibilité</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
-            <Link href="#">
+            <Link href="https://www.snu.gouv.fr/mentions-legales-10">
               <span className="text-[#6A6A6A] text-xs cursor-pointer">Mentions légales</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
-            <Link href="#">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer">Données personnelles</span>
-            </Link>
-            <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
-            <Link href="#">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer">Gestion des cookies</span>
+            <Link href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer">Données personnelles et cookies</span>
             </Link>
           </div>
           <span className="text-[#6A6A6A] text-xs text-center inline md:text-left gap-1">
             Sauf mention contraire, tous les textes de ce site sont sous{" "}
-            <a className="inline-flex items-center gap-0.5" href="#">
+            <a className="inline-flex items-center gap-0.5" href="https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf">
               <span className="underline cursor-pointer">licence etatlab-2.0</span>
               <span className="material-icons text-[#666666] text-base">open_in_new</span>
             </a>
