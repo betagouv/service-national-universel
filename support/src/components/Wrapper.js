@@ -38,7 +38,7 @@ const Wrapper = ({ children }) => {
             <Search
               path="/base-de-connaissance"
               showNoAnswerButton
-              noAnswer="Nous ne trouvons pas d'article correspondant à votre recherche... 😢 Vous pouvez essayer avec d'autres mots clés ou cliquer sur le bouton ci-dessous"
+              noAnswer="Nous ne trouvons pas d'article correspondant à votre recherche... 😢 Vous pouvez essayer avec d'autres mots clés ou cliquez sur le bouton ci-dessous"
             />
           </div>
           {isLoggedIn ? (

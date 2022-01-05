@@ -3,6 +3,7 @@ import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import Loader from "../../components/Loader";
 import { useEffect, useState } from "react";
+import Head from "next/head";
 
 const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
   const [showLoading, setShowLoading] = useState(true);
@@ -11,6 +12,9 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
   }, [isLoading]);
   return (
     <Wrapper>
+      <Head>
+        <title>SNU - Base de connaissance</title>
+      </Head>
       <div className="grid grid-cols-1 grid-rows-[auto,180px,auto]">
         <div className="row-span-2 row-start-1 bg-center bg-cover col-span-full" style={{ backgroundImage: `url('/assets/hero.png')` }}>
           <div className="bg-snu-purple-900 bg-opacity-95 h-full">

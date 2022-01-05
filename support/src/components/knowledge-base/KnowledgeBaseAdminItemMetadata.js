@@ -143,9 +143,14 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
     <>
       <aside className={`flex-grow-0 flex-shrink-0 border-l-2 shadow-lg z-10 resize-x dir-rtl overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
         <form onSubmit={onSubmit} className="flex-grow-0 flex-shrink-0  px-4 py-6 flex flex-col w-full overflow-scroll h-full dir-ltr items-start" key={item._id}>
-          <label className="mb-5" htmlFor="description">
-            <b>Nombre de vues:</b> {item.read}
-          </label>
+          <p className="mb-5">
+            <em>Nombre de vues: {item.read}</em>
+            <br />
+            <em>
+              Dernière modification:{" "}
+              {Intl.DateTimeFormat("fr-FR", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(item.updatedAt))}
+            </em>
+          </p>
           <label className="font-bold" htmlFor="title">
             Titre
           </label>

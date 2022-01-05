@@ -98,7 +98,6 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
     // This lets the user step into and out of the inline without stepping over characters.
     // You may wish to customize this further to only use unit:'offset' in specific cases.
     if (event.key === "Enter" && event.shiftKey === true) {
-      console.log("SOFT ");
       event.preventDefault();
       editor.insertText("\n");
       return;
@@ -125,8 +124,6 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
       }
     }
   };
-
-  console.log(value);
 
   return (
     <>
@@ -383,27 +380,15 @@ const Image = ({ attributes, children, element, readOnly }) => {
         <img
           src={element.url}
           alt={element.alt}
-          onMouseEnter={() => {
-            console.log("plaf");
-            setShowDelete(true);
-          }}
-          onMouseLeave={() => {
-            console.log("plaf");
-            setShowDelete(false);
-          }}
+          onMouseEnter={() => setShowDelete(true)}
+          onMouseLeave={() => setShowDelete(false)}
           className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`}
         />
         {!readOnly && !!showDelete && (
           <TextEditorButton
             active
-            onMouseEnter={() => {
-              console.log("plaf");
-              setShowDelete(true);
-            }}
-            onMouseLeave={() => {
-              console.log("plaf");
-              setShowDelete(false);
-            }}
+            onMouseEnter={() => setShowDelete(true)}
+            onMouseLeave={() => setShowDelete(false)}
             onClick={() => {
               const path = ReactEditor.findPath(editor, element);
               Transforms.removeNodes(editor, { at: path });
