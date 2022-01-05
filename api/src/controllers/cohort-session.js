@@ -103,7 +103,7 @@ router.post("/eligibility/2022", async (req, res) => {
   let sessions = [
     {
       month: "Février",
-      excludedGrade: ["3ème", "1ère", "Terminale", "Terminale CAP"],
+      excludedGrade: ["3eme", "1ere", "Terminale", "Terminale CAP"],
       // exclude all DOM-TOMs
       excludedZip: ["971", "972", "973", "974", "975", "976", "978", "984", "986", "987", "988"],
       includedBirthdate: { begin: "2004-02-26", end: "2007-02-12" },
@@ -114,7 +114,7 @@ router.post("/eligibility/2022", async (req, res) => {
     },
     {
       month: "Juin",
-      excludedGrade: ["3ème", "1ère", "Terminale", "Terminale CAP"],
+      excludedGrade: ["3eme", "1ere", "Terminale", "Terminale CAP"],
       excludedZip: [],
       includedBirthdate: { begin: "2004-06-25", end: "2007-06-11" },
       stringDate: "12 au 24 juin 2022",

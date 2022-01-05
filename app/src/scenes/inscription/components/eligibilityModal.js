@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Modal, Col } from "reactstrap";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
@@ -15,26 +15,15 @@ import Note from "../../../components/Note";
 import { departmentList, translate } from "../../../utils";
 
 const levels = [
-  {
-    value: "3ème",
-    label: "3ème",
-  },
-  {
-    value: "Seconde",
-    label: "Seconde",
-  },
-  {
-    value: "1ère",
-    label: "1ère",
-  },
-  {
-    value: "Terminale",
-    label: "Terminale",
-  },
-  {
-    value: "Terminale CAP",
-    label: "Terminale CAP",
-  },
+  { label: "3ème", value: "3eme" },
+  { label: "2nd", value: "2nd" },
+  { label: "1ère", value: "1ere" },
+  { label: "1ère année CAP", value: "1ere CAP" },
+  { label: "Terminale", value: "Terminale" },
+  { label: "Terminale CAP", value: "Terminale CAP" },
+  { label: "SEGPA", value: "SEGPA" },
+  { label: "Classe relais", value: "Classe relais" },
+  { label: "Autre", value: "Autre" },
 ];
 
 export default function EligibilityModal({ onChange }) {
@@ -177,9 +166,6 @@ export default function EligibilityModal({ onChange }) {
 }
 
 const Item = ({ title, subTitle, name, value, values, handleChange, errors, touched, validate, type, options, selectPlaceholder, style, ...props }) => {
-  useEffect(() => {
-    console.log("OPTIONS", options);
-  }, []);
   return (
     <Col style={{ marginTop: "20px", ...style }}>
       <Label>
