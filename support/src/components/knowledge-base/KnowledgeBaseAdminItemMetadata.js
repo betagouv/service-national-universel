@@ -70,7 +70,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
       setIsDeleting(false);
       if (response.error) {
         for (const string of [...response.error.split("\n")].reverse()) {
-          toast.error(string, { autoClose: false, draggable: true, closeOnClick: false });
+          toast.error(string);
         }
         return;
       }
@@ -90,9 +90,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
     const imageRes = await API.uploadFile("/support-center/knowledge-base/picture", event.target.files);
     if (imageRes.code === "FILE_CORRUPTED") {
       setIsSettingImg(false);
-      return toast.error("Le fichier semble corrompu", "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support", {
-        timeOut: 0,
-      });
+      return toast.error("Le fichier semble corrompu", "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support");
     }
     if (!imageRes.ok) return toast.error("Une erreur s'est produite lors du téléversement de votre fichier");
     const response = await API.put({ path: `/support-center/knowledge-base/${item._id}`, body: { imageSrc: imageRes.data } });
