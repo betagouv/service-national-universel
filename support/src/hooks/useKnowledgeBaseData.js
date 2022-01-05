@@ -26,9 +26,9 @@ const useKnowledgeBaseData = ({ debug = false } = {}) => {
 
   const { data: response, mutate } = useSWR(API.getUrl({ path: "/support-center/knowledge-base/all" }));
   // whole tree, from root to all articles with nested children
-  const [tree, setTree] = useState(buildTree(root, response?.data || [], { debug }));
+  const [tree, setTree] = useState(() => buildTree(root, response?.data || [], { debug }));
   // flattened tree as a flat array
-  const [flattenedData, setFlattenedData] = useState(response?.data || []);
+  const [flattenedData, setFlattenedData] = useState(() => response?.data || []);
   // whole tree from specific section
   const [item, setItem] = useState(() => {
     const initItemTree = buildItemTree(slug, flattenedData, tree, debug);
@@ -39,7 +39,7 @@ const useKnowledgeBaseData = ({ debug = false } = {}) => {
       return initItemTree;
     }
   });
-  const [parent, setParent] = useState(flattenedData.find((i) => i._id === item.parentId) || null);
+  const [parent, setParent] = useState(() => flattenedData.find((i) => i._id === item.parentId) || null);
 
   useEffect(() => {
     setFlattenedData(response?.data || []);

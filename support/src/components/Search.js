@@ -12,14 +12,21 @@ const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAns
   const [search, setSearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [items, setItems] = useState([]);
+  const [hideItems, setHideItems] = useState(false);
 
   const searchTimeout = useRef(null);
   useEffect(() => {
     if (search.length > 0 && !isSearching) setIsSearching(true);
-    if (!search.length && !!isSearching) setIsSearching(false);
+    if (!search.length) {
+      setIsSearching(false);
+      setSearch("");
+      clearTimeout(searchTimeout.current);
+      setItems([]);
+    }
     clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(async () => {
       setIsSearching(true);
+      setHideItems(false);
       const response = await API.getasync({ path: `/support-center/knowledge-base/${restriction || user.restriction}/search`, query: { search } });
       setIsSearching(false);
       if (response.ok) {
@@ -34,7 +41,7 @@ const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAns
 
   const router = useRouter();
   useEffect(() => {
-    setItems([]);
+    setHideItems(true);
   }, [router?.query?.slug]);
 
   return (
@@ -50,7 +57,7 @@ const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAns
         <span className="material-icons absolute text-xl text-gray-400 left-3">search</span>
       </div>
       <div className="relative flex items-center w-full">
-        {(search.length > 0 || isSearching || items.length) > 0 && (
+        {!hideItems && (search.length > 0 || isSearching || items.length) > 0 && (
           <div className="absolute w-full top-0 left-0 bg-white max-h-80 overflow-auto z-20">
             {search.length > 0 && isSearching && !items.length && <Loader size={20} className="my-4" />}
             {search.length > 0 && !isSearching && !items.length && <span className="block py-2 px-8 text-sm text-black">{noAnswer}</span>}

@@ -9,6 +9,8 @@ import KnowledgeBaseAdminItemCreate from "./KnowledgeBaseAdminItemCreate";
 import Tags from "../Tags";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import Loader from "../Loader";
+import Modal from "../Modal";
+import KnowledgeBasePublicContent from "./KnowledgeBasePublicContent";
 
 const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
   const { mutate } = useKnowledgeBaseData();
@@ -16,6 +18,8 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
   const gridAnswersRef = useRef(null);
   const sortableSections = useRef(null);
   const sortableAnswers = useRef(null);
+
+  const [readOnly, setReadOnly] = useState(false);
 
   const [isSaving, setIsSaving] = useState(false);
   const onListChange = async (list) => {
@@ -52,14 +56,19 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
   return (
     <article className="container bg-coolGray-100 mx-auto flex flex-col flex-grow h-full relative w-full flex-shrink overflow-hidden">
       {!isRoot && (
-        <header className="px-8 py-3 flex flex-col">
-          <h2 className="font-bold text-lg">{section.title}</h2>
-          {!!section.description?.length && <p className="mt-1 text-sm italic">{section.description}</p>}
-          {!!section.allowedRoles?.length && (
-            <p className="flex flex-wrap mt-3.5  text-sm">
-              Visible par: <Tags tags={section.allowedRoles} />
-            </p>
-          )}
+        <header className="px-8 py-3 flex justify-between w-full border-2">
+          <h2 className="font-bold text-lg">
+            {section.title}
+            {!!section.description?.length && <p className="mt-1 text-sm italic">{section.description}</p>}
+            {!!section.allowedRoles?.length && (
+              <p className="font-normal flex flex-wrap mt-3.5 text-sm">
+                Visible par: <Tags tags={section.allowedRoles} />
+              </p>
+            )}
+          </h2>
+          <button type="button" className="my-auto" onClick={() => setReadOnly((r) => !r)}>
+            {!readOnly ? "Prévisualiser" : "Éditer"}
+          </button>
         </header>
       )}
       <main className="flex h-full w-fullmax-w-screen-2xl flex-shrink overflow-y-auto">
@@ -119,6 +128,18 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
           </div>
         )}
       </main>
+      <Modal
+        fullScreen
+        isOpen={readOnly}
+        onRequestClose={() => setReadOnly(false)}
+        closeButton={
+          <button type="button" className="absolute right-2 top-2" onClick={() => setReadOnly((r) => !r)}>
+            {!readOnly ? "Prévisualiser" : "Éditer"}
+          </button>
+        }
+      >
+        <KnowledgeBasePublicContent item={section} />
+      </Modal>
     </article>
   );
 };
