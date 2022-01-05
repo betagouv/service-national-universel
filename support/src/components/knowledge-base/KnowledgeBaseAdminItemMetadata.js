@@ -146,10 +146,12 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
           <p className="mb-5">
             <em>Nombre de vues: {item.read}</em>
             <br />
-            <em>
-              Dernière modification:{" "}
-              {Intl.DateTimeFormat("fr-FR", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(item.updatedAt))}
-            </em>
+            {item?.updatedAt && (
+              <em>
+                Dernière modification:{" "}
+                {Intl.DateTimeFormat("fr-FR", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(item.updatedAt))}
+              </em>
+            )}
           </p>
           <label className="font-bold" htmlFor="title">
             Titre

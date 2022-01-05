@@ -65,14 +65,14 @@ const KnowledgeBase = () => {
           )}
         </div>
       </Header>
-      {isLoading ? (
+      {!item ? (
         <Loader />
       ) : (
         <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
           <aside className={`relative flex flex-col flex-grow-0 flex-shrink-0 border-r-2 shadow-lg z-10 resize-x p-2 overflow-hidden ${treeVisible ? "w-80" : "w-0 hidden"}`}>
             <KnowledgeBaseAdminTree isSortable onClick={(slug) => router.push(`/admin/knowledge-base/${slug || ""}`)} />
           </aside>
-          <Content key={slug} item={item} />
+          {isLoading ? <Loader /> : <Content key={slug} item={item} />}
           {!isRoot && (
             <>
               <KnowledgeBaseAdminItemMetadata key={item?._id} visible={metadataVisible} />
