@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Col } from "reactstrap";
 import styled from "styled-components";
-//import Modal from "./modal";
 import { Formik, Field } from "formik";
 import close from "../../../assets/cancel.png";
 import logo from "../../../assets/logo-snu.png";
@@ -165,7 +164,7 @@ export default function EligibilityModal({ onChange }) {
                     touched={touched}
                     rows="2"
                   />
-                  <LoadingButton loading={loading} type="submit" style={{ margin: "1.5rem auto 0 auto", width: "93%" }} onClick={handleSubmit} disabled={isSubmitting}>
+                  <LoadingButton loading={loading} type="submit" className="submit-button" onClick={handleSubmit} disabled={isSubmitting}>
                     Vérifier
                   </LoadingButton>
                   {isEligible && display ? (
@@ -275,8 +274,15 @@ const Form = styled.div`
   flex-direction: column;
   margin: 0 auto;
   width: 100%;
+  .submit-button {
+    margin: 1.5rem auto 0 auto;
+    width: 93%;
+  }
   @media (max-width: 767px) {
     width: 100%;
+    .submit-button {
+      margin: 0.5rem auto 0 auto;
+    }
   }
   .close_icon {
     cursor: pointer;
