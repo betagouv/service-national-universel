@@ -9,6 +9,7 @@ import KnowledgeBaseAdminSection from "../../../components/knowledge-base/Knowle
 import KnowledgeBaseAdminTree from "../../../components/knowledge-base/KnowledgeBaseAdminTree";
 import Layout from "../../../components/Layout";
 import Loader from "../../../components/Loader";
+import ResizablePanel from "../../../components/ResizablePanel";
 import withAuth from "../../../hocs/withAuth";
 import useKnowledgeBaseData from "../../../hooks/useKnowledgeBaseData";
 
@@ -69,9 +70,11 @@ const KnowledgeBase = () => {
         <Loader />
       ) : (
         <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
-          <aside className={`relative flex flex-col flex-grow-0 flex-shrink-0 border-r-2 shadow-lg z-10 resize-x p-2 overflow-hidden ${treeVisible ? "w-80" : "w-0 hidden"}`}>
-            <KnowledgeBaseAdminTree isSortable onClick={(slug) => router.push(`/admin/knowledge-base/${slug || ""}`)} />
-          </aside>
+          <ResizablePanel className={`relative flex flex-grow-0 flex-shrink-0 z-10  ${treeVisible ? "w-80" : "w-0 hidden"}`} name="admin-knowledge-base-tree" position="left">
+            <div className="relative flex flex-col p-2 overflow-hidden">
+              <KnowledgeBaseAdminTree isSortable onClick={(slug) => router.push(`/admin/knowledge-base/${slug || ""}`)} />
+            </div>
+          </ResizablePanel>
           {isLoading ? <Loader /> : <Content key={slug} item={item} />}
           {!isRoot && (
             <>

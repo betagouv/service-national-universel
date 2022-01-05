@@ -10,6 +10,7 @@ import IconsPicker, { RedIcon } from "../IconsPicker";
 import { Button, CancelButton } from "../Buttons";
 import Modal from "../Modal";
 import Link from "next/link";
+import ResizablePanel from "../ResizablePanel";
 
 const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
   const router = useRouter();
@@ -141,8 +142,12 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
 
   return (
     <>
-      <aside className={`flex-grow-0 flex-shrink-0 border-l-2 shadow-lg z-10 resize-x dir-rtl overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
-        <form onSubmit={onSubmit} className="flex-grow-0 flex-shrink-0  px-4 py-6 flex flex-col w-full overflow-scroll h-full dir-ltr items-start" key={item._id}>
+      <ResizablePanel
+        className={`flex-grow-0 flex-shrink-0 border-l-2 z-10 overflow-hidden flex ${visible ? "w-80" : "w-0 hidden"}`}
+        name="admin-knowledge-base-metadata"
+        position="right"
+      >
+        <form onSubmit={onSubmit} className="flex-grow-0 flex-shrink-0  px-4 py-6 flex flex-col w-full overflow-auto h-full items-start" key={item._id}>
           <p className="mb-5">
             <em>Nombre de vues: {item.read}</em>
             <br />
@@ -285,7 +290,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
             </Button>
           </div>
         </form>
-      </aside>
+      </ResizablePanel>
       <Modal isOpen={!!references} onRequestClose={() => setReferences(null)}>
         <div className="w-full h-full flex flex-col p-12 items-center">
           <h2 className="font-bold text-lg mb-8">⛔️ Cet article est réferencé dans d'autres articles</h2>
