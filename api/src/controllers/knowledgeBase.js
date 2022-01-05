@@ -413,8 +413,13 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
         size: 1000,
       },
     });
-    const hitsWithContent = await KnowledgeBaseObject.find({ _id: response.body.hits.hits.map((hit) => hit._id) });
-    return res.status(200).send({ ok: true, data: response.body.hits.hits.map((hit) => hitsWithContent.find((hitWithContent) => hitWithContent._id.equals(hit._id))) });
+    return res.status(200).send({
+      ok: true,
+      data: response.body.hits.hits.map((hit) => ({
+        _id: hit._id,
+        ...hit._source,
+      })),
+    });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
