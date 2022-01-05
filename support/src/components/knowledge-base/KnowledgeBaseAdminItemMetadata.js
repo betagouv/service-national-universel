@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { SUPPORT_ROLES } from "snu-lib/roles";
 import { toast } from "react-toastify";
@@ -8,10 +8,13 @@ import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import InputWithEmojiPicker from "../InputWithEmojiPicker";
 import IconsPicker, { RedIcon } from "../IconsPicker";
 import { Button, CancelButton } from "../Buttons";
+import Modal from "../Modal";
+import Link from "next/link";
 
 const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
   const router = useRouter();
   const [showIconChooser, setShowIconChooser] = useState(false);
+  const [references, setReferences] = useState(null);
 
   const { flattenedData, item, parent, mutate } = useKnowledgeBaseData();
 
@@ -68,12 +71,11 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
     if (window.confirm("Voulez-vous vraiment supprimer cet élément ? Cette opération est définitive")) {
       const response = await API.delete({ path: `/support-center/knowledge-base/${item._id}` });
       setIsDeleting(false);
-      if (response.error) {
-        for (const string of [...response.error.split("\n")].reverse()) {
-          toast.error(string);
-        }
+      if (response.code === "ARTICLES_REFERING_TO_ITEMS") {
+        setReferences(response.data);
         return;
       }
+      if (response.error) return toast.error(response.error);
       if (response.code) return toast.error(response.code);
       toast.success("Élément supprimé !");
       const parent = flattenedData.find((otherItems) => otherItems._id === item.parentId);
@@ -138,135 +140,171 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
   };
 
   return (
-    <aside className={`flex-grow-0 flex-shrink-0 border-l-2 shadow-lg z-10 resize-x dir-rtl overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
-      <form onSubmit={onSubmit} className="flex-grow-0 flex-shrink-0  px-4 py-6 flex flex-col w-full overflow-scroll h-full dir-ltr items-start" key={item._id}>
-        <label className="font-bold" htmlFor="title">
-          Titre
-        </label>
-        <InputWithEmojiPicker
-          inputClassName="p-2"
-          className="border-2 mb-5 bg-white w-full"
-          placeholder={`Titre ${item.type === "section" ? "de la rubrique" : "de l'article"}`}
-          name="title"
-          value={title}
-          onChange={onTitleChange}
-        />
-        <label className="font-bold" htmlFor="group">
-          Groupe (option)
-        </label>
-        <InputWithEmojiPicker inputClassName="p-2" className="border-2 mb-5 bg-white w-full" placeholder="Phase 1, Phase 2, Mon Compte..." name="group" defaultValue={item.group} />
-        <label className="font-bold" htmlFor="slug">
-          Slug (Url)
-        </label>
-        <input
-          className="p-2 border-2 mb-5 w-full"
-          placeholder={`Slug ${item.type === "section" ? "de la rubrique" : "de l'article"}`}
-          name="slug"
-          value={itemSlug}
-          onChange={onItemSlugChange}
-        />
-        {shouldChangeSlug() && (
-          <span className=" text-gray-500 italic text-sm -mt-5 mb-5 cursor-pointer" onClick={() => setItemSlug(makeTitleSlug(title))}>
-            {`Remplacer le slug actuel par\u00A0:`}
-            <br />
-            <span className="underline">{makeTitleSlug(title)}</span>
-            {" ?"}
-          </span>
-        )}
-        <label className="font-bold" htmlFor="description">
-          Description
-        </label>
-        <textarea
-          className="p-2 border-2 mb-5 w-full flex-shrink-0"
-          placeholder={`Description ${item.type === "section" ? "de la rubrique" : "de l'article"}`}
-          name="description"
-          defaultValue={item.description}
-        />
-        <label className="font-bold" htmlFor="description">
-          Mots clés
-        </label>
-        <input className="p-2 border-2 mb-5 w-full flex-shrink-0" placeholder="Mots clés" name="description" defaultValue={item.keywords} />
-        {item.type === "section" && (
-          <>
-            <label className="font-bold" htmlFor="imageSrc">
-              Image (option)
-            </label>
-            <input
-              className={`p-2 border-2 mb-2 w-full flex-shrink-0 ${!itemImageSrc ? "mb-5" : ""}`}
-              accept="image/jpeg,image/png"
-              name="imageSrc"
-              type="file"
-              onChange={onUploadImage}
-              placeholder="Choisissez un fichier"
-              disabled={isSettingImg}
-            />
-            {!!itemImageSrc && (
-              <div className="relative h-40 w-full mb-5 bg-gray-300 flex-shrink-0 flex items-center justify-center overflow-hidden show-button-on-hover rounded-t-lg ">
-                <img alt={item.title} className="relative h-40 w-full bg-gray-300 flex-shrink-0 object-contain" src={item.imageSrc} />
-                <div className="w-full h-full absolute flex items-center justify-center button-container bg-gray-800 bg-opacity-80 transition-opacity">
-                  <CancelButton className="absolute m-auto" onClick={onDeleteImage} loading={isDeletingImg} disabled={isDeletingImg}>
-                    Supprimer
-                  </CancelButton>
+    <>
+      <aside className={`flex-grow-0 flex-shrink-0 border-l-2 shadow-lg z-10 resize-x dir-rtl overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
+        <form onSubmit={onSubmit} className="flex-grow-0 flex-shrink-0  px-4 py-6 flex flex-col w-full overflow-scroll h-full dir-ltr items-start" key={item._id}>
+          <label className="mb-5" htmlFor="description">
+            <b>Nombre de vues:</b> {item.read}
+          </label>
+          <label className="font-bold" htmlFor="title">
+            Titre
+          </label>
+          <InputWithEmojiPicker
+            inputClassName="p-2"
+            className="border-2 mb-5 bg-white w-full"
+            placeholder={`Titre ${item.type === "section" ? "de la rubrique" : "de l'article"}`}
+            name="title"
+            value={title}
+            onChange={onTitleChange}
+          />
+          <label className="font-bold" htmlFor="group">
+            Groupe (option)
+          </label>
+          <InputWithEmojiPicker
+            inputClassName="p-2"
+            className="border-2 mb-5 bg-white w-full"
+            placeholder="Phase 1, Phase 2, Mon Compte..."
+            name="group"
+            defaultValue={item.group}
+          />
+          <label className="font-bold" htmlFor="slug">
+            Slug (Url)
+          </label>
+          <input
+            className="p-2 border-2 mb-5 w-full"
+            placeholder={`Slug ${item.type === "section" ? "de la rubrique" : "de l'article"}`}
+            name="slug"
+            value={itemSlug}
+            onChange={onItemSlugChange}
+          />
+          {shouldChangeSlug() && (
+            <span className=" text-gray-500 italic text-sm -mt-5 mb-5 cursor-pointer" onClick={() => setItemSlug(makeTitleSlug(title))}>
+              {`Remplacer le slug actuel par\u00A0:`}
+              <br />
+              <span className="underline">{makeTitleSlug(title)}</span>
+              {" ?"}
+            </span>
+          )}
+          <label className="font-bold" htmlFor="description">
+            Description
+          </label>
+          <textarea
+            className="p-2 border-2 mb-5 w-full flex-shrink-0"
+            placeholder={`Description ${item.type === "section" ? "de la rubrique" : "de l'article"}`}
+            name="description"
+            defaultValue={item.description}
+          />
+          <label className="font-bold" htmlFor="description">
+            Mots clés
+          </label>
+          <input className="p-2 border-2 mb-5 w-full flex-shrink-0" placeholder="Mots clés" name="description" defaultValue={item.keywords} />
+          {item.type === "section" && (
+            <>
+              <label className="font-bold" htmlFor="imageSrc">
+                Image (option)
+              </label>
+              <input
+                className={`p-2 border-2 mb-2 w-full flex-shrink-0 ${!itemImageSrc ? "mb-5" : ""}`}
+                accept="image/jpeg,image/png"
+                name="imageSrc"
+                type="file"
+                onChange={onUploadImage}
+                placeholder="Choisissez un fichier"
+                disabled={isSettingImg}
+              />
+              {!!itemImageSrc && (
+                <div className="relative h-40 w-full mb-5 bg-gray-300 flex-shrink-0 flex items-center justify-center overflow-hidden show-button-on-hover rounded-t-lg ">
+                  <img alt={item.title} className="relative h-40 w-full bg-gray-300 flex-shrink-0 object-contain" src={item.imageSrc} />
+                  <div className="w-full h-full absolute flex items-center justify-center button-container bg-gray-800 bg-opacity-80 transition-opacity">
+                    <CancelButton className="absolute m-auto" onClick={onDeleteImage} loading={isDeletingImg} disabled={isDeletingImg}>
+                      Supprimer
+                    </CancelButton>
+                  </div>
                 </div>
-              </div>
-            )}
-            <label className="font-bold" htmlFor="imageSrc">
-              Icon (option - sera remplacée par l'image si elle existe)
-            </label>
-            {!!itemIcon && <RedIcon icon={itemIcon} showText={false} />}
-            <Button
-              type="button"
-              className="bg-white mt-2 mb-5 !border-2 border-snu-purple-300  !text-snu-purple-300"
-              onClick={onChooseIcon}
-              loading={isSettingIcon}
-              disabled={isSettingIcon}
-            >
-              Choisir
-            </Button>
-            <IconsPicker isOpen={showIconChooser} onRequestClose={() => setShowIconChooser(false)} onSelect={onSelectIcon} />
-          </>
-        )}
-        <fieldset className="mb-5">
-          <legend className="">Visible par:</legend>
-          <span className="mb-2 text-xs italic text-gray-500 leading-none block">Note: seul les rôles autorisés par l'entité parent sont disponibles</span>
-          <div className="flex flex-col ml-4">
-            {Object.keys(SUPPORT_ROLES).map((role) => {
-              const disabled = !!parent && !parent?.allowedRoles.includes(role);
-              return (
-                <div className="flex items-center" key={role}>
-                  <input
-                    className="mr-4"
-                    id={`allowedRoles.${role}`}
-                    disabled={disabled}
-                    type="checkbox"
-                    name={`allowedRoles.${role}`}
-                    defaultChecked={item.allowedRoles?.includes(role)}
-                  />
-                  <label className={`mr-2 ${disabled ? "text-gray-300 italic" : ""}`} id={role} disabled={disabled} htmlFor={`allowedRoles.${role}`}>
-                    {SUPPORT_ROLES[role]}
-                  </label>
-                </div>
-              );
-            })}
+              )}
+              <label className="font-bold" htmlFor="imageSrc">
+                Icon (option - sera remplacée par l'image si elle existe)
+              </label>
+              {!!itemIcon && <RedIcon icon={itemIcon} showText={false} />}
+              <Button
+                type="button"
+                className="bg-white mt-2 mb-5 !border-2 border-snu-purple-300  !text-snu-purple-300"
+                onClick={onChooseIcon}
+                loading={isSettingIcon}
+                disabled={isSettingIcon}
+              >
+                Choisir
+              </Button>
+              <IconsPicker isOpen={showIconChooser} onRequestClose={() => setShowIconChooser(false)} onSelect={onSelectIcon} />
+            </>
+          )}
+          <fieldset className="mb-5">
+            <legend className="">Visible par:</legend>
+            <span className="mb-2 text-xs italic text-gray-500 leading-none block">Note: seul les rôles autorisés par l'entité parent sont disponibles</span>
+            <div className="flex flex-col ml-4">
+              {Object.keys(SUPPORT_ROLES).map((role) => {
+                const disabled = !!parent && !parent?.allowedRoles.includes(role);
+                return (
+                  <div className="flex items-center" key={role}>
+                    <input
+                      className="mr-4"
+                      id={`allowedRoles.${role}`}
+                      disabled={disabled}
+                      type="checkbox"
+                      name={`allowedRoles.${role}`}
+                      defaultChecked={item.allowedRoles?.includes(role)}
+                    />
+                    <label className={`mr-2 ${disabled ? "text-gray-300 italic" : ""}`} id={role} disabled={disabled} htmlFor={`allowedRoles.${role}`}>
+                      {SUPPORT_ROLES[role]}
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          </fieldset>
+          <div className="flex justify-start items-center">
+            <label htmlFor="status">Visibilité: </label>
+            <select className="border-2 ml-5 p-2" name="status" defaultValue={item.status}>
+              <option value="PUBLISHED">Publié</option>
+              <option value="DRAFT">Brouillon</option>
+            </select>
           </div>
-        </fieldset>
-        <div className="flex justify-start items-center">
-          <label htmlFor="status">Visibilité: </label>
-          <select className="border-2 ml-5 p-2" name="status" defaultValue={item.status}>
-            <option value="PUBLISHED">Publié</option>
-            <option value="DRAFT">Brouillon</option>
-          </select>
+          <div className="flex flex-wrap justify-around items-center mt-8 mb-2 w-full">
+            <Button type="submit" className="mb-2" loading={isSubmitting} disabled={isSubmitting || isDeleting}>
+              Enregistrer
+            </Button>
+            <Button className="mb-2" onClick={onDelete} loading={isDeleting} disabled={isSubmitting || isDeleting}>
+              Supprimer
+            </Button>
+          </div>
+        </form>
+      </aside>
+      <Modal isOpen={!!references} onRequestClose={() => setReferences(null)}>
+        <div className="w-full h-full flex flex-col p-12 items-center">
+          <h2 className="font-bold text-lg mb-8">⛔️ Cet article est réferencé dans d'autres articles</h2>
+          <p className="text-justify">
+            Il y a une référence de cet article que vous souhaitez supprimer dans d'autres articles.
+            <br /> Il faut les mettre à jour avant de pouvoir supprimer celui-ci.
+            <br />{" "}
+            <em>
+              <small>Vous pouvez cliquer sur les articles ci-dessous, ils s'ouvriront dans une autre page.</small>
+            </em>
+            <br />
+            <br />
+            {references?.map((reference) => (
+              <React.Fragment key={reference._id}>
+                <Link href={`/admin/knowledge-base/${reference.slug}`} passHref>
+                  <a href="#" target="_blank" className="underline leading-7">
+                    {reference.title}
+                  </a>
+                </Link>
+                <br />
+              </React.Fragment>
+            ))}
+          </p>
         </div>
-        <div className="flex flex-wrap justify-around items-center mt-8 mb-2 w-full">
-          <Button type="submit" className="mb-2" loading={isSubmitting} disabled={isSubmitting || isDeleting}>
-            Enregistrer
-          </Button>
-          <Button className="mb-2" onClick={onDelete} loading={isDeleting} disabled={isSubmitting || isDeleting}>
-            Supprimer
-          </Button>
-        </div>
-      </form>
-    </aside>
+      </Modal>
+    </>
   );
 };
 

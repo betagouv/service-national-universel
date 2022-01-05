@@ -390,7 +390,7 @@ const setAllowedRoleMiddleWare = async (req, res, next) => {
 router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMiddleWare, async (req, res) => {
   try {
     // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html#multi-match-types
-    const response = await esClient.search({
+    const esQuery = {
       index: "knowledgebase",
       body: {
         query: {
@@ -403,16 +403,19 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
                 },
               },
             ],
-            filter: [
-              {
-                term: { "allowedRoles.keyword": req.allowedRole },
-              },
-            ],
           },
         },
         size: 1000,
       },
-    });
+    };
+    if (req.allowedRole !== "admin") {
+      esQuery.body.query.bool.filter = [
+        {
+          term: { "allowedRoles.keyword": req.allowedRole },
+        },
+      ];
+    }
+    const response = await esClient.search(esQuery);
     return res.status(200).send({
       ok: true,
       data: response.body.hits.hits.map((hit) => ({
@@ -449,6 +452,8 @@ router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWar
 
     if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    await KnowledgeBaseObject.findByIdAndUpdate(existingKb._id, { $inc: { read: 1 } });
+
     const parents = await findParents(existingKb);
     existingKb.parents = parents;
 
@@ -475,6 +480,9 @@ router.get("/:allowedRole(referent|young|public)", setAllowedRoleMiddleWare, asy
       .populate({ path: "author", select: "_id firstName lastName role" })
       .lean(); // to json;
 
+    for (const child of children) {
+      await KnowledgeBaseObject.findByIdAndUpdate(child._id, { $inc: { read: 1 } });
+    }
     return res.status(200).send({ ok: true, data: children });
   } catch (error) {
     capture(error);
@@ -506,9 +514,10 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       return res.status(400).send({
         ok: true,
         data: articlesReferingItemsToDelete,
-        error: `Il y a une référence de l'élément que vous souhaitez supprimer dans d'autres articles, veuillez les mettre à jour: ${articlesReferingItemsToDelete.map(
-          (article) => `\n${article.title}`,
-        )}`,
+        code: "ARTICLES_REFERING_TO_ITEMS",
+        // error: `Il y a une référence de l'élément que vous souhaitez supprimer dans d'autres articles, veuillez les mettre à jour: ${articlesReferingItemsToDelete.map(
+        //   (article) => `\n${article.title}`,
+        // )}`,
       });
     }
 
