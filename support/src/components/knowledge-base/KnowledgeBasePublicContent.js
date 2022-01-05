@@ -9,7 +9,7 @@ import Loader from "../Loader";
 
 const KnowledgeBasePublicContent = ({ item, isLoading }) => {
   const group = useMemo(() => {
-    return item?.group || item?.parents?.[0].group;
+    return item?.group || item?.parents?.[0]?.group;
   }, [item]);
 
   return (
