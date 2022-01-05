@@ -92,7 +92,7 @@ router.post("/eligibility/2022", async (req, res) => {
   const { error, value } = Joi.object({
     department: Joi.string().required(),
     birthDate: Joi.string().required(),
-    schoolLevel: Joi.string().required(),
+    schoolLevel: Joi.string(),
   })
     .unknown()
     .validate(eligibilityObject);
