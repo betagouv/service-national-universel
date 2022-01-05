@@ -219,7 +219,9 @@ const Wrapper = styled.div`
 
 const TitleContainer = styled.div`
   display: flex;
-  justify-content: space-around;
+  max-width: 1000px;
+  margin: 0 auto;
+  justify-content: space-between;
   align-items: center;
   padding: 0 1.5rem;
 `;

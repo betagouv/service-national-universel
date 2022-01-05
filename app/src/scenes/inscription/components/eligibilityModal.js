@@ -7,11 +7,12 @@ import logo from "../../../assets/logo-snu.png";
 import tick from "../../../assets/tick.svg";
 import cross from "../../../assets/cross.png";
 
+import api from "../../../services/api";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 import { ModalContainer } from "../../../components/modals/Modal";
 import Note from "../../../components/Note";
-import { departmentList, getDepartmentNumber } from "../../../utils";
+import { departmentList, translate } from "../../../utils";
 
 const levels = [
   {
@@ -62,48 +63,14 @@ export default function EligibilityModal({ onChange }) {
                   setLoading(true);
                   let { birthDate, schoolLevel, department, school } = values;
                   if (!school) schoolLevel = "";
-                  const formatBirthDate = birthDate.split("/").reverse();
-                  const correctBirthDate = "".concat("", formatBirthDate);
-                  let sessions = [
-                    {
-                      month: "Février",
-                      excludedGrade: ["3ème", "1ère", "Terminale", "Terminale CAP"],
-                      // exclude all DOM-TOMs
-                      excludedZip: ["971", "972", "973", "974", "975", "976", "978", "984", "986", "987", "988"],
-                      includedBirthdate: { begin: "2004-02-26", end: "2007-02-12" },
-                      stringDate: "13 au 25 février 2022",
-                      info: "Pour les élèves de 2nde scolarisés dans un établissement relevant du ministère de l’éducation nationale, de la jeunesse et des sports, l’inscription est possible y compris dans le cas où une semaine du séjour de cohésion se déroule sur le temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.",
-                      id: "Février 2022",
-                    },
-                    {
-                      month: "Juin",
-                      excludedGrade: ["3ème", "1ère", "Terminale", "Terminale CAP"],
-                      excludedZip: [],
-                      includedBirthdate: { begin: "2004-06-25", end: "2007-06-11" },
-                      stringDate: "12 au 24 juin 2022",
-                      id: "Juin 2022",
-                    },
-                    {
-                      month: "Juillet",
-                      excludedGrade: [],
-                      excludedZip: [],
-                      includedBirthdate: { begin: "2004-07-16", end: "2007-07-02" },
-                      stringDate: "3 au 15 juillet 2022",
-                      id: "Juillet 2022",
-                    },
-                  ].filter((el) => {
-                    if (el.excludedGrade.includes(schoolLevel)) return false;
-                    else if (el.excludedZip.some((e) => getDepartmentNumber(department) === e)) return false;
-                    else if (
-                      new Date(el.includedBirthdate.begin).getTime() <= new Date(correctBirthDate).getTime() &&
-                      new Date(correctBirthDate).getTime() <= new Date(el.includedBirthdate.end).getTime()
-                    ) {
-                      return true;
-                    }
-                    return false;
+                  const { ok, code, data } = await api.post("/cohort-session/eligibility/2022", {
+                    birthDate,
+                    schoolLevel,
+                    department,
                   });
                   setLoading(false);
-                  setIsEligible(!!sessions.length);
+                  if (!ok) return console.log("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
+                  setIsEligible(!!data.length);
                   setDisplay(true);
                 } catch (e) {
                   console.log(e);
@@ -119,7 +86,11 @@ export default function EligibilityModal({ onChange }) {
                     type="input"
                     value={values.birthDate}
                     handleChange={handleChange}
-                    validate={(v) => !v && requiredMessage}
+                    validate={(v) => {
+                      if (!v) return requiredMessage;
+                      const regex = /^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/;
+                      if (!regex.test(values.birthDate)) return "La date doit être au format JJ/MM/AAAA";
+                    }}
                     errors={errors}
                     touched={touched}
                     rows="2"
@@ -216,7 +187,7 @@ const Item = ({ title, subTitle, name, value, values, handleChange, errors, touc
       </Label>
       {type === "select" ? (
         <Field as={type} className="form-control" name={name} value={value} onChange={handleChange} validate={validate} {...props}>
-          <option disabled key={-1} value="" selected={!values[name]} label={selectPlaceholder}>
+          <option disabled key={-1} value="" defaultValue={!values[name]} label={selectPlaceholder}>
             {selectPlaceholder}
           </option>
           {options?.map((o, i) => (
