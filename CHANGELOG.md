@@ -1,3 +1,16 @@
+# [1.17.0](https://github.com/betagouv/service-national-universel/compare/v1.16.0...v1.17.0) (2022-01-05)
+
+
+### Bug Fixes
+
+* **support:** elastic search results ([#1052](https://github.com/betagouv/service-national-universel/issues/1052)) ([ae825ff](https://github.com/betagouv/service-national-universel/commit/ae825ff88513ce19f23feaca983dd93c33283761))
+
+
+### Features
+
+* **support:** can look for items ([#1051](https://github.com/betagouv/service-national-universel/issues/1051)) ([1096c14](https://github.com/betagouv/service-national-universel/commit/1096c14c64e7714e9dadb0e2a085f1c016a9dda3))
+* **support:** many stuff ([#1055](https://github.com/betagouv/service-national-universel/issues/1055)) ([5727186](https://github.com/betagouv/service-national-universel/commit/5727186f93626c3f69de6bda2d7e91c25b03603f))
+
 # [1.16.0](https://github.com/betagouv/service-national-universel/compare/v1.15.0...v1.16.0) (2022-01-04)
 
 
