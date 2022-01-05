@@ -11,14 +11,14 @@ export default function Note({ title, titleColor, text, textColor, link, textLin
           <p className="text">
             {text}{" "}
             {linkInText && (
-              <a href={link} className="link">
+              <a href={link} className="link" target="_blank" rel="noreferrer">
                 {textLink}
               </a>
             )}
           </p>
         ) : null}
         {link && !linkInText ? (
-          <a href={link} className="link">
+          <a href={link} className="link" target="_blank" rel="noreferrer">
             {textLink}
           </a>
         ) : null}

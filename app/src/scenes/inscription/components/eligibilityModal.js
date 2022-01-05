@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Col } from "reactstrap";
 import styled from "styled-components";
 //import Modal from "./modal";
@@ -12,6 +12,30 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 import { ModalContainer } from "../../../components/modals/Modal";
 import Note from "../../../components/Note";
+import { departmentList, getDepartmentNumber } from "../../../utils";
+
+const levels = [
+  {
+    value: "3ème",
+    label: "3ème",
+  },
+  {
+    value: "Seconde",
+    label: "Seconde",
+  },
+  {
+    value: "1ère",
+    label: "1ère",
+  },
+  {
+    value: "Terminale",
+    label: "Terminale",
+  },
+  {
+    value: "Terminale CAP",
+    label: "Terminale CAP",
+  },
+];
 
 export default function EligibilityModal({ onChange }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,14 +55,16 @@ export default function EligibilityModal({ onChange }) {
           <Form>
             <img src={close} className="close_icon" onClick={() => setIsOpen(false)} />
             <Formik
-              initialValues={{ birthDate: "", school: false, schoolLevel: "", address: "" }}
+              initialValues={{ birthDate: "", school: false, schoolLevel: "", department: "" }}
               validateOnChange={false}
               validateOnBlur={false}
               onSubmit={async (values) => {
                 try {
                   setLoading(true);
-                  let { birthDate, schoolLevel, address, school } = values;
+                  let { birthDate, schoolLevel, department, school } = values;
                   if (!school) schoolLevel = "";
+                  const formatBirthDate = birthDate.split("/").reverse();
+                  const correctBirthDate = "".concat("", formatBirthDate);
                   let sessions = [
                     {
                       month: "Février",
@@ -48,7 +74,6 @@ export default function EligibilityModal({ onChange }) {
                       includedBirthdate: { begin: "2004-02-26", end: "2007-02-12" },
                       stringDate: "13 au 25 février 2022",
                       info: "Pour les élèves de 2nde scolarisés dans un établissement relevant du ministère de l’éducation nationale, de la jeunesse et des sports, l’inscription est possible y compris dans le cas où une semaine du séjour de cohésion se déroule sur le temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.",
-                      buffer: 1.15,
                       id: "Février 2022",
                     },
                     {
@@ -57,7 +82,6 @@ export default function EligibilityModal({ onChange }) {
                       excludedZip: [],
                       includedBirthdate: { begin: "2004-06-25", end: "2007-06-11" },
                       stringDate: "12 au 24 juin 2022",
-                      buffer: 1.25,
                       id: "Juin 2022",
                     },
                     {
@@ -66,15 +90,14 @@ export default function EligibilityModal({ onChange }) {
                       excludedZip: [],
                       includedBirthdate: { begin: "2004-07-16", end: "2007-07-02" },
                       stringDate: "3 au 15 juillet 2022",
-                      buffer: 1.25,
                       id: "Juillet 2022",
                     },
                   ].filter((el) => {
                     if (el.excludedGrade.includes(schoolLevel)) return false;
-                    else if (el.excludedZip.some((e) => address.includes(e))) return false;
+                    else if (el.excludedZip.some((e) => getDepartmentNumber(department) === e)) return false;
                     else if (
-                      new Date(el.includedBirthdate.begin).getTime() <= new Date(birthDate).getTime() &&
-                      new Date(birthDate).getTime() <= new Date(el.includedBirthdate.end).getTime()
+                      new Date(el.includedBirthdate.begin).getTime() <= new Date(correctBirthDate).getTime() &&
+                      new Date(correctBirthDate).getTime() <= new Date(el.includedBirthdate.end).getTime()
                     ) {
                       return true;
                     }
@@ -92,8 +115,8 @@ export default function EligibilityModal({ onChange }) {
                   <Item
                     name="birthDate"
                     title="Date de naissance"
-                    subTitle="Au format : AAAA/MM/JJ"
-                    placeholder="Par exemple : 2005/05/22"
+                    subTitle="Au format : JJ/MM/AAAA"
+                    placeholder="Exemple : 22/05/2005"
                     type="input"
                     value={values.birthDate}
                     handleChange={handleChange}
@@ -117,21 +140,25 @@ export default function EligibilityModal({ onChange }) {
                   </CheckboxContainer>
                   {values.school && (
                     <Item
+                      style={{ marginTop: "0" }}
                       name="schoolLevel"
                       type="select"
-                      options={["3ème", "Seconde", "1ère", "Terminale", "Terminale CAP"]}
+                      options={levels}
                       title=""
-                      selectPlaceholder="Sélectionnez votre classe"
+                      selectPlaceholder="Sélectionner ma classe"
                       handleChange={handleChange}
                       value={values.schoolLevel}
+                      values={values}
                     />
                   )}
                   <Item
-                    name="address"
-                    title="Adresse"
-                    placeholder="Renseignez votre adresse"
-                    type="input"
-                    value={values.address}
+                    name="department"
+                    title="Département"
+                    selectPlaceholder="Sélectionner mon département"
+                    type="select"
+                    options={departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label))}
+                    values={values}
+                    value={values.department}
                     handleChange={handleChange}
                     validate={(v) => !v && requiredMessage}
                     errors={errors}
@@ -179,20 +206,23 @@ export default function EligibilityModal({ onChange }) {
   );
 }
 
-const Item = ({ title, subTitle, name, value, handleChange, errors, touched, validate, type, options, selectPlaceholder, ...props }) => {
+const Item = ({ title, subTitle, name, value, values, handleChange, errors, touched, validate, type, options, selectPlaceholder, style, ...props }) => {
+  useEffect(() => {
+    console.log("OPTIONS", options);
+  }, []);
   return (
-    <Col style={{ marginTop: type !== "select" ? 20 : 0 }}>
+    <Col style={{ marginTop: "20px", ...style }}>
       <Label>
         {title} <Subtitle>{subTitle}</Subtitle>
       </Label>
       {type === "select" ? (
         <Field as={type} className="form-control" name={name} value={value} onChange={handleChange} validate={validate} {...props}>
-          <option value="" disabled>
+          <option disabled key={-1} value="" selected={!values[name]} label={selectPlaceholder}>
             {selectPlaceholder}
           </option>
-          {options?.map((option) => (
-            <option value={option} key={option}>
-              {option}
+          {options?.map((o, i) => (
+            <option key={i} value={o.value} label={o.label}>
+              {o.label}
             </option>
           ))}
         </Field>
@@ -263,7 +293,6 @@ const CheckboxContainer = styled.section`
   padding: 1rem 1rem 0 1rem;
   align-items: baseline;
   .checkbox_label {
-    width: 50%;
     margin-left: 0.7rem;
   }
 `;
