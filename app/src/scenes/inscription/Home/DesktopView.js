@@ -5,6 +5,7 @@ import StopIcon from "../components/stopIcon";
 import TickIcon from "../components/tickIcon";
 import conditions from "./conditions";
 import informations from "./informations";
+import EligibilityModal from "../components/eligibilityModal";
 
 export default function DesktopView() {
   return (
@@ -30,7 +31,10 @@ export default function DesktopView() {
         </section>
       </div>
       <Points backgroundColor="#fff">
-        <div className="points-title">Conditions d&apos;inscription</div>
+        <TitleContainer>
+          <div className="points-title">Conditions d&apos;inscription</div>
+          <EligibilityModal />
+        </TitleContainer>
         <div className="first_container">
           <FirstSection>
             <div className="section_conditions">
@@ -42,7 +46,7 @@ export default function DesktopView() {
                 />
               </svg>
               <p>
-                J’aurai <strong>15, 16 ou 17 ans</strong> au moment de mon séjour de cohésion
+                J&apos;aurai <strong>15, 16 ou 17 ans</strong> au moment de mon séjour de cohésion
               </p>
             </div>
             <div className="section_conditions">
@@ -211,6 +215,15 @@ const Wrapper = styled.div`
   @media (max-width: 767px) {
     display: none;
   }
+`;
+
+const TitleContainer = styled.div`
+  display: flex;
+  max-width: 1000px;
+  margin: 0 auto;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.5rem;
 `;
 
 const FAQ = styled.a`

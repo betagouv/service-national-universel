@@ -4,6 +4,7 @@ import StopIcon from "../components/stopIcon";
 import TickIcon from "../components/tickIcon";
 import conditions from "./conditions";
 import informations from "./informations";
+import EligibilityModal from "../components/eligibilityModal";
 
 export default function MobileView() {
   return (
@@ -28,7 +29,10 @@ export default function MobileView() {
           </p>
         </section>
       </div>
-      <div className="points-title">Conditions d&apos;inscription</div>
+      <TitleContainer>
+        <div className="points-title">Conditions d&apos;inscription</div>
+        <EligibilityModal />
+      </TitleContainer>
       <ul>
         <li>
           <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -170,6 +174,16 @@ const FAQ = styled.a`
   p {
     flex: 1;
     margin: 0;
+  }
+`;
+
+const TitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  .points-title {
+    margin-bottom: 1rem;
   }
 `;
 
