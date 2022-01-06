@@ -3,7 +3,7 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason, colors } from "../../../utils";
+import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason, colors, CONSENTMENT_TEXTS } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -15,41 +15,6 @@ import TickDone from "../../../assets/TickDone";
 import Copy from "../../../assets/Copy";
 import PatchHistoric from "../../../components/views/PatchHistoric";
 import ExpandComponent from "../../../components/ExpandComponent";
-
-const youngConsentmentText = (
-  <ul>
-    <li>A lu et accepte les Conditions générales d&apos;utilisation de la plateforme du Service national universel ;</li>
-    <li>A pris connaissance des modalités de traitement de mes données personnelles ;</li>
-    <li>
-      Est volontaire, sous le contrôle des représentants légaux, pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion
-      puis la réalisation d&apos;une mission d&apos;intérêt général ;
-    </li>
-    <li>Certifie l&apos;exactitude des renseignements fournis ;</li>
-    <li>
-      Si en terminale, a bien pris connaissance que si je suis convoqué(e) pour les épreuves du second groupe du baccalauréat entre le 6 et le 8 juillet 2022, je ne pourrai pas
-      participer au séjour de cohésion entre le 3 et le 15 juillet 2022 (il n’y aura ni dérogation sur la date d’arrivée au séjour de cohésion ni report des épreuves).
-    </li>
-  </ul>
-);
-
-const parentsConsentmentText = (
-  <ul>
-    <li>Confirmation d&apos;être titulaire de l&apos;autorité parentale / le représentant légal du volontaire ;</li>
-    <li>
-      Autorisation du volontaire à participer à la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion puis la réalisation d&apos;une
-      mission d&apos;intérêt général ;
-    </li>
-    <li>Engagement à renseigner le consentement relatif aux droits à l&apos;image avant le début du séjour de cohésion ;</li>
-    <li>Engagement à renseigner l&apos;utilisation d&apos;autotest COVID avant le début du séjour de cohésion ;</li>
-    <li>
-      Engagement à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires à son arrivée au centre de séjour de cohésion ;
-    </li>
-    <li>
-      Engagement à ce que le volontaire soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires
-      résidents de Guyane, la fièvre jaune.
-    </li>
-  </ul>
-);
 
 export default function VolontaireViewDetails({ young }) {
   const user = useSelector((state) => state.Auth.user);
@@ -259,9 +224,21 @@ export default function VolontaireViewDetails({ young }) {
               ) : null}
               <Bloc title="Consentements">
                 <Details title={`Consentements validés par ${young.firstName} ${young.lastName}`} value={t(young.consentment || "false")} style={{ border: "none" }} />
-                <ExpandComponent>{youngConsentmentText}</ExpandComponent>
+                <ExpandComponent>
+                  <ul>
+                    {CONSENTMENT_TEXTS?.young?.map((line) => (
+                      <li key={line}>• {line}</li>
+                    ))}
+                  </ul>
+                </ExpandComponent>
                 <Details title="Consentements validés par ses représentants légaux" value={t(young.parentConsentment || "false")} style={{ border: "none" }} />
-                <ExpandComponent>{parentsConsentmentText}</ExpandComponent>
+                <ExpandComponent>
+                  <ul>
+                    {CONSENTMENT_TEXTS?.parents?.map((line) => (
+                      <li key={line}>• {line}</li>
+                    ))}
+                  </ul>
+                </ExpandComponent>
               </Bloc>
             </Col>
           </Row>
