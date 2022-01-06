@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Col } from "reactstrap";
+import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
 import close from "../../../assets/cancel.png";
@@ -8,6 +9,7 @@ import tick from "../../../assets/tick.svg";
 import cross from "../../../assets/cross.png";
 
 import api from "../../../services/api";
+import { appURL, supportURL } from "../../../config.js";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 import { ModalContainer } from "../../../components/modals/Modal";
@@ -58,11 +60,11 @@ export default function EligibilityModal({ onChange }) {
                     department,
                   });
                   setLoading(false);
-                  if (!ok) return console.log("Une erreur s'est produite lors de la vérification d'éligibilité :", translate(code));
+                  if (!ok) return toastr.error("Une erreur s'est produite lors de la vérification d'éligibilité :", translate(code));
                   setIsEligible(!!data.length);
                   setDisplay(true);
                 } catch (e) {
-                  console.log(e);
+                  toastr.error("Oups, une erreur est survenue", translate(e.code));
                 }
               }}>
               {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
@@ -132,7 +134,7 @@ export default function EligibilityModal({ onChange }) {
                       title="Félicitations, vous êtes bien éligible au SNU."
                       text="Vous pouvez donc procéder à l'inscription."
                       textLink="Commencer l’inscription ›"
-                      link="https://inscription.snu.gouv.fr/inscription/profil"
+                      link={`${appURL}/inscription/profil`}
                       icon={tick}
                       backgroundColor="#ECFDF5"
                       titleColor="#065F46"
@@ -145,7 +147,7 @@ export default function EligibilityModal({ onChange }) {
                       title="Malheureusement, vous n'êtes pas éligible au SNU."
                       text="Vous pouvez découvrir d'autres formes d'engagement en "
                       textLink="cliquant ici."
-                      link="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/7-les-autres-formes-d-engagement"
+                      link={`${supportURL}/help/fr-fr/16-comprendre-le-snu/7-les-autres-formes-d-engagement`}
                       icon={cross}
                       backgroundColor="#FEF2F2"
                       titleColor="#991B1B"
