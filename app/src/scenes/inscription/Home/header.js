@@ -2,8 +2,23 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { colors } from "../../../utils";
+import { useSelector, useDispatch } from "react-redux";
+import api from "../../../services/api";
+import { setYoung } from "../../../redux/auth/actions";
 
 export default function HeaderComponent({ location }) {
+  const dispatch = useDispatch();
+  const young = useSelector((state) => state.Auth.young);
+
+  const logout = async () => {
+    try {
+      await api.post(`/young/logout`);
+    } catch (error) {
+      console.log({ error });
+    }
+    dispatch(setYoung(null));
+  };
+
   return (
     <Header>
       <Logos>
@@ -15,9 +30,15 @@ export default function HeaderComponent({ location }) {
         </a>
       </Logos>
       <CTAContainer>
-        <AvatarText onClick={() => plausible("Clic CTA - Connexion")} to={{ pathname: "/auth/login", search: location?.search }}>
-          Se connecter
-        </AvatarText>
+        {young ? (
+          <AvatarText onClick={logout} to={{ pathname: "/", search: location?.search }}>
+            Se deconnecter
+          </AvatarText>
+        ) : (
+          <AvatarText onClick={() => window.plausible?.("Clic CTA - Connexion")} to={{ pathname: "/auth/login", search: location?.search }}>
+            Se connecter
+          </AvatarText>
+        )}
         <AvatarText to={{ pathname: "/inscription/profil" }}>S&apos;inscrire</AvatarText>
       </CTAContainer>
     </Header>
