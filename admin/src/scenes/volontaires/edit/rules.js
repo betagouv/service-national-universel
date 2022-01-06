@@ -19,7 +19,7 @@ export default function Rules({ values, handleChange, handleSubmit }) {
             name="rulesYoung"
             values={values}
             handleChange={handleChange}
-            title="Autorisation"
+            title="Autorisation (volontaire)"
             options={[
               { value: "true", label: "Oui" },
               { value: "false", label: "Non" },
@@ -29,7 +29,7 @@ export default function Rules({ values, handleChange, handleSubmit }) {
             name="rulesParent1"
             values={values}
             handleChange={handleChange}
-            title="Autorisation"
+            title="Autorisation (repres. légal 1)"
             options={[
               { value: "true", label: "Oui" },
               { value: "false", label: "Non" },
@@ -39,7 +39,7 @@ export default function Rules({ values, handleChange, handleSubmit }) {
             name="rulesParent2"
             values={values}
             handleChange={handleChange}
-            title="Autorisation"
+            title="Autorisation (repres. légal 2)"
             options={[
               { value: "true", label: "Oui" },
               { value: "false", label: "Non" },
