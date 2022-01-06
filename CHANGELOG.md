@@ -1,3 +1,17 @@
+# [1.18.0](https://github.com/betagouv/service-national-universel/compare/v1.17.0...v1.18.0) (2022-01-06)
+
+
+### Bug Fixes
+
+* **app,inscription:** block inscription for some status ([8177820](https://github.com/betagouv/service-national-universel/commit/8177820b014dd63e51dee3b79ac6f80ffbe14cf5))
+
+
+### Features
+
+* **admin,export,young:** add foreign and host informations ([da31a1f](https://github.com/betagouv/service-national-universel/commit/da31a1fb10f6713fc5b67b974ded4765ba7b50d7))
+* **admin,young:** rules validation in details ([9838748](https://github.com/betagouv/service-national-universel/commit/9838748c4f87876b8d0ad5e4847c813dca3000d2))
+* **app,inscription:** do not show february anymore in stepAvailability ([#1010](https://github.com/betagouv/service-national-universel/issues/1010)) ([de2f469](https://github.com/betagouv/service-national-universel/commit/de2f469f44b305c001c55a4e7d7ff33eccbfe12f))
+
 # [1.17.0](https://github.com/betagouv/service-national-universel/compare/v1.16.0...v1.17.0) (2022-01-05)
 
 
