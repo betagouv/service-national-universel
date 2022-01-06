@@ -58,7 +58,7 @@ export default function EligibilityModal({ onChange }) {
                     department,
                   });
                   setLoading(false);
-                  if (!ok) return console.log("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
+                  if (!ok) return console.log("Une erreur s'est produite lors de la vérification d'éligibilité :", translate(code));
                   setIsEligible(!!data.length);
                   setDisplay(true);
                 } catch (e) {
