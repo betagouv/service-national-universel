@@ -61,6 +61,11 @@ export default function Index() {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
+  // if it is a young in a status that is not eligible, they cant access to the inscription
+  if (young?.status && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young?.status)) {
+    return <Redirect to={{ pathname: "/" }} />;
+  }
+
   return (
     <Switch>
       <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
