@@ -15,7 +15,7 @@ import Drawer from "./Create/drawer";
 import Desistement from "../../scenes/desistement";
 
 import { useSelector } from "react-redux";
-import { colors, YOUNG_STATUS } from "../../utils";
+import { colors, YOUNG_STATUS, inscriptionCreationAndModificationOpenForYoungs, COHORTS } from "../../utils";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
@@ -56,8 +56,9 @@ const Step = ({ step }) => {
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
-  // if it is a young from an old cohort, they cant access to the inscription
-  if (young?.cohort && !["", "Juillet 2022", "Juin 2022", "Février 2022", "2022"].includes(young?.cohort)) {
+
+  const allowedCohorts = COHORTS.filter((c) => inscriptionCreationAndModificationOpenForYoungs(c));
+  if (young?.cohort && !allowedCohorts.includes(young?.cohort)) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
