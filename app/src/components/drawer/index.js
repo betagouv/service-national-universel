@@ -43,7 +43,7 @@ export default function Drawer(props) {
     if (young.status !== YOUNG_STATUS.VALIDATED) return;
 
     young.statusPhase1 && setStatus1(young.statusPhase1);
-    if (![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.CANCEL, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) return;
+    if (![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) return;
 
     young.statusPhase2 && setStatus2(young.statusPhase2);
     if (young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED) return;
