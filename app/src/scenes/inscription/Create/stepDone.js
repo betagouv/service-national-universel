@@ -243,12 +243,18 @@ const InfosContainer = styled.section`
 const Wrapper = styled.div`
   padding: 2rem;
   width: 100%;
+  @media (max-width: 380px) {
+    padding: 0.5rem;
+  }
   .bloc-title {
     display: flex;
   }
   .detail {
     border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
     display: flex;
+    @media (max-width: 380px) {
+      flex-wrap: wrap;
+    }
     justify-content: space-between;
     font-size: 14px;
     margin-top: 1rem;
@@ -261,6 +267,10 @@ const Wrapper = styled.div`
     &-text {
       color: rgba(26, 32, 44);
       text-align: right;
+      @media (max-width: 380px) {
+        max-width: 240px;
+        overflow: scroll;
+      }
     }
   }
   .icon {
