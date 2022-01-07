@@ -125,6 +125,16 @@ export default function VolontaireViewDetails({ young }) {
                   />
                 ))}
               </Bloc>
+              <Bloc title="Règlement intérieur">
+                <Details title="Validation" value={t(young.rulesYoung)} />
+                {(young.rulesFiles || []).map((e, i) => (
+                  <DownloadButton
+                    key={i}
+                    source={() => api.get(`/referent/youngFile/${young._id}/rulesFiles/${e}`)}
+                    title={`Télécharger le formulaire (${i + 1}/${young.rulesFiles.length})`}
+                  />
+                ))}
+              </Bloc>
               {getAge(young?.birthdateAt) < 15 ? (
                 <Bloc title="Traitement des données personnelles">
                   {(young.dataProcessingConsentmentFiles || []).map((e, i) => (

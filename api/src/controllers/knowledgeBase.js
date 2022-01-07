@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
@@ -399,6 +400,7 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
               {
                 multi_match: {
                   query: req.query.search,
+                  type: "bool_prefix",
                   fields: ["title^3", "contentAsText"],
                 },
               },
