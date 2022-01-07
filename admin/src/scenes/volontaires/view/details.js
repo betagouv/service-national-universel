@@ -245,7 +245,7 @@ export default function VolontaireViewDetails({ young }) {
                 <ExpandComponent>
                   <ul>
                     {CONSENTMENT_TEXTS?.parents?.map((line) => (
-                      <li key={line}>• {line}</li>
+                      <li key={line}>{line}</li>
                     ))}
                   </ul>
                 </ExpandComponent>
