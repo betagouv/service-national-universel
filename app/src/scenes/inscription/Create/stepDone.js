@@ -38,7 +38,7 @@ export default function StepDone() {
           <Bloc title="Mon profil" profile>
             <Details title="Nom" value={young.lastName} />
             <Details title="Prénom" value={young.firstName} />
-            <Details title="Sexe" value={young.gender} />
+            <Details title="Sexe" value={t(young.gender)} />
             <Details title="Date de naissance" value={`${formatStringDate(young.birthdateAt)} • ${getAge(young.birthdateAt)} ans`} />
             <Details title="Lieu de naissance" value={`${young.birthCity}, ${young.birthCityZip}`} />
             <Details title="Email" value={young.email} />
@@ -252,7 +252,7 @@ const Wrapper = styled.div`
   .detail {
     border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
     display: flex;
-    @media (max-width: 380px) {
+    @media (max-width: 925px) {
       flex-wrap: wrap;
     }
     justify-content: space-between;
@@ -267,9 +267,13 @@ const Wrapper = styled.div`
     &-text {
       color: rgba(26, 32, 44);
       text-align: right;
-      @media (max-width: 380px) {
-        max-width: 240px;
+      @media (max-width: 925px) {
         overflow: scroll;
+        max-width: 300px;
+      }
+      @media (max-width: 385px) {
+        overflow: scroll;
+        max-width: 240px;
       }
     }
   }
@@ -284,7 +288,7 @@ const Wrapper = styled.div`
 
 const Info = styled.div`
   flex: 1.5;
-  padding: 5rem;
+  padding: 2rem;
   @media (max-width: 768px) {
     padding: 1.5rem;
   }
