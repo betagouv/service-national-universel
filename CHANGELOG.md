@@ -1,3 +1,12 @@
+# [1.19.0](https://github.com/betagouv/service-national-universel/compare/v1.18.0...v1.19.0) (2022-01-07)
+
+
+### Features
+
+* **admin+app:** remove obsolete phase1 status ([#1061](https://github.com/betagouv/service-national-universel/issues/1061)) ([dee3f46](https://github.com/betagouv/service-national-universel/commit/dee3f4679ec8c3c47f9849ac6b653d783fbddb09))
+* **app:** inscription data checking ([#1056](https://github.com/betagouv/service-national-universel/issues/1056)) ([d7c0cd9](https://github.com/betagouv/service-national-universel/commit/d7c0cd99945d20bbc1cfabbdcde8ed41e089cbc5))
+* **app,inscription:** block access to the inscriptions screen for cohorts ([#1057](https://github.com/betagouv/service-national-universel/issues/1057)) ([717ca20](https://github.com/betagouv/service-national-universel/commit/717ca201fb2cfa7eb58e6cfb45ed774ff21ea270))
+
 # [1.18.0](https://github.com/betagouv/service-national-universel/compare/v1.17.0...v1.18.0) (2022-01-06)
 
 
