@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { HeroContainer, Hero, Content, Alert, WhiteButton } from "../../components/Content";
-import { isEndOfInscriptionManagement2021 } from "../../utils";
+import { inscriptionCreationAndModificationOpenForYoungs } from "../../utils";
 
 export default function WaitingCorrection() {
   const young = useSelector((state) => state.Auth.young);
@@ -25,7 +25,7 @@ export default function WaitingCorrection() {
           <h1 style={{ marginTop: "1.5rem" }}>
             <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
           </h1>
-          {isEndOfInscriptionManagement2021() && (
+          {inscriptionCreationAndModificationOpenForYoungs(young.cohort) && (
             <IconContainer>
               <svg width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="48" height="48" rx="24" fill="#FFFBEB" />
