@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,10 +21,6 @@ export default function StepDone() {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    console.log("YOUNG", young);
-  }, []);
 
   if (!young) {
     history.push("/inscription/profil");
