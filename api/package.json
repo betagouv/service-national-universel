@@ -62,7 +62,7 @@
     "csv-parser": "3.0.0",
     "eslint": "8.5.0",
     "eslint-config-prettier": "8.3.0",
-    "eslint-plugin-import": "2.25.3",
+    "eslint-plugin-import": "2.25.4",
     "eslint-plugin-prettier": "4.0.0",
     "faker": "5.5.3",
     "jest": "27.4.5",
