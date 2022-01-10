@@ -48,8 +48,11 @@ exports.handler = async () => {
 
         // stock the list in young
         const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
-        young.set({ missionsInMail });
-        await young.save();
+
+        // This is used in order to minimize risk of version conflict.
+        const youngForUpdate = await Young.findOne({ _id: young._id });
+        youngForUpdate.set({ missionsInMail });
+        await youngForUpdate.save();
       }
     });
     slack.info({
