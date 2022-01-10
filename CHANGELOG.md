@@ -1,3 +1,10 @@
+## [1.19.1](https://github.com/betagouv/service-national-universel/compare/v1.19.0...v1.19.1) (2022-01-10)
+
+
+### Bug Fixes
+
+* **api,cron:** error in noticePushMission ([#1062](https://github.com/betagouv/service-national-universel/issues/1062)) ([120a693](https://github.com/betagouv/service-national-universel/commit/120a693f02d3c0b6f1f76192d543e1a88a86dd62))
+
 # [1.19.0](https://github.com/betagouv/service-national-universel/compare/v1.18.0...v1.19.0) (2022-01-07)
 
 
