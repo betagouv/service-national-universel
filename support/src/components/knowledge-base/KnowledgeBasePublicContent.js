@@ -13,8 +13,6 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
   }, [item]);
   const router = useRouter();
 
-  console.log(router);
-
   return (
     <Wrapper>
       <Head>

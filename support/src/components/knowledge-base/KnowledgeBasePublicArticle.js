@@ -1,26 +1,7 @@
 import TextEditor from "../TextEditor";
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
-  if (isLoading)
-    return (
-      <div className="wrapper bg-coolGray-100  mx-auto flex flex-col flex-grow flex-shrink overflow-hidden w-full">
-        <div className="h-2  bg-gray-200 w-full mt-16 mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-16" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-16" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-        <div className="h-2  bg-gray-200 w-full mb-5" />
-      </div>
-    );
+  if (isLoading) return <ArticleLoader />;
   return (
     <div className="wrapper bg-coolGray-100  mx-auto flex flex-col flex-grow flex-shrink overflow-hidden w-full">
       {item?.updatedAt && (
@@ -32,5 +13,55 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
     </div>
   );
 };
+
+const ArticleLoader = () => (
+  <div className="wrapper bg-coolGray-100  mx-auto flex flex-col flex-grow flex-shrink overflow-hidden w-full">
+    <div className="h-2 relative  bg-gray-200 w-full mt-16 mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-16">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-16">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+    <div className="h-2 relative  bg-gray-200 w-full mb-5">
+      <div className="animated-background" />
+    </div>
+  </div>
+);
 
 export default KnowledgeBasePublicArticle;
