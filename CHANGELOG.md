@@ -1,3 +1,18 @@
+# [1.20.0](https://github.com/betagouv/service-national-universel/compare/v1.19.1...v1.20.0) (2022-01-11)
+
+
+### Bug Fixes
+
+* **api,support:** remove useless file ([#1065](https://github.com/betagouv/service-national-universel/issues/1065)) ([9f32216](https://github.com/betagouv/service-national-universel/commit/9f3221658f195c3ec7bd1789845a6732abbfa36a))
+* **support:**  support many stuff ([#1066](https://github.com/betagouv/service-national-universel/issues/1066)) ([ecb08f7](https://github.com/betagouv/service-national-universel/commit/ecb08f716362bfb4450b6c4118a70f08041c8d3a))
+* **support:** fix search showing no answer button on page load ([#1068](https://github.com/betagouv/service-national-universel/issues/1068)) ([7aa37be](https://github.com/betagouv/service-national-universel/commit/7aa37befae7e990e85b1b84d91330b597d1eb207))
+* **support:** zammad search by id and by type ([#1069](https://github.com/betagouv/service-national-universel/issues/1069)) ([cdafb9d](https://github.com/betagouv/service-national-universel/commit/cdafb9d32448af51f8f66ede857f83c86afce2d9))
+
+
+### Features
+
+* **support:** redirect pages coming from old zammad links ([#1064](https://github.com/betagouv/service-national-universel/issues/1064)) ([465d290](https://github.com/betagouv/service-national-universel/commit/465d2905ca5d522b335f0b8bf6197c7aa631c566))
+
 ## [1.19.1](https://github.com/betagouv/service-national-universel/compare/v1.19.0...v1.19.1) (2022-01-10)
 
 
