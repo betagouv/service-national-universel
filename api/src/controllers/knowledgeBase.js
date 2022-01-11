@@ -463,7 +463,7 @@ router.get("/:allowedRole(referent|young|public)/zammad-id/:zammadId", setAllowe
     existingKb.parents = parents;
 
     if (existingKb.type === "section") {
-      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id, allowedRoles: req.allowedRole })
+      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id, allowedRoles: req.allowedRole, status: "PUBLISHED" })
         .sort({ type: -1, position: 1 })
         .populate({ path: "author", select: "_id firstName lastName role" })
         .lean(); // to json;
@@ -495,7 +495,7 @@ router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWar
     existingKb.parents = parents;
 
     if (existingKb.type === "section") {
-      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id, allowedRoles: req.allowedRole })
+      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id, allowedRoles: req.allowedRole, status: "PUBLISHED" })
         .sort({ type: -1, position: 1 })
         .populate({ path: "author", select: "_id firstName lastName role" })
         .lean(); // to json;

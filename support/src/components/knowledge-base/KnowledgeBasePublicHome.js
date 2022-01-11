@@ -1,10 +1,9 @@
 import Wrapper from "../../components/Wrapper";
 import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
-import Loader from "../../components/Loader";
 import { useEffect, useState } from "react";
 import Head from "next/head";
-import LoaderHomeCard from "../LoaderHomeCards";
+import LoaderSection from "../LoaderSection";
 import LoaderArticle from "../LoaderArticle";
 
 const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
@@ -12,8 +11,6 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
   useEffect(() => {
     setShowLoading(isLoading);
   }, [isLoading]);
-
-  console.log({ isLoading });
 
   return (
     <Wrapper>
@@ -34,10 +31,10 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
         {showLoading ? (
           <>
             <div className="md:px-10 lg:px-6 lg:flex flex-col flex-wrap justify-center lg:overflow-hidden lg:max-w-screen-95 mx-auto grid-cols-2 md:grid md:flex-row row-span-2 row-start-2 col-span-full gap-2.5">
-              <LoaderHomeCard />
-              <LoaderHomeCard />
-              <LoaderHomeCard />
-              <LoaderHomeCard />
+              <LoaderSection />
+              <LoaderSection />
+              <LoaderSection />
+              <LoaderSection />
             </div>
             <main className="flex flex-col sm:px-2 lg:flex-row lg:px-0 justify-evenly h-full w-fullmax-w-screen-2xl flex-shrink overflow-y-auto">
               <section className="flex flex-col flex-grow flex-shrink-0 pt-12 max-w-4xl">

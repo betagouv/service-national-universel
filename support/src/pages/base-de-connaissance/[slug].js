@@ -20,7 +20,7 @@ const Content = () => {
     }
   }, [response?.code]);
 
-  return <KnowledgeBasePublicContent item={item} />;
+  return <KnowledgeBasePublicContent item={item} isLoading={!Object.keys(item).length} />;
 };
 
 const AuthContent = () => {

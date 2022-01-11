@@ -1,6 +1,6 @@
 import Loader from "./Loader";
 
-const LoaderHomeCard = () => (
+const LoaderSection = () => (
   <div className="mx-2 my-4 w-72 flex flex-shrink flex-grow-0 min-w-1/4">
     <article className="overflow-hidden rounded-lg shadow-lg flex flex-col flex-grow bg-white">
       <div className="h-32 w-full bg-gray-200 flex items-center justify-center overflow-hidden">
@@ -17,4 +17,4 @@ const LoaderHomeCard = () => (
   </div>
 );
 
-export default LoaderHomeCard;
+export default LoaderSection;
