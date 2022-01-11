@@ -448,7 +448,7 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
 // this is for the public-access part of the knowledge base (not the admin part)
 router.get("/:allowedRole(referent|young|public)/zammad-id/:zammadId", setAllowedRoleMiddleWare, async (req, res) => {
   try {
-    const existingKb = await KnowledgeBaseObject.findOne({ zammadId: req.params.zammadId, allowedRoles: req.allowedRole, status: "PUBLISHED" })
+    const existingKb = await KnowledgeBaseObject.findOne({ zammadId: req.params.zammadId, allowedRoles: req.allowedRole, status: "PUBLISHED", type: req.query.type })
       .populate({
         path: "author",
         select: "_id firstName lastName role",
