@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import KnowledgeBaseSectionCard from "./KnowledgeBaseSectionCard";
 import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
 
-const KnowledgeBasePublicSection = ({ item }) => {
+const KnowledgeBasePublicSection = ({ item, isRoot }) => {
   const [sections, setSections] = useState(item.children?.filter((c) => c.type === "section") || []);
   useEffect(() => {
     setSections(item.children?.filter((c) => c.type === "section") || []);
@@ -13,24 +13,36 @@ const KnowledgeBasePublicSection = ({ item }) => {
     setArticles(item.children?.filter((c) => c.type === "article") || []);
   }, [item]);
 
-  if (!articles.length) {
+  if (isRoot) {
     return (
-      <div className="md:px-10 lg:px-6 lg:flex flex-col flex-wrap justify-center lg:overflow-hidden lg:max-w-screen-95 mx-auto grid-cols-2 md:grid md:flex-row row-span-2 row-start-2 col-span-full gap-2.5">
-        {sections.map((section) => (
-          <KnowledgeBaseSectionCard
-            key={section._id}
-            _id={section._id}
-            path="/base-de-connaissance"
-            position={section.position}
-            imageSrc={section.imageSrc}
-            icon={section.icon}
-            title={section.title}
-            group={section.group}
-            createdAt={section.createdAt}
-            slug={section.slug}
-          />
-        ))}
-      </div>
+      <>
+        <div className="md:px-10 lg:px-6 lg:flex flex-col flex-wrap justify-center lg:overflow-hidden lg:max-w-screen-95 mx-auto grid-cols-2 md:grid md:flex-row row-span-2 row-start-2 col-span-full gap-2.5">
+          {sections.map((section) => (
+            <KnowledgeBaseSectionCard
+              key={section._id}
+              _id={section._id}
+              path="/base-de-connaissance"
+              position={section.position}
+              imageSrc={section.imageSrc}
+              icon={section.icon}
+              title={section.title}
+              group={section.group}
+              createdAt={section.createdAt}
+              slug={section.slug}
+            />
+          ))}
+        </div>
+        <main className="flex flex-col sm:px-2 lg:flex-row lg:px-0 justify-evenly h-full w-fullmax-w-screen-2xl flex-shrink overflow-y-auto">
+          <section className="flex flex-col flex-grow flex-shrink-0 pt-12 max-w-4xl">
+            <h3 className="sm:px-4 sm:pb-2 lg:px-16 flex items-center font-bold uppercase text-sm text-snu-purple-900">Sujets</h3>
+            <div id="articles" className="flex flex-col sm:pb-4 sm:px-2 h-full w-full flex-shrink overflow-y-auto lg:px-12">
+              {articles.map((article) => (
+                <KnowledgeBaseArticleCard key={article._id} _id={article._id} position={article.position} title={article.title} slug={article.slug} path="/base-de-connaissance" />
+              ))}
+            </div>
+          </section>
+        </main>
+      </>
     );
   }
   return (

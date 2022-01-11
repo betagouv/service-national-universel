@@ -4,12 +4,17 @@ import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import Loader from "../../components/Loader";
 import { useEffect, useState } from "react";
 import Head from "next/head";
+import LoaderHomeCard from "../LoaderHomeCards";
+import LoaderArticle from "../LoaderArticle";
 
 const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
   const [showLoading, setShowLoading] = useState(true);
   useEffect(() => {
     setShowLoading(isLoading);
   }, [isLoading]);
+
+  console.log({ isLoading });
+
   return (
     <Wrapper>
       <Head>
@@ -26,9 +31,34 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
             </div>
           </div>
         </div>
-        {showLoading ? <Loader /> : <KnowledgeBasePublicSection item={item} />}
+        {showLoading ? (
+          <>
+            <div className="md:px-10 lg:px-6 lg:flex flex-col flex-wrap justify-center lg:overflow-hidden lg:max-w-screen-95 mx-auto grid-cols-2 md:grid md:flex-row row-span-2 row-start-2 col-span-full gap-2.5">
+              <LoaderHomeCard />
+              <LoaderHomeCard />
+              <LoaderHomeCard />
+              <LoaderHomeCard />
+            </div>
+            <main className="flex flex-col sm:px-2 lg:flex-row lg:px-0 justify-evenly h-full w-fullmax-w-screen-2xl flex-shrink overflow-y-auto">
+              <section className="flex flex-col flex-grow flex-shrink-0 pt-12 max-w-4xl">
+                <h3 className="sm:px-4 sm:pb-2 lg:px-16 flex items-center font-bold uppercase text-sm text-snu-purple-900">Sujets</h3>
+                <LoaderArticle />
+                <LoaderArticle />
+                <LoaderArticle />
+                <LoaderArticle />
+                <LoaderArticle />
+                <LoaderArticle />
+                <LoaderArticle />
+              </section>
+            </main>
+          </>
+        ) : (
+          <>
+            <KnowledgeBasePublicSection isRoot item={item} />
+            <KnowledgeBasePublicNoAnswer />
+          </>
+        )}
       </div>
-      <KnowledgeBasePublicNoAnswer />
     </Wrapper>
   );
 };
