@@ -415,6 +415,9 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
         {
           term: { "allowedRoles.keyword": req.allowedRole },
         },
+        {
+          term: { "status.keyword": "PUBLISHED" },
+        },
       ];
     }
     const response = await esClient.search(esQuery);
@@ -445,7 +448,7 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
 // this is for the public-access part of the knowledge base (not the admin part)
 router.get("/:allowedRole(referent|young|public)/zammad-id/:zammadId", setAllowedRoleMiddleWare, async (req, res) => {
   try {
-    const existingKb = await KnowledgeBaseObject.findOne({ zammadId: req.params.zammadId, allowedRoles: req.allowedRole })
+    const existingKb = await KnowledgeBaseObject.findOne({ zammadId: req.params.zammadId, allowedRoles: req.allowedRole, status: "PUBLISHED" })
       .populate({
         path: "author",
         select: "_id firstName lastName role",
@@ -460,7 +463,7 @@ router.get("/:allowedRole(referent|young|public)/zammad-id/:zammadId", setAllowe
     existingKb.parents = parents;
 
     if (existingKb.type === "section") {
-      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id, allowedRoles: req.allowedRole })
+      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id, allowedRoles: req.allowedRole, status: "PUBLISHED" })
         .sort({ type: -1, position: 1 })
         .populate({ path: "author", select: "_id firstName lastName role" })
         .lean(); // to json;
@@ -477,7 +480,7 @@ router.get("/:allowedRole(referent|young|public)/zammad-id/:zammadId", setAllowe
 // this is for the public-access part of the knowledge base (not the admin part)
 router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWare, async (req, res) => {
   try {
-    const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug, allowedRoles: req.allowedRole })
+    const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug, allowedRoles: req.allowedRole, status: "PUBLISHED" })
       .populate({
         path: "author",
         select: "_id firstName lastName role",
@@ -492,7 +495,7 @@ router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWar
     existingKb.parents = parents;
 
     if (existingKb.type === "section") {
-      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id, allowedRoles: req.allowedRole })
+      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id, allowedRoles: req.allowedRole, status: "PUBLISHED" })
         .sort({ type: -1, position: 1 })
         .populate({ path: "author", select: "_id firstName lastName role" })
         .lean(); // to json;
@@ -509,7 +512,7 @@ router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWar
 // this is for the public-access part of the knowledge base (not the admin part)
 router.get("/:allowedRole(referent|young|public)", setAllowedRoleMiddleWare, async (req, res) => {
   try {
-    const children = await KnowledgeBaseObject.find({ parentId: null, allowedRoles: req.allowedRole })
+    const children = await KnowledgeBaseObject.find({ parentId: null, allowedRoles: req.allowedRole, status: "PUBLISHED" })
       .sort({ type: -1, position: 1 })
       .populate({ path: "author", select: "_id firstName lastName role" })
       .lean(); // to json;

@@ -14,7 +14,7 @@ const Sections = () => {
     setSections(response?.data || []);
   }, [response?.data]);
 
-  return <KnowledgeBasePublicHome item={{ children: sections }} />;
+  return <KnowledgeBasePublicHome item={{ children: sections }} isLoading={!sections?.length} />;
 };
 
 const AuthSections = () => {

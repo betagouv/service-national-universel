@@ -7,7 +7,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow: visible;
 }
 
 * {
@@ -185,4 +185,40 @@ body {
 .with-emoji {
   font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji", -apple-system, BlinkMacSystemFont,
     Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important ;
+}
+
+/* animation placeholder */
+
+.animated-background {
+  position: absolute;
+  left: -45%;
+  height: 100%;
+  width: 45%;
+  background-image: linear-gradient(to left, rgba(251, 251, 251, 0.05), rgba(251, 251, 251, 0.15), rgba(251, 251, 251, 0.3), rgba(251, 251, 251, 0.15), rgba(251, 251, 251, 0.05));
+  background-image: -moz-linear-gradient(
+    to left,
+    rgba(251, 251, 251, 0.05),
+    rgba(251, 251, 251, 0.15),
+    rgba(251, 251, 251, 0.3),
+    rgba(251, 251, 251, 0.15),
+    rgba(251, 251, 251, 0.05)
+  );
+  background-image: -webkit-linear-gradient(
+    to left,
+    rgba(251, 251, 251, 0.05),
+    rgba(251, 251, 251, 0.15),
+    rgba(251, 251, 251, 0.3),
+    rgba(251, 251, 251, 0.15),
+    rgba(251, 251, 251, 0.05)
+  );
+  animation: loading 1s infinite;
+}
+
+@keyframes loading {
+  0% {
+    left: -45%;
+  }
+  100% {
+    left: 100%;
+  }
 }
