@@ -12,10 +12,10 @@ const ZammadHelp = () => {
 
   const redirect = async () => {
     if (!Object.keys(query).length) return;
-    if (!router?.query?.zammadSectionOrArticleSlug) return router.push("/base-de-connaissance");
-    const zammadId = router?.query?.zammadSectionOrArticleSlug?.split("-")?.[0];
+    if (!router?.query?.zammadArticleSlug) return router.push("/base-de-connaissance");
+    const zammadId = router?.query?.zammadArticleSlug?.split("-")?.[0];
     if (!zammadId) return router.push("/base-de-connaissance");
-    const response = await API.getasync({ path: `/support-center/knowledge-base/${user.restriction}/zammad-id/${zammadId}` });
+    const response = await API.getasync({ path: `/support-center/knowledge-base/${user.restriction}/zammad-id/${zammadId}`, query: { type: "article" } });
     if (!response.ok || !response?.data?.slug) return router.push("/base-de-connaissance");
     return router.push(`/base-de-connaissance/${response.data.slug}`);
   };
