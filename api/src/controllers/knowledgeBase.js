@@ -443,6 +443,38 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
 });
 
 // this is for the public-access part of the knowledge base (not the admin part)
+router.get("/:allowedRole(referent|young|public)/zammad-id/:zammadId", setAllowedRoleMiddleWare, async (req, res) => {
+  try {
+    const existingKb = await KnowledgeBaseObject.findOne({ zammadId: req.params.zammadId, allowedRoles: req.allowedRole })
+      .populate({
+        path: "author",
+        select: "_id firstName lastName role",
+      })
+      .lean(); // to json
+
+    if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    await KnowledgeBaseObject.findByIdAndUpdate(existingKb._id, { $inc: { read: 1 } });
+
+    const parents = await findParents(existingKb);
+    existingKb.parents = parents;
+
+    if (existingKb.type === "section") {
+      const children = await KnowledgeBaseObject.find({ parentId: existingKb._id, allowedRoles: req.allowedRole })
+        .sort({ type: -1, position: 1 })
+        .populate({ path: "author", select: "_id firstName lastName role" })
+        .lean(); // to json;
+      existingKb.children = children;
+    }
+
+    return res.status(200).send({ ok: true, data: existingKb });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+// this is for the public-access part of the knowledge base (not the admin part)
 router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWare, async (req, res) => {
   try {
     const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug, allowedRoles: req.allowedRole })
