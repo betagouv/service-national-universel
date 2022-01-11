@@ -64,7 +64,6 @@ async function sync(doc, { force } = { force: false }) {
       console.log("NO AUTHORIZED ROLE");
       return;
     } else if (!doc.role) {
-      console.log("VOLONTAIRE");
       role = ROLE.VOLONTAIRE;
       note = `<a href=${`https://admin.snu.gouv.fr/volontaire/${doc._id}`}>Profil volontaire</a><br/><br/>
       <p><b>Phase 1 :</b> ${translate(doc.statusPhase1)}</p><br/><p><b>Phase 2 :</b> ${translate(doc.statusPhase2)}</p><br/><p><b>Phase 3 :</b> ${translate(
