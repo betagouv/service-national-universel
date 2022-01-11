@@ -15,13 +15,15 @@ const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAns
   const [hideItems, setHideItems] = useState(false);
 
   const searchTimeout = useRef(null);
-  useEffect(() => {
+
+  const computeSearch = () => {
     if (search.length > 0 && !isSearching) setIsSearching(true);
     if (!search.length) {
       setIsSearching(false);
       setSearch("");
       clearTimeout(searchTimeout.current);
       setItems([]);
+      return;
     }
     clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(async () => {
@@ -33,6 +35,10 @@ const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAns
         setItems(response.data);
       }
     }, 250);
+  };
+
+  useEffect(() => {
+    computeSearch();
     return () => {
       clearTimeout(searchTimeout.current);
       setIsSearching(false);
