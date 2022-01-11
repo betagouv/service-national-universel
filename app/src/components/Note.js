@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-export default function Note({ title, titleColor, text, textColor, link, textLink, linkColor, backgroundColor, icon, linkInText, ...rest }) {
+export default function Note({ title, titleColor, text, textColor, link, textLink, linkColor, backgroundColor, icon, linkInText, sessions, ...rest }) {
   return (
     <NoteContainer {...rest} titleColor={titleColor} backgroundColor={backgroundColor} textColor={textColor} linkColor={linkColor}>
       <img src={icon} />
@@ -10,6 +10,11 @@ export default function Note({ title, titleColor, text, textColor, link, textLin
         {text ? (
           <p className="text">
             {text}{" "}
+            <ul>
+              {sessions.map((session) => (
+                <li key={session.id}>• Du {session.stringDate}</li>
+              ))}
+            </ul>
             {linkInText && (
               <a href={link} className="link" target="_blank" rel="noreferrer">
                 {textLink}
