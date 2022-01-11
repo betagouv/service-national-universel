@@ -18,6 +18,16 @@ const moduleExports = {
         destination: "/base-de-connaissance",
         permanent: true,
       },
+      {
+        source: "/help/fr-fr",
+        destination: "/base-de-connaissance",
+        permanent: true,
+      },
+      {
+        source: "/help",
+        destination: "/base-de-connaissance",
+        permanent: true,
+      },
     ];
   },
 };
