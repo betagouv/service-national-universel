@@ -164,7 +164,7 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
       <Label>{title}</Label>
       {type === "select" ? (
         <Field as={type} className="form-control" name={name} value={value} onChange={handleChange} validate={validate} {...props}>
-          <option value="" disabled>
+          <option disabled value="" selected={!value} label={placeholder}>
             {placeholder}
           </option>
           {/* {options?.map((option) => (
