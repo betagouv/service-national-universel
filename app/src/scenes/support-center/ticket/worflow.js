@@ -2,8 +2,9 @@ import React from "react";
 import { Col } from "reactstrap";
 import styled from "styled-components";
 import { Field } from "formik";
+import ErrorMessage from "../../inscription/components/errorMessage";
 
-export const SelectTag = ({ options, name, value, title, selectPlaceholder, handleChange }) => {
+export const SelectTag = ({ options, name, value, errors, touched, values, validate, title, selectPlaceholder, handleChange }) => {
   return (
     <Col style={{ marginTop: 20 }}>
       <Label>{title}</Label>
@@ -12,11 +13,12 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
         className="form-control"
         name={name}
         value={value || ""}
+        validate={validate}
         onChange={(e) => {
           const value = options.find((o) => o.id === e.target.value);
           handleChange({ target: { name, value } });
         }}>
-        <option value="" disabled>
+        <option disabled key={-1} value="" selected={!values[name]} label={selectPlaceholder}>
           {selectPlaceholder}
         </option>
         {options?.map((option, i) => (
@@ -25,6 +27,7 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
           </option>
         ))}
       </Field>
+      {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
     </Col>
   );
 };

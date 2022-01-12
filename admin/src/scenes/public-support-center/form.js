@@ -49,7 +49,7 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
             <Item
               name="name"
               title="Nom et prénom"
-              placeholder="Renseignez votre nom et prénom"
+              placeholder="Renseignez vos nom et prénom"
               type="input"
               value={values.name}
               handleChange={handleChange}
@@ -79,10 +79,21 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
               handleChange={handleChange}
               title="Département"
               options={departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label))}
+              validate={(v) => !v && requiredMessage}
               errors={errors}
               touched={touched}
             />
-            <SelectTag name="step1" options={Object.values(step1)} title={"Sujet"} selectPlaceholder={"Choisir le sujet"} handleChange={handleChange} value={values?.step1?.id} />
+            <SelectTag
+              name="step1"
+              options={Object.values(step1)}
+              title={"Sujet"}
+              selectPlaceholder={"Choisir le sujet"}
+              validate={(v) => !v && requiredMessage}
+              handleChange={handleChange}
+              value={values?.step1?.id}
+              errors={errors}
+              touched={touched}
+            />
             {values.step1?.id === "TECHNICAL" ? (
               <SelectTag
                 name="step2"
@@ -90,7 +101,10 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
                 title={"Précision"}
                 selectPlaceholder={"Préciser"}
                 handleChange={handleChange}
+                validate={(v) => !v && requiredMessage}
                 value={values.step2?.id}
+                errors={errors}
+                touched={touched}
               />
             ) : null}
             {values.step1?.id === "QUESTION" ? (
@@ -100,7 +114,10 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
                 title={"Précision"}
                 selectPlaceholder={"Préciser"}
                 handleChange={handleChange}
+                validate={(v) => !v && requiredMessage}
                 value={values.step2?.id}
+                errors={errors}
+                touched={touched}
               />
             ) : null}
             <Item
