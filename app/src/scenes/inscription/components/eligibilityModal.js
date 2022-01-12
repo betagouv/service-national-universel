@@ -33,6 +33,7 @@ export default function EligibilityModal({ onChange }) {
   const [loading, setLoading] = useState(false);
   const [isEligible, setIsEligible] = useState(false);
   const [display, setDisplay] = useState(false);
+  const [sessions, setSessions] = useState(null);
 
   return (
     <>
@@ -62,6 +63,7 @@ export default function EligibilityModal({ onChange }) {
                   setLoading(false);
                   if (!ok) return toastr.error("Une erreur s'est produite lors de la vérification d'éligibilité :", translate(code));
                   setIsEligible(!!data.length);
+                  setSessions(data);
                   setDisplay(true);
                 } catch (e) {
                   toastr.error("Oups, une erreur est survenue", translate(e.code));
@@ -132,7 +134,8 @@ export default function EligibilityModal({ onChange }) {
                   {isEligible && display ? (
                     <Note
                       title="Félicitations, vous êtes bien éligible au SNU."
-                      text="Vous pouvez donc procéder à l'inscription."
+                      text={sessions.length > 1 ? "Vous pouvez vous inscrire aux séjours suivants :" : "Vous pouvez vous inscrire au séjour suivant :"}
+                      sessions={sessions}
                       textLink="Commencer l’inscription ›"
                       link={`${appURL}/inscription/profil`}
                       icon={tick}
