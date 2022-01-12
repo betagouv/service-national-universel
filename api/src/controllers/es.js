@@ -8,6 +8,7 @@ const { ERRORS, isYoung, getSignedUrlForApiAssociation } = require("../utils");
 const StructureObject = require("../models/structure");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
+const SessionPhase1Object = require("../models/sessionPhase1");
 const { serializeMissions, serializeSchools, serializeYoungs, serializeStructures, serializeReferents, serializeApplications, serializeHits } = require("../utils/es-serializer");
 const { allRecords } = require("../es/utils");
 const { API_ASSOCIATION_ES_ENDPOINT } = require("../config");
@@ -91,9 +92,9 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
 
     // A head center can only see youngs of their cohesion center.
     if (user.role === ROLES.HEAD_CENTER) {
-      const center = await CohesionCenterObject.findById(user.cohesionCenterId);
-      if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      filter.push({ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { "cohesionCenterId.keyword": center._id.toString() } });
+      const sessionPhase1 = await SessionPhase1Object.findById(user.sessionPhase1Id);
+      if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      filter.push({ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { "sessionPhase1Id.keyword": sessionPhase1._id.toString() } });
     }
 
     // A responsible can only see youngs in application of their structure.
@@ -176,6 +177,52 @@ router.post("/cohesionyoung/:id/:action(_msearch|export)", passport.authenticate
       {
         bool: {
           filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { cohesionCenterId: req.params.id } }],
+          must_not: [{ term: { "statusPhase1.keyword": "WAITING_LIST" } }],
+        },
+      },
+    ];
+
+    if (req.params.action === "export") {
+      const response = await allRecords("young", applyFilterOnQuery(req.body.query, filter));
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    } else {
+      const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, filter) });
+      return res.status(200).send(serializeYoungs(response.body));
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
+  }
+});
+
+router.post("/sessionphase1young/:id/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+
+    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    if (user.role === ROLES.REFERENT_REGION) {
+      const centers = await CohesionCenterObject.find({ region: user.region });
+      const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
+      if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.id)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      const centers = await CohesionCenterObject.find({ department: user.department });
+      const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
+      if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.id)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
+    const filter = [
+      {
+        bool: {
+          filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { sessionPhase1Id: req.params.id } }],
           must_not: [{ term: { "statusPhase1.keyword": "WAITING_LIST" } }],
         },
       },

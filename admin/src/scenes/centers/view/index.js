@@ -14,6 +14,7 @@ import { translate } from "../../../utils";
 export default function Index({ ...props }) {
   const [center, setCenter] = useState();
   const [focusedCohort, setFocusedCohort] = useState();
+  const [focusedSession, setFocusedSession] = useState();
   const [focusedTab, setFocusedTab] = useState("equipe");
   const history = useHistory();
 
@@ -36,6 +37,17 @@ export default function Index({ ...props }) {
     setFocusedCohort(center.cohorts[0]);
   }, [center]);
 
+  useEffect(() => {
+    (async () => {
+      if (!center || !center?.cohorts || !center?.cohorts?.length || !focusedCohort) return;
+      const sessionPhase1 = await api.get(`/cohesion-center/${center._id}/cohort/${focusedCohort}/session-phase1`);
+      if (!sessionPhase1.ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1.code));
+      }
+      setFocusedSession(sessionPhase1.data);
+    })();
+  }, [center, focusedCohort]);
+
   const updateCenter = async () => {
     const { data, ok } = await api.get(`/cohesion-center/${center._id}`);
     if (ok) setCenter(data);
@@ -50,7 +62,10 @@ export default function Index({ ...props }) {
         <Switch>
           {/* liste-attente reliquat ? */}
           <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
-          <Route path="/centre/:id/volontaires" component={() => <Youngs center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
+          <Route
+            path="/centre/:id/volontaires"
+            component={() => <Youngs center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} focusedSession={focusedSession} />}
+          />
           <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
           <Route
             path="/centre/:id"

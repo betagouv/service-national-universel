@@ -25,7 +25,7 @@ import DownloadAllAttestation from "../../../components/buttons/DownloadAllAttes
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
-export default function Youngs({ center, updateCenter, focusedCohort }) {
+export default function Youngs({ center, updateCenter, focusedCohort, focusedSession }) {
   const [young, setYoung] = useState();
   const [meetingPoints, setMeetingPoints] = useState(null);
 
@@ -47,20 +47,20 @@ export default function Youngs({ center, updateCenter, focusedCohort }) {
     if (ok) setYoung(data);
   };
 
-  if (!center) return <Loader />;
+  if (!focusedSession) return <Loader />;
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <div style={{ display: "flex", flexDirection: "column", flex: "1" }}>
         <div>
-          <ReactiveBase url={`${apiURL}/es`} app={`cohesionyoung/${center._id}`} headers={{ Authorization: `JWT ${api.getToken()}` }}>
+          <ReactiveBase url={`${apiURL}/es`} app={`sessionphase1young/${focusedSession._id}`} headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ float: "right", marginBottom: "1.5rem", marginRight: "1.5rem" }}>
               <div style={{ display: "flex" }}>
                 <ExportComponent
                   title="Exporter les volontaires"
                   defaultQuery={getExportQuery}
                   exportTitle="Volontaires_centre"
-                  index={`cohesionyoung/${center._id}`}
+                  index={`sessionphase1young/${focusedSession._id}`}
                   react={{ and: FILTERS }}
                   transform={(all) => {
                     return all.map((data) => {

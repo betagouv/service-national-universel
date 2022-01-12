@@ -24,7 +24,7 @@ const {
 const renderFromHtml = require("../htmlToPdf");
 const { ROLES, canCreateOrUpdateCohesionCenter } = require("snu-lib/roles");
 const Joi = require("joi");
-const { serializeCohesionCenter, serializeYoung, serializeReferent } = require("../utils/serializer");
+const { serializeCohesionCenter, serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateNewCohesionCenter, validateUpdateCohesionCenter, validateId } = require("../utils/validator");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -184,6 +184,24 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/:id/cohort/:cohort/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ id: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const center = await CohesionCenterModel.findById(value.id);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const sessionsPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort: value.cohort });
+    if (!sessionsPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    return res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionsPhase1) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
