@@ -55,6 +55,7 @@ export default function TicketCreate() {
                 selectPlaceholder={"Choisir la catégorie"}
                 handleChange={handleChange}
                 value={values?.step1?.id}
+                values={values}
               />
               {values.step1?.id === "TECHNICAL" ? (
                 <SelectTag
@@ -64,6 +65,7 @@ export default function TicketCreate() {
                   selectPlaceholder={"Choisir le sujet"}
                   handleChange={handleChange}
                   value={values.step2?.id}
+                  values={values}
                 />
               ) : null}
               {values.step1?.id === "QUESTION" ? (
@@ -74,6 +76,7 @@ export default function TicketCreate() {
                   selectPlaceholder={"Choisir le sujet"}
                   handleChange={handleChange}
                   value={values.step2?.id}
+                  values={values}
                 />
               ) : null}
               <Item
