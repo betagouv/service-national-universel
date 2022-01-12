@@ -11,7 +11,7 @@ export default function Note({ title, titleColor, text, textColor, link, textLin
           <p className="text">
             {text}{" "}
             <ul>
-              {sessions.map((session) => (
+              {(sessions || []).map((session) => (
                 <li key={session.id}>• Du {session.stringDate}</li>
               ))}
             </ul>
