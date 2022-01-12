@@ -29,7 +29,7 @@ const getCustomerIdByEmail = async (email) => {
 
 const api = async (path, options = {}) => {
   if (!ZAMMAD_TOKEN) return console.log("No token");
-  const res = await fetch(`https://support.snu.gouv.fr/api/v1${path}`, {
+  const res = await fetch(`https://zammad.snu.gouv.fr/api/v1${path}`, {
     ...options,
     headers: { Authorization: `Token token=${ZAMMAD_TOKEN}`, "Content-Type": "application/json", ...(options.headers || {}) },
   });
