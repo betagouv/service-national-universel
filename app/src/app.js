@@ -18,7 +18,7 @@ import Phase1 from "./scenes/phase1";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Diagoriente from "./scenes/diagoriente";
-//import SupportCenter from "./scenes/support-center";
+import SupportCenter from "./scenes/support-center";
 import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
 import Applications from "./scenes/applications";
@@ -33,8 +33,7 @@ import MilitaryPreparation from "./scenes/militaryPreparation";
 import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
 import CGU from "./scenes/CGU";
-//import PublicSupport from "./scenes/public-support-center";
-import SupportMaintenance from "./scenes/support-center-maintenance";
+import PublicSupport from "./scenes/public-support-center";
 import Desistement from "./scenes/desistement";
 
 import api from "./services/api";
@@ -90,8 +89,8 @@ export default function App() {
         <Switch>
           <Route path="/bug" component={Bug} />
           <Route path="/conditions-generales-utilisation" component={CGU} />
-          <Route path="/public-besoin-d-aide" component={SupportMaintenance} />
-          <Route path="/besoin-d-aide" component={SupportMaintenance} />
+          <Route path="/public-besoin-d-aide" component={PublicSupport} />
+          <Route path="/besoin-d-aide" component={SupportCenter} />
           <Route path="/validate-contract/done" component={ContractDone} />
           <Route path="/validate-contract" component={Contract} />
           <Route path="/inscription" component={Inscription} />
