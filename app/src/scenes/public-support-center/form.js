@@ -167,11 +167,6 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
           <option disabled value="" selected={!value} label={placeholder}>
             {placeholder}
           </option>
-          {/* {options?.map((option) => (
-            <option value={option} key={option}>
-              {option}
-            </option>
-          ))} */}
           {options?.map((o, i) => (
             <option key={i} value={o.value} label={o.label}>
               {o.label}
