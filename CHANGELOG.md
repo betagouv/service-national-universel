@@ -1,3 +1,16 @@
+# [1.21.0](https://github.com/betagouv/service-national-universel/compare/v1.20.0...v1.21.0) (2022-01-12)
+
+
+### Bug Fixes
+
+* **app+admin:** reopen support center ([#1075](https://github.com/betagouv/service-national-universel/issues/1075)) ([d92c640](https://github.com/betagouv/service-national-universel/commit/d92c640b64b5fe762b86bc8e3dca5177d7c9d961))
+
+
+### Features
+
+* **api-zammad:** change zammad url ([#1074](https://github.com/betagouv/service-national-universel/issues/1074)) ([870a6a9](https://github.com/betagouv/service-national-universel/commit/870a6a9f059b8a6c618c8eae6c73def69e8c35d6))
+* **app-inscription:** add sessions to eligibility module ([#1070](https://github.com/betagouv/service-national-universel/issues/1070)) ([0ef2fee](https://github.com/betagouv/service-national-universel/commit/0ef2feee7dc02cca78411923f13116241e965b6d))
+
 # [1.20.0](https://github.com/betagouv/service-national-universel/compare/v1.19.1...v1.20.0) (2022-01-11)
 
 
