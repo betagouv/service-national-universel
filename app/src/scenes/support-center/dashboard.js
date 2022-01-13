@@ -13,25 +13,26 @@ import { ticketStateNameById, colors, translateState } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
+import { supportURL } from "../../config";
 
 const articles = [
   {
     title: "SNU phase 0 : inscriptions",
     emoji: "📄",
     body: `Rédaction du dossier d'inscription : Le jeune remplit son dossier...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/11-phase-0-inscriptions/173-phase-0-inscriptions",
+    url: `${supportURL}/base-de-connaissance/phase-0-le-parcours-des-inscriptions-2-1-1?type=article`,
   },
   {
     title: "Phase 1 : L'organisation du séjour de cohésion",
     emoji: "🌲",
     body: `Lorsque l'inscription du volontaire est validée, il entre dans la phase 1...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/12-phase-1-le-sejour-de-cohesion/174-phase-1-le-sejour-de-cohesion",
+    url: `${supportURL}/base-de-connaissance/phase-1-lorganisation-du-sejour-de-cohesion-2-1-1-1?type=article`,
   },
   {
     title: "Phase 2 : Le parcours d'une MIG",
     emoji: "🤝",
     body: `La publication d'une MIG : la structure s'inscrit sur la plateforme...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/77-phase-2-le-parcours-d-une-mig",
+    url: `${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig-1?type=article`,
   },
 ];
 
@@ -104,14 +105,14 @@ export default function Dashboard() {
               <br />
               N&apos;hésitez pas à consulter notre{" "}
               <strong>
-                <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
+                <a className="link" href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
                   base de connaissance
                 </a>
               </strong>
               &nbsp;!
             </div>
             <div className="buttons">
-              <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
+              <LinkButton href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
                 Trouver&nbsp;ma&nbsp;réponse
               </LinkButton>
             </div>

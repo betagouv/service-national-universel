@@ -18,7 +18,7 @@ import api from "../../../services/api";
 import EyeOpen from "../../../assets/eye.svg";
 import EyeClose from "../../../assets/eye-slash.svg";
 import FormFooter from "../../../components/form/FormFooter";
-import { appURL } from "../../../config";
+import { appURL, supportURL } from "../../../config";
 
 export default function StepProfil() {
   const [passwordText, setPasswordText] = useState(false);
@@ -74,7 +74,7 @@ export default function StepProfil() {
                   <p>
                     Si vous ne vous souvenez plus de votre identifiant (email),{" "}
                     <a
-                      href="https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/178-comment-recuperer-mon-identifiant"
+                      href={`${supportURL}/base-de-connaissance/comment-recuperer-mon-identifiant-dossier-deja-inscrit-1?type=article`}
                       target="_blank"
                       style={{ color: "white", textDecoration: "underline" }}
                       rel="noreferrer">

@@ -6,6 +6,7 @@ import DownloadAttestationButton, { PrimaryStyle } from "../../components/button
 import MailAttestationButton from "../../components/buttons/MailAttestationButton";
 
 import { HeroContainer, Hero } from "../../components/Content";
+import { supportURL } from "../../config";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -36,7 +37,7 @@ export default function Done() {
                 <strong>Attestation de JDC</strong>
                 <br />
                 Penser à réaliser votre recensement auprès de votre mairie
-                <a href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire/126-journee-defense-et-citoyennete-jdc" target="_blank" rel="noreferrer">
+                <a href={`${supportURL}/base-de-connaissance/journee-defense-et-citoyennete?type=article`} target="_blank" rel="noreferrer">
                   <PrimaryStyle>En savoir plus &gt;</PrimaryStyle>
                 </a>
               </p>

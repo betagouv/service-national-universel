@@ -5,6 +5,7 @@ import TickIcon from "../components/tickIcon";
 import conditions from "./conditions";
 import informations from "./informations";
 import EligibilityModal from "../components/eligibilityModal";
+import { supportURL } from "../../../config";
 
 export default function MobileView() {
   return (
@@ -124,7 +125,7 @@ export default function MobileView() {
         <li style={{ padding: 0 }}>
           <FAQ
             onClick={() => window.plausible?.("Clic Besoin d'aide", { props: { device: "mobile" } })}
-            href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu"
+            href={`${supportURL}/base-de-connaissance/questions-frequentes?type=section`}
             target="blank">
             <p>Toutes les réponses à vos questions</p>
             <svg width="6" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">

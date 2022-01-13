@@ -7,56 +7,56 @@ import { colors } from "../../utils";
 import { adminURL } from "../../config";
 import ZammadForm from "./form";
 
-const articles = [
-  {
-    title: "Je n'arrive pas à me connecter",
-    emoji: "⛔",
-    body: "Ces actions vous permettront de réinitialiser...",
-    url: "https://support.snu.gouv.fr/help/fr-fr/8-mon-compte/15-je-n-arrive-pas-a-me-connecter",
-  },
-  {
-    title: "Je crée ma structure",
-    emoji: "📝",
-    body: "Connectez-vous à l'espace d'inscription structure...",
-    url: "https://support.snu.gouv.fr/help/fr-fr/8-mon-compte/45-je-cree-ma-structure",
-  },
-  {
-    title: "Je crée une nouvelle mission",
-    emoji: "📇",
-    body: "Cliquez pour voir les instructions en vidéo.",
-    url: "https://support.snu.gouv.fr/help/fr-fr/9-mes-missions/183-je-cree-une-nouvelle-mission",
-  },
-  {
-    title: "Phase 0 : le parcours des inscriptions",
-    emoji: "📄",
-    body: "Rédaction du dossier d'inscription : Le jeune...",
-    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/170-phase-0-le-parcours-des-inscriptions",
-  },
-  {
-    title: "Phase 1 : l'organisation du séjour de cohésion",
-    emoji: "🌲",
-    body: "Lorsque l'inscription du volontaire est validée...",
-    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/169-phase-1-l-organisation-du-sejour-de-cohesion",
-  },
-  {
-    title: "Phase 2 : le parcours d'une MIG",
-    emoji: "🤝",
-    body: "La publication d'une MIG : La structure...",
-    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/5-phase-2-le-parcours-d-une-mig",
-  },
-  {
-    title: "Phase 3 : le parcours de l'engagement",
-    emoji: "🌟",
-    body: "Optionnelle, la phase 3 vous permet de poursuivre...",
-    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/60-phase-3-le-parcours-de-l-engagement",
-  },
-  {
-    title: "J'invite un nouveau responsable pour ma structure",
-    emoji: "👋",
-    body: "Vous pouvez ajouter d'autres responsables à votre...",
-    url: "https://support.snu.gouv.fr/help/fr-fr/8-mon-compte/20-j-invite-un-nouveau-responsable-pour-ma-structure",
-  },
-];
+// const articles = [
+// {
+//   title: "Je n'arrive pas à me connecter",
+//   emoji: "⛔",
+//   body: "Ces actions vous permettront de réinitialiser...",
+//   url: `${supportURL}/base-de-connaissance/8-mon-compte/15-je-n-arrive-pas-a-me-connecter`,
+// },
+// {
+//   title: "Je crée ma structure",
+//   emoji: "📝",
+//   body: "Connectez-vous à l'espace d'inscription structure...",
+//   url: "https://support.snu.gouv.fr/help/fr-fr/8-mon-compte/45-je-cree-ma-structure",
+// },
+// {
+//   title: "Je crée une nouvelle mission",
+//   emoji: "📇",
+//   body: "Cliquez pour voir les instructions en vidéo.",
+//   url: "https://support.snu.gouv.fr/help/fr-fr/9-mes-missions/183-je-cree-une-nouvelle-mission",
+// },
+// {
+//   title: "Phase 0 : le parcours des inscriptions",
+//   emoji: "📄",
+//   body: "Rédaction du dossier d'inscription : Le jeune...",
+//   url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/170-phase-0-le-parcours-des-inscriptions",
+// },
+// {
+//   title: "Phase 1 : l'organisation du séjour de cohésion",
+//   emoji: "🌲",
+//   body: "Lorsque l'inscription du volontaire est validée...",
+//   url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/169-phase-1-l-organisation-du-sejour-de-cohesion",
+// },
+// {
+//   title: "Phase 2 : le parcours d'une MIG",
+//   emoji: "🤝",
+//   body: "La publication d'une MIG : La structure...",
+//   url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/5-phase-2-le-parcours-d-une-mig",
+// },
+// {
+//   title: "Phase 3 : le parcours de l'engagement",
+//   emoji: "🌟",
+//   body: "Optionnelle, la phase 3 vous permet de poursuivre...",
+//   url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/60-phase-3-le-parcours-de-l-engagement",
+// },
+// {
+//   title: "J'invite un nouveau responsable pour ma structure",
+//   emoji: "👋",
+//   body: "Vous pouvez ajouter d'autres responsables à votre...",
+//   url: "https://support.snu.gouv.fr/help/fr-fr/8-mon-compte/20-j-invite-un-nouveau-responsable-pour-ma-structure",
+// },
+// ];
 
 export default function PublicSupportCenter() {
   const user = useSelector((state) => state.Auth.user);
@@ -75,7 +75,7 @@ export default function PublicSupportCenter() {
           </p>
         )}
         <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
-        <div className="help-section">
+        {/* <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
               Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d&apos;engagement&nbsp;?
@@ -94,11 +94,11 @@ export default function PublicSupportCenter() {
               </LinkButton>
             </div>
           </div>
-        </div>
+        </div> */}
       </Container>
-      <h4 style={{ margin: "1rem 0", textAlign: "center" }}>Quelques articles pour vous aider</h4>
+      {/* <h4 style={{ margin: "1rem 0", textAlign: "center" }}>Quelques articles pour vous aider</h4>
       <Articles>
-        {articles.map((article) => (
+        {articles?.map((article) => (
           <div className="block" key={article.url} onClick={() => window.open(article.url)}>
             <div className="block-title">
               <p>{article.emoji}</p>
@@ -113,9 +113,9 @@ export default function PublicSupportCenter() {
           </div>
         ))}
       </Articles>
-      <hr style={{ margin: "3rem auto", maxWidth: "600px" }} />
+      <hr style={{ margin: "3rem auto", maxWidth: "600px" }} /> */}
       <Container>
-        <h4 style={{ textAlign: "center" }}>Vous n&apos;avez pas trouvé de réponse à votre demande&nbsp;?</h4>
+        {/* <h4 style={{ textAlign: "center" }}>Vous n&apos;avez pas trouvé de réponse à votre demande&nbsp;?</h4> */}
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280", marginBottom: "0.5rem" }}>
