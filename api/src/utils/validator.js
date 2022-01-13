@@ -232,6 +232,7 @@ function validateNewApplication(application, user) {
 const cohesionCenterKeys = {
   name: Joi.string().allow(null, ""),
   code: Joi.string().allow(null, ""),
+  code2022: Joi.string().allow(null, ""),
   country: Joi.string().allow(null, ""),
   COR: Joi.string().allow(null, ""),
   departmentCode: Joi.string().allow(null, ""),
