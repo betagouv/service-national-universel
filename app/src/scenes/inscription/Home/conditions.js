@@ -50,7 +50,7 @@ export default [
     date3: "du 3 au 15 juillet 2022",
   },
   {
-    label: "Je suis scolarisé(e)",
+    label: "• Je suis scolarisé(e)",
     bold: "en Terminale CAP",
     isDate1: false,
     isDate2: false,
@@ -60,7 +60,7 @@ export default [
     date3: "du 3 au 15 juillet 2022",
   },
   {
-    label: "Je ne suis",
+    label: "• Je ne suis",
     bold: "pas scolarisé(e)",
     isDate1: true,
     isDate2: true,
