@@ -13,16 +13,14 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
   }, [item]);
   const router = useRouter();
 
-  const [type, setType] = useState(router?.query?.type);
+  const [loadingType, setType] = useState(router?.query?.loadingType);
 
   useEffect(() => {
-    console.log(router?.query?.type);
-    if (router?.query?.type) {
-      setType(router?.query?.type);
-      console.log(router);
+    if (router?.query?.loadingType) {
+      setType(router?.query?.loadingType);
       router.replace(`/base-de-connaissance/${router.query.slug}`, undefined, { shallow: true });
     }
-  }, [router?.query?.type]);
+  }, [router?.query?.loadingType]);
 
   return (
     <Wrapper>
@@ -42,8 +40,8 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
         </div>
         {!item || isLoading ? (
           <>
-            {type === "article" && <KnowledgeBasePublicArticle isLoading />}
-            {type === "section" && <KnowledgeBasePublicSection isLoading />}
+            {loadingType === "article" && <KnowledgeBasePublicArticle isLoading />}
+            {loadingType === "section" && <KnowledgeBasePublicSection isLoading />}
           </>
         ) : (
           <>
