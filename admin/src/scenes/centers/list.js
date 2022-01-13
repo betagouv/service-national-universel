@@ -102,7 +102,7 @@ export default function List() {
                   showIcon={false}
                   placeholder="Rechercher par mots clés, ville, code postal..."
                   componentId="SEARCH"
-                  dataField={["name", "city", "zip", "code"]}
+                  dataField={["name", "city", "zip", "code", "code2022"]}
                   react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                   // fuzziness={1}
                   style={{ flex: 1, marginRight: "1rem" }}

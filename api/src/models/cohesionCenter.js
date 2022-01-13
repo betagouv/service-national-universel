@@ -17,6 +17,12 @@ const Schema = new mongoose.Schema({
       description: "Code du centre",
     },
   },
+  code2022: {
+    type: String,
+    documentation: {
+      description: "Code du centre utilisé en 2022",
+    },
+  },
   country: {
     type: String,
     documentation: {

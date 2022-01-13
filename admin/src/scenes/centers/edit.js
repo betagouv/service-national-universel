@@ -75,7 +75,8 @@ export default function Edit(props) {
                   <BoxHeadTitle>Informations générales sur le centre</BoxHeadTitle>
                   <BoxContent direction="column">
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" />
+                    <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" handleChange={handleChange} />
+                    <Item disabled={user.role !== "admin"} title="Code 2022" values={values} name="code2022" handleChange={handleChange} />
                     <Item type="number" title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Select
                       name="pmr"
