@@ -75,7 +75,7 @@ const cancelApplications = async (mission) => {
   });
   for (let application of applications) {
     let statusComment = "La mission a été archivée.";
-    let sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_ARCHIVED;
+    let sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_ARCHIVED_AUTO;
 
     application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
     await application.save();
