@@ -26,7 +26,7 @@ const articles = [
     title: "Phase 1 : L'organisation du séjour de cohésion",
     emoji: "🌲",
     body: `Lorsque l'inscription du volontaire est validée, il entre dans la phase 1...`,
-    url: `${supportURL}/base-de-connaissance/phase-1-lorganisation-du-sejour-de-cohesion-2-1-1-1?type=article`,
+    url: `${supportURL}/base-de-connaissance/phase-1-lorganisation-du-sejour-de-cohesion?type=article`,
   },
   {
     title: "Phase 2 : Le parcours d'une MIG",

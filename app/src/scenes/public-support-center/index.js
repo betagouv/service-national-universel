@@ -9,8 +9,8 @@ import ZammadForm from "./form";
 
 const articles = [
   {
-    title: "Identifiant ou mot de passe oublié (ou incorrect)",
-    emoji: "⛔",
+    title: "Mot de passe oublié (ou incorrect)",
+    emoji: "🔐",
     body: `Pour se connecter à votre compte SNU, rendez-vous sur...`,
     url: `${supportURL}/base-de-connaissance/jai-oublie-mon-mot-de-passe-volontaire-1?type=article`,
   },
@@ -18,19 +18,19 @@ const articles = [
     title: "Est-ce que le SNU est obligatoire ?",
     emoji: "❓",
     body: `Le SNU est pour le moment un dispositif basé sur le volontariat...`,
-    url: `${supportURL}/base-de-connaissance/est-ce-que-le-snu-est-obligatoire-1?type=article`,
+    url: `${supportURL}/base-de-connaissance/est-ce-que-le-snu-est-obligatoire?type=article`,
   },
   {
     title: "A qui s'adresse le SNU ?",
     emoji: "👍",
     body: `Le Service National Universel s'adresse : aux jeunes de nationalité...`,
-    url: `${supportURL}/base-de-connaissance/a-qui-sadresse-le-snu-1?type=article`,
+    url: `${supportURL}/base-de-connaissance/a-qui-sadresse-le-snu?type=article`,
   },
   {
     title: "Le SNU est-il payant ?",
     emoji: "👛",
     body: `La participation au SNU est gratuite ! Le séjour de cohésion...`,
-    url: `${supportURL}/base-de-connaissance/le-snu-est-il-payant-frais?type=article`,
+    url: `${supportURL}/base-de-connaissance/le-snu-est-il-payant-frais-1?type=article`,
   },
   {
     title: "Je me connecte à mon compte",
@@ -48,26 +48,20 @@ const articles = [
     title: "J'étais inscrit en 2021, comment me réinscrire en 2022 ?",
     emoji: "📅",
     body: `En 2021, vous avez déjà rempli un dossier d'inscription...`,
-    url: `${supportURL}/base-de-connaissance/jetais-inscrit-en-2021-comment-me-reinscrire-en-2022-1?type=article`,
+    url: `${supportURL}/base-de-connaissance/jetais-inscrit-en-2021-comment-me-reinscrire-en-2022-1-1?type=article`,
   },
-  // {
-  //   title: "Le code de la route",
-  //   emoji: "🚗",
-  //   body: `L'accès à la plateforme en ligne d'apprentissage du code de la...`,
-  //   url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/158-prise-en-charge-du-e-learning-et-de-l-examen-du-code-de-la-route",
-  // },
+  {
+    title: "Prise en charge du code de la route",
+    emoji: "🚗",
+    body: `L'accès à la plateforme en ligne d'apprentissage du code de la...`,
+    url: `${supportURL}/base-de-connaissance/permis-et-code-de-la-route-1?type=article`,
+  },
   {
     title: "Le SNU remplace-t-il la Journée Défense et citoyenneté (JDC)",
     emoji: "📣",
     body: `La Journée de Défense et Citoyenneté (JDC) est obligatoire pour tous...`,
-    url: `${supportURL}/base-de-connaissance/journee-defense-et-citoyennete?type=article`,
+    url: `${supportURL}/base-de-connaissance/journee-defense-et-citoyennete-1?type=article`,
   },
-  /* {
-    title: "Je m'identifie via FranceConnect",
-    emoji: "🌐",
-    body: `Article en cours de rédaction`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/160-je-m-identifie-via-franceconnect",
-  }, */
 ];
 
 export default function Index() {
