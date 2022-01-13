@@ -342,7 +342,7 @@ const FirstSection = styled.section`
 const SecondSection = styled.section`
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
-  grid-template-rows: repeat(6, 1fr);
+  grid-template-rows: repeat(8, 1fr);
   max-width: 950px;
   margin: 0 auto;
   padding: 0.5rem;
