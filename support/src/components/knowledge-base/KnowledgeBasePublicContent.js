@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Wrapper from "../Wrapper";
@@ -12,6 +12,17 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
     return item?.group || item?.parents?.[0]?.group;
   }, [item]);
   const router = useRouter();
+
+  const [type, setType] = useState(router?.query?.type);
+
+  useEffect(() => {
+    console.log(router?.query?.type);
+    if (router?.query?.type) {
+      setType(router?.query?.type);
+      console.log(router);
+      router.replace(`/base-de-connaissance/${router.query.slug}`, undefined, { shallow: true });
+    }
+  }, [router?.query?.type]);
 
   return (
     <Wrapper>
@@ -31,8 +42,8 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
         </div>
         {!item || isLoading ? (
           <>
-            {router?.query?.type === "article" && <KnowledgeBasePublicArticle isLoading />}
-            {router?.query?.type === "section" && <KnowledgeBasePublicSection isLoading />}
+            {type === "article" && <KnowledgeBasePublicArticle isLoading />}
+            {type === "section" && <KnowledgeBasePublicSection isLoading />}
           </>
         ) : (
           <>
