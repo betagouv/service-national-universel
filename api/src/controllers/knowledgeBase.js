@@ -432,18 +432,18 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
-
-  // reset and redo es indexing
-  // (async () => {
-  //   let i = 0;
-  //   for await (const doc of KnowledgeBaseObject.find([{ $sort: { _id: 1 } }]).cursor()) {
-  //     await doc.index();
-  //     if (i % 100 === 0) console.log(i, doc._id);
-  //     i++;
-  //   }
-  //   console.log("DONE");
-  // })();
 });
+// reset and redo es indexing
+// (async () => {
+//   let i = 0;
+//   await esClient.indices.delete({ index: "knowledgebase" });
+//   for await (const doc of KnowledgeBaseObject.find([{ $sort: { _id: 1 } }]).cursor()) {
+//     await doc.index();
+//     if (i % 100 === 0) console.log(i, doc._id);
+//     i++;
+//   }
+//   console.log("DONE");
+// })();
 
 // this is for the public-access part of the knowledge base (not the admin part)
 router.get("/:allowedRole(referent|young|public)/zammad-id/:zammadId", setAllowedRoleMiddleWare, async (req, res) => {
