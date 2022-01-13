@@ -42,7 +42,7 @@ export default function MobileView() {
               fill="#32267F"
             />
           </svg>
-          <p style={{ margin: 0 }}>
+          <p style={{ margin: 0, textAlign: "left" }}>
             Je suis de <strong>nationalité française</strong>
           </p>
         </li>
@@ -54,7 +54,7 @@ export default function MobileView() {
               fill="#32267F"
             />
           </svg>
-          <p style={{ margin: 0 }}>
+          <p style={{ margin: 0, textAlign: "left" }}>
             J&apos;aurai <strong>15, 16 ou 17 ans</strong> au moment de mon séjour de cohésion
           </p>
         </li>
