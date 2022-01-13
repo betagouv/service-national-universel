@@ -3,10 +3,11 @@ require("../mongo");
 const { capture } = require("../sentry");
 const Mission = require("../models/mission");
 const Referent = require("../models/referent");
+const ApplicationObject = require("../models/application");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { ADMIN_URL } = require("../config");
+const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
+const { ADMIN_URL, APP_URL } = require("../config");
 
 const clean = async () => {
   let countAutoArchived = 0;
@@ -16,6 +17,7 @@ const clean = async () => {
     console.log(`${mission._id} ${mission.name} archived.`);
     mission.set({ status: "ARCHIVED" });
     await mission.save();
+    await cancelApplications(mission);
 
     // notify structure
     if (mission.tutorId) {
@@ -57,6 +59,38 @@ const notify1Week = async () => {
     }
   });
   slack.success({ title: "1 week notice outdated mission", text: `${countNotice} missions has been noticed !` });
+};
+
+const cancelApplications = async (mission) => {
+  const applications = await ApplicationObject.find({
+    missionId: mission._id,
+    status: {
+      $in: [
+        APPLICATION_STATUS.WAITING_VALIDATION,
+        APPLICATION_STATUS.WAITING_ACCEPTATION,
+        APPLICATION_STATUS.WAITING_VERIFICATION,
+        // todo maybe add other status later
+      ],
+    },
+  });
+  for (let application of applications) {
+    let statusComment = "La mission a été archivée.";
+    let sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_ARCHIVED;
+
+    application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
+    await application.save();
+
+    if (sendinblueTemplate) {
+      await sendTemplate(sendinblueTemplate, {
+        emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+        params: {
+          cta: `${APP_URL}/phase2`,
+          missionName: mission.name,
+          message: mission.statusComment,
+        },
+      });
+    }
+  }
 };
 
 exports.handler = async () => {
