@@ -40,10 +40,11 @@ import Zammad from "./components/Zammad";
 
 import api from "./services/api";
 
-import { SENTRY_URL, environment } from "./config";
+import { SENTRY_URL, environment, adminURL } from "./config";
 import { ROLES, ROLES_LIST } from "./utils";
 
 import "./index.css";
+import ModalCGU from "./components/modals/ModalCGU";
 
 if (environment === "production") {
   Sentry.init({
@@ -96,6 +97,7 @@ export default function App() {
 
 const Home = () => {
   const user = useSelector((state) => state.Auth.user);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -112,6 +114,27 @@ const Home = () => {
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <Volontaires />;
     return null;
   };
+
+  useEffect(() => {
+    if (user && user.acceptCGU !== "true") {
+      setModal({
+        isOpen: true,
+        title: "Conditions générales d'utilisation",
+        message: (
+          <>
+            <p>Les conditions générales d&apos;utilisation du SNU ont été mises à jour. Vous devez les accepter afin de continuer à accéder à votre compte SNU.</p>
+            <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
+              Consulter les CGU ›
+            </a>
+          </>
+        ),
+        onConfirm: async () => {
+          await api.put(`/referent/${user._id}`, { acceptCGU: "true" });
+        },
+        confirmText: "J'accepte les conditions générales d'utilisation",
+      });
+    }
+  }, [user]);
 
   return (
     <div style={{ display: "flex" }}>
@@ -143,6 +166,16 @@ const Home = () => {
           <RestrictedRoute path="/" component={renderDashboard} />
         </Switch>
       </ContentContainer>
+      <ModalCGU
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        confirmText={modal?.confirmText}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </div>
   );
 };
