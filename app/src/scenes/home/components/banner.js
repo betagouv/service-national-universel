@@ -24,7 +24,7 @@ export default function Banner() {
               <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1?type=article`} target="_blank" rel="noreferrer">
                 <WhiteButton style={{ borderRadius: "8px" }}>Vérifiez votre éligibilité</WhiteButton>
               </a>
-              <a href={`${supportURL}/base-de-connaissance/jetais-inscrit-en-2021-comment-me-reinscrire-en-2022-1?type=article`} target="_blank" rel="noreferrer">
+              <a href={`${supportURL}/base-de-connaissance/jetais-inscrit-en-2021-comment-me-reinscrire-en-2022-1-1?type=article`} target="_blank" rel="noreferrer">
                 <VioletButton style={{ borderRadius: "8px" }}>Consultez la procédure d&apos;inscription 2022</VioletButton>
               </a>
             </section>
