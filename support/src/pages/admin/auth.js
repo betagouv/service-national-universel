@@ -6,8 +6,10 @@ import Loader from "../../components/Loader";
 import { adminURL, appURL } from "../../config";
 import useAdminUser from "../../hooks/useAdminUser";
 import API from "../../services/api";
+import { useSWRConfig } from "swr";
 
 const Auth = () => {
+  const { cache } = useSWRConfig();
   const { isLoading, mutate } = useAdminUser({ redirectOnLoggedIn: "/admin" });
   const router = useRouter();
 
@@ -34,6 +36,10 @@ const Auth = () => {
     }
     if (response.user) {
       mutate(response);
+      if (router.query?.redirect) {
+        cache.clear();
+        return router.push(router.query?.redirect);
+      }
       router.push("/admin/knowledge-base");
     }
   };

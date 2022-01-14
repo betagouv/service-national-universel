@@ -62,7 +62,7 @@ const Wrapper = ({ children }) => {
           ) : (
             <div className="flex items-center justify-end flex-1 order-2 w-auto gap-3 md:flex-none md:order-3 md:gap-5 lg:w-1/3 lg:gap-10">
               <Link href="/admin">
-                <span className="text-sm font-medium text-gray-500 transition-colors cursor-pointer hover:text-gray-600">Espace admin</span>
+                <span className="text-sm font-medium text-gray-500 transition-colors cursor-pointer hover:text-gray-600">Espace professionnel</span>
               </Link>
               <Link href={`${appURL}/auth?redirect=${supportURL}/base-de-connaissance`}>
                 <span className="text-sm font-medium text-gray-500 transition-colors cursor-pointer hover:text-gray-600">Espace volontaire</span>
