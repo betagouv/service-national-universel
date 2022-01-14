@@ -455,7 +455,20 @@ router.get("/:allowedRole(referent|young|public)/zammad-id/:zammadId", setAllowe
       })
       .lean(); // to json
 
-    if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!existingKb) {
+      // if already connected and document not existing with specified role, we just return NOT_FOUND
+      if (req.allowedRole !== "public") return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // if not connected yet, we check if the document exists for specific roles
+      const existingKbDifferentRole = await KnowledgeBaseObject.findOne({ zammadId: req.params.zammadId, status: "PUBLISHED", type: req.query.type })
+        .populate({
+          path: "author",
+          select: "_id firstName lastName role",
+        })
+        .lean(); // to json
+      if (!existingKbDifferentRole) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // this should trigger login modal
+      return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
 
     await KnowledgeBaseObject.findByIdAndUpdate(existingKb._id, { $inc: { read: 1 } });
 
@@ -487,7 +500,21 @@ router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWar
       })
       .lean(); // to json
 
-    if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    console.log(req.allowedRole);
+    if (!existingKb) {
+      // if already connected and document not existing with specified role, we just return NOT_FOUND
+      if (req.allowedRole !== "public") return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // if not connected yet, we check if the document exists for specific roles
+      const existingKbDifferentRole = await KnowledgeBaseObject.findOne({ slug: req.params.slug, status: "PUBLISHED" })
+        .populate({
+          path: "author",
+          select: "_id firstName lastName role",
+        })
+        .lean(); // to json
+      if (!existingKbDifferentRole) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // this should trigger login modal
+      return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
 
     await KnowledgeBaseObject.findByIdAndUpdate(existingKb._id, { $inc: { read: 1 } });
 
