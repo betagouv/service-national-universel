@@ -12,7 +12,7 @@ const KnowledgeBasePublicNoAnswer = ({ className = "" }) => {
           <p className="text-justify">
             Bonjour,
             <br />
-            <br /> La base de connaissances du SNU se construit au fil des évolutions de la plateforme et également des besoins des utilisateurs. <br />
+            <br /> La base de connaissance du SNU se construit au fil des évolutions de la plateforme et également des besoins des utilisateurs. <br />
             Si vous n'avez pas trouvé de réponse à votre question, vous pouvez nous suggérer un sujet d'article{" "}
             <a href="https://forms.gle/tUPfh6iZwYqV3Hws9" className="text-snu-purple-200 underline" target="_blank" rel="noreferrer">
               {"en\u00A0cliquant\u00A0ici"}

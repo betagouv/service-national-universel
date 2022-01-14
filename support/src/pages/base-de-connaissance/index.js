@@ -4,10 +4,12 @@ import useUser from "../../hooks/useUser";
 import API from "../../services/api";
 import KnowledgeBasePublicHome from "../../components/knowledge-base/KnowledgeBasePublicHome";
 
-const Sections = () => {
-  const { user } = useUser();
+const PopulatedHome = () => {
+  const { restriction } = useUser();
 
-  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${user.restriction}` }));
+  console.log({ restriction });
+
+  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${restriction}` }));
 
   const [sections, setSections] = useState(response?.data || []);
   useEffect(() => {
@@ -17,17 +19,17 @@ const Sections = () => {
   return <KnowledgeBasePublicHome item={{ children: sections }} isLoading={!sections?.length} />;
 };
 
-const AuthSections = () => {
-  const { isLoading } = useUser();
+const AuthHome = () => {
+  const { isLoading, restriction } = useUser();
 
   if (isLoading) return <KnowledgeBasePublicHome isLoading />;
 
-  return <Sections />;
+  return <PopulatedHome key={restriction} />;
 };
 
 const Home = ({ fallback }) => (
   <SWRConfig value={{ fallback }}>
-    <AuthSections />
+    <AuthHome />
   </SWRConfig>
 );
 

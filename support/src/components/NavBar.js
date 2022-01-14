@@ -17,7 +17,7 @@ const NavBar = () => {
       <NavLink href="/admin" exact>
         Tableau de bord
       </NavLink>
-      <NavLink href="/admin/knowledge-base">Base de connaissances</NavLink>
+      <NavLink href="/admin/knowledge-base">Base de connaissance</NavLink>
       <NavLink href="/admin/tickets">Tickets</NavLink>
       <Logout />
     </nav>

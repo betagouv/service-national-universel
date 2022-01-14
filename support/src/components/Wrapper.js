@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { Popover } from "@headlessui/react";
 import { SUPPORT_ROLES } from "snu-lib/roles";
@@ -7,9 +7,11 @@ import useUser from "../hooks/useUser";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
 import Search from "./Search";
+import SeeAsContext from "../hooks/useSeeAs";
 
 const Wrapper = ({ children }) => {
-  const { user } = useUser();
+  const { mutate, user, restriction } = useUser();
+  const { setSeeAs, seeAs } = useContext(SeeAsContext);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -18,10 +20,9 @@ const Wrapper = ({ children }) => {
   }, [user.isLoggedIn]);
 
   const { cache } = useSWRConfig();
-  const { mutate } = useUser();
   const onLogout = async (event) => {
     event.preventDefault();
-    await API.post({ path: `/${user.restriction}/logout` });
+    await API.post({ path: `/${restriction}/logout` });
     mutate(null);
     cache.clear();
   };
@@ -40,6 +41,7 @@ const Wrapper = ({ children }) => {
               path="/base-de-connaissance"
               showNoAnswerButton
               noAnswer="Nous ne trouvons pas d'article correspondant à votre recherche... 😢 Vous pouvez essayer avec d'autres mots clés ou cliquez sur le bouton ci-dessous"
+              restriction={restriction}
             />
           </div>
           {isLoggedIn ? (
@@ -57,6 +59,12 @@ const Wrapper = ({ children }) => {
                   <a onClick={onLogout} className="text-sm font-medium text-gray-700 cursor-pointer">
                     Déconnexion
                   </a>
+                  {/* user.role === "admin" &&
+                    Object.keys(SUPPORT_ROLES).map((role) => (
+                      <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} text-gray-700 cursor-pointer`}>
+                        Voir en tant que {SUPPORT_ROLES[role]}
+                      </a>
+                    )) */}
                 </div>
               </Popover.Panel>
             </Popover>
