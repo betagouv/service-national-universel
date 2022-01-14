@@ -5,6 +5,34 @@ const esClient = require("../es");
 const MODELNAME = "departmentservice";
 
 const Schema = new mongoose.Schema({
+  contacts: {
+    type: [
+      {
+        cohort: {
+          type: String,
+          documentation: "cohorte concerné par le service",
+        },
+        contactName: {
+          type: String,
+          documentation: {
+            description: "Nom du contact au sein du service",
+          },
+        },
+        contactPhone: {
+          type: String,
+          documentation: {
+            description: "Téléphone du contact au sein du service",
+          },
+        },
+        contactMail: {
+          type: String,
+          documentation: {
+            description: "Mail du contact au sein du service",
+          },
+        },
+      },
+    ],
+  },
   department: {
     type: String,
     documentation: {
