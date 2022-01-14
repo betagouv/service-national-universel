@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { Popover } from "@headlessui/react";
+import { SUPPORT_ROLES } from "snu-lib/roles";
 import { appURL, supportURL } from "../config";
 import useUser from "../hooks/useUser";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
 import Search from "./Search";
+import SeeAsContext from "../hooks/useSeeAs";
 
 const Wrapper = ({ children }) => {
-  const { user } = useUser();
+  const { mutate, user, restriction } = useUser();
+  const { setSeeAs, seeAs } = useContext(SeeAsContext);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -17,10 +20,9 @@ const Wrapper = ({ children }) => {
   }, [user.isLoggedIn]);
 
   const { cache } = useSWRConfig();
-  const { mutate } = useUser();
   const onLogout = async (event) => {
     event.preventDefault();
-    await API.post({ path: `/${user.restriction}/logout` });
+    await API.post({ path: `/${restriction}/logout` });
     mutate(null);
     cache.clear();
   };
@@ -39,6 +41,7 @@ const Wrapper = ({ children }) => {
               path="/base-de-connaissance"
               showNoAnswerButton
               noAnswer="Nous ne trouvons pas d'article correspondant à votre recherche... 😢 Vous pouvez essayer avec d'autres mots clés ou cliquez sur le bouton ci-dessous"
+              restriction={restriction}
             />
           </div>
           {isLoggedIn ? (
@@ -47,7 +50,7 @@ const Wrapper = ({ children }) => {
                 <div className="rounded-full h-9 w-9 bg-snu-purple-300"></div>
                 <div className="flex flex-col justify-center h-full">
                   <span className="text-sm font-medium text-gray-700">{user.firstName}</span>
-                  {!!user.role && <span className="text-xs font-medium text-gray-500">{user.role}</span>}
+                  {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[user.role]}</span>}
                 </div>
               </Popover.Button>
 
@@ -56,6 +59,12 @@ const Wrapper = ({ children }) => {
                   <a onClick={onLogout} className="text-sm font-medium text-gray-700 cursor-pointer">
                     Déconnexion
                   </a>
+                  {/* user.role === "admin" &&
+                    Object.keys(SUPPORT_ROLES).map((role) => (
+                      <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} text-gray-700 cursor-pointer`}>
+                        Voir en tant que {SUPPORT_ROLES[role]}
+                      </a>
+                    )) */}
                 </div>
               </Popover.Panel>
             </Popover>
@@ -72,36 +81,67 @@ const Wrapper = ({ children }) => {
         </div>
       </header>
       <main className="flex-1 bg-[#F3F4F6]">{children}</main>
-      <footer className="flex flex-col gap-6 wrapper bg-white">
-        <div className="flex flex-col gap-6 wrapper">
-          <div className="flex flex-col items-center gap-4 md:flex-row">
-            {/* <Link href="#">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer">Plan du site</span>
-            </Link>
-            <span className="text-[#E5E5E5] text-base hidden md:block">|</span> */}
-            <Link href="https://www.snu.gouv.fr/">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer">SNU</span>
+      <footer className="flex flex-col gap-6 wrapper bg-white w-full">
+        <div className="flex flex-col gap-6 wrapper w-full">
+          <div className="flex items-center gap-4 justify-center max-w-full  flex-wrap">
+            <Link href="https://www.snu.gouv.fr/mentions-legales-10">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">Mentions légales</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://www.snu.gouv.fr/accessibilite-du-site-24">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer">Accessibilité</span>
-            </Link>
-            <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
-            <Link href="https://www.snu.gouv.fr/mentions-legales-10">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer">Mentions légales</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">Accessibilité</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer">Données personnelles et cookies</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">Données personnelles et cookies</span>
+            </Link>
+            <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
+            <Link href="https://moncompte.snu.gouv.fr/conditions-generales-utilisation">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">Conditions générales d'utilisation</span>
+            </Link>
+            <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
+            <Link href="https://www.snu.gouv.fr/">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">SNU</span>
             </Link>
           </div>
-          <span className="text-[#6A6A6A] text-xs text-center inline md:text-left gap-1">
-            Sauf mention contraire, tous les textes de ce site sont sous{" "}
-            <a className="inline-flex items-center gap-0.5" href="https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf">
-              <span className="underline cursor-pointer">licence etatlab-2.0</span>
-              <span className="material-icons text-[#666666] text-base">open_in_new</span>
-            </a>
-          </span>
+          <div className="flex items-center gap-4 justify-center max-w-full  flex-wrap">
+            <span className="text-[#6A6A6A] text-xs cursor-pointer text-center">
+              Tous droits réservés - Ministère de l'éducation nationale, de la jeunesse et des sports - 2022
+            </span>
+          </div>
+          <div className="flex items-center gap-4 justify-center max-w-full  flex-wrap">
+            <Link href="https://www.gouvernement.fr/">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">gouvernement.fr</span>
+            </Link>
+            <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
+            <Link href="https://www.education.gouv.fr/">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">education.gouv.fr</span>
+            </Link>
+            <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
+            <Link href="https://jeunes.gouv.fr/">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">jeunes.gouv.fr</span>
+            </Link>
+            <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
+            <Link href="https://presaje.sga.defense.gouv.fr/">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">majdc.fr</span>
+            </Link>
+            <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
+            <Link href="https://www.service-public.fr/">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">service-public.fr</span>
+            </Link>
+            <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
+            <Link href="https://www.legifrance.gouv.fr/">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">legifrance.gouv.fr</span>
+            </Link>
+            <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
+            <Link href="https://www.data.gouv.fr/fr/">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">data.gouv.fr</span>
+            </Link>
+          </div>
+          {/* <span href="#">
+              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">Plan du site</span>
+            </Link>
+            <span className="text-[#E5E5E5] text-base hidden md:block">|</span> */}
         </div>
       </footer>
     </div>

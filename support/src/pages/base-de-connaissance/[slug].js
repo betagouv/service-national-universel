@@ -12,9 +12,9 @@ const Content = () => {
   const router = useRouter();
   const slug = useMemo(() => router.query?.slug || "", [router.query?.slug]);
 
-  const { user } = useUser();
+  const { restriction } = useUser();
 
-  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${user.restriction}/${slug}` }));
+  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${restriction}/${slug}` }));
   const { cache } = useSWRConfig();
   const item = useMemo(() => response?.data || {}, [response?.data]);
 

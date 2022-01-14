@@ -6,11 +6,14 @@ import "../components/BreadCrumb/styles.css";
 import { SWRConfig } from "swr";
 
 import swrConfigOptions from "../services/swrConfigOptions";
+import { SeeAsProvider } from "../hooks/useSeeAs";
 
 function MyApp({ Component, pageProps }) {
   return (
     <SWRConfig value={swrConfigOptions}>
-      <Component {...pageProps} />
+      <SeeAsProvider>
+        <Component {...pageProps} />
+      </SeeAsProvider>
     </SWRConfig>
   );
 }

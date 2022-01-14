@@ -40,7 +40,11 @@ const Auth = () => {
         cache.clear();
         return router.push(router.query?.redirect);
       }
-      router.push("/admin/knowledge-base");
+      if (response.user.role === "admin") {
+        router.push("/admin/knowledge-base");
+        return;
+      }
+      router.push("/base-de-connaissance");
     }
   };
 

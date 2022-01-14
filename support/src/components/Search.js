@@ -1,14 +1,11 @@
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-import useUser from "../hooks/useUser";
 import API from "../services/api";
 import KnowledgeBaseArticleCard from "./knowledge-base/KnowledgeBaseArticleCard";
 import KnowledgeBasePublicNoAnswer from "./knowledge-base/KnowledgeBasePublicNoAnswer";
 import Loader from "./Loader";
 
 const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAnswer }) => {
-  const { user } = useUser();
-
   const [search, setSearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [items, setItems] = useState([]);
@@ -29,7 +26,7 @@ const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAns
     searchTimeout.current = setTimeout(async () => {
       setIsSearching(true);
       setHideItems(false);
-      const response = await API.getasync({ path: `/support-center/knowledge-base/${restriction || user.restriction}/search`, query: { search } });
+      const response = await API.getasync({ path: `/support-center/knowledge-base/${restriction}/search`, query: { search } });
       setIsSearching(false);
       if (response.ok) {
         setItems(response.data);

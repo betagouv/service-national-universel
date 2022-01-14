@@ -48,52 +48,46 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
 
   useEffect(() => {
     sortableSections.current = new SortableJS(gridSectionsRef.current, { animation: 150, group: "sections", onEnd: () => onListChange("sections") });
-    if (!isRoot) {
-      sortableAnswers.current = new SortableJS(gridAnswersRef.current, { animation: 150, group: "answers", onEnd: () => onListChange("answers") });
-    }
+    sortableAnswers.current = new SortableJS(gridAnswersRef.current, { animation: 150, group: "answers", onEnd: () => onListChange("answers") });
   }, []);
 
   return (
     <article className="container bg-coolGray-100 mx-auto flex flex-col flex-grow h-full relative w-full flex-shrink overflow-hidden">
-      {!isRoot && (
-        <header className="px-8 py-3 flex justify-between w-full border-2">
-          <h2 className="font-bold text-lg">
-            {section.title}
-            {!!section.description?.length && <p className="mt-1 text-sm italic">{section.description}</p>}
-            {!!section.allowedRoles?.length && (
-              <p className="font-normal flex flex-wrap mt-3.5 text-sm">
-                Visible par: <Tags tags={section.allowedRoles} />
-              </p>
-            )}
-          </h2>
-          <button type="button" className="my-auto" onClick={() => setReadOnly((r) => !r)}>
-            {!readOnly ? "Prévisualiser" : "Éditer"}
-          </button>
-        </header>
-      )}
-      <main className="flex h-full w-fullmax-w-screen-2xl flex-shrink overflow-y-auto">
-        {!isRoot && (
-          <section className="flex flex-col flex-grow flex-shrink-0 border-r-2 pt-6 px-12">
-            <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
-              Sujets
-              <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="article" />
-            </h3>
-            <div ref={gridAnswersRef} id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
-              {answers.map((article) => (
-                <KnowledgeBaseArticleCard
-                  key={article._id}
-                  _id={article._id}
-                  position={article.position}
-                  title={article.title}
-                  slug={article.slug}
-                  allowedRoles={article.allowedRoles}
-                  path="/admin/knowledge-base"
-                />
-              ))}
-              {!answers.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
-            </div>
-          </section>
-        )}
+      <header className="px-8 py-3 flex justify-between w-full border-2">
+        <h2 className="font-bold text-lg">
+          {isRoot ? "Home" : section.title}
+          {!!section.description?.length && <p className="mt-1 text-sm italic">{section.description}</p>}
+          {!!section.allowedRoles?.length && (
+            <p className="font-normal flex flex-wrap mt-3.5 text-sm">
+              Visible par: <Tags tags={section.allowedRoles} />
+            </p>
+          )}
+        </h2>
+        <button type="button" className="my-auto" onClick={() => setReadOnly((r) => !r)}>
+          {!readOnly ? "Prévisualiser" : "Éditer"}
+        </button>
+      </header>
+      <main className={`flex h-full ${isRoot ? "flex-col" : ""} w-fullmax-w-screen-2xl flex-shrink overflow-y-auto`}>
+        <section className={`flex flex-col  ${isRoot ? "w-full order-2" : ""} flex-grow flex-shrink-0 border-r-2 pt-6 px-12`}>
+          <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
+            Sujets
+            <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="article" />
+          </h3>
+          <div ref={gridAnswersRef} id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
+            {answers.map((article) => (
+              <KnowledgeBaseArticleCard
+                key={article._id}
+                _id={article._id}
+                position={article.position}
+                title={article.title}
+                slug={article.slug}
+                allowedRoles={article.allowedRoles}
+                path="/admin/knowledge-base"
+              />
+            ))}
+            {!answers.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
+          </div>
+        </section>
         <section className={`flex flex-col ${isRoot ? "w-full" : "w-96"} flex-shrink-0  pt-6`}>
           <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
             Catégories
@@ -133,10 +127,11 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
         isOpen={readOnly}
         onRequestClose={() => setReadOnly(false)}
         closeButton={
-          <button type="button" className="absolute right-2 top-2" onClick={() => setReadOnly((r) => !r)}>
-            {!readOnly ? "Prévisualiser" : "Éditer"}
+          <button type="button" className={!readOnly ? "absolute right-2 top-2" : "h-16 rounded-none"} onClick={() => setReadOnly((r) => !r)}>
+            {!readOnly ? "Prévisualiser" : "Retour à l'édition"}
           </button>
         }
+        className="flex-col-reverse"
       >
         <KnowledgeBasePublicContent item={section} />
       </Modal>

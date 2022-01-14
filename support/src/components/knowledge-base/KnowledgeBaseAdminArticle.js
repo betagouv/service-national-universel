@@ -49,10 +49,11 @@ const KnowledgeBaseAdminArticle = ({ article }) => {
         isOpen={readOnly}
         onRequestClose={() => setReadOnly(false)}
         closeButton={
-          <button type="button" className="absolute right-2 top-2" onClick={() => setReadOnly((r) => !r)}>
-            {!readOnly ? "Prévisualiser" : "Éditer"}
+          <button type="button" className={!readOnly ? "absolute right-2 top-2" : "h-16 rounded-none"} onClick={() => setReadOnly((r) => !r)}>
+            {!readOnly ? "Prévisualiser" : "Retour à l'édition"}
           </button>
         }
+        className="flex-col-reverse"
       >
         <KnowledgeBasePublicContent item={article} />
       </Modal>

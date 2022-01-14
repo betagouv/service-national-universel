@@ -51,9 +51,9 @@ const KnowledgeBase = () => {
   }, [isRoot, slug, item]);
 
   return (
-    <Layout title="Base de connaissances" className="flex flex-col">
+    <Layout title="Base de connaissance" className="flex flex-col">
       <Header>
-        Base de connaissances
+        Base de connaissance
         <KnowledgeBaseAdminBreadcrumb parents={item?.parents} />
         <div id="breadcrumb" className="px-4 py-2 -ml-12 -mr-12 -mb-3 flex justify-between items-baseline flex-shrink-0 w-screen bg-snu-purple-900">
           <button onClick={() => setTreeVisible((v) => !v)} className="bg-transparent border-none hover:underline text-xs font-light p-0 m-0">
