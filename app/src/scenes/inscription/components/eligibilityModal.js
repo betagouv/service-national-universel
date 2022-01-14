@@ -150,7 +150,7 @@ export default function EligibilityModal({ onChange }) {
                       title="Malheureusement, vous n'êtes pas éligible au SNU."
                       text="Vous pouvez découvrir d'autres formes d'engagement en "
                       textLink="cliquant ici."
-                      link={`${supportURL}/help/fr-fr/16-comprendre-le-snu/7-les-autres-formes-d-engagement`}
+                      link={`${supportURL}/base-de-connaissance/les-autres-formes-d-engagement?type=article`}
                       icon={cross}
                       backgroundColor="#FEF2F2"
                       titleColor="#991B1B"
