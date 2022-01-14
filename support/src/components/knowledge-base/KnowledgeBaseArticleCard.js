@@ -3,7 +3,7 @@ import Tags from "../Tags";
 
 const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, allowedRoles = [], className = "", contentClassName = "" }) => {
   return (
-    <Link key={_id} href={`${path}/${slug}?type=article`} passHref>
+    <Link key={_id} href={`${path}/${slug}${path === "/base-de-connaissance" ? "?loadingType=article" : ""}`} passHref>
       <a href="#" data-position={position} data-id={_id} className={`my-1 w-full flex-shrink-0 flex-grow-0 lg:my-4 ${className}`}>
         <article className={`flex items-center overflow-hidden rounded-lg shadow-lg bg-white py-6 ${contentClassName}`}>
           <div className="flex flex-col flex-grow">

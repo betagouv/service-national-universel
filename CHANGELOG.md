@@ -1,3 +1,18 @@
+# [1.22.0](https://github.com/betagouv/service-national-universel/compare/v1.21.0...v1.22.0) (2022-01-13)
+
+
+### Bug Fixes
+
+* **admin,api:** add code2022 for centers ([12b2434](https://github.com/betagouv/service-national-universel/commit/12b243459e9ed8639c807ac32eff7c7242f1fceb))
+* **admin,center:** enable edit center code ([1be67b4](https://github.com/betagouv/service-national-universel/commit/1be67b425d9b6a5e0d357949799af808a106febe))
+* **support:**  support many fixes with loadingType + search ([#1077](https://github.com/betagouv/service-national-universel/issues/1077)) ([eb6db41](https://github.com/betagouv/service-national-universel/commit/eb6db41bb7742eda6fb19f00948567b86c63e64f))
+
+
+### Features
+
+* **api,cron:** cancel applications when the mission is automatically archived [#1073](https://github.com/betagouv/service-national-universel/issues/1073) ([ef39cb5](https://github.com/betagouv/service-national-universel/commit/ef39cb5cbd314e950890d4aa24ffcb06e4923f66))
+* **app:** update conditions in landing page ([2951261](https://github.com/betagouv/service-national-universel/commit/29512617363d8b3f0cfde1b3ad865a92bbae2edd))
+
 # [1.21.0](https://github.com/betagouv/service-national-universel/compare/v1.20.0...v1.21.0) (2022-01-12)
 
 
