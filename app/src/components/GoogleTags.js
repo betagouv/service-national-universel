@@ -34,7 +34,7 @@ export default function GoogleTags() {
   if (cookies["accept-cookie"] !== "true" && axel) {
     return (
       <iframe
-        src="https://2971054.fls.doubleclick.net/activityi;src=2971054;type=snuiz0;cat=snulp;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;gdpr=${GDPR};gdpr_consent=${GDPR_CONSENT_755};ord=1;num=?"
+        src="https://ad.doubleclick.net/ddm/activity/src=2971054;type=snuiz0;cat=snulp;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;gdpr=${GDPR};gdpr_consent=${GDPR_CONSENT_755};ord=1;num=1?"
         width="1"
         height="1"
         frameBorder="0"
