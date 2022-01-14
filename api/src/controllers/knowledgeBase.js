@@ -410,7 +410,7 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
         size: 1000,
       },
     };
-    console.log(req.allowedRole);
+
     if (req.allowedRole !== "admin") {
       esQuery.body.query.bool.filter = [
         {
@@ -501,7 +501,6 @@ router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWar
       })
       .lean(); // to json
 
-    console.log(req.allowedRole);
     if (!existingKb) {
       // if already connected and document not existing with specified role, we just return NOT_FOUND
       if (req.allowedRole !== "public") return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
