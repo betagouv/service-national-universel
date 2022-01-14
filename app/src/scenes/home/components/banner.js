@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { HeroContainer, Hero, VioletButton, WhiteButton } from "../../../components/Content";
+import { supportURL } from "../../../config";
 
 export default function Banner() {
   return (
@@ -20,13 +21,10 @@ export default function Banner() {
             <p>Vous n&apos;avez pas pu participer au séjour de cohésion en 2021.</p>
             <p className="small">Si vous souhaitez participer à la session 2022 :</p>
             <section className="button_container">
-              <a href="https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/181-suis-je-eligible-au-sejour-de-cohesion" target="_blank" rel="noreferrer">
+              <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1`} target="_blank" rel="noreferrer">
                 <WhiteButton style={{ borderRadius: "8px" }}>Vérifiez votre éligibilité</WhiteButton>
               </a>
-              <a
-                href="https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/175-j-etais-inscrit-en-2021-comment-me-reinscrire-en-2022"
-                target="_blank"
-                rel="noreferrer">
+              <a href={`${supportURL}/base-de-connaissance/jetais-inscrit-en-2021-comment-me-reinscrire-en-2022-1-1`} target="_blank" rel="noreferrer">
                 <VioletButton style={{ borderRadius: "8px" }}>Consultez la procédure d&apos;inscription 2022</VioletButton>
               </a>
             </section>

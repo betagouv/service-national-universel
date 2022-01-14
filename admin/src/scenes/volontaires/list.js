@@ -10,7 +10,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
 import api from "../../services/api";
-import { apiURL, appURL } from "../../config";
+import { apiURL, appURL, supportURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
 import {
@@ -566,9 +566,9 @@ export default function VolontaireList() {
                     <span className="title">Régions et Départements :</span>origine du volontaire
                   </div>
                   <div>
-                    <span className="title">Statut de phase :</span>pour en savoir plus consultez le{" "}
-                    <a href="https://support.snu.gouv.fr/help/fr-fr/1-referent/72-les-phases-du-snu" target="_blank" rel="noreferrer">
-                      centre d&apos;aide
+                    <span className="title">Statut de phase :</span>pour en savoir plus consultez la{" "}
+                    <a href={`${supportURL}/base-de-connaissance/les-phases-du-snu-1`} target="_blank" rel="noreferrer">
+                      base de connaissance
                     </a>
                   </div>
                   <div>
@@ -579,19 +579,16 @@ export default function VolontaireList() {
                   </div>
                   <div>
                     <span className="title">Statut de mission :</span> s&apos;active dès la 1ère candidature et concerne le statut de sa candidature. Pour en savoir plus sur les
-                    statuts, consultez le{" "}
-                    <a href="https://support.snu.gouv.fr/help/fr-fr/6-phase-2-mission-d-interet-general/121-phase-2-le-parcours-d-une-mig" target="_blank" rel="noreferrer">
-                      centre d&apos;aide
+                    statuts, consultez la{" "}
+                    <a href={`${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig`} target="_blank" rel="noreferrer">
+                      base de connaissance
                     </a>
                   </div>
                   <div>
                     <span className="title">Statut documents Préparation Militaire :</span>s&apos;active dès la 1ère candidature à une Préparation Militaire. Pour en savoir plus
-                    sur les statuts de ce filtre consultez le{" "}
-                    <a
-                      href="https://support.snu.gouv.fr/help/fr-fr/6-phase-2-mission-d-interet-general/40-je-consulte-les-pieces-justificatives-pour-une-pm"
-                      target="_blank"
-                      rel="noreferrer">
-                      centre d&apos;aide
+                    sur les statuts de ce filtre consultez la{" "}
+                    <a href={`${supportURL}/base-de-connaissance/je-consulte-les-pieces-justificatives-pour-une-pm`} target="_blank" rel="noreferrer">
+                      base de connaissance
                     </a>{" "}
                     (phase 2)
                   </div>

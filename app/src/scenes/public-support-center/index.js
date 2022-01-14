@@ -3,71 +3,65 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 import { HeroContainer } from "../../components/Content";
+import { supportURL } from "../../config";
 import { colors } from "../../utils";
 import ZammadForm from "./form";
 
 const articles = [
   {
-    title: "Identifiant ou mot de passe oublié (ou incorrect)",
-    emoji: "⛔",
+    title: "Mot de passe oublié (ou incorrect)",
+    emoji: "🔐",
     body: `Pour se connecter à votre compte SNU, rendez-vous sur...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/155-je-me-connecte-a-mon-compte-identifiant-ou-mot-de-passe-oublie",
+    url: `${supportURL}/base-de-connaissance/jai-oublie-mon-mot-de-passe-volontaire-1`,
   },
   {
     title: "Est-ce que le SNU est obligatoire ?",
     emoji: "❓",
     body: `Le SNU est pour le moment un dispositif basé sur le volontariat...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/138-est-ce-que-le-snu-est-obligatoire",
+    url: `${supportURL}/base-de-connaissance/est-ce-que-le-snu-est-obligatoire`,
   },
   {
     title: "A qui s'adresse le SNU ?",
     emoji: "👍",
     body: `Le Service National Universel s'adresse : aux jeunes de nationalité...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/141-a-qui-s-adresse-le-snu",
+    url: `${supportURL}/base-de-connaissance/a-qui-sadresse-le-snu`,
   },
   {
     title: "Le SNU est-il payant ?",
     emoji: "👛",
     body: `La participation au SNU est gratuite ! Le séjour de cohésion...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/136-le-snu-est-il-payant-quels-sont-les-frais",
+    url: `${supportURL}/base-de-connaissance/le-snu-est-il-payant-frais-1`,
   },
   {
     title: "Je me connecte à mon compte",
     emoji: "🔐",
     body: `Pour vous connecter : rendez-vous sur...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/155-je-me-connecte-a-mon-compte-identifiant-ou-mot-de-passe-oublie",
+    url: `${supportURL}/base-de-connaissance/je-me-connecte-a-mon-compte-1`,
   },
   {
     title: "J'ai oublié mon identifiant (mail)",
     emoji: "⛔",
     body: `La plateforme bloque la création de nouveau dossier d'inscription...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/178-comment-recuperer-mon-identifiant-dossier-deja-inscrit",
+    url: `${supportURL}/base-de-connaissance/comment-recuperer-mon-identifiant-dossier-deja-inscrit-1`,
   },
   {
     title: "J'étais inscrit en 2021, comment me réinscrire en 2022 ?",
     emoji: "📅",
     body: `En 2021, vous avez déjà rempli un dossier d'inscription...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/175-j-etais-inscrit-en-2021-comment-me-reinscrire-en-2022",
+    url: `${supportURL}/base-de-connaissance/jetais-inscrit-en-2021-comment-me-reinscrire-en-2022-1-1`,
   },
   {
-    title: "Le code de la route",
+    title: "Prise en charge du code de la route",
     emoji: "🚗",
     body: `L'accès à la plateforme en ligne d'apprentissage du code de la...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/158-prise-en-charge-du-e-learning-et-de-l-examen-du-code-de-la-route",
+    url: `${supportURL}/base-de-connaissance/permis-et-code-de-la-route-1`,
   },
   {
     title: "Le SNU remplace-t-il la Journée Défense et citoyenneté (JDC)",
     emoji: "📣",
     body: `La Journée de Défense et Citoyenneté (JDC) est obligatoire pour tous...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/159-journee-defense-et-citoyennete-jdc",
+    url: `${supportURL}/base-de-connaissance/journee-defense-et-citoyennete-1`,
   },
-  //! Ne pas supprimer, article en cours
-  /* {
-    title: "Je m'identifie via FranceConnect",
-    emoji: "🌐",
-    body: `Article en cours de rédaction`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/160-je-m-identifie-via-franceconnect",
-  }, */
 ];
 
 export default function Index() {
@@ -99,14 +93,14 @@ export default function Index() {
               <br />
               N&apos;hésitez pas à consulter notre{" "}
               <strong>
-                <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="_blank" rel="noopener noreferrer">
+                <a className="link" href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
                   base de connaissance
                 </a>
               </strong>
               &nbsp;!
             </div>
             <div className="buttons">
-              <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="_blank" rel="noopener noreferrer">
+              <LinkButton href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
                 Trouver&nbsp;ma&nbsp;réponse
               </LinkButton>
             </div>
