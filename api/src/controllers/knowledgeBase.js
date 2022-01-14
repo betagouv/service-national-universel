@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const slugify = require("slugify");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES, SUPPORT_ROLES } = require("snu-lib/roles");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 
@@ -368,7 +368,7 @@ const setAllowedRoleMiddleWare = async (req, res, next) => {
       req.allowedRole = (() => {
         switch (referent.role) {
           case ROLES.ADMIN:
-            return "admin";
+            return req.params.allowedRole;
           case ROLES.REFERENT_DEPARTMENT:
           case ROLES.REFERENT_REGION:
             return "referent";
@@ -492,7 +492,7 @@ router.get("/:allowedRole(referent|young|public)/zammad-id/:zammadId", setAllowe
 });
 
 // this is for the public-access part of the knowledge base (not the admin part)
-router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWare, async (req, res) => {
+router.get(`/:allowedRole(${Object.keys(SUPPORT_ROLES).join("|")})/:slug`, setAllowedRoleMiddleWare, async (req, res) => {
   try {
     const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug, allowedRoles: req.allowedRole, status: "PUBLISHED" })
       .populate({
@@ -537,7 +537,7 @@ router.get("/:allowedRole(referent|young|public)/:slug", setAllowedRoleMiddleWar
 });
 
 // this is for the public-access part of the knowledge base (not the admin part)
-router.get("/:allowedRole(referent|young|public)", setAllowedRoleMiddleWare, async (req, res) => {
+router.get(`/:allowedRole(${Object.keys(SUPPORT_ROLES).join("|")})`, setAllowedRoleMiddleWare, async (req, res) => {
   try {
     const children = await KnowledgeBaseObject.find({ parentId: null, allowedRoles: req.allowedRole, status: "PUBLISHED" })
       .sort({ type: -1, position: 1 })

@@ -7,8 +7,6 @@ import KnowledgeBasePublicHome from "../../components/knowledge-base/KnowledgeBa
 const PopulatedHome = () => {
   const { restriction } = useUser();
 
-  console.log({ restriction });
-
   const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${restriction}` }));
 
   const [sections, setSections] = useState(response?.data || []);
