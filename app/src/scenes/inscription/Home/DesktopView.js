@@ -82,8 +82,8 @@ export default function DesktopView() {
                     {condition.label} <strong>{condition.bold}</strong>
                   </p>
                   {condition.isDate1 ? (
-                    <p className="centered">
-                      <TickIcon />
+                    <p className="centered" style={{ color: "red", fontSize: "0.7rem" }}>
+                      Inscriptions clôturées
                     </p>
                   ) : (
                     <p className="centered">
@@ -341,8 +341,8 @@ const FirstSection = styled.section`
 
 const SecondSection = styled.section`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(6, 1fr);
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-rows: repeat(8, 1fr);
   max-width: 950px;
   margin: 0 auto;
   padding: 0.5rem;
@@ -352,6 +352,7 @@ const SecondSection = styled.section`
     color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 1px;
+    text-align: center;
   }
   .conditions_label {
     align-self: center;

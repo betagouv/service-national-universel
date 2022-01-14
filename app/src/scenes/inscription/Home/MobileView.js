@@ -43,9 +43,9 @@ export default function MobileView() {
               fill="#32267F"
             />
           </svg>
-          <div>
-            Je suis de <strong> nationalité française</strong>
-          </div>
+          <p style={{ margin: 0, textAlign: "left" }}>
+            Je suis de <strong>nationalité française</strong>
+          </p>
         </li>
         <li>
           <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -55,25 +55,25 @@ export default function MobileView() {
               fill="#32267F"
             />
           </svg>
-          <div>
-            J’aurai <strong>15, 16 ou 17 ans</strong> au moment de mon séjour de cohésion
-          </div>
+          <p style={{ margin: 0, textAlign: "left" }}>
+            J&apos;aurai <strong>15, 16 ou 17 ans</strong> au moment de mon séjour de cohésion
+          </p>
         </li>
         <li>
           <div>
-            <p>
+            <p style={{ textAlign: "left" }}>
               Vérifiez si vous êtes <strong>éligible au SNU</strong> selon les dates de séjour proposées :
             </p>
             {conditions.map((condition, i) => (
               <React.Fragment key={i}>
-                <p className="conditions_label">
+                <p>
                   {condition.label} <strong>{condition.bold}</strong>
                 </p>
                 {condition.isDate1 ? (
                   <Date>
                     <p className="conditions_date">{condition.date1}</p>
-                    <p className="centered">
-                      <TickIcon />
+                    <p className="centered" style={{ color: "red", fontSize: "0.7rem" }}>
+                      Inscriptions clôturées
                     </p>
                   </Date>
                 ) : (
@@ -255,6 +255,10 @@ const Points = styled.div`
     color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 1px;
+    text-align: left;
+  }
+  .centered {
+    text-align: right;
   }
   .note {
     font-size: 0.8rem;
@@ -265,7 +269,7 @@ const Points = styled.div`
     padding: 25px 2rem;
     display: flex;
     align-items: flex-start;
-    justify-content: center;
+    justify-content: flex-start;
     svg {
       width: 26px;
       margin-right: 10px;
@@ -273,7 +277,7 @@ const Points = styled.div`
     div {
       width: 100%;
     }
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid rgba(50, 38, 127, 0.1);
   }
   .button {
     text-transform: uppercase;
@@ -298,6 +302,6 @@ const Points = styled.div`
 `;
 
 const Date = styled.div`
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 `;

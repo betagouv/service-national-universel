@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import { translate } from "../../utils";
 import api from "../../services/api";
@@ -21,6 +22,7 @@ export default function Edit(props) {
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const isNew = !props?.match?.params?.id;
+  const user = useSelector((state) => state.Auth.user);
 
   async function initCenter() {
     if (isNew) return setDefaultValue(null);
@@ -73,7 +75,8 @@ export default function Edit(props) {
                   <BoxHeadTitle>Informations générales sur le centre</BoxHeadTitle>
                   <BoxContent direction="column">
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    {values._id ? <Item disabled title="Code" values={values} name="_id" /> : null}
+                    <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" handleChange={handleChange} />
+                    <Item disabled={user.role !== "admin"} title="Code 2022" values={values} name="code2022" handleChange={handleChange} />
                     <Item type="number" title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Select
                       name="pmr"

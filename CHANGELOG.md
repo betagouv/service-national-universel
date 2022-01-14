@@ -1,3 +1,31 @@
+# [1.22.0](https://github.com/betagouv/service-national-universel/compare/v1.21.0...v1.22.0) (2022-01-13)
+
+
+### Bug Fixes
+
+* **admin,api:** add code2022 for centers ([12b2434](https://github.com/betagouv/service-national-universel/commit/12b243459e9ed8639c807ac32eff7c7242f1fceb))
+* **admin,center:** enable edit center code ([1be67b4](https://github.com/betagouv/service-national-universel/commit/1be67b425d9b6a5e0d357949799af808a106febe))
+* **support:**  support many fixes with loadingType + search ([#1077](https://github.com/betagouv/service-national-universel/issues/1077)) ([eb6db41](https://github.com/betagouv/service-national-universel/commit/eb6db41bb7742eda6fb19f00948567b86c63e64f))
+
+
+### Features
+
+* **api,cron:** cancel applications when the mission is automatically archived [#1073](https://github.com/betagouv/service-national-universel/issues/1073) ([ef39cb5](https://github.com/betagouv/service-national-universel/commit/ef39cb5cbd314e950890d4aa24ffcb06e4923f66))
+* **app:** update conditions in landing page ([2951261](https://github.com/betagouv/service-national-universel/commit/29512617363d8b3f0cfde1b3ad865a92bbae2edd))
+
+# [1.21.0](https://github.com/betagouv/service-national-universel/compare/v1.20.0...v1.21.0) (2022-01-12)
+
+
+### Bug Fixes
+
+* **app+admin:** reopen support center ([#1075](https://github.com/betagouv/service-national-universel/issues/1075)) ([d92c640](https://github.com/betagouv/service-national-universel/commit/d92c640b64b5fe762b86bc8e3dca5177d7c9d961))
+
+
+### Features
+
+* **api-zammad:** change zammad url ([#1074](https://github.com/betagouv/service-national-universel/issues/1074)) ([870a6a9](https://github.com/betagouv/service-national-universel/commit/870a6a9f059b8a6c618c8eae6c73def69e8c35d6))
+* **app-inscription:** add sessions to eligibility module ([#1070](https://github.com/betagouv/service-national-universel/issues/1070)) ([0ef2fee](https://github.com/betagouv/service-national-universel/commit/0ef2feee7dc02cca78411923f13116241e965b6d))
+
 # [1.20.0](https://github.com/betagouv/service-national-universel/compare/v1.19.1...v1.20.0) (2022-01-11)
 
 
