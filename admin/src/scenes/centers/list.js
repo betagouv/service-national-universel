@@ -68,9 +68,12 @@ export default function List() {
                   return all.map((data) => {
                     return {
                       Nom: data.name,
-                      Code: data.code,
-                      Pays: data.country,
+                      id: data._id,
+                      "Code (2021)": data.code,
+                      "Code (2022)": data.code2022,
+                      "Cohorte(s)": data.cohorts?.join(", "),
                       COR: data.COR,
+                      "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
                       Adresse: data.address,
                       Ville: data.city,
                       "Code Postal": data.zip,
