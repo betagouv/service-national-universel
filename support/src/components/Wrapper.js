@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { /*  useContext, */ useEffect, useState } from "react";
 import Link from "next/link";
 import { Popover } from "@headlessui/react";
 import { SUPPORT_ROLES } from "snu-lib/roles";
@@ -7,11 +7,11 @@ import useUser from "../hooks/useUser";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
 import Search from "./Search";
-import SeeAsContext from "../hooks/useSeeAs";
+// import SeeAsContext from "../hooks/useSeeAs";
 
 const Wrapper = ({ children }) => {
   const { mutate, user, restriction } = useUser();
-  const { setSeeAs, seeAs } = useContext(SeeAsContext);
+  // const { setSeeAs, seeAs } = useContext(SeeAsContext);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
