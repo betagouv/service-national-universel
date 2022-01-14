@@ -111,7 +111,7 @@ export default function StepAvailability() {
                 <Info>
                   <h3>INSCRIPTION NON-RECEVABLE</h3>
                   <h1 style={{ marginBottom: "1rem" }}>Malheureusement votre situation ne vous permet pas de participer à la session 2022 du SNU.</h1>
-                  <Infos href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1?type=article`} target="_blank" rel="noreferrer">
+                  <Infos href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1`} target="_blank" rel="noreferrer">
                     <InfoIcon color="#32257F" />
                     <p>
                       <i>Pourquoi je ne vois aucun séjour ?</i> En savoir plus sur l&apos;éligibilité
@@ -119,11 +119,7 @@ export default function StepAvailability() {
                   </Infos>
                   <div className="btns">
                     <Button backgroundColor="#4f46e5" dark>
-                      <a
-                        style={{ fontSize: ".9rem", color: "#fff" }}
-                        href={`${supportURL}/base-de-connaissance/les-autres-formes-d-engagement?type=article`}
-                        target="_blank"
-                        rel="noreferrer">
+                      <a style={{ fontSize: ".9rem", color: "#fff" }} href={`${supportURL}/base-de-connaissance/les-autres-formes-d-engagement`} target="_blank" rel="noreferrer">
                         Consulter d&apos;autres dispositifs d&apos;engagement
                       </a>
                     </Button>
@@ -144,7 +140,7 @@ export default function StepAvailability() {
                   <h3>Séjour de cohésion à venir</h3>
                   <h1>Etes-vous disponible du {availability[indexAvailability].stringDate} ?</h1>
                   {availability[indexAvailability].info ? <AlerteInfo url={availability[indexAvailability].url}>{availability[indexAvailability].info}</AlerteInfo> : null}
-                  <Infos href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1?type=article`} target="_blank" rel="noreferrer">
+                  <Infos href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1`} target="_blank" rel="noreferrer">
                     <InfoIcon color="#32257F" />
                     <p>
                       Veuillez vous assurer d&apos;être disponible sur l&apos;ensemble de la période.

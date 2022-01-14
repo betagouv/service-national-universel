@@ -20,19 +20,19 @@ const articles = [
     title: "SNU phase 0 : Le parcours des inscriptions",
     emoji: "📄",
     body: `Rédaction du dossier d'inscription : Le jeune remplit son dossier...`,
-    url: `${supportURL}/base-de-connaissance/phase-0-le-parcours-des-inscriptions?type=article`,
+    url: `${supportURL}/base-de-connaissance/phase-0-le-parcours-des-inscriptions`,
   },
   {
     title: "Phase 1 : L'organisation du séjour de cohésion",
     emoji: "🌲",
     body: `Lorsque l'inscription du volontaire est validée, il entre dans la phase 1...`,
-    url: `${supportURL}/base-de-connaissance/phase-1-lorganisation-du-sejour-de-cohesion?type=article`,
+    url: `${supportURL}/base-de-connaissance/phase-1-lorganisation-du-sejour-de-cohesion`,
   },
   {
     title: "Phase 2 : Le parcours d'une MIG",
     emoji: "🤝",
     body: `La publication d'une MIG : la structure s'inscrit sur la plateforme...`,
-    url: `${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig?type=article`,
+    url: `${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig`,
   },
 ];
 

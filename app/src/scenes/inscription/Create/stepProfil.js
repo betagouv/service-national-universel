@@ -74,7 +74,7 @@ export default function StepProfil() {
                   <p>
                     Si vous ne vous souvenez plus de votre identifiant (email),{" "}
                     <a
-                      href={`${supportURL}/base-de-connaissance/comment-recuperer-mon-identifiant-dossier-deja-inscrit-1?type=article`}
+                      href={`${supportURL}/base-de-connaissance/comment-recuperer-mon-identifiant-dossier-deja-inscrit-1`}
                       target="_blank"
                       style={{ color: "white", textDecoration: "underline" }}
                       rel="noreferrer">

@@ -15,7 +15,8 @@
     "coverage": "jest --runInBand --coverage --silent",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint --ext .js --fix src",
-    "zammad-migrate:tickets": "node ./src/zammad-migration/ticketScript"
+    "zammad-migrate:tickets": "node ./src/zammad-migration/ticketScript",
+    "doc": "node ./src/utils/generate-models-documentation.js"
   },
   "author": "SELEGO",
   "license": "MIT",
