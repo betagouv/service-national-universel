@@ -567,7 +567,7 @@ export default function VolontaireList() {
                   </div>
                   <div>
                     <span className="title">Statut de phase :</span>pour en savoir plus consultez la{" "}
-                    <a href={`${supportURL}/base-de-connaissance/les-phases-du-snu-1?type=article`} target="_blank" rel="noreferrer">
+                    <a href={`${supportURL}/base-de-connaissance/les-phases-du-snu-1`} target="_blank" rel="noreferrer">
                       base de connaissance
                     </a>
                   </div>
@@ -580,14 +580,14 @@ export default function VolontaireList() {
                   <div>
                     <span className="title">Statut de mission :</span> s&apos;active dès la 1ère candidature et concerne le statut de sa candidature. Pour en savoir plus sur les
                     statuts, consultez la{" "}
-                    <a href={`${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig?type=article`} target="_blank" rel="noreferrer">
+                    <a href={`${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig`} target="_blank" rel="noreferrer">
                       base de connaissance
                     </a>
                   </div>
                   <div>
                     <span className="title">Statut documents Préparation Militaire :</span>s&apos;active dès la 1ère candidature à une Préparation Militaire. Pour en savoir plus
                     sur les statuts de ce filtre consultez la{" "}
-                    <a href={`${supportURL}/base-de-connaissance/je-consulte-les-pieces-justificatives-pour-une-pm?type=article`} target="_blank" rel="noreferrer">
+                    <a href={`${supportURL}/base-de-connaissance/je-consulte-les-pieces-justificatives-pour-une-pm`} target="_blank" rel="noreferrer">
                       base de connaissance
                     </a>{" "}
                     (phase 2)
