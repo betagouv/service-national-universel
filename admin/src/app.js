@@ -121,14 +121,12 @@ const Home = () => {
         isOpen: true,
         title: "Conditions générales d'utilisation",
         message: (
-          <p>
-            Les conditions générales d&apos;utilisation du SNU ont été mises à jour. Vous devez les accepter afin de continuer à accéder à votre compte SNU.
-            <br />
-            <br />
+          <>
+            <p>Les conditions générales d&apos;utilisation du SNU ont été mises à jour. Vous devez les accepter afin de continuer à accéder à votre compte SNU.</p>
             <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
-              Consulter les CGU
+              Consulter les CGU ›
             </a>
-          </p>
+          </>
         ),
         onConfirm: async () => {
           await api.put(`/referent/${user._id}`, { acceptCGU: "true" });

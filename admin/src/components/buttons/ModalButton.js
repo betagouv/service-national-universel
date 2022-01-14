@@ -39,7 +39,7 @@ export default function ModalButton({ primary, secondary, loading, children, dis
 const VioletButtonHeader = styled(Button)`
   border: none;
   border-radius: 5px;
-  padding: 7px 30px;
+  padding: 9px 30px;
   margin: 0.3rem;
   font-size: 14px;
   font-weight: 700;
