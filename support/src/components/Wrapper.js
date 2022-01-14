@@ -1,4 +1,4 @@
-import { /*  useContext, */ useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { Popover } from "@headlessui/react";
 import { SUPPORT_ROLES } from "snu-lib/roles";
@@ -7,11 +7,11 @@ import useUser from "../hooks/useUser";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
 import Search from "./Search";
-// import SeeAsContext from "../hooks/useSeeAs";
+import SeeAsContext from "../hooks/useSeeAs";
 
 const Wrapper = ({ children }) => {
   const { mutate, user, restriction } = useUser();
-  // const { setSeeAs, seeAs } = useContext(SeeAsContext);
+  const { setSeeAs, seeAs } = useContext(SeeAsContext);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -50,7 +50,7 @@ const Wrapper = ({ children }) => {
                 <div className="rounded-full h-9 w-9 bg-snu-purple-300"></div>
                 <div className="flex flex-col justify-center h-full">
                   <span className="text-sm font-medium text-gray-700">{user.firstName}</span>
-                  {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[user.role]}</span>}
+                  {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[seeAs || user.role]}</span>}
                 </div>
               </Popover.Button>
 
@@ -59,12 +59,12 @@ const Wrapper = ({ children }) => {
                   <a onClick={onLogout} className="text-sm font-medium text-gray-700 cursor-pointer">
                     Déconnexion
                   </a>
-                  {/* user.role === "admin" &&
+                  {user.role === "admin" &&
                     Object.keys(SUPPORT_ROLES).map((role) => (
                       <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} text-gray-700 cursor-pointer`}>
                         Voir en tant que {SUPPORT_ROLES[role]}
                       </a>
-                    )) */}
+                    ))}
                 </div>
               </Popover.Panel>
             </Popover>
