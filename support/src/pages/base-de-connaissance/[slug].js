@@ -44,17 +44,24 @@ const Content = () => {
   return (
     <>
       <KnowledgeBasePublicContent item={item} isLoading={!Object.keys(item).length} />
-      <Modal isOpen={showLoginModal} onRequestClose={() => setShowLoginModal(false)} className="flex flex-col items-start">
-        <h2 className="font-bold ml-4 mb-16 text-xl">Vous devez vous connecter pour accéder à cet article</h2>
+      <Modal
+        isOpen={showLoginModal}
+        onRequestClose={() => {
+          setShowLoginModal(false);
+          router.push("/base-de-connaissance");
+        }}
+        className="flex flex-col items-start"
+      >
+        <Link href="/base-de-connaissance">
+          <span className="text-sm font-medium text-black underline transition-colors -mt-6 cursor-pointer hover:text-gray-600">Retour à l'accueil</span>
+        </Link>
+        <h2 className="font-bold ml-4 mb-16 mt-6 text-xl">Vous devez vous connecter pour accéder à cet article</h2>
         <div className="flex items-center justify-center w-full flex-col gap-3">
           <Link href={`/admin/auth?redirect=${supportURL}/base-de-connaissance/${slug}`} onClick={() => cache.clear()}>
-            <span className="text-sm font-medium text-gray-500 transition-colors cursor-pointer hover:text-gray-600">Espace professionnel</span>
+            <button>Espace professionnel</button>
           </Link>
           <Link href={`${appURL}/auth?redirect=${supportURL}/base-de-connaissance/${slug}`} onClick={() => cache.clear()}>
-            <span className="text-sm font-medium text-gray-500 transition-colors cursor-pointer hover:text-gray-600 mb-4">Espace volontaire</span>
-          </Link>
-          <Link href="/base-de-connaissance">
-            <span className="text-sm font-medium text-gray-500 transition-colors cursor-pointer hover:text-gray-600">Retour à l'accueil</span>
+            <button>Espace volontaire</button>
           </Link>
         </div>
       </Modal>
