@@ -37,7 +37,8 @@ import PublicSupport from "./scenes/public-support-center";
 import Desistement from "./scenes/desistement";
 
 import api from "./services/api";
-import { SENTRY_URL, environment } from "./config";
+import { SENTRY_URL, environment, appURL } from "./config";
+import ModalCGU from "./components/modals/ModalCGU";
 
 import "./index.css";
 import { YOUNG_STATUS, ENABLE_PM } from "./utils";
@@ -106,12 +107,36 @@ export default function App() {
 
 const Espace = () => {
   const [menuVisible, setMenuVisible] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
   const young = useSelector((state) => state.Auth.young);
   if (!young) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
     return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/inscription" }} />;
   }
   if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status)) return <Redirect to="/inscription/coordonnees" />;
+
+  useEffect(() => {
+    if (young && young.acceptCGU !== "true") {
+      setModal({
+        isOpen: true,
+        title: "Conditions générales d'utilisation",
+        message: (
+          <>
+            <p>Les conditions générales d&apos;utilisation du SNU ont été mises à jour. Vous devez les accepter afin de continuer à accéder à votre compte SNU.</p>
+            <a href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
+              Consulter les CGU ›
+            </a>
+          </>
+        ),
+        onConfirm: async () => {
+          // todo add field in young model
+          await api.put(`/young`, { acceptCGU: "true" });
+        },
+        confirmText: "J'accepte les conditions générales d'utilisation",
+      });
+    }
+  }, [young]);
 
   return (
     <>
@@ -138,6 +163,16 @@ const Espace = () => {
             <Route path="/" component={Home} />
           </Switch>
         </Content>
+        <ModalCGU
+          isOpen={modal?.isOpen}
+          title={modal?.title}
+          message={modal?.message}
+          confirmText={modal?.confirmText}
+          onConfirm={() => {
+            modal?.onConfirm();
+            setModal({ isOpen: false, onConfirm: null });
+          }}
+        />
       </div>
     </>
   );
