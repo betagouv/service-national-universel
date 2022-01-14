@@ -12,7 +12,7 @@ import { ticketStateNameById, colors, translateState } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
-import { referentArticles, adminArticles, structureArticles, visitorArticles } from "./articles";
+import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles } from "./articles";
 import { supportURL } from "../../config";
 
 const Dashboard = () => {
@@ -27,6 +27,8 @@ const Dashboard = () => {
       setArticles(structureArticles);
     } else if (user.role === "referent_department" || user.role === "referent_region") {
       setArticles(referentArticles);
+    } else if (user.role === "head_center") {
+      setArticles(headCenterArticles);
     } else if (user.role === "visitor") {
       setArticles(visitorArticles);
     } else {
@@ -117,7 +119,7 @@ const Dashboard = () => {
       <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
       <ArticlesBlock articles={articles} />
       <hr style={{ margin: "2rem" }} />
-      <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations en cours</h4>
+      <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations :</h4>
       <List>
         <section className="ticket titles">
           <p>Nº demande</p>
@@ -173,6 +175,8 @@ const StateContainer = styled.div`
 export const HeroContainer = styled.div`
   flex: 1;
   padding: 1rem;
+  max-width: 1300px;
+  margin: 0 auto;
   @media (max-width: 768px) {
     padding: 1rem 0;
   }

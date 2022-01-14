@@ -32,13 +32,13 @@ export const referentArticles = [
     title: "La fiche mission et ses actions",
     emoji: "📇",
     body: "J'accède à la fiche mission...",
-    url: `${supportURL}/base-de-connaissance/la-fiche-mission-et-ses-actions-1?type=article`,
+    url: `${supportURL}/base-de-connaissance/la-fiche-mission-et-ses-actions?type=article`,
   },
   {
     title: "Phase 3 : Le parcours de l'engagement",
     emoji: "🌟",
     body: `Optionnelle, la phase 3 vous permet de poursuivre votre parcours...`,
-    url: `${supportURL}/base-de-connaissance/phase-3-le-parcours-de-lengagement-1-1-1?type=article`,
+    url: `${supportURL}/base-de-connaissance/phase-3-le-parcours-de-lengagement-1?type=article`,
   },
 ];
 
@@ -101,6 +101,6 @@ export const headCenterArticles = [
     title: "Phase 1 : L'organisation du séjour de cohésion",
     emoji: "🌲",
     body: `Lorsque l'inscription du volontaire est validée, il entre dans la phase 1...`,
-    url: `${supportURL}/base-de-connaissance/phase-1-lorganisation-du-sejour-de-cohesion-2-1-1-1?type=article`,
+    url: `${supportURL}/base-de-connaissance/phase-1-lorganisation-du-sejour-de-cohesion?type=article`,
   },
 ];
