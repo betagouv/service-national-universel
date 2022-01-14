@@ -410,6 +410,7 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
         size: 1000,
       },
     };
+    console.log(req.allowedRole);
     if (req.allowedRole !== "admin") {
       esQuery.body.query.bool.filter = [
         {
