@@ -37,7 +37,7 @@ export default function Done() {
                 <strong>Attestation de JDC</strong>
                 <br />
                 Penser à réaliser votre recensement auprès de votre mairie
-                <a href={`${supportURL}/base-de-connaissance/journee-defense-et-citoyennete?type=article`} target="_blank" rel="noreferrer">
+                <a href={`${supportURL}/base-de-connaissance/journee-defense-et-citoyennete-1?type=article`} target="_blank" rel="noreferrer">
                   <PrimaryStyle>En savoir plus &gt;</PrimaryStyle>
                 </a>
               </p>
