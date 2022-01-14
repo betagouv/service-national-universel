@@ -587,7 +587,7 @@ export default function VolontaireList() {
                   <div>
                     <span className="title">Statut documents Préparation Militaire :</span>s&apos;active dès la 1ère candidature à une Préparation Militaire. Pour en savoir plus
                     sur les statuts de ce filtre consultez la{" "}
-                    <a href={`${supportURL}/base-de-connaissance/je-consulte-les-pieces-justificatives-pour-une-pm-1?type=article`} target="_blank" rel="noreferrer">
+                    <a href={`${supportURL}/base-de-connaissance/je-consulte-les-pieces-justificatives-pour-une-pm?type=article`} target="_blank" rel="noreferrer">
                       base de connaissance
                     </a>{" "}
                     (phase 2)
