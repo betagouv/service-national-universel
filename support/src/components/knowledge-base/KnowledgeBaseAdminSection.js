@@ -11,6 +11,7 @@ import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import Loader from "../Loader";
 import Modal from "../Modal";
 import KnowledgeBasePublicContent from "./KnowledgeBasePublicContent";
+import KnowledgeBasePublicHome from "./KnowledgeBasePublicHome";
 
 const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
   const { mutate } = useKnowledgeBaseData();
@@ -44,11 +45,11 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
   };
 
   const sections = section.children.filter((c) => c.type === "section");
-  const answers = section.children.filter((c) => c.type === "article");
+  const articles = section.children.filter((c) => c.type === "article");
 
   useEffect(() => {
     sortableSections.current = new SortableJS(gridSectionsRef.current, { animation: 150, group: "sections", onEnd: () => onListChange("sections") });
-    sortableAnswers.current = new SortableJS(gridAnswersRef.current, { animation: 150, group: "answers", onEnd: () => onListChange("answers") });
+    sortableAnswers.current = new SortableJS(gridAnswersRef.current, { animation: 150, group: "articles", onEnd: () => onListChange("articles") });
   }, []);
 
   return (
@@ -73,8 +74,8 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
             Sujets
             <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="article" />
           </h3>
-          <div ref={gridAnswersRef} id="answers" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
-            {answers.map((article) => (
+          <div ref={gridAnswersRef} id="articles" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
+            {articles.map((article) => (
               <KnowledgeBaseArticleCard
                 key={article._id}
                 _id={article._id}
@@ -85,7 +86,7 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
                 path="/admin/knowledge-base"
               />
             ))}
-            {!answers.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
+            {!articles.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
           </div>
         </section>
         <section className={`flex flex-col ${isRoot ? "w-full" : "w-96"} flex-shrink-0  pt-6`}>
@@ -127,13 +128,13 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
         isOpen={readOnly}
         onRequestClose={() => setReadOnly(false)}
         closeButton={
-          <button type="button" className={!readOnly ? "absolute right-2 top-2" : "h-16 rounded-none"} onClick={() => setReadOnly((r) => !r)}>
+          <button type="button" className={!readOnly ? "absolute right-2 top-2" : "fixed h-16 top-0 w-full rounded-none"} onClick={() => setReadOnly((r) => !r)}>
             {!readOnly ? "Prévisualiser" : "Retour à l'édition"}
           </button>
         }
-        className="flex-col-reverse"
+        className="pt-16"
       >
-        <KnowledgeBasePublicContent item={section} />
+        {section.type === "root" ? <KnowledgeBasePublicHome item={section} /> : <KnowledgeBasePublicContent item={section} />}
       </Modal>
     </article>
   );
