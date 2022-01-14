@@ -580,7 +580,7 @@ export default function VolontaireList() {
                   <div>
                     <span className="title">Statut de mission :</span> s&apos;active dès la 1ère candidature et concerne le statut de sa candidature. Pour en savoir plus sur les
                     statuts, consultez la{" "}
-                    <a href={`${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig-2?type=article`} target="_blank" rel="noreferrer">
+                    <a href={`${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig?type=article`} target="_blank" rel="noreferrer">
                       base de connaissance
                     </a>
                   </div>
