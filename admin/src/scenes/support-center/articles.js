@@ -74,7 +74,7 @@ export const visitorArticles = [
     title: "Mon tableau de bord",
     emoji: "📊",
     body: "Découvrez comment utiliser votre tableau de bord...",
-    url: `${supportURL}/base-de-connaissance/mon-tableau-de-bord?type=section`,
+    url: `${supportURL}/base-de-connaissance/mon-tableau-de-bord`,
   },
   {
     title: "Les statuts Phase 2 des volontaires",

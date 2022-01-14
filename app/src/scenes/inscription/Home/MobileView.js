@@ -125,7 +125,7 @@ export default function MobileView() {
         <li style={{ padding: 0 }}>
           <FAQ
             onClick={() => window.plausible?.("Clic Besoin d'aide", { props: { device: "mobile" } })}
-            href={`${supportURL}/base-de-connaissance/questions-frequentes-1?type=section`}
+            href={`${supportURL}/base-de-connaissance/questions-frequentes-1`}
             target="blank">
             <p>Toutes les réponses à vos questions</p>
             <svg width="6" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
