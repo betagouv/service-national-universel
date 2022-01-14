@@ -518,6 +518,7 @@ function validateYoung(young, user) {
 function validateDepartmentService(departmentService) {
   return Joi.object()
     .keys({
+      contacts: Joi.array().items(Joi.any().allow(null, "")),
       department: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
       directionName: Joi.string().allow(null, ""),
