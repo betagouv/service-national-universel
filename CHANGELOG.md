@@ -1,3 +1,20 @@
+# [1.24.0](https://github.com/betagouv/service-national-universel/compare/v1.23.0...v1.24.0) (2022-01-17)
+
+
+### Bug Fixes
+
+* **admin,center:** display places and codes ([b92eaa3](https://github.com/betagouv/service-national-universel/commit/b92eaa3cc5cf0bf3ea67e99cc75aebbb89188200))
+
+
+### Features
+
+* **admin:** admin can delete referent ([#1092](https://github.com/betagouv/service-national-universel/issues/1092)) ([90dc7b1](https://github.com/betagouv/service-national-universel/commit/90dc7b1b90c26a0fad75d6c47cb2a32cc7520dbc))
+* **admin:** contact-departement by cohort ([#1091](https://github.com/betagouv/service-national-universel/issues/1091)) ([aca74e1](https://github.com/betagouv/service-national-universel/commit/aca74e1172c2b355be7fc8062b12a0099633af65))
+* **admin:** unavailable feature screen ([#1090](https://github.com/betagouv/service-national-universel/issues/1090)) ([f660cc1](https://github.com/betagouv/service-national-universel/commit/f660cc18196f6ef51be862137858ac45072f9da5))
+* **tmp,admin:** export temporary columns ([b765680](https://github.com/betagouv/service-national-universel/commit/b7656804e9841c7abebca02805c9c272236381c3))
+* add three tmp columns ([22e3c58](https://github.com/betagouv/service-national-universel/commit/22e3c589e2e6d79a707440c63a9b184769aba671))
+* **admin,app,api:** prise en compte field `sessionPhase1` ([#1072](https://github.com/betagouv/service-national-universel/issues/1072)) ([f5cb53b](https://github.com/betagouv/service-national-universel/commit/f5cb53b1181a59fddaf3260e0eb55e0b254520e6))
+
 # [1.23.0](https://github.com/betagouv/service-national-universel/compare/v1.22.0...v1.23.0) (2022-01-14)
 
 
