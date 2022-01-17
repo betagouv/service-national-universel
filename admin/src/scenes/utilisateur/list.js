@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
-import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT, ROLES, canUpdateReferent } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT, ROLES, canUpdateReferent, canDeleteReferent } from "../../utils";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
@@ -18,6 +18,7 @@ import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiL
 import Badge from "../../components/Badge";
 import ExportComponent from "../../components/ExportXlsx";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
@@ -217,10 +218,11 @@ const Hit = ({ hit, onClick, user, selected, structure }) => {
   );
 };
 
-const Action = ({ hit, color }) => {
+const Action = ({ hit }) => {
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const handleImpersonate = async () => {
     try {
@@ -234,24 +236,62 @@ const Action = ({ hit, color }) => {
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
     }
   };
+  const onClickDelete = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: onConfirmDelete,
+      title: `Êtes-vous sûr(e) de vouloir supprimer le compte de ${hit.firstName} ${hit.lastName} ?`,
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async () => {
+    try {
+      const { ok, code } = await api.remove(`/referent/${hit._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Ce profil a été supprimé.");
+      return history.go(0);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
+    }
+  };
   return (
-    <ActionBox color={"#444"}>
-      <UncontrolledDropdown setActiveFromChild>
-        <DropdownToggle tag="button">
-          Choisissez une action
-          <Chevron color="#444" />
-        </DropdownToggle>
-        <DropdownMenu>
-          <Link to={`/user/${hit._id}`}>
-            <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
-          </Link>
-          {user.role === ROLES.ADMIN ? (
-            <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
-              Prendre sa place
-            </DropdownItem>
-          ) : null}
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    </ActionBox>
+    <>
+      <ActionBox color={"#444"}>
+        <UncontrolledDropdown setActiveFromChild>
+          <DropdownToggle tag="button">
+            Choisissez une action
+            <Chevron color="#444" />
+          </DropdownToggle>
+          <DropdownMenu>
+            <Link to={`/user/${hit._id}`}>
+              <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
+            </Link>
+            {user.role === ROLES.ADMIN ? (
+              <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
+                Prendre sa place
+              </DropdownItem>
+            ) : null}
+            {canDeleteReferent(user, hit) ? (
+              <DropdownItem className="dropdown-item" onClick={onClickDelete}>
+                Supprimer le profil
+              </DropdownItem>
+            ) : null}
+          </DropdownMenu>
+        </UncontrolledDropdown>
+      </ActionBox>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </>
   );
 };
