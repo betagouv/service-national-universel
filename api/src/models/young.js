@@ -299,6 +299,24 @@ const Schema = new mongoose.Schema({
       description: "Id de la session de cohésion d'accueil pour la phase 1",
     },
   },
+  sessionPhase1IdTmp: {
+    type: String,
+    documentation: {
+      description: "TODO",
+    },
+  },
+  codeCenterTmp: {
+    type: String,
+    documentation: {
+      description: "TODO",
+    },
+  },
+  busTmp: {
+    type: String,
+    documentation: {
+      description: "TODO",
+    },
+  },
   // *** START LEGACY COHESION CENTER ***
   // phase1 legacy infos, we keep it for retrocompatibility, can be deleted in the future
   cohesionCenterId: {
