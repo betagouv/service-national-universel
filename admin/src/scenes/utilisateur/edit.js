@@ -327,52 +327,87 @@ export default function Edit(props) {
       ) : null}
       {canDeleteReferent(currentUser, user) ? <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn> : null}
       {canModify(currentUser, user) && user.role === ROLES.REFERENT_DEPARTMENT && (
-        <Formik
-          initialValues={service || { department: user.department }}
-          onSubmit={async (values) => {
-            try {
-              const { ok, code, data } = await api.post(`/department-service`, values);
-              if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-              setService(data);
-              toastr.success("Service departemental mis à jour !");
-            } catch (e) {
-              console.log(e);
-              toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-            }
-          }}>
-          {({ values, handleChange, handleSubmit, isSubmitting }) => (
-            <>
-              <TitleWrapper>
-                <div>
-                  <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
-                </div>
-                <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                  Enregistrer
-                </SaveBtn>
-              </TitleWrapper>
-              <Row>
-                <Col md={6} style={{ marginBottom: "20px" }}>
-                  <Box>
-                    <BoxHeadTitle>{`Service Départemental`}</BoxHeadTitle>
-                    <BoxContent direction="column">
-                      <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
-                      <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
-                      <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
-                      <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
-                      <Item title="Ville" values={values} name="city" handleChange={handleChange} />
-                    </BoxContent>
-                    <BoxHeadTitle>Contact convocation</BoxHeadTitle>
-                    <BoxContent direction="column">
-                      <Item title="Nom du Contact" values={values} name="contactName" handleChange={handleChange} />
-                      <Item title="Tel." values={values} name="contactPhone" handleChange={handleChange} />
-                      <Item title="Email" values={values} name="contactMail" handleChange={handleChange} />
-                    </BoxContent>
-                  </Box>
-                </Col>
-              </Row>
-            </>
-          )}
-        </Formik>
+        <>
+          <Formik
+            initialValues={service || { department: user.department }}
+            onSubmit={async (values) => {
+              try {
+                const { ok, code, data } = await api.post(`/department-service`, values);
+                if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+                setService(data);
+                toastr.success("Service departemental mis à jour !");
+              } catch (e) {
+                console.log(e);
+                toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+              }
+            }}>
+            {({ values, handleChange, handleSubmit, isSubmitting }) => (
+              <>
+                <TitleWrapper>
+                  <div>
+                    <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
+                  </div>
+                </TitleWrapper>
+                <Row>
+                  <Col md={6} style={{ marginBottom: "20px" }}>
+                    <Box>
+                      <BoxHeadTitle>{`Service Départemental`}</BoxHeadTitle>
+                      <BoxContent direction="column">
+                        <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
+                        <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
+                        <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
+                        <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
+                        <Item title="Ville" values={values} name="city" handleChange={handleChange} />
+                      </BoxContent>
+                      <div style={{ display: "flex", justifyContent: "flex-end", padding: "0 2rem" }}>
+                        <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                          Enregistrer
+                        </SaveBtn>
+                      </div>
+                    </Box>
+                  </Col>
+                </Row>
+              </>
+            )}
+          </Formik>
+          <Row>
+            {["Février 2022", "Juin 2022", "Juillet 2022", "2021"].map((cohort) => (
+              <Formik
+                key={`contact-${cohort}`}
+                initialValues={service?.contacts?.find((e) => e.cohort === cohort) || {}}
+                onSubmit={async (values) => {
+                  try {
+                    // return console.log("✍️ ~ values", values);
+                    const { ok, code, data } = await api.post(`/department-service/${service._id}/cohort/${cohort}/contact`, { ...values, cohort });
+                    if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+                    setService(data);
+                    toastr.success("Service departemental mis à jour !");
+                  } catch (e) {
+                    console.log(e);
+                    toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+                  }
+                }}>
+                {({ values, handleChange, handleSubmit, isSubmitting }) => (
+                  <Col md={6} style={{ marginBottom: "20px" }}>
+                    <Box>
+                      <BoxHeadTitle>Contacts convocation ({cohort})</BoxHeadTitle>
+                      <BoxContent direction="column">
+                        <Item title="Nom du Contact" values={values} name="contactName" handleChange={handleChange} />
+                        <Item title="Tel." values={values} name="contactPhone" handleChange={handleChange} />
+                        <Item title="Email" values={values} name="contactMail" handleChange={handleChange} />
+                      </BoxContent>
+                      <div style={{ display: "flex", justifyContent: "flex-end", padding: "0 2rem" }}>
+                        <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                          Enregistrer
+                        </SaveBtn>
+                      </div>
+                    </Box>
+                  </Col>
+                )}
+              </Formik>
+            ))}
+          </Row>
+        </>
       )}
       <ModalConfirm
         isOpen={modal?.isOpen}
