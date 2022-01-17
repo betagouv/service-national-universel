@@ -136,7 +136,7 @@ export default function Edit(props) {
     setModal({
       isOpen: true,
       onConfirm: () => onConfirmDelete(),
-      title: "Êtes-vous sûr(e) de vouloir supprimer ce profil ?",
+      title: `Êtes-vous sûr(e) de vouloir supprimer le profil de ${user.firstName} ${user.lastName} ?`,
       message: "Cette action est irréversible.",
     });
   };
