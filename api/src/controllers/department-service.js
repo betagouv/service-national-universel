@@ -38,8 +38,8 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const data = await DepartmentServiceModel.findById(value.id);
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const departmentService = await DepartmentServiceModel.findById(value.id);
+    if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const newContact = {
       cohort: value.cohort,
@@ -49,14 +49,14 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
     };
 
     // checking if the contact for this cohort already exists...
-    const alreadyExist = data.contacts.find((c) => c.cohort === value.cohort);
-    let contacts = [...data.contacts];
+    const alreadyExist = departmentService.contacts.find((c) => c.cohort === value.cohort);
+    let contacts = [...departmentService.contacts];
     if (!alreadyExist) {
       //... if not, we add it
       contacts.push(newContact);
     } else {
       //... if yes, we update it
-      contacts = data.contacts.map((c) => {
+      contacts = departmentService.contacts.map((c) => {
         if (value.cohort !== c.cohort) return c;
         return newContact;
       });
