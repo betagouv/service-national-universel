@@ -15,6 +15,7 @@ jest.mock("@elastic/elasticsearch", () => ({
 const esClient = require("../es");
 const { getNewApplicationFixture } = require("./fixtures/application");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
+const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 const getNewReferentFixture = require("./fixtures/referent");
 const getNewStructureFixture = require("./fixtures/structure");
 const getNewYoungFixture = require("./fixtures/young");
@@ -22,6 +23,7 @@ const getNewYoungFixture = require("./fixtures/young");
 const getAppHelper = require("./helpers/app");
 const { createApplication } = require("./helpers/application");
 const { createCohesionCenter, notExistingCohesionCenterId } = require("./helpers/cohesionCenter");
+const { createSessionPhase1, notExistingSessionPhase1Id } = require("./helpers/sessionPhase1");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createReferentHelper } = require("./helpers/referent");
 const { createStructureHelper } = require("./helpers/structure");
@@ -481,15 +483,15 @@ describe("Es", () => {
       passport.user.role = ROLES.ADMIN;
     });
     it("should return young from center for head center when center exits", async () => {
-      const center = await createCohesionCenter(getNewCohesionCenterFixture());
+      const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
       const passport = require("passport");
 
       passport.user.role = ROLES.HEAD_CENTER;
-      passport.user.cohesionCenterId = center._id.toString();
+      passport.user.sessionPhase1Id = sessionPhase1._id.toString();
 
       const res = await msearch("young", buildMsearchQuery("young", matchAll));
       expect(res.statusCode).toEqual(200);
-      expect(getFilter()[2].term["cohesionCenterId.keyword"]).toBe(center._id.toString());
+      expect(getFilter()[2].term["sessionPhase1Id.keyword"]).toBe(sessionPhase1._id.toString());
 
       passport.user.role = ROLES.ADMIN;
     });

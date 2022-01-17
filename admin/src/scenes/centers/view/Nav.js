@@ -15,7 +15,6 @@ export default function Nav({ center, tab, onChangeCohort, onChangeTab }) {
   return (
     <Header>
       <div style={{ flex: 1, display: "flex" }}>
-        {/* TODO : connect center sessions */}
         <Filter style={{ padding: "0 1rem 0 0" }}>
           <select className="form-control" value={null} onChange={(e) => onChangeCohort(e.target.value)}>
             <option disabled value={null} label="Sélectionner une période">
@@ -66,7 +65,10 @@ export default function Nav({ center, tab, onChangeCohort, onChangeTab }) {
             <Tab
               isActive={tab === "volontaires"}
               last
-              onClick={() => history.push(`/centre/${center._id}/volontaires`)}
+              onClick={() => {
+                onChangeTab("volontaires");
+                history.push(`/centre/${center._id}/volontaires`);
+              }}
               style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRadius: "0 0.5rem 0.5rem 0" }}>
               Volontaires
             </Tab>
