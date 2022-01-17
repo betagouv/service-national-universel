@@ -252,6 +252,9 @@ export default function VolontaireList() {
                         "Adresse point de rassemblement": meetingPoint?.departureAddress,
                         "Date aller": meetingPoint?.departureAtString,
                         "Date retour": meetingPoint?.returnAtString,
+                        sessionPhase1IdTmp: data?.sessionPhase1IdTmp,
+                        codeCenterTmp: data?.codeCenterTmp,
+                        busTmp: data?.busTmp,
                       };
                     });
                   }}
