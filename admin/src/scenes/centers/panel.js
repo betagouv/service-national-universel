@@ -80,7 +80,8 @@ export default function PanelCenter({ onChange, center }) {
         </Row>
       </Info> */}
       <Info title="À propos du centre">
-        <Details title="Capacité d'accueil" value={center.placesTotal} />
+        <Details title="Code (2021)" value={center.code} copy />
+        <Details title="Code (2022)" value={center.code2022} copy />
         <Details title="Adresse" value={center.address} />
         <Details title="Ville" value={center.city} />
         <Details title="Code postal" value={center.zip} />

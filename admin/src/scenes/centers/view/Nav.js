@@ -7,11 +7,11 @@ import { canAssignCohesionCenter, colors } from "../../../utils";
 import { Filter } from "../../../components/list";
 import TabList from "../../../components/views/TabList";
 
-export default function Nav({ center, tab, onChangeCohort, onChangeTab }) {
+export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedSession }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
 
-  if (!center) return null;
+  if (!center || !focusedSession) return null;
   return (
     <Header>
       <div style={{ flex: 1, display: "flex" }}>
@@ -38,51 +38,40 @@ export default function Nav({ center, tab, onChangeCohort, onChangeTab }) {
             style={{ borderRadius: "0.5rem 0 0 0.5rem" }}>
             Équipe
           </Tab>
+          <Tab
+            isActive={tab === "volontaires"}
+            middle
+            onClick={() => {
+              onChangeTab("volontaires");
+              history.push(`/centre/${center._id}/volontaires`);
+            }}
+            style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRight: "1px solid rgba(0,0,0,0.1)", minWidth: "110px" }}>
+            Volontaires
+          </Tab>
           {canAssignCohesionCenter(user) ? (
-            <>
-              <Tab
-                isActive={tab === "volontaires"}
-                middle
-                onClick={() => {
-                  onChangeTab("volontaires");
-                  history.push(`/centre/${center._id}/volontaires`);
-                }}
-                style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRight: "1px solid rgba(0,0,0,0.1)", minWidth: "110px" }}>
-                Volontaires
-              </Tab>
-              <Tab
-                isActive={tab === "affectation"}
-                last
-                onClick={() => {
-                  onChangeTab("affectation");
-                  history.push(`/centre/${center._id}/affectation`);
-                }}
-                style={{ borderRadius: "0 0.5rem 0.5rem 0", minWidth: "168px" }}>
-                Affectation manuelle
-              </Tab>
-            </>
-          ) : (
             <Tab
-              isActive={tab === "volontaires"}
+              isActive={tab === "affectation"}
               last
               onClick={() => {
-                onChangeTab("volontaires");
-                history.push(`/centre/${center._id}/volontaires`);
+                onChangeTab("affectation");
+                history.push(`/centre/${center._id}/affectation`);
               }}
-              style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRadius: "0 0.5rem 0.5rem 0" }}>
-              Volontaires
+              style={{ borderRadius: "0 0.5rem 0.5rem 0", minWidth: "168px" }}>
+              Affectation manuelle
             </Tab>
-          )}
+          ) : null}
         </TabList>
       </div>
       <BoxPlaces style={{ borderRight: "1px solid rgba(0,0,0,0.2)", borderRadius: "0" }}>
         <DetailCardTitle>Taux d&apos;occupation</DetailCardTitle>
-        <DetailCardContent>{`${center.placesTotal ? (((center.placesTotal - center.placesLeft) * 100) / center.placesTotal).toFixed(2) : 0} %`}</DetailCardContent>
+        <DetailCardContent>{`${
+          focusedSession.placesTotal ? (((focusedSession.placesTotal - focusedSession.placesLeft) * 100) / focusedSession.placesTotal).toFixed(2) : 0
+        } %`}</DetailCardContent>
       </BoxPlaces>
       <BoxPlaces>
-        <DetailCardTitle>{Math.max(0, center.placesLeft)} places restantes</DetailCardTitle>
+        <DetailCardTitle>{Math.max(0, focusedSession.placesLeft)} places restantes</DetailCardTitle>
         <DetailCardContent>
-          {center.placesTotal - center.placesLeft} / {center.placesTotal}
+          {focusedSession.placesTotal - focusedSession.placesLeft} / {focusedSession.placesTotal}
         </DetailCardContent>
       </BoxPlaces>
     </Header>

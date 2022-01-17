@@ -16,7 +16,7 @@ export default function Details({ center }) {
         <Wrapper>
           <Header>
             <h4>
-              <strong>Centre</strong> <span style={{ color: "#9C9C9C" }}>#{center._id}</span>
+              <strong>Centre</strong> <span style={{ color: "#9C9C9C", fontSize: "0.85rem" }}>#{center._id}</span>
             </h4>
             {canCreateOrUpdateCohesionCenter(user) ? (
               <div style={{ flexBasis: "0" }}>
@@ -50,10 +50,18 @@ export default function Details({ center }) {
               </div>
             </section>
             <section>
-              <div className="detail">
-                <div className="detail-title-second">Capacité maximale :</div>
-                <div className="detail-text">{center.placesTotal} places</div>
-              </div>
+              {center.code ? (
+                <div className="detail">
+                  <div className="detail-title-second">Code (2021) :</div>
+                  <div className="detail-text">{center.code}</div>
+                </div>
+              ) : null}
+              {center.code2022 ? (
+                <div className="detail">
+                  <div className="detail-title-second">Code (2022) :</div>
+                  <div className="detail-text">{center.code2022}</div>
+                </div>
+              ) : null}
               <div className="detail">
                 <div className="detail-title-second">Accessibilité aux personnes à mobilité réduite (PMR) :</div>
                 <div className="detail-text">{translate(center.pmr)}</div>

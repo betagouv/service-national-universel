@@ -58,7 +58,7 @@ export default function Index({ ...props }) {
     <>
       <CenterInformations center={center} />
       <div style={{ padding: "0 3rem" }}>
-        <Nav tab={focusedTab} center={center} onChangeCohort={setFocusedCohort} onChangeTab={setFocusedTab} />
+        <Nav tab={focusedTab} center={center} onChangeCohort={setFocusedCohort} onChangeTab={setFocusedTab} focusedSession={focusedSession} />
         <Switch>
           {/* liste-attente reliquat ? */}
           <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
