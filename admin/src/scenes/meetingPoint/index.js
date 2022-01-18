@@ -8,7 +8,7 @@ import Chevron from "../../components/Chevron";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
-const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS"];
+const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT"];
 
 export default function MeetingPoint() {
   const [filterVisible, setFilterVisible] = useState(false);
@@ -54,6 +54,20 @@ export default function MeetingPoint() {
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
                   size={1000}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Cohorte"
+                  componentId="COHORT"
+                  dataField="cohort.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                  renderItem={(e, count) => {
+                    return `${e} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
                 />
                 <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
               </FilterRow>
