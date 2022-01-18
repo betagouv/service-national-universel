@@ -129,6 +129,14 @@ const Schema = new mongoose.Schema(
         description: "Nombre de vues d'une réponse",
       },
     },
+    searched: {
+      type: Number,
+      required: true,
+      default: 0,
+      documentation: {
+        description: "Nombre de d'apparition dans le moteur de recherche",
+      },
+    },
     // temp
     zammadId: Number,
     zammadParentId: Number,

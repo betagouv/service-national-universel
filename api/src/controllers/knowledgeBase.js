@@ -401,7 +401,7 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
                 multi_match: {
                   query: req.query.search,
                   type: "bool_prefix",
-                  fields: ["title^3", "contentAsText"],
+                  fields: ["title^3", "keywords^3", "contentAsText"],
                 },
               },
             ],
@@ -422,13 +422,19 @@ router.get("/:allowedRole(admin|referent|young|public)/search", setAllowedRoleMi
       ];
     }
     const response = await esClient.search(esQuery);
-    return res.status(200).send({
+    res.status(200).send({
       ok: true,
       data: response.body.hits.hits.map((hit) => ({
         _id: hit._id,
         ...hit._source,
       })),
     });
+
+    if (req.allowedRole !== "admin") {
+      for (const id of response.body.hits.hits.map((hit) => hit._id)) {
+        await KnowledgeBaseObject.findByIdAndUpdate(id, { $inc: { searched: 1 } });
+      }
+    }
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -471,7 +477,9 @@ router.get("/:allowedRole(referent|young|public)/zammad-id/:zammadId", setAllowe
       return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    await KnowledgeBaseObject.findByIdAndUpdate(existingKb._id, { $inc: { read: 1 } });
+    if (req.allowedRole !== "admin") {
+      await KnowledgeBaseObject.findByIdAndUpdate(existingKb._id, { $inc: { read: 1 } });
+    }
 
     const parents = await findParents(existingKb);
     existingKb.parents = parents;
@@ -516,7 +524,9 @@ router.get(`/:allowedRole(${Object.keys(SUPPORT_ROLES).join("|")})/:slug`, setAl
       return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    await KnowledgeBaseObject.findByIdAndUpdate(existingKb._id, { $inc: { read: 1 } });
+    if (req.allowedRole !== "admin") {
+      await KnowledgeBaseObject.findByIdAndUpdate(existingKb._id, { $inc: { read: 1 } });
+    }
 
     const parents = await findParents(existingKb);
     existingKb.parents = parents;
@@ -544,9 +554,6 @@ router.get(`/:allowedRole(${Object.keys(SUPPORT_ROLES).join("|")})`, setAllowedR
       .populate({ path: "author", select: "_id firstName lastName role" })
       .lean(); // to json;
 
-    for (const child of children) {
-      await KnowledgeBaseObject.findByIdAndUpdate(child._id, { $inc: { read: 1 } });
-    }
     return res.status(200).send({ ok: true, data: children });
   } catch (error) {
     capture(error);

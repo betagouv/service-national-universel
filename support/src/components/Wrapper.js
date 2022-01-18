@@ -45,29 +45,52 @@ const Wrapper = ({ children }) => {
             />
           </div>
           {isLoggedIn ? (
-            <Popover className="relative flex justify-end flex-1 order-2 w-auto md:flex-none lg:w-1/3">
-              <Popover.Button className="flex items-start justify-center gap-3 p-0 text-left bg-white border-none rounded-none shadow-none">
-                <div className="rounded-full h-9 w-9 bg-snu-purple-300"></div>
-                <div className="flex flex-col justify-center h-full">
-                  <span className="text-sm font-medium text-gray-700">{user.firstName}</span>
-                  {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[seeAs || user.role]}</span>}
-                </div>
-              </Popover.Button>
+            <>
+              <Popover className="relative flex justify-end flex-1 order-2 w-auto md:flex-none lg:w-1/3">
+                <Popover.Button className="flex items-start justify-center gap-3 p-0 text-left bg-white border-none rounded-none shadow-none">
+                  <div className="rounded-full h-9 w-9 bg-snu-purple-300"></div>
+                  <div className="flex flex-col justify-center h-full">
+                    <span className="text-sm font-medium text-gray-700">{user.firstName}</span>
+                    {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[seeAs || user.role]}</span>}
+                  </div>
+                </Popover.Button>
 
-              <Popover.Panel className="absolute right-0 min-w-[208px] lg:min-w-0 z-10 top-10">
-                <div className="flex flex-col gap-4 px-4 py-3 bg-white border border-gray-300 rounded-md">
-                  <a onClick={onLogout} className="text-sm font-medium text-gray-700 cursor-pointer">
-                    Déconnexion
-                  </a>
-                  {user.role === "admin" &&
-                    Object.keys(SUPPORT_ROLES).map((role) => (
-                      <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} text-gray-700 cursor-pointer`}>
-                        Voir en tant que {SUPPORT_ROLES[role]}
-                      </a>
-                    ))}
-                </div>
-              </Popover.Panel>
-            </Popover>
+                <Popover.Panel className="absolute right-0 min-w-[208px] lg:min-w-0 z-10 top-10">
+                  <div className="flex flex-col gap-4 px-4 py-3 bg-white border border-gray-300 rounded-md">
+                    {user.role === "admin" && (
+                      <>
+                        <Link href="/admin/knowledge-base">
+                          <a href="#" className="text-sm font-medium text-gray-700 cursor-pointer">
+                            Admin
+                          </a>
+                        </Link>
+                        <Popover className="relative flex justify-end order-3 flex-1 w-auto md:flex-none">
+                          <Popover.Button className="flex items-start justify-center gap-3 p-0 text-left bg-white border-none rounded-none shadow-none">
+                            {/* <img src="/assets/change-user.png" className="opacity-30 h-5 w-5 my-auto object-contain"></img> */}
+                            <div className="flex flex-col justify-center h-full">
+                              <span className="text-sm font-medium text-gray-700">Voir en tant que</span>
+                            </div>
+                          </Popover.Button>
+
+                          <Popover.Panel className="absolute right-0 min-w-[208px] lg:min-w-0 z-10 top-10">
+                            <div className="flex flex-col gap-4 px-4 py-3 bg-white border border-gray-300 rounded-md">
+                              {Object.keys(SUPPORT_ROLES).map((role) => (
+                                <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} text-gray-700 cursor-pointer`}>
+                                  {SUPPORT_ROLES[role]}
+                                </a>
+                              ))}
+                            </div>
+                          </Popover.Panel>
+                        </Popover>
+                      </>
+                    )}
+                    <a onClick={onLogout} className="text-sm font-medium text-gray-700 cursor-pointer">
+                      Déconnexion
+                    </a>
+                  </div>
+                </Popover.Panel>
+              </Popover>
+            </>
           ) : (
             <div className="flex items-center justify-end flex-1 order-2 w-auto gap-3 md:flex-none md:order-3 md:gap-5 lg:w-1/3 lg:gap-10">
               <Link href="/admin">
