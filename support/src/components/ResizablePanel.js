@@ -2,15 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 // inspired from https://stackoverflow.com/a/53220241/5225096
 
-const ResizablePanel = ({ children, name, position, className, Tag = "aside" }) => {
+const ResizablePanel = ({ children, name, position, className }) => {
+  const side = ["left", "right"].includes(position) ? "width" : "height";
+
   const panelRef = useRef(null);
-  const [panelWidth, setPanelWidth] = useState(() => {
-    const savedWidth = window.localStorage.getItem(`snu-panel-${name}-width`);
+  const [panelLength, setPanelLength] = useState(() => {
+    const savedWidth = window.localStorage.getItem(`snu-panel-${name}-length`);
     if (!!savedWidth) return parseInt(savedWidth, 10);
     return null;
   });
   useEffect(() => {
-    if (!panelWidth) setPanelWidth(parseInt(getComputedStyle(panelRef.current, "").width, 10));
+    if (!panelLength) setPanelLength(parseInt(getComputedStyle(panelRef.current, "")[side], 10));
   }, []);
   const moveStart = useRef(null);
   const panelWidthRef = useRef(null);
@@ -21,48 +23,54 @@ const ResizablePanel = ({ children, name, position, className, Tag = "aside" }) 
   const siblingDivRef = useRef(null);
 
   useEffect(() => {
-    panelWidthRef.current = panelWidth;
-  }, [panelWidth]);
+    panelWidthRef.current = panelLength;
+  }, [panelLength]);
 
   const resize = (e) => {
     if (position === "right") {
       const dx = moveStart.current - e.screenX;
       moveStart.current = e.screenX;
-      setPanelWidth((w) => w + dx);
+      setPanelLength((l) => l + dx);
     }
     if (position === "left") {
       const dx = e.screenX - moveStart.current;
       moveStart.current = e.screenX;
-      setPanelWidth((w) => w + dx);
+      setPanelLength((l) => l + dx);
+    }
+    if (position === "bottom") {
+      const dy = moveStart.current - e.screenY;
+      moveStart.current = e.screenY;
+      setPanelLength((l) => l + dy);
     }
   };
 
   const handleMouseUp = () => {
     siblingDivRef.current.classList.remove("pointer-events-none");
-    window.localStorage.setItem(`snu-panel-${name}-width`, panelWidthRef.current);
+    window.localStorage.setItem(`snu-panel-${name}-length`, panelWidthRef.current);
     document.removeEventListener("mousemove", resize, false);
     document.removeEventListener("mouseup", handleMouseUp, false);
   };
 
   const handleMouseDown = (e) => {
-    siblingDivRef.current = e.target[position === "left" ? "previousSibling" : "nextSibling"];
+    siblingDivRef.current = e.target[["left", "bottom"].includes(position) ? "previousSibling" : "nextSibling"];
     siblingDivRef.current.classList.add("pointer-events-none");
-    moveStart.current = e.screenX;
+    moveStart.current = e[["left", "right"].includes(position) ? "screenX" : "screenY"];
     document.addEventListener("mousemove", resize, false);
     document.addEventListener("mouseup", handleMouseUp, false);
   };
 
   const style = useMemo(() => {
-    if (!!panelWidth) return { width: panelWidth };
+    if (!!panelLength) return { [side]: panelLength };
     return {};
-  }, [panelWidth]);
+  }, [panelLength]);
 
   return (
-    <Tag ref={panelRef} className={className} style={style}>
+    <aside ref={panelRef} className={className} style={style}>
       {position === "right" && <div className="w-1 bg-coolGray-300 h-full flex-shrink-0 cursor-col-resize" onMouseDown={handleMouseDown} />}
       {children}
       {position === "left" && <div className="w-1 bg-coolGray-300 h-full flex-shrink-0 cursor-col-resize" onMouseDown={handleMouseDown} />}
-    </Tag>
+      {position === "bottom" && <div className="h-1 bg-coolGray-300 w-full flex-shrink-0 cursor-row-resize" onMouseDown={handleMouseDown} />}
+    </aside>
   );
 };
 
