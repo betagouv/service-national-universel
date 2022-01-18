@@ -10,11 +10,12 @@ import { translate } from "../../utils";
 import DownloadConvocationButton from "../../components/buttons/DownloadConvocationButton";
 
 import SelectMeetingPoint from "./SelectMeetingPoint";
-import Convocation from "./components/Convocation";
+//import Convocation from "./components/Convocation";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
+  const [meetingPoint, setMeetingPoint] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(true);
 
   const isFromDOMTOM = () => {
@@ -35,13 +36,21 @@ export default function Affected() {
     }
   };
 
+  const getMeetingPoint = async () => {
+    const { data, code, ok } = await api.get(`/meeting-point/60be2c07470697204b84e679`);
+    if (!ok) return toastr.error("error", translate(code));
+    setMeetingPoint(data);
+    console.log("POINT", data);
+  };
+
   useEffect(() => {
     (async () => {
       const { data, code, ok } = await api.get(`/cohesion-center/young/${young._id}`);
       if (!ok) return toastr.error("error", translate(code));
       setCenter(data);
+      getMeetingPoint();
     })();
-  }, []);
+  }, [young]);
 
   if (!center) return <div />;
   return (
@@ -55,20 +64,22 @@ export default function Affected() {
           />
         ) : null}
         <Hero>
-          <div className="content">
+          <Section className="content">
             <h1>
-              <strong>Mon séjour de cohésion</strong>
+              <strong>Mon séjour de cohésion </strong>
+              <br /> <span>{translate(young.cohort)}</span>
             </h1>
             <p>
               Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
               nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
             </p>
-            <p>Cette année, il se déroule du 21 juin au 2 juillet 2021. </p>
-            <Separator />
+            <Separator style={{ width: "150px" }} />
             <p>
-              <strong>Votre lieu d&apos;affectation</strong>
+              <strong style={{ color: "black" }}>Votre lieu d&apos;affectation</strong>
               <br />
-              Vous êtes actuellement affecté(e) à un centre de cohésion.
+              <strong>
+                <span>Vous êtes actuellement affecté(e) au centre de cohésion de :</span>
+              </strong>
               <br />
               <span style={{ color: "#5145cd" }}>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</span>
             </p>
@@ -93,11 +104,44 @@ export default function Affected() {
                 </p>
               </>
             ) : null}
-          </div>
+          </Section>
           <div className="thumb" />
         </Hero>
       </HeroContainer>
-      {isFromDOMTOM() ? (
+      <HeroContainer id="convocationPhase1">
+        <Hero>
+          <Content style={{ width: "100%" }}>
+            <Container style={{ display: "flex" }}>
+              <div>
+                <h2>Votre convocation</h2>
+                <p>
+                  Votre convocation sera à présenter à votre arrivée muni d&apos;une <strong>pièce d&apos;identité valide</strong> et de votre{" "}
+                  <strong>test PCR ou antigénique négatif de moins de 72 heures </strong>
+                  (recommandé)
+                </p>
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "auto", padding: "1rem" }}>
+                <ContinueButton>
+                  <DownloadConvocationButton young={young} uri="cohesion">
+                    Télécharger&nbsp;ma&nbsp;convocation
+                  </DownloadConvocationButton>
+                </ContinueButton>
+              </div>
+            </Container>
+            <Separator />
+            <Container>
+              <h3>Mon point de rassemblement</h3>
+              <p>
+                <strong>{meetingPoint.departureAddress}</strong>
+              </p>
+              <p>ALLER</p>
+              <p></p>
+            </Container>
+          </Content>
+        </Hero>
+        {/* <Convocation /> */}
+      </HeroContainer>
+      {/* {isFromDOMTOM() ? (
         <HeroContainer>
           <Hero>
             <ContentHorizontal>
@@ -110,7 +154,7 @@ export default function Affected() {
         </HeroContainer>
       ) : (
         <SelectMeetingPoint />
-      )}
+      )} */}
       <NextStep />
       <HeroContainer>
         <Hero>
@@ -127,32 +171,30 @@ export default function Affected() {
           </ContentHorizontal>
         </Hero>
       </HeroContainer>
-      {showConvocation() ? (
-        <HeroContainer id="convocationPhase1">
-          <Hero>
-            <ContentHorizontal>
-              <div>
-                <h2>Votre convocation</h2>
-                <p>
-                  Votre convocation sera à présenter à votre arrivée muni d&apos;une pièce d&apos;identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures
-                  (recommandé)
-                </p>
-              </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "auto", padding: "1rem" }}>
-                <ContinueButton>
-                  <DownloadConvocationButton young={young} uri="cohesion">
-                    Télécharger&nbsp;ma&nbsp;convocation
-                  </DownloadConvocationButton>
-                </ContinueButton>
-              </div>
-            </ContentHorizontal>
-          </Hero>
-          <Convocation />
-        </HeroContainer>
-      ) : null}
     </>
   );
 }
+
+const Section = styled.section`
+  width: 100%;
+  h1 span {
+    color: #2e2e2e;
+    font-weight: 400;
+  }
+  p span {
+    color: #888888;
+  }
+`;
+
+const Container = styled.div`
+  h2 {
+    font-size: 2rem;
+  }
+  h3 {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+`;
 
 const ContentHorizontal = styled(Content)`
   display: flex;
