@@ -28,7 +28,7 @@ const useIsActive = ({ slug }, onIsActive) => {
 
 const horizontalSpacing = 2;
 
-const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions, parentId, onListChange, onIsActive, onToggleOpen, isSortable, onClick }) => {
+const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions, parentId, onListChange, onIsActive, onToggleOpen, isSortable, onClick, className = "" }) => {
   const [open, setIsOpen] = useState(initShowOpen);
   useEffect(() => {
     if (!!isMounted) onToggleOpen(open);
@@ -67,7 +67,7 @@ const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions,
       data-parentid={parentId || "root"}
       data-id={section._id || "root"}
       data-type="section"
-      className={`flex flex-col ml-${level * horizontalSpacing}`}
+      className={`flex flex-col ml-${level * horizontalSpacing} ${className}`}
     >
       <span className={` text-warmGray-500  max-w-full inline-block overflow-hidden overflow-ellipsis whitespace-nowrap ${isActive ? "font-bold" : ""}`}>
         <small className="text-trueGray-400 mr-1 w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
@@ -194,7 +194,7 @@ const KnowledgeBaseAdminTree = ({ isSortable, onClick }) => {
       {/* TODO find a way for tailwind to not filter margins from compiling,
        because things like `ml-${level}` are not compiled */}
       <div className="hidden ml-2 ml-3 ml-4 ml-5 ml-6 ml-7 ml-8 ml-9 ml-10 ml-11 ml-12 ml-13 ml-14 ml-15 ml-16"></div>
-      <div ref={rootRef} key={reloadTreeKey} className="overflow-auto pb-10">
+      <div ref={rootRef} key={reloadTreeKey} className="overflow-auto pt-2 px-2 pb-10 dir-rtl">
         <Branch
           section={tree}
           level={0}
@@ -204,6 +204,7 @@ const KnowledgeBaseAdminTree = ({ isSortable, onClick }) => {
           cachedOpenedPositions={cachedOpenedPositions}
           isSortable={isSortable}
           onClick={onClick}
+          className="dir-ltr"
         />
       </div>
       {!!isSaving && (
