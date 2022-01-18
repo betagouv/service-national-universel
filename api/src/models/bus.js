@@ -5,6 +5,13 @@ const esClient = require("../es");
 const MODELNAME = "bus";
 
 const Schema = new mongoose.Schema({
+  cohort: {
+    type: String,
+    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2021"],
+    documentation: {
+      description: "Cohorte",
+    },
+  },
   idExcel: {
     type: String,
   },
