@@ -8,6 +8,8 @@ import NextStep from "./nextStep";
 import api from "../../services/api";
 import { translate } from "../../utils";
 import DownloadConvocationButton from "../../components/buttons/DownloadConvocationButton";
+import roundRight from "../../assets/roundRight.svg";
+import roundLeft from "../../assets/roundLeft.svg";
 
 import SelectMeetingPoint from "./SelectMeetingPoint";
 //import Convocation from "./components/Convocation";
@@ -111,31 +113,45 @@ export default function Affected() {
       <HeroContainer id="convocationPhase1">
         <Hero>
           <Content style={{ width: "100%" }}>
-            <Container style={{ display: "flex" }}>
-              <div>
-                <h2>Votre convocation</h2>
-                <p>
-                  Votre convocation sera à présenter à votre arrivée muni d&apos;une <strong>pièce d&apos;identité valide</strong> et de votre{" "}
-                  <strong>test PCR ou antigénique négatif de moins de 72 heures </strong>
-                  (recommandé)
-                </p>
-              </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "auto", padding: "1rem" }}>
-                <ContinueButton>
-                  <DownloadConvocationButton young={young} uri="cohesion">
-                    Télécharger&nbsp;ma&nbsp;convocation
-                  </DownloadConvocationButton>
-                </ContinueButton>
-              </div>
+            <Container>
+              <section className="download">
+                <div>
+                  <h2>Votre convocation</h2>
+                  <p>
+                    Votre convocation sera à présenter à votre arrivée muni d&apos;une <strong>pièce d&apos;identité valide</strong> et de votre{" "}
+                    <strong>test PCR ou antigénique négatif de moins de 72 heures </strong>
+                    (recommandé)
+                  </p>
+                </div>
+                <div className="button-container">
+                  <ContinueButton>
+                    <DownloadConvocationButton young={young} uri="cohesion">
+                      Télécharger&nbsp;ma&nbsp;convocation
+                    </DownloadConvocationButton>
+                  </ContinueButton>
+                </div>
+              </section>
             </Container>
             <Separator />
             <Container>
               <h3>Mon point de rassemblement</h3>
-              <p>
-                <strong>{meetingPoint.departureAddress}</strong>
-              </p>
-              <p>ALLER</p>
-              <p></p>
+              <p>{meetingPoint?.departureAddress}</p>
+              <section className="meeting">
+                <div className="meeting-dates">
+                  <img src={roundRight} />
+                  <article>
+                    <p>ALLER</p>
+                    <span>Le {meetingPoint?.departureAtString}</span>
+                  </article>
+                </div>
+                <div className="meeting-dates">
+                  <img src={roundLeft} />
+                  <article>
+                    <p>RETOUR</p>
+                    <span>Le {meetingPoint?.returnAtString}</span>
+                  </article>
+                </div>
+              </section>
             </Container>
           </Content>
         </Hero>
@@ -176,7 +192,6 @@ export default function Affected() {
 }
 
 const Section = styled.section`
-  width: 100%;
   h1 span {
     color: #2e2e2e;
     font-weight: 400;
@@ -193,6 +208,47 @@ const Container = styled.div`
   h3 {
     font-size: 1.2rem;
     font-weight: bold;
+  }
+  .meeting {
+    img {
+      width: 1.5rem;
+      height: 1.5rem;
+      margin: 1rem 0;
+    }
+    &-dates p {
+      font-size: 1rem;
+      font-weight: bold;
+      color: black;
+      margin-bottom: 0.5rem;
+    }
+  }
+  .button-container {
+    display: flex;
+    justify-content: center;
+  }
+  @media (min-width: 768px) {
+    .download {
+      display: flex;
+    }
+    .button-container {
+      justify-content: flex-end;
+      align-items: center;
+      margin-left: auto;
+      padding: 1rem;
+    }
+    .meeting {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      &-dates {
+        display: flex;
+        align-items: center;
+        text-align: left;
+      }
+      img {
+        margin-right: 1rem;
+        margin-bottom: 0;
+      }
+    }
   }
 `;
 
