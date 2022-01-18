@@ -1,3 +1,16 @@
+# [1.25.0](https://github.com/betagouv/service-national-universel/compare/v1.24.0...v1.25.0) (2022-01-18)
+
+
+### Bug Fixes
+
+* **admin:** add filter cohort in meetingPoint list ([87b7700](https://github.com/betagouv/service-national-universel/commit/87b77007a7eaae9cd0c06dbce73b876ecc86c5e2))
+* **support:** resizable drawer ([#1096](https://github.com/betagouv/service-national-universel/issues/1096)) ([5f5a38d](https://github.com/betagouv/service-national-universel/commit/5f5a38d2260d27173c03d5399c98a07e9ea1e54e))
+
+
+### Features
+
+* **support:** imporve voir en tant que + remove read for not admin + added searched ([#1095](https://github.com/betagouv/service-national-universel/issues/1095)) ([bf6166d](https://github.com/betagouv/service-national-universel/commit/bf6166de909ecb85aeba5af9aaa4808c8778a52b))
+
 # [1.24.0](https://github.com/betagouv/service-national-universel/compare/v1.23.0...v1.24.0) (2022-01-17)
 
 
