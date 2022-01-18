@@ -18,6 +18,8 @@ const ResizablePanel = ({ children, name, position, className, Tag = "aside" }) 
     return () => document.removeEventListener("mousemove", resize, false);
   }, []);
 
+  const siblingDivRef = useRef(null);
+
   useEffect(() => {
     panelWidthRef.current = panelWidth;
   }, [panelWidth]);
@@ -36,12 +38,15 @@ const ResizablePanel = ({ children, name, position, className, Tag = "aside" }) 
   };
 
   const handleMouseUp = () => {
+    siblingDivRef.current.classList.remove("pointer-events-none");
     window.localStorage.setItem(`snu-panel-${name}-width`, panelWidthRef.current);
     document.removeEventListener("mousemove", resize, false);
     document.removeEventListener("mouseup", handleMouseUp, false);
   };
 
   const handleMouseDown = (e) => {
+    siblingDivRef.current = e.target[position === "left" ? "previousSibling" : "nextSibling"];
+    siblingDivRef.current.classList.add("pointer-events-none");
     moveStart.current = e.screenX;
     document.addEventListener("mousemove", resize, false);
     document.addEventListener("mouseup", handleMouseUp, false);
