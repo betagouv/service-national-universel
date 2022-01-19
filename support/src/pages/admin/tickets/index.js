@@ -3,7 +3,6 @@ import Layout from "../../../components/Layout";
 import TicketsBottomDrawer from "../../../components/TicketsBottomDrawer";
 import TicketsLeftDrawer from "../../../components/TicketsLeftDrawer";
 import TicketsRightDrawer from "../../../components/TicketsRightDrawer";
-import WIP from "../../../components/WIP";
 import withAuth from "../../../hocs/withAuth";
 
 const KnowledgeBase = () => {
