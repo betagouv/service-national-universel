@@ -1,5 +1,5 @@
 * {
-  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  font-family: "Arial", "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
 }
 
 img.bg {
@@ -125,7 +125,7 @@ img.bg {
   font-size: 0.8rem;
   position: absolute;
   left: 130px;
-  top: 180px;
+  top: 150px;
   font-weight: bold;
   text-decoration: underline;
   text-align: right;
@@ -136,37 +136,39 @@ img.bg {
   position: absolute;
   text-align: right;
   right: 60px;
-  top: 180px;
+  top: 150px;
 }
-#convocation-cohesion > .center {
+#convocation-cohesion > .infos-center {
+  border: 1px solid #f00 ;
   font-size: 0.75rem;
   position: absolute;
-  left: 295px;
-  top: 380px;
-  width: 450px;
-  background-color: #f00;
+  left: 50px;
+  top: 330px;
+  width: 85%;
 }
 #convocation-cohesion > .center-domtom {
   font-size: 0.75rem;
   position: absolute;
   left: 295px;
   top: 436px;
-  width: 450px;
-  background-color: #f00;
+  width: 85%;
 }
 
 #convocation-cohesion > .meeting-point {
+  border: 1px solid rgb(47, 0, 255) ;
   font-size: 0.8rem;
   position: absolute;
-  left: 82px;
-  top: 437px;
+  left: 50px;
+  top: 390px;
+  width: 85%;
 }
 
 #convocation-cohesion > .meeting-point-date-return {
-  font-size: 0.75rem;
+  border: 1px solid rgb(47, 0, 255) ;
+  font-size: 0.8rem;
   position: absolute;
-  left: 70px;
-  top: 580px;
+  left: 50px;
+  top: 525px;
   width: 85%;
 }
 
