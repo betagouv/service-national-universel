@@ -59,14 +59,17 @@ export default function Convocation() {
 
   if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true") return null;
   if ((young.meetingPointId && !meetingPoint) || !center || !service) return <Loader />;
+
+  const contact = service.contacts.find((el) => el.cohort === young.cohort);
+
   return (
     <Hero>
       <Content style={{ width: "100%" }}>
         <ConvocText style={{ fontWeight: "500", textDecoration: "underline", display: "flex" }}>
           Affaire suivie par :
           <div style={{ textAlign: "right" }}>
-            {service.contactName} <br />
-            {service.contactPhone}
+            {contact.contactName} <br />
+            {contact.contactPhone}
           </div>
         </ConvocText>
         <ConvocText style={{ textAlign: "center" }}>
@@ -75,8 +78,8 @@ export default function Convocation() {
           <br /> <i style={{ fontSize: ".8rem" }}>Décret n° 2020-922 du 29 juillet 2020 portant diverses dispositions relatives au service national universel</i>
         </ConvocText>
         <ConvocText>
-          Votre candidature pour participer au séjour de cohésion, phase 1 du service national universel, du <b>21 juin au 2 juillet 2021</b>, a été retenue. Votre séjour se
-          déroulera au : {center.name}, {center.address} {center.zip} {center.city}
+          Je suis heureuse de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service national universel, du <b>13 février 2022</b>, a été
+          retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
         </ConvocText>
         {isFromDOMTOM() ? (
           <ConvocText>
@@ -88,10 +91,10 @@ export default function Convocation() {
             <ConvocText>
               Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
               <div>
-                <b>Le</b> {getDepartureMeetingDate()}
+                <b>Le </b> {getDepartureMeetingDate()}
               </div>
               <div>
-                <b>Lieu de rassemblement prévu : </b>
+                <b>Au </b>
                 {getMeetingAddress()}
               </div>
               <div>
@@ -118,16 +121,13 @@ export default function Convocation() {
         <ConvocText>Il vous est demandé de vous présenter avec :</ConvocText>
         <ConvocText>
           <ul style={{ marginLeft: "1rem" }}>
-            <li>- Cette convocation,</li>
-            <li>- Votre carte nationale d’identité,</li>
-            <li>- Votre test PCR ou antigénique de moins de 72h (recommandé),</li>
-            <li>- 4 masques jetables grand public filtration supérieure à 90%,</li>
-            <li>- Votre repas n’étant pas pris en charge à l’aller, il vous est demandé de prévoir votre collation et votre boisson, en fonction de la durée de votre trajet,</li>
+            <li>- Votre convocation</li>
+            <li>- Une pièce d'identité</li>
+            <li>- La fiche sanitaire complétée sous pli</li>
+            <li>- 2 masques jetables ayant une capacité de filtration supérieure à 90 %</li>
           </ul>
         </ConvocText>
-        <ConvocText>
-          Enfin, nous vous recommandons d’étiqueter vos bagages notamment pour les volontaires se rendant dans les centres par les moyens de transport mis à votre disposition.
-        </ConvocText>
+        <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
         <ConvocText>
           Afin que votre séjour se déroule dans les meilleures conditions, nous vous rappelons que chaque volontaire, lors de son inscription, s’est engagé à respecter le{" "}
           <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU_-_Réglement_intérieur.pdf" target="_blank" rel="noreferrer">
@@ -135,10 +135,10 @@ export default function Convocation() {
           </a>{" "}
           du centre
         </ConvocText>
-        <ConvocText>Nous vous souhaitons un excellent séjour de cohésion !</ConvocText>
+        <ConvocText>Vous adressant nos meilleurs vœux pour cette nouvelle année et vous souhaitant un excellent séjour de cohésion,</ConvocText>
         <Sign>
-          Jean-Roger RIBAUD <br />
-          Sous-directeur du service national universel
+          Emmanuelle PÉRÈS <br />
+          La directrice de la jeunesse, de l'éducation populaire et de la vie associative, déléguée interministérielle à la jeunesse
         </Sign>
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
           Pour toute information complémentaire, rendez-vous sur votre compte volontaire ou sur la{" "}
