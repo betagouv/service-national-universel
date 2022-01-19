@@ -1,3 +1,19 @@
+# [1.26.0](https://github.com/betagouv/service-national-universel/compare/v1.25.0...v1.26.0) (2022-01-19)
+
+
+### Bug Fixes
+
+* **admin:** add shortcut to young referents ([ddd04c7](https://github.com/betagouv/service-national-universel/commit/ddd04c712ced4a215ebc0869861027f0a76e61b7))
+* **app:** redirect to http url ([#1102](https://github.com/betagouv/service-national-universel/issues/1102)) ([c841c4d](https://github.com/betagouv/service-national-universel/commit/c841c4d0582c9929d0a71cf5d526a22e7e4ccf8e))
+* **support:** lint ([#1103](https://github.com/betagouv/service-national-universel/issues/1103)) ([cea670c](https://github.com/betagouv/service-national-universel/commit/cea670c94f1b52402bb5819d07c09192b420cca5))
+* **support:** see as with bandeau ([#1098](https://github.com/betagouv/service-national-universel/issues/1098)) ([7255709](https://github.com/betagouv/service-national-universel/commit/72557091db9c95db9190f13846c6a390442a77c8))
+
+
+### Features
+
+* **api:** update convocation pour fevrier 2022 ([#1100](https://github.com/betagouv/service-national-universel/issues/1100)) ([77349ad](https://github.com/betagouv/service-national-universel/commit/77349ad5b77e4029a5fa9bf0f2a3f896bb7d54c2))
+* **support:** tickets first iteration ([#1099](https://github.com/betagouv/service-national-universel/issues/1099)) ([6fb472c](https://github.com/betagouv/service-national-universel/commit/6fb472cfbb2dadac5400e4ddb098ddfc2f016b2c))
+
 # [1.25.0](https://github.com/betagouv/service-national-universel/compare/v1.24.0...v1.25.0) (2022-01-18)
 
 
