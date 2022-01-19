@@ -3,7 +3,18 @@ import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate, getLabelWithdrawnReason, ROLES } from "../../utils";
+import {
+  YOUNG_SITUATIONS,
+  translate as t,
+  YOUNG_STATUS,
+  isInRuralArea,
+  getAge,
+  formatDateFRTimezoneUTC,
+  formatStringLongDate,
+  getLabelWithdrawnReason,
+  ROLES,
+  colors,
+} from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -68,6 +79,9 @@ export default function VolontairePanel({ onChange, value }) {
           {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
         </div>
         <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
+        <Link to={`/user?DEPARTMENT=%5B"${young.department}"%5D&ROLE=%5B"${ROLES.REFERENT_DEPARTMENT}"%5D`}>
+          <TextButton>Voir équipe de référents ({young.department}) ›</TextButton>
+        </Link>
       </div>
       {young.status === YOUNG_STATUS.WITHDRAWN ? (
         <Info title="Motif du désistement">
@@ -83,7 +97,7 @@ export default function VolontairePanel({ onChange, value }) {
                 .sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0))
                 .map((a, i) => <ApplicationDetails key={a._id} application={a} i={i + 1} />)}
             <Link to={`/volontaire/${young._id}/phase2`}>
-              <div style={{ textAlign: "center", color: "#5245cc" }}>{"Voir toutes ses candidatures >"}</div>
+              <TextButton>Voir toutes ses candidatures ›</TextButton>
             </Link>
           </>
         ) : (
@@ -204,4 +218,15 @@ const NoResult = styled.div`
   text-align: center;
   font-style: italic;
   margin: 1rem;
+`;
+
+const TextButton = styled.div`
+  margin: 0.5rem;
+  text-align: center;
+  color: ${colors.purple};
+  :hover {
+    cursor: pointer;
+    color: ${colors.purple};
+    text-decoration: underline;
+  }
 `;
