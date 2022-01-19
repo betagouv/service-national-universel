@@ -8,6 +8,8 @@ import { translate } from "../../../utils";
 import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
 import roundRight from "../../../assets/roundRight.svg";
 import roundLeft from "../../../assets/roundLeft.svg";
+import questionMark from "../../../assets/question-mark.svg";
+import { supportURL } from "../../../config";
 
 export function ConvocationDetails({ young, center, meetingPoint }) {
   console.log("CENTER", center);
@@ -66,7 +68,7 @@ export function ConvocationDetails({ young, center, meetingPoint }) {
         </section>
         <section className="autonomous">
           <div className="autonomous-switch">
-            <p style={{ color: "black", fontWeight: "bold" }}>Vous souhaitez vous rendre au centre par vos propres moyens ?</p>
+            <p className="black-bold">Vous souhaitez vous rendre au centre par vos propres moyens ?</p>
             {open ? (
               <button className="autonomous-button" onClick={() => setOpen(false)}>
                 ↑ Réduire{" "}
@@ -112,6 +114,14 @@ export function ConvocationDetails({ young, center, meetingPoint }) {
             </>
           ) : null}
         </section>
+        <Separator />
+        <section className="more-info">
+          <img src={questionMark} />
+          <p className="black-bold">Des questions sur le transport ?</p>
+          <a href={`${supportURL}/base-de-connaissance`}>
+            Rendez-vous sur notre <span>base de connaissance ›</span>
+          </a>
+        </section>
       </Container>
     </>
   );
@@ -123,6 +133,10 @@ const Container = styled.div`
   }
   h3 {
     font-size: 1.2rem;
+    font-weight: bold;
+  }
+  .black-bold {
+    color: black;
     font-weight: bold;
   }
   .meeting {
@@ -161,6 +175,18 @@ const Container = styled.div`
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+  }
+  .more-info {
+    a {
+      color: #6c6c6c;
+    }
+    span {
+      color: #5245cc;
+      text-decoration: underline;
+    }
+    img {
+      width: 1.5rem;
     }
   }
   @media (min-width: 768px) {
