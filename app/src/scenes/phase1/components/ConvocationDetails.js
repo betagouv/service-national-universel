@@ -13,7 +13,6 @@ import map from "../../../assets/map.png";
 import { supportURL } from "../../../config";
 
 export function ConvocationDetails({ young, center, meetingPoint }) {
-  console.log("CENTER", center);
   const [open, setOpen] = useState(false);
   const [isAutonomous, setIsAutonomous] = useState(young.deplacementPhase1Autonomous === "true");
 
@@ -25,7 +24,6 @@ export function ConvocationDetails({ young, center, meetingPoint }) {
     });
     if (!ok) return toastr.error("error", translate(code));
     setIsAutonomous(data.deplacementPhase1Autonomous === "true");
-    console.log("AUTO", data);
     return toastr.success("Mis à jour !");
   }
   return (

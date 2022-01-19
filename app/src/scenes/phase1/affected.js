@@ -12,32 +12,11 @@ import { supportURL } from "../../config";
 import Case from "../../assets/case";
 import Question from "../../assets/question";
 
-//import SelectMeetingPoint from "./SelectMeetingPoint";
-//import Convocation from "./components/Convocation";
-
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(true);
-
-  const isFromDOMTOM = () => {
-    return ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
-      young.department,
-    );
-  };
-  const showConvocation = () => {
-    return isFromDOMTOM() || young.meetingPointId || young.deplacementPhase1Autonomous === "true";
-  };
-
-  const goToConvocation = () => {
-    if (document.getElementById) {
-      const yOffset = -70; // header's height
-      const element = document.getElementById("convocationPhase1");
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo(0, y);
-    }
-  };
 
   const getMeetingPoint = async () => {
     const { data, code, ok } = await api.get(`/meeting-point/60be2c07470697204b84e679`);
@@ -85,28 +64,6 @@ export default function Affected() {
               <br />
               <span style={{ color: "#5145cd" }}>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</span>
             </p>
-            {/* À supprimer ? */}
-            {/* {showConvocation() ? (
-              <>
-                <p>
-                  <a>
-                    <strong style={{ textDecoration: "underline", cursor: "pointer" }} onClick={goToConvocation}>
-                      Voir votre convocation
-                    </strong>
-                  </a>
-                </p>
-                <p>
-                  <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU_-_Réglement_intérieur.pdf" target="blank">
-                    <strong style={{ textDecoration: "underline", cursor: "pointer", color: "#6b7280" }}>Voir règlement intérieur</strong>
-                  </a>
-                </p>
-                <p>
-                  <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Protocole_sanitaire_ACM_avec_hebergement_post_CIC_070621.pdf" target="blank">
-                    <strong style={{ textDecoration: "underline", cursor: "pointer", color: "#6b7280" }}>Voir protocole sanitaire des centres de séjour</strong>
-                  </a>
-                </p>
-              </>
-            ) : null} */}
           </Section>
           <div className="thumb" />
         </Hero>
@@ -137,7 +94,6 @@ export default function Affected() {
             <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} />
           </Content>
         </Hero>
-        {/* <Convocation /> */}
       </HeroContainer>
       <Documents>Documents à renseigner</Documents>
       <NextStep />
