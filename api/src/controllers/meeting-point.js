@@ -22,11 +22,11 @@ router.get("/all", passport.authenticate("referent", { session: false, failWithE
 router.get("/:id", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-    // A young can only see his own meetingPoint.
-    // if (isYoung(req.user) && checkedId !== req.user.meetingPointId) {
-    //   return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    // }
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, errorId });
+    //A young can only see his own meetingPoint.
+    if (isYoung(req.user) && checkedId !== req.user.meetingPointId) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
     const data = await MeetingPointModel.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const bus = await BusModel.findById(data.busId);
