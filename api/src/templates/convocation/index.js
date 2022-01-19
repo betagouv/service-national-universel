@@ -48,7 +48,8 @@ const render = async (young) => {
     return meetingPoint.departureAddress;
   };
   try {
-    if (young.statusPhase1 === "AFFECTED" && !young.sessionPhase1Id && young.deplacementPhase1Autonomous !== "true") throw `young ${young.id} unauthorized`;
+    if (young.statusPhase1 !== "AFFECTED") throw `young ${young.id} not affected`;
+    if (!young.sessionPhase1Id && young.deplacementPhase1Autonomous !== "true") throw `young ${young.id} unauthorized`;
     const session = await SessionPhase1.findById(young.sessionPhase1Id);
     if (!session) throw `session ${young.sessionPhase1Id} not found for young ${young._id}`;
     const center = await CohesionCenterModel.findById(session.cohesionCenterId);
