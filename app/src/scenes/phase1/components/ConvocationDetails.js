@@ -9,21 +9,22 @@ import DownloadConvocationButton from "../../../components/buttons/DownloadConvo
 import roundRight from "../../../assets/roundRight.svg";
 import roundLeft from "../../../assets/roundLeft.svg";
 import questionMark from "../../../assets/question-mark.svg";
-import bus from "../../../assets/bus.png";
 import map from "../../../assets/map.png";
 import { supportURL } from "../../../config";
 
 export function ConvocationDetails({ young, center, meetingPoint }) {
   console.log("CENTER", center);
   const [open, setOpen] = useState(false);
-  const [isAutonomous, setIsAutonomous] = useState(young.deplacementPhase1Autonomous);
+  const [isAutonomous, setIsAutonomous] = useState(young.deplacementPhase1Autonomous === "true");
 
   async function confirmAutonomous() {
+    // delete meetingPointID
+    // delete bus...
     const { data, code, ok } = await api.put(`/young`, {
       deplacementPhase1Autonomous: "true",
     });
     if (!ok) return toastr.error("error", translate(code));
-    setIsAutonomous(data.deplacementPhase1Autonomous);
+    setIsAutonomous(data.deplacementPhase1Autonomous === "true");
     console.log("AUTO", data);
     return toastr.success("Mis à jour !");
   }
@@ -50,83 +51,86 @@ export function ConvocationDetails({ young, center, meetingPoint }) {
       </Container>
       <Separator />
       <Container>
-        <div className="flex">
-          <div className="flex-firstchild">
-            <img src={map} className="icon" />
-            <section>
-              <h3>Mon point de rassemblement</h3>
-              <p style={{ margin: 0 }}>{meetingPoint?.departureAddress}</p>
-            </section>
-          </div>
-          <div className="flex-secondchild">
-            <img src={bus} className="icon" />
-            <section className="meeting">
-              <div className="meeting-dates">
-                <img src={roundRight} />
-                <article>
-                  <p>ALLER</p>
-                  <span>Le {meetingPoint?.departureAtString}</span>
-                </article>
-              </div>
-              <div className="meeting-dates">
-                <img src={roundLeft} />
-                <article>
-                  <p>RETOUR</p>
-                  <span>Le {meetingPoint?.returnAtString}</span>
-                </article>
-              </div>
-            </section>
-          </div>
+        <div className="meeting">
+          <img src={map} className="icon" />
+          <section className="meeting-point">
+            <h3>Mon point de rassemblement</h3>
+            <p style={{ margin: 0 }}>
+              {isAutonomous ? `${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}` : `${meetingPoint?.departureAddress}`}
+            </p>
+          </section>
+          <section className="meeting-dates">
+            <div className="meeting-dates-detail">
+              <img src={roundRight} />
+              <article>
+                <p>ALLER</p>
+                <span>{isAutonomous ? "Le dimanche 13 février 2022 à 16 heures" : `Le ${meetingPoint?.departureAtString}`}</span>
+              </article>
+            </div>
+            <div className="meeting-dates-detail">
+              <img src={roundLeft} />
+              <article>
+                <p>RETOUR</p>
+                <span>{isAutonomous ? "Le vendredi 25 février 2022 à 11 heures" : `Le ${meetingPoint?.departureAtString}`}</span>
+              </article>
+            </div>
+          </section>
         </div>
         <Separator className="mobile-only" />
-        <section className="autonomous">
-          <div className="autonomous-switch">
-            <p className="black-bold">Vous souhaitez vous rendre au centre par vos propres moyens ?</p>
-            {open ? (
-              <button className="autonomous-button" onClick={() => setOpen(false)}>
-                ↑ Réduire{" "}
-              </button>
-            ) : (
-              <button className="autonomous-button" onClick={() => setOpen(true)}>
-                <svg width="11" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5.5 1v4m0 0v4m0-4h4m-4 0h-4" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                En savoir plus{" "}
-              </button>
-            )}
-          </div>
-          {open ? (
-            <>
-              <p style={{ marginTop: "1rem" }}>
-                <strong>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</strong>
-              </p>
-              <div className="meeting-dates">
-                <img src={roundRight} />
-                <article>
-                  <p>ALLER</p>
-                  <span>Le {meetingPoint?.departureAtString}</span>
-                </article>
-              </div>
-              <div className="meeting-dates">
-                <img src={roundLeft} />
-                <article>
-                  <p>RETOUR</p>
-                  <span>Le {meetingPoint?.returnAtString}</span>
-                </article>
-              </div>
-              {isAutonomous === "true" ? (
-                <p style={{ color: "#5145cd", marginTop: "2rem" }}>Vous avez choisi de vous rendre au centre de cohésion par vos propres moyens.</p>
+        {isAutonomous ? (
+          <p style={{ color: "#5145cd", marginTop: "2rem" }}>Vous avez choisi de vous rendre au centre de cohésion par vos propres moyens.</p>
+        ) : (
+          <section className="autonomous">
+            <div className="autonomous-switch">
+              <p className="black-bold">Vous souhaitez vous rendre au centre par vos propres moyens ?</p>
+              {open ? (
+                <button className="autonomous-button" onClick={() => setOpen(false)}>
+                  ↑ Réduire{" "}
+                </button>
               ) : (
+                <button className="autonomous-button" onClick={() => setOpen(true)}>
+                  <svg width="11" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5.5 1v4m0 0v4m0-4h4m-4 0h-4" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  En savoir plus{" "}
+                </button>
+              )}
+            </div>
+            {open ? (
+              <>
+                <div className="meeting meeting-autonomous">
+                  <img src={map} className="icon" />
+                  <p className="meeting-center">
+                    <strong>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</strong>
+                  </p>
+                  <section className="meeting-dates">
+                    <div className="meeting-dates-detail">
+                      <img src={roundRight} />
+                      <article>
+                        <p>ALLER</p>
+                        <span>Le dimanche 13 février 2022 à 16 heures</span>
+                      </article>
+                    </div>
+                    <div className="meeting-dates-detail">
+                      <img src={roundLeft} />
+                      <article>
+                        <p>RETOUR</p>
+                        <span>Le vendredi 25 février 2022 à 11 heures</span>
+                      </article>
+                    </div>
+                  </section>
+                </div>
                 <ContinueButton onClick={confirmAutonomous}>
                   Je confirme venir par mes propres moyens{" "}
                   <svg width="16" height="12" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 7l4 4L15 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </ContinueButton>
-              )}
-            </>
-          ) : null}
-        </section>
+              </>
+            ) : null}
+          </section>
+        )}
+
         <Separator />
         <section className="more-info">
           <div className="more-info-question">
@@ -154,22 +158,7 @@ const Container = styled.div`
     color: black;
     font-weight: bold;
   }
-  .meeting {
-    &-dates p {
-      font-size: 1rem;
-      font-weight: bold;
-      color: black;
-      margin-bottom: 0.3rem;
-      margin-top: 0.5rem;
-    }
-    &-dates {
-      img {
-        width: 1.5rem;
-        height: 1.5rem;
-        margin: 1rem 0;
-      }
-    }
-  }
+
   .button-container {
     display: flex;
     justify-content: center;
@@ -195,17 +184,42 @@ const Container = styled.div`
       align-items: center;
     }
   }
-  .flex {
+  .meeting {
     display: flex;
     justify-content: center;
     flex-direction: column;
     .icon {
-      width: 3rem;
-      height: 3rem;
-      margin-right: 0;
+      display: none;
     }
-    &-firstchild {
-      margin-bottom: 2rem;
+    &-point {
+      max-width: 450px;
+    }
+    &-center {
+      align-self: center;
+      margin-top: 1rem;
+      max-width: 400px;
+      margin-bottom: 0;
+    }
+    &-dates {
+      &-detail p {
+        font-size: 1rem;
+        font-weight: bold;
+        color: black;
+        margin-bottom: 0.3rem;
+        margin-top: 0.5rem;
+      }
+      &-detail span {
+        color: #888888;
+        font-weight: bold;
+      }
+      &-detail {
+        letter-spacing: 2px;
+        img {
+          width: 1.5rem;
+          height: 1.5rem;
+          margin: 1rem 0;
+        }
+      }
     }
   }
   .more-info {
@@ -231,36 +245,41 @@ const Container = styled.div`
       margin-left: auto;
       padding: 1rem;
     }
-    .flex {
+    .meeting {
       display: flex;
       align-items: center;
+      justify-content: flex-start;
       flex-direction: row;
-      &-firstchild {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0;
-      }
-      &-secondchild {
-        display: flex;
-        align-items: center;
-        margin-left: 3rem;
-      }
       .icon {
+        display: block;
+        width: 4rem;
+        height: 4rem;
         margin-right: 2rem;
       }
-    }
-    .meeting {
-      display: grid;
-      grid-template-rows: 1fr 1fr;
+      &-center {
+        margin-right: 1rem;
+        margin-top: 0;
+      }
+      &-point {
+        margin-right: 2rem;
+      }
       &-dates {
-        display: flex;
-        align-items: center;
-        text-align: left;
-        img {
-          margin-right: 1.5rem;
-          margin-bottom: 0;
+        min-width: 300px;
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        &-detail {
+          display: flex;
+          align-items: center;
+          text-align: left;
+          img {
+            margin-right: 1.5rem;
+            margin-bottom: 0;
+          }
         }
       }
+    }
+    .meeting-autonomous {
+      padding: 3rem 0;
     }
     .autonomous-switch {
       margin-top: 3rem;

@@ -8,6 +8,9 @@ import NextStep from "./nextStep";
 import api from "../../services/api";
 import { translate } from "../../utils";
 import { ConvocationDetails } from "./components/ConvocationDetails";
+import { supportURL } from "../../config";
+import Case from "../../assets/case";
+import Question from "../../assets/question";
 
 //import SelectMeetingPoint from "./SelectMeetingPoint";
 //import Convocation from "./components/Convocation";
@@ -108,6 +111,26 @@ export default function Affected() {
           <div className="thumb" />
         </Hero>
       </HeroContainer>
+      <GoodToKnow>
+        <section className="good-article">
+          <Case />
+          <div className="good-article-text">
+            <p>Dans ma valise, il y a...</p>
+            <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau-1`}>
+              Comment bien <span>préparer son séjour ›</span>
+            </a>
+          </div>
+        </section>
+        <section className="good-article">
+          <Question />
+          <div className="good-article-text">
+            <p>Vous avez des questions sur le séjour ?</p>
+            <a href={`${supportURL}/base-de-connaissance`}>
+              Consulter notre <span>base de connaissance ›</span>
+            </a>
+          </div>
+        </section>
+      </GoodToKnow>
       <HeroContainer id="convocationPhase1">
         <Hero>
           <Content style={{ width: "100%", padding: "3.2rem" }}>
@@ -116,6 +139,7 @@ export default function Affected() {
         </Hero>
         {/* <Convocation /> */}
       </HeroContainer>
+      <Documents>Documents à renseigner</Documents>
       <NextStep />
       <HeroContainer>
         <Hero>
@@ -144,6 +168,51 @@ const Section = styled.section`
   p span {
     color: #888888;
   }
+`;
+
+const GoodToKnow = styled.article`
+  max-width: 1280px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  .good-article {
+    margin: 2rem;
+    display: flex;
+    align-items: center;
+    &-text {
+      margin-left: 1rem;
+    }
+  }
+  a {
+    color: #6c6c6c;
+  }
+  span {
+    color: #5245cc;
+    text-decoration: underline;
+  }
+  img {
+    width: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  p {
+    margin: 0;
+    color: black;
+    font-weight: bold;
+  }
+  @media (min-width: 1335px) {
+    justify-content: center;
+  }
+`;
+
+const Documents = styled.h2`
+  max-width: 1280px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+  color: #6b7280;
+  font-weight: bold;
+  font-size: 2.25rem;
 `;
 
 const ContentHorizontal = styled(Content)`
