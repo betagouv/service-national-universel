@@ -139,7 +139,7 @@ img.bg {
   top: 150px;
 }
 #convocation-cohesion > .infos-center {
-  border: 1px solid #f00 ;
+  /* border: 1px solid #f00 ; */
   font-size: 0.75rem;
   position: absolute;
   left: 50px;
@@ -155,7 +155,7 @@ img.bg {
 }
 
 #convocation-cohesion > .meeting-point {
-  border: 1px solid rgb(47, 0, 255) ;
+  /* border: 1px solid rgb(47, 0, 255) ; */
   font-size: 0.8rem;
   position: absolute;
   left: 50px;
@@ -164,7 +164,7 @@ img.bg {
 }
 
 #convocation-cohesion > .meeting-point-date-return {
-  border: 1px solid rgb(47, 0, 255) ;
+  /* border: 1px solid rgb(47, 0, 255) ; */
   font-size: 0.8rem;
   position: absolute;
   left: 50px;
