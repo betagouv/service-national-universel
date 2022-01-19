@@ -7,12 +7,13 @@ const MODELNAME = "tag";
 
 const Schema = new mongoose.Schema(
   {
-    zammadId: {
-      type: String,
-    },
     name: {
       type: String,
       required: true,
+    },
+    // zammad migration
+    zammadId: {
+      type: String,
     },
   },
   { timestamps: true },

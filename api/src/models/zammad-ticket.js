@@ -146,7 +146,7 @@ const Schema = new mongoose.Schema(
       documentation: {
         description: "L'agent (ou les agents) auquel est destiné le ticket",
       },
-    }, // OK
+    },
     fromCanal: {
       type: String,
       enum: ["CANAL_Chat", "CANAL_Mail", "CANAL_Plateforme", "CANAL_Formulaire", "CANAL_Facebook", "CANAL_Twitter", ""],

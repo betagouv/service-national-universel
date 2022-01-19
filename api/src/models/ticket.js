@@ -7,46 +7,12 @@ const MODELNAME = "ticket";
 
 const Message = new mongoose.Schema(
   {
-    zammadId: {
-      type: String,
-      documentation: {
-        description: "identifiant dans Zammad",
-      },
-    },
     type: {
       type: String,
+      enum: ["email", "chat message"],
       documentation: {
-        description: "zammad type",
+        description: "type du message - TODO à définir",
       },
-    },
-    emitterSNURole: {
-      type: String,
-      documentation: {
-        description: "rôle de l'émetteur : agent, référent, volontaire...",
-      },
-    },
-    emitterZammadRole: {
-      type: String,
-      documentation: {
-        description: "rôle de l'émetteur sur Zammad",
-      },
-    },
-    createdByUserId: {
-      type: mongoose.Types.ObjectId,
-      ref: "referent",
-    },
-    createdByYoungId: {
-      type: mongoose.Types.ObjectId,
-      ref: "young",
-    },
-    createdByZammadId: {
-      type: String,
-      documentation: {
-        description: "identifiant Zammad de l'émetteur",
-      },
-    },
-    contentType: {
-      type: String,
     },
     body: {
       type: String,
@@ -54,10 +20,58 @@ const Message = new mongoose.Schema(
         description: "contenu du message",
       },
     },
-    internal: {
+    internalOnly: {
       type: Boolean,
       documentation: {
-        description: "le message est-il de visibilité interne",
+        description: "le message est-il de visibilité interne seulement",
+      },
+    },
+    // connection with existing db
+    emitterUserId: {
+      type: mongoose.Types.ObjectId,
+      required: true,
+      refPath: "createdByModel",
+      documentation: {
+        description: "https://github.com/Automattic/mongoose/issues/4217, https://mongoosejs.com/docs/populate.html#dynamic-ref",
+      },
+    },
+    emitterModel: {
+      type: String,
+      enum: ["young", "referent", ""],
+      documentation: {
+        description: "modèle de référence en base de donnée de l'émetteur. Il y en a deux pour le SNU, il pourrait y en avoir, 1 seul ou autant qu'on veut",
+      },
+    },
+    emitterRole: {
+      type: String,
+      documentation: {
+        description: "rôle de l'émetteur : agent, référent, volontaire...",
+      },
+    },
+
+    // zammad migration
+    zammadCreatedById: {
+      type: String,
+      documentation: {
+        description: "identifiant Zammad de l'émetteur",
+      },
+    },
+    zammadEmitterRole: {
+      type: String,
+      documentation: {
+        description: "rôle de l'émetteur sur Zammad",
+      },
+    },
+    zammadId: {
+      type: String,
+      documentation: {
+        description: "identifiant dans Zammad",
+      },
+    },
+    zammadType: {
+      type: String,
+      documentation: {
+        description: "zammad type",
       },
     },
   },
@@ -66,12 +80,7 @@ const Message = new mongoose.Schema(
 
 const Schema = new mongoose.Schema(
   {
-    zammadId: {
-      type: String,
-      documentation: {
-        description: "identifiant dans Zammad",
-      },
-    },
+    // infos
     number: {
       type: [String],
       documentation: {
@@ -84,40 +93,53 @@ const Schema = new mongoose.Schema(
       documentation: {
         description: "Objet du ticket",
       },
-    }, // OK
+    },
     category: {
       type: String,
       enum: ["TECHNICAL", "QUESTION", ""],
       documentation: {
         description: "Catégorie du ticket",
       },
-    }, // OK
+    },
     subject: {
       type: String,
       documentation: {
         description: "Sujet du ticket",
       },
-    }, // OK
-    emitterYoungId: {
-      type: mongoose.Types.ObjectId,
-      ref: "young",
-      documentation: {
-        description: "Identifiant de l'émetteur volontaire",
-      },
-    }, // OK
-    emitterUserId: {
-      type: mongoose.Types.ObjectId,
-      ref: "referent",
-      documentation: {
-        description: "Identifiant de l'émetteur",
-      },
     },
-    emitterZammadId: {
+    fromCanal: {
       type: String,
+      enum: ["Chat", "Mail", "Plateforme", "Formulaire", "Facebook", "Twitter", ""],
       documentation: {
-        description: "identifiant Zammad de l'émetteur",
+        description: "canal de communication d'où provient le ticket",
       },
     },
+    group: {
+      type: String,
+      enum: ["Admin", "Contact", "Inscription", "Jeunes", "Référents", "Structures", "Sous-direction", "Volontaires", "Test", "AnciensUsers"],
+      documentation: {
+        description: "nom du groupe",
+      },
+    },
+    priority: {
+      type: String,
+      enum: ["LOW", "NORMAL", "HIGH"],
+      documentation: {
+        description: "nom du degré de priorité",
+      },
+    },
+    status: {
+      type: String,
+      enum: ["new", "open", "closed", "pending reminder", "pending close", "merged"],
+      documentation: {
+        description: "nom de l'état du ticket",
+      },
+    },
+    messages: {
+      type: [Message],
+    },
+
+    // emitter
     emitterExternal: {
       type: Boolean,
       default: false,
@@ -140,43 +162,24 @@ const Schema = new mongoose.Schema(
         description: "Académie de l'émetteur",
       },
     },
+
+    // ventilation
     addressedToAgent: {
       type: [String],
       enum: ["AGENT_SUPPORT", "AGENT_TECHNICAL", "AGENT_DEPARTMENT_REFERENT", "AGENT_REGION_REFERENT", ""],
       documentation: {
         description: "L'agent (ou les agents) auquel est destiné le ticket",
       },
-    }, // OK
-    fromCanal: {
-      type: String,
-      enum: ["CANAL_Chat", "CANAL_Mail", "CANAL_Plateforme", "CANAL_Formulaire", "CANAL_Facebook", "CANAL_Twitter", ""],
-      documentation: {
-        description: "canal de communication d'où provient le ticket",
-      },
-    }, // OK
-    group: {
-      type: String,
-      enum: ["Admin", "Contact", "Inscription", "Jeunes", "Référents", "Structures", "Sous-direction", "Volontaires", "Test", "AnciensUsers"],
-      documentation: {
-        description: "nom du groupe",
-      },
-    }, // OK
-
-    priority: {
-      type: String,
-      enum: ["LOW", "NORMAL", "HIGH"],
-      documentation: {
-        description: "nom du degré de priorité",
-      },
     },
-    status: {
-      type: String,
-      enum: ["new", "open", "closed", "pending reminder", "pending close", "merged"],
+    agentInChargeId: {
+      type: mongoose.Types.ObjectId,
+      ref: "supportUser",
       documentation: {
-        description: "nom de l'état du ticket",
+        description: "identifiant de l'agent en charge du ticket",
       },
     },
 
+    // stats
     firstResponseAt: {
       type: Date,
       documentation: {
@@ -205,38 +208,17 @@ const Schema = new mongoose.Schema(
         description: "date de la dernière interaction de l'agent",
       },
     },
-
     agentResponseCount: {
       type: Number,
       documentation: {
         description: "nombre de réponses données par l'agent",
       },
     },
-
-    agentInChargeId: {
-      type: mongoose.Types.ObjectId,
-      ref: "referent",
-      documentation: {
-        description: "identifiant de l'agent en charge du ticket",
-      },
-    },
-
-    agentInChargeZammadId: {
-      type: String,
-      documentation: {
-        description: "identifiant de l'agent en charge du ticket",
-      },
-    },
-
     lastAgentInChargeUpdateAt: {
       type: Date,
       documentation: {
         description: "dernière mise à jour de la part de l'agent en charge",
       },
-    },
-
-    lastUpdateById: {
-      type: String,
     },
 
     tags: {
@@ -245,12 +227,48 @@ const Schema = new mongoose.Schema(
         description: "étiquettes reliées au ticket",
       },
     },
-    messages: {
-      type: [Message],
-    },
-
     closedAt: {
       type: Date,
+    },
+    // connection with existing db
+    emitterYoungId: {
+      type: mongoose.Types.ObjectId,
+      ref: "young",
+      documentation: {
+        description: "Identifiant de l'émetteur volontaire",
+      },
+    },
+    emitterUserId: {
+      type: mongoose.Types.ObjectId,
+      ref: "referent",
+      documentation: {
+        description: "Identifiant de l'émetteur",
+      },
+    },
+    // zammad migration
+    zammadId: {
+      type: String,
+      documentation: {
+        description: "identifiant dans Zammad",
+      },
+    },
+    agentInChargeZammadId: {
+      type: String,
+      documentation: {
+        description: "identifiant de l'agent en charge du ticket",
+      },
+    },
+    emitterZammadId: {
+      type: String,
+      documentation: {
+        description: "identifiant Zammad de l'émetteur",
+      },
+    },
+    lastUpdateById: {
+      type: String,
+      documentation: {
+        description: "zammad: updated by id...",
+      },
     },
   },
   { timestamps: true },
