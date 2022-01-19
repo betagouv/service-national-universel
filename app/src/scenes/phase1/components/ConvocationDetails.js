@@ -9,6 +9,8 @@ import DownloadConvocationButton from "../../../components/buttons/DownloadConvo
 import roundRight from "../../../assets/roundRight.svg";
 import roundLeft from "../../../assets/roundLeft.svg";
 import questionMark from "../../../assets/question-mark.svg";
+import bus from "../../../assets/bus.png";
+import map from "../../../assets/map.png";
 import { supportURL } from "../../../config";
 
 export function ConvocationDetails({ young, center, meetingPoint }) {
@@ -48,24 +50,35 @@ export function ConvocationDetails({ young, center, meetingPoint }) {
       </Container>
       <Separator />
       <Container>
-        <h3>Mon point de rassemblement</h3>
-        <p>{meetingPoint?.departureAddress}</p>
-        <section className="meeting">
-          <div className="meeting-dates">
-            <img src={roundRight} />
-            <article>
-              <p>ALLER</p>
-              <span>Le {meetingPoint?.departureAtString}</span>
-            </article>
+        <div className="flex">
+          <div className="flex-firstchild">
+            <img src={map} className="icon" />
+            <section>
+              <h3>Mon point de rassemblement</h3>
+              <p style={{ margin: 0 }}>{meetingPoint?.departureAddress}</p>
+            </section>
           </div>
-          <div className="meeting-dates">
-            <img src={roundLeft} />
-            <article>
-              <p>RETOUR</p>
-              <span>Le {meetingPoint?.returnAtString}</span>
-            </article>
+          <div className="flex-secondchild">
+            <img src={bus} className="icon" />
+            <section className="meeting">
+              <div className="meeting-dates">
+                <img src={roundRight} />
+                <article>
+                  <p>ALLER</p>
+                  <span>Le {meetingPoint?.departureAtString}</span>
+                </article>
+              </div>
+              <div className="meeting-dates">
+                <img src={roundLeft} />
+                <article>
+                  <p>RETOUR</p>
+                  <span>Le {meetingPoint?.returnAtString}</span>
+                </article>
+              </div>
+            </section>
           </div>
-        </section>
+        </div>
+        <Separator className="mobile-only" />
         <section className="autonomous">
           <div className="autonomous-switch">
             <p className="black-bold">Vous souhaitez vous rendre au centre par vos propres moyens ?</p>
@@ -116,8 +129,10 @@ export function ConvocationDetails({ young, center, meetingPoint }) {
         </section>
         <Separator />
         <section className="more-info">
-          <img src={questionMark} />
-          <p className="black-bold">Des questions sur le transport ?</p>
+          <div className="more-info-question">
+            <img src={questionMark} />
+            <p className="black-bold">Des questions sur le transport ?</p>
+          </div>
           <a href={`${supportURL}/base-de-connaissance`}>
             Rendez-vous sur notre <span>base de connaissance ›</span>
           </a>
@@ -140,16 +155,19 @@ const Container = styled.div`
     font-weight: bold;
   }
   .meeting {
-    img {
-      width: 1.5rem;
-      height: 1.5rem;
-      margin: 1rem 0;
-    }
     &-dates p {
       font-size: 1rem;
       font-weight: bold;
       color: black;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
+      margin-top: 0.5rem;
+    }
+    &-dates {
+      img {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin: 1rem 0;
+      }
     }
   }
   .button-container {
@@ -177,6 +195,19 @@ const Container = styled.div`
       align-items: center;
     }
   }
+  .flex {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    .icon {
+      width: 3rem;
+      height: 3rem;
+      margin-right: 0;
+    }
+    &-firstchild {
+      margin-bottom: 2rem;
+    }
+  }
   .more-info {
     a {
       color: #6c6c6c;
@@ -187,6 +218,7 @@ const Container = styled.div`
     }
     img {
       width: 1.5rem;
+      margin-bottom: 1rem;
     }
   }
   @media (min-width: 768px) {
@@ -199,22 +231,67 @@ const Container = styled.div`
       margin-left: auto;
       padding: 1rem;
     }
+    .flex {
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+      &-firstchild {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+      }
+      &-secondchild {
+        display: flex;
+        align-items: center;
+        margin-left: 3rem;
+      }
+      .icon {
+        margin-right: 2rem;
+      }
+    }
     .meeting {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
       &-dates {
         display: flex;
         align-items: center;
         text-align: left;
-      }
-      img {
-        margin-right: 1rem;
-        margin-bottom: 0;
+        img {
+          margin-right: 1.5rem;
+          margin-bottom: 0;
+        }
       }
     }
-    autonomous-switch {
+    .autonomous-switch {
+      margin-top: 3rem;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      button {
+        display: flex;
+        justify-content: center;
+        min-width: 148px;
+      }
+      p {
+        margin: 0;
+      }
+    }
+    .more-info {
+      img {
+        margin-bottom: 0;
+      }
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      p {
+        margin: 0 0 0 1rem;
+      }
+      &-question {
+        display: flex;
+      }
+    }
+    .mobile-only {
+      display: none;
     }
   }
 `;

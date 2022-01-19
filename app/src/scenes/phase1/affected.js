@@ -82,7 +82,8 @@ export default function Affected() {
               <br />
               <span style={{ color: "#5145cd" }}>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</span>
             </p>
-            {showConvocation() ? (
+            {/* À supprimer ? */}
+            {/* {showConvocation() ? (
               <>
                 <p>
                   <a>
@@ -102,33 +103,19 @@ export default function Affected() {
                   </a>
                 </p>
               </>
-            ) : null}
+            ) : null} */}
           </Section>
           <div className="thumb" />
         </Hero>
       </HeroContainer>
       <HeroContainer id="convocationPhase1">
         <Hero>
-          <Content style={{ width: "100%" }}>
+          <Content style={{ width: "100%", padding: "3.2rem" }}>
             <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} />
           </Content>
         </Hero>
         {/* <Convocation /> */}
       </HeroContainer>
-      {/* {isFromDOMTOM() ? (
-        <HeroContainer>
-          <Hero>
-            <ContentHorizontal>
-              <div>
-                <h2>Point de rassemblement</h2>
-                <p>Votre point de rassemblement vous sera communiqué par votre service régional</p>
-              </div>
-            </ContentHorizontal>
-          </Hero>
-        </HeroContainer>
-      ) : (
-        <SelectMeetingPoint />
-      )} */}
       <NextStep />
       <HeroContainer>
         <Hero>
