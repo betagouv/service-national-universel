@@ -3,7 +3,7 @@ require("../mongo");
 const client = require("./database");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");
-const TicketModel = require("../models/ticket");
+const ZammadTicketModel = require("../models/zammad-ticket");
 const TagModel = require("../models/tag");
 const { formatDistance } = require("date-fns");
 const { fr } = require("date-fns/locale");
@@ -158,12 +158,12 @@ const migrateTickets = async ({ force } = { force: false }) => {
         lastUpdateById: ticket.updated_by_id,
       };
       console.log("TICKET BODY OKAY ?", ticketBody);
-      const ticketExisting = await TicketModel.findOne({ zammadId: ticket.id });
+      const ticketExisting = await ZammadTicketModel.findOne({ zammadId: ticket.id });
       if (ticketExisting) {
         console.log("TICKET EXISTING !");
         await ticketExisting.save(ticketBody);
       } else {
-        const ticketCreated = await TicketModel.create(ticketBody);
+        const ticketCreated = await ZammadTicketModel.create(ticketBody);
         console.log("TICKET CREATED", ticketCreated?.title);
         if (!ticketCreated) {
           console.log("ERROR IN TICKET CREATION");

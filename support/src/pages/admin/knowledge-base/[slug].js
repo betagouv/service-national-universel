@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import Header from "../../../components/Header";
@@ -53,7 +54,14 @@ const KnowledgeBase = () => {
   return (
     <Layout title="Base de connaissance" className="flex flex-col">
       <Header>
-        Base de connaissance
+        <div className="mb-2 w-screen flex justify-between items-baseline -ml-12 -mr-12 pl-12 pr-4">
+          <span>Base de connaissance</span>
+          <Link href="/base-de-connaissance">
+            <a className="bg-transparent border-none hover:underline text-xs font-light p-0 m-0 ml-auto" href="#">
+              Aller à la base de connaissance publique
+            </a>
+          </Link>
+        </div>
         <KnowledgeBaseAdminBreadcrumb parents={item?.parents} />
         <div id="breadcrumb" className="px-4 py-2 -ml-12 -mr-12 -mb-3 flex justify-between items-baseline flex-shrink-0 w-screen bg-snu-purple-900">
           <button onClick={() => setTreeVisible((v) => !v)} className="bg-transparent border-none hover:underline text-xs font-light p-0 m-0">
