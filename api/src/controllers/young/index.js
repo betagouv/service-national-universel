@@ -370,6 +370,27 @@ router.post("/:id/archive", passport.authenticate("referent", { session: false, 
   }
 });
 
+router.put("/:id/phase1", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.body.deplacementPhase1Autonomous === "true") {
+      young.set({
+        deplacementPhase1Autonomous: "true",
+        meetingPointId: "",
+      });
+    }
+  } catch (error) {
+    capture(error);
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.put("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body, req.user);
