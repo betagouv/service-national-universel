@@ -383,6 +383,7 @@ router.put("/:id/phase1", passport.authenticate("young", { session: false, failW
         deplacementPhase1Autonomous: "true",
         meetingPointId: "",
       });
+      await young.save();
     }
   } catch (error) {
     capture(error);
