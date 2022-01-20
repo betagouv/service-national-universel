@@ -39,14 +39,14 @@ export default function Phase1(props) {
     if (!young?.sessionPhase1Id) return;
     (async () => {
       const { data, code, ok } = await api.get(`/session-phase1/${young?.sessionPhase1Id}/cohesion-center`);
-      if (!ok) return toastr.error("error", translate(code));
+      if (!ok) return toastr.error("Impossible de récupérer les informations du centre de cohésion", translate(code));
       setCohesionCenter(data);
     })();
 
     if (!young.meetingPointId) return;
     (async () => {
       const { data, code, ok } = await api.get(`/meeting-point/${young?.meetingPointId}`);
-      if (!ok) return toastr.error("error", translate(code));
+      if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
       setMeetingPoint(data);
     })();
   }, []);
