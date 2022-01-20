@@ -7,16 +7,20 @@ import { HeroContainer, Hero, Content, Separator, AlertBoxInformation } from "..
 import NextStep from "./nextStep";
 import api from "../../services/api";
 import { translate, translateCohort } from "../../utils";
-import { ConvocationDetails } from "./components/ConvocationDetails";
+import ConvocationDetails from "./components/ConvocationDetails";
+import Convocation from "./components/Convocation";
 import { supportURL } from "../../config";
 import Case from "../../assets/case";
 import Question from "../../assets/question";
+import Bouclier from "../../assets/bouclier";
+import right from "../../assets/right.svg";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(true);
+  const [showConvocation, setShowConvocation] = useState(false);
 
   const getMeetingPoint = async () => {
     const { data, ok } = await api.get(`/young/${young._id}/meeting-point`);
@@ -44,28 +48,38 @@ export default function Affected() {
             onClose={() => setShowInfoMessage(false)}
           />
         ) : null}
-        <Hero>
-          <Section className="content">
-            <h1>
-              <strong>Mon séjour de cohésion </strong>
-              <br /> <span>{translateCohort(young.cohort)}</span>
-            </h1>
-            <p>
-              Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
-              nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
-            </p>
-            <Separator style={{ width: "150px" }} />
-            <p>
-              <strong style={{ color: "black" }}>Votre lieu d&apos;affectation</strong>
-              <br />
-              <strong>
-                <span>Vous êtes actuellement affecté(e) au centre de cohésion de :</span>
-              </strong>
-              <br />
-              <span style={{ color: "#5145cd" }}>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</span>
-            </p>
+        <Hero style={{ flexDirection: "column" }}>
+          <Section className="hero-container">
+            <section className="content">
+              <h1>
+                <strong>Mon séjour de cohésion </strong>
+                <br /> <span>{translateCohort(young.cohort)}</span>
+              </h1>
+              <p>
+                Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des
+                liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
+              </p>
+              <Separator style={{ width: "150px" }} />
+              <p>
+                <strong style={{ color: "black" }}>Votre lieu d&apos;affectation</strong>
+                <br />
+                <strong>
+                  <span>Vous êtes actuellement affecté(e) au centre de cohésion de :</span>
+                </strong>
+                <br />
+                <span style={{ color: "#5145cd" }}>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</span>
+              </p>
+            </section>
+            <div className="thumb" />
           </Section>
-          <div className="thumb" />
+          <Separator style={{ margin: 0 }} />
+          <Protocole href="https://www.jeunes.gouv.fr/Les-Protocoles-sanitaires-dans-les" target="_blank" rel="noreferrer">
+            <span>
+              <Bouclier />
+              Protocole sanitaire en vigueur pour les Accueils Collectifs de Mineur
+            </span>
+            <img src={right} />
+          </Protocole>
         </Hero>
       </HeroContainer>
       <GoodToKnow>
@@ -91,38 +105,70 @@ export default function Affected() {
       <HeroContainer id="convocationPhase1">
         <Hero>
           <Content style={{ width: "100%", padding: "3.2rem" }}>
-            <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} />
+            <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} setShowConvocation={setShowConvocation} />
           </Content>
         </Hero>
       </HeroContainer>
+      {showConvocation ? (
+        <HeroContainer id="convocationPhase1">
+          <Hero>
+            <ContentHorizontal>
+              <div>
+                <h2>Votre convocation</h2>
+                <p>
+                  Votre convocation sera à présenter à votre arrivée muni d&apos;une pièce d&apos;identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures
+                  (recommandé)
+                </p>
+              </div>
+            </ContentHorizontal>
+          </Hero>
+          <Convocation />
+        </HeroContainer>
+      ) : null}
       <Documents>Documents à renseigner</Documents>
       <NextStep />
-      <HeroContainer>
-        <Hero>
-          <ContentHorizontal>
-            <div>
-              <h2>Comment bien préparer votre séjour de cohésion</h2>
-              <p>Consultez le trousseau indicatif pour être sûr(e) de ne rien oublier</p>
-            </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "auto" }}>
-              <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/trousseauIndicatif.pdf">
-                <ContinueButton>Consulter</ContinueButton>
-              </a>
-            </div>
-          </ContentHorizontal>
-        </Hero>
-      </HeroContainer>
     </>
   );
 }
 
 const Section = styled.section`
+  display: flex;
   h1 span {
     color: #2e2e2e;
     font-weight: 400;
   }
   p span {
     color: #888888;
+  }
+`;
+
+const Protocole = styled.a`
+  padding: 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  span {
+    color: black;
+  }
+  svg {
+    margin-right: 0.5rem;
+    margin-bottom: 0.2rem;
+  }
+  img {
+    display: none;
+  }
+  @media (min-width: 768px) {
+    svg {
+      margin-right: 3rem;
+    }
+    span {
+      font-size: 1.2rem;
+      display: block;
+    }
+    img {
+      display: block;
+      width: 0.8rem;
+    }
   }
 `;
 
@@ -139,6 +185,9 @@ const GoodToKnow = styled.article`
     align-items: center;
     &-text {
       margin-left: 1rem;
+    }
+    svg {
+      min-width: 48px;
     }
   }
   a {
@@ -159,6 +208,14 @@ const GoodToKnow = styled.article`
   }
   @media (min-width: 1335px) {
     justify-content: center;
+  }
+  @media (max-width: 360px) {
+    .good-article {
+      flex-direction: column;
+    }
+    svg {
+      margin-bottom: 0.5rem;
+    }
   }
 `;
 
@@ -184,25 +241,5 @@ const ContentHorizontal = styled(Content)`
     margin-top: 0.5rem;
     font-weight: 400;
     cursor: pointer;
-  }
-`;
-
-const ContinueButton = styled.button`
-  color: #fff;
-  background-color: #5145cd;
-  padding: 9px 20px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 1rem;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  display: block;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  :hover {
-    opacity: 0.9;
   }
 `;

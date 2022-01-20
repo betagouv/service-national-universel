@@ -12,7 +12,7 @@ import questionMark from "../../../assets/question-mark.svg";
 import map from "../../../assets/map.png";
 import { supportURL } from "../../../config";
 
-export function ConvocationDetails({ young, center, meetingPoint }) {
+export default function ConvocationDetails({ young, center, meetingPoint, setShowConvocation }) {
   const [open, setOpen] = useState(false);
   const [isAutonomous, setIsAutonomous] = useState(young.deplacementPhase1Autonomous === "true");
 
@@ -37,6 +37,9 @@ export function ConvocationDetails({ young, center, meetingPoint }) {
               Votre convocation sera à présenter à votre arrivée muni d&apos;une <strong>pièce d&apos;identité valide</strong> et de votre{" "}
               <strong>test PCR ou antigénique négatif de moins de 72 heures </strong>
               (recommandé)
+            </p>
+            <p className="show-convocation">
+              En cas de problème de téléchargement : <span onClick={setShowConvocation}>afficher ma convocation</span>
             </p>
           </div>
           <div className="button-container">
@@ -168,6 +171,14 @@ const Container = styled.div`
   .button-container {
     display: flex;
     justify-content: center;
+  }
+  .show-convocation {
+    font-size: 0.9rem;
+    span {
+      cursor: pointer;
+      color: #5245cc;
+      text-decoration: underline;
+    }
   }
   .autonomous {
     margin-top: 1rem;
