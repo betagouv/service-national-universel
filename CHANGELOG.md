@@ -1,3 +1,20 @@
+# [1.27.0](https://github.com/betagouv/service-national-universel/compare/v1.26.0...v1.27.0) (2022-01-20)
+
+
+### Bug Fixes
+
+* **admin:** add hidden close button cgu modal ([5861942](https://github.com/betagouv/service-national-universel/commit/5861942c07c9f1c2caed119c81ccce7b58d8388c))
+* **admin:** allow null contact ([dde9782](https://github.com/betagouv/service-national-universel/commit/dde9782e694cefeeef3258a5a6d8426223c066e2))
+* **admin:** infos center in young/id/phase1 ([#1105](https://github.com/betagouv/service-national-universel/issues/1105)) ([0e63bff](https://github.com/betagouv/service-national-universel/commit/0e63bffdf723a00dca125926eb54b595f63522f8))
+* **support:** see as for referent and admin ([#1104](https://github.com/betagouv/service-national-universel/issues/1104)) ([b154852](https://github.com/betagouv/service-national-universel/commit/b154852bc9c2c5d10a0c0f2595b7b689ce80149b))
+* **support:** show seeas banner only when seeas is active ([#1108](https://github.com/betagouv/service-national-universel/issues/1108)) ([63b9d06](https://github.com/betagouv/service-national-universel/commit/63b9d06d3ccc1cab3db300d5bb8f14f1c8de54b1))
+
+
+### Features
+
+* **app:** enable edit files in phase1 ([#1109](https://github.com/betagouv/service-national-universel/issues/1109)) ([76ced2b](https://github.com/betagouv/service-national-universel/commit/76ced2bfc8b67039c49d833c1410b852e6dde868))
+* **app:** event plausible - step 2 ([85cefca](https://github.com/betagouv/service-national-universel/commit/85cefca34b5a84db5018a9c4156d8ba3cd12b765))
+
 # [1.26.0](https://github.com/betagouv/service-national-universel/compare/v1.25.0...v1.26.0) (2022-01-19)
 
 
