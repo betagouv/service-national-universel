@@ -16,6 +16,8 @@ const ReferentModel = require("../../models/referent");
 const CohesionCenterObject = require("../../models/cohesionCenter");
 const ApplicationModel = require("../../models/application");
 const MissionModel = require("../../models/mission");
+const MeetingPointModel = require("../../models/meetingPoint");
+const BusModel = require("../../models/bus");
 const AuthObject = require("../../auth");
 const YoungAuth = new AuthObject(YoungObject);
 const {
@@ -28,6 +30,7 @@ const {
   inSevenDays,
   isYoung,
   // updateApplicationsWithYoungOrMission,
+  updatePlacesBus
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -370,6 +373,7 @@ router.post("/:id/archive", passport.authenticate("referent", { session: false, 
   }
 });
 
+// On peut simplifier cette route en passant directement le meetingPoint en entier dans la requête
 router.put("/:id/phase1", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
@@ -378,12 +382,20 @@ router.put("/:id/phase1", passport.authenticate("young", { session: false, failW
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
+    if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const bus = await BusModel.findById(meetingPoint.busId);
+    if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     if (req.body.deplacementPhase1Autonomous === "true") {
       young.set({
         deplacementPhase1Autonomous: "true",
         meetingPointId: "",
       });
       await young.save();
+
+      await updatePlacesBus(bus);
     }
   } catch (error) {
     capture(error);
