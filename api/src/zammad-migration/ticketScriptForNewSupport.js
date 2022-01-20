@@ -3,7 +3,7 @@ require("../mongo");
 const client = require("./database");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");
-const ZammadTicketModel = require("../models/zammad-ticket");
+const TicketModel = require("../models/zammad-ticket");
 const TagModel = require("../models/tag");
 const { formatDistance } = require("date-fns");
 const { fr } = require("date-fns/locale");
@@ -76,16 +76,15 @@ const migrateTickets = async ({ force } = { force: false }) => {
           if (emitterUserId) emitterModel = "referent";
         }
         messagesArray.push({
-          type: "zammad",
           body: message.body,
           emitterRole: emitterUserId?.role || "",
           emitterUserId: emitterUserId?._id || null,
           emitterModel,
-          contentType: message.content_type,
           internalOnly: message.internal,
           createdAt: message.created_at,
           updatedAt: message.updated_at,
           zammadId: message.id,
+          zammadContentType: message.content_type,
           zammadCreatedById: message.created_by_id,
           zammadEmitterRole: ticketArticleSenders.filter((sender) => message.sender_id === sender.id)[0].name,
           zammadType: ticketArticleTypes.filter((type) => message.type_id === type.id)[0].name,
@@ -102,7 +101,7 @@ const migrateTickets = async ({ force } = { force: false }) => {
       const tags = ticketTags.filter((tag) => tag.o_id === ticket.id);
       let tagsIds = [];
       let addressedToAgents = [];
-      let fromCanal = "";
+      let canal = "";
       let category = "";
       let department = "";
       let region = "";
@@ -112,7 +111,7 @@ const migrateTickets = async ({ force } = { force: false }) => {
         if (tagName.includes("AGENT")) {
           addressedToAgents.push(tagName);
         } else if (tagName.includes("CANAL")) {
-          fromCanal = tagName;
+          canal = tagName;
         } else if (tagName.includes("TECHNICAL") || tagName.includes("QUESTION")) {
           category = tagName;
         } else if (tagName.includes("DEPARTEMENT")) {
@@ -141,7 +140,7 @@ const migrateTickets = async ({ force } = { force: false }) => {
         emitterDepartment: department || emitterUser?.department || emitterYoung?.department || "",
         emitterRegion: region || emitterUser?.region || emitterYoung?.region || "",
         addressedToAgents,
-        fromCanal,
+        canal,
         group: groups.filter((group) => ticket.group_id === group.id)[0].name,
         priority,
         status: ticketStates.filter((state) => ticket.state_id === state.id)[0].name,
@@ -161,12 +160,12 @@ const migrateTickets = async ({ force } = { force: false }) => {
         lastUpdateById: ticket.updated_by_id,
       };
       console.log("TICKET BODY OKAY ?", ticketBody);
-      const ticketExisting = await ZammadTicketModel.findOne({ zammadId: ticket.id });
+      const ticketExisting = await TicketModel.findOne({ zammadId: ticket.id });
       if (ticketExisting) {
         console.log("TICKET EXISTING !");
         await ticketExisting.save(ticketBody);
       } else {
-        const ticketCreated = await ZammadTicketModel.create(ticketBody);
+        const ticketCreated = await TicketModel.create(ticketBody);
         console.log("TICKET CREATED", ticketCreated?.title);
         if (!ticketCreated) {
           console.log("ERROR IN TICKET CREATION");

@@ -7,11 +7,11 @@ const MODELNAME = "ticket";
 
 const Message = new mongoose.Schema(
   {
-    type: {
+    canal: {
       type: String,
-      enum: ["email", "chat message"],
+      enum: ["Chat", "Mail", "Plateforme", "Formulaire", "Facebook", "Twitter", ""],
       documentation: {
-        description: "type du message - TODO à définir",
+        description: "canal de communication d'où provient le ticket",
       },
     },
     body: {
@@ -74,6 +74,12 @@ const Message = new mongoose.Schema(
         description: "zammad type",
       },
     },
+    zammadContentType: {
+      type: String,
+      documentation: {
+        description: "zammad content type",
+      },
+    },
   },
   { timestamps: true },
 );
@@ -107,7 +113,7 @@ const Schema = new mongoose.Schema(
         description: "Sujet du ticket",
       },
     },
-    fromCanal: {
+    canal: {
       type: String,
       enum: ["Chat", "Mail", "Plateforme", "Formulaire", "Facebook", "Twitter", ""],
       documentation: {
