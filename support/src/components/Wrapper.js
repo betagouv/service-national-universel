@@ -104,7 +104,7 @@ const Wrapper = ({ children }) => {
           )}
         </div>
       </header>
-      {user?.role === "admin" && seeAs !== "admin" && (
+      {["admin", "referent"].includes(user?.role) && user?.role !== seeAs && (
         <button onClick={() => setSeeAs("admin")} className="bg-red-500 border-none rounded-none font-normal">
           Vous visualisez la base de connaissance en tant que {SUPPORT_ROLES[seeAs]}, pour retourner à votre vue cliquez ici
         </button>
