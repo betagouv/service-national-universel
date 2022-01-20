@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Row, Col } from "reactstrap";
+import { Row, Col, Button } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { Formik, Field } from "formik";
 import DndFileInput from "../../components/dndFileInput";
@@ -8,9 +8,10 @@ import ErrorMessage, { requiredMessage } from "../inscription/components/errorMe
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
-import { translate } from "../../utils";
+import { translate, colors } from "../../utils";
 import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, BackButton, Content } from "./components/printable";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import styled from "styled-components";
 
 export default function AutoTest() {
   const young = useSelector((state) => state.Auth.young);
@@ -18,6 +19,7 @@ export default function AutoTest() {
   const isPlural = young?.parent1Status && young?.parent2Status;
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showFields, setShowFields] = useState(!young.autoTestPCRFiles?.length);
 
   return (
     <HeroContainer>
@@ -46,15 +48,23 @@ export default function AutoTest() {
             </div>
           </div>
           {young.autoTestPCRFiles && young.autoTestPCRFiles.length ? (
-            <SuccessMessage>
-              <Logo>
-                <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              </Logo>
-              Vous avez bien renseigné le document
-            </SuccessMessage>
-          ) : (
+            <>
+              <SuccessMessage>
+                <Logo>
+                  <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </Logo>
+                Vous avez bien renseigné le document
+              </SuccessMessage>
+              {!showFields && (
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <VioletButton onClick={() => setShowFields(true)}>Modifier</VioletButton>
+                </div>
+              )}
+            </>
+          ) : null}
+          {showFields && (
             <>
               <Formik
                 initialValues={{
@@ -76,6 +86,7 @@ export default function AutoTest() {
                     if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
                     dispatch(setYoung(young));
                     toastr.success("Mis à jour !");
+                    setShowFields(false);
                   } catch (e) {
                     setLoading(false);
                     console.log(e);
@@ -266,3 +277,20 @@ export default function AutoTest() {
     </HeroContainer>
   );
 }
+
+const VioletButton = styled(Button)`
+  background-color: #5245cc;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 30px;
+  margin: 0;
+  margin-top: 1rem;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff !important;
+  cursor: pointer;
+  background-color: ${colors.purple} !important;
+  &:hover {
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.5);
+  }
+`;
