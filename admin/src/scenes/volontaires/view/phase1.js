@@ -253,7 +253,7 @@ export default function Phase1(props) {
               </MailAttestationButton>
             </div>
           ) : null}
-          {young.meetingPointId || young.deplacementPhase1Autonomous === "true" ? (
+          {young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && (young.meetingPointId || young.deplacementPhase1Autonomous === "true") ? (
             <DownloadConvocationButton young={young} uri="cohesion">
               Télécharger la convocation au séjour de cohésion
             </DownloadConvocationButton>
