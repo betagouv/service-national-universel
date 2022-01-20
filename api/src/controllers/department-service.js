@@ -30,9 +30,9 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       cohort: Joi.string().required(),
-      contactName: Joi.string().optional(),
-      contactPhone: Joi.string().optional(),
-      contactMail: Joi.string().optional(),
+      contactName: Joi.string().allow(null, ""),
+      contactPhone: Joi.string().allow(null, ""),
+      contactMail: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
