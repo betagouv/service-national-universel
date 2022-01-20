@@ -19,7 +19,7 @@ export default function Affected() {
   const [showInfoMessage, setShowInfoMessage] = useState(true);
 
   const getMeetingPoint = async () => {
-    const { data, code, ok } = await api.get(`/young/${young._id}/meeting-point`);
+    const { data, ok } = await api.get(`/young/${young._id}/meeting-point`);
     if (!ok) setMeetingPoint(null);
     setMeetingPoint(data);
   };

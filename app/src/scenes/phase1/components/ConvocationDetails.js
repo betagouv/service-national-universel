@@ -19,6 +19,7 @@ export function ConvocationDetails({ young, center, meetingPoint }) {
   async function confirmAutonomous() {
     // delete meetingPointID
     // delete bus...
+    //! route à changer après création de la route dédié : "young/:id/phase1"
     const { data, code, ok } = await api.put(`/young`, {
       deplacementPhase1Autonomous: "true",
     });
