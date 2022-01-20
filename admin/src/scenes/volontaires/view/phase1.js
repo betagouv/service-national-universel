@@ -31,14 +31,22 @@ export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
   const [young, setYoung] = useState(props.young);
+  const [cohesionCenter, setCohesionCenter] = useState();
   const disabled = young.statusPhase1 === "WITHDRAWN" || user.role !== ROLES.ADMIN;
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   useEffect(() => {
+    if (!young?.sessionPhase1Id) return;
+    (async () => {
+      const { data, code, ok } = await api.get(`/session-phase1/${young?.sessionPhase1Id}/cohesion-center`);
+      if (!ok) return toastr.error("Impossible de récupérer les informations du centre de cohésion", translate(code));
+      setCohesionCenter(data);
+    })();
+
     if (!young.meetingPointId) return;
     (async () => {
       const { data, code, ok } = await api.get(`/meeting-point/${young?.meetingPointId}`);
-      if (!ok) return toastr.error("error", translate(code));
+      if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
       setMeetingPoint(data);
     })();
   }, []);
@@ -61,28 +69,29 @@ export default function Phase1(props) {
       );
     return (
       <div>
-        <i>{`Aucun point de rassemblement n'a été confirmé par ${young.firstName}`}</i>
+        <i>{`Aucun point de rassemblement n'a été confirmé pour ${young.firstName}`}</i>
       </div>
     );
   };
 
   const getCohesionStay = (young) => {
+    if (!cohesionCenter) return <i>Aucun centre renseigné</i>;
     if (young.statusPhase1 === "DONE")
       return (
         <>
           <p>{young.firstName} a réalisé son séjour de cohésion.</p>
-          <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "NOT_DONE")
       return (
         <>
           <p>{young.firstName} n&apos;a pas réalisé son séjour de cohésion.</p>
-          <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) {
@@ -102,9 +111,9 @@ export default function Phase1(props) {
       return (
         <>
           <p>{young.firstName} a été affecté(e) au centre :</p>
-          <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "WAITING_AFFECTATION")
@@ -118,9 +127,9 @@ export default function Phase1(props) {
       return (
         <>
           <p>{young.firstName} est sur liste d&apos;attente au centre :</p>
-          <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "WAITING_ACCEPTATION")
@@ -129,18 +138,18 @@ export default function Phase1(props) {
           <p>
             {young.firstName} doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringLongDate(young.autoAffectationPhase1ExpiresAt)}</b>.
           </p>
-          <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "WITHDRAWN")
       return (
         <>
           <p>{young.firstName} s&apos;est désisté(e) du séjour de cohésion.</p>
-          <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
   };
@@ -234,7 +243,7 @@ export default function Phase1(props) {
           </Row>
         </Box>
         <div style={{ display: "flex", alignItems: "flex-start" }}>
-          {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
+          {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (
             <div style={{ textAlign: "center" }}>
               <DownloadAttestationButton young={young} uri="1">
                 Télécharger l&apos;attestation de réalisation de la phase 1
@@ -244,7 +253,7 @@ export default function Phase1(props) {
               </MailAttestationButton>
             </div>
           ) : null}
-          {young.meetingPointId || young.deplacementPhase1Autonomous === "true" ? (
+          {young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && (young.meetingPointId || young.deplacementPhase1Autonomous === "true") ? (
             <DownloadConvocationButton young={young} uri="cohesion">
               Télécharger la convocation au séjour de cohésion
             </DownloadConvocationButton>
