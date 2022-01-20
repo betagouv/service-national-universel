@@ -337,24 +337,6 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.get("/session/phase1/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value: id } = Joi.string().required().validate(req.params.id);
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-
-  try {
-    const cohesionSession = await SessionPhase1.findById(id);
-    if (!cohesionSession) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const cohesionCenter = await CohesionCenterModel.findById(cohesionSession.cohesionCenterId);
-    if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    res.status(200).send({ ok: true, data: cohesionCenter });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   const { error, value: id } = Joi.string().required().validate(req.params.id);
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });

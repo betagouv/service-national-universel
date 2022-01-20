@@ -36,8 +36,9 @@ export default function Phase1(props) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   useEffect(() => {
+    if (!young?.sessionPhase1Id) return;
     (async () => {
-      const { data, code, ok } = await api.get(`/cohesion-center/session/phase1/${young?.sessionPhase1Id}`);
+      const { data, code, ok } = await api.get(`/session-phase1/${young?.sessionPhase1Id}/cohesion-center`);
       if (!ok) return toastr.error("error", translate(code));
       setCohesionCenter(data);
     })();
@@ -68,12 +69,13 @@ export default function Phase1(props) {
       );
     return (
       <div>
-        <i>{`Aucun point de rassemblement n'a été confirmé par ${young.firstName}`}</i>
+        <i>{`Aucun point de rassemblement n'a été confirmé pour ${young.firstName}`}</i>
       </div>
     );
   };
 
   const getCohesionStay = (young) => {
+    if (!cohesionCenter) return <i>Aucun centre renseigné</i>;
     if (young.statusPhase1 === "DONE")
       return (
         <>
@@ -241,7 +243,7 @@ export default function Phase1(props) {
           </Row>
         </Box>
         <div style={{ display: "flex", alignItems: "flex-start" }}>
-          {young.statusPhase1 === "DONE" && cohesionCenter.name ? (
+          {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (
             <div style={{ textAlign: "center" }}>
               <DownloadAttestationButton young={young} uri="1">
                 Télécharger l&apos;attestation de réalisation de la phase 1
