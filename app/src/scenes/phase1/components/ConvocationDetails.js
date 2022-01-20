@@ -53,23 +53,31 @@ export function ConvocationDetails({ young, center, meetingPoint }) {
           <img src={map} className="icon" />
           <section className="meeting-point">
             <h3>Mon point de rassemblement</h3>
-            <p style={{ margin: 0 }}>
-              {isAutonomous ? `${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}` : `${meetingPoint?.departureAddress}`}
-            </p>
+            {isAutonomous ? (
+              <p style={{ margin: 0 }}>
+                `${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`
+              </p>
+            ) : (
+              <p style={{ margin: 0 }}>
+                {meetingPoint
+                  ? `${meetingPoint?.departureAddress}, ${meetingPoint?.departureZip}, ${meetingPoint?.departureCity}, ${meetingPoint?.departureDepartment},  ${meetingPoint?.departureRegion}`
+                  : "Aucun point de rassemblement ne vous a été assigné pour le moment."}
+              </p>
+            )}
           </section>
           <section className="meeting-dates">
             <div className="meeting-dates-detail">
               <img src={roundRight} />
               <article>
                 <p>ALLER</p>
-                <span>{isAutonomous ? "Le dimanche 13 février 2022 à 16 heures" : `Le ${meetingPoint?.departureAtString}`}</span>
+                {isAutonomous ? <span>Le dimanche 13 février 2022 à 16 heures</span> : <span>{meetingPoint ? `Le ${meetingPoint?.departureAtString}` : "Horaire à venir"}</span>}
               </article>
             </div>
             <div className="meeting-dates-detail">
               <img src={roundLeft} />
               <article>
                 <p>RETOUR</p>
-                <span>{isAutonomous ? "Le vendredi 25 février 2022 à 11 heures" : `Le ${meetingPoint?.departureAtString}`}</span>
+                {isAutonomous ? <span>Le vendredi 25 février 2022 à 11 heures</span> : <span>{meetingPoint ? `Le ${meetingPoint?.departureAtString}` : "Horaire à venir"}</span>}
               </article>
             </div>
           </section>
@@ -156,7 +164,6 @@ const Container = styled.div`
     color: black;
     font-weight: bold;
   }
-
   .button-container {
     display: flex;
     justify-content: center;

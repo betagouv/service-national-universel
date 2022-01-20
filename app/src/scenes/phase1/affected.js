@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { HeroContainer, Hero, Content, Separator, AlertBoxInformation } from "../../components/Content";
 import NextStep from "./nextStep";
 import api from "../../services/api";
-import { translate } from "../../utils";
+import { translate, translateCohort } from "../../utils";
 import { ConvocationDetails } from "./components/ConvocationDetails";
 import { supportURL } from "../../config";
 import Case from "../../assets/case";
@@ -19,8 +19,8 @@ export default function Affected() {
   const [showInfoMessage, setShowInfoMessage] = useState(true);
 
   const getMeetingPoint = async () => {
-    const { data, code, ok } = await api.get(`/meeting-point/${young.meetingPointId}`);
-    if (!ok) return toastr.error("error", translate(code));
+    const { data, code, ok } = await api.get(`/young/${young._id}/meeting-point`);
+    if (!ok) setMeetingPoint(null);
     setMeetingPoint(data);
   };
 
@@ -48,7 +48,7 @@ export default function Affected() {
           <Section className="content">
             <h1>
               <strong>Mon séjour de cohésion </strong>
-              <br /> <span>{translate(young.cohort)}</span>
+              <br /> <span>{translateCohort(young.cohort)}</span>
             </h1>
             <p>
               Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
