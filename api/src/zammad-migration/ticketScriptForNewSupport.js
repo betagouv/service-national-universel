@@ -3,8 +3,8 @@ require("../mongo");
 const client = require("./database");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");
-const TicketModel = require("../models/zammad-ticket");
-const TagModel = require("../models/tag");
+const TicketModel = require("../models/supportTicket");
+const TagModel = require("../models/supportTag");
 const { formatDistance } = require("date-fns");
 const { fr } = require("date-fns/locale");
 const { ENVIRONMENT } = require("../config");
@@ -109,15 +109,15 @@ const migrateTickets = async ({ force } = { force: false }) => {
       for (let tag of tags) {
         const tagName = tagItems.filter((item) => item.id === tag.tag_item_id)[0].name;
         if (tagName.includes("AGENT")) {
-          addressedToAgents.push(tagName);
+          addressedToAgents.push(tagName.replace("AGENT_", "").trim());
         } else if (tagName.includes("CANAL")) {
-          canal = tagName;
+          canal = tagName.replace("CANAL_", "").trim();
         } else if (tagName.includes("TECHNICAL") || tagName.includes("QUESTION")) {
           category = tagName;
         } else if (tagName.includes("DEPARTEMENT")) {
-          department = tagName;
+          department = tagName.replace("DEPARTEMENT", "").trim();
         } else if (tagName.includes("REGION")) {
-          region = tagName;
+          region = tagName.replace("REGION", "").trim();
         } else {
           // 3. Récupérer les ids des tags du ticket dans la table Tag
           const tagId = await TagModel.findOne({ zammadId: tag.tag_item_id });
@@ -178,4 +178,4 @@ const migrateTickets = async ({ force } = { force: false }) => {
   }
 };
 
-//migrateTickets();
+// migrateTickets();

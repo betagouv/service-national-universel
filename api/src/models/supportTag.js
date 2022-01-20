@@ -3,7 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 
 const esClient = require("../es");
 
-const MODELNAME = "tag";
+const MODELNAME = "support_tag";
 
 const Schema = new mongoose.Schema(
   {

@@ -3,7 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 
 const esClient = require("../es");
 
-const MODELNAME = "ticket";
+const MODELNAME = "support_ticket";
 
 const Message = new mongoose.Schema(
   {
@@ -29,7 +29,6 @@ const Message = new mongoose.Schema(
     // connection with existing db
     emitterUserId: {
       type: mongoose.Types.ObjectId,
-      required: true,
       refPath: "createdByModel",
       documentation: {
         description: "https://github.com/Automattic/mongoose/issues/4217, https://mongoosejs.com/docs/populate.html#dynamic-ref",
@@ -172,14 +171,14 @@ const Schema = new mongoose.Schema(
     // ventilation
     addressedToAgent: {
       type: [String],
-      enum: ["AGENT_SUPPORT", "AGENT_TECHNICAL", "AGENT_DEPARTMENT_REFERENT", "AGENT_REGION_REFERENT", ""],
+      enum: ["SUPPORT", "TECHNICAL", "DEPARTMENT_REFERENT", "REGION_REFERENT", ""],
       documentation: {
         description: "L'agent (ou les agents) auquel est destiné le ticket",
       },
     },
     agentInChargeId: {
       type: mongoose.Types.ObjectId,
-      ref: "supportUser",
+      ref: "support_user",
       documentation: {
         description: "identifiant de l'agent en charge du ticket",
       },

@@ -5,7 +5,7 @@ import API from "../services/api";
 
 const useAdminUser = ({ redirectOnLoggedOut = "", redirectOnLoggedIn } = {}) => {
   const { cache } = useSWRConfig();
-  const { data, mutate, error } = useSWR(API.getUrl({ path: "/referent/signin_token" }));
+  const { data, mutate, error } = useSWR(API.getUrl({ path: "/support-center/user/signin_token" }));
   const router = useRouter();
 
   const isLoading = !error && !data;

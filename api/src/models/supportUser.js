@@ -2,15 +2,63 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
 
-const MODELNAME = "supportUser";
+const MODELNAME = "support_user";
+
+const folderSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      documentation: {
+        description: "Nom du dossier",
+      },
+    },
+    tickets: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "ticket",
+        documentation: {
+          description: "Tickets manuellement déposés dans le dossier",
+        },
+      },
+    ],
+    filters: {
+      type: [
+        {
+          field: { type: String },
+          criteria: { type: String, enum: ["$ne", "$eq", "$gt", "$gte", "$lt", "$;te"] },
+        },
+      ],
+      documentation: {
+        description: "Filtres appliqués au dossier",
+      },
+    },
+    // cache
+    totalTickets: {
+      type: Number,
+      documentation: {
+        description: "Nombre de tickets enregistré en cache pour affichage dans la plateforme",
+      },
+    },
+  },
+  { timestamps: true },
+);
 
 const Schema = new mongoose.Schema(
   {
-    rootId: {
+    _id: mongoose.Types.ObjectId,
+    projectUserId: {
       type: String,
       index: true,
       documentation: {
-        description: "Identifiant dans le projet",
+        description: "Identifiant de l'utilisateur dans le projet",
+      },
+    },
+    status: {
+      type: Boolean,
+      enum: ["active", "deleted", "inactive", ""],
+      default: "active",
+      documentation: {
+        description: "Status de l'utilisateur",
       },
     },
     firstName: {
@@ -40,14 +88,12 @@ const Schema = new mongoose.Schema(
         description: "Date de dernière connexion",
       },
     },
-
     registerdAt: {
       type: Date,
       documentation: {
         description: "Date de création",
       },
     },
-
     role: {
       type: String,
       enum: ["admin", "referent", "structure", "visitor"],
@@ -55,77 +101,18 @@ const Schema = new mongoose.Schema(
         description: "Rôle de l'utilisateur dans le support",
       },
     },
-    folders: [
-      new mongoose.Schema({
-        name: {
-          type: String,
-          documentation: {
-            description: "Nom du dossier",
-          },
+    filters: {
+      type: [
+        {
+          field: { type: String },
+          criteria: { type: String, enum: ["$ne", "$eq", "$gt", "$gte", "$lt", "$;te"] },
         },
-        filters: [
-          {
-            type: {
-              type: String,
-              enum: ["tag", "canal", "department", "external", "status", "department", "region", "academy", "addressedToAgent", "category", "title"],
-            },
-          },
-        ],
-        tags: [
-          {
-            tag: {
-              type: String,
-              documentation: {
-                description: "Tous les tickets avec ces tags seront inclus dans ce dossier",
-              },
-            },
-            criteria: {
-              type: String,
-              enum: ["$ne", "$eq"],
-            },
-          },
-        ],
-        canals: [
-          {
-            canal: {
-              type: String,
-              documentation: {
-                description: "Tous les tickets avec ce canal seront inclus dans ce dossier",
-              },
-            },
-            criteria: {
-              type: String,
-              enum: ["$ne", "$eq"],
-            },
-          },
-        ],
-        department: [
-          {
-            canal: {
-              type: String,
-              documentation: {
-                description: "Tous les tickets avec ce canal seront inclus dans ce dossier",
-              },
-            },
-            criteria: {
-              type: String,
-              enum: ["$ne", "$eq"],
-            },
-          },
-        ],
-        tickets: {
-          type: [{ type: mongoose.Types.ObjectId, ref: "ticket" }],
-          documentation: {
-            description: "Tickets manuellement déposés dans le dossier",
-          },
-        },
-        // cache
-        totalTickets: {
-          type: Number,
-          documentation: {},
-        },
-      }),
-    ],
+      ],
+      documentation: {
+        description: "Filtres appliqués à l'utilisateur",
+      },
+    },
+    folders: [folderSchema],
   },
   { timestamps: true },
 );

@@ -30,10 +30,14 @@ function clientCreated(query) {
       // directement dans ce script (ou un fichier à côté).
       privateKey: require("fs").readFileSync(process.env.SSHKEY),
       // Ma clé privée nécessite une passphrase, mais dans notre cas il n'y aura peut-être pas besoin.
-      //passphrase: process.env.PP,
+      passphrase: process.env.PP,
     });
     c.on("connect", function () {
       console.log("Connection :: connect");
+    });
+    c.on("error", function (error) {
+      console.log("ERROR ZAMMAD");
+      console.log(error);
     });
     c.on("ready", function () {
       ready = true;
