@@ -7,7 +7,7 @@ import { colors } from "../../utils";
 import ModalButton from "../buttons/ModalButton";
 import YellowWarning from "../../assets/YellowWarning";
 
-export default function ModalConfirm({ isOpen, title, message, onConfirm, confirmText = "Confirmer" }) {
+export default function ModalCGU({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirmer" }) {
   const [sending, setSending] = useState(false);
 
   const submit = async () => {
@@ -18,6 +18,7 @@ export default function ModalConfirm({ isOpen, title, message, onConfirm, confir
 
   return (
     <Modal centered isOpen={isOpen}>
+      <HiddenCloseButtonSuperHack onClick={onCancel} />
       <ModalContainer>
         <IconContent>
           <YellowWarning />
@@ -35,6 +36,12 @@ export default function ModalConfirm({ isOpen, title, message, onConfirm, confir
     </Modal>
   );
 }
+
+const HiddenCloseButtonSuperHack = styled.div`
+  width: 5px;
+  height: 5px;
+  background-color: transparent;
+`;
 
 const IconContent = styled(Content)`
   display: grid;

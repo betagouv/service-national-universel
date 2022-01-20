@@ -175,6 +175,9 @@ const Home = () => {
           modal?.onConfirm();
           setModal({ isOpen: false, onConfirm: null });
         }}
+        onCancel={() => {
+          setModal({ isOpen: false, onConfirm: null });
+        }}
       />
     </div>
   );
