@@ -142,7 +142,7 @@ export default function DesktopView() {
                 strokeLinejoin="round"
               />
             </svg>
-            <FAQ onClick={() => window.plausible?.("Clic Besoin d'aide", { props: { device: "desktop" } })} href={`${appURL}/public-besoin-d-aide`} target="blank">
+            <FAQ onClick={() => window.plausible?.("LP - Aide", { props: { device: "desktop" } })} href={`${appURL}/public-besoin-d-aide`} target="blank">
               <p>
                 <strong>Besoin d&apos;aide ?</strong>
               </p>

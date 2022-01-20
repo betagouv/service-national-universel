@@ -23,7 +23,12 @@ export default function Note({ title, titleColor, text, textColor, link, textLin
           </p>
         ) : null}
         {link && !linkInText ? (
-          <a href={link} className="link" target="_blank" rel="noreferrer">
+          <a
+            onClick={() => window.plausible?.("LP/module éligibilité - Commencer inscription", { props: { device: navigator?.userAgentData?.mobile ? "mobile" : "desktop" } })}
+            href={link}
+            className="link"
+            target="_blank"
+            rel="noreferrer">
             {textLink}
           </a>
         ) : null}

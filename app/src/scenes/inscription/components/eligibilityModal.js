@@ -165,7 +165,13 @@ export default function EligibilityModal({ onChange }) {
           </Form>
         </Container>
       </Modal>
-      <ModalButton onClick={() => setIsOpen(true)}>Vérifier votre éligibilité</ModalButton>
+      <ModalButton
+        onClick={() => {
+          window.plausible?.("LP CTA - vérifier éligibilité", { props: { device: navigator?.userAgentData?.mobile ? "mobile" : "desktop" } });
+          setIsOpen(true);
+        }}>
+        Vérifier votre éligibilité
+      </ModalButton>
     </>
   );
 }

@@ -35,7 +35,7 @@ export default function HeaderComponent({ location }) {
             Se deconnecter
           </AvatarText>
         ) : (
-          <AvatarText onClick={() => window.plausible?.("Clic CTA - Connexion")} to={{ pathname: "/auth/login", search: location?.search }}>
+          <AvatarText onClick={() => window.plausible?.("LP CTA - Connexion")} to={{ pathname: "/auth/login", search: location?.search }}>
             Se connecter
           </AvatarText>
         )}
