@@ -8,11 +8,10 @@ import ErrorMessage, { requiredMessage } from "../inscription/components/errorMe
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
-import { translate } from "../../utils";
+import { translate, colors } from "../../utils";
 import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, BackButton, Content } from "./components/printable";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import styled from "styled-components";
-import { colors } from "../../utils";
 
 export default function AutoTest() {
   const young = useSelector((state) => state.Auth.young);
@@ -60,7 +59,7 @@ export default function AutoTest() {
               </SuccessMessage>
               {!showFields && (
                 <div style={{ display: "flex", justifyContent: "center" }}>
-                  <VioletButton onClick={() => setShowFields(true)}>Modifier son choix</VioletButton>
+                  <VioletButton onClick={() => setShowFields(true)}>Modifier</VioletButton>
                 </div>
               )}
             </>
