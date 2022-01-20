@@ -30,7 +30,7 @@ const {
   inSevenDays,
   isYoung,
   // updateApplicationsWithYoungOrMission,
-  updatePlacesBus
+  updatePlacesBus,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
