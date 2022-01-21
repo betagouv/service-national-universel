@@ -1,3 +1,32 @@
+# [1.28.0](https://github.com/betagouv/service-national-universel/compare/v1.27.0...v1.28.0) (2022-01-21)
+
+
+### Bug Fixes
+
+* **admin:** cancel meetingpoint ([17ac237](https://github.com/betagouv/service-national-universel/commit/17ac237c45dfc535bc88a48f614647dd7bd8ef6e))
+* **admin:** enable change meetingPoint from admin ([596ac83](https://github.com/betagouv/service-national-universel/commit/596ac8360d027fd5216bf27970afe22c329411f2))
+* **api:** test allow route meeting point ([#1116](https://github.com/betagouv/service-national-universel/issues/1116)) ([09a651e](https://github.com/betagouv/service-national-universel/commit/09a651e7f2ce5c5386eaf431d7124bed0c5fd43c))
+* **api:** update rules download convocation ([877c337](https://github.com/betagouv/service-national-universel/commit/877c337789249dde0e59c1c82be4f53feb760474))
+* **app:** add modal confirm autonomous ([6df2a8a](https://github.com/betagouv/service-national-universel/commit/6df2a8a02ab575c53305eb8f8e9b24582c87a619))
+* **app:** link in footer convocation ([181b49b](https://github.com/betagouv/service-national-universel/commit/181b49b7dae14437905667fe037d143b979c5ed2))
+* **app:** maj reglement interieur dans convoc ([7a398c9](https://github.com/betagouv/service-national-universel/commit/7a398c9229af3551f23aaad2c171791916037299))
+* **app:** phase 1 convoc + allow router ([33a5ec0](https://github.com/betagouv/service-national-universel/commit/33a5ec050f6ff477805aa781ac44b5d4fb33b6a9))
+* **app:** update Convocation.js ([#1110](https://github.com/betagouv/service-national-universel/issues/1110)) ([ad275f8](https://github.com/betagouv/service-national-universel/commit/ad275f8f50d832446e93b6d9daf8cd8b268e9382))
+* **app:** update home ([e2a09fb](https://github.com/betagouv/service-national-universel/commit/e2a09fb5d2c35c4a7f7539bce593fdea15ec6e01))
+* **app:** warning message convocation not found ([#1119](https://github.com/betagouv/service-national-universel/issues/1119)) ([c44635b](https://github.com/betagouv/service-national-universel/commit/c44635bd8b4e5aa34c9b922429a2d724ac1db786))
+* **app:** wording ([ac3a075](https://github.com/betagouv/service-national-universel/commit/ac3a07527e4a92ddae65fb035b54bad9357cfba9))
+* **app,api:** deplacementPhase1Autonomous + display center infos ([#1117](https://github.com/betagouv/service-national-universel/issues/1117)) ([becfcc7](https://github.com/betagouv/service-national-universel/commit/becfcc77847bd9c3c1f4225294e95ba215b77a0f))
+* **support:** can insert mailto stuff ([#1112](https://github.com/betagouv/service-national-universel/issues/1112)) ([fdf8252](https://github.com/betagouv/service-national-universel/commit/fdf8252c3fde830dd3a038a153ff75691c04276c))
+* **support:** many stuff in knowledge-base ([#1121](https://github.com/betagouv/service-national-universel/issues/1121)) ([885535c](https://github.com/betagouv/service-national-universel/commit/885535cf206e4a06655d8cb881aef85dc03a290f))
+* **support:** redirections ([#1113](https://github.com/betagouv/service-national-universel/issues/1113)) ([8cf758f](https://github.com/betagouv/service-national-universel/commit/8cf758f76508db73c6ad4936e5d065ed78886e16))
+* **support:** update slug only when needed + fix change slugs when no content yet ([#1114](https://github.com/betagouv/service-national-universel/issues/1114)) ([4c088cf](https://github.com/betagouv/service-national-universel/commit/4c088cff5f9d9749a8d780e8b64b8499546be549))
+
+
+### Features
+
+* **app:** affichage date/heure convoc app ([#1118](https://github.com/betagouv/service-national-universel/issues/1118)) ([34dac93](https://github.com/betagouv/service-national-universel/commit/34dac9359d92a6bf0b96f0fadfbb22db4bd12caf))
+* **app:** phase1 affecté ([#1097](https://github.com/betagouv/service-national-universel/issues/1097)) ([5a8f216](https://github.com/betagouv/service-national-universel/commit/5a8f21621712657c98fa2a333690117c89d03dd7))
+
 # [1.27.0](https://github.com/betagouv/service-national-universel/compare/v1.26.0...v1.27.0) (2022-01-20)
 
 
