@@ -54,21 +54,10 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
         </section>
       </Container>
       {showConvocation ? (
-        <HeroContainer id="convocationPhase1">
+        <>
           <Separator />
-          <Hero>
-            <ContentHorizontal>
-              <div>
-                <h2>Votre convocation</h2>
-                <p>
-                  Votre convocation sera à présenter à votre arrivée muni d&apos;une pièce d&apos;identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures
-                  (recommandé)
-                </p>
-              </div>
-            </ContentHorizontal>
-          </Hero>
           <Convocation />
-        </HeroContainer>
+        </>
       ) : null}
       <Separator />
       <Container>

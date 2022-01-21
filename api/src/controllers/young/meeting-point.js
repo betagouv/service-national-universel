@@ -11,7 +11,7 @@ const { ERRORS, updatePlacesBus, isYoung } = require("../../utils");
 const { serializeMeetingPoint, serializeYoung } = require("../../utils/serializer");
 const { validateId } = require("../../utils/validator");
 
-router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
