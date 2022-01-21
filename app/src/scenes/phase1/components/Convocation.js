@@ -46,16 +46,31 @@ export default function Convocation() {
     getService();
   }, [young]);
 
+  // ! WARNING : Change date also in api/src/templates/convocation/index.js
+  const departureMeetingDate = {
+    2021: "lundi 20 février, 14:00",
+    "Février 2022": "lundi 13 février, 16:00",
+  };
+  const returnMeetingDate = {
+    2021: "2 juillet, 14:00",
+    "Février 2022": "lundi 25 février, 11:00",
+  };
+
+  const COHESION_STAY_DATE_STRING = {
+    2021: "20 février 2021",
+    "Février 2022": "13 février 2022",
+  };
+
   const getMeetingAddress = () => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
     return meetingPoint.departureAddress;
   };
   const getDepartureMeetingDate = () => {
-    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return "dimanche 20 juin, 16:30"; //new Date("2021-06-20T14:30:00.000+00:00");
+    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return departureMeetingDate[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
     return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = () => {
-    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return "vendredi 2 juillet, 14:00"; // new Date("2021-07-02T12:00:00.000+00:00");
+    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return returnMeetingDate[young.cohort]; // new Date("2021-07-02T12:00:00.000+00:00");
     return meetingPoint.returnAtString;
   };
 

@@ -20,6 +20,7 @@ function getBg(template = "default") {
   return getSignedUrl("convocation/convocation_phase1_v2.png");
 }
 
+// ! WARNING : Change date also in app/src/scenes/phase1/components/Convocation.js
 const departureMeetingDate = {
   2021: "lundi 20 février, 14:00",
   "Février 2022": "lundi 13 février, 16:00",
