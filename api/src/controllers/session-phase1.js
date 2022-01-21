@@ -41,7 +41,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.get("/:id/cohesion-center", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });

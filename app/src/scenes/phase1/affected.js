@@ -28,7 +28,7 @@ export default function Affected() {
 
   useEffect(() => {
     (async () => {
-      const { data, code, ok } = await api.get(`/cohesion-center/young/${young._id}`);
+      const { data, code, ok } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
       if (!ok) return toastr.error("error", translate(code));
       setCenter(data);
       getMeetingPoint();
