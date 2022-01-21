@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import isHotkey, { isKeyHotkey } from "is-hotkey";
-import isUrl from "is-url";
 import { Editable, withReact, useSlate, Slate, useSlateStatic, useSelected, ReactEditor, useFocused } from "slate-react";
 import { Editor, Transforms, createEditor, Element as SlateElement, Range } from "slate";
 import { withHistory } from "slate-history";
@@ -10,7 +9,7 @@ import PasteLinkify from "slate-paste-linkify";
 
 import API from "../../services/api";
 import { TextEditorButton, Icon, Spacer, Toolbar } from "./components";
-import { wrapLink, AddLinkButton, RemoveLinkButton } from "./links";
+import { wrapLink, AddLinkButton, RemoveLinkButton, isLink } from "./links";
 import EmojiPicker from "../EmojiPicker";
 import { deserialize } from "./importHtml";
 
@@ -198,7 +197,7 @@ const withPlugins = (editor) => {
   editor.isInline = (element) => ["link"].includes(element.type) || isInline(element);
 
   editor.insertText = (text) => {
-    if (text && isUrl(text)) {
+    if (isLink(text)) {
       wrapLink(editor, text);
     } else {
       insertText(text);
@@ -233,7 +232,7 @@ const withPlugins = (editor) => {
       }
       return;
     }
-    if (text && isUrl(text)) {
+    if (isLink(text)) {
       wrapLink(editor, text);
       return;
     }
