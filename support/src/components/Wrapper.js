@@ -8,6 +8,7 @@ import { useSWRConfig } from "swr";
 import API from "../services/api";
 import Search from "./Search";
 import SeeAsContext from "../hooks/useSeeAs";
+import { useRouter } from "next/router";
 
 const Wrapper = ({ children }) => {
   const { mutate, user, restriction } = useUser();
@@ -26,6 +27,8 @@ const Wrapper = ({ children }) => {
     mutate(null);
     cache.clear();
   };
+
+  const router = useRouter();
 
   return (
     <div className="flex flex-col w-full min-h-screen">
@@ -58,7 +61,7 @@ const Wrapper = ({ children }) => {
                 <Popover.Panel className="absolute right-0 min-w-[208px] lg:min-w-0 z-10 top-10">
                   <div className="flex flex-col gap-4 px-4 py-3 bg-white border border-gray-300 rounded-md">
                     {user.role === "admin" && (
-                      <Link href="/admin/knowledge-base">
+                      <Link href={`/admin/knowledge-base/${router?.query?.slug}`}>
                         <a href="#" className="text-sm font-medium text-gray-700 cursor-pointer">
                           Admin
                         </a>

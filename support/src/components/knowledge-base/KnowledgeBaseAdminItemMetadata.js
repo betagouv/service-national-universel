@@ -58,7 +58,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
     setIsSubmitting(false);
     if (response.code) return toast.error(response.code);
     if (itemSlug !== item.slug) {
-      await mutate({ ok: true, data: flattenedData.map((i) => (i._id === item._id ? response.data : i)) }, false);
+      mutate({ ok: true, data: [...flattenedData, response.data] }, true);
       router.replace(`/admin/knowledge-base/${response.data.slug}`);
     }
     mutate();
