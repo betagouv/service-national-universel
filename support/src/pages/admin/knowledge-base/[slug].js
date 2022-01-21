@@ -56,7 +56,7 @@ const KnowledgeBase = () => {
       <Header>
         <div className="mb-2 w-screen flex justify-between items-baseline -ml-12 -mr-12 pl-12 pr-4">
           <span>Base de connaissance</span>
-          <Link href="/base-de-connaissance">
+          <Link href={`/base-de-connaissance/${router?.query?.slug}`}>
             <a className="bg-transparent border-none hover:underline text-xs font-light p-0 m-0 ml-auto" href="#">
               Aller à la base de connaissance publique
             </a>
