@@ -86,9 +86,4 @@ describe("GET /young/:id/meeting-point", () => {
     expect(res.status).toBe(200);
     expect(res.body.data._id).toBe(meetingPoint._id.toString());
   });
-  it("should be only accessible by referent", async () => {
-    const passport = require("passport");
-    await request(getAppHelper()).get(`/young/${notExistingYoungId}/meeting-point`);
-    expect(passport.lastTypeCalledOnAuthenticate).toEqual(["referent"]);
-  });
 });
