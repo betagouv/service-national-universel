@@ -7,6 +7,7 @@ import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 import { translate, translateCohort } from "../../../utils";
 import { Hero, Content } from "../../../components/Content";
+import { supportURL } from "../../../config";
 
 export default function Convocation() {
   const young = useSelector((state) => state.Auth.young);
@@ -142,11 +143,11 @@ export default function Convocation() {
           La directrice de la jeunesse, de l&apos;éducation populaire et de la vie associative, déléguée interministérielle à la jeunesse
         </Sign>
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
-          Pour toute information complémentaire, rendez-vous sur votre compte volontaire ou sur la{" "}
-          <a href="https://www.snu.gouv.fr/foire-aux-questions-11" target="_blank" rel="noreferrer">
-            FAQ
-          </a>{" "}
-          du site snu.gouv.fr.
+          Pour toute information complémentaire, rendez-vous sur votre compte volontaire dans la section «&nbsp;Séjour&nbsp;de&nbsp;cohésion&nbsp;» ou le{" "}
+          <a href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
+            centre&nbsp;d&apos;aide
+          </a>
+          .
         </ConvocText>
       </Content>
     </Hero>
