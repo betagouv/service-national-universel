@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
+import { useDispatch } from "react-redux";
 
-import { Separator, HeroContainer, Hero, Content, AlertBoxInformation } from "../../../components/Content";
+import { setYoung } from "../../../redux/auth/actions";
+import { Separator, Content } from "../../../components/Content";
 import { translate } from "../../../utils";
 import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
 import roundRight from "../../../assets/roundRight.svg";
@@ -13,12 +15,15 @@ import map from "../../../assets/map.png";
 import { supportURL } from "../../../config";
 import Convocation from "./Convocation";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import LoadingButton from "../../../components/buttons/LoadingButton";
 
 export default function ConvocationDetails({ young, center, meetingPoint }) {
   const [open, setOpen] = useState(false);
   const [isAutonomous, setIsAutonomous] = useState(young.deplacementPhase1Autonomous === "true");
   const [showConvocation, setShowConvocation] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const handleAutonomousClick = () => {
     setModal({
@@ -26,7 +31,11 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
       title: "Je confirme venir par mes propres moyens",
       message: (
         <>
-          <p>Vous confirmez vous rendre au centre // afficher nom + addresse // par vos propres moyens.</p>
+          <p>
+            Vous confirmez vous rendre au centre <b>{[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}</b>{" "}
+            par vos propres moyens.
+          </p>
+          <br />
           <p>Cette action est irréversible.</p>
         </>
       ),
@@ -36,14 +45,15 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
   };
 
   async function confirmAutonomous() {
-    // delete meetingPointID
-    // delete bus...
-    //! route à changer après création de la route dédié : "young/:id/phase1"
-    const { data, code, ok } = await api.put(`/young`, {
-      deplacementPhase1Autonomous: "true",
-    });
-    if (!ok) return toastr.error("error", translate(code));
+    setIsLoading(true);
+    const { data, code, ok } = await api.post(`/young/${young._id}/deplacementPhase1Autonomous`);
+    if (!ok) {
+      setIsLoading(false);
+      return toastr.error("error", translate(code));
+    }
+    dispatch(setYoung(data));
     setIsAutonomous(data.deplacementPhase1Autonomous === "true");
+    setIsLoading(false);
     return toastr.success("Mis à jour !");
   }
   return (
@@ -83,13 +93,13 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
           <section className="meeting-point">
             <h3>Mon point de rassemblement</h3>
             {isAutonomous ? (
-              <p style={{ margin: 0 }}>
-                `${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`
-              </p>
+              <p style={{ margin: 0 }}>{[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}</p>
             ) : (
               <p style={{ margin: 0 }}>
                 {meetingPoint
-                  ? `${meetingPoint?.departureAddress}, ${meetingPoint?.departureZip}, ${meetingPoint?.departureCity}, ${meetingPoint?.departureDepartment},  ${meetingPoint?.departureRegion}`
+                  ? `${[meetingPoint?.departureAddress, meetingPoint?.departureZip, meetingPoint?.departureCity, meetingPoint?.departureDepartment, meetingPoint?.departureRegion]
+                      .filter((e) => e)
+                      .join(", ")}`
                   : "Aucun point de rassemblement ne vous a été assigné pour le moment."}
               </p>
             )}
@@ -106,7 +116,7 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
               <img src={roundLeft} />
               <article>
                 <p>RETOUR</p>
-                {isAutonomous ? <span>Le vendredi 25 février 2022 à 11 heures</span> : <span>{meetingPoint ? `Le ${meetingPoint?.departureAtString}` : "Horaire à venir"}</span>}
+                {isAutonomous ? <span>Le vendredi 25 février 2022 à 11 heures</span> : <span>{meetingPoint ? `Le ${meetingPoint?.returnAtString}` : "Horaire à venir"}</span>}
               </article>
             </div>
           </section>
@@ -136,7 +146,7 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
                 <div className="meeting meeting-autonomous">
                   <img src={map} className="icon" />
                   <p className="meeting-center">
-                    <strong>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</strong>
+                    <strong>{[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}</strong>
                   </p>
                   <section className="meeting-dates">
                     <div className="meeting-dates-detail">
@@ -155,12 +165,14 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
                     </div>
                   </section>
                 </div>
-                <ContinueButton onClick={handleAutonomousClick}>
-                  Je confirme venir par mes propres moyens{" "}
-                  <svg width="16" height="12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 7l4 4L15 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </ContinueButton>
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                  <LoadingButton loading={isLoading} disabled={isLoading} onClick={handleAutonomousClick}>
+                    Valider le consentement&nbsp;
+                    <svg width="16" height="12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M1 7l4 4L15 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </LoadingButton>
+                </div>
               </>
             ) : null}
           </section>
