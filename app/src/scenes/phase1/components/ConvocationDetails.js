@@ -28,12 +28,12 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
   const handleAutonomousClick = () => {
     setModal({
       isOpen: true,
-      title: "Je confirme venir par mes propres moyens",
+      title: "Je confirme venir et rentrer par mes propres moyens",
       message: (
         <>
           <p>
             Vous confirmez vous rendre au centre <b>{[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}</b>{" "}
-            par vos propres moyens.
+            et en revenir par vos propres moyens.
           </p>
           <br />
           <p>Cette action est irréversible.</p>
@@ -127,7 +127,7 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
         ) : (
           <section className="autonomous">
             <div className="autonomous-switch">
-              <p className="black-bold">Vous souhaitez vous rendre au centre par vos propres moyens ?</p>
+              <p className="black-bold">Vous souhaitez vous rendre au centre et en revenir par vos propres moyens ?</p>
               {open ? (
                 <button className="autonomous-button" onClick={() => setOpen(false)}>
                   ↑ Réduire{" "}

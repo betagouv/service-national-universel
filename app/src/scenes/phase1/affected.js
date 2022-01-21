@@ -54,8 +54,8 @@ export default function Affected() {
                 <br /> <span>{translateCohort(young.cohort)}</span>
               </h1>
               <p>
-                Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des
-                liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
+                Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région (sauf exception) pour
+                créer ainsi des liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
               </p>
               <Separator style={{ width: "150px" }} />
               <p>
@@ -85,7 +85,7 @@ export default function Affected() {
           <Case />
           <div className="good-article-text">
             <p>Dans ma valise, il y a...</p>
-            <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau-1`}>
+            <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau-1`} target="_blank" rel="noreferrer">
               Comment bien <span>préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
             </a>
           </div>
@@ -94,7 +94,7 @@ export default function Affected() {
           <Question />
           <div className="good-article-text">
             <p>Vous avez des questions sur le séjour ?</p>
-            <a href={`${supportURL}/base-de-connaissance`}>
+            <a href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noreferrer">
               Consulter notre <span>base&nbsp;de&nbsp;connaissance&nbsp;›</span>
             </a>
           </div>
