@@ -42,7 +42,7 @@ const KnowledgeBase = () => {
 
   const { item } = useKnowledgeBaseData({ debug: true });
 
-  const isRoot = router.pathname === "/admin/knowledge-base";
+  const isRoot = router.pathname === "/admin/base-de-connaissance";
 
   const isLoading = useMemo(() => {
     if (!isRoot && !slug) return true;
@@ -80,7 +80,7 @@ const KnowledgeBase = () => {
         <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
           <ResizablePanel className={`relative flex flex-grow-0 flex-shrink-0 z-10  ${treeVisible ? "w-80" : "w-0 hidden"}`} name="admin-knowledge-base-tree" position="left">
             <div className="relative flex flex-col pr-2 overflow-hidden">
-              <KnowledgeBaseAdminTree isSortable onClick={(slug) => router.push(`/admin/knowledge-base/${slug || ""}`)} />
+              <KnowledgeBaseAdminTree isSortable onClick={(slug) => router.push(`/admin/base-de-connaissance/${slug || ""}`)} />
             </div>
           </ResizablePanel>
           {isLoading ? <Loader /> : <Content key={slug} item={item} />}

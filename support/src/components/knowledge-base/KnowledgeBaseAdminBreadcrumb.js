@@ -24,7 +24,7 @@ const KnowledgeBaseAdminBreadcrumb = () => {
   const router = useRouter();
   const { flattenedData } = useKnowledgeBaseData();
   const parents = computeCrumb(flattenedData, router.query?.slug);
-  return <Breadcrumb parents={parents} path="/admin/knowledge-base" />;
+  return <Breadcrumb parents={parents} path="/admin/base-de-connaissance" />;
 };
 
 export default KnowledgeBaseAdminBreadcrumb;

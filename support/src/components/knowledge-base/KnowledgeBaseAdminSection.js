@@ -103,7 +103,7 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
                 title={article.title}
                 slug={article.slug}
                 allowedRoles={article.allowedRoles}
-                path="/admin/knowledge-base"
+                path="/admin/base-de-connaissance"
               />
             ))}
             {!articles.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
@@ -119,7 +119,7 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
               <React.Fragment key={section._id}>
                 <KnowledgeBaseSectionCard
                   _id={section._id}
-                  path="/admin/knowledge-base"
+                  path="/admin/base-de-connaissance"
                   position={section.position}
                   imageSrc={section.imageSrc}
                   icon={section.icon}

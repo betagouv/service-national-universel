@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { Popover } from "@headlessui/react";
 import { SUPPORT_ROLES } from "snu-lib/roles";
-import { appURL, supportURL } from "../config";
+import { adminURL, appURL, supportURL } from "../config";
 import useUser from "../hooks/useUser";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
@@ -30,9 +30,11 @@ const Wrapper = ({ children }) => {
 
   const router = useRouter();
 
+  const withSeeAs = ["admin", "referent"].includes(user?.role);
+
   return (
     <div className="flex flex-col w-full min-h-screen">
-      <header className="flex-none bg-white">
+      <header className="flex-none bg-white print:hidden ">
         <div className="flex flex-wrap items-center gap-4 lg:gap-8 py-4 mr-auto ml-auto px-8 max-w-screen-95">
           <div className="flex-none w-auto lg:w-1/6">
             <Link href="/">
@@ -49,21 +51,38 @@ const Wrapper = ({ children }) => {
           </div>
           {isLoggedIn ? (
             <>
-              <Popover className="relative flex justify-end lg:flex-1 order-2 w-auto md:flex-none lg:w-1/3">
+              <Popover className={`relative flex justify-end order-2 ${withSeeAs ? "lg:order-4" : " w-auto lg:w-1/3 lg:flex-1 "} md:flex-none`}>
                 <Popover.Button className="flex items-start justify-center gap-3 p-0 text-left bg-white border-none rounded-none shadow-none">
-                  <div className="rounded-full h-9 w-9 bg-snu-purple-300"></div>
+                  <span className="rounded-full h-10 w-10 border-red-500 border-4 text-snu-purple-900 uppercase flex justify-center items-center">
+                    {user.firstName?.[0]}
+                    {user.lastName?.[0]}
+                  </span>
                   <div className="flex flex-col justify-center h-full">
                     <span className="text-sm font-medium text-gray-700">{user.firstName}</span>
-                    {!!user.role && <span className="text-xs font-medium text-gray-500">{user.role}</span>}
+                    {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[user.role]}</span>}
                   </div>
                 </Popover.Button>
 
-                <Popover.Panel className="absolute right-0 min-w-[208px] lg:min-w-0 z-10 top-10">
+                <Popover.Panel className="absolute right-0 min-w-[208px] lg:min-w-[200px] z-10 top-10">
                   <div className="flex flex-col gap-4 px-4 py-3 bg-white border border-gray-300 rounded-md">
-                    {user.role === "admin" && (
-                      <Link href={`/admin/knowledge-base/${router?.query?.slug}`}>
+                    {["admin"].includes(user?.role) && (
+                      <Link href={`/admin/base-de-connaissance/${router?.query?.slug}`}>
                         <a href="#" className="text-sm font-medium text-gray-700 cursor-pointer">
-                          Admin
+                          Espace d'édition
+                        </a>
+                      </Link>
+                    )}
+                    {!["young"].includes(user?.role) && (
+                      <Link href={adminURL}>
+                        <a href="#" className="text-sm font-medium text-gray-700 cursor-pointer">
+                          Espace admin SNU
+                        </a>
+                      </Link>
+                    )}
+                    {["young"].includes(user?.role) && (
+                      <Link href={appURL}>
+                        <a href="#" className="text-sm font-medium text-gray-700 cursor-pointer">
+                          Mon compte SNU
                         </a>
                       </Link>
                     )}
@@ -73,8 +92,8 @@ const Wrapper = ({ children }) => {
                   </div>
                 </Popover.Panel>
               </Popover>
-              {user.role === "admin" && (
-                <Popover className="relative flex justify-end order-1 margin md:order-3 mx-auto w-auto md:flex-none /3">
+              {withSeeAs && (
+                <Popover className="relative flex justify-end order-1 md:ml-auto md:order-3 lg:flex-1  mx-auto w-auto md:flex-none">
                   <Popover.Button className="flex items-center justify-center gap-3 p-0 text-left bg-white border-none rounded-none shadow-none">
                     <img src="/assets/change-user.png" className="h-5 w-5 grayscale" />
                     <div className="flex flex-col justify-center h-full">
@@ -107,13 +126,13 @@ const Wrapper = ({ children }) => {
           )}
         </div>
       </header>
-      {!!seeAs && ["admin", "referent"].includes(user?.role) && user?.role !== seeAs && (
-        <button onClick={() => setSeeAs("admin")} className="bg-red-500 border-none rounded-none font-normal">
+      {!!seeAs && withSeeAs && user?.role !== seeAs && (
+        <button onClick={() => setSeeAs("admin")} className="noprint bg-red-500 border-none rounded-none font-normal">
           Vous visualisez la base de connaissance en tant que {SUPPORT_ROLES[seeAs]}, pour retourner à votre vue cliquez ici
         </button>
       )}
-      <main className="flex-1 bg-[#F3F4F6]">{children}</main>
-      <footer className="flex flex-col gap-6 wrapper bg-white w-full">
+      <main className="flex-1 bg-[#F3F4F6] print:bg-transparent">{children}</main>
+      <footer className="flex flex-col gap-6 wrapper bg-white w-full print:hidden ">
         <div className="flex flex-col gap-6 wrapper w-full">
           <div className="flex items-center gap-4 justify-center max-w-full  flex-wrap">
             <Link href="https://www.snu.gouv.fr/mentions-legales-10">
