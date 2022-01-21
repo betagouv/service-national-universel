@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
@@ -11,6 +12,7 @@ import { supportURL } from "../../../config";
 
 export default function Convocation() {
   const young = useSelector((state) => state.Auth.young);
+  const history = useHistory();
 
   const [meetingPoint, setMeetingPoint] = useState();
   const [center, setCenter] = useState();
@@ -59,7 +61,13 @@ export default function Convocation() {
     return meetingPoint.returnAtString;
   };
 
-  if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true") return null;
+  if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true") {
+    return (
+      <Warning>
+        ⚠️ Impossible d'afficher votre convocation, merci de contacter le <a onClick={() => history.push("/besoin-d-aide")}>support</a>.
+      </Warning>
+    );
+  }
   if ((young.meetingPointId && !meetingPoint) || !center || !service) return <Loader />;
 
   const contact = service.contacts.find((el) => el.cohort === young.cohort);
@@ -153,6 +161,16 @@ export default function Convocation() {
     </Hero>
   );
 }
+
+const Warning = styled.div`
+  color: #6b7280;
+  font-size: 1.25rem;
+  font-weight: 400;
+  a {
+    text-decoration: underline !important;
+    cursor: pointer;
+  }
+`;
 
 const ConvocText = styled.div`
   margin: 1rem;
