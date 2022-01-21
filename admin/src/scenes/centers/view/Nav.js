@@ -48,7 +48,7 @@ export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedS
             style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRight: "1px solid rgba(0,0,0,0.1)", minWidth: "110px" }}>
             Volontaires
           </Tab>
-          {canAssignCohesionCenter(user) ? (
+          {/* {canAssignCohesionCenter(user) ? (
             <Tab
               isActive={tab === "affectation"}
               last
@@ -59,7 +59,7 @@ export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedS
               style={{ borderRadius: "0 0.5rem 0.5rem 0", minWidth: "168px" }}>
               Affectation manuelle
             </Tab>
-          ) : null}
+          ) : null} */}
         </TabList>
       </div>
       <BoxPlaces style={{ borderRight: "1px solid rgba(0,0,0,0.2)", borderRadius: "0" }}>
