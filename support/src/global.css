@@ -222,3 +222,12 @@ body {
     left: 100%;
   }
 }
+
+@media print {
+  .noprint {
+    display: none !important;
+  }
+  *::-webkit-scrollbar {
+    width: 0 !important;
+  }
+}

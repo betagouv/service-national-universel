@@ -34,7 +34,7 @@ const KnowledgeBaseAdminItemCreate = ({ type, position, parentId = null }) => {
     if (response.error) return toast.error(response.error);
     if (response.data) {
       mutate({ ok: true, data: [...flattenedData, response.data] });
-      router.push(`/admin/knowledge-base/${response.data.slug}`);
+      router.push(`/admin/base-de-connaissance/${response.data.slug}`);
       setOpen(false);
     }
   };
@@ -69,13 +69,6 @@ const KnowledgeBaseAdminItemCreate = ({ type, position, parentId = null }) => {
                   </div>
                 </div>
               </fieldset>
-              {/* <div className="flex flex-row items-center">
-                <label htmlFor="status">Visibilité: </label>
-                <select className="border-2 ml-10 p-2" name="status" value="DRAFT">
-                  <option value="PUBLISHED">Publié</option>
-                  <option value="DRAFT">Brouillon</option>
-                </select>
-              </div> */}
             </div>
           </div>
           <div className="flex justify-evenly mt-3.5 w-full">

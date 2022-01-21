@@ -23,7 +23,7 @@
   text-decoration: underline;
 } */
 
-@media screen and (min-width: 617px) {
+@media screen and (min-width: 617px), print {
   #breadcrumb #mobile {
     display: none;
   }

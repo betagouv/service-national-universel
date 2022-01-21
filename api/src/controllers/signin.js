@@ -33,9 +33,10 @@ router.get("/token", async (req, res) => {
     }
     const referent = await Referent.findById(value._id);
     if (referent) {
+      const restriction = referent.role === "admin" ? "admin" : "referent";
       referent.set({ lastLoginAt: Date.now() });
       await referent.save();
-      return res.status(200).send({ ok: true, user: { ...serializeReferent(referent, referent), restriction: "referent" } });
+      return res.status(200).send({ ok: true, user: { ...serializeReferent(referent, referent), restriction } });
     }
     return res.status(401).send({ ok: false, user: { restriction: "public" } });
   } catch (error) {

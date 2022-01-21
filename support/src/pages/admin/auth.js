@@ -41,7 +41,7 @@ const Auth = () => {
         return router.push(router.query?.redirect);
       }
       if (response.user.role === "admin") {
-        router.push("/admin/knowledge-base");
+        router.push("/admin/base-de-connaissance");
         return;
       }
       router.push("/base-de-connaissance");

@@ -59,7 +59,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
     if (response.code) return toast.error(response.code);
     if (itemSlug !== item.slug) {
       mutate({ ok: true, data: [...flattenedData, response.data] }, true);
-      router.replace(`/admin/knowledge-base/${response.data.slug}`);
+      router.replace(`/admin/base-de-connaissance/${response.data.slug}`);
     }
     mutate();
     toast.success("Élément enregistré !");
@@ -81,7 +81,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
       toast.success("Élément supprimé !");
       const parent = flattenedData.find((otherItems) => otherItems._id === item.parentId);
       mutate();
-      router.replace(`/admin/knowledge-base/${parent?.slug || ""}`);
+      router.replace(`/admin/base-de-connaissance/${parent?.slug || ""}`);
     }
     setIsDeleting(false);
   };
@@ -305,7 +305,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
             <br />
             {references?.map((reference) => (
               <React.Fragment key={reference._id}>
-                <Link href={`/admin/knowledge-base/${reference.slug}`} passHref>
+                <Link href={`/admin/base-de-connaissance/${reference.slug}`} passHref>
                   <a href="#" target="_blank" className="underline leading-7">
                     {reference.title}
                   </a>

@@ -12,12 +12,12 @@ const NavBar = () => {
         <span className=" text-sm ml-4">SNU Support</span>
       </div>
       <div className="w-1/2 max-w-lg flex-shrink mr-auto ml-auto">
-        <Search path="/admin/knowledge-base" restriction="admin" showAllowedRoles noAnswer="Il n'y a pas de résultat 👀" />
+        <Search path="/admin/base-de-connaissance" restriction="admin" showAllowedRoles noAnswer="Il n'y a pas de résultat 👀" />
       </div>
       <NavLink href="/admin" exact>
         Tableau de bord
       </NavLink>
-      <NavLink href="/admin/knowledge-base">Base de connaissance</NavLink>
+      <NavLink href="/admin/base-de-connaissance">Base de connaissance</NavLink>
       <NavLink href="/admin/tickets">Tickets</NavLink>
       <Logout />
     </nav>

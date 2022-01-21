@@ -34,7 +34,7 @@ const useKnowledgeBaseData = ({ debug = false } = {}) => {
     if (!slug?.length) return [tree, null];
     const itemTree = buildItemTree(slug, flattenedData, tree, debug);
     if (!itemTree) {
-      router.push("/admin/knowledge-base/");
+      router.push("/admin/base-de-connaissance/");
       return [tree, null];
     }
     return [itemTree, flattenedData?.find((i) => i._id === itemTree?.parentId)];

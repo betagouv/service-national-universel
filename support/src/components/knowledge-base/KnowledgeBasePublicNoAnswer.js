@@ -28,7 +28,7 @@ const KnowledgeBasePublicNoAnswer = ({ className = "" }) => {
           e.preventDefault();
           setIsOpen(true);
         }}
-        className={`mx-2 bg-white hover:shadow-sm text-snu-purple-200 my-[70px] text-base font-normal shadow-base rounded-md border-0 py-3.5 px-5 smmd:mx-auto ${className}`}
+        className={`mx-2 bg-white hover:shadow-sm text-snu-purple-200 my-[70px] text-base font-normal shadow-base rounded-md border-0 py-3.5 px-5 smmd:mx-auto ${className} print:hidden`}
       >
         Je n’ai pas trouvé de réponse à ma question
       </button>
