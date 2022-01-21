@@ -28,6 +28,8 @@ const {
   inSevenDays,
   isYoung,
   // updateApplicationsWithYoungOrMission,
+  updatePlacesBus,
+  updatePlacesSessionPhase1,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -36,6 +38,8 @@ const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
 const { canDeleteYoung } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const MeetingPointModel = require("../../models/meetingPoint");
+const BusModel = require("../../models/bus");
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
@@ -362,6 +366,41 @@ router.post("/:id/archive", passport.authenticate("referent", { session: false, 
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: previousEmail }],
       params: { cta: `${config.APP_URL}/inscription/profil` },
     });
+    return res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.post("/:id/deplacementPhase1Autonomous", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const young = await YoungObject.findById(value.id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
+    const bus = await BusModel.findById(meetingPoint?.busId);
+
+    young.set({
+      deplacementPhase1Autonomous: "true",
+      meetingPointId: null,
+    });
+    await young.save();
+
+    // if there is a bus, we need to remove the young from it
+    if (bus) await updatePlacesBus(bus);
+
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
