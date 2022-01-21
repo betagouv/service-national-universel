@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 
-import { Separator } from "../../../components/Content";
+import { Separator, HeroContainer, Hero, Content, AlertBoxInformation } from "../../../components/Content";
 import { translate } from "../../../utils";
 import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
 import roundRight from "../../../assets/roundRight.svg";
@@ -11,10 +11,12 @@ import roundLeft from "../../../assets/roundLeft.svg";
 import questionMark from "../../../assets/question-mark.svg";
 import map from "../../../assets/map.png";
 import { supportURL } from "../../../config";
+import Convocation from "./Convocation";
 
-export default function ConvocationDetails({ young, center, meetingPoint, setShowConvocation }) {
+export default function ConvocationDetails({ young, center, meetingPoint }) {
   const [open, setOpen] = useState(false);
   const [isAutonomous, setIsAutonomous] = useState(young.deplacementPhase1Autonomous === "true");
+  const [showConvocation, setShowConvocation] = useState(false);
 
   async function confirmAutonomous() {
     // delete meetingPointID
@@ -39,7 +41,7 @@ export default function ConvocationDetails({ young, center, meetingPoint, setSho
               (recommandé)
             </p>
             <p className="show-convocation">
-              En cas de problème de téléchargement : <span onClick={setShowConvocation}>afficher ma convocation</span>
+              En cas de problème de téléchargement : <span onClick={() => setShowConvocation((e) => !e)}>afficher ma convocation</span>
             </p>
           </div>
           <div className="button-container">
@@ -51,6 +53,23 @@ export default function ConvocationDetails({ young, center, meetingPoint, setSho
           </div>
         </section>
       </Container>
+      {showConvocation ? (
+        <HeroContainer id="convocationPhase1">
+          <Separator />
+          <Hero>
+            <ContentHorizontal>
+              <div>
+                <h2>Votre convocation</h2>
+                <p>
+                  Votre convocation sera à présenter à votre arrivée muni d&apos;une pièce d&apos;identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures
+                  (recommandé)
+                </p>
+              </div>
+            </ContentHorizontal>
+          </Hero>
+          <Convocation />
+        </HeroContainer>
+      ) : null}
       <Separator />
       <Container>
         <div className="meeting">
@@ -354,5 +373,20 @@ const ContinueButton = styled.button`
   svg {
     margin-left: 0.5rem;
     margin-bottom: 0.2rem;
+  }
+`;
+const ContentHorizontal = styled(Content)`
+  display: flex;
+  width: 100%;
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+
+  .link {
+    color: #5145cd;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 400;
+    cursor: pointer;
   }
 `;

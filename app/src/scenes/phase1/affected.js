@@ -8,7 +8,6 @@ import NextStep from "./nextStep";
 import api from "../../services/api";
 import { translate, translateCohort } from "../../utils";
 import ConvocationDetails from "./components/ConvocationDetails";
-import Convocation from "./components/Convocation";
 import { supportURL } from "../../config";
 import Case from "../../assets/case";
 import Question from "../../assets/question";
@@ -20,7 +19,6 @@ export default function Affected() {
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(true);
-  const [showConvocation, setShowConvocation] = useState(false);
 
   const getMeetingPoint = async () => {
     const { data, ok } = await api.get(`/young/${young._id}/meeting-point`);
@@ -105,26 +103,10 @@ export default function Affected() {
       <HeroContainer id="convocationPhase1">
         <Hero>
           <Content style={{ width: "100%", padding: "3.2rem" }}>
-            <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} setShowConvocation={setShowConvocation} />
+            <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} />
           </Content>
         </Hero>
       </HeroContainer>
-      {showConvocation ? (
-        <HeroContainer id="convocationPhase1">
-          <Hero>
-            <ContentHorizontal>
-              <div>
-                <h2>Votre convocation</h2>
-                <p>
-                  Votre convocation sera à présenter à votre arrivée muni d&apos;une pièce d&apos;identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures
-                  (recommandé)
-                </p>
-              </div>
-            </ContentHorizontal>
-          </Hero>
-          <Convocation />
-        </HeroContainer>
-      ) : null}
       <Documents>Documents à renseigner</Documents>
       <NextStep />
     </>
