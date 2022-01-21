@@ -86,7 +86,7 @@ export default function Affected() {
           <div className="good-article-text">
             <p>Dans ma valise, il y a...</p>
             <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau-1`}>
-              Comment bien <span>préparer son séjour ›</span>
+              Comment bien <span>préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
             </a>
           </div>
         </section>
@@ -95,7 +95,7 @@ export default function Affected() {
           <div className="good-article-text">
             <p>Vous avez des questions sur le séjour ?</p>
             <a href={`${supportURL}/base-de-connaissance`}>
-              Consulter notre <span>base de connaissance ›</span>
+              Consulter notre <span>base&nbsp;de&nbsp;connaissance&nbsp;›</span>
             </a>
           </div>
         </section>

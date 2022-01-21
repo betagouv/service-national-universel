@@ -12,11 +12,28 @@ import questionMark from "../../../assets/question-mark.svg";
 import map from "../../../assets/map.png";
 import { supportURL } from "../../../config";
 import Convocation from "./Convocation";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default function ConvocationDetails({ young, center, meetingPoint }) {
   const [open, setOpen] = useState(false);
   const [isAutonomous, setIsAutonomous] = useState(young.deplacementPhase1Autonomous === "true");
   const [showConvocation, setShowConvocation] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
+  const handleAutonomousClick = () => {
+    setModal({
+      isOpen: true,
+      title: "Je confirme venir par mes propres moyens",
+      message: (
+        <>
+          <p>Vous confirmez vous rendre au centre // afficher nom + addresse // par vos propres moyens.</p>
+          <p>Cette action est irréversible.</p>
+        </>
+      ),
+      onConfirm: confirmAutonomous,
+      confirmText: "Je confirme",
+    });
+  };
 
   async function confirmAutonomous() {
     // delete meetingPointID
@@ -138,7 +155,7 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
                     </div>
                   </section>
                 </div>
-                <ContinueButton onClick={confirmAutonomous}>
+                <ContinueButton onClick={handleAutonomousClick}>
                   Je confirme venir par mes propres moyens{" "}
                   <svg width="16" height="12" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 7l4 4L15 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -156,10 +173,23 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
             <p className="black-bold">Des questions sur le transport ?</p>
           </div>
           <a href={`${supportURL}/base-de-connaissance`}>
-            Rendez-vous sur notre <span>base de connaissance ›</span>
+            Rendez-vous sur notre <span>base&nbsp;de&nbsp;connaissance&nbsp;›</span>
           </a>
         </section>
       </Container>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        confirmText={modal?.confirmText}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+        onCancel={() => {
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </>
   );
 }
@@ -326,7 +356,7 @@ const Container = styled.div`
       }
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 1rem;
       p {
         margin: 0 0 0 1rem;
       }
