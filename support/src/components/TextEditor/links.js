@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSlate } from "slate-react";
 import isUrl from "is-url";
+import isEmail from "is-email";
 import { Editor, Transforms, Element as SlateElement, Range } from "slate";
 import { TextEditorButton, Icon } from "./components";
 import Modal from "../Modal";
@@ -13,6 +14,17 @@ export const isLinkActive = (editor) => {
     match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === "link",
   });
   return link;
+};
+
+export const isLink = (text) => {
+  if (!text) return false;
+  if (text.includes("mailto:")) return isEmail(text.replace("mailto:", ""));
+  return isUrl(text);
+};
+
+const displayLink = (url) => {
+  if (url.includes("mailto:")) return url.replace("mailto:", "");
+  return url;
 };
 
 export const unwrapLink = (editor) => {
@@ -38,7 +50,7 @@ export const wrapLink = (editor, url) => {
   const leaf = {
     type: "link",
     url,
-    children: isCollapsed ? [{ text: url }] : [],
+    children: isCollapsed ? [{ text: displayLink(url) }] : [],
   };
 
   if (isCollapsed && !link) {
@@ -84,6 +96,10 @@ export const AddLinkModal = ({ isOpen, onRequestClose }) => {
     const isSlug = flattenedData.map((item) => `/base-de-connaissance/${item.slug}`).includes(url);
     if (url.startsWith("/")) {
       if (!isSlug) return "Ce lien ne redirige vers aucun article";
+      return "";
+    }
+    if (url.startsWith("mailto:")) {
+      if (!isEmail(url.replace("mailto:", ""))) return "Cet email n'est pas valide";
       return "";
     }
     if (!isUrl(url)) return "Ce lien n'est pas valide";
