@@ -111,7 +111,7 @@ const findAndUpdateArticlesWithLinksWithSlug = async (oldSlug, newSlug) => {
   };
   for (const article of articles) {
     const { content } = article;
-    if (JSON.stringify(content).includes(oldSlug)) {
+    if (!!content && JSON.stringify(content).includes(oldSlug)) {
       article.set({ content: content.map(findAndUpdateLink) });
       await article.save();
     }
@@ -277,8 +277,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       updateKb.title = req.body.title;
     }
     if (req.body.hasOwnProperty("slug")) {
-      oldSlugToUpdate = existingKb.slug;
-      updateKb.slug = await getSlug(req.body.slug.trim());
+      if (req.body.slug.trim() !== existingKb.slug) {
+        updateKb.slug = await getSlug(req.body.slug.trim());
+        if (existingKb.slug !== updateKb.slug) oldSlugToUpdate = existingKb.slug;
+      }
     }
     if (req.body.hasOwnProperty("imageSrc")) updateKb.imageSrc = req.body.imageSrc;
     if (req.body.hasOwnProperty("imageAlt")) updateKb.imageAlt = req.body.imageAlt;
