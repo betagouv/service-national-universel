@@ -57,11 +57,17 @@ const Schema = new mongoose.Schema({
   departureAtString: {
     type: String,
   },
+  realDepartureAtString: {
+    type: String,
+  },
   // date de retour
   returnAt: {
     type: Date,
   },
   returnAtString: {
+    type: String,
+  },
+  realReturnAtString: {
     type: String,
   },
 
