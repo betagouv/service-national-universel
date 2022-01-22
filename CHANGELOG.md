@@ -1,3 +1,10 @@
+## [1.28.1](https://github.com/betagouv/service-national-universel/compare/v1.28.0...v1.28.1) (2022-01-22)
+
+
+### Bug Fixes
+
+* **api:** add fields to meetingpoint model ([ab646b1](https://github.com/betagouv/service-national-universel/commit/ab646b16b73831f98a08d43f8675199f6dcaec44))
+
 # [1.28.0](https://github.com/betagouv/service-national-universel/compare/v1.27.0...v1.28.0) (2022-01-21)
 
 
