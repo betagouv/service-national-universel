@@ -62,7 +62,16 @@ export default function Desistement() {
       ) : confirm.state ? (
         <ComponentConfirm
           title="Êtes-vous sûr ?"
-          message="Vous vous apprêtez à quitter votre parcours SNU. Cette action est irréversible, souhaitez-vous confirmer cette action ?"
+          message={
+            <>
+              <p>Vous vous apprêtez à quitter votre parcours SNU. Cette action est irréversible, souhaitez-vous confirmer cette action ?</p>
+              {young.cohort.search(/2022/) ? (
+                <p>
+                  Si vous souhaitez changer vos dates de séjour, merci de <Link to="/besoin-d-aide/ticket">contacter le support</Link>
+                </p>
+              ) : null}
+            </>
+          }
           onConfirm={() => {
             confirm.onConfirm();
           }}
