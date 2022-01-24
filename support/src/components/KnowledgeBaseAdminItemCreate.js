@@ -2,11 +2,11 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { SUPPORT_ROLES } from "snu-lib/roles";
-import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
-import API from "../../services/api";
-import { Button, CancelButton } from "../Buttons";
-import InputWithEmojiPicker from "../InputWithEmojiPicker";
-import Modal from "../Modal";
+import useKnowledgeBaseData from "../hooks/useKnowledgeBaseData";
+import API from "../services/api";
+import { Button, CancelButton } from "./Buttons";
+import InputWithEmojiPicker from "./InputWithEmojiPicker";
+import Modal from "./Modal";
 
 const KnowledgeBaseAdminItemCreate = ({ type, position, parentId = null }) => {
   const [open, setOpen] = useState(null);

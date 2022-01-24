@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import SortableJS from "sortablejs";
-import API from "../../services/api";
+import API from "../services/api";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
-import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
-import Loader from "../Loader";
+import useKnowledgeBaseData from "../hooks/useKnowledgeBaseData";
+import Loader from "./Loader";
 
 const useIsActive = ({ slug }, onIsActive) => {
   const router = useRouter();
