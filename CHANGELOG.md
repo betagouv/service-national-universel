@@ -1,3 +1,19 @@
+# [1.29.0](https://github.com/betagouv/service-national-universel/compare/v1.28.1...v1.29.0) (2022-01-24)
+
+
+### Bug Fixes
+
+* **support:** can delete article ([#1124](https://github.com/betagouv/service-national-universel/issues/1124)) ([6954c38](https://github.com/betagouv/service-national-universel/commit/6954c386ee6c9ce6241cb6cbef423aa17607da13))
+
+
+### Features
+
+* **app:** ajout modal desistement - confirmation ([#1131](https://github.com/betagouv/service-national-universel/issues/1131)) ([3f06cfe](https://github.com/betagouv/service-national-universel/commit/3f06cfe17b32fac0a842c98208cd62e15382040a))
+* **app,api:** get cohesionCenter via sessionPhase1  ([#1120](https://github.com/betagouv/service-national-universel/issues/1120)) ([bba1020](https://github.com/betagouv/service-national-universel/commit/bba102051372708827b2aac7f97648ad5b2ddfc1))
+* **support:**  admin global interface + print button ([#1123](https://github.com/betagouv/service-national-universel/issues/1123)) ([f4b2690](https://github.com/betagouv/service-national-universel/commit/f4b26903dbc8a00d316e0bbc31c1ade6b4ea7f92))
+* **support:** first integration tickets ([#1130](https://github.com/betagouv/service-national-universel/issues/1130)) ([c2240da](https://github.com/betagouv/service-national-universel/commit/c2240dabe157403100daa75ba2fd1c29016afcbb))
+* **support:** print button ([#1122](https://github.com/betagouv/service-national-universel/issues/1122)) ([40afc8c](https://github.com/betagouv/service-national-universel/commit/40afc8c578f89702be498fb9b07dd5086866f738))
+
 ## [1.28.1](https://github.com/betagouv/service-national-universel/compare/v1.28.0...v1.28.1) (2022-01-22)
 
 
