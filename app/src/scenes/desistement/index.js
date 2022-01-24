@@ -65,7 +65,7 @@ export default function Desistement() {
           message={
             <>
               <p>Vous vous apprêtez à quitter votre parcours SNU. Cette action est irréversible, souhaitez-vous confirmer cette action ?</p>
-              {young.cohort.search(/2022/) ? (
+              {/2022/.test(young.cohort) ? (
                 <p>
                   Si vous souhaitez changer vos dates de séjour, merci de <Link to="/besoin-d-aide/ticket">contacter le support</Link>
                 </p>
