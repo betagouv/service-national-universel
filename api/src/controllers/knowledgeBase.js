@@ -76,6 +76,7 @@ const consolidateAllowedRoles = async (initSection = { type: "section" }, newAll
 };
 
 const findArticlesWithSlug = (slug, content) => {
+  if (!content) return false;
   for (const item of content) {
     if (item.type === "link") {
       if (item.url.includes(slug)) return true;
