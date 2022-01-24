@@ -2,6 +2,7 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { ROLES } = require("snu-lib/roles");
+const { PHASE1_HEADCENTER_ACCESS_LIMIT } = require("snu-lib/constants");
 const { capture } = require("../sentry");
 const esClient = require("../es");
 const { ERRORS, isYoung, getSignedUrlForApiAssociation } = require("../utils");
@@ -95,8 +96,18 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
       const sessionPhase1 = await SessionPhase1Object.findById(user.sessionPhase1Id);
       if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       filter.push({ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { "sessionPhase1Id.keyword": sessionPhase1._id.toString() } });
+      let accessible = { terms: { "cohort.keyword": ["Juillet 2022", "Juin 2022", "Février 2022"] } };
+      if (PHASE1_HEADCENTER_ACCESS_LIMIT["juillet"] < Date.now()) {
+        return;
+        // La ligne du dessous déconnecte le chef de centre de son espace
+        //return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      } else if (PHASE1_HEADCENTER_ACCESS_LIMIT["juin"] < Date.now()) {
+        accessible = { terms: { "cohort.keyword": "Juillet 2022" } };
+      } else if (PHASE1_HEADCENTER_ACCESS_LIMIT["février"] < Date.now()) {
+        accessible = { terms: { "cohort.keyword": ["Juillet 2022", "Juin 2022"] } };
+      }
+      filter.push(accessible);
     }
-
     // A responsible can only see youngs in application of their structure.
     if (user.role === ROLES.RESPONSIBLE) {
       if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
