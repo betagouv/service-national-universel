@@ -17,6 +17,8 @@ const CohesionCenterObject = require("../../models/cohesionCenter");
 const ApplicationModel = require("../../models/application");
 const MissionModel = require("../../models/mission");
 const AuthObject = require("../../auth");
+const MeetingPointModel = require("../../models/meetingPoint");
+const BusModel = require("../../models/bus");
 const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
@@ -38,8 +40,6 @@ const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
 const { canDeleteYoung } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
-const MeetingPointModel = require("../../models/meetingPoint");
-const BusModel = require("../../models/bus");
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
