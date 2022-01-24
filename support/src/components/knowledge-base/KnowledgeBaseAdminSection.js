@@ -88,8 +88,8 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
           </Popover.Panel>
         </Popover>
       </header>
-      <main className={`flex h-full ${isRoot ? "flex-col" : ""} w-fullmax-w-screen-2xl flex-shrink overflow-y-auto`}>
-        <section className={`flex flex-col  ${isRoot ? "w-full order-2" : ""} flex-grow flex-shrink-0 border-r-2 pt-6 px-12`}>
+      <main className={`flex h-full ${isRoot ? "flex-col" : ""} w-full max-w-screen-2xl flex-shrink overflow-y-auto`}>
+        <section className={`flex flex-col  ${isRoot ? "w-full order-2" : ""} flex-grow-[4] flex-shrink-0 border-r-2 pt-6 px-12`}>
           <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
             Sujets
             <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="article" />
@@ -109,7 +109,7 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
             {!articles.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
           </div>
         </section>
-        <section className={`flex flex-col ${isRoot ? "w-full" : "w-96"} flex-shrink-0  pt-6`}>
+        <section className={`flex flex-col ${isRoot ? "w-full" : ""} flex-grow-[2] flex-shrink-0  pt-6`}>
           <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
             Catégories
             <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="section" />

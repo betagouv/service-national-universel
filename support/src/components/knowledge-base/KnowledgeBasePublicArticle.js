@@ -7,9 +7,9 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
       {item?.updatedAt && (
         <span className="ml-auto text-xs text-gray-400 mt-2 mb-4 print:mt-0 print:mb-2 italic flex flex-col items-end">
           <em>Article mis à jour le {Intl.DateTimeFormat("fr-FR", { year: "numeric", month: "long", day: "numeric" }).format(new Date(item.updatedAt))}</em>
-          <em className="cursor-pointer noprint" onClick={window.print}>
+          <button className="font-normal mt-2 bg-gray-100 border border-gray-300 shadow-none text-black cursor-pointer noprint" onClick={window.print}>
             🖨 Imprimer
-          </em>
+          </button>
         </span>
       )}
       <TextEditor readOnly content={item.content} _id={item._id} slug={item.slug} />

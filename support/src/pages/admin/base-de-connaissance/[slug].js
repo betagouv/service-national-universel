@@ -54,8 +54,8 @@ const KnowledgeBase = () => {
   return (
     <Layout title="Base de connaissance" className="flex flex-col">
       <Header>
-        <div className="mb-2 w-screen flex justify-between items-baseline -ml-12 -mr-12 pl-12 pr-4">
-          <span>Base de connaissance</span>
+        <div className="mb-2 w-full flex justify-between items-baseline">
+          <span className="-ml-8">Base de connaissance</span>
           <Link href={`/base-de-connaissance/${router?.query?.slug}`}>
             <a className="bg-transparent border-none hover:underline text-xs font-light p-0 m-0 ml-auto" href="#">
               Aller à la base de connaissance publique
@@ -63,12 +63,12 @@ const KnowledgeBase = () => {
           </Link>
         </div>
         <KnowledgeBaseAdminBreadcrumb parents={item?.parents} />
-        <div id="breadcrumb" className="px-4 py-2 -ml-12 -mr-12 -mb-3 flex justify-between items-baseline flex-shrink-0 w-screen bg-snu-purple-900">
+        <div id="breadcrumb" className="py-2 -ml-8 -mr-8 -mb-3 flex justify-between items-baseline flex-shrink-0 w-full bg-snu-purple-900">
           <button onClick={() => setTreeVisible((v) => !v)} className="bg-transparent border-none hover:underline text-xs font-light p-0 m-0">
             {treeVisible ? "Masquer" : "Afficher"} l'arbre
           </button>
           {!isRoot && (
-            <button onClick={() => setMetadataVisible((v) => !v)} className="bg-transparent border-none hover:underline text-xs font-light p-0 m-0">
+            <button onClick={() => setMetadataVisible((v) => !v)} className="bg-transparent border-none hover:underline text-xs font-light p-0 m-0 ml-auto -mr-8">
               {metadataVisible ? "Masquer les infos" : "Afficher les infos"}
             </button>
           )}
@@ -77,7 +77,7 @@ const KnowledgeBase = () => {
       {!item ? (
         <Loader />
       ) : (
-        <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
+        <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full m-w-full flex-grow flex-shrink overflow-hidden">
           <ResizablePanel className={`relative flex flex-grow-0 flex-shrink-0 z-10  ${treeVisible ? "w-80" : "w-0 hidden"}`} name="admin-knowledge-base-tree" position="left">
             <div className="relative flex flex-col pr-2 overflow-hidden">
               <KnowledgeBaseAdminTree isSortable onClick={(slug) => router.push(`/admin/base-de-connaissance/${slug || ""}`)} />

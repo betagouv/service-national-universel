@@ -8,7 +8,7 @@ const ResizablePanel = ({ children, name, position, className }) => {
   const panelRef = useRef(null);
   const [panelLength, setPanelLength] = useState(() => {
     const savedWidth = window.localStorage.getItem(`snu-panel-${name}-length`);
-    if (!!savedWidth) return parseInt(savedWidth, 10);
+    if (!!savedWidth) return Math.max(0, parseInt(savedWidth, 10));
     return null;
   });
   useEffect(() => {
@@ -45,7 +45,7 @@ const ResizablePanel = ({ children, name, position, className }) => {
   };
 
   const handleMouseUp = () => {
-    siblingDivRef.current.classList.remove("pointer-events-none");
+    siblingDivRef.current.classList.remove("select-none");
     window.localStorage.setItem(`snu-panel-${name}-length`, panelWidthRef.current);
     document.removeEventListener("mousemove", resize, false);
     document.removeEventListener("mouseup", handleMouseUp, false);
@@ -53,8 +53,9 @@ const ResizablePanel = ({ children, name, position, className }) => {
 
   const handleMouseDown = (e) => {
     siblingDivRef.current = e.target[["left", "bottom"].includes(position) ? "previousSibling" : "nextSibling"];
-    siblingDivRef.current.classList.add("pointer-events-none");
+    siblingDivRef.current.classList.add("select-none");
     moveStart.current = e[["left", "right"].includes(position) ? "screenX" : "screenY"];
+    console.log(e[["left", "right"].includes(position) ? "screenX" : "screenY"]);
     document.addEventListener("mousemove", resize, false);
     document.addEventListener("mouseup", handleMouseUp, false);
   };
@@ -64,6 +65,7 @@ const ResizablePanel = ({ children, name, position, className }) => {
     return {};
   }, [panelLength]);
 
+  console.log(style);
   return (
     <aside ref={panelRef} className={className} style={style}>
       {position === "right" && <div className="w-1 bg-coolGray-300 h-full flex-shrink-0 cursor-col-resize" onMouseDown={handleMouseDown} />}

@@ -36,7 +36,7 @@ const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
               <LoaderSection />
               <LoaderSection />
             </div>
-            <main className="flex flex-col sm:px-2 lg:flex-row lg:px-0 justify-evenly h-full w-fullmax-w-screen-2xl flex-shrink overflow-y-auto">
+            <main className="flex flex-col sm:px-2 lg:flex-row lg:px-0 justify-evenly h-full flex-shrink overflow-y-auto">
               <section className="flex flex-col flex-grow flex-shrink-0 pt-12 max-w-4xl">
                 <h3 className="sm:px-4 sm:pb-2 lg:px-16 flex items-center font-bold uppercase text-sm text-snu-purple-900">Sujets</h3>
                 <LoaderArticle />

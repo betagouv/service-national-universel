@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 
 const getActiveClassName = (pathname, href, exact) => {
   if (exact) {
-    if (pathname === href) return "font-bold";
+    if (pathname === href) return "font-bold stroke-2";
     return "";
   }
-  if (pathname.includes(href)) return "font-bold";
+  if (pathname.includes(href)) return "font-bold stroke-2";
   return "";
 };
 
@@ -20,7 +20,7 @@ const NavLink = ({ href, children, exact = false, className = "" }) => {
 
   return (
     <Link href={href} passHref>
-      <li className={`px-4 py-2 text-sm cursor-pointer ${activeClassName} ${className}`}>{children}</li>
+      <li className={`px-4 py-4 text-sm cursor-pointer  flex flex-nowrap ${activeClassName} ${className}`}>{children}</li>
     </Link>
   );
 };
