@@ -13,6 +13,7 @@ import RoundWarning from "../../assets/RoundWarning";
 export default function Desistement() {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
+  const [confirm, setConfirm] = useState({ state: false, onConfirm: () => {} });
 
   // in /inscription/desistement, we do not check if the young is logged in
   // so we need to double check here
@@ -58,13 +59,30 @@ export default function Desistement() {
             onConfirm(YOUNG_STATUS.DELETED);
           }}
         />
+      ) : confirm.state ? (
+        <ComponentConfirm
+          title="Êtes-vous sûr ?"
+          message={
+            <>
+              <p>Vous vous apprêtez à quitter votre parcours SNU. Cette action est irréversible, souhaitez-vous confirmer cette action ?</p>
+              {/2022/.test(young.cohort) ? (
+                <p>
+                  Si vous souhaitez changer vos dates de séjour, merci de <Link to="/besoin-d-aide/ticket">contacter le support</Link>
+                </p>
+              ) : null}
+            </>
+          }
+          onConfirm={() => {
+            confirm.onConfirm();
+          }}
+        />
       ) : (
         <ComponentWithdrawn
           title="Vous souhaitez vous désister ?"
           message="Précisez la raison de votre désistement"
           placeholder="Précisez en quelques mots la raison de votre désistement"
           onConfirm={(values) => {
-            onConfirm(YOUNG_STATUS.WITHDRAWN, values);
+            setConfirm({ state: true, onConfirm: () => onConfirm(YOUNG_STATUS.WITHDRAWN, values) });
           }}
         />
       )}
