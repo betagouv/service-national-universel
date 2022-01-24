@@ -5,7 +5,7 @@ import KnowledgeBaseArticleCard from "./knowledge-base/KnowledgeBaseArticleCard"
 import KnowledgeBasePublicNoAnswer from "./knowledge-base/KnowledgeBasePublicNoAnswer";
 import Loader from "./Loader";
 
-const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAnswer }) => {
+const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAnswer, placeholder = "Comment pouvons-nous vous aider ?", className = "" }) => {
   const [search, setSearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [items, setItems] = useState([]);
@@ -51,9 +51,9 @@ const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAns
     <div className="relative flex flex-col items-center w-full">
       <div className="relative flex items-center w-full">
         <input
-          className="pl-10 py-2.5 w-full pr-3 text-gray-500 transition-colors focus:outline-none text-sm border rounded-md border-gray-300 focus:border-gray-400"
+          className={`pl-10 py-2.5 w-full pr-3 text-gray-500 transition-colors text-sm ${className}`}
           type="text"
-          placeholder="Comment pouvons-nous vous aider ?"
+          placeholder={placeholder}
           onChange={(e) => setSearch(e.target.value)}
           value={search}
         />
