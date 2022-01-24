@@ -1,8 +1,8 @@
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import API from "../services/api";
-import KnowledgeBaseArticleCard from "./knowledge-base/KnowledgeBaseArticleCard";
-import KnowledgeBasePublicNoAnswer from "./knowledge-base/KnowledgeBasePublicNoAnswer";
+import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
+import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import Loader from "./Loader";
 
 const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAnswer, placeholder = "Comment pouvons-nous vous aider ?", className = "" }) => {

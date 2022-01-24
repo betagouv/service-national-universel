@@ -27,8 +27,8 @@ const LIST_TYPES = ["numbered-list", "bulleted-list"];
 const TextEditor = ({ content, _id, readOnly, onSave }) => {
   const router = useRouter();
 
-  const [value, setValue] = useState(JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || empty);
-  const [isSaveable, setIsSaveable] = useState(!!localStorage.getItem(`snu-kb-content-${_id}`));
+  const [value, setValue] = useState(() => JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || empty);
+  const [isSaveable, setIsSaveable] = useState(() => !!localStorage.getItem(`snu-kb-content-${_id}`));
   const [forceUpdateKey, setForceUpdateKey] = useState(0);
 
   const renderElement = useCallback((props) => <Element {...props} readOnly={readOnly} />, []);

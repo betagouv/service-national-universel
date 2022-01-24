@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
-import API from "../../services/api";
-import Modal from "../Modal";
-import Tags from "../Tags";
-import TextEditor from "../TextEditor";
+import useKnowledgeBaseData from "../hooks/useKnowledgeBaseData";
+import API from "../services/api";
+import Modal from "./Modal";
+import Tags from "./Tags";
+import TextEditor from "./TextEditor";
 import KnowledgeBasePublicContent from "./KnowledgeBasePublicContent";
 
 const KnowledgeBaseAdminArticle = ({ article }) => {
