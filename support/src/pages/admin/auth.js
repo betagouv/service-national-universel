@@ -99,7 +99,7 @@ const Auth = () => {
                 placeholder="Tapez votre mot de passe"
               />
             </div>
-            <a href="" className="text-[#5145cd] text-sm">
+            <a href={`${adminURL}/auth/forgot`} className="text-[#5145cd] text-sm">
               Mot de passe perdu ?
             </a>
             <Button className="py-2 px-12 transition-colors w-max" type="submit" loading={isLogging}>

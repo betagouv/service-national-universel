@@ -6,6 +6,14 @@ const MODELNAME = "support_user";
 
 const folderSchema = new mongoose.Schema(
   {
+    _id: {
+      type: mongoose.Types.ObjectId,
+      required: true,
+      index: true,
+      documentation: {
+        description: "Same ID as the user ID in the project",
+      },
+    },
     name: {
       type: String,
       documentation: {
@@ -42,6 +50,10 @@ const folderSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+// because properties for support user have nothing to do with referent and SNU project
+// because the support is also supposed to belong to other projects at some point
+// we create a new model for support user with a schema only for support
 
 const Schema = new mongoose.Schema(
   {
