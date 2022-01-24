@@ -419,9 +419,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
 
-    delete value.firstName;
-    delete value.lastName;
-
     young.set(value);
     await young.save({ fromUser: req.user });
 
