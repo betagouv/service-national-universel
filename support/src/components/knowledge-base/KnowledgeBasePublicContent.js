@@ -33,7 +33,7 @@ const KnowledgeBasePublicContent = ({ item, isLoading }) => {
             <Breadcrumb parents={item?.parents || []} path="/base-de-connaissance" />
             <div className="py-4">
               {<h5 className="text-snu-purple-100 print:text-black max-w-3xl pb-2 text-base md:text-lg uppercase">{group}</h5>}
-              <h1 className="mb-6 text-4xl font-bold text-white print:text-black md:text-5xl">{item?.title}</h1>
+              <h1 className="mb-6  print:mb-0 text-4xl font-bold text-white print:text-black md:text-5xl">{item?.title}</h1>
               <h6 className="text-snu-purple-100 text-base md:text-lg lg:text-xl print:text-black">{item?.description}</h6>
             </div>
           </div>
