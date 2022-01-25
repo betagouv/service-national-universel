@@ -6,14 +6,6 @@ const MODELNAME = "support_user";
 
 const folderSchema = new mongoose.Schema(
   {
-    _id: {
-      type: mongoose.Types.ObjectId,
-      required: true,
-      index: true,
-      documentation: {
-        description: "Same ID as the user ID in the project",
-      },
-    },
     name: {
       type: String,
       documentation: {
@@ -57,7 +49,14 @@ const folderSchema = new mongoose.Schema(
 
 const Schema = new mongoose.Schema(
   {
-    _id: mongoose.Types.ObjectId,
+    _id: {
+      type: mongoose.Types.ObjectId,
+      required: true,
+      index: true,
+      documentation: {
+        description: "Same ID as the user ID in the project",
+      },
+    },
     projectUserId: {
       type: String,
       index: true,
@@ -66,7 +65,7 @@ const Schema = new mongoose.Schema(
       },
     },
     status: {
-      type: Boolean,
+      type: String,
       enum: ["active", "deleted", "inactive", ""],
       default: "active",
       documentation: {

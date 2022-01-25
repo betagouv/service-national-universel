@@ -5,6 +5,7 @@ import TicketsPreview from "../../../components/TicketsPreview";
 import TicketsFolders from "../../../components/TicketsFolders";
 import TicketsRightDrawer from "../../../components/TicketsRightDrawer";
 import withAuth from "../../../hocs/withAuth";
+import TicketsTable from "../../../components/TicketsTable";
 
 const KnowledgeBase = () => {
   const [activeFolder, setActiveFolder] = useState(JSON.parse(localStorage.getItem("snu-tickets-active-folder-id")) || null);
@@ -20,7 +21,9 @@ const KnowledgeBase = () => {
         <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
           <TicketsFolders activeFolder={activeFolder} onFolderClick={onFolderClick} />
           <div className="flex flex-grow flex-col">
-            <div className="flex flex-grow flex-col"></div>
+            <div className="flex flex-grow flex-col">
+              <TicketsTable />
+            </div>
             <TicketsPreview />
           </div>
           <TicketsRightDrawer />
