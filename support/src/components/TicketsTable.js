@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import useSWR from "swr";
 import API from "../services/api";
 
@@ -36,56 +36,42 @@ const initColumns = [
 const TicketsTable = () => {
   const { data } = useSWR(API.getUrl({ path: "/support-center/ticket" }));
   console.log({ data });
+  const tickets = data.data;
 
   const [columns, setColumns] = useState(() => JSON.parse(localStorage.getItem("snu-tickets-table")) || initColumns);
 
   return (
-    <div className="flex flex-col">
-      <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div className="py-2 inline-block min-w-full sm:px-6 lg:px-8">
-          <div className="overflow-hidden">
-            <table className="min-w-full">
-              <thead className="bg-white border-b">
-                <tr>
-                  <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
-                    #
-                  </th>
-                  <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
-                    First
-                  </th>
-                  <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
-                    Last
-                  </th>
-                  <th scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
-                    Handle
-                  </th>
+    <div className="overflow-auto m-4">
+      <table className="min-w-full border-collapse">
+        <thead className="bg-white border-b">
+          <tr className="relative">
+            {columns
+              .filter((c) => c.visible)
+              .map(({ key, name }) => (
+                <th key={key} scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left border-2 resize-x overflow-auto sticky top-0 min-w-[70px]">
+                  {name}
+                </th>
+              ))}
+          </tr>
+        </thead>
+        <tbody>
+          {tickets.map((ticket, index) => {
+            return (
+              <React.Fragment key={ticket._id}>
+                <tr className={`${index % 2 === 1 ? "bg-gray-100" : "bg-white"}  hover:bg-gray-200 border-b`}>
+                  {columns
+                    .filter((c) => c.visible)
+                    .map(({ key }) => (
+                      <td key={key} className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 overflow-auto">
+                        {ticket[key]}
+                      </td>
+                    ))}
                 </tr>
-              </thead>
-              <tbody>
-                <tr className="bg-gray-100 border-b">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">1</td>
-                  <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">Mark</td>
-                  <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">Otto</td>
-                  <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">@mdo</td>
-                </tr>
-                <tr className="bg-white border-b">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">2</td>
-                  <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">Jacob</td>
-                  <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">Thornton</td>
-                  <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">@fat</td>
-                </tr>
-                <tr className="bg-gray-100 border-b">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">3</td>
-                  <td colSpan="2" className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap text-center">
-                    Larry the Bird
-                  </td>
-                  <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">@twitter</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+              </React.Fragment>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 };

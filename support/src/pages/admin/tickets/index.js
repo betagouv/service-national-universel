@@ -20,8 +20,8 @@ const KnowledgeBase = () => {
         <Header>🚧 Tickets (EN COURS DE DÉVELOPPEMENT) 🚧</Header>
         <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
           <TicketsFolders activeFolder={activeFolder} onFolderClick={onFolderClick} />
-          <div className="flex flex-grow flex-col">
-            <div className="flex flex-grow flex-col">
+          <div className="flex flex-grow flex-col flex-shrink-1 w-full overflow-hidden">
+            <div className="flex flex-grow flex-col overflow-auto">
               <TicketsTable />
             </div>
             <TicketsPreview />
