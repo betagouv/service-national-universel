@@ -1,3 +1,16 @@
+# [1.30.0](https://github.com/betagouv/service-national-universel/compare/v1.29.0...v1.30.0) (2022-01-25)
+
+
+### Bug Fixes
+
+* **app:** text affectation ([#1134](https://github.com/betagouv/service-national-universel/issues/1134)) ([e540290](https://github.com/betagouv/service-national-universel/commit/e540290ccfe747f6773b1fad69b69e6d98dfb91d))
+* change support-center to zammad-support-center ([#1133](https://github.com/betagouv/service-national-universel/issues/1133)) ([1dda5a2](https://github.com/betagouv/service-national-universel/commit/1dda5a237bc8fc84b129f5f7cda0476c50d3aa2c))
+
+
+### Features
+
+* **admin:** restrict access of head center ([#1127](https://github.com/betagouv/service-national-universel/issues/1127)) ([27c793d](https://github.com/betagouv/service-national-universel/commit/27c793d5a1373b19e213ef46ce0b8572416cb4e5))
+
 # [1.29.0](https://github.com/betagouv/service-national-universel/compare/v1.28.1...v1.29.0) (2022-01-24)
 
 
