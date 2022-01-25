@@ -253,13 +253,13 @@ const deleteCenterDependencies = async (center) => {
 const updatePlacesBus = async (bus) => {
   console.log(`update bus ${bus.id} - ${bus.idExcel}`);
   try {
-    const meetingPoints = await MeetingPointModel.find({ busId: bus.id });
+    const meetingPoints = await MeetingPointModel.find({ busId: bus.id, cohort: bus.cohort });
     if (!meetingPoints?.length) return console.log("meetingPoints not found");
     const idsMeetingPoints = meetingPoints.map((e) => e._id);
     console.log(`idsMeetingPoints for bus ${bus.id}`, idsMeetingPoints);
     const youngs = await YoungModel.find({
       status: "VALIDATED",
-      statusPhase1: "AFFECTED",
+      statusPhase1: { $in: ["AFFECTED", "WAITING_ACCEPTATION", "DONE"] },
       meetingPointId: {
         $in: idsMeetingPoints,
       },
