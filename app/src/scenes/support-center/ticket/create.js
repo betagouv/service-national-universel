@@ -32,7 +32,7 @@ export default function TicketCreate() {
           onSubmit={async (values) => {
             try {
               const { message, step1, step2 } = values;
-              const { ok, code } = await api.post("/support-center/ticket", {
+              const { ok, code } = await api.post("/zammad-support-center/ticket", {
                 title: `${step1?.label} - ${step2?.label}`,
                 message,
                 // eslint-disable-next-line no-unsafe-optional-chaining

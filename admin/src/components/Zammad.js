@@ -51,7 +51,7 @@ export default function Zammad() {
             // We have to create a ticket before initializing first chat message
             // because we have to include link.
             api
-              .post("/support-center/ticket", {
+              .post("/zammad-support-center/ticket", {
                 subject: `${user.firstName} ${user.lastName} - ${new Date().toLocaleString()}`,
                 type: "💬 Chat",
                 message: "Chat initialisé",
@@ -85,7 +85,7 @@ export default function Zammad() {
         if (chat.waitingForTicketAdditionalInformation && data?.message?.chat_session_id) {
           chat.waitingForTicketAdditionalInformation = false;
           api
-            .put(`/support-center/ticket/${chat.ticketId}`, {
+            .put(`/zammad-support-center/ticket/${chat.ticketId}`, {
               message: `https://zammad.snu.gouv.fr/#customer_chat/session/${data.message.chat_session_id}`,
             })
             .then(() => {

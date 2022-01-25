@@ -36,7 +36,7 @@ const Dashboard = () => {
     }
     const fetchTickets = async () => {
       try {
-        const response = await api.get("/support-center/ticket?withArticles=true");
+        const response = await api.get("/zammad-support-center/ticket?withArticles=true");
         if (!response.ok) return setUserTickets([]);
         setUserTickets(response.data);
       } catch (error) {

@@ -28,7 +28,7 @@ export default function TicketMessage({ ticket: propTicket }) {
       if (!id) {
         return setTicket(undefined);
       }
-      const { data, ok } = await api.get(`/support-center/ticket/${id}`);
+      const { data, ok } = await api.get(`/zammad-support-center/ticket/${id}`);
       if (data.error || !ok) return setTicket(propTicket);
       return setTicket(data);
     } catch (e) {
@@ -51,7 +51,7 @@ export default function TicketMessage({ ticket: propTicket }) {
     // then send the message
     // todo : we may be able to reset the status in only one call
     // but im not sure the POST for a message can take state in its body
-    await api.put(`/support-center/ticket/${ticket?.id}`, { message, ticket });
+    await api.put(`/zammad-support-center/ticket/${ticket?.id}`, { message, ticket });
 
     // reset ticket and input message
     setMessage("");

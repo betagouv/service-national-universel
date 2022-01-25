@@ -18,7 +18,7 @@ export default function TicketInfos({ ticket }) {
     (async () => {
       if (!ticket?.articles?.length) return;
       const email = ticket.articles[0].created_by;
-      const { tags } = await api.get(`/support-center/ticket/${ticket.id}/tags`);
+      const { tags } = await api.get(`/zammad-support-center/ticket/${ticket.id}/tags`);
       if (tags?.includes("EMETTEUR_Volontaire")) {
         const { data } = await api.get(`/young?email=${email}`);
         setUser(data);
@@ -45,7 +45,7 @@ export default function TicketInfos({ ticket }) {
   }, [user]);
 
   const resolveTicket = async () => {
-    const response = await api.put(`/support-center/ticket/${ticket.id}`, {
+    const response = await api.put(`/zammad-support-center/ticket/${ticket.id}`, {
       state: "closed",
     });
     if (!response.ok) console.log(response.status, "error");

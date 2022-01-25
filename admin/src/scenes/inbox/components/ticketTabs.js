@@ -17,7 +17,7 @@ export default function TicketTabs({ setTicket, selectedTicket }) {
 
   const getTickets = async (tags) => {
     try {
-      const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
+      const { data } = await api.post(`/zammad-support-center/ticket/search-by-tags?withArticles=true`, { tags });
       setTickets(data);
     } catch (err) {
       console.log("Oups, une erreur s'est produite.");

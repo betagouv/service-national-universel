@@ -9,7 +9,7 @@ import api from "../../services/api";
 import { translate, departmentList, department2region } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { SelectTag, step1, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/workflow";
+import { SelectTag, step1, step2TechnicalPublic, step2QuestionPublic } from "../zammad-support-center/ticket/workflow";
 
 export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) {
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
@@ -26,7 +26,7 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
             setLoading(true);
             const { message, subject, name, email, step1, step2, department } = values;
             const regionTags = [`DEPARTEMENT_${department}`, `REGION_${department2region[department]}`];
-            const { ok, code } = await api.post("/support-center/public/ticket", {
+            const { ok, code } = await api.post("/zammad-support-center/public/ticket", {
               title: `${step1?.label} - ${step2?.label} - ${subject}`,
               subject,
               name,
