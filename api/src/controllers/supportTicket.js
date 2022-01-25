@@ -10,10 +10,10 @@ router.get("/", passport.authenticate("support-user", { session: false, failWith
   try {
     const query = {};
     const limit = 50;
-    query.page = req.query.page || 1;
-    const skip = (query.page - 1) * limit;
+    const skip = (req.query.page - 1) * limit;
 
     const tickets = await TicketModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 });
+    console.log(tickets.length);
     return res.status(200).send({ ok: true, data: tickets });
   } catch (error) {
     capture(error);

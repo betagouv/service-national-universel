@@ -77,7 +77,7 @@ const KnowledgeBase = () => {
       {!item ? (
         <Loader />
       ) : (
-        <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full m-w-full flex-grow flex-shrink overflow-hidden">
+        <div className="relative bg-coolGray-200 flex max-w-[calc(100vw - 52px)] border-t-2 h-full w-full m-w-full flex-grow flex-shrink overflow-hidden">
           <ResizablePanel className={`relative flex flex-grow-0 flex-shrink-0 z-10  ${treeVisible ? "w-80" : "w-0 hidden"}`} name="admin-knowledge-base-tree" position="left">
             <div className="relative flex flex-col pr-2 overflow-hidden">
               <KnowledgeBaseAdminTree isSortable onClick={(slug) => router.push(`/admin/base-de-connaissance/${slug || ""}`)} />

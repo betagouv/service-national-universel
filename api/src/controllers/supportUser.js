@@ -25,7 +25,6 @@ router.get("/signin_token", passport.authenticate("referent", { session: false, 
         role: req.user.role,
       });
     }
-    supportUser.set({ lastLoginAt: Date.now() });
     await supportUser.save();
     return res.status(200).send({ ok: true, token: value.token, user: supportUser });
   } catch (error) {
