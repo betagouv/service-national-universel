@@ -2,6 +2,7 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { ROLES } = require("snu-lib/roles");
+const { PHASE1_HEADCENTER_ACCESS_LIMIT, COHORTS } = require("snu-lib/constants");
 const { capture } = require("../sentry");
 const esClient = require("../es");
 const { ERRORS, isYoung, getSignedUrlForApiAssociation } = require("../utils");
@@ -95,8 +96,14 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
       const sessionPhase1 = await SessionPhase1Object.findById(user.sessionPhase1Id);
       if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       filter.push({ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { "sessionPhase1Id.keyword": sessionPhase1._id.toString() } });
+      const visibleCohorts = COHORTS.filter((cohort) => PHASE1_HEADCENTER_ACCESS_LIMIT[cohort] > Date.now());
+      if (visibleCohorts.length) {
+        filter.push({ terms: { "cohort.keyword": visibleCohorts } });
+      } else {
+        // Tried that to specify when there's just no data or when the head center has no longer access
+        return res.status(200).send({ ok: true, data: "no cohort available" });
+      }
     }
-
     // A responsible can only see youngs in application of their structure.
     if (user.role === ROLES.RESPONSIBLE) {
       if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
