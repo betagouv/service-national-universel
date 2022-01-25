@@ -195,7 +195,7 @@ const Drawer = (props) => {
       else if (user?.role === ROLES.REFERENT_REGION) tags.push(["AGENT_Référent_Région", `REGION_${user.region}`]);
 
       const getTickets = async (tags) => {
-        const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
+        const { data } = await api.post(`/zammad-support-center/ticket/search-by-tags?withArticles=true`, { tags });
         props.dispatchTickets(data);
       };
       if (tags.length) getTickets(tags);

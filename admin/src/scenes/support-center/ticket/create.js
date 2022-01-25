@@ -67,7 +67,7 @@ export default function Create() {
               let title = type?.label;
               if (user.role === "visitor") title = messageTitle;
               if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
-              const { ok, code } = await api.post("/support-center/ticket", {
+              const { ok, code } = await api.post("/zammad-support-center/ticket", {
                 title,
                 message,
                 tags: [...new Set([...computedTags])], // dirty hack to remove duplicates

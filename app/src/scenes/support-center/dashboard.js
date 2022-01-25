@@ -45,7 +45,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const response = await api.get("/support-center/ticket?withArticles=true");
+        const response = await api.get("/zammad-support-center/ticket?withArticles=true");
         if (!response.ok) return console.log(response);
         setUserTickets(response.data);
       } catch (error) {

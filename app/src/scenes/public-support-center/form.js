@@ -26,7 +26,7 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
             setLoading(true);
             const { message, subject, name, email, step1, step2, department } = values;
             const regionTags = [`DEPARTEMENT_${department}`, `REGION_${department2region[department]}`];
-            const { ok, code } = await api.post("/support-center/public/ticket", {
+            const { ok, code } = await api.post("/zammad-support-center/public/ticket", {
               title: `${step1?.label} - ${step2?.label} - ${subject}`,
               subject,
               name,

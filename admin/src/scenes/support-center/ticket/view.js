@@ -28,7 +28,7 @@ export default function View(props) {
     try {
       const id = props.match?.params?.id;
       if (!id) return setTicket(null);
-      const { data, ok } = await api.get(`/support-center/ticket/${id}`);
+      const { data, ok } = await api.get(`/zammad-support-center/ticket/${id}`);
       if (data.error || !ok) return setTicket(null);
       return setTicket(data);
     } catch (e) {
@@ -47,7 +47,7 @@ export default function View(props) {
     setSending(true);
     if (!message) return setSending(false);
     const id = props.match?.params?.id;
-    await api.put(`/support-center/ticket/${id}`, { message, ticket });
+    await api.put(`/zammad-support-center/ticket/${id}`, { message, ticket });
     setMessage("");
     getTicket();
     setSending(false);

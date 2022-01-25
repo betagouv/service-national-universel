@@ -11,7 +11,7 @@ if (environment === "staging") {
   apiURL = "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
   adminURL = "https://app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io";
   appURL = "https://app-66aba4d6-e5fc-4c74-b252-f55fb0e9d37f.cleverapps.io";
-  supportURL = "https://app-16a214d4-a14b-4be0-abc6-da10131a8938.cleverapps.io";
+  supportURL = "https://app-9266b532-ff6e-4a6a-aeeb-e6ff7bb67f60.cleverapps.io";
 }
 if (environment === "production") {
   apiURL = "https://api.snu.gouv.fr";
