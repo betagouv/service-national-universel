@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { HeroContainer, Hero } from "../../components/Content";
 import { translateCohort } from "../../utils";
+import { supportURL } from "../../config";
 import NextStep from "./nextStep";
 
 export default function WaitingAffectation({ young }) {
@@ -23,7 +24,15 @@ export default function WaitingAffectation({ young }) {
             <p>
               <strong style={{ color: "#000" }}>Vous êtes en attente d&apos;affectation à un centre</strong>
               <br />
-              Votre affectation vous sera annoncée 3 semaines avant votre départ en séjour de cohésion.
+              <span style={{ fontSize: "1rem" }}>
+                Votre affectation vous sera communiquée dans les prochains jours par mail. Pensez à vérifier vos spams et courriers indésirables pour vous assurer que vous recevez
+                bien les communications de la plateforme. Vous pouvez d&apos;ores et déjà préparer votre venue en consultant les{" "}
+                <a href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
+                  articles à propos de la Phase 1
+                </a>
+                . <br />
+                Merci de votre patience. L&apos;équipe SNU
+              </span>
             </p>
           </div>
           <div className="thumb" />
