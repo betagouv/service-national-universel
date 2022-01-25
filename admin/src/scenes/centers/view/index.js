@@ -9,7 +9,7 @@ import Youngs from "./youngs";
 import Affectation from "./affectation";
 import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../../utils";
+import { translate, CENTER_ROLES } from "../../../utils";
 
 export default function Index({ ...props }) {
   const [center, setCenter] = useState();
@@ -53,6 +53,61 @@ export default function Index({ ...props }) {
     if (ok) setCenter(data);
   };
 
+  const deleteTeamate = async (index) => {
+    focusedSession.team.splice(index, 1);
+
+    try {
+      const r = await api.put(`/session-phase1/${focusedSession._id}`, { team: focusedSession.team });
+      const { ok, data } = r;
+      if (!ok) toastr.error("Oups, une erreur est survenue lors de la suppression du membre", translate(data.code));
+      setFocusedSession(data);
+      toastr.success("Succès", "Le membre a été supprimé à l'équipe");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !", translate(e.code));
+    }
+  };
+
+  const addTeamate = async (teamate) => {
+    let obj = {};
+
+    if (teamate.role === CENTER_ROLES.chef) obj = await setChefCenter(teamate);
+    else obj = setTeamate(teamate);
+
+    if (!Object.keys(obj).length) return;
+
+    try {
+      const { ok, data } = await api.put(`/session-phase1/${focusedSession._id}`, obj);
+      if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du membre", translate(data.code));
+      setFocusedSession(data);
+      toastr.success("Succès", "Le membre a été ajouté à l'équipe");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !", translate(e.code));
+    }
+  };
+
+  const setChefCenter = async (teamate) => {
+    try {
+      let { data: referent } = await api.get(`/referent?email=${teamate.email}`);
+
+      if (!referent) {
+        toastr.error("Erreur !", "Aucun utilisateur trouvé avec cette adresse email");
+        return {};
+      }
+
+      return { headCenterId: referent._id };
+    } catch (e) {
+      toastr.error("Erreur !", translate(e));
+    }
+  };
+
+  const setTeamate = async (teamate) => {
+    const obj = { team: focusedSession.team };
+    obj.team.push(teamate);
+    return obj;
+  };
+
   if (!center) return <div />;
   return (
     <>
@@ -71,7 +126,7 @@ export default function Index({ ...props }) {
             path="/centre/:id"
             component={() => (
               <>
-                <Team center={center} focusedCohort={focusedCohort} />
+                <Team center={center} focusedSession={focusedSession} deleteTeamate={deleteTeamate} addTeamate={addTeamate} />
               </>
             )}
           />

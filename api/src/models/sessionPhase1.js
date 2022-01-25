@@ -54,6 +54,8 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  chefCentreId: { type: String, description: "Id du chef de centre" },
+
   waitingList: {
     type: [String],
     documentation: {
