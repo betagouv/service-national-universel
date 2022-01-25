@@ -32,9 +32,10 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     if (cc?.length) body.cc = cc;
     body.bcc = bcc;
     if (ENVIRONMENT !== "production") {
-      body.to = body.to.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
-      if (body.cc) body.cc = body.cc.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
-      if (body.bcc) body.bcc = body.bcc.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
+      const regexp = /(selego\.co|beta\.gouv\.fr|fr\.ey\.com)/;
+      body.to = body.to.filter((e) => e.email.match(regexp));
+      if (body.cc) body.cc = body.cc.filter((e) => e.email.match(regexp));
+      if (body.bcc) body.bcc = body.bcc.filter((e) => e.email.match(regexp));
     }
     body.htmlContent = htmlContent;
     body.sender = { name: SENDER_NAME, email: SENDER_EMAIL };
