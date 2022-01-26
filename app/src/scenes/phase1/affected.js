@@ -85,7 +85,7 @@ export default function Affected() {
           <Case />
           <div className="good-article-text">
             <p>Dans ma valise, il y a...</p>
-            <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau-1`} target="_blank" rel="noreferrer">
+            <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`} target="_blank" rel="noreferrer">
               Comment bien <span>préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
             </a>
           </div>
@@ -94,7 +94,7 @@ export default function Affected() {
           <Question />
           <div className="good-article-text">
             <p>Vous avez des questions sur le séjour ?</p>
-            <a href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
+            <a href={`${supportURL}/base-de-connaissance/phase-1-le-sejour-de-cohesion`} target="_blank" rel="noreferrer">
               Consulter notre <span>base&nbsp;de&nbsp;connaissance&nbsp;›</span>
             </a>
           </div>
