@@ -156,7 +156,16 @@ export default function Drawer(props) {
             Mes documents
           </NavLink>
         </li> */}
-            <HelpButton to="/besoin-d-aide" />
+            <HelpButton
+              to={`/besoin-d-aide?from=${window.location.pathname}`}
+              onClick={() => {
+                console.log({ url: window.location });
+                console.log("✍️ ~ window.location.search", window.location.search);
+                const p = decodeURIComponent(window.location.search);
+                console.log(p);
+                // window.plausible?.("Compte/CTA - Aide", { props: { device: navigator?.userAgentData?.mobile ? "mobile" : "desktop", url: window.location.href } });
+              }}
+            />
             {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
             <DrawerButton>
               <DownloadAttestationButton young={young} uri="snu">
