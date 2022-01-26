@@ -1,3 +1,20 @@
+# [1.31.0](https://github.com/betagouv/service-national-universel/compare/v1.30.0...v1.31.0) (2022-01-26)
+
+
+### Bug Fixes
+
+* **admin:** edit young ([94ded8f](https://github.com/betagouv/service-national-universel/commit/94ded8fa71e9c67a22d2ff7207cc50875466a924))
+* **app:** display convocation in browser ([6e5a14e](https://github.com/betagouv/service-national-universel/commit/6e5a14ee450f150e1eae80d6f1e9d7a5353f380a))
+* **app:** links base de connaissance ([327d424](https://github.com/betagouv/service-national-universel/commit/327d424ca9056de5f10f7a042df1c19959bee38f))
+* **app:** url in `affected` scene ([3d53071](https://github.com/betagouv/service-national-universel/commit/3d53071aa5e12e6502c7e17605d0def4acff1805))
+* **app:** wording validation `deplacementPhase1Autonomous` ([1e11599](https://github.com/betagouv/service-national-universel/commit/1e11599b2dfe87efdee4c2e9af9643db12a6c2a1))
+
+
+### Features
+
+* **admin,api:** rules canDeleteReferent by another referent ([#1128](https://github.com/betagouv/service-national-universel/issues/1128)) ([3a13174](https://github.com/betagouv/service-national-universel/commit/3a131742b1242708eeafe234be3c71681d78c108))
+* **app:** display convoc for EVERYBODY ([094cbfd](https://github.com/betagouv/service-national-universel/commit/094cbfdd5399201309a3c63999d9c4c635785618))
+
 # [1.30.0](https://github.com/betagouv/service-national-universel/compare/v1.29.0...v1.30.0) (2022-01-25)
 
 
