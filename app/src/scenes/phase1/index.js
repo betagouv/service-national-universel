@@ -19,7 +19,11 @@ export default () => {
 
   const renderStep = () => {
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) return <Done />;
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) return <Affected />;
+    //masquer pur les PDL en attendant un arbitrage
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) {
+      if (young.region === "Pays de la Loire") return <WaitingAffectation young={young} />;
+      return <Affected />;
+    }
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED && young.cohesion2020Step !== "DONE") return <Cancel />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return <NotDone />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return <WaitingAffectation young={young} />;
