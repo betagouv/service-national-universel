@@ -94,7 +94,7 @@ export default function Affected() {
           <Question />
           <div className="good-article-text">
             <p>Vous avez des questions sur le séjour ?</p>
-            <a href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noreferrer">
+            <a href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
               Consulter notre <span>base&nbsp;de&nbsp;connaissance&nbsp;›</span>
             </a>
           </div>

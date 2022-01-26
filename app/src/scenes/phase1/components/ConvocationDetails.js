@@ -184,7 +184,7 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
             <img src={questionMark} />
             <p className="black-bold">Des questions sur le transport ?</p>
           </div>
-          <a href={`${supportURL}/base-de-connaissance`}>
+          <a href={`${supportURL}/base-de-connaissance/le-transport`} target="_blank" rel="noreferrer">
             Rendez-vous sur notre <span>base&nbsp;de&nbsp;connaissance&nbsp;›</span>
           </a>
         </section>
