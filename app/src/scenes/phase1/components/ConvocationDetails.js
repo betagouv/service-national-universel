@@ -167,7 +167,7 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
                 </div>
                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                   <LoadingButton loading={isLoading} disabled={isLoading} onClick={handleAutonomousClick}>
-                    Valider le consentement&nbsp;
+                    Je confirme venir et rentrer par mes propres moyens&nbsp;
                     <svg width="16" height="12" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M1 7l4 4L15 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
