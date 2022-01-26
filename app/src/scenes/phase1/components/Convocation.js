@@ -30,7 +30,7 @@ export default function Convocation() {
     setMeetingPoint(data);
   };
   const getCenter = async () => {
-    const { data, code, ok } = await api.get(`/cohesion-center/young/${young._id}`);
+    const { data, code, ok } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
     if (!ok) return toastr.error("error", translate(code));
     setCenter(data);
   };
@@ -104,7 +104,7 @@ export default function Convocation() {
         </ConvocText>
         <ConvocText>
           Je suis heureuse de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service national universel,{" "}
-          <b>{translateCohort(young.cohort)}</b>, a été retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
+          <b>du {COHESION_STAY_DATE_STRING[young.cohort]}</b>, a été retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
         </ConvocText>
         {isFromDOMTOM() ? (
           <ConvocText>
