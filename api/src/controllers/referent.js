@@ -715,7 +715,11 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   try {
     const referent = await ReferentModel.findById(req.params.id);
     if (!referent) return res.status(404).send({ ok: false });
-    if (!canDeleteReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    let structure;
+    if (referent.role === ROLES.RESPONSIBLE) {
+      structure = await StructureModel.findById(referent.structureId);
+    }
+    if (!canDeleteReferent({ actor: req.user, originalTarget: referent, structure })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });

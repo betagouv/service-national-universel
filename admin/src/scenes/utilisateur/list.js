@@ -209,7 +209,7 @@ const Hit = ({ hit, onClick, user, selected, structure }) => {
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
       {displayActionButton ? (
         <td onClick={(e) => e.stopPropagation()}>
-          <Action hit={hit} />
+          <Action hit={hit} structure={structure} />
         </td>
       ) : (
         <td />
@@ -218,7 +218,7 @@ const Hit = ({ hit, onClick, user, selected, structure }) => {
   );
 };
 
-const Action = ({ hit }) => {
+const Action = ({ hit, structure }) => {
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -274,7 +274,7 @@ const Action = ({ hit }) => {
                 Prendre sa place
               </DropdownItem>
             ) : null}
-            {canDeleteReferent(user, hit) ? (
+            {canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? (
               <DropdownItem className="dropdown-item" onClick={onClickDelete}>
                 Supprimer le profil
               </DropdownItem>

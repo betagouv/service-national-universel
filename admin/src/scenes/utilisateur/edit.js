@@ -22,6 +22,7 @@ import {
   REFERENT_DEPARTMENT_SUBROLE,
   REFERENT_REGION_SUBROLE,
   colors,
+  canUpdateReferent,
   canDeleteReferent,
 } from "../../utils";
 import api from "../../services/api";
@@ -103,20 +104,6 @@ export default function Edit(props) {
       setLoadingChangeStructure(false);
       return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.error?.message);
     }
-  }
-
-  function canModify(user, value) {
-    if (user.role === ROLES.ADMIN) return true;
-    // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-    if (user.role === ROLES.REFERENT_REGION) {
-      if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(value.role) && user.region === value.region) return true;
-      return false;
-    }
-    if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      if (user.role === value.role && user.department === value.department) return true;
-      return false;
-    }
-    return false;
   }
 
   const handleImpersonate = async () => {
@@ -217,7 +204,7 @@ export default function Edit(props) {
                   </BoxContent>
                 </Box>
               </Col>
-              {canModify(currentUser, values) && (
+              {canUpdateReferent({ actor: currentUser, originalTarget: values }) && (
                 <Col md={6} style={{ marginBottom: "20px" }}>
                   <Box>
                     <BoxHeadTitle>Information</BoxHeadTitle>
@@ -325,8 +312,10 @@ export default function Edit(props) {
           <HistoricComponent model="referent" value={user} />
         </Box>
       ) : null}
-      {canDeleteReferent(currentUser, user) ? <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn> : null}
-      {canModify(currentUser, user) && user.role === ROLES.REFERENT_DEPARTMENT && (
+      {canDeleteReferent({ actor: currentUser, originalTarget: user }) ? (
+        <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn>
+      ) : null}
+      {canUpdateReferent({ actor: currentUser, originalTarget: user }) && user.role === ROLES.REFERENT_DEPARTMENT && (
         <>
           <Formik
             initialValues={service || { department: user.department }}
