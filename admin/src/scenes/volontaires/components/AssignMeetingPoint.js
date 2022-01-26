@@ -16,7 +16,7 @@ export default function AssignMeetingPoint({ young, onAffect, onClick }) {
   const getDefaultQuery = () => ({
     query: {
       bool: {
-        filter: [{ term: { "centerId.keyword": young.cohesionCenterId } }, { term: { "departureDepartment.keyword": young.department } }],
+        filter: [{ term: { "cohort.keyword": young.cohort } }, { term: { "departureDepartment.keyword": young.department } }],
       },
     },
   });
