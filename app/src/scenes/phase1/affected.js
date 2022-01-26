@@ -18,7 +18,7 @@ export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
-  const [showInfoMessage, setShowInfoMessage] = useState(true);
+  const [showInfoMessage, setShowInfoMessage] = useState(false);
 
   const getMeetingPoint = async () => {
     const { data, ok } = await api.get(`/young/${young._id}/meeting-point`);
