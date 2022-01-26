@@ -19,13 +19,7 @@ export default () => {
 
   const renderStep = () => {
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) return <Done />;
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) {
-      //dirty hack to see if its ok
-      if (young.department === "Ariège") {
-        return <Affected />;
-      }
-      return <WaitingAffectation young={young} />;
-    }
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) return <Affected />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED && young.cohesion2020Step !== "DONE") return <Cancel />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return <NotDone />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return <WaitingAffectation young={young} />;

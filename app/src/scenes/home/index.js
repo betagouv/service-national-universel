@@ -36,7 +36,7 @@ export default () => {
           <Refused />
         </>
       );
-    if (["2022", "Juillet 2022", "Juin 2022", "Février 2022"].includes(young.cohort)) {
+    if (["2022", "Juillet 2022", "Juin 2022"].includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
