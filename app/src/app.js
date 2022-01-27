@@ -44,6 +44,7 @@ import "./index.css";
 import { YOUNG_STATUS, ENABLE_PM } from "./utils";
 import Zammad from "./components/Zammad";
 import GoogleTags from "./components/GoogleTags";
+import { toastr } from "react-redux-toastr";
 
 if (environment === "production") {
   Sentry.init({
@@ -110,12 +111,6 @@ const Espace = () => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const young = useSelector((state) => state.Auth.young);
-  if (!young) {
-    const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
-    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/inscription" }} />;
-  }
-  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status)) return <Redirect to="/inscription/coordonnees" />;
-
   useEffect(() => {
     if (young && young.acceptCGU !== "true") {
       setModal({
@@ -131,12 +126,20 @@ const Espace = () => {
         ),
         onConfirm: async () => {
           // todo add field in young model
-          await api.put(`/young`, { acceptCGU: "true" });
+          const { ok, code } = await api.put(`/young`, { acceptCGU: "true" });
+          if (!ok) return toastr.error(`Une erreur est survenue : ${code}`);
+          return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
         },
         confirmText: "J'accepte les conditions générales d'utilisation",
       });
     }
   }, [young]);
+
+  if (!young) {
+    const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
+    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/inscription" }} />;
+  }
+  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status)) return <Redirect to="/inscription/coordonnees" />;
 
   return (
     <>
