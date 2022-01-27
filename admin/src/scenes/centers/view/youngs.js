@@ -5,6 +5,8 @@ import { apiURL } from "../../../config";
 import SelectStatus from "../../../components/selectStatus";
 import api from "../../../services/api";
 import Panel from "../../volontaires/panel";
+import Chevron from "../../../components/Chevron";
+import { RegionFilter, DepartmentFilter } from "../../../components/filters";
 
 import {
   getFilterLabel,
@@ -28,6 +30,7 @@ import ReactiveListComponent from "../../../components/ReactiveListComponent";
 export default function Youngs({ center, updateCenter, focusedCohort, focusedSession }) {
   const [young, setYoung] = useState();
   const [meetingPoints, setMeetingPoints] = useState(null);
+  const [filterVisible, setFilterVisible] = useState(false);
 
   const getDefaultQuery = () => ({
     query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { term: { "cohort.keyword": focusedCohort } }] } },
@@ -238,6 +241,11 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
                     />
+                    <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={() => setFilterVisible((e) => !e)} />
+                  </FilterRow>
+                  <FilterRow visible={filterVisible}>
+                    <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                    <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                   </FilterRow>
                 </Filter>
                 <ResultTable style={{ borderRadius: "8px", boxShadow: "0px 3px 2px #edf2f7" }}>
