@@ -60,6 +60,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                 department: "",
                 cohesionCenterName: "",
                 cohesionCenterId: "",
+                sessionPhase1Id: "",
               }}
               onSubmit={async (values, { setSubmitting }) => {
                 try {
@@ -67,7 +68,13 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                   if (obj.role === ROLES.REFERENT_DEPARTMENT) obj.region = department2region[obj.department];
                   if (obj.role === ROLES.REFERENT_REGION) obj.department = null;
                   if (obj.department && !obj.region) obj.region = department2region[obj.department];
-                  await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
+                  const { data: referent } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
+
+                  if (values.sessionPhase1Id) {
+                    const { data: sessionPhase1 } = await api.get(`/cohesion-center/${values.cohesionCenterId}/cohort/${values.sessionPhase1Id}/session-phase1`);
+                    await api.put(`/session-phase1/${sessionPhase1._id}`, { headCenterId: referent._id });
+                    // TODO: Comment on gère si il y a eu un problème lorsque l'on met à jour la session et que cela fail ? @tangimds
+                  }
                   toastr.success("Invitation envoyée");
                   setOpen();
                   setOpen(false);
@@ -160,6 +167,11 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       <Col md={6}>
                         <FormGroup>
                           <ChooseCenter validate={(v) => !v} value={values} onChange={handleChange} centers={centers} />
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <ChooseSessionPhase1 value={values} onChange={handleChange} />
                         </FormGroup>
                       </Col>
                     </Row>
@@ -266,6 +278,30 @@ const ChooseCenter = ({ onChange, centers, onSelect }) => {
         onChange({ target: { value: e._id, name: "cohesionCenterId" } });
         onChange({ target: { value: e.value, name: "cohesionCenterName" } });
         onSelect?.(e);
+      }}
+    />
+  );
+};
+
+const ChooseSessionPhase1 = ({ onChange, value }) => {
+  const [sessions, setSessions] = useState([]);
+  useEffect(() => {
+    if (!value.cohesionCenterId) return;
+
+    (async () => {
+      const { ok, error, data } = await api.get(`/cohesion-center/${value.cohesionCenterId}`);
+      if (!ok) return toastr.error("Erreur", error);
+      setSessions(data.cohorts.map((e) => ({ label: e, value: e })));
+    })();
+  }, [value.cohesionCenterId]);
+
+  return (
+    <ReactSelect
+      options={sessions}
+      placeholder="Choisir une session"
+      noOptionsMessage={() => "Aucune session ne correspond à cette recherche."}
+      onChange={(e) => {
+        onChange({ target: { value: e.value, name: "sessionPhase1Id" } });
       }}
     />
   );
