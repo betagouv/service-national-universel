@@ -36,8 +36,7 @@ export default () => {
           <Refused />
         </>
       );
-    //masquer pur les PDL en attendant un arbitrage
-    if (["2022", "Juillet 2022", "Juin 2022"].includes(young.cohort) || (young.region === "Pays de la Loire" && young.cohort === "Février 2022")) {
+    if (["2022", "Juillet 2022", "Juin 2022"].includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
