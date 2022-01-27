@@ -254,17 +254,6 @@ export default function StepProfilOnline() {
   );
 }
 
-const EyeIcon = styled.img`
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  height: 18px;
-  opacity: 0.7;
-  transform: translateY(-50%);
-  font-size: 18px;
-  cursor: pointer;
-`;
-
 const Wrapper = styled.div`
   padding: 40px;
   @media (max-width: 768px) {
@@ -292,12 +281,6 @@ const Heading = styled.div`
 const Label = styled.div`
   color: #374151;
   margin-bottom: 10px;
-`;
-
-const TextUnderField = styled.div`
-  font-size: 12px;
-  color: #666;
-  margin-top: 4px;
 `;
 
 const FieldWithWidth = styled(Field)`
