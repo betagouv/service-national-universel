@@ -61,7 +61,7 @@ export default function Index({ ...props }) {
       const { ok, data } = r;
       if (!ok) toastr.error("Oups, une erreur est survenue lors de la suppression du membre", translate(data.code));
       setFocusedSession(data);
-      toastr.success("Succès", "Le membre a été supprimé à l'équipe");
+      toastr.success("Succès", "Le membre a été supprimé de l'équipe");
     } catch (e) {
       console.log(e);
       toastr.error("Erreur !", translate(e.code));

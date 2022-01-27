@@ -53,9 +53,6 @@ const Schema = new mongoose.Schema({
       description: "equipe d'encadrement pour le séjour",
     },
   },
-
-  chefCentreId: { type: String, description: "Id du chef de centre" },
-
   waitingList: {
     type: [String],
     documentation: {

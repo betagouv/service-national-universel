@@ -10,7 +10,7 @@ import { Box } from "../../../components/box";
 import api from "../../../services/api";
 import BinSVG from "../../../assets/bin.svg";
 
-export default function Team({ center, focusedSession, deleteTeamate, addTeamate }) {
+export default function Team({ focusedSession, deleteTeamate, addTeamate }) {
   if (focusedSession?.length <= 0 || !focusedSession?.headCenterId) {
     return (
       <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -71,7 +71,7 @@ const TeamBlock = ({ team, deleteTeamate }) => {
     <div style={{ padding: "2rem" }}>
       <h3>Équipe ({team.length || 0})</h3>
       {team.map((user, index) => (
-        <FlexBox style={{ justifyContent: "space-between", marginBlock: "0.25rem" }}>
+        <FlexBox key={index} style={{ justifyContent: "space-between", marginBlock: "0.25rem" }}>
           <FlexBox>
             <Badge>
               <p style={{ margin: 0, fontSize: "1rem", color: "#372F78", fontWeight: "bold" }}>
