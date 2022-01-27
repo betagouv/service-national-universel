@@ -6,6 +6,7 @@ import { Field } from "formik";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import api from "../../../services/api";
 import countries from "i18n-iso-countries";
+import { departmentLookUp } from "../../../utils";
 
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
@@ -36,6 +37,7 @@ export default function EtablissmentInput({ handleChange, values, keys, errors, 
             setFieldValue(keys.schoolName, "");
             setFieldValue(keys.schoolCity, "");
             setFieldValue(keys.schoolId, "");
+            setFieldValue(keys.schoolDepartment, "");
           }}>
           {Object.values(countriesList)
             .sort((a, b) => a.localeCompare(b))
@@ -53,8 +55,9 @@ export default function EtablissmentInput({ handleChange, values, keys, errors, 
             <Label>Ville de l&apos;établissement</Label>
             <SchoolCityTypeahead
               initialValue={values[keys.schoolCity] || ""}
-              onChange={(text) => {
-                setFieldValue(keys.schoolCity, text);
+              onChange={({ name, department }) => {
+                setFieldValue(keys.schoolCity, name);
+                setFieldValue(keys.schoolDepartment, department);
                 setFieldValue(keys.schoolName, "");
                 setFieldValue(keys.schoolId, "");
               }}
@@ -155,7 +158,9 @@ function SchoolCityTypeahead({ onChange, initialValue }) {
           value,
           onChange: (event, { newValue }) => {
             setValue(newValue);
-            onChange(newValue);
+            const departmentCode = suggestions.find((e) => e.nom === newValue)?.departement?.code;
+            const department = departmentLookUp[departmentCode] || "";
+            onChange({ name: newValue, department });
           },
           className: "form-control",
         }}

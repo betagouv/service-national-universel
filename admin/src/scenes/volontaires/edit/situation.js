@@ -22,6 +22,7 @@ export default function Situation({ values, handleChange, required = {}, errors,
               schoolId: "schoolId",
               schoolCountry: "schoolCountry",
               schoolCity: "schoolCity",
+              schoolDepartment: "schoolDepartment",
             }}
           />
         </BoxContent>
