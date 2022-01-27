@@ -39,7 +39,7 @@ const ChefCenterBlock = ({ headCenterId }) => {
   }, []);
 
   return (
-    <div style={{ padding: "2rem", paddingBottom: "0" }}>
+    <div style={{ padding: "3rem 3rem 0 3rem" }}>
       <h4 style={{ marginBottom: 0 }}>Chef de centre</h4>
       <a onClick={() => history.push(`/user/${headCenterId}`)} style={{ cursor: "pointer", color: "#5245CC" }}>
         {chefCenter?.firstName} {chefCenter?.lastName}&nbsp;›
