@@ -267,7 +267,14 @@ const Schema = new mongoose.Schema({
       description: "Date limite de validité du token d'invitation",
     },
   },
-
+  acceptCGU: {
+    type: String,
+    enum: ["true", "false", ""],
+    default: "",
+    documentation: {
+      description: "Le volontaire a accepté les CGU",
+    },
+  },
   cniFiles: {
     type: [String],
     default: [],

@@ -13,6 +13,7 @@ function getNewYoungFixture() {
     gender: faker.name.gender(),
     birthdateAt: faker.date.past().toISOString(),
     cohort: "2019",
+    acceptCGU: "true",
     phase: "CONTINUE",
     status: "REFUSED",
     statusPhase1: "AFFECTED",
