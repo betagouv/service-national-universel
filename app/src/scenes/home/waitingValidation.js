@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { HeroContainer, Hero, Content, Alert, WhiteButton } from "../../components/Content";
-import { YOUNG_STATUS, inscriptionCreationAndModificationOpenForYoungs } from "../../utils";
+import { YOUNG_STATUS, inscriptionCreationAndModificationOpenForYoungs, translate } from "../../utils";
 import styled from "styled-components";
+import plausibleEvent from "../../services/plausible";
 
 export default function WaitingValidation() {
   const young = useSelector((state) => state.Auth.young);
@@ -45,7 +46,9 @@ export default function WaitingValidation() {
             </>
           ) : null}
           <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: "2rem" }}>
-            <a href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f">
+            <a
+              href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
+              onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}>
               <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
             </a>
           </div>

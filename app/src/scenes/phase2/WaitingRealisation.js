@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { HeroContainer, Hero, Content } from "../../components/Content";
 import api from "../../services/api";
 import { ENABLE_PM } from "../../utils";
+import plausibleEvent from "../../services/plausible";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);

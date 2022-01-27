@@ -10,6 +10,7 @@ import SubMenuPhase2 from "./SubMenuPhase2";
 import SubMenuPhase3 from "./SubMenuPhase3";
 import { environment } from "../../config";
 import HelpButton from "../buttons/HelpButton";
+import plausibleEvent from "../../services/plausible";
 
 export default function Drawer(props) {
   const [open, setOpen] = useState();
@@ -159,11 +160,9 @@ export default function Drawer(props) {
             <HelpButton
               to={`/besoin-d-aide?from=${window.location.pathname}`}
               onClick={() => {
-                console.log({ url: window.location });
-                console.log("✍️ ~ window.location.search", window.location.search);
-                const p = decodeURIComponent(window.location.search);
-                console.log(p);
-                // window.plausible?.("Compte/CTA - Aide", { props: { device: navigator?.userAgentData?.mobile ? "mobile" : "desktop", url: window.location.href } });
+                // const p = decodeURIComponent(window.location.search);
+                // console.log(p.split("?from="));
+                plausibleEvent("Compte/CTA - Aide", { url: decodeURIComponent(window.location.search).split("?from=")[1] });
               }}
             />
             {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (

@@ -14,6 +14,7 @@ import TransportCard from "./transportCard";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
 import { translate, MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "../../utils";
 import { HeroContainer, Hero, Content } from "../../components/Content";
+import plausibleEvent from "../../services/plausible";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
@@ -40,6 +41,7 @@ export default function Index() {
         onSubmit={async (values) => {
           try {
             console.log(values);
+            plausibleEvent("Phase2/CTA préférences missions - Enregistrer préférences");
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
             if (young) {

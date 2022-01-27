@@ -10,6 +10,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { MISSION_DOMAINS, translate, YOUNG_STATUS_PHASE3 } from "../../../utils";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
 
 export default function WaitingRealisation() {
   const history = useHistory();
@@ -211,6 +212,7 @@ export default function WaitingRealisation() {
             <h2>Un e-mail sera envoyé au tuteur pour valider votre mission.</h2>
             <ContinueButton
               onClick={() => {
+                plausibleEvent("Phase3/CTA - Valider la phase 3");
                 handleSubmit();
               }}>
               Faire valider ma phase 3

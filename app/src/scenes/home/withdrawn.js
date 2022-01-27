@@ -2,6 +2,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { HeroContainer, Hero, Content, Separator, VioletButton } from "../../components/Content";
+import { translate } from "../../utils";
+import plausibleEvent from "../../services/plausible";
 
 export default function Withdrawn() {
   const young = useSelector((state) => state.Auth.young);
@@ -20,7 +22,7 @@ export default function Withdrawn() {
             Les équipes du Service National Universel
           </p>
           <Separator />
-          <Link to="/les-programmes">
+          <Link to="/les-programmes" onClick={() => plausibleEvent("CTA désisté - Autres possibilités d'engagement", { statut: translate(young.status) })}>
             <VioletButton>Consulter les autres possibilités d&apos;engagement</VioletButton>
           </Link>
         </Content>

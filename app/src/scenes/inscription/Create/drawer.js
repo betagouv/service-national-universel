@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { STEPS } from "../utils";
 import HelpButton from "../../../components/buttons/HelpButton";
 import { YOUNG_STATUS } from "../../../utils";
+import plausibleEvent from "../../../services/plausible";
 
 export default function InscriptionDrawer({ step }) {
   const history = useHistory();
@@ -75,10 +76,10 @@ export default function InscriptionDrawer({ step }) {
         </li>
       </MainNav>
       <HelpButton
-        onClick={() =>
-          window.plausible?.("Funnel Inscription/CTA - Aide", { props: { device: navigator?.userAgentData?.mobile ? "mobile" : "desktop", url: window.location.href } })
-        }
-        to="/public-besoin-d-aide"
+        to={`/public-besoin-d-aide?from=${window.location.pathname}`}
+        onClick={() => {
+          plausibleEvent("Funnel Inscription/CTA - Aide", { url: decodeURIComponent(window.location.search).split("?from=")[1] });
+        }}
       />
       {young &&
       [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) ? (

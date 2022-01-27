@@ -7,6 +7,7 @@ import MailAttestationButton from "../../components/buttons/MailAttestationButto
 
 import { HeroContainer, Hero } from "../../components/Content";
 import { supportURL } from "../../config";
+import plausibleEvent from "../../services/plausible";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -29,7 +30,12 @@ export default function Done() {
                 <DownloadAttestationButton young={young} uri="1">
                   Télécharger mon attestation &gt;
                 </DownloadAttestationButton>
-                <MailAttestationButton young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
+                <MailAttestationButton
+                  young={young}
+                  type="1"
+                  template="certificate"
+                  placeholder="Attestation de réalisation de la phase 1"
+                  onClick={() => plausibleEvent("Phase1/CTA - Envoi par mail de l'attestation réussite")}>
                   Envoyer l&apos;attestation de réalisation par mail &gt;
                 </MailAttestationButton>
               </p>
