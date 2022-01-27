@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import api from "../../services/api";
 import { translate, formatStringDate } from "../../utils";
+import plausibleEvent from "../../services/plausible";
 
 export default function Index() {
   const [diagorienteUrl, setDiagorienteUrl] = useState();
@@ -67,9 +68,9 @@ export default function Index() {
           <div className="content">
             <img src={require("../../assets/logo-diagoriente-blue.png")} />
             <h1>Identifiez vos compétences et explorez vos intérêts</h1>
-            <p>Complètez vos expériences, qu&apos;elles soient professionnelles ou personnelles, puis évaluez vos compétences.</p>
+            <p>Complétez vos expériences, qu&apos;elles soient professionnelles ou personnelles, puis évaluez vos compétences.</p>
 
-            <VioletButton href={diagorienteUrl} target="_blank">
+            <VioletButton href={diagorienteUrl} target="_blank" onClick={() => plausibleEvent("Compte/CTA - Accéder Diagoriente")}>
               Accéder à Diagoriente
             </VioletButton>
           </div>
