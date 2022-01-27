@@ -7,18 +7,18 @@ import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
-import DateInput from "../components/dateInput";
+import DateInput from "../../components/dateInput";
 import * as Sentry from "@sentry/react";
 
-import { getPasswordErrorMessage, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
-import ErrorMessage, { requiredMessage } from "../components/errorMessage";
-import { setYoung } from "../../../redux/auth/actions";
-import FormRow from "../../../components/form/FormRow";
-import api from "../../../services/api";
-import EyeOpen from "../../../assets/eye.svg";
-import EyeClose from "../../../assets/eye-slash.svg";
-import FormFooter from "../../../components/form/FormFooter";
-import { appURL, supportURL } from "../../../config";
+import { getPasswordErrorMessage, translate, SENDINBLUE_TEMPLATES } from "../../../../utils";
+import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
+import { setYoung } from "../../../../redux/auth/actions";
+import FormRow from "../../../../components/form/FormRow";
+import api from "../../../../services/api";
+import EyeOpen from "../../../../assets/eye.svg";
+import EyeClose from "../../../../assets/eye-slash.svg";
+import FormFooter from "../../../../components/form/FormFooter";
+import { appURL, supportURL } from "../../../../config";
 
 export default function StepProfil() {
   const [passwordText, setPasswordText] = useState(false);
