@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import plausibleEvent from "../services/plausible";
 
 export default function Note({ title, titleColor, text, textColor, link, textLink, linkColor, backgroundColor, icon, linkInText, sessions, ...rest }) {
   return (
@@ -23,12 +24,7 @@ export default function Note({ title, titleColor, text, textColor, link, textLin
           </p>
         ) : null}
         {link && !linkInText ? (
-          <a
-            onClick={() => window.plausible?.("LP/module éligibilité - Commencer inscription", { props: { device: navigator?.userAgentData?.mobile ? "mobile" : "desktop" } })}
-            href={link}
-            className="link"
-            target="_blank"
-            rel="noreferrer">
+          <a onClick={() => plausibleEvent("LP/module éligibilité - Commencer inscription")} href={link} className="link" target="_blank" rel="noreferrer">
             {textLink}
           </a>
         ) : null}

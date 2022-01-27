@@ -6,6 +6,7 @@ import conditions from "./conditions";
 import informations from "./informations";
 import EligibilityModal from "../components/eligibilityModal";
 import { supportURL } from "../../../config";
+import plausibleEvent from "../../../services/plausible";
 
 export default function MobileView() {
   return (
@@ -123,7 +124,7 @@ export default function MobileView() {
           </div>
         </li>
         <li style={{ padding: 0 }}>
-          <FAQ onClick={() => window.plausible?.("LP - Aide", { props: { device: "mobile" } })} href={`${supportURL}/base-de-connaissance/questions-frequentes-1`} target="blank">
+          <FAQ onClick={() => plausibleEvent("LP - Aide")} href={`${supportURL}/base-de-connaissance/questions-frequentes-1`} target="blank">
             <p>Toutes les réponses à vos questions</p>
             <svg width="6" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path

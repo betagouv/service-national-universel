@@ -10,6 +10,7 @@ import SubMenuPhase2 from "./SubMenuPhase2";
 import SubMenuPhase3 from "./SubMenuPhase3";
 import { environment } from "../../config";
 import HelpButton from "../buttons/HelpButton";
+import plausibleEvent from "../../services/plausible";
 
 export default function Drawer(props) {
   const [open, setOpen] = useState();
@@ -156,7 +157,12 @@ export default function Drawer(props) {
             Mes documents
           </NavLink>
         </li> */}
-            <HelpButton to="/besoin-d-aide" />
+            <HelpButton
+              to={`/besoin-d-aide?from=${window.location.pathname}`}
+              onClick={() => {
+                plausibleEvent("Compte/CTA - Aide", { url: decodeURIComponent(window.location.search).split("?from=")[1] });
+              }}
+            />
             {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
             <DrawerButton>
               <DownloadAttestationButton young={young} uri="snu">

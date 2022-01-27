@@ -7,17 +7,10 @@ import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a lo
 import { Carousel } from "react-responsive-carousel";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
+import plausibleEvent from "../../../services/plausible";
 
 export default function Home({ location }) {
   const history = useHistory();
-
-  const registerEventPlausibleMobile = (e) => {
-    window.plausible?.(e, { props: { device: "mobile" } });
-  };
-
-  const registerEventPlausibleDesktop = (e) => {
-    window.plausible?.(e, { props: { device: "desktop" } });
-  };
 
   return (
     <div>
@@ -26,7 +19,7 @@ export default function Home({ location }) {
         <TitleContainer>
           <TopTitle className="mobileOnly">inscription 2022</TopTitle>
           <Title>Participez au SNU</Title>
-          <PlayButton onClick={() => window.plausible?.("LP - Video")} href="https://www.youtube.com/watch?v=rE-8fe9xPDo" target="_blank">
+          <PlayButton onClick={() => plausibleEvent("LP - Video")} href="https://www.youtube.com/watch?v=rE-8fe9xPDo" target="_blank">
             <svg width="20" height="26" viewBox="0 0 20 26" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M19.1346 11.0998L3.79966 0.640236C2.49183 -0.253291 0.722412 0.719077 0.722412 2.32217V23.2149C0.722412 24.8443 2.49183 25.7904 3.79966 24.8969L19.1346 14.4373C20.2886 13.6752 20.2886 11.8882 19.1346 11.0998Z"
@@ -39,21 +32,21 @@ export default function Home({ location }) {
           <CardTitle>Une aventure en trois phases</CardTitle>
           <div className="desktop">
             <CardPhase
-              onClick={() => registerEventPlausibleDesktop("LP - Phase 1")}
+              onClick={() => plausibleEvent("LP - Phase 1")}
               upText="phase 1"
               title="Le séjour de cohésion"
               downText="3 sessions possibles en février, juin et juillet 2022"
               to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
             />
             <CardPhase
-              onClick={() => registerEventPlausibleDesktop("LP - Phase 2")}
+              onClick={() => plausibleEvent("LP - Phase 2")}
               upText="phase 2"
               title="La mission d'intérêt général"
               downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
               to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
             />
             <CardPhase
-              onClick={() => registerEventPlausibleDesktop("LP - Phase 3")}
+              onClick={() => plausibleEvent("LP - Phase 3")}
               upText="phase 3 - facultative"
               title="L'engagement"
               downText="Mission facultative de 3 mois minimum"
@@ -62,21 +55,21 @@ export default function Home({ location }) {
           </div>
           <Carousel className="mobile" showThumbs={false} showStatus={false} showArrows={true}>
             <CardPhase
-              onClick={() => registerEventPlausibleMobile("LP - Phase 1")}
+              onClick={() => plausibleEvent("LP - Phase 1")}
               upText="phase 1"
               title="Le séjour de cohésion"
               downText="3 sessions possibles en février, juin et juillet 2022"
               to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
             />
             <CardPhase
-              onClick={() => registerEventPlausibleMobile("LP - Phase 2")}
+              onClick={() => plausibleEvent("LP - Phase 2")}
               upText="phase 2"
               title="La mission d'intérêt général"
               downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
               to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
             />
             <CardPhase
-              onClick={() => registerEventPlausibleMobile("LP - Phase 3")}
+              onClick={() => plausibleEvent("LP - Phase 3")}
               upText="phase 3 - facultative"
               title="L'engagement"
               downText="Mission facultative de 3 mois minimum"
@@ -87,7 +80,7 @@ export default function Home({ location }) {
             <StartButton
               onClick={() => {
                 history.push("/inscription/profil");
-                registerEventPlausibleDesktop("LP CTA - Inscription");
+                plausibleEvent("LP CTA - Inscription");
               }}>
               Commencer&nbsp;l&apos;inscription
             </StartButton>
@@ -100,7 +93,7 @@ export default function Home({ location }) {
         <StartButton
           onClick={() => {
             history.push("/inscription/profil");
-            registerEventPlausibleMobile("LP CTA - Inscription");
+            plausibleEvent("LP CTA - Inscription");
           }}>
           Commencer&nbsp;l&apos;inscription
         </StartButton>

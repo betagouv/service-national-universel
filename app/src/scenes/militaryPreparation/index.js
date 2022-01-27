@@ -14,6 +14,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import AlertBox from "../../components/AlertBox";
 import Loader from "../../components/Loader";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import plausibleEvent from "../../services/plausible";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
@@ -48,6 +49,7 @@ export default function Index() {
   if (!applicationsToMilitaryPreparation) return <Loader />;
 
   const onClickSubmit = (values, actions) => {
+    plausibleEvent("Phase2/CTA PM - Demande validation dossier");
     return setModal({
       isOpen: true,
       onConfirm: () => onSubmit(values),

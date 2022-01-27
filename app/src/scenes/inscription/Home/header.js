@@ -5,6 +5,7 @@ import { colors } from "../../../utils";
 import { useSelector, useDispatch } from "react-redux";
 import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
+import plausibleEvent from "../../../services/plausible";
 
 export default function HeaderComponent({ location }) {
   const dispatch = useDispatch();
@@ -35,7 +36,7 @@ export default function HeaderComponent({ location }) {
             Se deconnecter
           </AvatarText>
         ) : (
-          <AvatarText onClick={() => window.plausible?.("LP CTA - Connexion")} to={{ pathname: "/auth/login", search: location?.search }}>
+          <AvatarText onClick={() => plausibleEvent("LP CTA - Connexion")} to={{ pathname: "/auth/login", search: location?.search }}>
             Se connecter
           </AvatarText>
         )}

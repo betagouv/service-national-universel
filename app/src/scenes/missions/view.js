@@ -12,6 +12,7 @@ import ApplyDoneModal from "./components/ApplyDoneModal";
 import Loader from "../../components/Loader";
 import Badge from "../../components/Badge";
 import DomainThumb from "../../components/DomainThumb";
+import plausibleEvent from "../../services/plausible";
 
 export default function View(props) {
   const [mission, setMission] = useState();
@@ -123,7 +124,13 @@ const ApplyButton = ({ applied, placesLeft, setModal }) => {
     </>
   ) : (
     <>
-      <Button onClick={() => setModal("APPLY")}>Candidater</Button>
+      <Button
+        onClick={() => {
+          setModal("APPLY");
+          plausibleEvent("Phase2/CTA missions - Candidater");
+        }}>
+        Candidater
+      </Button>
       <p className="button-subtitle">{`${placesLeft} volontaire${placesLeft > 1 ? "s" : ""} recherché${placesLeft > 1 ? "s" : ""}`}</p>
     </>
   );
