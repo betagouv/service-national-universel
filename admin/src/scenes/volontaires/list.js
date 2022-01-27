@@ -59,6 +59,7 @@ export default function VolontaireList() {
 
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
+  const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
 
@@ -78,6 +79,10 @@ export default function VolontaireList() {
     (async () => {
       const { data } = await api.get("/meeting-point/all");
       setMeetingPoints(data);
+    })();
+    (async () => {
+      const { data } = await api.get("/session-phase1/");
+      setSessionsPhase1(data);
     })();
   }, []);
   const getDefaultQuery = () => ({
@@ -116,8 +121,8 @@ export default function VolontaireList() {
                     }
                     return all.map((data) => {
                       let center = {};
-                      if (data.cohesionCenterId && centers) {
-                        center = centers.find((c) => c._id === data.cohesionCenterId);
+                      if (data.sessionPhase1Id && centers && sessionsPhase1) {
+                        center = centers.find((c) => sessionsPhase1.find((sessionPhase1) => sessionPhase1._id === data.sessionPhase1Id)?.cohesionCenterId === c._id);
                         if (!center) center = {};
                       }
                       let meetingPoint = {};
@@ -241,9 +246,10 @@ export default function VolontaireList() {
                         "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
                         "Message de desistement": data.withdrawnMessage,
                         "ID centre": center._id || "",
-                        "Code centre": center.code || "",
+                        "Code centre (2021)": center.code || "",
+                        "Code centre (2022)": center.code2022 || "",
                         "Nom du centre": center.name || "",
-                        "Ville du centre": data.cohesionCenterCity || "",
+                        "Ville du centre": center.city || "",
                         "Département du centre": center.department || "",
                         "Région du centre": center.region || "",
                         "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
@@ -252,9 +258,6 @@ export default function VolontaireList() {
                         "Adresse point de rassemblement": meetingPoint?.departureAddress,
                         "Date aller": meetingPoint?.departureAtString,
                         "Date retour": meetingPoint?.returnAtString,
-                        sessionPhase1IdTmp: data?.sessionPhase1IdTmp,
-                        codeCenterTmp: data?.codeCenterTmp,
-                        busTmp: data?.busTmp,
                       };
                     });
                   }}
