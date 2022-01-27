@@ -8,6 +8,7 @@ import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import DateInput from "../../components/dateInput";
 import * as Sentry from "@sentry/react";
+import validator from "validator";
 
 import { translate } from "../../../../utils";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
@@ -49,7 +50,7 @@ export default function StepProfilOnline() {
           try {
             const newValues = { ...values };
             const { ok: okPut, code: codePut, data } = await api.put("/young", newValues);
-            if (!okPut || !data?._id) return toastr.error("Une erreur s'est produite :", codePut);
+            if (!okPut || !data?._id) return toastr.error("Une erreur s'est produite :", translate(codePut));
             dispatch(setYoung(data));
             history.push("/inscription/coordonnees");
           } catch (e) {
@@ -109,6 +110,43 @@ export default function StepProfilOnline() {
                     onChange={handleChange}
                   />
                   <ErrorMessage errors={errors} touched={touched} name="lastName" />
+                </Col>
+              </FormRow>
+              <FormRow align="center">
+                <Col md={4}>
+                  <Label>Votre e-mail</Label>
+                </Col>
+                <Col md={8}>
+                  <FieldWithWidth
+                    maxWidth="400px"
+                    placeholder="xxx@exemple.com"
+                    className="form-control"
+                    validate={(v) => {
+                      return (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format");
+                    }}
+                    type="email"
+                    name="email"
+                    value={values.email}
+                    onChange={handleChange}
+                  />
+                  <ErrorMessage errors={errors} touched={touched} name="email" />
+                  <TextUnderField style={{ marginBottom: "15px" }}>Cette adresse vous servira d&apos;identifiant de connexion, notez le bien.</TextUnderField>
+                </Col>
+                <Col md={4}>
+                  <Label>Confirmez votre email</Label>
+                </Col>
+                <Col md={8}>
+                  <FieldWithWidth
+                    maxWidth="400px"
+                    placeholder="xxx@exemple.com"
+                    className="form-control"
+                    validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
+                    type="email"
+                    name="newEmail"
+                    value={values.newEmail}
+                    onChange={handleChange}
+                  />
+                  <ErrorMessage errors={errors} touched={touched} name="newEmail" />
                 </Col>
               </FormRow>
               <FormRow align="center">
@@ -307,4 +345,10 @@ const RadioLabel = styled.label`
     min-width: 15px;
     min-height: 15px;
   }
+`;
+
+const TextUnderField = styled.div`
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
 `;
