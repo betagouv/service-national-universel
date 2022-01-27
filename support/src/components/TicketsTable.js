@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import API from "../services/api";
 
@@ -36,42 +36,109 @@ const initColumns = [
 const TicketsTable = () => {
   const { data } = useSWR(API.getUrl({ path: "/support-center/ticket" }));
   console.log({ data });
-  const tickets = data.data;
+  const tickets = data?.data || [];
 
   const [columns, setColumns] = useState(() => JSON.parse(localStorage.getItem("snu-tickets-table")) || initColumns);
+  const tableRef = useRef(null);
 
   return (
-    <div className="overflow-auto m-4">
-      <table className="min-w-full border-collapse">
-        <thead className="bg-white border-b">
-          <tr className="relative">
-            {columns
-              .filter((c) => c.visible)
-              .map(({ key, name }) => (
-                <th key={key} scope="col" className="text-sm font-medium text-gray-900 px-6 py-4 text-left border-2 resize-x overflow-auto sticky top-0 min-w-[70px]">
-                  {name}
-                </th>
-              ))}
-          </tr>
-        </thead>
-        <tbody>
+    <div ref={tableRef} className="overflow-auto m-4">
+      <div ref={tableRef} className="min-w-full border-collapse relative">
+        <div className="bg-white flex  sticky top-0 border-b">
+          {columns
+            .filter((c) => c.visible)
+            .map(({ key, name }) => (
+              <ResizableColumn height={tableRef?.current?.getBoundingClientRect().height} key={key} columnKey={key}>
+                {name}
+              </ResizableColumn>
+            ))}
+        </div>
+        <div>
           {tickets.map((ticket, index) => {
             return (
               <React.Fragment key={ticket._id}>
-                <tr className={`${index % 2 === 1 ? "bg-gray-100" : "bg-white"}  hover:bg-gray-200 border-b`}>
+                <div className={`${index % 2 === 1 ? "bg-gray-100" : "bg-white"}  hover:bg-gray-200 border-b flex`}>
                   {columns
                     .filter((c) => c.visible)
                     .map(({ key }) => (
-                      <td key={key} className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 overflow-auto">
+                      <div
+                        key={key}
+                        data-key={key}
+                        className={`px-6 py-4 whitespace-nowrap text-sm border-r font-medium text-gray-900 truncate flex-shrink-0 flex-grow-0 ${
+                          index % 2 === 1 ? "bg-gray-100" : "bg-white"
+                        }  `}
+                      >
                         {ticket[key]}
-                      </td>
+                      </div>
                     ))}
-                </tr>
+                </div>
               </React.Fragment>
             );
           })}
-        </tbody>
-      </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ResizableColumn = ({ height, children, columnKey }) => {
+  const col = useRef(null);
+  const xPosition = useRef(null);
+  const currentWidth = useRef(null);
+  const colWidthRef = useRef(null);
+  const [colWidth, setColWidth] = useState(() => {
+    const savedWidth = window.localStorage.getItem(`snu-col-${columnKey}-width`);
+    if (!!savedWidth && !isNaN(savedWidth)) return Math.max(0, parseInt(savedWidth, 10));
+    return null;
+  });
+
+  const mouseDownHandler = function (e) {
+    // Get the current mouse position
+    xPosition.current = e.clientX;
+
+    // Calculate the current width of column
+    currentWidth.current = col.current.getBoundingClientRect().width;
+
+    // Attach listeners for document's events
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
+  };
+
+  const mouseMoveHandler = function (e) {
+    // Determine how far the mouse has been moved
+    const dx = e.clientX - xPosition.current;
+    // Update the width of column
+    setColWidth(currentWidth.current + dx);
+    colWidthRef.current = currentWidth.current + dx;
+  };
+
+  // When user releases the mouse, remove the existing event listeners
+  const mouseUpHandler = function () {
+    window.localStorage.setItem(`snu-col-${columnKey}-width`, colWidthRef.current);
+    document.removeEventListener("mousemove", mouseMoveHandler);
+    document.removeEventListener("mouseup", mouseUpHandler);
+  };
+
+  const style = useMemo(() => {
+    if (!!colWidth) return { width: colWidth };
+    return {};
+  }, [colWidth]);
+
+  useEffect(() => {
+    const newWidth = colWidth || col.current.getBoundingClientRect().width;
+    for (const cell of [...document.querySelectorAll(`[data-key='${columnKey}']`)]) {
+      if (cell.style) {
+        console.log("YOLO");
+        cell.style.width = `${newWidth}px`;
+      }
+    }
+  }, [colWidth]);
+
+  return (
+    <div ref={col} scope="col" className="text-sm font-medium bg-white text-gray-900 px-6 text-left h-auto border flex-shrink-0 flex-grow-0 relative" style={style}>
+      {children}
+      <div className="resizer" onMouseDown={mouseDownHandler} style={{ height }}></div>
+      <div className="absolute h-[1px] bottom-[-1px] right-0 left-0 bg-coolGray-200"></div>
     </div>
   );
 };
