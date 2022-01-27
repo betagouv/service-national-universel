@@ -112,7 +112,7 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
 
 async function toArrayOfArray(results, transform) {
   const data = transform ? await transform(results) : results;
-  let columns = Object.keys(data[0]);
+  let columns = Object.keys(data[0] ?? []);
   return [columns, ...data.map((item) => Object.values(item))];
 }
 
