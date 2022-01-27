@@ -1,3 +1,27 @@
+# [1.32.0](https://github.com/betagouv/service-national-universel/compare/v1.31.0...v1.32.0) (2022-01-27)
+
+
+### Bug Fixes
+
+* **admin:** export youngs ([6a24a00](https://github.com/betagouv/service-national-universel/commit/6a24a00d81215ec8c7940c3d2e29ae54fbc42238))
+* **api:** `max-width` oin contact convocation ([4f2bc2c](https://github.com/betagouv/service-national-universel/commit/4f2bc2ce058bb16a28cc9f9edc3f252710e9a781))
+* **app:** department for young ([#1148](https://github.com/betagouv/service-national-universel/issues/1148)) ([d226c03](https://github.com/betagouv/service-national-universel/commit/d226c032df2729a904a740da161749201661415a))
+* **app:** display convoc, even for PDL ([e004254](https://github.com/betagouv/service-national-universel/commit/e00425417424bd7afc132077cfbc90c7ccc98ced))
+* **app:** typo ([dbc7325](https://github.com/betagouv/service-national-universel/commit/dbc732506ebfc8391ae95bc74f7b96fa16bc0457))
+* **deps:** update dependency core-js to v3.20.3 ([#1027](https://github.com/betagouv/service-national-universel/issues/1027)) ([e735b71](https://github.com/betagouv/service-national-universel/commit/e735b71de31f78d75d2b872f996025ddf71421c5))
+* export when empty ([f15075d](https://github.com/betagouv/service-national-universel/commit/f15075dfa09788a70417eb3761cd42ab72e8a552))
+* permette modification de la premiere etape du formulaire ([#1129](https://github.com/betagouv/service-national-universel/issues/1129)) ([85390a6](https://github.com/betagouv/service-national-universel/commit/85390a6d5019b8c9bd1562f5d572e7f47edeedbe)), closes [#1063](https://github.com/betagouv/service-national-universel/issues/1063)
+
+
+### Features
+
+* **admin:** ajout filtres liste des volontaires / sessionPhase1 ([#1146](https://github.com/betagouv/service-national-universel/issues/1146)) ([86c9c51](https://github.com/betagouv/service-national-universel/commit/86c9c51a6f2be31fc00d9cf7f6664d6d942397d7))
+* **admin:** ajout filtres vue chef de centre ([#1144](https://github.com/betagouv/service-national-universel/issues/1144)) ([702c84c](https://github.com/betagouv/service-national-universel/commit/702c84c99c7e2716f725ad1fc29de321d13cea0e))
+* **admin:** création de l'équipe pour les séjours ([#1136](https://github.com/betagouv/service-national-universel/issues/1136)) ([a1ec06b](https://github.com/betagouv/service-national-universel/commit/a1ec06b3d6800407f02a6d9b8989a1a13b0ddf8d))
+* **admin:** visibilité du numéro de téléphone entre chefs de centre ([#1145](https://github.com/betagouv/service-national-universel/issues/1145)) ([ed59b12](https://github.com/betagouv/service-national-universel/commit/ed59b12ce487e9f81dac7b1d884297a61a7ccdda))
+* **app:** add CGU for youngs ([#1082](https://github.com/betagouv/service-national-universel/issues/1082)) ([5ac8be1](https://github.com/betagouv/service-national-universel/commit/5ac8be18de9dbe1e34ac1ab543eaa579740ad414))
+* **app:** event-plausible ([#1138](https://github.com/betagouv/service-national-universel/issues/1138)) ([4f2aeec](https://github.com/betagouv/service-national-universel/commit/4f2aeecbda2811fb099c96ac60ff63e77834dbf8))
+
 # [1.31.0](https://github.com/betagouv/service-national-universel/compare/v1.30.0...v1.31.0) (2022-01-26)
 
 
