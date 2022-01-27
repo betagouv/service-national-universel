@@ -72,7 +72,7 @@ export default function Index({ ...props }) {
     let obj = {};
 
     if (teamate.role === CENTER_ROLES.chef) obj = await setChefCenter(teamate);
-    else obj = setTeamate(teamate);
+    else obj = await setTeamate(teamate);
 
     if (!Object.keys(obj).length) return;
 

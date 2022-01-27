@@ -11,22 +11,12 @@ import api from "../../../services/api";
 import BinSVG from "../../../assets/bin.svg";
 
 export default function Team({ focusedSession, deleteTeamate, addTeamate }) {
-  if (focusedSession?.length <= 0 || !focusedSession?.headCenterId) {
-    return (
-      <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-        <Box>
-          <div style={{ padding: "2rem" }}>Bientôt Disponible ! On y affichera l&apos;équipe de {focusedSession?.cohort}</div>
-        </Box>
-      </div>
-    );
-  }
-
   return (
     <Box>
       <Wrapper gridTemplateColumns="repeat(2,1fr)" style={{ background: "linear-gradient(#E5E4E8,#E5E4E8) center/1px 100% no-repeat" }}>
         <div>
           <ChefCenterBlock headCenterId={focusedSession?.headCenterId} />
-          <TeamBlock team={focusedSession.team} deleteTeamate={deleteTeamate} />
+          <TeamBlock team={focusedSession?.team} deleteTeamate={deleteTeamate} />
         </div>
         <AddBlock addTeamate={addTeamate} />
       </Wrapper>
@@ -50,9 +40,9 @@ const ChefCenterBlock = ({ headCenterId }) => {
 
   return (
     <div style={{ padding: "2rem", paddingBottom: "0" }}>
-      <h3 style={{ marginBottom: 0 }}>Chef de centre</h3>
+      <h4 style={{ marginBottom: 0 }}>Chef de centre</h4>
       <a onClick={() => history.push(`/user/${headCenterId}`)} style={{ cursor: "pointer", color: "#5245CC" }}>
-        {chefCenter?.firstName} {chefCenter?.lastName} {">"}
+        {chefCenter?.firstName} {chefCenter?.lastName}&nbsp;›
       </a>
       <Wrapper gridTemplateColumns="120px auto" style={{ marginBlock: "1rem" }}>
         <b>E-mail :</b>
@@ -68,27 +58,31 @@ const TeamBlock = ({ team, deleteTeamate }) => {
   if (!team) return <></>;
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h3>Équipe ({team.length || 0})</h3>
-      {team.map((user, index) => (
-        <FlexBox key={index} style={{ justifyContent: "space-between", marginBlock: "0.25rem" }}>
-          <FlexBox>
-            <Badge>
-              <p style={{ margin: 0, fontSize: "1rem", color: "#372F78", fontWeight: "bold" }}>
-                {user.firstName?.[0]}
-                {user.lastName?.[0]}
-              </p>
-            </Badge>
-            <div>
-              <p style={{ fontSize: "1rem", fontWeight: "500", margin: 0 }}>
-                {user.firstName} {user.lastName}
-              </p>
-              <p style={{ color: "#92929D", margin: 0 }}>{user.role}</p>
-            </div>
+    <div style={{ padding: "3rem" }}>
+      <h4>Équipe ({team.length || 0})</h4>
+      {team.length === 0 ? (
+        <p style={{ fontStyle: "italic" }}>Aucun membre</p>
+      ) : (
+        team.map((user, index) => (
+          <FlexBox key={index} style={{ justifyContent: "space-between", marginBlock: "0.25rem" }}>
+            <FlexBox>
+              <Badge>
+                <p style={{ margin: 0, fontSize: "1rem", color: "#372F78", fontWeight: "bold" }}>
+                  {user.firstName?.[0]}
+                  {user.lastName?.[0]}
+                </p>
+              </Badge>
+              <div>
+                <p style={{ fontSize: "1rem", fontWeight: "500", margin: 0 }}>
+                  {user.firstName} {user.lastName}
+                </p>
+                <p style={{ color: "#92929D", margin: 0 }}>{user.role}</p>
+              </div>
+            </FlexBox>
+            <ButtonIcon icon={BinSVG} onClick={() => deleteTeamate(index)} />
           </FlexBox>
-          <ButtonIcon icon={BinSVG} onClick={() => deleteTeamate(index)} />
-        </FlexBox>
-      ))}
+        ))
+      )}
     </div>
   );
 };
@@ -97,8 +91,8 @@ const AddBlock = ({ addTeamate }) => {
   const listRoles = Object.values(CENTER_ROLES);
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h3>Ajouter un nouveau membre à l’équipe</h3>
+    <div style={{ padding: "3rem" }}>
+      <h4>Ajouter un nouveau membre à l’équipe</h4>
       <p style={{ color: "#9C9C9C" }}>Renseignez les membres de l’équipe d’encadrement du centre de séjour de cohésion.</p>
       <h6 style={{ color: "#696974", textTransform: "uppercase" }}>
         informations <span style={{ color: "#EF4036" }}>*</span>
@@ -114,7 +108,7 @@ const AddBlock = ({ addTeamate }) => {
           phone: "",
         }}
         onSubmit={(values) => addTeamate(values)}>
-        {({ values, handleChange, handleSubmit, errors }) => (
+        {({ values, handleChange, handleSubmit, errors, isSubmitting }) => (
           <React.Fragment>
             <Row>
               <Col xs="12" md="6">
@@ -148,7 +142,7 @@ const AddBlock = ({ addTeamate }) => {
             </Row>
             <Row>
               <Col xs="12" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                <ButtonText type="submit" onClick={handleSubmit}>
+                <ButtonText type="submit" onClick={handleSubmit} disabled={isSubmitting}>
                   Ajouter le membre
                 </ButtonText>
               </Col>
