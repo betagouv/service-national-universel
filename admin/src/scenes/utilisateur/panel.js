@@ -135,6 +135,8 @@ export default function UserPanel({ onChange, value }) {
         <Details title="Fonction" value={translate(value.subRole)} />
         <Details title="Région" value={value.region} />
         <Details title="Département" value={value.department} />
+        <Details title="Tel fixe" value={value.phone} />
+        <Details title="Tel Mobile" value={value.mobile} />
       </Info>
       {structure ? (
         <React.Fragment>
