@@ -35,7 +35,7 @@ export default function StepDone() {
           Vous êtes sur le point de soumettre votre dossier à l&apos;administration du SNU. Veuillez vérifier vos informations avant de valider votre demande d&apos;inscription.
         </p>
         <InfosContainer>
-          <Bloc title="Mon profil" profile>
+          <Bloc title="Mon profil" to="/inscription/profil">
             <Details title="Nom" value={young.lastName} />
             <Details title="Prénom" value={young.firstName} />
             <Details title="Sexe" value={t(young.gender)} />
@@ -196,17 +196,15 @@ export default function StepDone() {
   );
 }
 
-const Bloc = ({ children, title, last, profile, to }) => {
+const Bloc = ({ children, title, last, to }) => {
   return (
     <Row style={{ borderBottom: last ? 0 : "2px solid #f4f5f7" }}>
       <Wrapper>
         <div className="bloc-title">
           <BoxTitle>{title}</BoxTitle>
-          {!profile ? (
-            <Link to={to}>
-              <img src={pen} />
-            </Link>
-          ) : null}
+          <Link to={to}>
+            <img src={pen} />
+          </Link>
         </div>
         {children}
       </Wrapper>
