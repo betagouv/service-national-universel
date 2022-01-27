@@ -43,6 +43,11 @@ const FILTERS = [
   "CONTRACT_STATUS",
   "MEDICAL_FILE_RECEIVED",
   "COHESION_PRESENCE",
+  "QPV",
+  "HANDICAP",
+  "SEXE",
+  "ZRR",
+  "GRADE",
 ];
 
 export default function List() {
@@ -292,6 +297,76 @@ export default function List() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Classe"
+                  componentId="GRADE"
+                  dataField="grade.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "GRADE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="QPV"
+                  componentId="QPV"
+                  dataField="qpv.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "QPV") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "QPV", "QPV")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="HANDICAP"
+                  componentId="HANDICAP"
+                  dataField="handicap.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "HANDICAP") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="SEXE"
+                  componentId="SEXE"
+                  dataField="gender.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SEXE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Sexe")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="ZRR"
+                  componentId="ZRR"
+                  dataField="populationDensity.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "ZRR") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "ZRR")}
                 />
               </FilterRow>
             </Filter>
