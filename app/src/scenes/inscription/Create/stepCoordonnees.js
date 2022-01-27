@@ -508,6 +508,7 @@ export default function StepCoordonnees() {
                               schoolId: "schoolId",
                               schoolCountry: "schoolCountry",
                               schoolCity: "schoolCity",
+                              schoolDepartment: "schoolDepartment",
                             }}
                           />
                         </div>
