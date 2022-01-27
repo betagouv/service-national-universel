@@ -160,8 +160,6 @@ export default function Drawer(props) {
             <HelpButton
               to={`/besoin-d-aide?from=${window.location.pathname}`}
               onClick={() => {
-                // const p = decodeURIComponent(window.location.search);
-                // console.log(p.split("?from="));
                 plausibleEvent("Compte/CTA - Aide", { url: decodeURIComponent(window.location.search).split("?from=")[1] });
               }}
             />

@@ -12,10 +12,6 @@ import plausibleEvent from "../../../services/plausible";
 export default function Home({ location }) {
   const history = useHistory();
 
-  const registerEventPlausibleMobile = (e) => plausibleEvent(e);
-
-  const registerEventPlausibleDesktop = (e) => plausibleEvent(e);
-
   return (
     <div>
       <Header location={location} />
@@ -36,21 +32,21 @@ export default function Home({ location }) {
           <CardTitle>Une aventure en trois phases</CardTitle>
           <div className="desktop">
             <CardPhase
-              onClick={() => registerEventPlausibleDesktop("LP - Phase 1")}
+              onClick={() => plausibleEvent("LP - Phase 1")}
               upText="phase 1"
               title="Le séjour de cohésion"
               downText="3 sessions possibles en février, juin et juillet 2022"
               to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
             />
             <CardPhase
-              onClick={() => registerEventPlausibleDesktop("LP - Phase 2")}
+              onClick={() => plausibleEvent("LP - Phase 2")}
               upText="phase 2"
               title="La mission d'intérêt général"
               downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
               to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
             />
             <CardPhase
-              onClick={() => registerEventPlausibleDesktop("LP - Phase 3")}
+              onClick={() => plausibleEvent("LP - Phase 3")}
               upText="phase 3 - facultative"
               title="L'engagement"
               downText="Mission facultative de 3 mois minimum"
@@ -59,21 +55,21 @@ export default function Home({ location }) {
           </div>
           <Carousel className="mobile" showThumbs={false} showStatus={false} showArrows={true}>
             <CardPhase
-              onClick={() => registerEventPlausibleMobile("LP - Phase 1")}
+              onClick={() => plausibleEvent("LP - Phase 1")}
               upText="phase 1"
               title="Le séjour de cohésion"
               downText="3 sessions possibles en février, juin et juillet 2022"
               to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
             />
             <CardPhase
-              onClick={() => registerEventPlausibleMobile("LP - Phase 2")}
+              onClick={() => plausibleEvent("LP - Phase 2")}
               upText="phase 2"
               title="La mission d'intérêt général"
               downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
               to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
             />
             <CardPhase
-              onClick={() => registerEventPlausibleMobile("LP - Phase 3")}
+              onClick={() => plausibleEvent("LP - Phase 3")}
               upText="phase 3 - facultative"
               title="L'engagement"
               downText="Mission facultative de 3 mois minimum"
@@ -84,7 +80,7 @@ export default function Home({ location }) {
             <StartButton
               onClick={() => {
                 history.push("/inscription/profil");
-                registerEventPlausibleDesktop("LP CTA - Inscription");
+                plausibleEvent("LP CTA - Inscription");
               }}>
               Commencer&nbsp;l&apos;inscription
             </StartButton>
@@ -97,7 +93,7 @@ export default function Home({ location }) {
         <StartButton
           onClick={() => {
             history.push("/inscription/profil");
-            registerEventPlausibleMobile("LP CTA - Inscription");
+            plausibleEvent("LP CTA - Inscription");
           }}>
           Commencer&nbsp;l&apos;inscription
         </StartButton>
