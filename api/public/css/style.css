@@ -129,6 +129,7 @@ img.bg {
   font-weight: bold;
   text-decoration: underline;
   text-align: right;
+  max-width: 50%;
 }
 
 #convocation-cohesion > .infos-young {
