@@ -127,7 +127,7 @@ export default function StepConsentements() {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural ? "nous engageons" : "m'engage"}à renseigner le consentement relatif aux droits à l&apos;image* <strong>avant le début du séjour de cohésion</strong>
+                    {isPlural ? "nous engageons" : "m'engage"} à renseigner le consentement relatif aux droits à l&apos;image* <strong>avant le début du séjour de cohésion</strong>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment7" />
