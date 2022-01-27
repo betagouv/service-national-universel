@@ -32,8 +32,6 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
 
-  const handleShowFilter = () => setFilterVisible(!filterVisible);
-
   const getDefaultQuery = () => ({
     query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { term: { "cohort.keyword": focusedCohort } }] } },
     sort: [{ "lastName.keyword": "asc" }],
@@ -243,7 +241,7 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
                     />
-                    <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+                    <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={() => setFilterVisible((e) => !e)} />
                   </FilterRow>
                   <FilterRow visible={filterVisible}>
                     <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
