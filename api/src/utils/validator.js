@@ -261,6 +261,7 @@ function validateUpdateCohesionCenter(application) {
 
 const sessionPhase1Keys = {
   cohesionCenterId: Joi.string().allow(null, ""),
+  headCenterId: Joi.string().allow(null, ""),
   cohort: Joi.string().allow(null, ""),
   userId: Joi.string().allow(null, ""),
   team: Joi.array().items(Joi.any().allow(null, "")),

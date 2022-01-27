@@ -53,7 +53,6 @@ const Schema = new mongoose.Schema({
       description: "equipe d'encadrement pour le séjour",
     },
   },
-
   waitingList: {
     type: [String],
     documentation: {
