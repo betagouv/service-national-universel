@@ -15,6 +15,7 @@ import ErrorMessage, { requiredMessage } from "../../inscription/components/erro
 import { ModalContainer } from "../../../components/modals/Modal";
 import Note from "../../../components/Note";
 import { departmentList, translate } from "../../../utils";
+import plausibleEvent from "../../../services/plausible";
 
 const levels = [
   { label: "3ème", value: "3eme" },
@@ -167,7 +168,7 @@ export default function EligibilityModal({ onChange }) {
       </Modal>
       <ModalButton
         onClick={() => {
-          window.plausible?.("LP CTA - vérifier éligibilité", { props: { device: navigator?.userAgentData?.mobile ? "mobile" : "desktop" } });
+          plausibleEvent("LP CTA - vérifier éligibilité");
           setIsOpen(true);
         }}>
         Vérifier votre éligibilité

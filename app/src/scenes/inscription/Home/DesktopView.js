@@ -6,6 +6,7 @@ import TickIcon from "../components/tickIcon";
 import conditions from "./conditions";
 import informations from "./informations";
 import EligibilityModal from "../components/eligibilityModal";
+import plausibleEvent from "../../../services/plausible";
 
 export default function DesktopView() {
   return (
@@ -142,7 +143,7 @@ export default function DesktopView() {
                 strokeLinejoin="round"
               />
             </svg>
-            <FAQ onClick={() => window.plausible?.("LP - Aide", { props: { device: "desktop" } })} href={`${appURL}/public-besoin-d-aide`} target="blank">
+            <FAQ onClick={() => plausibleEvent("LP - Aide")} href={`${appURL}/public-besoin-d-aide`} target="blank">
               <p>
                 <strong>Besoin d&apos;aide ?</strong>
               </p>
