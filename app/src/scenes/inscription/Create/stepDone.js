@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Field, Formik } from "formik";
 import { toastr } from "react-redux-toastr";
 import { Spinner, Row } from "reactstrap";
-
+import { useCookies } from "react-cookie";
 import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, translate as t, formatStringDate, getAge, CONSENTMENT_TEXTS } from "../../../utils";
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
@@ -18,6 +18,7 @@ import pen from "../../../assets/pen.svg";
 
 export default function StepDone() {
   const history = useHistory();
+  const [cookies] = useCookies(["accept-cookie"]);
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -137,6 +138,24 @@ export default function StepDone() {
               values.aknowledgmentTerminaleSessionAvailability = "true";
               const { ok, code, data } = await api.put("/young", { ...values, status: YOUNG_STATUS.WAITING_VALIDATION });
               if (!ok) return toastr.error("Une erreur s'est produite :", t(code));
+
+              // GOOGLE TAG MANAGER
+              if (cookies["accept-cookie"] === "true") {
+                window.dataLayer = window.dataLayer || [];
+                window.gtag =
+                  window.gtag ||
+                  function () {
+                    window.dataLayer.push(arguments);
+                  };
+                window.gtag("js", new Date());
+                window.gtag("config", "DC-2971054");
+                window.gtag("event", "conversion", {
+                  allow_custom_scripts: true,
+                  send_to: "DC-2971054/snuiz0/bouton2+unique",
+                });
+              }
+              // END GOOGLE TAG MANAGER
+
               toastr.success("Enregistré");
               dispatch(setYoung(data));
               await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_VALIDATION}`, { cta: `${appURL}/auth` });
