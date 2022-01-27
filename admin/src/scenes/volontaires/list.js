@@ -26,6 +26,7 @@ import {
   colors,
   getLabelWithdrawnReason,
   departmentLookUp,
+  YOUNG_STATUS,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -335,6 +336,7 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
+                  defaultValue={[YOUNG_STATUS.VALIDATED]}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -667,15 +669,11 @@ const Hit = ({ hit, onClick, selected }) => {
       </td>
       <td>
         <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
-        {hit.status === "WITHDRAWN" ? (
-          <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} />
-        ) : (
-          <>
-            <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} />
-            <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} />
-            <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} />
-          </>
-        )}
+        {hit.status === "WITHDRAWN" && <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} />}
+
+        <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} />
+        <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} />
+        <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} />
       </td>
       <td onClick={(e) => e.stopPropagation()}>
         <Action hit={hit} />

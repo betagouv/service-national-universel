@@ -443,7 +443,9 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
 
     // if withdrawn, cascade withdrawn on every status
     if (young.status === "WITHDRAWN" && (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")) {
-      young.set({ statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" });
+      if (young.statusPhase1 !== "DONE") young.set({ statusPhase1: "WITHDRAWN" });
+      if (young.statusPhase2 !== "VALIDATED") young.set({ statusPhase2: "WITHDRAWN" });
+      if (young.statusPhase3 !== "VALIDATED") young.set({ statusPhase3: "WITHDRAWN" });
       await young.save({ fromUser: req.user });
     }
 
