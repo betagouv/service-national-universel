@@ -16,6 +16,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { appURL } from "../../../config";
 import InfoIcon from "../../../assets/InfoIcon";
 import pen from "../../../assets/pen.svg";
+import gtagEvent from "../../../services/gtag";
 
 export default function StepDone() {
   const history = useHistory();
@@ -134,29 +135,13 @@ export default function StepDone() {
           validateOnBlur={false}
           onSubmit={async (values) => {
             plausibleEvent("Funnel inscription/CTA - Validation finale inscription");
+            gtagEvent(cookies, "DC-2971054/snuiz0/bouton2+unique");
             setLoading(true);
             try {
               values.informationAccuracy = "true";
               values.aknowledgmentTerminaleSessionAvailability = "true";
               const { ok, code, data } = await api.put("/young", { ...values, status: YOUNG_STATUS.WAITING_VALIDATION });
               if (!ok) return toastr.error("Une erreur s'est produite :", t(code));
-
-              // GOOGLE TAG MANAGER
-              if (cookies["accept-cookie"] === "true") {
-                window.dataLayer = window.dataLayer || [];
-                window.gtag =
-                  window.gtag ||
-                  function () {
-                    window.dataLayer.push(arguments);
-                  };
-                window.gtag("js", new Date());
-                window.gtag("config", "DC-2971054");
-                window.gtag("event", "conversion", {
-                  allow_custom_scripts: true,
-                  send_to: "DC-2971054/snuiz0/bouton2+unique",
-                });
-              }
-              // END GOOGLE TAG MANAGER
 
               toastr.success("Enregistré");
               dispatch(setYoung(data));
