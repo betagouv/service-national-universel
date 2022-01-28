@@ -198,10 +198,27 @@ router.get("/:id/cohort/:cohort/session-phase1", passport.authenticate("referent
     const center = await CohesionCenterModel.findById(value.id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const sessionsPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort: value.cohort });
+    const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort: value.cohort });
+    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    return res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionPhase1) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const center = await CohesionCenterModel.findById(value.id);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
     if (!sessionsPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionsPhase1) });
+    return res.status(200).send({ ok: true, data: sessionsPhase1.map(serializeSessionPhase1) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

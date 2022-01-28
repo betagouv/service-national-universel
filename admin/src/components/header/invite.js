@@ -71,9 +71,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                   const { data: referent } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
 
                   if (values.sessionPhase1Id) {
-                    const { data: sessionPhase1 } = await api.get(`/cohesion-center/${values.cohesionCenterId}/cohort/${values.sessionPhase1Id}/session-phase1`);
-                    await api.put(`/session-phase1/${sessionPhase1._id}`, { headCenterId: referent._id });
-                    // TODO: Comment on gère si il y a eu un problème lorsque l'on met à jour la session et que cela fail ? @tangimds
+                    await api.put(`/session-phase1/${values.sessionPhase1Id}`, { headCenterId: referent._id });
                   }
                   toastr.success("Invitation envoyée");
                   setOpen();
@@ -289,9 +287,9 @@ const ChooseSessionPhase1 = ({ onChange, value }) => {
     if (!value.cohesionCenterId) return;
 
     (async () => {
-      const { ok, error, data } = await api.get(`/cohesion-center/${value.cohesionCenterId}`);
+      const { ok, error, data } = await api.get(`/cohesion-center/${value.cohesionCenterId}/session-phase1`);
       if (!ok) return toastr.error("Erreur", error);
-      setSessions(data.cohorts.map((e) => ({ label: e, value: e })));
+      setSessions(data.map((e) => ({ label: e.cohort, value: e._id })));
     })();
   }, [value.cohesionCenterId]);
 
