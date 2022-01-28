@@ -23,12 +23,18 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 
 export default function InviteHeader({ setOpen, open, label = "Inviter un référent" }) {
+  const { user } = useSelector((state) => state.Auth);
+
   const [centers, setCenters] = useState(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await api.get("/cohesion-center");
+        let { data } = await api.get("/cohesion-center");
+
+        if (user.role === ROLES.REFERENT_REGION) data = data.filter((e) => e.region === user.region);
+        if (user.role === ROLES.REFERENT_DEPARTMENT) data = data.filter((e) => e.department === user.department);
+
         const c = data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         setCenters(c);
       } catch (e) {
