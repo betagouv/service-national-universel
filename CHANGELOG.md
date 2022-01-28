@@ -1,3 +1,23 @@
+# [1.33.0](https://github.com/betagouv/service-national-universel/compare/v1.32.0...v1.33.0) (2022-01-28)
+
+
+### Bug Fixes
+
+* remove test ([5886f9f](https://github.com/betagouv/service-national-universel/commit/5886f9f5f97befdb088751607f2351bb66e482d5))
+* **admin:** ES for head center ([0d900bc](https://github.com/betagouv/service-national-universel/commit/0d900bcf248ffcf9a3bcb9372cc9a39e3849f6d7))
+* **api:** controller es for head center ([af455ef](https://github.com/betagouv/service-national-universel/commit/af455eff22f62e18b847d9452027f1d3c92ab71a))
+* **api:** test es for head center ([af6d0c7](https://github.com/betagouv/service-national-universel/commit/af6d0c774decf7f9d8081bf696514cfe4d734d91))
+* **api,app:** default date convocation ([10607cb](https://github.com/betagouv/service-national-universel/commit/10607cbf7112d973527c8e7e14d85522b22a8c3b))
+* **app:** cookies dentsu ([#1163](https://github.com/betagouv/service-national-universel/issues/1163)) ([014eca1](https://github.com/betagouv/service-national-universel/commit/014eca1406efa1e86fae8721132211c76b7a5e75))
+
+
+### Features
+
+* **admin:** tableau de bord - centres ([#1160](https://github.com/betagouv/service-national-universel/issues/1160)) ([9dffc9b](https://github.com/betagouv/service-national-universel/commit/9dffc9bbab21c23f780c61d75a6d8ba4e71ff629))
+* **app-plausible:** event on inscription validation ([a988104](https://github.com/betagouv/service-national-universel/commit/a9881044af50e716e84182346a17fe67208e665e))
+* **app,api:** desistement cascade [#1142](https://github.com/betagouv/service-national-universel/issues/1142) ([#1149](https://github.com/betagouv/service-national-universel/issues/1149)) ([5f3adce](https://github.com/betagouv/service-national-universel/commit/5f3adcedbea55cfeb957ecc89bb6ca48cb6dd5fe))
+* **support:**  tickets models + interface ([#1135](https://github.com/betagouv/service-national-universel/issues/1135)) ([e3e3caa](https://github.com/betagouv/service-national-universel/commit/e3e3caa2bd76a80c254679b739859e4a9a4fb52a))
+
 # [1.32.0](https://github.com/betagouv/service-national-universel/compare/v1.31.0...v1.32.0) (2022-01-27)
 
 
