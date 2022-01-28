@@ -8,6 +8,7 @@ import { Spinner, Row } from "reactstrap";
 import { useCookies } from "react-cookie";
 import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, translate as t, formatStringDate, getAge, CONSENTMENT_TEXTS } from "../../../utils";
 import api from "../../../services/api";
+import plausibleEvent from "../../../services/plausible";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { BoxTitle } from "../../../components/box";
 import ExpandComponent from "../../../components/ExpandComponent";
@@ -132,6 +133,7 @@ export default function StepDone() {
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
+            plausibleEvent("Funnel inscription/CTA - Validation finale inscription");
             setLoading(true);
             try {
               values.informationAccuracy = "true";
