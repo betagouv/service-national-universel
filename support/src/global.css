@@ -55,6 +55,10 @@
   }
 }
 
+.content {
+  max-width: calc(100vw - 3.5rem);
+}
+
 .dir-rtl {
   direction: rtl;
 }
@@ -71,6 +75,26 @@
 .show-button-on-hover .button-container {
   opacity: 0;
   pointer-events: none;
+}
+
+/*
+
+TABLE
+
+*/
+.resizer {
+  /* Displayed at the right side of column */
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  cursor: col-resize;
+  user-select: none;
+}
+
+.resizer:hover,
+.resizing {
+  border-right: 2px solid blue;
 }
 
 /*

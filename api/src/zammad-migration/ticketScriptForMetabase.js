@@ -4,7 +4,7 @@ const client = require("./database");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");
 const ZammadTicketModel = require("../models/zammad-ticket");
-const TagModel = require("../models/tag");
+// const TagModel = require("../models/tag");
 const { formatDistance } = require("date-fns");
 const { fr } = require("date-fns/locale");
 const { ENVIRONMENT } = require("../config");
@@ -31,7 +31,9 @@ const migrateTickets = async ({ force } = { force: false }) => {
   }
 
   try {
-    // 2. Créer / mettre à jour ma table Tag avec toutes les occurences
+    /*
+No need for ZammadTickets for metabase
+// 2. Créer / mettre à jour ma table Tag avec toutes les occurences
     for (let tag of tagItems) {
       const tagExisting = await TagModel.findOne({ zammadId: tag.id });
       if (tagExisting) {
@@ -43,7 +45,7 @@ const migrateTickets = async ({ force } = { force: false }) => {
       }
       const SNUtag = await TagModel.create({ zammadId: tag.id, name: tag.name });
       console.log("TAG CREATED", SNUtag);
-    }
+    } */
 
     for (let ticket of tickets) {
       console.log("I'm here !!");
@@ -97,7 +99,7 @@ const migrateTickets = async ({ force } = { force: false }) => {
       }
 
       const tags = ticketTags.filter((tag) => tag.o_id === ticket.id);
-      let tagsIds = [];
+      // let tagsIds = [];
       let addressedToAgents = [];
       let fromCanal = "";
       let category = "";
@@ -118,9 +120,9 @@ const migrateTickets = async ({ force } = { force: false }) => {
           region = tagName;
         } else {
           // 3. Récupérer les ids des tags du ticket dans la table Tag
-          const tagId = await TagModel.findOne({ zammadId: tag.tag_item_id });
-          if (!tagId) continue;
-          tagsIds.push(tagId.zammadId);
+          // const tagId = await TagModel.findOne({ zammadId: tag.tag_item_id });
+          // if (!tagId) continue;
+          // tagsIds.push(tagId.zammadId);
           subject.concat(", ", tagName);
         }
       }
@@ -150,7 +152,7 @@ const migrateTickets = async ({ force } = { force: false }) => {
         lastContactEmitterAt: ticket.last_contact_customer_at,
         lastContactAgentAt: ticket.last_contact_agent_at,
         tagIds: [],
-        tags: tagsIds,
+        // tags: tagsIds,
         messages: messagesArray,
         agentInChargeId,
         agentInChargeZammadId: ticket.owner_id,
