@@ -29,7 +29,7 @@ const Message = new mongoose.Schema(
     // connection with existing db
     emitterUserId: {
       type: mongoose.Types.ObjectId,
-      refPath: "createdByModel",
+      refPath: "emitterModel",
       documentation: {
         description: "https://github.com/Automattic/mongoose/issues/4217, https://mongoosejs.com/docs/populate.html#dynamic-ref",
       },
