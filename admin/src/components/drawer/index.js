@@ -154,9 +154,10 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
   );
 }
 
-function headCenter({ onClick }) {
+function headCenter({ onClick, user }) {
   return (
     <>
+      {user.cohesionCenterId && <DrawerTab to={`/centre/${user.cohesionCenterId}`} title="Mon Centre" onClick={onClick} />}
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
