@@ -24,13 +24,13 @@ export default function Status({ filter }) {
 
       if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
       if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
-      if (filter.cohorte?.length) body.query.bool.filter.push({ terms: { "cohorts.keyword": filter.cohorte } });
+      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohorts.keyword": filter.cohort } });
 
       const { responses } = await api.esQuery("cohesioncenter", body);
       if (responses.length) {
         setPlacesTotal(responses[0].aggregations.placesTotal.value);
         setPlacesLeft(responses[0].aggregations.placesLeft.value);
-        setTotal(responses[0].hits.hits.reduce((previousValue, el) => previousValue + el._source.cohorts.length, 0));
+        setTotal(responses[0].hits.total.value);
       }
     }
     initStatus();

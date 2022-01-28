@@ -37,7 +37,7 @@ export default function Index() {
           {filter && (
             <>
               <FiltersList>
-                <FilterCohorte onChange={(cohorte) => updateFilter({ cohorte })} value={filter.cohorte} filter={filter} />
+                <FilterCohorte onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} filter={filter} />
                 <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
                 <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
               </FiltersList>
