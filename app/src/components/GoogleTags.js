@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
+import gtagEvent from "../services/gtag";
 // import { Helmet } from "react-helmet";
 
 export default function GoogleTags() {
@@ -13,19 +14,7 @@ export default function GoogleTags() {
     script.src = "https://www.googletagmanager.com/gtag/js?id=DC-2971054";
     script.async = true;
     document.body.appendChild(script);
-
-    window.dataLayer = window.dataLayer || [];
-    window.gtag =
-      window.gtag ||
-      function () {
-        window.dataLayer.push(arguments);
-      };
-    window.gtag("js", new Date());
-    window.gtag("config", "DC-2971054");
-    window.gtag("event", "conversion", {
-      allow_custom_scripts: true,
-      send_to: "DC-2971054/snuiz0/snulp+unique",
-    });
+    gtagEvent(cookies, "DC-2971054/snuiz0/snulp+unique");
 
     // Add floodlight tag
     setAxel((Math.random() + "") * 10000000000000);

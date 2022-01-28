@@ -1,16 +1,18 @@
 import React from "react";
 import styled from "styled-components";
 import { useHistory } from "react-router-dom";
-
+import { useCookies } from "react-cookie";
 import Header from "./header";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
 import plausibleEvent from "../../../services/plausible";
+import gtagEvent from "../../../services/gtag";
 
 export default function Home({ location }) {
   const history = useHistory();
+  const [cookies] = useCookies(["accept-cookie"]);
 
   return (
     <div>
@@ -81,6 +83,7 @@ export default function Home({ location }) {
               onClick={() => {
                 history.push("/inscription/profil");
                 plausibleEvent("LP CTA - Inscription");
+                gtagEvent(cookies, "DC-2971054/snuiz0/bouton1+unique");
               }}>
               Commencer&nbsp;l&apos;inscription
             </StartButton>
@@ -94,6 +97,7 @@ export default function Home({ location }) {
           onClick={() => {
             history.push("/inscription/profil");
             plausibleEvent("LP CTA - Inscription");
+            gtagEvent(cookies, "DC-2971054/snuiz0/bouton1+unique");
           }}>
           Commencer&nbsp;l&apos;inscription
         </StartButton>
