@@ -42,9 +42,9 @@ const TicketsTable = () => {
   const tableRef = useRef(null);
 
   return (
-    <div ref={tableRef} className="overflow-auto m-4">
-      <div ref={tableRef} className="min-w-full border-collapse relative">
-        <div className="bg-white flex  sticky top-0 border-b">
+    <div ref={tableRef} className="p-4 h-full">
+      <div className="relative overflow-auto h-full">
+        <div className="bg-white flex sticky top-0 border-b w-min">
           {columns
             .filter((c) => c.visible)
             .map(({ key, name }) => (
@@ -53,34 +53,259 @@ const TicketsTable = () => {
               </ResizableColumn>
             ))}
         </div>
-        <div>
-          {tickets.map((ticket, index) => {
-            return (
-              <React.Fragment key={ticket._id}>
-                <div className={`${index % 2 === 1 ? "bg-gray-100" : "bg-white"}  hover:bg-gray-200 border-b flex`}>
-                  {columns
-                    .filter((c) => c.visible)
-                    .map(({ key }) => (
-                      <div
-                        key={key}
-                        data-key={key}
-                        className={`px-6 py-4 whitespace-nowrap text-sm border-r font-medium text-gray-900 truncate flex-shrink-0 flex-grow-0 ${
-                          index % 2 === 1 ? "bg-gray-100" : "bg-white"
-                        }  `}
-                      >
-                        {ticket[key]}
-                      </div>
-                    ))}
-                </div>
-              </React.Fragment>
-            );
-          })}
-        </div>
+        {tickets.map((ticket, index) => {
+          return (
+            <React.Fragment key={ticket._id}>
+              <div className={`${index % 2 === 1 ? "bg-gray-100" : "bg-white"}  hover:bg-gray-200 border-b  flex cursor-pointer  w-min`}>
+                {columns
+                  .filter((c) => c.visible)
+                  .map(({ key }) => (
+                    <div key={key} data-key={key} className={`px-6 py-4 whitespace-nowrap text-sm border-r font-medium text-gray-900 truncate flex-shrink-0 flex-grow-0 `}>
+                      {ticket[key]}
+                    </div>
+                  ))}
+              </div>
+            </React.Fragment>
+          );
+        })}
       </div>
     </div>
   );
 };
 
+/*
+ */
+/*
+
+<div className="p-4 bg-green-500 h-full">
+      <div className="bg-blue-500 relative overflow-auto h-full">
+        <div className="border-black border-4 flex  sticky top-0 w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className="border-red-500 border-4 flex flex-shrink-0 flex-nowrap relative w-min">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((n) => (
+            <div key={n} style={{ width: 250, flexShrink: 0, display: "inline-block" }} className="">
+              {n}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+     */
 const ResizableColumn = ({ height, children, columnKey }) => {
   const col = useRef(null);
   const xPosition = useRef(null);
@@ -128,14 +353,13 @@ const ResizableColumn = ({ height, children, columnKey }) => {
     const newWidth = colWidth || col.current.getBoundingClientRect().width;
     for (const cell of [...document.querySelectorAll(`[data-key='${columnKey}']`)]) {
       if (cell.style) {
-        console.log("YOLO");
         cell.style.width = `${newWidth}px`;
       }
     }
   }, [colWidth]);
 
   return (
-    <div ref={col} scope="col" className="text-sm font-medium bg-white text-gray-900 px-6 text-left h-auto border flex-shrink-0 flex-grow-0 relative" style={style}>
+    <div ref={col} scope="col" className="text-sm font-medium bg-white text-gray-900 px-6 py-2 text-left h-auto border flex-shrink-0 flex-grow-0 relative" style={style}>
       {children}
       <div className="resizer" onMouseDown={mouseDownHandler} style={{ height }}></div>
       <div className="absolute h-[1px] bottom-[-1px] right-0 left-0 bg-coolGray-200"></div>
