@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
-import { YOUNG_STATUS_COLORS, colors, getLink } from "../../../utils";
+import { YOUNG_STATUS_COLORS, colors, getLink, ES_NO_LIMIT } from "../../../utils";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
 
 import api from "../../../services/api";
@@ -19,11 +19,12 @@ export default function Status({ filter }) {
           placesTotal: { sum: { field: "placesTotal" } },
           placesLeft: { sum: { field: "placesLeft" } },
         },
-        size: 0,
+        size: ES_NO_LIMIT,
       };
 
       if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
       if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohorts.keyword": filter.cohort } });
 
       const { responses } = await api.esQuery("cohesioncenter", body);
       if (responses.length) {

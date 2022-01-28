@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
+import FilterCohorte from "../components/FilterCohorte";
 
 import Status from "./status";
 
@@ -36,6 +37,7 @@ export default function Index() {
           {filter && (
             <>
               <FiltersList>
+                <FilterCohorte onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} filter={filter} />
                 <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
                 <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
               </FiltersList>
