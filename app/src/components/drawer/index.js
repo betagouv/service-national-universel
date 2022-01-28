@@ -32,6 +32,17 @@ export default function Drawer(props) {
   }, [props.open]);
 
   useEffect(() => {
+    if (young.status === YOUNG_STATUS.WITHDRAWN) {
+      setStatus1(young.statusPhase1);
+      setStatus2(young.statusPhase2);
+      setStatus3(young.statusPhase3);
+    }
+
+    // si le jeune n'est pas validé, ni désisté
+    // -> on ne le considère pas encore dans le snu et on affiche donc les status "IN_COMING"
+    // ou les status lié au moment de son désistement
+    if (young.status !== YOUNG_STATUS.VALIDATED) return;
+
     young.statusPhase1 && setStatus1(young.statusPhase1);
     if (young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) {
       setStatus2(YOUNG_STATUS_PHASE2.WITHDRAWN);

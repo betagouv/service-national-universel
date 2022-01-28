@@ -1,5 +1,5 @@
 import passwordValidator from "password-validator";
-import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
 export * from "snu-lib";
 import { environment } from "../config";
 
@@ -23,7 +23,6 @@ export function getPasswordErrorMessage(v) {
   }
 }
 
-// TODO: Vérifier les permissions @tangimds
 const permissionApp = (y) => {
   if (!y) false;
   return y?.status !== YOUNG_STATUS.REFUSED;
@@ -31,7 +30,7 @@ const permissionApp = (y) => {
 
 export function permissionPhase1(y) {
   if (!permissionApp(y)) return false;
-  return ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(y.status);
+  return ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(y.status) && y.statusPhase1 !== YOUNG_STATUS_PHASE1.WITHDRAWN;
 }
 
 export function permissionPhase2(y) {
