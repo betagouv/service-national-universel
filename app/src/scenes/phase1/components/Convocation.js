@@ -51,11 +51,11 @@ export default function Convocation() {
   // ! WARNING : Change date also in api/src/templates/convocation/index.js
   const departureMeetingDate = {
     2021: "lundi 20 février, 14:00",
-    "Février 2022": "lundi 13 février, 16:00",
+    "Février 2022": "dimanche 13 février, 16:00",
   };
   const returnMeetingDate = {
     2021: "2 juillet, 14:00",
-    "Février 2022": "lundi 25 février, 11:00",
+    "Février 2022": "vendredi 25 février, 11:00",
   };
 
   const COHESION_STAY_DATE_STRING = {
