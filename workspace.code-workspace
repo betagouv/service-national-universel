@@ -1,0 +1,17 @@
+{
+  "folders": [
+	{
+		"path": "api"
+	},
+	{
+		"path": "admin"
+	},
+	{
+		"path": "app"
+	},
+	{
+		"path": "lib"
+	}
+],
+  "settings": {}
+}
