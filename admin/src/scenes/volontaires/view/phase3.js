@@ -21,7 +21,14 @@ export default function Phase3({ young }) {
           <Bloc title="Réalisation d'une nouvelle mission d'intérêt général">
             <div style={{ display: "flex" }}>
               <p style={{ flex: 1 }}>Le volontaire doit réaliser sa phase 3 avant ses 25 ans.</p>
-              {young.statusPhase3 ? <SelectStatus hit={young} statusName="statusPhase3" phase={YOUNG_PHASE.CONTINUE} options={Object.keys(YOUNG_STATUS_PHASE3)} /> : null}
+              {young.statusPhase3 ? (
+                <SelectStatus
+                  hit={young}
+                  statusName="statusPhase3"
+                  phase={YOUNG_PHASE.CONTINUE}
+                  options={Object.keys(YOUNG_STATUS_PHASE3).filter((e) => e !== YOUNG_STATUS_PHASE3.WITHDRAWN)}
+                />
+              ) : null}
             </div>
           </Bloc>
         </Box>

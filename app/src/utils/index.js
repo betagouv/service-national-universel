@@ -1,5 +1,5 @@
 import passwordValidator from "password-validator";
-import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
 export * from "snu-lib";
 import { environment } from "../config";
 
@@ -25,22 +25,25 @@ export function getPasswordErrorMessage(v) {
 
 const permissionApp = (y) => {
   if (!y) false;
-  return y?.status !== YOUNG_STATUS.REFUSED && y?.status !== YOUNG_STATUS.WITHDRAWN;
+  return y?.status !== YOUNG_STATUS.REFUSED;
 };
 
 export function permissionPhase1(y) {
   if (!permissionApp(y)) return false;
-  return ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(y.status);
+  return ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(y.status) && y.statusPhase1 !== YOUNG_STATUS_PHASE1.WITHDRAWN;
 }
 
 export function permissionPhase2(y) {
   if (!permissionApp(y)) return false;
-  return ![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "AFFECTED" || y.statusPhase1 === "DONE" || y.statusPhase1 === "EXEMPTED";
+  return (
+    y.statusPhase2 !== YOUNG_STATUS_PHASE2.WITHDRAWN &&
+    (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "AFFECTED" || y.statusPhase1 === "DONE" || y.statusPhase1 === "EXEMPTED")
+  );
 }
 
 export function permissionPhase3(y) {
   if (!permissionApp(y)) return false;
-  return y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
+  return y.statusPhase3 !== YOUNG_STATUS_PHASE3.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
 }
 
 export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];

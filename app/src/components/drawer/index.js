@@ -3,7 +3,7 @@ import { NavLink, useLocation, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, permissionPhase1, permissionPhase2, permissionPhase3 } from "../../utils";
+import { YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, permissionPhase1, permissionPhase2, permissionPhase3 } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 import SubMenuPhase2 from "./SubMenuPhase2";
@@ -33,20 +33,27 @@ export default function Drawer(props) {
   }, [props.open]);
 
   useEffect(() => {
-    // if the young is not validated yet
-
     if (young.status === YOUNG_STATUS.WITHDRAWN) {
-      setStatus1(young.status);
-      setStatus2(young.status);
-      setStatus3(young.status);
+      setStatus1(young.statusPhase1);
+      setStatus2(young.statusPhase2);
+      setStatus3(young.statusPhase3);
     }
 
+    // si le jeune n'est pas validé, ni désisté
+    // -> on ne le considère pas encore dans le snu et on affiche donc les status "IN_COMING"
+    // ou les status lié au moment de son désistement
     if (young.status !== YOUNG_STATUS.VALIDATED) return;
 
     young.statusPhase1 && setStatus1(young.statusPhase1);
+    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) {
+      setStatus2(YOUNG_STATUS_PHASE2.WITHDRAWN);
+      setStatus3(YOUNG_STATUS_PHASE3.WITHDRAWN);
+      return;
+    }
     if (![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) return;
 
     young.statusPhase2 && setStatus2(young.statusPhase2);
+    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) return setStatus3(YOUNG_STATUS_PHASE3.WITHDRAWN);
     if (young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED) return;
 
     young.statusPhase3 && setStatus3(young.statusPhase3);

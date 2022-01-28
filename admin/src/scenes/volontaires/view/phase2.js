@@ -44,7 +44,12 @@ export default function Phase2({ young, onChange }) {
               </Row>
             </Col>
             <Col md={4} sm={4} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <SelectStatus hit={young} statusName="statusPhase2" phase={YOUNG_PHASE.INTEREST_MISSION} options={Object.keys(YOUNG_STATUS_PHASE2)} />
+              <SelectStatus
+                hit={young}
+                statusName="statusPhase2"
+                phase={YOUNG_PHASE.INTEREST_MISSION}
+                options={Object.keys(YOUNG_STATUS_PHASE2).filter((e) => e !== YOUNG_STATUS_PHASE2.WITHDRAWN)}
+              />
             </Col>
           </Row>
         </Box>
