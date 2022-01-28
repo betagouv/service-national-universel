@@ -472,13 +472,14 @@ describe("Es", () => {
   });
 
   describe("POST /es/young/_msearch", () => {
-    it("should return 404 for head center when center does not exit", async () => {
+    it("should return no youngs for head center when center does not exit", async () => {
       const passport = require("passport");
 
       passport.user.role = ROLES.HEAD_CENTER;
       passport.user.cohesionCenterId = notExistingCohesionCenterId;
       const res = await msearch("young", buildMsearchQuery("young", matchAll));
-      expect(res.statusCode).toEqual(404);
+      expect(res.statusCode).toEqual(200);
+      expect(res.data).not.toBeDefined();
 
       passport.user.role = ROLES.ADMIN;
     });
