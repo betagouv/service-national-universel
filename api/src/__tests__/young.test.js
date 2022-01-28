@@ -217,13 +217,33 @@ describe("Young", () => {
       expect(updatedYoung.qpv).toEqual("false");
     });
 
-    it("should cascade status to WITHDRAWN", async () => {
-      const { updatedYoung, response } = await selfUpdateYoung({ status: "WITHDRAWN" });
+    it("should cascade status to WITHDRAWN if not validated", async () => {
+      const young = await createYoungHelper({...getNewYoungFixture(), statusPhase1: "WAITING_AFFECTATION", statusPhase2:'WAITING_REALISATION', statusPhase3: 'WAITING_REALISATION'});
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const response = await request(getAppHelper()).put("/young").send({ status: "WITHDRAWN" });
+      const updatedYoung = response.body.data;
       expect(response.statusCode).toEqual(200);
       expect(updatedYoung.status).toEqual("WITHDRAWN");
       expect(updatedYoung.statusPhase1).toEqual("WITHDRAWN");
       expect(updatedYoung.statusPhase2).toEqual("WITHDRAWN");
       expect(updatedYoung.statusPhase3).toEqual("WITHDRAWN");
+      passport.user = previous;
+    });
+    it("should not cascade status to WITHDRAWN if validated", async () => {
+      const young = await createYoungHelper({...getNewYoungFixture(), statusPhase1: "DONE", statusPhase2:'VALIDATED', statusPhase3: 'VALIDATED'});
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const response = await request(getAppHelper()).put("/young").send({ status: "WITHDRAWN" });
+      const updatedYoung = response.body.data;
+      expect(response.statusCode).toEqual(200);
+      expect(updatedYoung.status).toEqual("WITHDRAWN");
+      expect(updatedYoung.statusPhase1).toEqual("DONE");
+      expect(updatedYoung.statusPhase2).toEqual("VALIDATED");
+      expect(updatedYoung.statusPhase3).toEqual("VALIDATED");
+      passport.user = previous;
     });
 
     it("should update young birthCountry", async () => {
