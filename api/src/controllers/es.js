@@ -94,7 +94,7 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
     // A head center can only see youngs of their session.
     if (user.role === ROLES.HEAD_CENTER) {
       const sessionPhase1 = await SessionPhase1Object.findById(user.sessionPhase1Id);
-      if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!sessionPhase1) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
       filter.push({ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { "sessionPhase1Id.keyword": sessionPhase1._id.toString() } });
       const visibleCohorts = COHORTS.filter((cohort) => PHASE1_HEADCENTER_ACCESS_LIMIT[cohort] > Date.now());
       if (visibleCohorts.length) {
