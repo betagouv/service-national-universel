@@ -3,7 +3,7 @@ import Header from "../../../components/Header";
 import Layout from "../../../components/Layout";
 import TicketsPreview from "../../../components/TicketsPreview";
 import TicketsFolders from "../../../components/TicketsFolders";
-import TicketsRightDrawer from "../../../components/TicketsRightDrawer";
+// import TicketsRightDrawer from "../../../components/TicketsRightDrawer";
 import withAuth from "../../../hocs/withAuth";
 import TicketsTable from "../../../components/TicketsTable";
 
