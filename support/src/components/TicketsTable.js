@@ -37,7 +37,7 @@ const TicketsTable = ({ onTicketClick }) => {
   const { data } = useSWR(API.getUrl({ path: "/support-center/ticket" }));
   const tickets = data?.data || [];
 
-  const [columns, setColumns] = useState(() => JSON.parse(localStorage.getItem("snu-tickets-table")) || initColumns);
+  const [columns] = useState(() => JSON.parse(localStorage.getItem("snu-tickets-table")) || initColumns);
   const tableRef = useRef(null);
 
   return (
