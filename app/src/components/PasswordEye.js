@@ -7,7 +7,7 @@ import EyeOpen from "../assets/eye.svg";
 import EyeClose from "../assets/eye-slash.svg";
 
 // eslint-disable-next-line prettier/prettier
-export default function PasswordEye({ value, onChange, autoComplete = "new-password", placeholder = "Tapez votre mot de passe", name = "password", validate = () => { } }) {
+export default function PasswordEye({ value, onChange, showError = true, autoComplete = "new-password", placeholder = "Tapez votre mot de passe", name = "password", validate = () => { } }) {
   const [passwordText, setPasswordText] = useState(false);
 
   return (
@@ -15,7 +15,7 @@ export default function PasswordEye({ value, onChange, autoComplete = "new-passw
       <InputField
         placeholder={placeholder}
         className="form-control"
-        validate={(v) => validate(v) || getPasswordErrorMessage(v)}
+        validate={(v) => validate(v) || (showError && getPasswordErrorMessage(v))}
         type={passwordText ? "text" : "password"}
         autoComplete={autoComplete}
         name={name}
@@ -52,13 +52,10 @@ const InputField = styled(Field)`
   background-color: #fff;
   color: #606266;
   outline: 0;
-  padding: 9px 20px;
+  padding: 21px 20px;
   border-radius: 4px;
   border: 1px solid;
   border-color: ${({ hasError }) => (hasError ? "red" : "#dcdfe6")};
-  ::placeholder {
-    color: #d6d6e1;
-  }
   :focus {
     border: 1px solid #aaa;
   }

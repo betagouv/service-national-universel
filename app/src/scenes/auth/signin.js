@@ -17,6 +17,7 @@ import Register from "./components/Register";
 import ErrorLogin from "./components/ErrorLogin";
 import ModalInProgress from "../../components/modals/ModalInProgress";
 import { toastr } from "react-redux-toastr";
+import PasswordEye from "../../components/PasswordEye";
 
 /*
 
@@ -109,15 +110,7 @@ export default function Signin() {
                 </StyledFormGroup>
                 <StyledFormGroup>
                   <div>
-                    <InputField
-                      // validate={(v) => validator.isEmpty(v) && "This field is Required"}
-                      name="password"
-                      type="password"
-                      id="password"
-                      placeholder="Votre mot de passe"
-                      value={values.password}
-                      onChange={handleChange}
-                    />
+                    <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
                     <label htmlFor="password">Mot de passe</label>
                   </div>
                   <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.password}</p>
