@@ -72,11 +72,11 @@ const TeamBlock = ({ team, deleteTeamate }) => {
 const Group = ({ team, role }) => {
   const teamFiltered = team.filter((member) => member.role === role);
 
-  if (teamFiltered.length === 0) return <></>;
-
   return (
-    <>
-      <h6>{teamFiltered[0].role}</h6>
+    <GroupContainer>
+      <h6>
+        {role}&nbsp;({teamFiltered.length})
+      </h6>
       {teamFiltered.map((user, index) => (
         <FlexBox key={index} style={{ justifyContent: "space-between", marginBlock: "0.25rem" }}>
           <FlexBox>
@@ -96,7 +96,7 @@ const Group = ({ team, role }) => {
           <ButtonIcon icon={BinSVG} onClick={() => deleteTeamate(index)} />
         </FlexBox>
       ))}
-    </>
+    </GroupContainer>
   );
 };
 
@@ -186,6 +186,10 @@ const Badge = styled.div`
   align-items: center;
   justify-content: center;
   margin-right: 1rem;
+`;
+
+const GroupContainer = styled.div`
+  margin: 1rem 0 2rem 0;
 `;
 
 const FlexBox = styled.div`
