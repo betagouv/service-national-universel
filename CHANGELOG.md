@@ -1,3 +1,21 @@
+# [1.34.0](https://github.com/betagouv/service-national-universel/compare/v1.33.1...v1.34.0) (2022-01-31)
+
+
+### Bug Fixes
+
+* **admin:** remove export cas particulier ([cea8a69](https://github.com/betagouv/service-national-universel/commit/cea8a69b8313b6841ac4c4215891ec041915b021))
+* **admin:** view head center ([4776614](https://github.com/betagouv/service-national-universel/commit/4776614504a3ba2d6c2c8e8b6c7e981687acfe30))
+* **api:** privileges `canCreateOrUpdateSessionPhase1` ([49a2795](https://github.com/betagouv/service-national-universel/commit/49a2795f4a5bf6d00d03978ba581c89afbac197f))
+* **api:** sync places sessions ([9a1a456](https://github.com/betagouv/service-national-universel/commit/9a1a45642cc995c1a79aee55a4b9e2b7e87d4f4e))
+
+
+### Features
+
+* **admin:** onglet "Mon centre" espace chef de centre ([#1164](https://github.com/betagouv/service-national-universel/issues/1164)) ([182405d](https://github.com/betagouv/service-national-universel/commit/182405df5ab3f9cb9b2cc086e36120f61e8bf4cf))
+* **app:** add passwordEye ([#1167](https://github.com/betagouv/service-national-universel/issues/1167)) ([bdaaf6d](https://github.com/betagouv/service-national-universel/commit/bdaaf6d26b1b16a8e58cb1b8a3c736e484dbba7b))
+* **support:** metadata for knowledge base ([#1173](https://github.com/betagouv/service-national-universel/issues/1173)) ([f2c29e6](https://github.com/betagouv/service-national-universel/commit/f2c29e671d542ed23283d47de98d739eb36e0be6))
+* inviter un chef de centre ([#1147](https://github.com/betagouv/service-national-universel/issues/1147)) ([d2ef68f](https://github.com/betagouv/service-national-universel/commit/d2ef68f9cce5e50dfa62f3fbe709b36c01783bce))
+
 ## [1.33.1](https://github.com/betagouv/service-national-universel/compare/v1.33.0...v1.33.1) (2022-01-29)
 
 
