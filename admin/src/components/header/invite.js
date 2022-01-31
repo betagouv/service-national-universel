@@ -23,12 +23,18 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 
 export default function InviteHeader({ setOpen, open, label = "Inviter un référent" }) {
+  const { user } = useSelector((state) => state.Auth);
+
   const [centers, setCenters] = useState(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await api.get("/cohesion-center");
+        let { data } = await api.get("/cohesion-center");
+
+        if (user.role === ROLES.REFERENT_REGION) data = data.filter((e) => e.region === user.region);
+        if (user.role === ROLES.REFERENT_DEPARTMENT) data = data.filter((e) => e.department === user.department);
+
         const c = data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         setCenters(c);
       } catch (e) {
@@ -60,6 +66,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                 department: "",
                 cohesionCenterName: "",
                 cohesionCenterId: "",
+                sessionPhase1Id: "",
               }}
               onSubmit={async (values, { setSubmitting }) => {
                 try {
@@ -67,7 +74,11 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                   if (obj.role === ROLES.REFERENT_DEPARTMENT) obj.region = department2region[obj.department];
                   if (obj.role === ROLES.REFERENT_REGION) obj.department = null;
                   if (obj.department && !obj.region) obj.region = department2region[obj.department];
-                  await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
+                  const { data: referent } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
+
+                  if (values.sessionPhase1Id) {
+                    await api.put(`/session-phase1/${values.sessionPhase1Id}`, { headCenterId: referent._id });
+                  }
                   toastr.success("Invitation envoyée");
                   setOpen();
                   setOpen(false);
@@ -160,6 +171,11 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       <Col md={6}>
                         <FormGroup>
                           <ChooseCenter validate={(v) => !v} value={values} onChange={handleChange} centers={centers} />
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <ChooseSessionPhase1 value={values} onChange={handleChange} />
                         </FormGroup>
                       </Col>
                     </Row>
@@ -266,6 +282,30 @@ const ChooseCenter = ({ onChange, centers, onSelect }) => {
         onChange({ target: { value: e._id, name: "cohesionCenterId" } });
         onChange({ target: { value: e.value, name: "cohesionCenterName" } });
         onSelect?.(e);
+      }}
+    />
+  );
+};
+
+const ChooseSessionPhase1 = ({ onChange, value }) => {
+  const [sessions, setSessions] = useState([]);
+  useEffect(() => {
+    if (!value.cohesionCenterId) return;
+
+    (async () => {
+      const { ok, error, data } = await api.get(`/cohesion-center/${value.cohesionCenterId}/session-phase1`);
+      if (!ok) return toastr.error("Erreur", error);
+      setSessions(data.map((e) => ({ label: e.cohort, value: e._id })));
+    })();
+  }, [value.cohesionCenterId]);
+
+  return (
+    <ReactSelect
+      options={sessions}
+      placeholder="Choisir une session"
+      noOptionsMessage={() => "Aucune session ne correspond à cette recherche."}
+      onChange={(e) => {
+        onChange({ target: { value: e.value, name: "sessionPhase1Id" } });
       }}
     />
   );
