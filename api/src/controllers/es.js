@@ -209,10 +209,33 @@ router.post("/sessionphase1young/:id/:action(_msearch|export)", passport.authent
   try {
     const { user, body } = req;
 
-    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
+    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
+    let filter = [
+      {
+        bool: {
+          filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { sessionPhase1Id: req.params.id } }],
+          must_not: [{ term: { "statusPhase1.keyword": "WAITING_LIST" } }],
+        },
+      },
+    ];
+
+    if (user.role === ROLES.HEAD_CENTER) {
+      const sessionsPhase1 = await SessionPhase1Object.find({ headCenterId: user._id });
+      if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const visibleCohorts = COHORTS.filter((cohort) => PHASE1_HEADCENTER_ACCESS_LIMIT[cohort] > Date.now());
+      if (visibleCohorts.length) {
+        filter.push({ terms: { "cohort.keyword": visibleCohorts } });
+      } else {
+        // Tried that to specify when there's just no data or when the head center has no longer access
+        return res.status(200).send({ ok: true, data: "no cohort available" });
+      }
+      if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.id)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
     if (user.role === ROLES.REFERENT_REGION) {
       const centers = await CohesionCenterObject.find({ region: user.region });
       const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
@@ -228,15 +251,6 @@ router.post("/sessionphase1young/:id/:action(_msearch|export)", passport.authent
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
-
-    const filter = [
-      {
-        bool: {
-          filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { sessionPhase1Id: req.params.id } }],
-          must_not: [{ term: { "statusPhase1.keyword": "WAITING_LIST" } }],
-        },
-      },
-    ];
 
     if (req.params.action === "export") {
       const response = await allRecords("young", applyFilterOnQuery(req.body.query, filter));
