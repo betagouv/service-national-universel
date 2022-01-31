@@ -15,6 +15,9 @@ const { getYoungsHelper, createYoungHelper, notExistingYoungId, deleteYoungByEma
 //cohesion center
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
+const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
+const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
+
 const { ROLES } = require("snu-lib/roles");
 
 jest.mock("../sendinblue", () => ({
@@ -253,16 +256,16 @@ describe("Young", () => {
     });
 
     it("should remove places when sending to cohesion center", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const placesLeft = cohesionCenter.placesLeft;
+      const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
+      const placesLeft = sessionPhase1.placesLeft;
       const { updatedYoung, response } = await selfUpdateYoung({
-        cohesionCenterId: cohesionCenter._id,
+        sessionPhase1Id: sessionPhase1._id,
         status: "VALIDATED",
         statusPhase1: "DONE",
       });
       expect(response.statusCode).toEqual(200);
-      const updatedCohesionCenter = await getCohesionCenterById(updatedYoung.cohesionCenterId);
-      expect(updatedCohesionCenter.placesLeft).toEqual(placesLeft - 1);
+      const updatedSessionPhase1 = await getSessionPhase1ById(updatedYoung.sessionPhase1Id);
+      expect(updatedSessionPhase1.placesLeft).toEqual(placesLeft - 1);
     });
 
     it("should be only accessible by young", async () => {

@@ -23,6 +23,8 @@ const {
 } = require("./helpers/referent");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
+const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
+const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { getNewApplicationFixture } = require("./fixtures/application");
 const { createApplication, getApplicationsHelper } = require("./helpers/application");
@@ -130,16 +132,16 @@ describe("Referent", () => {
       expect(young.cohesionStayPresence).toEqual("false");
     });
     it("should remove places when sending to cohesion center", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const placesLeft = cohesionCenter.placesLeft;
+      const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
+      const placesLeft = sessionPhase1.placesLeft;
       const { young, response } = await createYoungThenUpdate({
-        cohesionCenterId: cohesionCenter._id,
+        sessionPhase1Id: sessionPhase1._id,
         status: "VALIDATED",
         statusPhase1: "AFFECTED",
       });
       expect(response.statusCode).toEqual(200);
-      const updatedCohesionCenter = await getCohesionCenterById(young.cohesionCenterId);
-      expect(updatedCohesionCenter.placesLeft).toEqual(placesLeft - 1);
+      const updatedSessionPhase1 = await getSessionPhase1ById(young.sessionPhase1Id);
+      expect(updatedSessionPhase1.placesLeft).toEqual(placesLeft - 1);
     });
   });
 
