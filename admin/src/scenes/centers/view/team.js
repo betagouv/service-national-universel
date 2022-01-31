@@ -62,14 +62,16 @@ const TeamBlock = ({ team, deleteTeamate }) => {
       <h4>Équipe ({team.length || 0})</h4>
       {team.length === 0 && <p style={{ fontStyle: "italic" }}>Aucun membre</p>}
 
-      {Object.values(CENTER_ROLES).map((role, index) => {
-        return <Group key={index} team={team} role={role} />;
-      })}
+      {Object.values(CENTER_ROLES)
+        .filter((e) => e !== CENTER_ROLES.chef)
+        .map((role, index) => {
+          return <Group key={index} team={team} role={role} deleteTeamate={deleteTeamate} />;
+        })}
     </div>
   );
 };
 
-const Group = ({ team, role }) => {
+const Group = ({ team, role, deleteTeamate }) => {
   const teamFiltered = team.filter((member) => member.role === role);
 
   return (
