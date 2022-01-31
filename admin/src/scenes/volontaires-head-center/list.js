@@ -68,7 +68,7 @@ export default function List() {
     })();
   }, []);
   const getDefaultQuery = () => ({
-    query: { bool: { filter: [{ term: { "cohesionCenterId.keyword": user.cohesionCenterId } }, { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }] } },
+    query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }] } },
     sort: [{ "lastName.keyword": "asc" }],
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });

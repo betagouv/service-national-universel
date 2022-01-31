@@ -12,7 +12,7 @@ export default function Index() {
   const user = useSelector((state) => state.Auth.user);
 
   function updateFilter(n) {
-    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: [], department: [], cohort: ["2021"] }), ...n });
+    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: [], department: [], cohort: ["Février 2022"] }), ...n });
   }
 
   useEffect(() => {
@@ -43,6 +43,9 @@ export default function Index() {
                       { value: "2019", label: "2019" },
                       { value: "2020", label: "2020" },
                       { value: "2021", label: "2021" },
+                      { value: "Février 2022", label: "Février 2022" },
+                      { value: "Juin 2022", label: "Juin 2022" },
+                      { value: "Juillet 2022", label: "Juillet 2022" },
                     ]}
                     onChange={(cohort) => updateFilter({ cohort })}
                     value={filter.cohort}

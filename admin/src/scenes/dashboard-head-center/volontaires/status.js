@@ -19,7 +19,7 @@ export default function Status({ filter }) {
         query: {
           bool: {
             must: { match_all: {} },
-            filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { "cohesionCenterId.keyword": user.cohesionCenterId } }],
+            filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }],
           },
         },
         aggs: {
