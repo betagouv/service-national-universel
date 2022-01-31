@@ -46,6 +46,7 @@ const EyeIcon = styled.img`
   right: 15px;
   top: 50%;
   height: 18px;
+  width: 25px;
   opacity: 0.7;
   transform: translateY(-50%);
   font-size: 18px;
