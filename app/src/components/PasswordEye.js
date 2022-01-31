@@ -38,6 +38,7 @@ const EyeIcon = styled.img`
   position: absolute;
   right: 15px;
   top: 50%;
+  width: 25px;
   height: 18px;
   opacity: 0.7;
   transform: translateY(-50%);
@@ -56,7 +57,13 @@ const InputField = styled(Field)`
   border-radius: 4px;
   border: 1px solid;
   border-color: ${({ hasError }) => (hasError ? "red" : "#dcdfe6")};
+  ::placeholder {
+    color: #798fb0;
+  }
   :focus {
     border: 1px solid #aaa;
+    ::placeholder {
+      color: #ccd5e0;
+    }
   }
 `;
