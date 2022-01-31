@@ -3,7 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 
 const esClient = require("../es");
 
-const MODELNAME = "zammadticket";
+const MODELNAME = "ticket";
 
 const Message = new mongoose.Schema(
   {
@@ -97,14 +97,23 @@ const Schema = new mongoose.Schema(
       documentation: {
         description: "Sujet du ticket",
       },
-    }, // OK
+    },
+    emitter: {
+      type: String,
+      documentation: {
+        description: "Groupe de l'émetteur : Volontaire, Référent...",
+      },
+    },
+    cohort: {
+      type: String,
+    },
     emitterYoungId: {
       type: mongoose.Types.ObjectId,
       ref: "young",
       documentation: {
         description: "Identifiant de l'émetteur volontaire",
       },
-    }, // OK
+    },
     emitterUserId: {
       type: mongoose.Types.ObjectId,
       ref: "referent",
@@ -142,11 +151,10 @@ const Schema = new mongoose.Schema(
     },
     addressedToAgent: {
       type: [String],
-      enum: ["AGENT_SUPPORT", "AGENT_TECHNICAL", "AGENT_DEPARTMENT_REFERENT", "AGENT_REGION_REFERENT", ""],
       documentation: {
         description: "L'agent (ou les agents) auquel est destiné le ticket",
       },
-    },
+    }, // OK
     fromCanal: {
       type: String,
       enum: ["CANAL_Chat", "CANAL_Mail", "CANAL_Plateforme", "CANAL_Formulaire", "CANAL_Facebook", "CANAL_Twitter", ""],
@@ -244,6 +252,22 @@ const Schema = new mongoose.Schema(
       documentation: {
         description: "étiquettes reliées au ticket",
       },
+    },
+    // This is for Metabase for now, as we're still using Zammad
+    tagName1: {
+      type: String,
+    },
+    tagName2: {
+      type: String,
+    },
+    tagName3: {
+      type: String,
+    },
+    tagName4: {
+      type: String,
+    },
+    feedback: {
+      type: String,
     },
     messages: {
       type: [Message],

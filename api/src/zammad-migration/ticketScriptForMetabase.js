@@ -1,18 +1,18 @@
-require("dotenv").config({ path: "../../.env-staging" });
+require("dotenv").config({ path: "../../.env-prod" });
 require("../mongo");
 const client = require("./database");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");
-const ZammadTicketModel = require("../models/zammad-ticket");
-// const TagModel = require("../models/tag");
-const { formatDistance } = require("date-fns");
+const TicketModel = require("../models/ticket");
+const TagModel = require("../models/tag");
+const { intervalToDuration, formatDuration } = require("date-fns");
 const { fr } = require("date-fns/locale");
 const { ENVIRONMENT } = require("../config");
 
 // function call, because eslint is yelling
 const migrateTickets = async ({ force } = { force: false }) => {
+  console.log("MONGO", process.env.MONGO_URL);
   if (ENVIRONMENT !== "production" && !force) return console.log("no migration zammad");
-  console.log("AM I HERE ???");
   // Mes étapes
   // 1. Récupérer les différentes tables et les filtrer pour récupérer les champs intéressants
   const tickets = (await client("SELECT * from tickets")).rows;
@@ -31,24 +31,22 @@ const migrateTickets = async ({ force } = { force: false }) => {
   }
 
   try {
-    /*
-No need for ZammadTickets for metabase
-// 2. Créer / mettre à jour ma table Tag avec toutes les occurences
+    // 2. Créer / mettre à jour ma table Tag avec toutes les occurences
     for (let tag of tagItems) {
       const tagExisting = await TagModel.findOne({ zammadId: tag.id });
       if (tagExisting) {
-        console.log("TAG ALREADY EXISTS !");
+        //console.log("TAG ALREADY EXISTS !");
         if (tagExisting.name !== tag.name) {
           await tagExisting.save({ name: tag.name });
         }
         continue;
       }
       const SNUtag = await TagModel.create({ zammadId: tag.id, name: tag.name });
-      console.log("TAG CREATED", SNUtag);
-    } */
+      //console.log("TAG CREATED", SNUtag);
+    }
 
     for (let ticket of tickets) {
-      console.log("I'm here !!");
+      console.log("-------------------------");
       let priority = await ticketPriorities.filter((priority) => ticket.priority_id === priority.id)[0].name;
       if (priority === "1 low") priority = "LOW";
       if (priority === "2 normal") priority = "NORMAL";
@@ -91,39 +89,55 @@ No need for ZammadTickets for metabase
         });
       }
       // As we can't use the firstResponseAt from Zammad's ticket object, we have to do this instead :
-      const firstResponseAt = messages[1]?.created_at;
+      //const firstResponseAt = messages[1]?.created_at;
+      const firstResponseAt = messages.filter((m) => m.created_by_id !== ticket.created_by_id)[0]?.created_at;
+      //console.log("FIRST RESPONSE AT", firstResponseAt);
       let timeUntilFirstResponse;
       if (firstResponseAt) {
-        timeUntilFirstResponse = formatDistance(ticket.created_at, firstResponseAt, { locale: fr });
-        console.log("TIME ?", timeUntilFirstResponse);
+        const duration = intervalToDuration({ start: ticket.created_at, end: firstResponseAt });
+        timeUntilFirstResponse = formatDuration(duration, { zero: false, locale: fr });
+        //console.log("TIME UNTIL FIRST RESPONSE ---->", timeUntilFirstResponse);
       }
 
       const tags = ticketTags.filter((tag) => tag.o_id === ticket.id);
-      // let tagsIds = [];
-      let addressedToAgents = [];
+      let tagsIds = [];
+      let addressedToAgent = [];
       let fromCanal = "";
       let category = "";
+      let subject = "";
       let department = "";
       let region = "";
-      let subject = "";
+      let cohort = "";
+      let emitter = "";
+      let feedback = "";
+      let tagNames = [];
       for (let tag of tags) {
-        const tagName = tagItems.filter((item) => item.id === tag.tag_item_id)[0].name;
+        const tagName = await tagItems.filter((item) => item.id === tag.tag_item_id)[0].name;
         if (tagName.includes("AGENT")) {
-          addressedToAgents.push(tagName);
+          addressedToAgent.push(tagName);
         } else if (tagName.includes("CANAL")) {
           fromCanal = tagName;
-        } else if (tagName.includes("TECHNICAL") || tagName.includes("QUESTION")) {
-          category = tagName;
+        } else if (tagName.includes("problème_technique") || tagName.includes("question")) {
+          tagName.includes("question") ? (category = "QUESTION") : (category = "TECHNICAL");
         } else if (tagName.includes("DEPARTEMENT")) {
-          department = tagName;
+          department = tagName.split("DEPARTEMENT_")[1];
         } else if (tagName.includes("REGION")) {
-          region = tagName;
+          region = tagName.split("REGION_")[1];
+        } else if (tagName.includes("merci") || tagName.includes("WOW") || tagName.includes("mécontent")) {
+          feedback = tagName;
+        } else if (tagName.includes("COHORTE")) {
+          cohort = tagName.split("COHORTE_")[1];
+        } else if (tagName.includes("EMETTEUR")) {
+          emitter = tagName.split("EMETTEUR_")[1];
+        } else if (tagName.includes("TAG")) {
+          subject = tagName.split("TAG_")[1];
         } else {
           // 3. Récupérer les ids des tags du ticket dans la table Tag
-          // const tagId = await TagModel.findOne({ zammadId: tag.tag_item_id });
-          // if (!tagId) continue;
-          // tagsIds.push(tagId.zammadId);
-          subject.concat(", ", tagName);
+          const tagId = await TagModel.findOne({ zammadId: tag.tag_item_id });
+          if (!tagId) continue;
+          tagsIds.push({ id: tagId.zammadId, name: tagName });
+          tagNames.push(tagName);
+          console.log("TAGS", tagNames);
         }
       }
       // 7. Rassembler toutes les données et créer un nouveau document dans ma table Ticket ou update un document existant
@@ -133,13 +147,15 @@ No need for ZammadTickets for metabase
         title: ticket.title,
         category,
         subject,
+        emitter,
+        cohort,
         emitterUserId: emitterUser?._id || null,
         emitterYoungId: emitterYoung?._id || null,
         emitterZammadId: ticket.created_by_id,
         emitterExternal,
         emitterDepartment: department || emitterUser?.department || emitterYoung?.department || "",
         emitterRegion: region || emitterUser?.region || emitterYoung?.region || "",
-        addressedToAgents,
+        addressedToAgent,
         fromCanal,
         group: groups.filter((group) => ticket.group_id === group.id)[0].name,
         priority,
@@ -147,35 +163,41 @@ No need for ZammadTickets for metabase
         createdAt: ticket.created_at,
         updatedAt: ticket.updated_at,
         closedAt: ticket.close_at,
-        firstResponseAt: ticket.first_response_at,
+        firstResponseAt,
         timeUntilFirstResponse,
         lastContactEmitterAt: ticket.last_contact_customer_at,
         lastContactAgentAt: ticket.last_contact_agent_at,
-        tagIds: [],
-        // tags: tagsIds,
+        feedback: feedback || "neutre",
+        tagIds: tagsIds,
+        tagName1: tagNames[0] || null,
+        tagName2: tagNames[1] || null,
+        tagName3: tagNames[2] || null,
+        tagName4: tagNames[3] || null,
         messages: messagesArray,
         agentInChargeId,
         agentInChargeZammadId: ticket.owner_id,
         lastAgentInChargeUpdateAt: ticket.last_owner_update_at,
         lastUpdateById: ticket.updated_by_id,
       };
-      console.log("TICKET BODY OKAY ?", ticketBody);
-      const ticketExisting = await ZammadTicketModel.findOne({ zammadId: ticket.id });
+      //console.log("TICKET BODY OKAY ?", ticketBody);
+      const ticketExisting = await TicketModel.findOne({ zammadId: ticket.id });
       if (ticketExisting) {
         console.log("TICKET EXISTING !");
-        await ticketExisting.save(ticketBody);
+        ticketExisting.set(ticketBody);
+        const ticketSaved = await ticketExisting.save();
+        console.log("TICKET ----->", ticketSaved?.title);
       } else {
-        const ticketCreated = await ZammadTicketModel.create(ticketBody);
+        const ticketCreated = await TicketModel.create(ticketBody);
         console.log("TICKET CREATED", ticketCreated?.title);
         if (!ticketCreated) {
           console.log("ERROR IN TICKET CREATION");
         }
       }
-      console.log("END OF TICKET LOOP");
     }
   } catch (error) {
     console.log("ERROR !", error);
   }
+  console.log("END OF SCRIPT.");
 };
 
-//migrateTickets();
+migrateTickets();
