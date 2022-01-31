@@ -13,7 +13,7 @@ const { encrypt } = require("../../cryptoUtils");
 const { getQPV, getDensity } = require("../../geo");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
-const CohesionCenterObject = require("../../models/cohesionCenter");
+const SessionPhase1 = require("../../models/sessionPhase1");
 const ApplicationModel = require("../../models/application");
 const MissionModel = require("../../models/mission");
 const AuthObject = require("../../auth");
@@ -23,7 +23,6 @@ const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
   validatePassword,
-  updatePlacesCenter,
   signinLimiter,
   // assignNextYoungFromWaitingList,
   ERRORS,
@@ -453,9 +452,9 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     }
 
     // if they had a cohesion center, we check if we need to update the places taken / left
-    if (req.user.statusPhase1 !== young.statusPhase1 && young.cohesionCenterId) {
-      const center = await CohesionCenterObject.findById(young.cohesionCenterId);
-      if (center) await updatePlacesCenter(center);
+    if (young.sessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
     }
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {

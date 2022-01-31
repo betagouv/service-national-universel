@@ -11,7 +11,7 @@ const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
 const MissionModel = require("../models/mission");
 const ApplicationModel = require("../models/application");
-const CohesionCenterModel = require("../models/cohesionCenter");
+const SessionPhase1 = require("../models/sessionPhase1");
 const StructureModel = require("../models/structure");
 const AuthObject = require("../auth");
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -26,7 +26,7 @@ const {
   getFile,
   uploadFile,
   validatePassword,
-  updatePlacesCenter,
+  updatePlacesSessionPhase1,
   signinLimiter,
   //  assignNextYoungFromWaitingList,
   ERRORS,
@@ -345,9 +345,9 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     await young.save({ fromUser: req.user });
 
     // if they had a cohesion center, we check if we need to update the places taken / left
-    if (young.cohesionCenterId) {
-      const center = await CohesionCenterModel.findById(young.cohesionCenterId);
-      if (center) await updatePlacesCenter(center);
+    if (young.sessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
     }
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
