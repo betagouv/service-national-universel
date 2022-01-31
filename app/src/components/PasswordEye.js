@@ -37,7 +37,7 @@ const ContainerPassword = styled.div`
 const EyeIcon = styled.img`
   position: absolute;
   right: 15px;
-  top: 50%;
+  top: 47%;
   width: 25px;
   height: 18px;
   opacity: 0.7;
