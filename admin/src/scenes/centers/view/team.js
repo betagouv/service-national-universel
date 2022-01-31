@@ -60,30 +60,43 @@ const TeamBlock = ({ team, deleteTeamate }) => {
   return (
     <div style={{ padding: "3rem" }}>
       <h4>Équipe ({team.length || 0})</h4>
-      {team.length === 0 ? (
-        <p style={{ fontStyle: "italic" }}>Aucun membre</p>
-      ) : (
-        team.map((user, index) => (
-          <FlexBox key={index} style={{ justifyContent: "space-between", marginBlock: "0.25rem" }}>
-            <FlexBox>
-              <Badge>
-                <p style={{ margin: 0, fontSize: "1rem", color: "#372F78", fontWeight: "bold" }}>
-                  {user.firstName?.[0]}
-                  {user.lastName?.[0]}
-                </p>
-              </Badge>
-              <div>
-                <p style={{ fontSize: "1rem", fontWeight: "500", margin: 0 }}>
-                  {user.firstName} {user.lastName}
-                </p>
-                <p style={{ color: "#92929D", margin: 0 }}>{user.role}</p>
-              </div>
-            </FlexBox>
-            <ButtonIcon icon={BinSVG} onClick={() => deleteTeamate(index)} />
-          </FlexBox>
-        ))
-      )}
+      {team.length === 0 && <p style={{ fontStyle: "italic" }}>Aucun membre</p>}
+
+      {Object.values(CENTER_ROLES).map((role, index) => {
+        return <Group key={index} team={team} role={role} />;
+      })}
     </div>
+  );
+};
+
+const Group = ({ team, role }) => {
+  const teamFiltered = team.filter((member) => member.role === role);
+
+  if (teamFiltered.length === 0) return <></>;
+
+  return (
+    <>
+      <h6>{teamFiltered[0].role}</h6>
+      {teamFiltered.map((user, index) => (
+        <FlexBox key={index} style={{ justifyContent: "space-between", marginBlock: "0.25rem" }}>
+          <FlexBox>
+            <Badge>
+              <p style={{ margin: 0, fontSize: "1rem", color: "#372F78", fontWeight: "bold" }}>
+                {user.firstName?.[0]}
+                {user.lastName?.[0]}
+              </p>
+            </Badge>
+            <div>
+              <p style={{ fontSize: "1rem", fontWeight: "500", margin: 0 }}>
+                {user.firstName} {user.lastName}
+              </p>
+              <p style={{ color: "#92929D", margin: 0 }}>{user.role}</p>
+            </div>
+          </FlexBox>
+          <ButtonIcon icon={BinSVG} onClick={() => deleteTeamate(index)} />
+        </FlexBox>
+      ))}
+    </>
   );
 };
 
