@@ -84,27 +84,6 @@ export default function List() {
               </div>
               <div style={{ display: "flex" }}>
                 <ExportComponent
-                  title="Export pour les cas particuliers"
-                  defaultQuery={getExportQuery}
-                  exportTitle="Volontaires_cas_particuliers"
-                  index="young"
-                  react={{ and: FILTERS }}
-                  transform={(all) => {
-                    return all.map((data) => {
-                      return {
-                        _id: data._id,
-                        Prénom: data.firstName,
-                        Nom: data.lastName,
-                        "Code centre": center.code || "",
-                        "Nom du centre": center.name || "",
-                        "Présence au séjour de cohésion": data.cohesionStayPresence || "",
-                        "Cas particulier qui valide sa JDC malgré son absence au séjour de cohésion (oui/non)": "",
-                        "Commentaires (Décrivez pourquoi)": "",
-                      };
-                    });
-                  }}
-                />
-                <ExportComponent
                   defaultQuery={getExportQuery}
                   title="Exporter les volontaires"
                   exportTitle="Volontaires"
