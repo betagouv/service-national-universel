@@ -20,7 +20,6 @@ export default function Index({ ...props }) {
   const [availableCohorts, setAvailableCohorts] = useState([]);
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
-  console.log(user);
 
   useEffect(() => {
     (async () => {
@@ -33,7 +32,6 @@ export default function Index({ ...props }) {
         return history.push("/center");
       }
       setCenter(centerResponse.data);
-      console.log("CENTER", centerResponse.data);
     })();
   }, [props.match.params.id]);
 
