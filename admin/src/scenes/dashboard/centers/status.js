@@ -13,24 +13,35 @@ export default function Status({ filter }) {
 
   useEffect(() => {
     async function initStatus() {
-      const body = {
+      const bodyCohension = {
         query: { bool: { must: { match_all: {} }, filter: [] } },
+        size: ES_NO_LIMIT,
+      };
+
+      if (filter.region?.length) bodyCohension.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) bodyCohension.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (filter.cohort?.length) bodyCohension.query.bool.filter.push({ terms: { "cohorts.keyword": filter.cohort } });
+
+      const { responses: responsesCohesion } = await api.esQuery("cohesioncenter", bodyCohension);
+
+      if (!responsesCohesion.length) return;
+      setTotal(responsesCohesion[0].hits.total.value);
+
+      const cohesionCenterId = responsesCohesion[0].hits.hits.map((e) => e._id);
+      const bodySession = {
+        query: { bool: { must: { match_all: {} }, filter: [{ terms: { cohesionCenterId } }] } },
         aggs: {
           placesTotal: { sum: { field: "placesTotal" } },
           placesLeft: { sum: { field: "placesLeft" } },
         },
-        size: ES_NO_LIMIT,
+        size: 0,
       };
 
-      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
-      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
-      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohorts.keyword": filter.cohort } });
+      const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
 
-      const { responses } = await api.esQuery("cohesioncenter", body);
-      if (responses.length) {
-        setPlacesTotal(responses[0].aggregations.placesTotal.value);
-        setPlacesLeft(responses[0].aggregations.placesLeft.value);
-        setTotal(responses[0].hits.total.value);
+      if (responsesSession.length) {
+        setPlacesTotal(responsesSession[0].aggregations.placesTotal.value);
+        setPlacesLeft(responsesSession[0].aggregations.placesLeft.value);
       }
     }
     initStatus();
