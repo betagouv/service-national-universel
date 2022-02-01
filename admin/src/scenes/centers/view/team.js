@@ -94,7 +94,7 @@ const Group = ({ team, role, deleteTeamate }) => {
               </p>
             </div>
           </FlexBox>
-          <ButtonIcon icon={BinSVG} onClick={() => deleteTeamate(index)} />
+          <ButtonIcon icon={BinSVG} onClick={() => deleteTeamate(user)} />
         </FlexBox>
       ))}
     </GroupContainer>
