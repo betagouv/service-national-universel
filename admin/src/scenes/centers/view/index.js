@@ -53,7 +53,8 @@ export default function Index({ ...props }) {
     if (ok) setCenter(data);
   };
 
-  const deleteTeamate = async (index) => {
+  const deleteTeamate = async (user) => {
+    const index = focusedSession.team.findIndex((e) => JSON.stringify(e) === JSON.stringify(user));
     focusedSession.team.splice(index, 1);
 
     try {
