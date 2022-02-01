@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Switch, Route, useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import Team from "./team";
@@ -16,7 +17,10 @@ export default function Index({ ...props }) {
   const [focusedCohort, setFocusedCohort] = useState();
   const [focusedSession, setFocusedSession] = useState();
   const [focusedTab, setFocusedTab] = useState("equipe");
+  const [availableCohorts, setAvailableCohorts] = useState([]);
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
+  console.log(user);
 
   useEffect(() => {
     (async () => {
@@ -29,6 +33,7 @@ export default function Index({ ...props }) {
         return history.push("/center");
       }
       setCenter(centerResponse.data);
+      console.log("CENTER", centerResponse.data);
     })();
   }, [props.match.params.id]);
 
@@ -40,6 +45,11 @@ export default function Index({ ...props }) {
   useEffect(() => {
     (async () => {
       if (!center || !center?.cohorts || !center?.cohorts?.length || !focusedCohort) return;
+      const allSessions = await api.get(`/cohesion-center/${center._id}/session-phase1`);
+      if (!allSessions.ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération des sessions", translate(allSessions.code));
+      }
+      setAvailableCohorts(allSessions.data.filter((session) => session.headCenterId === user._id).map((session) => session.cohort));
       const sessionPhase1 = await api.get(`/cohesion-center/${center._id}/cohort/${focusedCohort}/session-phase1`);
       if (!sessionPhase1.ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1.code));
@@ -113,14 +123,24 @@ export default function Index({ ...props }) {
     <>
       <CenterInformations center={center} />
       <div style={{ padding: "0 3rem" }}>
-        <Nav tab={focusedTab} center={center} onChangeCohort={setFocusedCohort} onChangeTab={setFocusedTab} focusedSession={focusedSession} />
+        <Nav
+          tab={focusedTab}
+          center={center}
+          user={user}
+          cohorts={availableCohorts}
+          onChangeCohort={setFocusedCohort}
+          onChangeTab={setFocusedTab}
+          focusedSession={focusedSession}
+        />
         <Switch>
           {/* liste-attente reliquat ? */}
           <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
-          <Route
-            path="/centre/:id/volontaires"
-            component={() => <Youngs center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} focusedSession={focusedSession} />}
-          />
+          {user.role !== "head_center" ? (
+            <Route
+              path="/centre/:id/volontaires"
+              component={() => <Youngs center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} focusedSession={focusedSession} />}
+            />
+          ) : null}
           <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
           <Route
             path="/centre/:id"

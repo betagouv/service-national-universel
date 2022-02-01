@@ -1,15 +1,13 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
 
-import { canAssignCohesionCenter, colors } from "../../../utils";
+import { colors } from "../../../utils";
 import { Filter } from "../../../components/list";
 import TabList from "../../../components/views/TabList";
 
-export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedSession }) {
+export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedSession, user, cohorts }) {
   const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
 
   if (!center || !focusedSession) return null;
   return (
@@ -20,7 +18,7 @@ export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedS
             <option disabled value={null} label="Sélectionner une période">
               Sélectionner une période
             </option>
-            {center.cohorts.map((c) => (
+            {cohorts.map((c) => (
               <option key={c} value={c} label={c}>
                 {c}
               </option>
@@ -38,16 +36,18 @@ export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedS
             style={{ borderRadius: "0.5rem 0 0 0.5rem" }}>
             Équipe
           </Tab>
-          <Tab
-            isActive={tab === "volontaires"}
-            middle
-            onClick={() => {
-              onChangeTab("volontaires");
-              history.push(`/centre/${center._id}/volontaires`);
-            }}
-            style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRight: "1px solid rgba(0,0,0,0.1)", minWidth: "110px" }}>
-            Volontaires
-          </Tab>
+          {user.role !== "head_center" ? (
+            <Tab
+              isActive={tab === "volontaires"}
+              middle
+              onClick={() => {
+                onChangeTab("volontaires");
+                history.push(`/centre/${center._id}/volontaires`);
+              }}
+              style={{ borderLeft: "1px solid rgba(0,0,0,0.1)", borderRight: "1px solid rgba(0,0,0,0.1)", minWidth: "110px" }}>
+              Volontaires
+            </Tab>
+          ) : null}
           {/* {canAssignCohesionCenter(user) ? (
             <Tab
               isActive={tab === "affectation"}
