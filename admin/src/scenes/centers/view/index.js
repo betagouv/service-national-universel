@@ -10,7 +10,7 @@ import Youngs from "./youngs";
 import Affectation from "./affectation";
 import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
-import { translate, CENTER_ROLES } from "../../../utils";
+import { translate, CENTER_ROLES, ROLES } from "../../../utils";
 
 export default function Index({ ...props }) {
   const [center, setCenter] = useState();
@@ -133,7 +133,7 @@ export default function Index({ ...props }) {
         <Switch>
           {/* liste-attente reliquat ? */}
           <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
-          {user.role !== "head_center" ? (
+          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
             <Route
               path="/centre/:id/volontaires"
               component={() => <Youngs center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} focusedSession={focusedSession} />}
