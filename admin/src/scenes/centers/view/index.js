@@ -20,7 +20,6 @@ export default function Index({ ...props }) {
   const [availableCohorts, setAvailableCohorts] = useState([]);
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
-  console.log(user);
 
   useEffect(() => {
     (async () => {
