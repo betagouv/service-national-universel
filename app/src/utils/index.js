@@ -37,7 +37,7 @@ export function permissionPhase2(y) {
   if (!permissionApp(y)) return false;
   return (
     y.statusPhase2 !== YOUNG_STATUS_PHASE2.WITHDRAWN &&
-    (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "AFFECTED" || y.statusPhase1 === "DONE" || y.statusPhase1 === "EXEMPTED")
+    (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "DONE" || y.statusPhase1 === "EXEMPTED")
   );
 }
 
