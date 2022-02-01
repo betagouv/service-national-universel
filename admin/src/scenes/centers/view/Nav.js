@@ -2,12 +2,13 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 
-import { colors } from "../../../utils";
+import { colors, ROLES } from "../../../utils";
 import { Filter } from "../../../components/list";
 import TabList from "../../../components/views/TabList";
 
 export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedSession, user, cohorts }) {
   const history = useHistory();
+  const visibleCohorts = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? center.cohorts : cohorts;
 
   if (!center || !focusedSession) return null;
   return (
@@ -18,7 +19,7 @@ export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedS
             <option disabled value={null} label="Sélectionner une période">
               Sélectionner une période
             </option>
-            {cohorts.map((c) => (
+            {visibleCohorts.map((c) => (
               <option key={c} value={c} label={c}>
                 {c}
               </option>
@@ -36,7 +37,7 @@ export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedS
             style={{ borderRadius: "0.5rem 0 0 0.5rem" }}>
             Équipe
           </Tab>
-          {user.role !== "head_center" ? (
+          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
             <Tab
               isActive={tab === "volontaires"}
               middle
