@@ -65,6 +65,7 @@ const render = async (young) => {
     return html
       .replace(/{{REFERENT_NAME}}/g, contact?.contactName)
       .replace(/{{REFERENT_PHONE}}/g, contact?.contactPhone)
+      .replace(/{{REFERENT_MAIL}}/g, contact?.contactMail)
       .replace(/{{DATE}}/g, formatStringDate(Date.now()))
       .replace(/{{FIRST_NAME}}/g, young.firstName)
       .replace(/{{LAST_NAME}}/g, young.lastName)
