@@ -1,3 +1,17 @@
+# [1.35.0](https://github.com/betagouv/service-national-universel/compare/v1.34.0...v1.35.0) (2022-02-01)
+
+
+### Bug Fixes
+
+* **app:** droit phase 2 ([63a2c0c](https://github.com/betagouv/service-national-universel/commit/63a2c0c27c54d471e6f0272cf425e0d2c4874906))
+* **app:** message desistement ([7728bd4](https://github.com/betagouv/service-national-universel/commit/7728bd4e1033c02650d2c6c9d0222bd0a0fd67a2))
+
+
+### Features
+
+* **admin:** grouper membre d'équipe par role ([#1172](https://github.com/betagouv/service-national-universel/issues/1172)) ([c0337ca](https://github.com/betagouv/service-national-universel/commit/c0337ca9feeb26b11f4c5747835a587bc68c78ba))
+* **support:**  kb metadata ([#1174](https://github.com/betagouv/service-national-universel/issues/1174)) ([4f69dc8](https://github.com/betagouv/service-national-universel/commit/4f69dc800408253a7c74558cd91d8d512fefd8c9))
+
 # [1.34.0](https://github.com/betagouv/service-national-universel/compare/v1.33.1...v1.34.0) (2022-01-31)
 
 
