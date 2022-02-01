@@ -84,15 +84,14 @@ const Group = ({ team, role, deleteTeamate }) => {
           <FlexBox>
             <Badge>
               <p style={{ margin: 0, fontSize: "1rem", color: "#372F78", fontWeight: "bold" }}>
-                {user.firstName?.[0]}
-                {user.lastName?.[0]}
+                {user.firstName?.[0]?.toUpperCase()}
+                {user.lastName?.[0]?.toUpperCase()}
               </p>
             </Badge>
             <div>
-              <p style={{ fontSize: "1rem", fontWeight: "500", margin: 0 }}>
+              <p style={{ fontSize: "1rem", fontWeight: "400", margin: 0 }}>
                 {user.firstName} {user.lastName}
               </p>
-              <p style={{ color: "#92929D", margin: 0 }}>{user.role}</p>
             </div>
           </FlexBox>
           <ButtonIcon icon={BinSVG} onClick={() => deleteTeamate(index)} />
