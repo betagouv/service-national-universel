@@ -245,15 +245,24 @@ export default function Edit(props) {
                       <ErrorMessage errors={errors} touched={touched} name="name" />
                     </FormGroup>
                     <FormGroup>
-                      <label>DOMAINES D&apos;ACTION</label>
-                      <MultiSelect
+                      <label>
+                        <span>*</span>DOMAINE D&apos;ACTION PRINCIPAL
+                      </label>
+                      <Field
+                        component="select"
                         value={values.domains || []}
                         onChange={handleChange}
                         name="domains"
                         // eslint-disable-next-line no-prototype-builtins
                         options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
-                        placeholder="Sélectionnez un ou plusieurs domains"
-                      />
+                        placeholder="Sélectionnez un ou plusieurs domaines">
+                        {console.log(Object.keys(MISSION_DOMAINS))}
+                        {Object.keys(MISSION_DOMAINS).map((el) => (
+                          <option key={el} value={el}>
+                            {translate(el)}
+                          </option>
+                        ))}
+                      </Field>
                     </FormGroup>
                     <FormGroup>
                       <label>
