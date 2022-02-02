@@ -63,9 +63,10 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}) {
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     if (ENVIRONMENT !== "production") {
-      body.to = body.to.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
-      if (body.cc) body.cc = body.cc.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
-      if (body.bcc) body.bcc = body.bcc.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
+      const regexp = /(selego\.co|beta\.gouv\.fr|fr\.ey\.com)/;
+      body.to = body.to.filter((e) => e.email.match(regexp));
+      if (body.cc) body.cc = body.cc.filter((e) => e.email.match(regexp));
+      if (body.bcc) body.bcc = body.bcc.filter((e) => e.email.match(regexp));
     }
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
     if (ENVIRONMENT !== "production") {
