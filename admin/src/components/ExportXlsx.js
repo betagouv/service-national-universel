@@ -7,12 +7,13 @@ import ModalConfirm from "./modals/ModalConfirm";
 import api from "../services/api";
 import dayjs from "dayjs";
 
-export default function ExportComponent({ title, exportTitle, index, react, transform, defaultQuery = () => ({ query: { query: { match_all: {} } } }) }) {
+export default function ExportComponent({ handleClick, title, exportTitle, index, react, transform, defaultQuery = () => ({ query: { query: { match_all: {} } } }) }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const query = useRef(defaultQuery().query);
 
   const onClick = () => {
+    handleClick?.();
     setModal({
       isOpen: true,
       onConfirm: () => setExporting(true),

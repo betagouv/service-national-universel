@@ -84,6 +84,7 @@ export default function List() {
               </div>
               <div style={{ display: "flex" }}>
                 <ExportComponent
+                  handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
                   defaultQuery={getExportQuery}
                   title="Exporter les volontaires"
                   exportTitle="Volontaires"

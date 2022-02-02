@@ -7,6 +7,7 @@ import Invite from "./invite";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import { ROLES, colors } from "../../utils";
+import plausibleEvent from "../../services/pausible";
 
 import Avatar from "../Avatar";
 
@@ -59,7 +60,11 @@ export default function HeaderUser() {
 const InviteReferent = ({ role }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div onClick={() => setOpen(true)}>
+    <div
+      onClick={() => {
+        plausibleEvent("Profil CTA - Inviter nouvel utilisateur");
+        setOpen(true);
+      }}>
       <div style={{ padding: "10px 25px 8px" }}>Inviter un nouvel utilisateur</div>
       <Invite role={role} label="Inviter un nouvel utilisateur" open={open} setOpen={() => setOpen(false)} />
     </div>

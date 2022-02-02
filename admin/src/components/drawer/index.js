@@ -10,6 +10,7 @@ import SuccessIcon from "../SuccessIcon";
 import QuestionMark from "../../assets/QuestionMark";
 import api from "../../services/api";
 import Badge from "../Badge";
+import plausibleEvent from "../../services/pausible";
 
 const DrawerTab = ({ title, to, onClick, beta }) => (
   <li onClick={onClick}>
@@ -29,7 +30,12 @@ const BlankSeparator = () => (
 );
 
 const HelpButton = ({ onClick, to }) => (
-  <div className="help-button-container" onClick={onClick}>
+  <div
+    className="help-button-container"
+    onClick={() => {
+      plausibleEvent("Menu/CTA - Besoin Aide");
+      onClick();
+    }}>
     <NavLink className="help-button" to={to}>
       <QuestionMark className="icon" />
       <div className="help-button-text">
