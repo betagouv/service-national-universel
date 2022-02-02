@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import styled from "styled-components";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
@@ -8,14 +10,19 @@ import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { translate, getResultLabel } from "../../../utils";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
+import Chevron from "../../../components/Chevron";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-export default function AssignCenter({ young, onAffect, onClick }) {
+export default function AssignCenter({ young, onAffect }) {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
+  const [modal, setModal] = useState({ isOpen: false, message: "", onConfirm: () => {} });
 
   const handleAffectation = async (center) => {
     try {
-      const response = await api.post(`/cohesion-center/${center._id}/assign-young/${young._id}`);
+      setModal((prevState) => ({ ...prevState, isOpen: false }));
+      const session = await api.get(`/cohesion-center/${center._id}/cohort/${center.session}/session-phase1`);
+      const response = await api.post(`/session-phase1/${session.data._id}/assign-young/${young._id}`);
       if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
       toastr.success(`${response.young.firstName} a été affecté(e) au centre ${response.data.name} !`);
       setSearchedValue("");
@@ -65,13 +72,23 @@ export default function AssignCenter({ young, onAffect, onClick }) {
                   <thead>
                     <tr>
                       <th>Centre</th>
-                      <th>Places</th>
+                      <th>Session</th>
                       <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((hit, i) => (
-                      <HitCenter key={i} hit={hit} onSend={() => handleAffectation(hit)} onClick={() => onClick?.(hit)} />
+                    {data.map((hit) => (
+                      <HitCenter
+                        key={hit._id}
+                        hit={hit}
+                        onSend={(center) =>
+                          setModal({
+                            isOpen: true,
+                            message: `Voulez-vous affecté le volontaire au center ${center.name} et à la sessions de ${center.session}`,
+                            onConfirm: () => handleAffectation(center),
+                          })
+                        }
+                      />
                     ))}
                   </tbody>
                 </Table>
@@ -80,28 +97,120 @@ export default function AssignCenter({ young, onAffect, onClick }) {
           </ResultTable>
         </div>
       </ReactiveBase>
+      <ModalConfirm
+        isOpen={modal.isOpen}
+        onConfirm={modal.onConfirm}
+        title="Attention"
+        message={modal.message}
+        onCancel={() => setModal((prevState) => ({ ...prevState, isOpen: false }))}
+      />
     </>
   );
 }
 
-const HitCenter = ({ hit, onSend, onClick }) => {
+const HitCenter = ({ hit, onSend }) => {
+  const [session, setSession] = useState(hit.cohorts[0]);
+
+  const options = hit.cohorts.filter((cohort) => cohort !== session);
+
   return (
     <tr>
       <td>
-        <MultiLine onClick={onClick}>
+        <MultiLine>
           <h2>{hit.name}</h2>
           <p>{`${hit.city || ""} • ${hit.department || ""}`}</p>
         </MultiLine>
       </td>
       <td>
-        <MultiLine>
-          <h2>{hit.placesLeft} places disponibles</h2>
-          <p>sur {hit.placesTotal} places proposées</p>
-        </MultiLine>
+        <ActionBox color={"#444"}>
+          <UncontrolledDropdown disabled={!options.length} setActiveFromChild>
+            <DropdownToggle tag="button">
+              {session}
+              {!!options.length && <Chevron color={"#444"} />}
+            </DropdownToggle>
+            <DropdownMenu>
+              {options.map((cohort) => {
+                return (
+                  <DropdownItem key={cohort} className="dropdown-item" onClick={() => setSession(cohort)}>
+                    {cohort}
+                  </DropdownItem>
+                );
+              })}
+            </DropdownMenu>
+          </UncontrolledDropdown>
+        </ActionBox>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <PanelActionButton onClick={onSend} title="Affecter à ce centre" />
+        <PanelActionButton onClick={() => onSend({ ...hit, session })} title="Affecter à ce centre" />
       </td>
     </tr>
   );
 };
+
+const ActionBox = styled.div`
+  .dropdown-menu {
+    max-width: 200px;
+    min-width: 200px;
+    a,
+    div {
+      white-space: nowrap;
+      font-size: 14px;
+      :hover {
+        color: inherit;
+      }
+    }
+  }
+  button {
+    ${({ color }) => `
+      background-color: ${color}15;
+      border: 1px solid ${color};
+      color: ${color};
+    `}
+    display: inline-flex;
+    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    border-radius: 0.5rem;
+    padding: 0 0 0 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    outline: 0;
+    width: 100%;
+    max-width: 200px;
+    min-width: 200px;
+    min-height: 34px;
+    .edit-icon {
+      height: 17px;
+      margin-right: 10px;
+      path {
+        fill: ${({ color }) => `${color}`};
+      }
+    }
+    .down-icon {
+      margin-left: auto;
+      padding: 7px 15px;
+      margin-left: 15px;
+      svg {
+        height: 10px;
+      }
+      svg polygon {
+        fill: ${({ color }) => `${color}`};
+      }
+    }
+  }
+  .dropdown-item {
+    border-radius: 0;
+    background-color: transparent;
+    border: none;
+    color: #767676;
+    white-space: nowrap;
+    font-size: 14px;
+    padding: 5px 15px;
+    font-weight: 400;
+    :hover {
+      background-color: #f3f3f3;
+    }
+  }
+`;
