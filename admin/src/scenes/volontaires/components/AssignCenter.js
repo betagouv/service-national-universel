@@ -24,7 +24,7 @@ export default function AssignCenter({ young, onAffect }) {
       const session = await api.get(`/cohesion-center/${center._id}/cohort/${center.session}/session-phase1`);
       const response = await api.post(`/session-phase1/${session.data._id}/assign-young/${young._id}`);
       if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
-      toastr.success(`${response.young.firstName} a été affecté(e) au centre ${response.data.name} !`);
+      toastr.success(`${response.young.firstName} a été affecté(e) au centre ${center.name} !`);
       setSearchedValue("");
       return onAffect?.(response.data, response.young);
     } catch (error) {
