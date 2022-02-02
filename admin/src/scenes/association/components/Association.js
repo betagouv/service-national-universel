@@ -4,6 +4,7 @@ import api from "../../../services/api";
 import styled from "styled-components";
 
 import Chevron from "../../../components/Chevron";
+import plausibleEvent from "../../../services/pausible";
 
 export default function Association({ hit, missionsInfo }) {
   const tabs = ["Informations", "Contacts", "Missions"];
@@ -47,6 +48,7 @@ export default function Association({ hit, missionsInfo }) {
         <ContactButtons>
           <ContactButton
             onClick={() => {
+              plausibleEvent("Association/CTA - Contacts");
               setShow(true);
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
@@ -60,6 +62,7 @@ export default function Association({ hit, missionsInfo }) {
           </ContactButton>
           <ContactButton
             onClick={() => {
+              plausibleEvent("Association/CTA - Site web");
               setShow(true);
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
@@ -85,6 +88,7 @@ export default function Association({ hit, missionsInfo }) {
           </ContactButton>
           <ContactButton
             onClick={() => {
+              plausibleEvent("Association/CTA - Mail to");
               setShow(true);
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
@@ -129,8 +133,10 @@ export default function Association({ hit, missionsInfo }) {
                   onClick={() => {
                     setTab(e);
                     if (e === "Contacts") {
+                      plausibleEvent("Association/CTA - Contacts");
                       sendEventToBackend("CONTACT_CLICK", association.id);
-                    }
+                    } else if (e === "Informations") plausibleEvent("Association/CTA - Informations");
+                    else if (e === "Missions") plausibleEvent("Association/CTA - Missions");
                   }}>
                   {e}
                 </TabTitle>
