@@ -21,6 +21,7 @@ function validateMission(mission) {
   return Joi.object()
     .keys({
       name: Joi.string().allow(null, ""),
+      domains: Joi.array().items(Joi.string().allow(null, "")),
       mainDomain: Joi.string().allow(null, ""),
       sideDomain: Joi.string().allow(null, ""),
       startAt: Joi.string().allow(null, ""),
