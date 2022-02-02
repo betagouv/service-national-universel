@@ -42,7 +42,6 @@ const Schema = new mongoose.Schema({
   }, // OK
   mainDomain: {
     type: String,
-    required: true,
     documentation: {
       description: "Domaine principal de la mission (citoyenneté, sport, culture, ...)",
     },
