@@ -260,23 +260,24 @@ export default function Edit(props) {
                           <li>Merci de sélectionner un domaine principal (requis), ainsi qu&apos;un domaine secondaire (facultatif)</li>
                         </ul>
                       ) : null}
-                      <Field
-                        component="select"
-                        value={values.mainDomain}
-                        onChange={handleChange}
-                        name="mainDomain"
-                        // eslint-disable-next-line no-prototype-builtins
-                        placeholder="Sélectionnez un ou plusieurs domaines">
+                      <Field component="select" value={values.mainDomain} onChange={handleChange} name="mainDomain" validate={(v) => !v && requiredMessage}>
+                        <option value="" label="Sélectionnez un domaine principal">
+                          Sélectionnez un domaine principal
+                        </option>
                         {Object.keys(MISSION_DOMAINS).map((el) => (
                           <option key={el} value={el}>
                             {translate(el)}
                           </option>
                         ))}
                       </Field>
+                      <ErrorMessage errors={errors} touched={touched} name="mainDomain" />
                     </FormGroup>
                     <FormGroup>
                       <label>DOMAINE D&apos;ACTION SECONDAIRE</label>
-                      <Field component="select" value={values.sideDomain || ""} onChange={handleChange} name="sideDomain" placeholder="Sélectionnez un ou plusieurs domaines">
+                      <Field component="select" value={values.sideDomain} onChange={handleChange} name="sideDomain">
+                        <option value="" label="Sélectionnez un domaine secondaire">
+                          Sélectionnez un domaine secondaire
+                        </option>
                         {Object.keys(MISSION_DOMAINS).map((el) => {
                           if (el === values.mainDomain) return null;
                           return (
