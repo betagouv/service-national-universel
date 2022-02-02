@@ -47,7 +47,11 @@ export default function Index({ ...props }) {
       if (!allSessions.ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des sessions", translate(allSessions.code));
       }
-      setAvailableCohorts(allSessions.data.filter((session) => session.headCenterId === user._id).map((session) => session.cohort));
+      if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+        setAvailableCohorts(allSessions.data.map((s) => s.cohort));
+      } else {
+        setAvailableCohorts(allSessions.data.filter((session) => session.headCenterId === user._id).map((session) => session.cohort));
+      }
       const sessionPhase1 = await api.get(`/cohesion-center/${center._id}/cohort/${focusedCohort}/session-phase1`);
       if (!sessionPhase1.ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1.code));
