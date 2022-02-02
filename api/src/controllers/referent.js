@@ -729,4 +729,17 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
+router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+
+    const sessions = await SessionPhase1.find({ headCenterId: checkedId });
+    return res.status(200).send({ ok: true, data: sessions });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;

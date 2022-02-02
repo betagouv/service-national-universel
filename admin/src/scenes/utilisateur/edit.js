@@ -41,6 +41,7 @@ export default function Edit(props) {
   const [centers, setCenters] = useState();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
+  const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
   const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const currentUser = useSelector((state) => state.Auth.user);
@@ -64,6 +65,8 @@ export default function Edit(props) {
         const responseCenter = await api.get(`/cohesion-center`);
         const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         setCenters(c);
+        const responseSession = await api.get(`/referent/${id}/session-phase1`);
+        setSessionsWhereUserIsHeadCenter(responseSession.data);
       } catch (e) {
         console.log(e);
         return toastr.error("Une erreur s'est produite lors du chargement de cet utilisateur");
@@ -297,6 +300,24 @@ export default function Edit(props) {
                           options={regionList.map((r) => ({ value: r, label: r }))}
                         />
                       ) : null}
+                      <Row className="detail">
+                        <Col md={4}>
+                          <label>Chef de centre des sessions: </label>
+                        </Col>
+                        <Col md={8}>
+                          {sessionsWhereUserIsHeadCenter.map((session) => (
+                            <Field
+                              disabled
+                              className="form-control"
+                              key={session.cohort}
+                              value={session.cohort}
+                              name={session.cohort}
+                              type="text"
+                              style={{ marginBottom: "0.5rem" }}
+                            />
+                          ))}
+                        </Col>
+                      </Row>
                     </BoxContent>
                   </Box>
                 </Col>
