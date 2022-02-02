@@ -179,6 +179,7 @@ export default function Edit(props) {
           }
 
           values.duration = values.duration?.toString();
+          if (values.domains.length > 1 && values.mainDomain) values.domains = [];
 
           const { ok, code, data: mission } = values._id ? await api.put(`/mission/${values._id}`, values) : await api.post("/mission", values);
 
@@ -246,11 +247,19 @@ export default function Edit(props) {
                       <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="Nom de votre mission" />
                       <ErrorMessage errors={errors} touched={touched} name="name" />
                     </FormGroup>
-                    {}
                     <FormGroup>
                       <label>
                         <span>*</span>DOMAINE D&apos;ACTION PRINCIPAL
                       </label>
+                      {values?.domains?.length > 1 ? (
+                        <ul style={{ color: "#a0aec1", fontSize: 12, marginBottom: "1rem" }}>
+                          <li>Précédemment, vous aviez sélectionné plusieurs domaines :</li>
+                          {values?.domains.map((domain) => (
+                            <li key={domain}>• {translate(domain)}</li>
+                          ))}
+                          <li>Merci de sélectionner un domaine principal (requis), ainsi qu&apos;un domaine secondaire (facultatif)</li>
+                        </ul>
+                      ) : null}
                       <Field
                         component="select"
                         value={values.mainDomain}

@@ -13,6 +13,7 @@ export default function MultiSelectComponent({ value, name, onChange, options, p
     for (let i in values) {
       const value = values[i];
       const option = options.find((e) => e.value === value);
+      if (!option) continue;
       const obj = { label: option.label, value: option.value };
       arr.push(obj);
     }
