@@ -147,8 +147,10 @@ export default function Edit(props) {
           location: "",
           department: "",
           region: "",
-          period: [],
+          mainDomain: "",
+          sideDomain: "",
           domains: [],
+          period: [],
           subPeriod: [],
         }
       }
@@ -244,24 +246,36 @@ export default function Edit(props) {
                       <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="Nom de votre mission" />
                       <ErrorMessage errors={errors} touched={touched} name="name" />
                     </FormGroup>
+                    {}
                     <FormGroup>
                       <label>
                         <span>*</span>DOMAINE D&apos;ACTION PRINCIPAL
                       </label>
                       <Field
                         component="select"
-                        value={values.domains || []}
+                        value={values.mainDomain}
                         onChange={handleChange}
-                        name="domains"
+                        name="mainDomain"
                         // eslint-disable-next-line no-prototype-builtins
-                        options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
                         placeholder="Sélectionnez un ou plusieurs domaines">
-                        {console.log(Object.keys(MISSION_DOMAINS))}
                         {Object.keys(MISSION_DOMAINS).map((el) => (
                           <option key={el} value={el}>
                             {translate(el)}
                           </option>
                         ))}
+                      </Field>
+                    </FormGroup>
+                    <FormGroup>
+                      <label>DOMAINE D&apos;ACTION SECONDAIRE</label>
+                      <Field component="select" value={values.sideDomain || ""} onChange={handleChange} name="sideDomain" placeholder="Sélectionnez un ou plusieurs domaines">
+                        {Object.keys(MISSION_DOMAINS).map((el) => {
+                          if (el === values.mainDomain) return null;
+                          return (
+                            <option key={el} value={el}>
+                              {translate(el)}
+                            </option>
+                          );
+                        })}
                       </Field>
                     </FormGroup>
                     <FormGroup>
@@ -383,11 +397,11 @@ export default function Edit(props) {
                         </Row>
                       </FormGroup>
                       <FormGroup>
-                        <label>Durée de la mission</label>
+                        <label htmlFor="duration">Durée de la mission</label>
                         <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</p>
                         <Row>
                           <Col>
-                            <Input type="number" name="duration" onChange={handleChange} value={values.duration} />
+                            <Input type="number" name="duration" id="duration" onChange={handleChange} value={values.duration} />
                           </Col>
                           <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
                         </Row>

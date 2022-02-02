@@ -37,7 +37,20 @@ const Schema = new mongoose.Schema({
   domains: {
     type: [String],
     documentation: {
-      description: "Liste des domaines de la mission (citoyenneté, sport, culture, ...)",
+      description: "Domaines de la mission (citoyenneté, sport, culture, ...)",
+    },
+  }, // OK
+  mainDomain: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Domaine principal de la mission (citoyenneté, sport, culture, ...)",
+    },
+  }, // OK
+  sideDomain: {
+    type: String,
+    documentation: {
+      description: "Domaine secondaire de la mission (citoyenneté, sport, culture, ...)",
     },
   }, // OK
 

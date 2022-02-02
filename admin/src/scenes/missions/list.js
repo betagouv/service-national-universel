@@ -93,6 +93,8 @@ export default function List() {
                       "Prénom du tuteur": data.tutor?.firstName,
                       "Email du tuteur": data.tutor?.email,
                       "Téléphone du tuteur": data.tutor?.mobile ? data.tutor?.mobile : data.tutor?.phone,
+                      "Domaine principal de la mission": data.mainDomain ? data.mainDomain : "Non renseigné",
+                      "Domaine secondaire de la mission": data.sideDomain ? data.sideDomain : "Non renseigné",
                       "Liste des domaines de la mission": data.domains?.map(translate)?.join(", "),
                       "Date du début": formatDateFRTimezoneUTC(data.startAt),
                       "Date de fin": formatDateFRTimezoneUTC(data.endAt),
