@@ -1,3 +1,12 @@
+## [1.35.1](https://github.com/betagouv/service-national-universel/compare/v1.35.0...v1.35.1) (2022-02-02)
+
+
+### Bug Fixes
+
+* **api:** joi email young ([1972885](https://github.com/betagouv/service-national-universel/commit/19728857fb1440bacd9093a61b0ad202bdfc2ab3))
+* **api:** saint-martin et saint-barthelemy in Guadeloupe ([2671034](https://github.com/betagouv/service-national-universel/commit/267103494301e683d679b99df9cbeb4c816ee13c))
+* **app,api:** add contact mail ([#1187](https://github.com/betagouv/service-national-universel/issues/1187)) ([1daf25a](https://github.com/betagouv/service-national-universel/commit/1daf25a713b224a048b824a540bf6e9d36ad366e))
+
 # [1.35.0](https://github.com/betagouv/service-national-universel/compare/v1.34.0...v1.35.0) (2022-02-01)
 
 
