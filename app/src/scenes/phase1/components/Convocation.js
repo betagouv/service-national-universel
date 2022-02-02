@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
-import { translate, translateCohort } from "../../../utils";
+import { translate } from "../../../utils";
 import { Hero, Content } from "../../../components/Content";
 import { supportURL } from "../../../config";
 
@@ -90,11 +90,12 @@ export default function Convocation() {
   return (
     <Hero>
       <Content style={{ width: "100%" }}>
-        <ConvocText style={{ fontWeight: "500", textDecoration: "underline", display: "flex" }}>
+        <ConvocText style={{ fontWeight: "500", textDecoration: "underline", display: "flex", justifyContent: "space-between" }}>
           Affaire suivie par :
           <p style={{ textAlign: "right", marginLeft: "0.2rem", color: "black", fontSize: "1rem", fontWeight: "500" }}>
             {contact.contactName} <br />
-            {contact.contactPhone}
+            {contact.contactPhone} <br />
+            {contact.contactMail}
           </p>
         </ConvocText>
         <ConvocText style={{ textAlign: "center" }}>

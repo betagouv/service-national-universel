@@ -282,7 +282,7 @@ function validateYoung(young, user) {
     birthCountry: Joi.string().allow(null, ""),
     birthCity: Joi.string().allow(null, ""),
     birthCityZip: Joi.string().allow(null, ""),
-    email: Joi.string().allow(null, ""),
+    email: Joi.string().lowercase().trim().email().allow(null, ""),
     phone: Joi.string().allow(null, ""),
     gender: Joi.string().allow(null, ""),
     birthdateAt: Joi.string().allow(null, ""),

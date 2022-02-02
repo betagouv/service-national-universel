@@ -19,7 +19,8 @@ import {
   VISITOR_SUBROLES,
 } from "../../utils";
 
-import LoadingButton from "../../components/buttons/LoadingButton";
+import { Footer } from "../../components/modals/Modal";
+import ModalButton from "../../components/buttons/ModalButton";
 import api from "../../services/api";
 
 export default function InviteHeader({ setOpen, open, label = "Inviter un référent" }) {
@@ -51,45 +52,47 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
     <Invitation style={{ marginBottom: 10, textAlign: "right" }}>
       <Modal isOpen={open} toggle={() => setOpen(false)} size="lg">
         <Invitation>
-          <ModalHeader toggle={() => setOpen(false)}>{label}</ModalHeader>
-          <ModalBody>
-            <Formik
-              validateOnChange={false}
-              validateOnBlur={false}
-              initialValues={{
-                firstName: "",
-                lastName: "",
-                role: "",
-                subRole: "",
-                email: "",
-                region: "",
-                department: "",
-                cohesionCenterName: "",
-                cohesionCenterId: "",
-                sessionPhase1Id: "",
-              }}
-              onSubmit={async (values, { setSubmitting }) => {
-                try {
-                  const obj = { ...values };
-                  if (obj.role === ROLES.REFERENT_DEPARTMENT) obj.region = department2region[obj.department];
-                  if (obj.role === ROLES.REFERENT_REGION) obj.department = null;
-                  if (obj.department && !obj.region) obj.region = department2region[obj.department];
-                  const { data: referent } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
+          <ModalHeader style={{ border: "none" }} toggle={() => setOpen(false)}>
+            {label}
+          </ModalHeader>
+          <Formik
+            validateOnChange={false}
+            validateOnBlur={false}
+            initialValues={{
+              firstName: "",
+              lastName: "",
+              role: "",
+              subRole: "",
+              email: "",
+              region: "",
+              department: "",
+              cohesionCenterName: "",
+              cohesionCenterId: "",
+              sessionPhase1Id: "",
+            }}
+            onSubmit={async (values, { setSubmitting }) => {
+              try {
+                const obj = { ...values };
+                if (obj.role === ROLES.REFERENT_DEPARTMENT) obj.region = department2region[obj.department];
+                if (obj.role === ROLES.REFERENT_REGION) obj.department = null;
+                if (obj.department && !obj.region) obj.region = department2region[obj.department];
+                const { data: referent } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
 
-                  if (values.sessionPhase1Id) {
-                    await api.put(`/session-phase1/${values.sessionPhase1Id}`, { headCenterId: referent._id });
-                  }
-                  toastr.success("Invitation envoyée");
-                  setOpen();
-                  setOpen(false);
-                } catch (e) {
-                  console.log(e);
-                  toastr.error("Erreur !", translate(e.code));
+                if (values.sessionPhase1Id) {
+                  await api.put(`/session-phase1/${values.sessionPhase1Id}`, { headCenterId: referent._id });
                 }
-                setSubmitting(false);
-              }}>
-              {({ values, handleChange, handleSubmit, isSubmitting, errors }) => (
-                <React.Fragment>
+                toastr.success("Invitation envoyée");
+                setOpen();
+                setOpen(false);
+              } catch (e) {
+                console.log(e);
+                toastr.error("Erreur !", translate(e.code));
+              }
+              setSubmitting(false);
+            }}>
+            {({ values, handleChange, handleSubmit, isSubmitting, errors }) => (
+              <React.Fragment>
+                <ModalBody>
                   <Row>
                     <Col md={6}>
                       <FormGroup>
@@ -180,15 +183,18 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       </Col>
                     </Row>
                   )}
-                  <br />
-                  <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
+                </ModalBody>
+
+                <br />
+                <Footer>
+                  <ModalButton loading={isSubmitting} onClick={handleSubmit} primary>
                     Envoyer l&apos;invitation
-                  </LoadingButton>
+                  </ModalButton>
                   {Object.keys(errors).length ? <h3>Merci de remplir tous les champs avant d&apos;envoyer une invitation.</h3> : null}
-                </React.Fragment>
-              )}
-            </Formik>
-          </ModalBody>
+                </Footer>
+              </React.Fragment>
+            )}
+          </Formik>
         </Invitation>
       </Modal>
     </Invitation>
