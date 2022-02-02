@@ -127,7 +127,7 @@ const HitCenter = ({ hit, onSend }) => {
         </MultiLine>
       </td>
       <td>
-        <ActionBox color={"#444"}>
+        <ActionBox>
           <UncontrolledDropdown disabled={!options.length} setActiveFromChild>
             <DropdownToggle tag="button">
               {session}
@@ -166,11 +166,9 @@ const ActionBox = styled.div`
     }
   }
   button {
-    ${({ color }) => `
-      background-color: ${color}15;
-      border: 1px solid ${color};
-      color: ${color};
-    `}
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    color: #495057;
     display: inline-flex;
     flex: 1;
     justify-content: space-between;
