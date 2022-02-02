@@ -84,7 +84,12 @@ export default function AssignCenter({ young, onAffect }) {
                         onSend={(center) =>
                           setModal({
                             isOpen: true,
-                            message: `Voulez-vous affecté le volontaire au center ${center.name} et à la sessions de ${center.session}`,
+                            title: "Changement de centre",
+                            message: (
+                              <p>
+                                Voulez-vous affecter <b>{young.firstName}</b> au centre <b>{center.name}</b> au séjour de <b>{center.session}</b>.
+                              </p>
+                            ),
                             onConfirm: () => handleAffectation(center),
                           })
                         }
@@ -100,7 +105,7 @@ export default function AssignCenter({ young, onAffect }) {
       <ModalConfirm
         isOpen={modal.isOpen}
         onConfirm={modal.onConfirm}
-        title="Attention"
+        title={modal.title}
         message={modal.message}
         onCancel={() => setModal((prevState) => ({ ...prevState, isOpen: false }))}
       />
