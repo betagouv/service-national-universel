@@ -14,7 +14,7 @@ export default function Status() {
   useEffect(() => {
     (async () => {
       const bodySession = {
-        query: { bool: { must: { match_all: {} }, filter: [{ terms: { cohesionCenterId: [user.cohesionCenterId] } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { headCenterId: user._id } }] } },
         aggs: {
           placesTotal: { sum: { field: "placesTotal" } },
           placesLeft: { sum: { field: "placesLeft" } },

@@ -37,6 +37,7 @@ export default function Status({ filter }) {
         size: 0,
       };
 
+      if (filter.cohort?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
       const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
 
       if (responsesSession.length) {
