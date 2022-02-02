@@ -11,7 +11,16 @@ export default function Details({ center, sessions }) {
   const user = useSelector((state) => state.Auth.user);
   return (
     <div style={{ display: "flex", flexDirection: "column", padding: "2rem 3rem" }}>
-      <h1 style={{ marginBottom: "2rem" }}>{center.name}</h1>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <h1 style={{ marginBottom: "2rem" }}>{center.name}</h1>
+        {canCreateOrUpdateCohesionCenter(user) ? (
+          <div style={{ flexBasis: "0" }}>
+            <Link to={`/centre/${center._id}/edit`}>
+              <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />
+            </Link>
+          </div>
+        ) : null}
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gridGap: "1rem" }}>
         <Box>
           <Wrapper>
@@ -19,13 +28,6 @@ export default function Details({ center, sessions }) {
               <h4>
                 <strong>Centre</strong> <span style={{ color: "#9C9C9C", fontSize: "0.85rem" }}>#{center._id}</span>
               </h4>
-              {canCreateOrUpdateCohesionCenter(user) ? (
-                <div style={{ flexBasis: "0" }}>
-                  <Link to={`/centre/${center._id}/edit`}>
-                    <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />
-                  </Link>
-                </div>
-              ) : null}
             </Header>
             <Container>
               <section>
@@ -85,13 +87,6 @@ export default function Details({ center, sessions }) {
               <h4>
                 <strong>Sessions</strong>
               </h4>
-              {canCreateOrUpdateCohesionCenter(user) ? (
-                <div style={{ flexBasis: "0" }}>
-                  <Link to={`/centre/${center._id}/edit`}>
-                    <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />
-                  </Link>
-                </div>
-              ) : null}
             </Header>
             <section>
               {sessions.map((session) => (
