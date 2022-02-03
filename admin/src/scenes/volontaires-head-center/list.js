@@ -184,7 +184,7 @@ export default function List() {
                     });
                   }}
                 />
-                <DownloadAllAttestation cohesionCenterId={user.cohesionCenterId}>
+                <DownloadAllAttestation sessionPhase1={user.sessionPhase1Id}>
                   <div>Exporter les attestations</div>
                 </DownloadAllAttestation>
               </div>
