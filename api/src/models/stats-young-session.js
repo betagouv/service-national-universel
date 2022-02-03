@@ -9,7 +9,7 @@ const zammad = require("../zammad");
 const MODELNAME = "young";
 
 const Schema = new mongoose.Schema({
-  sqlId: {
+  young_sqlId: {
     type: String,
     index: true,
     documentation: {
@@ -17,44 +17,44 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  firstName: {
+  young_firstName: {
     type: String,
     documentation: {
       description: "Prénom du volontaire",
     },
   },
-  lastName: {
+  young_lastName: {
     type: String,
     documentation: {
       description: "Nom du volontaire",
     },
   },
-  frenchNationality: {
+  young_frenchNationality: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire est de nationalité française",
     },
   },
-  birthCountry: {
+  young_birthCountry: {
     type: String,
     documentation: {
       description: "Pays de naissance",
     },
   },
-  birthCity: {
+  young_birthCity: {
     type: String,
     documentation: {
       description: "La ville de naissance du volontaire",
     },
   },
-  birthCityZip: {
+  young_birthCityZip: {
     type: String,
     documentation: {
       description: "Le code postal de la ville de naissance du volontaire",
     },
   },
-  email: {
+  young_email: {
     type: String,
     required: true,
     unique: true,
@@ -63,25 +63,25 @@ const Schema = new mongoose.Schema({
       description: "E-mail du volontaire",
     },
   },
-  phone: {
+  young_phone: {
     type: String,
     documentation: {
       description: "Numéro de télephone du volontaire",
     },
   },
-  gender: {
+  young_gender: {
     type: String,
     documentation: {
       description: "Sexe",
     },
   },
-  birthdateAt: {
+  young_birthdateAt: {
     type: Date,
     documentation: {
       description: "Date de naissance du volontaire",
     },
   },
-  cohort: {
+  young_cohort: {
     type: String,
     default: "2022",
     enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019"],
@@ -89,7 +89,7 @@ const Schema = new mongoose.Schema({
       description: "Cohorte",
     },
   },
-  phase: {
+  young_phase: {
     type: String,
     default: "INSCRIPTION",
     enum: ["INSCRIPTION", "COHESION_STAY", "INTEREST_MISSION", "CONTINUE"],
@@ -97,7 +97,7 @@ const Schema = new mongoose.Schema({
       description: "Phase actuelle du volontaire",
     },
   },
-  status: {
+  young_status: {
     type: String,
     default: "IN_PROGRESS",
     enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "WITHDRAWN", "DELETED", "WAITING_LIST", "NOT_ELIGIBLE"],
@@ -105,7 +105,7 @@ const Schema = new mongoose.Schema({
       description: "Statut général du volontaire",
     },
   },
-  statusPhase1: {
+  young_statusPhase1: {
     type: String,
     default: "WAITING_AFFECTATION",
     enum: ["AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"],
@@ -113,20 +113,20 @@ const Schema = new mongoose.Schema({
       description: "Statut du volontaire lié à la première phase",
     },
   },
-  statusPhase1Motif: {
+  young_statusPhase1Motif: {
     type: String,
     enum: ["ILLNESS", "DEATH", "ADMINISTRATION_CANCEL", "OTHER"],
     documentation: {
       description: "Motif du statut du volontaire lié à la première phase",
     },
   },
-  statusPhase1MotifDetail: {
+  young_statusPhase1MotifDetail: {
     type: String,
     documentation: {
       description: "Détail du motif du statut du volontaire lié à la première phase",
     },
   },
-  statusPhase2: {
+  young_statusPhase2: {
     type: String,
     default: "WAITING_REALISATION",
     enum: ["WAITING_REALISATION", "IN_PROGRESS", "VALIDATED", "WITHDRAWN"],
@@ -134,13 +134,13 @@ const Schema = new mongoose.Schema({
       description: "Statut du volontaire lié à la seconde phase",
     },
   },
-  statusPhase2UpdatedAt: {
+  young_statusPhase2UpdatedAt: {
     type: Date,
     documentation: {
       description: "Date de dernière modification du statut lié à la seconde phase",
     },
   },
-  statusPhase2Contract: {
+  young_statusPhase2Contract: {
     type: [String],
     default: [],
     enum: ["NONE", "DRAFT", "SENT", "VALIDATED"],
@@ -148,7 +148,7 @@ const Schema = new mongoose.Schema({
       description: "Statut du contrat d'engagement du volontaire (cf: modèle contrat)",
     },
   },
-  statusPhase3: {
+  young_statusPhase3: {
     type: String,
     default: "WAITING_REALISATION",
     enum: ["WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED", "WITHDRAWN"],
@@ -156,20 +156,20 @@ const Schema = new mongoose.Schema({
       description: "Statut du volontaire lié à la troisième phase",
     },
   },
-  lastStatusAt: {
+  young_lastStatusAt: {
     type: Date,
     default: Date.now,
     documentation: {
       description: "Date de dernière modification d'un statut",
     },
   },
-  withdrawnReason: {
+  young_withdrawnReason: {
     type: String,
     documentation: {
       description: "Motif lors de l'abandon du SNU.",
     },
   },
-  withdrawnMessage: {
+  young_withdrawnMessage: {
     type: String,
     documentation: {
       description: "Message écrit lors de l'abandon du SNU.",
@@ -177,7 +177,7 @@ const Schema = new mongoose.Schema({
   },
 
   // keep track of the current inscription step
-  inscriptionStep: {
+  young_inscriptionStep: {
     type: String,
     default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES
     enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE", "DOCUMENTS"],
@@ -187,7 +187,7 @@ const Schema = new mongoose.Schema({
   },
 
   // keep track of the current cohesion inscription step for 2020 users
-  cohesion2020Step: {
+  young_cohesion2020Step: {
     type: String,
     default: "CONSENTEMENTS",
     enum: ["CONSENTEMENTS", "COORDONNEES", "PARTICULIERES", "JDC", "DONE"],
@@ -196,13 +196,13 @@ const Schema = new mongoose.Schema({
     },
   },
   // Inscription status message
-  inscriptionCorrectionMessage: {
+  young_inscriptionCorrectionMessage: {
     type: String,
     documentation: {
       description: "Message envoyé au volontaire dans le cas où son inscription nécessite des corrections.",
     },
   },
-  inscriptionRefusedMessage: {
+  young_inscriptionRefusedMessage: {
     type: String,
     documentation: {
       description: "Message envoyé au volontaire dans le cas où son inscription est refusée.",
@@ -210,7 +210,7 @@ const Schema = new mongoose.Schema({
   },
 
   // userName and userId because it can be a young or a referent
-  historic: {
+  young_historic: {
     type: [
       {
         phase: String,
@@ -227,47 +227,47 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  password: {
+  young_password: {
     type: String,
     select: false,
     documentation: {
       description: "Mot de passe du volontaire",
     },
   },
-  lastLoginAt: {
+  young_lastLoginAt: {
     type: Date,
     default: Date.now,
     documentation: {
       description: "Date de dernière connexion",
     },
   },
-  forgotPasswordResetToken: {
+  young_forgotPasswordResetToken: {
     type: String,
     default: "",
     documentation: {
       description: "Token servant à la réinitialisation du mot de passe",
     },
   },
-  forgotPasswordResetExpires: {
+  young_forgotPasswordResetExpires: {
     type: Date,
     documentation: {
       description: "Date limite de validité du token pour réinitialiser le mot de passe",
     },
   },
-  invitationToken: {
+  young_invitationToken: {
     type: String,
     default: "",
     documentation: {
       description: "Token d'invitation",
     },
   },
-  invitationExpires: {
+  young_invitationExpires: {
     type: Date,
     documentation: {
       description: "Date limite de validité du token d'invitation",
     },
   },
-  acceptCGU: {
+  young_acceptCGU: {
     type: String,
     enum: ["true", "false", ""],
     default: "",
@@ -275,7 +275,7 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire a accepté les CGU",
     },
   },
-  cniFiles: {
+  young_cniFiles: {
     type: [String],
     default: [],
     documentation: {
@@ -284,7 +284,7 @@ const Schema = new mongoose.Schema({
   },
 
   // * phase1 infos
-  cohesionStayPresence: {
+  young_cohesionStayPresence: {
     type: String,
     enum: ["true", "false", ""],
     default: "",
@@ -292,7 +292,7 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire était présent lors du séjour de cohésion",
     },
   },
-  cohesionStayMedicalFileReceived: {
+  young_cohesionStayMedicalFileReceived: {
     type: String,
     enum: ["true", "false", ""],
     default: "",
@@ -300,25 +300,25 @@ const Schema = new mongoose.Schema({
       description: "La fiche sanitaire a été reçu par le SNU",
     },
   },
-  sessionPhase1Id: {
+  young_sessionPhase1Id: {
     type: String,
     documentation: {
       description: "Id de la session de cohésion d'accueil pour la phase 1",
     },
   },
-  sessionPhase1IdTmp: {
+  young_sessionPhase1IdTmp: {
     type: String,
     documentation: {
       description: "TODO",
     },
   },
-  codeCenterTmp: {
+  young_codeCenterTmp: {
     type: String,
     documentation: {
       description: "TODO",
     },
   },
-  busTmp: {
+  young_busTmp: {
     type: String,
     documentation: {
       description: "TODO",
@@ -326,25 +326,25 @@ const Schema = new mongoose.Schema({
   },
   // *** START LEGACY COHESION CENTER ***
   // phase1 legacy infos, we keep it for retrocompatibility, can be deleted in the future
-  youngCohesionCenterId: {
+  young_youngCohesionCenterId: {
     type: String,
     documentation: {
       description: "Id du centre de cohésion d'accueil pour la phase 1",
     },
   },
-  cohesionCenterName: {
+  young_cohesionCenterName: {
     type: String,
     documentation: {
       description: "Nom du centre de cohésion d'accueil pour la phase 1",
     },
   },
-  cohesionCenterZip: {
+  young_cohesionCenterZip: {
     type: String,
     documentation: {
       description: "Code postal du centre de cohésion d'accueil pour la phase 1",
     },
   },
-  cohesionCenterCity: {
+  young_cohesionCenterCity: {
     type: String,
     documentation: {
       description: "Nom du centre de cohésion d'accueil pour la phase 1",
@@ -352,20 +352,20 @@ const Schema = new mongoose.Schema({
   },
   // *** END LEGACY COHESION CENTER ***
 
-  autoAffectationPhase1ExpiresAt: {
+  young_autoAffectationPhase1ExpiresAt: {
     type: Date,
     documentation: {
       description: "Date limite de réponse a la participation à la phase 1",
     },
   },
 
-  meetingPointId: {
+  young_meetingPointId: {
     type: String,
     documentation: {
       description: "Identifiant du point de rassemblement pour le sejour de cohesion",
     },
   },
-  deplacementPhase1Autonomous: {
+  young_deplacementPhase1Autonomous: {
     type: String,
     enum: ["true", "false", ""],
     documentation: {
@@ -374,7 +374,7 @@ const Schema = new mongoose.Schema({
   },
 
   // * phase 2 application infos
-  phase2ApplicationStatus: {
+  young_phase2ApplicationStatus: {
     type: [String],
     default: [],
     documentation: {
@@ -382,13 +382,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  phase2NumberHoursDone: {
+  young_phase2NumberHoursDone: {
     type: String,
     documentation: {
       description: "Somme des heures de mission effectuées",
     },
   },
-  phase2NumberHoursEstimated: {
+  young_phase2NumberHoursEstimated: {
     type: String,
     documentation: {
       description: "Sommes des heures de mission prévisionnelles",
@@ -396,19 +396,19 @@ const Schema = new mongoose.Schema({
   },
 
   // * phase 3 infos
-  phase3StructureName: { type: String },
-  phase3MissionDomain: { type: String },
-  phase3MissionDescription: { type: String },
-  phase3MissionStartAt: { type: Date },
-  phase3MissionEndAt: { type: Date },
+  young_phase3StructureName: { type: String },
+  young_phase3MissionDomain: { type: String },
+  young_phase3MissionDescription: { type: String },
+  young_phase3MissionStartAt: { type: Date },
+  young_phase3MissionEndAt: { type: Date },
 
-  phase3TutorFirstName: { type: String },
-  phase3TutorLastName: { type: String },
-  phase3TutorEmail: { type: String },
-  phase3TutorPhone: { type: String },
-  phase3TutorNote: { type: String },
+  young_phase3TutorFirstName: { type: String },
+  young_phase3TutorLastName: { type: String },
+  young_phase3TutorEmail: { type: String },
+  young_phase3TutorPhone: { type: String },
+  young_phase3TutorNote: { type: String },
 
-  phase3Token: {
+  young_phase3Token: {
     type: String,
     default: "",
     documentation: {
@@ -417,72 +417,72 @@ const Schema = new mongoose.Schema({
   },
 
   // * address
-  address: {
+  young_address: {
     type: String,
     documentation: {
       description: "Adresse pendant le snu du volontaire",
     },
   },
-  complementAddress: {
+  young_complementAddress: {
     type: String,
     documentation: {
       description: "Complément d'adresse pendant le snu du volontaire",
     },
   },
-  zip: {
+  young_zip: {
     type: String,
     documentation: {
       description: "Code postal pendant le snu du volontaire",
     },
   },
-  city: {
+  young_city: {
     type: String,
     documentation: {
       description: "Ville pendant le snu du volontaire",
     },
   },
-  addressVerified: {
+  young_addressVerified: {
     type: String,
     documentation: {
       description: "Adresse validée",
     },
   },
-  cityCode: {
+  young_cityCode: {
     type: String,
     documentation: {
       description: "Code pendant le snu insee de la ville",
     },
   },
-  populationDensity: {
+  young_populationDensity: {
     type: String,
     enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE", ""],
     documentation: {
       description: "Densité de la ville  pendant le snu du volontaire",
     },
   },
-  department: {
+  young_department: {
     type: String,
     documentation: {
       description: "Département pendant le snu du volontaire",
     },
   },
-  region: {
+  young_region: {
     type: String,
     documentation: {
       description: "Région pendant le snu du volontaire",
     },
   },
-  country: {
+  young_country: {
     type: String,
     documentation: {
       description: "Pays de résidence pendant le snu du volontaire",
     },
   },
-  location: {
+  young_location: {
     lat: { type: Number },
     lon: { type: Number },
   },
-  qpv: {
+  young_qpv: {
     type: String,
     enum: ["true", "false", ""],
     default: "",
@@ -490,25 +490,25 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire est dans un Quarier Prioritaire pendant le snu",
     },
   },
-  foreignAddress: {
+  young_foreignAddress: {
     type: String,
     documentation: {
       description: "Adresse à l'étranger du volontaire",
     },
   },
-  foreignCity: {
+  young_foreignCity: {
     type: String,
     documentation: {
       description: "Ville à l'étranger du volontaire",
     },
   },
-  foreignZip: {
+  young_foreignZip: {
     type: String,
     documentation: {
       description: "Code postal à l'étranger du volontaire",
     },
   },
-  foreignCountry: {
+  young_foreignCountry: {
     type: String,
     documentation: {
       description: "Pays à l'étranger du volontaire",
@@ -516,97 +516,97 @@ const Schema = new mongoose.Schema({
   },
 
   // * School informations
-  situation: {
+  young_situation: {
     type: String,
     documentation: {
       description: "Situation scolaire / professionnel du volontaire",
     },
   },
-  grade: {
+  young_grade: {
     type: String,
     documentation: {
       description: "Niveau scolaire du volontaire, si applicable",
     },
   },
-  schoolCertification: {
+  young_schoolCertification: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "",
     },
   },
-  schooled: {
+  young_schooled: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire est scolarisé",
     },
   },
-  schoolName: {
+  young_schoolName: {
     type: String,
     documentation: {
       description: "Nom de l'établissement du volontaire",
     },
   },
-  schoolType: {
+  young_schoolType: {
     type: String,
     documentation: {
       description: "Type de l'établissement du volontaire",
     },
   },
-  schoolAddress: {
+  young_schoolAddress: {
     type: String,
     documentation: {
       description: "Adresse de l'établissement du volontaire",
     },
   },
-  schoolComplementAdresse: {
+  young_schoolComplementAdresse: {
     type: String,
     documentation: {
       description: "Complément d'adresse de l'établissement du volontaire",
     },
   },
-  schoolZip: {
+  young_schoolZip: {
     type: String,
     documentation: {
       description: "Code postal de l'établissement du volontaire",
     },
   },
-  schoolCity: {
+  young_schoolCity: {
     type: String,
     documentation: {
       description: "Ville de l'établissement du volontaire",
     },
   },
-  schoolDepartment: {
+  young_schoolDepartment: {
     type: String,
     documentation: {
       description: "Département de l'établissement du volontaire",
     },
   },
-  schoolRegion: {
+  young_schoolRegion: {
     type: String,
     documentation: {
       description: "Région de l'établissement du volontaire",
     },
   },
-  schoolCountry: {
+  young_schoolCountry: {
     type: String,
     documentation: {
       description: "Pays de l'établissement du volontaire",
     },
   },
-  schoolLocation: {
+  young_schoolLocation: {
     lat: { type: Number },
     lon: { type: Number },
   },
-  schoolId: {
+  young_schoolId: {
     type: String,
     documentation: {
       description: "Identifiant de l'établissement du volontaire",
     },
   },
-  academy: {
+  young_academy: {
     type: String,
     documentation: {
       description: "Académie du volontaire (en fonction de son domicile)",
@@ -614,7 +614,7 @@ const Schema = new mongoose.Schema({
   },
 
   // * Situations pro
-  employed: {
+  young_employed: {
     type: String,
     enum: ["true", "false"],
     documentation: {
@@ -623,90 +623,90 @@ const Schema = new mongoose.Schema({
   },
 
   // * Parents et représentants
-  parent1Status: {
+  young_parent1Status: {
     type: String,
     documentation: {
       description: "Statut légal du parent 1",
     },
   },
-  parent1FirstName: {
+  young_parent1FirstName: {
     type: String,
     documentation: {
       description: "Prénom du parent 1",
     },
   },
-  parent1LastName: {
+  young_parent1LastName: {
     type: String,
     documentation: {
       description: "Nom du parent 1",
     },
   },
-  parent1Email: {
+  young_parent1Email: {
     type: String,
     documentation: {
       description: "E-mail du parent 1",
     },
   },
-  parent1Phone: {
+  young_parent1Phone: {
     type: String,
     documentation: {
       description: "Numéro de téléphone du parent 1",
     },
   },
-  parent1OwnAddress: {
+  young_parent1OwnAddress: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le parent 1 a sa propre adresse. Elle est différent de celle du volontaire",
     },
   },
-  parent1Address: {
+  young_parent1Address: {
     type: String,
     documentation: {
       description: "Adresse du parent 1",
     },
   },
-  parent1ComplementAddress: {
+  young_parent1ComplementAddress: {
     type: String,
     documentation: {
       description: "Complément d'adresse du parent 1",
     },
   },
-  parent1Zip: {
+  young_parent1Zip: {
     type: String,
     documentation: {
       description: "Code postal du parent 1",
     },
   },
-  parent1City: {
+  young_parent1City: {
     type: String,
     documentation: {
       description: "Ville du parent 1",
     },
   },
-  parent1Department: {
+  young_parent1Department: {
     type: String,
     documentation: {
       description: "Département du parent 1",
     },
   },
-  parent1Region: {
+  young_parent1Region: {
     type: String,
     documentation: {
       description: "Région du parent 1",
     },
   },
-  parent1Country: {
+  young_parent1Country: {
     type: String,
     documentation: {
       description: "Pays du parent 1",
     },
   },
-  parent1Location: {
+  young_parent1Location: {
     lat: { type: Number },
     lon: { type: Number },
   },
-  parent1FromFranceConnect: {
+  young_parent1FromFranceConnect: {
     type: String,
     enum: ["true", "false"],
     default: "false",
@@ -715,90 +715,90 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  parent2Status: {
+  young_parent2Status: {
     type: String,
     documentation: {
       description: "Statut légal du parent 2",
     },
   },
-  parent2FirstName: {
+  young_parent2FirstName: {
     type: String,
     documentation: {
       description: "Prénom du parent 2",
     },
   },
-  parent2LastName: {
+  young_parent2LastName: {
     type: String,
     documentation: {
       description: "Nom du parent 2",
     },
   },
-  parent2Email: {
+  young_parent2Email: {
     type: String,
     documentation: {
       description: "E-mail du parent 2",
     },
   },
-  parent2Phone: {
+  young_parent2Phone: {
     type: String,
     documentation: {
       description: "Numéro de téléphone du parent 2",
     },
   },
-  parent2OwnAddress: {
+  young_parent2OwnAddress: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le parent 2 a sa propre adresse. Elle est différent de celle du volontaire",
     },
   },
-  parent2Address: {
+  young_parent2Address: {
     type: String,
     documentation: {
       description: "Adresse du parent 2",
     },
   },
-  parent2ComplementAddress: {
+  young_parent2ComplementAddress: {
     type: String,
     documentation: {
       description: "Complément d'adresse du parent 2",
     },
   },
-  parent2Zip: {
+  young_parent2Zip: {
     type: String,
     documentation: {
       description: "Code postal du parent 2",
     },
   },
-  parent2City: {
+  young_parent2City: {
     type: String,
     documentation: {
       description: "Ville du parent 2",
     },
   },
-  parent2Department: {
+  young_parent2Department: {
     type: String,
     documentation: {
       description: "Département du parent 2",
     },
   },
-  parent2Region: {
+  young_parent2Region: {
     type: String,
     documentation: {
       description: "Région du parent 2",
     },
   },
-  parent2Country: {
+  young_parent2Country: {
     type: String,
     documentation: {
       description: "Pays du parent 2",
     },
   },
-  parent2Location: {
+  young_parent2Location: {
     lat: { type: Number },
     lon: { type: Number },
   },
-  parent2FromFranceConnect: {
+  young_parent2FromFranceConnect: {
     type: String,
     enum: ["true", "false"],
     default: "false",
@@ -808,91 +808,91 @@ const Schema = new mongoose.Schema({
   },
 
   // * Hébergeur
-  hostLastName: {
+  young_hostLastName: {
     type: String,
     documentation: {
       description: "Nom de l'hébergeur",
     },
   },
-  hostFirstName: {
+  young_hostFirstName: {
     type: String,
     documentation: {
       description: "Prénom de l'hébergeur",
     },
   },
-  hostRelationship: {
+  young_hostRelationship: {
     type: String,
     documentation: {
       description: "Lien de l'hébergeur avec le volontaire",
     },
   },
-  hostCity: {
+  young_hostCity: {
     type: String,
     documentation: {
       description: "Ville de l'hébergeur",
     },
   },
-  hostZip: {
+  young_hostZip: {
     type: String,
     documentation: {
       description: "Code postale de la ville de l'hébergeur",
     },
   },
-  hostAddress: {
+  young_hostAddress: {
     type: String,
     documentation: {
       description: "Adresse de l'hébergeur",
     },
   },
-  hostDepartment: {
+  young_hostDepartment: {
     type: String,
     documentation: {
       description: "Departement de l'hébergeur",
     },
   },
-  hostRegion: {
+  young_hostRegion: {
     type: String,
     documentation: {
       description: "Région de l'hébergeur",
     },
   },
   // * Situations particulières
-  handicap: {
+  young_handicap: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire a un handicap",
     },
   },
-  allergies: {
+  young_allergies: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire a des allergies",
     },
   },
-  handicapInSameDepartment: {
+  young_handicapInSameDepartment: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire souhaite être affecté dans son département",
     },
   },
-  reducedMobilityAccess: {
+  young_reducedMobilityAccess: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire a besoin d’un aménagement pour mobilité réduite",
     },
   },
-  ppsBeneficiary: {
+  young_ppsBeneficiary: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "le volontaire bénéficie d'un PPS (projet personnalisé de scolarisation)",
     },
   },
-  paiBeneficiary: {
+  young_paiBeneficiary: {
     type: String,
     enum: ["true", "false"],
     documentation: {
@@ -900,101 +900,101 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  medicosocialStructure: {
+  young_medicosocialStructure: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire est suivi par une structure médicosociale",
     },
   },
-  medicosocialStructureName: {
+  young_medicosocialStructureName: {
     type: String,
     documentation: {
       description: "Nom de la structure médicosociale",
     },
   },
-  medicosocialStructureAddress: {
+  young_medicosocialStructureAddress: {
     type: String,
     documentation: {
       description: "Adresse de la structure médicosociale",
     },
   },
-  medicosocialStructureComplementAddress: {
+  young_medicosocialStructureComplementAddress: {
     type: String,
     documentation: {
       description: "Complément d'adresse de la structure médicosociale",
     },
   },
-  medicosocialStructureZip: {
+  young_medicosocialStructureZip: {
     type: String,
     documentation: {
       description: "Code postal de la structure médicosociale",
     },
   },
-  medicosocialStructureCity: {
+  young_medicosocialStructureCity: {
     type: String,
     documentation: {
       description: "Ville de la structure médicosociale",
     },
   },
-  medicosocialStructureDepartment: {
+  young_medicosocialStructureDepartment: {
     type: String,
     documentation: {
       description: "Département de la structure médicosociale",
     },
   },
-  medicosocialStructureRegion: {
+  young_medicosocialStructureRegion: {
     type: String,
     documentation: {
       description: "Région de la structure médicosociale",
     },
   },
-  medicosocialStructureLocation: {
+  young_medicosocialStructureLocation: {
     lat: { type: Number },
     lon: { type: Number },
   },
 
-  engagedStructure: {
+  young_engagedStructure: {
     type: String,
     documentation: {
       description: "Structure dans laquelle le volontaire est engagée en dehors du SNU",
     },
   },
-  specificAmenagment: {
+  young_specificAmenagment: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire a besoin d'aménagements spécifiques",
     },
   },
-  specificAmenagmentType: {
+  young_specificAmenagmentType: {
     type: String,
     documentation: {
       description: "Type d'aménagements spécifiques",
     },
   },
 
-  highSkilledActivity: {
+  young_highSkilledActivity: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire pratique une activité de haut niveau",
     },
   },
-  highSkilledActivityInSameDepartment: {
+  young_highSkilledActivityInSameDepartment: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire pratique une activité de haut niveau et souhaite etre affecté dans son département pour la phase 1",
     },
   },
-  highSkilledActivityType: {
+  young_highSkilledActivityType: {
     type: String,
     documentation: {
       description: "Type de l'activité de haut niveau",
     },
   },
-  highSkilledActivityProofFiles: {
+  young_highSkilledActivityProofFiles: {
     type: [String],
     documentation: {
       description: "Fichier prouvant l'activité de haut niveau",
@@ -1002,111 +1002,111 @@ const Schema = new mongoose.Schema({
   },
 
   // * Consentements
-  dataProcessingConsentmentFiles: {
+  young_dataProcessingConsentmentFiles: {
     type: [String],
     default: [],
     documentation: {
       description: "Fichier : Formulaire de consentement au traitement des données personnelles",
     },
   },
-  parentConsentment: {
+  young_parentConsentment: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Les représentants ont fourni leur consentement",
     },
   },
-  parentConsentmentFiles: {
+  young_parentConsentmentFiles: {
     type: [String],
     default: [],
     documentation: {
       description: "Fichier : Formulaire de consentement des représentants",
     },
   },
-  parentConsentmentFilesCompliant: {
+  young_parentConsentmentFilesCompliant: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Consentement invalide",
     },
   },
-  parentConsentmentFilesCompliantInfo: {
+  young_parentConsentmentFilesCompliantInfo: {
     type: String,
     documentation: {
       description: "Information supplémentaire sur l'invalidité du consentement",
     },
   },
-  consentment: {
+  young_consentment: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire a fourni son consentement",
     },
   },
-  imageRight: {
+  young_imageRight: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire a fourni son consentement de droit à l'image ",
     },
   },
-  imageRightFiles: {
+  young_imageRightFiles: {
     type: [String],
     default: [],
     documentation: {
       description: "Fichier : Formulaire de consentement de droit à l'image",
     },
   },
-  autoTestPCR: {
+  young_autoTestPCR: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le representant légal a fourni son consentement d'autotest PCR ",
     },
   },
-  autoTestPCRFiles: {
+  young_autoTestPCRFiles: {
     type: [String],
     default: [],
     documentation: {
       description: "Fichier : Formulaire de consentement d'autotest PCR",
     },
   },
-  rulesYoung: {
+  young_rulesYoung: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire a accepté le règlement intérieur ",
     },
   },
-  rulesParent1: {
+  young_rulesParent1: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le representant légal 1 a accepté le règlement intérieur ",
     },
   },
-  rulesParent2: {
+  young_rulesParent2: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le representant légal  2 a accepté le règlement intérieur ",
     },
   },
-  rulesFiles: {
+  young_rulesFiles: {
     type: [String],
     default: [],
     documentation: {
       description: "Fichiers : règlement intérieur",
     },
   },
-  informationAccuracy: {
+  young_informationAccuracy: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire certifie l'exactitude des renseignements fournis",
     },
   },
-  aknowledgmentTerminaleSessionAvailability: {
+  young_aknowledgmentTerminaleSessionAvailability: {
     type: String,
     enum: ["true", "false"],
     documentation: {
@@ -1115,7 +1115,7 @@ const Schema = new mongoose.Schema({
   },
 
   // * JDC
-  jdc: {
+  young_jdc: {
     type: String,
     enum: ["true", "false"],
     documentation: {
@@ -1124,7 +1124,7 @@ const Schema = new mongoose.Schema({
   },
 
   // * Motivations
-  motivations: {
+  young_motivations: {
     type: String,
     documentation: {
       description: "Motivations du volontaire à rejoindre le SNU",
@@ -1132,117 +1132,117 @@ const Schema = new mongoose.Schema({
   },
 
   // * Preferences
-  domains: {
+  young_domains: {
     type: [String],
     default: [],
     documentation: {
       description: "3 domaines privilégiés",
     },
   },
-  professionnalProject: {
+  young_professionnalProject: {
     type: String,
     enum: ["UNIFORM", "OTHER", "UNKNOWN"],
     documentation: {
       description: "Projet professionnel",
     },
   },
-  professionnalProjectPrecision: {
+  young_professionnalProjectPrecision: {
     type: String,
     documentation: {
       description: "Information supplémentaire sur le projet professionnel du volontaire",
     },
   },
-  period: {
+  young_period: {
     type: String,
     enum: ["DURING_HOLIDAYS", "DURING_SCHOOL"],
     documentation: {
       description: "Période privilégiée pour réaliser des missions",
     },
   },
-  periodRanking: {
+  young_periodRanking: {
     type: [String],
     documentation: {
       description: "Classement des périodes",
     },
   },
-  mobilityNearSchool: {
+  young_mobilityNearSchool: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire est disponible pour des missions aux alentours de son établissement",
     },
   },
-  mobilityNearHome: {
+  young_mobilityNearHome: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire est disponible pour des missions aux alentours de son domicile",
     },
   },
-  mobilityNearRelative: {
+  young_mobilityNearRelative: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire est disponible pour des missions aux alentours de l'adresse d'un de ses proches",
     },
   },
-  mobilityNearRelativeName: {
+  young_mobilityNearRelativeName: {
     type: String,
     documentation: {
       description: "Nom du proche",
     },
   },
-  mobilityNearRelativeAddress: {
+  young_mobilityNearRelativeAddress: {
     type: String,
     documentation: {
       description: "Adresse du proche",
     },
   },
-  mobilityNearRelativeZip: {
+  young_mobilityNearRelativeZip: {
     type: String,
     documentation: {
       description: "Code postal du proche",
     },
   },
-  mobilityNearRelativeCity: {
+  young_mobilityNearRelativeCity: {
     type: String,
     documentation: {
       description: "Ville du proche",
     },
   },
-  mobilityTransport: {
+  young_mobilityTransport: {
     type: [String],
     documentation: {
       description: "Type de transport privilégié par le volontaire",
     },
   },
-  mobilityTransportOther: {
+  young_mobilityTransportOther: {
     type: String,
     documentation: {
       description: "Autre type de transport privilégié par le volontaire",
     },
   },
-  missionFormat: {
+  young_missionFormat: {
     type: String,
     enum: ["CONTINUOUS", "DISCONTINUOUS"],
     documentation: {
       description: "Format de mission privilégié",
     },
   },
-  engaged: {
+  young_engaged: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire est engagé dans une structrue en dehors du SNU",
     },
   },
-  engagedDescription: {
+  young_engagedDescription: {
     type: String,
     documentation: {
       description: "Description de l'engagement du volontaire en dehors du SNU ",
     },
   },
-  desiredLocation: {
+  young_desiredLocation: {
     type: String,
     documentation: {
       description: "",
@@ -1250,28 +1250,28 @@ const Schema = new mongoose.Schema({
   },
 
   // preparation militaire
-  militaryPreparationFilesIdentity: {
+  young_militaryPreparationFilesIdentity: {
     type: [String],
     default: [],
   },
-  militaryPreparationFilesCensus: {
+  young_militaryPreparationFilesCensus: {
     type: [String],
     default: [],
   },
-  militaryPreparationFilesAuthorization: {
+  young_militaryPreparationFilesAuthorization: {
     type: [String],
     default: [],
   },
-  militaryPreparationFilesCertificate: {
+  young_militaryPreparationFilesCertificate: {
     type: [String],
     default: [],
   },
-  statusMilitaryPreparationFiles: {
+  young_statusMilitaryPreparationFiles: {
     type: String,
     enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
   },
 
-  missionsInMail: {
+  young_missionsInMail: {
     type: [
       {
         missionId: String,
@@ -1284,87 +1284,135 @@ const Schema = new mongoose.Schema({
   },
 
   // TODO : clean interests
-  defenseInterest: { type: String },
-  defenseTypeInterest: { type: String },
-  defenseDomainInterest: { type: String },
-  defenseMotivationInterest: { type: String },
-  securityInterest: { type: String },
-  securityDomainInterest: { type: String },
-  solidarityInterest: { type: String },
-  healthInterest: { type: String },
-  educationInterest: { type: String },
-  cultureInterest: { type: String },
-  sportInterest: { type: String },
-  environmentInterest: { type: String },
-  citizenshipInterest: { type: String },
+  young_defenseInterest: { type: String },
+  young_defenseTypeInterest: { type: String },
+  young_defenseDomainInterest: { type: String },
+  young_defenseMotivationInterest: { type: String },
+  young_securityInterest: { type: String },
+  young_securityDomainInterest: { type: String },
+  young_solidarityInterest: { type: String },
+  young_healthInterest: { type: String },
+  young_educationInterest: { type: String },
+  young_cultureInterest: { type: String },
+  young_sportInterest: { type: String },
+  young_environmentInterest: { type: String },
+  young_citizenshipInterest: { type: String },
 
-  // SESSION PHASE 1
+  //! COHESION CENTER
 
-  cohesionCenterId: {
+  center_name: {
     type: String,
     documentation: {
-      description: "Id du centre de cohésion",
+      description: "Nom du centre",
     },
   },
-  centerCohort: {
-    type: String,
-    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2021", "2020", "2019"],
-    documentation: {
-      description: "Cohorte",
-    },
-  },
-  headCenterId: {
+  center_code: {
     type: String,
     documentation: {
-      description: "Id de l'utilisateur responsable, le chef de centre",
+      description: "Code du centre",
     },
   },
-  team: {
-    type: [
-      {
-        firstName: {
-          type: String,
-          description: "prénom du membre de l'équipe",
-        },
-        lastName: {
-          type: String,
-          description: "nom du membre de l'équipe",
-        },
-        role: {
-          type: String,
-          description: "role du membre de l'équipe",
-        },
-        email: {
-          type: String,
-          description: "email du membre de l'équipe",
-        },
-        phone: {
-          type: String,
-          description: "téléphone du membre de l'équipe",
-        },
-      },
-    ],
+  center_code2022: {
+    type: String,
     documentation: {
-      description: "equipe d'encadrement pour le séjour",
+      description: "Code du centre utilisé en 2022",
     },
   },
-  waitingList: {
-    type: [String],
+  center_country: {
+    type: String,
     documentation: {
-      description: "Liste  des jeunes en liste d'attente sur ce séjour de cohésion",
+      description: "Pays du centre",
     },
   },
-
-  placesTotal: {
+  center_COR: {
+    type: String,
+    documentation: {
+      description: "",
+    },
+  },
+  center_departmentCode: {
+    type: String,
+    documentation: {
+      description: "Numéro du départment du centre",
+    },
+  },
+  center_address: {
+    type: String,
+    documentation: {
+      description: "Adresse du centre",
+    },
+  },
+  center_city: {
+    type: String,
+    documentation: {
+      description: "Ville du centre",
+    },
+  },
+  center_zip: {
+    type: String,
+    documentation: {
+      description: "Code postal du centre",
+    },
+  },
+  center_department: {
+    type: String,
+    documentation: {
+      description: "Départment du centre",
+    },
+  },
+  center_region: {
+    type: String,
+    documentation: {
+      description: "Région du centre",
+    },
+  },
+  center_addressVerified: {
+    type: String,
+    documentation: {
+      description: "Adresse validée",
+    },
+  },
+  center_placesTotal: {
     type: Number,
     documentation: {
       description: "Nombre de places au total",
     },
   },
-  placesLeft: {
+  center_placesLeft: {
     type: Number,
     documentation: {
       description: "Nombre de places disponibles",
+    },
+  },
+  center_outfitDelivered: {
+    type: String,
+    documentation: {
+      description: "Livraison de tenue",
+    },
+  },
+  center_observations: {
+    type: String,
+    documentation: {
+      description: "Livraison de tenue",
+    },
+  },
+  center_waitingList: {
+    type: [String],
+    documentation: {
+      description: "Liste ordonnée des jeunes en liste d'attente sur ce cente de cohésion",
+    },
+  },
+  center_pmr: {
+    type: String,
+    enum: ["true", "false", ""],
+    documentation: {
+      description: "Accessibilité aux personnes à mobilité réduite",
+    },
+  },
+  center_cohorts: {
+    type: [String],
+    documentation: {
+      description: "Liste des cohortes concernées par ce centre de cohésion",
     },
   },
 
