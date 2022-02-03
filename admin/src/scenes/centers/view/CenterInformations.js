@@ -85,16 +85,14 @@ export default function Details({ center, sessions }) {
           <Wrapper>
             <Header>
               <h4>
-                <strong>Sessions</strong>
+                <strong>Séjours</strong>
               </h4>
             </Header>
             <section>
               {sessions.map((session) => (
-                <div className="detail">
-                  <div className="detail-title-first">{session.cohort} :</div>
-                  <div className="detail-text">
-                    {session.placesLeft} / {session.placesTotal} places
-                  </div>
+                <div className="detail" key={session.cohort}>
+                  <div className="detail-title-first">{session.cohort}&nbsp;:</div>
+                  <div className="detail-text">{session.placesTotal} places</div>
                 </div>
               ))}
             </section>

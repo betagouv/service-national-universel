@@ -163,6 +163,7 @@ export default function Edit(props) {
                   <BoxContent direction="column">
                     {sessions.map((session) => (
                       <Item
+                        key={session._id}
                         title={session.cohort}
                         values={values}
                         name={session.cohort}
