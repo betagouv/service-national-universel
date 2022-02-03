@@ -20,7 +20,6 @@ export default function Places({ filter }) {
 
   const [missionsStatus, setMissionsStatus] = useState({});
   const [missionsDomains, setMissionsDomains] = useState({});
-  //! Modifs à revoir
   const [missionsPeriod, setMissionsPeriod] = useState({});
   const [missionsFormat, setMissionsFormat] = useState({});
   const [missionPlaceTotal, setMissionPlaceTotal] = useState(0);
