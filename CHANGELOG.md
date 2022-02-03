@@ -1,3 +1,20 @@
+# [1.36.0](https://github.com/betagouv/service-national-universel/compare/v1.35.1...v1.36.0) (2022-02-03)
+
+
+### Bug Fixes
+
+* **admin:** add plausibleEvents ([4debbb3](https://github.com/betagouv/service-national-universel/commit/4debbb3eaf18b731488e3c23c65adf10d79f035e))
+* **admin:** restrict head center access ([#1182](https://github.com/betagouv/service-national-universel/issues/1182)) ([24cfad5](https://github.com/betagouv/service-national-universel/commit/24cfad5dfe13b541494e858baffa2eba946a51b2))
+* **api:** back to normal export young in center ([a2ba86d](https://github.com/betagouv/service-national-universel/commit/a2ba86d6ee52fd571e3fdbe0480bf0cf14de20c1))
+
+
+### Features
+
+* **admin:** change source of data in the dashboard (cohort -> session) ([#1181](https://github.com/betagouv/service-national-universel/issues/1181)) ([86e1d8b](https://github.com/betagouv/service-national-universel/commit/86e1d8bd06bbfc72c1bce2bfb93fb5c1fae2d217))
+* **admin:** event Plausible ([#1192](https://github.com/betagouv/service-national-universel/issues/1192)) ([b5ccaea](https://github.com/betagouv/service-national-universel/commit/b5ccaea2003b044a6ce5ca219b0831207b2c7454))
+* **admin:** remonter la session du chef de centre dans sa fiche utilisateur ([#1191](https://github.com/betagouv/service-national-universel/issues/1191)) ([cf48811](https://github.com/betagouv/service-national-universel/commit/cf48811f7e5d7e1459f4906dbf667a78cda32c3b))
+* **admin,api:** open certificate only bretagne ([#1194](https://github.com/betagouv/service-national-universel/issues/1194)) ([2985e34](https://github.com/betagouv/service-national-universel/commit/2985e34195106ed95918ad82b069507df34a03a3))
+
 ## [1.35.1](https://github.com/betagouv/service-national-universel/compare/v1.35.0...v1.35.1) (2022-02-02)
 
 
