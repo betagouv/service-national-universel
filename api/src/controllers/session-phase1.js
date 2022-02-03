@@ -105,16 +105,10 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
   if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  let body = {
+  const body = {
     sessionPhase1Id: session._id,
     cohesionStayPresence: "true",
   };
-
-  if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(req.user.role) && req.user.region === "Bretagne") {
-    body = {
-      sessionPhase1Id: session._id,
-    };
-  }
 
   const youngs = await YoungModel.find(body);
 
