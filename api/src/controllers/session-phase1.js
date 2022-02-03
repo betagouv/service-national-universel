@@ -110,7 +110,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     cohesionStayPresence: "true",
   };
 
-  if (req.user.region === "Bretagne") {
+  if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(req.user.role) && req.user.region === "Bretagne") {
     body = {
       sessionPhase1Id: session._id,
     };
