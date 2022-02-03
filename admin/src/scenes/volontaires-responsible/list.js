@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+import plausibleEvent from "../../services/pausible";
 
 import SelectStatusApplication from "../../components/selectStatusApplication";
 import api from "../../services/api";
