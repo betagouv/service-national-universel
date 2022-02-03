@@ -194,7 +194,7 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                     });
                   }}
                 />
-                <DownloadAllAttestation cohesionCenterId={center._id}>
+                <DownloadAllAttestation sessionPhase1={focusedSession._id}>
                   <div>Exporter les attestations</div>
                 </DownloadAllAttestation>
               </div>
