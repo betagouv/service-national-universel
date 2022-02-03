@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Switch, Route, useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import Team from "./team";
@@ -9,14 +10,16 @@ import Youngs from "./youngs";
 import Affectation from "./affectation";
 import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
-import { translate, CENTER_ROLES } from "../../../utils";
+import { translate, CENTER_ROLES, ROLES } from "../../../utils";
 
 export default function Index({ ...props }) {
   const [center, setCenter] = useState();
   const [focusedCohort, setFocusedCohort] = useState();
   const [focusedSession, setFocusedSession] = useState();
   const [focusedTab, setFocusedTab] = useState("equipe");
+  const [availableCohorts, setAvailableCohorts] = useState([]);
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -40,6 +43,15 @@ export default function Index({ ...props }) {
   useEffect(() => {
     (async () => {
       if (!center || !center?.cohorts || !center?.cohorts?.length || !focusedCohort) return;
+      const allSessions = await api.get(`/cohesion-center/${center._id}/session-phase1`);
+      if (!allSessions.ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération des sessions", translate(allSessions.code));
+      }
+      if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+        setAvailableCohorts(allSessions.data.map((s) => s.cohort));
+      } else {
+        setAvailableCohorts(allSessions.data.filter((session) => session.headCenterId === user._id).map((session) => session.cohort));
+      }
       const sessionPhase1 = await api.get(`/cohesion-center/${center._id}/cohort/${focusedCohort}/session-phase1`);
       if (!sessionPhase1.ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1.code));
@@ -114,14 +126,24 @@ export default function Index({ ...props }) {
     <>
       <CenterInformations center={center} />
       <div style={{ padding: "0 3rem" }}>
-        <Nav tab={focusedTab} center={center} onChangeCohort={setFocusedCohort} onChangeTab={setFocusedTab} focusedSession={focusedSession} />
+        <Nav
+          tab={focusedTab}
+          center={center}
+          user={user}
+          cohorts={availableCohorts}
+          onChangeCohort={setFocusedCohort}
+          onChangeTab={setFocusedTab}
+          focusedSession={focusedSession}
+        />
         <Switch>
           {/* liste-attente reliquat ? */}
           <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
-          <Route
-            path="/centre/:id/volontaires"
-            component={() => <Youngs center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} focusedSession={focusedSession} />}
-          />
+          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
+            <Route
+              path="/centre/:id/volontaires"
+              component={() => <Youngs center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} focusedSession={focusedSession} />}
+            />
+          ) : null}
           <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
           <Route
             path="/centre/:id"
