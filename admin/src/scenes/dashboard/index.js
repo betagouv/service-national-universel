@@ -45,7 +45,7 @@ export default function Dashboard() {
           </TabItem>
         </TabNavigationList>
         <div style={{ display: "flex", marginTop: "1rem" }}>
-          {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll filter={filter} onClick={() => console.log("Dashboard/CTA - Exporter rapport")} /> : null}
+          {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll filter={filter} /> : null}
           <VioletButton
             onClick={() => {
               plausibleEvent("Dashboard/CTA - Exporter statistiques");
