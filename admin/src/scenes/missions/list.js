@@ -16,7 +16,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from 
 import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION"];
+const FILTERS = ["MAINDOMAIN", "SIDEDOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION"];
 
 export default function List() {
   const [mission, setMission] = useState(null);
@@ -156,17 +156,32 @@ export default function List() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  placeholder="Domaine"
-                  componentId="DOMAIN"
-                  dataField="domains.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
+                  placeholder="Domaine principal"
+                  componentId="MAINDOMAIN"
+                  dataField="mainDomain.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MAINDOMAIN") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Domaine")}
+                  renderLabel={(items) => getFilterLabel(items, "Domaine principal")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Domaine secondaire"
+                  componentId="SIDEDOMAIN"
+                  dataField="sideDomain.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SIDEDOMAIN") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Domaine secondaire")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
