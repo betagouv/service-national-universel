@@ -5,10 +5,8 @@ import { Subtitle } from "../../../components/dashboard";
 import { translate, MISSION_DOMAINS } from "../../../utils";
 import { Box, BoxTitleCircular as BoxTitle } from "../../../components/box";
 
-export default function MissionDetail({ youngsDomains, missionsDomains, missionsMainDomain }) {
-  //! Modifs à revoir
-  const totalMissions = missionsDomains ? Object.keys(missionsDomains).reduce((acc, a) => acc + missionsDomains[a], 0) : null;
-  const totalMissionsMainDomain = missionsMainDomain ? Object.keys(missionsMainDomain)?.reduce((acc, a) => acc + missionsDomains[a], 0) : null;
+export default function MissionDetail({ youngsDomains, missionsDomains }) {
+  const totalMissions = Object.keys(missionsDomains).reduce((acc, a) => acc + missionsDomains[a], 0);
   const totalYoungs = Object.keys(youngsDomains).reduce((acc, a) => acc + youngsDomains[a], 0);
 
   return (
@@ -32,9 +30,9 @@ export default function MissionDetail({ youngsDomains, missionsDomains, missions
                   <CircularLineIndex>{`${k + 1}.`}</CircularLineIndex>
                   <CircularProgress
                     circleProgressColor="#1B7BBF"
-                    percentage={missionsMainDomain ? ((missionsMainDomain[l] * 100) / totalMissionsMainDomain).toFixed(1) : ((missionsDomains[l] * 100) / totalMissions).toFixed(1)}
+                    percentage={((missionsDomains[l] * 100) / totalMissions).toFixed(1)}
                     title={translate(l)}
-                    subtitle={missionsMainDomain ? `${missionsMainDomain[l] || 0} missions` : `${missionsDomains[l] || 0} missions`}
+                    subtitle={`${missionsDomains[l] || 0} missions`}
                   />
                 </CircularLine>
               );

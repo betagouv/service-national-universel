@@ -21,7 +21,6 @@ export default function Places({ filter }) {
   const [missionsStatus, setMissionsStatus] = useState({});
   const [missionsDomains, setMissionsDomains] = useState({});
   //! Modifs à revoir
-  const [missionsMainDomain, setMissionsMainDomain] = useState({});
   const [missionsPeriod, setMissionsPeriod] = useState({});
   const [missionsFormat, setMissionsFormat] = useState({});
   const [missionPlaceTotal, setMissionPlaceTotal] = useState(0);
@@ -38,7 +37,7 @@ export default function Places({ filter }) {
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
-          domains: { terms: { field: "domains.keyword" } },
+          domains: { terms: { field: "mainDomain.keyword" } },
           period: { terms: { field: "period.keyword" } },
           format: { terms: { field: "format.keyword" } },
           placesTotal: { sum: { field: "placesTotal" } },
@@ -53,7 +52,7 @@ export default function Places({ filter }) {
       const body2 = {
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
-          domains: { terms: { field: "domains.keyword" } },
+          domains: { terms: { field: "mainDomain.keyword" } },
           period: { terms: { field: "period.keyword" } },
           format: { terms: { field: "missionFormat.keyword" } },
           professionnalProject: { terms: { field: "professionnalProject.keyword" } },
@@ -71,8 +70,7 @@ export default function Places({ filter }) {
       const { responses: youngResponse } = await api.esQuery("young", body2);
 
       if (missionResponse.length) {
-        if (missionResponse[0].domains) setMissionsDomains(missionResponse[0].aggregations.domains?.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-        if (missionResponse[0].mainDomain) setMissionsMainDomain(missionResponse[0].aggregations.mainDomain?.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMissionsDomains(missionResponse[0].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionsStatus(missionResponse[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionsPeriod(missionResponse[0].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionsFormat(missionResponse[0].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
@@ -99,8 +97,7 @@ export default function Places({ filter }) {
     <React.Fragment>
       <ProposedPlaces getLink={getLink} filter={filter} missionPlaceLeft={missionPlaceLeft} missionPlaceTotal={missionPlaceTotal} />
       <Status getLink={getLink} filter={filter} data={missionsStatus} />
-      {missionsDomains ? <MissionDetail missionsDomains={missionsDomains} youngsDomains={youngsDomains} /> : null}
-      {missionsMainDomain ? <MissionDetail missionsMainDomain={missionsMainDomain} youngsDomains={youngsDomains} /> : null}
+      <MissionDetail missionsDomains={missionsDomains} youngsDomains={youngsDomains} />
       <MissionDetail missionsDomains={missionsDomains} youngsDomains={youngsDomains} />
       <Period youngsPeriod={youngsPeriod} missionsPeriod={missionsPeriod} />
       <Format youngsFormat={youngsFormat} missionsFormat={missionsFormat} />
