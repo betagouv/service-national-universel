@@ -19,6 +19,7 @@ import Badge from "../../components/Badge";
 import ExportComponent from "../../components/ExportXlsx";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import plausibleEvent from "../../services/pausible";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
@@ -63,6 +64,7 @@ export default function List() {
                 <Title>Utilisateurs</Title>
               </div>
               <ExportComponent
+                handleClick={() => plausibleEvent("Utilisateurs/CTA - Exporter utilisateurs")}
                 title="Exporter les utilisateurs"
                 exportTitle="Utilisateurs"
                 index="referent"

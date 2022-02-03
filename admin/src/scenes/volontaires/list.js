@@ -31,6 +31,7 @@ import {
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
+import plausibleEvent from "../../services/pausible";
 
 const FILTERS = [
   "SEARCH",
@@ -102,6 +103,7 @@ export default function VolontaireList() {
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: ".25rem", justifyContent: "flex-end" }}>
                 <ExportComponent
+                  handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
                   title="Exporter les volontaires"
                   defaultQuery={getExportQuery}
                   exportTitle="Volontaires"
@@ -708,14 +710,14 @@ const Action = ({ hit }) => {
           <Chevron color="#444" />
         </DropdownToggle>
         <DropdownMenu>
-          <Link to={`/volontaire/${hit._id}`}>
+          <Link to={`/volontaire/${hit._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
             <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
           </Link>
-          <Link to={`/volontaire/${hit._id}/edit`}>
+          <Link to={`/volontaire/${hit._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
             <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
           </Link>
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
-            <DropdownItem className="dropdown-item">
+            <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
               <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
             </DropdownItem>
           ) : null}

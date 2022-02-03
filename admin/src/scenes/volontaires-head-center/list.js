@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import plausibleEvent from "../../services/pausible";
 
 import api from "../../services/api";
 import { apiURL } from "../../config";
@@ -84,6 +85,7 @@ export default function List() {
               </div>
               <div style={{ display: "flex" }}>
                 <ExportComponent
+                  handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
                   defaultQuery={getExportQuery}
                   title="Exporter les volontaires"
                   exportTitle="Volontaires"

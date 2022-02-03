@@ -15,6 +15,7 @@ import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
 import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import plausibleEvent from "../../services/pausible";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION"];
 
@@ -66,6 +67,7 @@ export default function List() {
                 </Link>
               ) : null}
               <ExportComponent
+                handleClick={() => plausibleEvent("Mission/CTA - Exporter missions")}
                 title="Exporter les missions"
                 defaultQuery={getExportQuery}
                 exportTitle="Missions"

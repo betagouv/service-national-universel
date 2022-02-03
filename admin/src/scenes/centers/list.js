@@ -14,6 +14,7 @@ import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine, SubTd } from "../../components/list";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import plausibleEvent from "../../services/pausible";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION"];
 
@@ -59,6 +60,7 @@ export default function List() {
                 <Title>Centres</Title>
               </div>
               <ExportComponent
+                handleClick={() => plausibleEvent("Centres/CTA - Exporter centres")}
                 title="Exporter les centres"
                 defaultQuery={getExportQuery}
                 exportTitle="Centres_de_cohesion"
@@ -91,7 +93,7 @@ export default function List() {
                 }}
               />
               {canCreateOrUpdateCohesionCenter(user) ? (
-                <Link to={`/centre/nouveau`}>
+                <Link to={`/centre/nouveau`} onClick={() => plausibleEvent("Centres/CTA - Créer centre")}>
                   <VioletButton>
                     <p>Créer un nouveau centre</p>
                   </VioletButton>
