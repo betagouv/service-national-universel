@@ -228,6 +228,7 @@ const Action = ({ hit, structure }) => {
 
   const handleImpersonate = async () => {
     try {
+      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${hit._id}`);
       if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
       if (token) api.setToken(token);

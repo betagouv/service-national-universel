@@ -9,6 +9,7 @@ import api from "../../../services/api";
 import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel, SENDINBLUE_TEMPLATES } from "../../../utils";
 import { Link } from "react-router-dom";
 import Loadingbutton from "../../../components/buttons/LoadingButton";
+import plausibleEvent from "../../../services/pausible";
 
 export default function xxxxxxx({ young, onSend }) {
   const FILTERS = ["SEARCH"];
@@ -160,6 +161,7 @@ const HitMission = ({ hit, onSend }) => {
       <td onClick={(e) => e.stopPropagation()}>
         <Loadingbutton
           onClick={() => {
+            plausibleEvent("Volontaires/profil/phase2 CTA - Proposer mission existante");
             setSending(true);
             onSend();
           }}
