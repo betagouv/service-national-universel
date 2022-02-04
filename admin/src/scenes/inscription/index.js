@@ -131,6 +131,7 @@ export default function Inscription() {
                         "Consentement des représentants légaux": translate(data.parentConsentment),
                         "Droit à l'image": translate(data.imageRight),
                         "Autotest PCR": translate(data.autoTestPCR),
+                        "Règlement intérieur": translate(data.rulesYoung),
                         "fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
                         "Statut représentant légal 1": translate(data.parent1Status),
                         "Prénom représentant légal 1": data.parent1FirstName,
