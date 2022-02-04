@@ -138,7 +138,7 @@ export default function List() {
                 defaultQuery={getDefaultQuery}
                 className="dropdown-filter"
                 componentId="DOMAIN"
-                dataField="mainDomain.keyword"
+                dataField="domains.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
                 renderItem={(e, count) => {
                   return `${translate(e)} ${count ? `(${count})` : ""}`;

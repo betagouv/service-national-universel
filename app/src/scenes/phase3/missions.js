@@ -45,7 +45,7 @@ export default function MissionsComponent() {
                 URLParams={true}
                 componentId="DOMAIN"
                 placeholder="Filtrer par domaines"
-                dataField="mainDomain.keyword"
+                dataField="domains.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
                 showSearch={false}
               />

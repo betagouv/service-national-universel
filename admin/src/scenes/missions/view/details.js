@@ -12,6 +12,9 @@ import Copy from "../../../assets/Copy";
 
 export default function DetailsView({ mission, structure, tutor }) {
   const user = useSelector((state) => state.Auth.user);
+  const domains = mission?.domains?.filter((d) => {
+    return d !== mission.mainDomain;
+  });
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -21,9 +24,8 @@ export default function DetailsView({ mission, structure, tutor }) {
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Bloc title="La mission">
                 <Details title="Format" value={translate(mission.format)} />
-                {mission.domains ? <Details title="Domaines" value={mission.domains.map((d) => translate(d)).join(", ")} /> : null}
                 {mission.mainDomain ? <Details title="Domaine principal" value={translate(mission.mainDomain)} /> : null}
-                {mission.sideDomain ? <Details title="Domaine secondaire" value={translate(mission.sideDomain)} /> : null}
+                {mission.domains ? <Details title="Domaine(s) secondaire(s)" value={domains.map((d) => translate(d)).join(", ")} /> : null}
                 <Details title="Début" value={formatStringDateTimezoneUTC(mission.startAt)} />
                 <Details title="Fin" value={formatStringDateTimezoneUTC(mission.endAt)} />
                 {mission.duration ? <Details title="Durée" value={`${mission.duration} heure(s)`} /> : null}

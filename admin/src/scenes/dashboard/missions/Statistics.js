@@ -36,7 +36,7 @@ export default function Places({ filter }) {
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
-          domains: { terms: { field: "mainDomain.keyword" } },
+          domains: { terms: { field: "domains.keyword" } },
           period: { terms: { field: "period.keyword" } },
           format: { terms: { field: "format.keyword" } },
           placesTotal: { sum: { field: "placesTotal" } },
@@ -51,7 +51,7 @@ export default function Places({ filter }) {
       const body2 = {
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
-          domains: { terms: { field: "mainDomain.keyword" } },
+          domains: { terms: { field: "domains.keyword" } },
           period: { terms: { field: "period.keyword" } },
           format: { terms: { field: "missionFormat.keyword" } },
           professionnalProject: { terms: { field: "professionnalProject.keyword" } },
@@ -96,7 +96,6 @@ export default function Places({ filter }) {
     <React.Fragment>
       <ProposedPlaces getLink={getLink} filter={filter} missionPlaceLeft={missionPlaceLeft} missionPlaceTotal={missionPlaceTotal} />
       <Status getLink={getLink} filter={filter} data={missionsStatus} />
-      <MissionDetail missionsDomains={missionsDomains} youngsDomains={youngsDomains} />
       <MissionDetail missionsDomains={missionsDomains} youngsDomains={youngsDomains} />
       <Period youngsPeriod={youngsPeriod} missionsPeriod={missionsPeriod} />
       <Format youngsFormat={youngsFormat} missionsFormat={missionsFormat} />

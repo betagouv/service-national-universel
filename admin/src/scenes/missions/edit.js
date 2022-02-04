@@ -179,7 +179,8 @@ export default function Edit(props) {
           }
 
           values.duration = values.duration?.toString();
-          if (values.domains.length > 1 && values.mainDomain) values.domains = [];
+          if (values.sideDomain) values.sideDomain = "";
+          if (!values.domains.includes(values.mainDomain)) values.domains = [values.mainDomain, ...values.domains];
 
           const { ok, code, data: mission } = values._id ? await api.put(`/mission/${values._id}`, values) : await api.post("/mission", values);
 
@@ -251,13 +252,13 @@ export default function Edit(props) {
                       <label>
                         <span>*</span>DOMAINE D&apos;ACTION PRINCIPAL
                       </label>
-                      {values?.domains?.length > 1 ? (
+                      {!values.mainDomain && values.domains.length > 1 ? (
                         <ul style={{ color: "#a0aec1", fontSize: 12, marginBottom: "1rem" }}>
                           <li>Précédemment, vous aviez sélectionné plusieurs domaines :</li>
                           {values?.domains.map((domain) => (
                             <li key={domain}>• {translate(domain)}</li>
                           ))}
-                          <li>Merci de sélectionner un domaine principal (requis), ainsi qu&apos;un domaine secondaire (facultatif)</li>
+                          <li>Merci de sélectionner un domaine principal (requis), ainsi qu&apos;un ou plusieurs domaine(s) secondaire(s) (facultatif)</li>
                         </ul>
                       ) : null}
                       <Field component="select" value={values.mainDomain} onChange={handleChange} name="mainDomain" validate={(v) => !v && requiredMessage}>
@@ -273,20 +274,16 @@ export default function Edit(props) {
                       <ErrorMessage errors={errors} touched={touched} name="mainDomain" />
                     </FormGroup>
                     <FormGroup>
-                      <label>DOMAINE D&apos;ACTION SECONDAIRE</label>
-                      <Field component="select" value={values.sideDomain} onChange={handleChange} name="sideDomain">
-                        <option value="" label="Sélectionnez un domaine secondaire">
-                          Sélectionnez un domaine secondaire
-                        </option>
-                        {Object.keys(MISSION_DOMAINS).map((el) => {
-                          if (el === values.mainDomain) return null;
-                          return (
-                            <option key={el} value={el}>
-                              {translate(el)}
-                            </option>
-                          );
-                        })}
-                      </Field>
+                      <label>DOMAINE(S) D&apos;ACTION SECONDAIRE(S)</label>
+                      <MultiSelect
+                        value={values.domains || []}
+                        valueToExclude={values.mainDomain}
+                        onChange={handleChange}
+                        name="domains"
+                        // eslint-disable-next-line no-prototype-builtins
+                        options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
+                        placeholder="Sélectionnez un ou plusieurs domaines"
+                      />
                     </FormGroup>
                     <FormGroup>
                       <label>
