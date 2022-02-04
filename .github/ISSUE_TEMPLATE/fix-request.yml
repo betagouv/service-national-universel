@@ -1,7 +1,6 @@
 name: ✨ Demande de correctif
 title: "fix: "
 description: Proposer une nouvelle fonctionnalité/correctif pour améliorer la plateform du SNU !
-labels: [enhancement]
 body:
   - type: textarea
     id: description-bug
