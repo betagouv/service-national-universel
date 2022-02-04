@@ -69,14 +69,6 @@ export default function Details({ center, sessions }) {
                   <div className="detail-title-second">Accessibilité aux personnes à mobilité réduite (PMR) :</div>
                   <div className="detail-text">{translate(center.pmr)}</div>
                 </div>
-                <div className="detail">
-                  <div className="detail-title-second">Séjour(s) de cohésion concerné(s) par le centre :</div>
-                  {center.cohorts?.map((cohort) => (
-                    <div key={cohort} className="detail-text">
-                      <p className="detail-badge">{cohort}</p>
-                    </div>
-                  ))}
-                </div>
               </section>
             </Container>
           </Wrapper>
