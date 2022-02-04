@@ -72,7 +72,7 @@ export default function AssignCenter({ young, onAffect }) {
                   <thead>
                     <tr>
                       <th>Centre</th>
-                      <th>Session</th>
+                      <th>Séjour</th>
                       <th>Action</th>
                     </tr>
                   </thead>
