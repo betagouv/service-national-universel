@@ -79,7 +79,7 @@ export default function Convocation() {
   if (!isFromDOMTOM() && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true") {
     return (
       <Warning>
-        ⚠️ Impossible d'afficher votre convocation, merci de contacter le <a onClick={() => history.push("/besoin-d-aide")}>support</a>.
+        ⚠️ Impossible d&apos;afficher votre convocation, merci de contacter le <a onClick={() => history.push("/besoin-d-aide")}>support</a>.
       </Warning>
     );
   }
