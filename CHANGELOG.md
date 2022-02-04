@@ -1,3 +1,11 @@
+# [1.37.0](https://github.com/betagouv/service-national-universel/compare/v1.36.0...v1.37.0) (2022-02-04)
+
+
+### Features
+
+* **admin:** add rules young in export ([#1197](https://github.com/betagouv/service-national-universel/issues/1197)) ([616a8b2](https://github.com/betagouv/service-national-universel/commit/616a8b28cf3b81fb941bb4aaa198e6d815babf3f))
+* **app:** protocole sanitaire ([#1199](https://github.com/betagouv/service-national-universel/issues/1199)) ([d28caf1](https://github.com/betagouv/service-national-universel/commit/d28caf107cbd283874cad935d5b931346d237ee0))
+
 # [1.36.0](https://github.com/betagouv/service-national-universel/compare/v1.35.1...v1.36.0) (2022-02-03)
 
 
