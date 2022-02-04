@@ -1,7 +1,6 @@
 name: 💡 Demande de fonctionnalité
 title: "feat: "
 description: Proposer une nouvelle fonctionnalité pour améliorer la plateform du SNU !
-labels: [enhancement]
 body:
   - type: textarea
     id: description-bug
