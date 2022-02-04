@@ -25,8 +25,6 @@ export default function CohesionCenter({ values, handleChange }) {
     })();
   }, [values.sessionPhase1Id]);
 
-  if (!cohesionCenter) return <></>;
-
   return (
     <Col md={6} style={{ marginBottom: "20px" }}>
       <Box>
@@ -35,9 +33,13 @@ export default function CohesionCenter({ values, handleChange }) {
           {canAssignCohesionCenter(user) && (
             <AssignCenter young={values} onAffect={(session, young) => handleChange({ target: { value: young.sessionPhase1Id, name: "sessionPhase1Id" } })} />
           )}
-          <Item disabled title="Centre de cohésion" values={cohesionCenter} name="name" handleChange={handleChange} />
-          <Item disabled title="Code postal centre de cohésion" values={cohesionCenter} name="zip" handleChange={handleChange} />
-          <Item disabled title="Ville centre de cohésion" values={cohesionCenter} name="city" handleChange={handleChange} />
+          {cohesionCenter ? (
+            <>
+              <Item disabled title="Centre de cohésion" values={cohesionCenter} name="name" handleChange={handleChange} />
+              <Item disabled title="Code postal centre de cohésion" values={cohesionCenter} name="zip" handleChange={handleChange} />
+              <Item disabled title="Ville centre de cohésion" values={cohesionCenter} name="city" handleChange={handleChange} />
+            </>
+          ) : null}
         </BoxContent>
       </Box>
     </Col>
