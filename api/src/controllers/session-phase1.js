@@ -9,7 +9,7 @@ const CohesionCenterModel = require("../models/cohesionCenter");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
-const { ERRORS, updatePlacesSessionPhase1, sendAutoCancelMeetingPoint, updatePlacesBus } = require("../utils");
+const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus } = require("../utils");
 const { ROLES, canCreateOrUpdateSessionPhase1 } = require("snu-lib/roles");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
@@ -151,7 +151,6 @@ router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent
     // if young has confirmed their meetingPoint, as we will cancel it, we notify them
     if (young.meetingPointId || young.deplacementPhase1Autonomous === "true") {
       young.set({ meetingPointId: undefined, deplacementPhase1Autonomous: undefined });
-      await sendAutoCancelMeetingPoint(young);
     }
 
     await young.save({ fromUser: req.user });
