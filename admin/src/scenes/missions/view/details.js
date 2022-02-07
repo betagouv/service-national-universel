@@ -25,7 +25,7 @@ export default function DetailsView({ mission, structure, tutor }) {
               <Bloc title="La mission">
                 <Details title="Format" value={translate(mission.format)} />
                 {mission.mainDomain ? <Details title="Domaine principal" value={translate(mission.mainDomain)} /> : null}
-                {mission.domains ? <Details title="Domaine(s) secondaire(s)" value={domains.map((d) => translate(d)).join(", ")} /> : null}
+                {mission.domains ? <Details title="Domaine(s)" value={domains.map((d) => translate(d)).join(", ")} /> : null}
                 <Details title="Début" value={formatStringDateTimezoneUTC(mission.startAt)} />
                 <Details title="Fin" value={formatStringDateTimezoneUTC(mission.endAt)} />
                 {mission.duration ? <Details title="Durée" value={`${mission.duration} heure(s)`} /> : null}

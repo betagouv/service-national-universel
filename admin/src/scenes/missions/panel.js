@@ -126,7 +126,7 @@ export default function PanelView({ onChange, mission }) {
       </Info>
       <Info title="La mission">
         {mission.mainDomain ? <Details title="Domaine principal" value={translate(mission.mainDomain)} /> : null}
-        {mission.domains ? <Details title="Domaine(s) secondaire(s)" value={domains.map((d) => translate(d)).join(", ")} /> : null}
+        {mission.domains ? <Details title="Domaine(s)" value={domains.map((d) => translate(d)).join(", ")} /> : null}
         <Details title="Début" value={formatStringDateTimezoneUTC(mission.startAt)} />
         <Details title="Fin" value={formatStringDateTimezoneUTC(mission.endAt)} />
         <Details title="Adresse" value={mission.address} />
