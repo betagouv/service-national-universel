@@ -147,8 +147,9 @@ export default function Edit(props) {
           location: "",
           department: "",
           region: "",
-          period: [],
+          mainDomain: "",
           domains: [],
+          period: [],
           subPeriod: [],
         }
       }
@@ -177,6 +178,7 @@ export default function Edit(props) {
           }
 
           values.duration = values.duration?.toString();
+          if (!values.domains.includes(values.mainDomain)) values.domains = [values.mainDomain, ...values.domains];
 
           const { ok, code, data: mission } = values._id ? await api.put(`/mission/${values._id}`, values) : await api.post("/mission", values);
 
@@ -239,14 +241,40 @@ export default function Edit(props) {
                       <ErrorMessage errors={errors} touched={touched} name="name" />
                     </FormGroup>
                     <FormGroup>
-                      <label>DOMAINES D&apos;ACTION</label>
+                      <label>
+                        <span>*</span>DOMAINE D&apos;ACTION PRINCIPAL
+                      </label>
+                      {!values.mainDomain && values.domains.length > 1 ? (
+                        <ul style={{ color: "#a0aec1", fontSize: 12, marginBottom: "1rem" }}>
+                          <li>Précédemment, vous aviez sélectionné plusieurs domaines :</li>
+                          {values?.domains.map((domain) => (
+                            <li key={domain}>• {translate(domain)}</li>
+                          ))}
+                          <li>Merci de sélectionner un domaine principal (requis), ainsi qu&apos;un ou plusieurs domaine(s) secondaire(s) (facultatif)</li>
+                        </ul>
+                      ) : null}
+                      <Field component="select" value={values.mainDomain} onChange={handleChange} name="mainDomain" validate={(v) => !v && requiredMessage}>
+                        <option value="" label="Sélectionnez un domaine principal">
+                          Sélectionnez un domaine principal
+                        </option>
+                        {Object.keys(MISSION_DOMAINS).map((el) => (
+                          <option key={el} value={el}>
+                            {translate(el)}
+                          </option>
+                        ))}
+                      </Field>
+                      <ErrorMessage errors={errors} touched={touched} name="mainDomain" />
+                    </FormGroup>
+                    <FormGroup>
+                      <label>DOMAINE(S) D&apos;ACTION SECONDAIRE(S)</label>
                       <MultiSelect
                         value={values.domains || []}
+                        valueToExclude={values.mainDomain}
                         onChange={handleChange}
                         name="domains"
                         // eslint-disable-next-line no-prototype-builtins
                         options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
-                        placeholder="Sélectionnez un ou plusieurs domains"
+                        placeholder="Sélectionnez un ou plusieurs domaines"
                       />
                     </FormGroup>
                     <FormGroup>
@@ -376,11 +404,11 @@ export default function Edit(props) {
                         </Row>
                       </FormGroup>
                       <FormGroup>
-                        <label>Durée de la mission</label>
+                        <label htmlFor="duration">Durée de la mission</label>
                         <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</p>
                         <Row>
                           <Col>
-                            <Input type="number" name="duration" onChange={handleChange} value={values.duration} />
+                            <Input type="number" name="duration" id="duration" onChange={handleChange} value={values.duration} />
                           </Col>
                           <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
                         </Row>

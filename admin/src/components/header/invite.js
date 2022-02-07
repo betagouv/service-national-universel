@@ -75,6 +75,11 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                 const obj = { ...values };
                 if (obj.role === ROLES.REFERENT_DEPARTMENT) obj.region = department2region[obj.department];
                 if (obj.role === ROLES.REFERENT_REGION) obj.department = null;
+                if (obj.role !== ROLES.HEAD_CENTER) {
+                  obj.cohesionCenterId = null;
+                  obj.cohesionCenterName = null;
+                  obj.sessionPhase1Id = null;
+                }
                 if (obj.department && !obj.region) obj.region = department2region[obj.department];
                 const { data: referent } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
 
@@ -173,7 +178,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                     <Row>
                       <Col md={6}>
                         <FormGroup>
-                          <ChooseCenter validate={(v) => !v} value={values} onChange={handleChange} centers={centers} />
+                          <ChooseCenter value={values} onChange={handleChange} centers={centers} />
                         </FormGroup>
                       </Col>
                       <Col md={6}>
@@ -269,7 +274,7 @@ const ChooseRegion = ({ value, onChange, validate }) => {
   );
 };
 
-const ChooseCenter = ({ onChange, centers, onSelect }) => {
+const ChooseCenter = ({ onChange, centers, onSelect, value }) => {
   const { user } = useSelector((state) => state.Auth);
 
   useEffect(() => {
@@ -279,17 +284,21 @@ const ChooseCenter = ({ onChange, centers, onSelect }) => {
   }, []);
 
   return (
-    <ReactSelect
-      disabled={user.role === ROLES.HEAD_CENTER}
-      options={centers}
-      placeholder="Choisir un centre"
-      noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
-      onChange={(e) => {
-        onChange({ target: { value: e._id, name: "cohesionCenterId" } });
-        onChange({ target: { value: e.value, name: "cohesionCenterName" } });
-        onSelect?.(e);
-      }}
-    />
+    <>
+      <Field hidden value={value.cohesionCenterName} name="cohesionCenterName" onChange={onChange} validate={(v) => !v} />
+      <Field hidden value={value.cohesionCenterId} name="cohesionCenterId" onChange={onChange} validate={(v) => !v} />
+      <ReactSelect
+        disabled={user.role === ROLES.HEAD_CENTER}
+        options={centers}
+        placeholder="Choisir un centre"
+        noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
+        onChange={(e) => {
+          onChange({ target: { value: e._id, name: "cohesionCenterId" } });
+          onChange({ target: { value: e.value, name: "cohesionCenterName" } });
+          onSelect?.(e);
+        }}
+      />
+    </>
   );
 };
 
@@ -306,14 +315,18 @@ const ChooseSessionPhase1 = ({ onChange, value }) => {
   }, [value.cohesionCenterId]);
 
   return (
-    <ReactSelect
-      options={sessions}
-      placeholder="Choisir une session"
-      noOptionsMessage={() => "Aucune session ne correspond à cette recherche."}
-      onChange={(e) => {
-        onChange({ target: { value: e.value, name: "sessionPhase1Id" } });
-      }}
-    />
+    <>
+      <Field hidden value={value.sessionPhase1Id} name="sessionPhase1Id" onChange={onChange} validate={(v) => !v} />
+      <ReactSelect
+        options={sessions}
+        placeholder="Choisir une session"
+        noOptionsMessage={() => "Aucune session ne correspond à cette recherche."}
+        onChange={(e) => {
+          onChange({ target: { value: e.value, name: "sessionPhase1Id" } });
+        }}
+      />
+    </>
+
   );
 };
 
