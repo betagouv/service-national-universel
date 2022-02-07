@@ -1,3 +1,10 @@
+# [1.38.0](https://github.com/betagouv/service-national-universel/compare/v1.37.0...v1.38.0) (2022-02-07)
+
+
+### Features
+
+* **admin:** add required fields ([#1200](https://github.com/betagouv/service-national-universel/issues/1200)) ([42fc95a](https://github.com/betagouv/service-national-universel/commit/42fc95abb385400ae8ae74ec1121b7f40c4b820a))
+
 # [1.37.0](https://github.com/betagouv/service-national-universel/compare/v1.36.0...v1.37.0) (2022-02-04)
 
 
