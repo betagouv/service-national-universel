@@ -148,7 +148,6 @@ export default function Edit(props) {
           department: "",
           region: "",
           mainDomain: "",
-          sideDomain: "",
           domains: [],
           period: [],
           subPeriod: [],
@@ -179,7 +178,6 @@ export default function Edit(props) {
           }
 
           values.duration = values.duration?.toString();
-          if (values.sideDomain) values.sideDomain = "";
           if (!values.domains.includes(values.mainDomain)) values.domains = [values.mainDomain, ...values.domains];
 
           const { ok, code, data: mission } = values._id ? await api.put(`/mission/${values._id}`, values) : await api.post("/mission", values);

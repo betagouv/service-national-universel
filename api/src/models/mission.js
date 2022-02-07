@@ -46,13 +46,6 @@ const Schema = new mongoose.Schema({
       description: "Domaine principal de la mission (citoyenneté, sport, culture, ...)",
     },
   }, // OK
-  // À supprimer
-  sideDomain: {
-    type: String,
-    documentation: {
-      description: "Domaine secondaire de la mission (citoyenneté, sport, culture, ...)",
-    },
-  }, // OK
 
   startAt: {
     type: Date,
