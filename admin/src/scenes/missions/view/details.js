@@ -135,7 +135,7 @@ const Details = ({ title, value, copy }) => {
   }, [copied]);
   return (
     <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
+      <div className="detail-title">{title}&nbsp;:</div>
       <div className="detail-text">
         {value}
         {copy ? (
@@ -165,7 +165,6 @@ const Wrapper = styled.div`
     padding-bottom: 0.5rem;
     &-title {
       min-width: 120px;
-      width: 90px;
       margin-right: 1rem;
       color: #798399;
     }
