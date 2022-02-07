@@ -179,6 +179,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
     }
 
+    if (checkedMission.description !== mission.description || checkedMission.actions !== mission.actions) {
+      checkedMission.status = "WAITING_VALIDATION";
+    }
+
+    console.log("MISSION CHANGES", checkedMission);
     const oldStatus = mission.status;
     mission.set(checkedMission);
     await mission.save({ fromUser: req.user });

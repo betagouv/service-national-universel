@@ -215,13 +215,7 @@ export default function Edit(props) {
               </LoadingButton>
             ) : null}
 
-            <LoadingButton
-              loading={loadings.submitButton}
-              disabled={loadings.saveButton || loadings.changeStructureButton}
-              onClick={() => {
-                handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-                handleSubmit();
-              }}>
+            <LoadingButton loading={loadings.submitButton} disabled={loadings.saveButton || loadings.changeStructureButton} onClick={handleSubmit}>
               {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
             </LoadingButton>
           </Header>
@@ -273,6 +267,10 @@ export default function Edit(props) {
                       <label>
                         <span>*</span>OBJECTIFS DE LA MISSION
                       </label>
+                      <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                        En cas de modification de ce champ après validation de votre mission, cette dernière repassera en attente de validation et devra être de nouveau étudiée par
+                        votre référent départemental.
+                      </p>
                       <Field
                         validate={(v) => !v && requiredMessage}
                         name="description"
@@ -288,6 +286,10 @@ export default function Edit(props) {
                       <label>
                         <span>*</span>ACTIONS CONCRÈTES CONFIÉES AU(X) VOLONTAIRE(S)
                       </label>
+                      <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                        En cas de modification de ce champ après validation de votre mission, cette dernière repassera en attente de validation et devra être de nouveau étudiée par
+                        votre référent départemental.
+                      </p>
                       <Field
                         validate={(v) => !v && requiredMessage}
                         name="actions"
@@ -555,13 +557,7 @@ export default function Edit(props) {
                 </LoadingButton>
               ) : null}
 
-              <LoadingButton
-                loading={loadings.submitButton}
-                disabled={loadings.saveButton || loadings.changeStructureButton}
-                onClick={() => {
-                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-                  handleSubmit();
-                }}>
+              <LoadingButton loading={loadings.submitButton} disabled={loadings.saveButton || loadings.changeStructureButton} onClick={handleSubmit}>
                 {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
               </LoadingButton>
             </Header>
