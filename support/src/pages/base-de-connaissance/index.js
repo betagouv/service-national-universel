@@ -2,7 +2,7 @@ import useSWR, { SWRConfig } from "swr";
 import { useEffect, useState } from "react";
 import useUser from "../../hooks/useUser";
 import API from "../../services/api";
-import KnowledgeBasePublicHome from "../../components//KnowledgeBasePublicHome";
+import KnowledgeBasePublicHome from "../../components/KnowledgeBasePublicHome";
 import Head from "next/head";
 
 const PopulatedHome = () => {
