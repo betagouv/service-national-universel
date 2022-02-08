@@ -1,6 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import useSWR from "swr";
-import API from "../../services/api";
 
 const TicketsTable = ({ onTicketClick, tickets }) => {
   const ticketsIds = tickets.map((t) => t._id);
@@ -14,37 +12,46 @@ const TicketsTable = ({ onTicketClick, tickets }) => {
         <div className="sticky top-0 flex w-min border-b bg-white">
           {columns
             .filter((c) => c.visible)
-            .map(({ key, name }) => (
-              <ResizableColumn height={tableRef?.current?.getBoundingClientRect().height} key={key} columnKey={key} ticketsIds={ticketsIds}>
+            .map(({ key, name }, index, array) => (
+              <ResizableColumn
+                height={tableRef?.current?.getBoundingClientRect().height}
+                isFirst={index === 0}
+                isLast={index === array.length - 1}
+                key={key}
+                columnKey={key}
+                ticketsIds={ticketsIds}
+              >
                 {name}
               </ResizableColumn>
             ))}
         </div>
-        {tickets.map((ticket, index) => {
-          return (
-            <React.Fragment key={ticket._id}>
-              <div
-                data-ticketid={ticket._id}
-                onClick={onTicketClick}
-                className={`${index % 2 === 1 ? "bg-gray-100" : "bg-white"} flex w-min  cursor-pointer border-b hover:bg-gray-200`}
-              >
-                {columns
-                  .filter((c) => c.visible)
-                  .map(({ key }) => (
-                    <div key={key} data-key={key} className={`shrink-0 grow-0 truncate whitespace-nowrap border-r px-6 py-4 text-sm font-medium text-gray-900 `}>
-                      {ticket[key]}
-                    </div>
-                  ))}
-              </div>
-            </React.Fragment>
-          );
-        })}
+        {tickets
+          .map((t) => ({ ...t, numberOfMessages: t.messages.length }))
+          .map((ticket, index) => {
+            return (
+              <React.Fragment key={ticket._id}>
+                <div
+                  data-ticketid={ticket._id}
+                  onClick={onTicketClick}
+                  className={`${index % 2 === 1 ? "bg-gray-100" : "bg-white"} flex w-min  cursor-pointer border-b hover:bg-gray-200`}
+                >
+                  {columns
+                    .filter((c) => c.visible)
+                    .map(({ key }) => (
+                      <div key={key} data-key={key} className={`shrink-0 grow-0 truncate whitespace-nowrap border-r px-6 py-4 text-sm font-medium text-gray-900 `}>
+                        {ticket[key]}
+                      </div>
+                    ))}
+                </div>
+              </React.Fragment>
+            );
+          })}
       </div>
     </div>
   );
 };
 
-const ResizableColumn = ({ height, children, columnKey, ticketsIds }) => {
+const ResizableColumn = ({ height, children, columnKey, ticketsIds, isFirst, isLast }) => {
   const col = useRef(null);
   const xPosition = useRef(null);
   const currentWidth = useRef(null);
@@ -97,7 +104,14 @@ const ResizableColumn = ({ height, children, columnKey, ticketsIds }) => {
   }, [colWidth, style, ticketsIds]);
 
   return (
-    <div ref={col} scope="col" className="relative h-auto shrink-0 grow-0 border bg-white px-6 py-2 text-left text-sm font-medium text-gray-900" style={style}>
+    <div
+      ref={col}
+      scope="col"
+      className={`relative h-auto shrink-0 grow-0 border bg-white px-6 py-2 text-left text-sm font-medium text-gray-900 ${isFirst ? "border-l-0" : ""} ${
+        isLast ? "border-r-0" : ""
+      }`}
+      style={style}
+    >
       {children}
       <div className="resizer" onMouseDown={mouseDownHandler} style={{ height }}></div>
       <div className="absolute bottom-[-1px] right-0 left-0 h-[1px] bg-coolGray-200"></div>
@@ -107,6 +121,7 @@ const ResizableColumn = ({ height, children, columnKey, ticketsIds }) => {
 
 const initColumns = [
   { key: "number", visible: true, name: "Numéro", type: Number },
+  { key: "numberOfMessages", visible: true, name: "Messages", type: Number },
   { key: "title", visible: true, name: "Titre", type: String },
   { key: "category", visible: true, name: "Categorie", type: String, map: { TECHNICAL: "Technique", QUESTION: "Question", EMPTY: "Aucune" } },
   { key: "subject", visible: true, name: "Sujet", type: String },
@@ -133,7 +148,7 @@ const initColumns = [
   { key: "lastAgentInChargeUpdateAt", visible: true, name: "Dernière réponse de l'agent en charge", type: Date },
   { key: "tags", visible: true, name: "Tags", type: [String] },
   { key: "closedAt", visible: true, name: "Fermé le", type: Date },
-  { key: "createdAt", visible: true, name: "Clos le", type: Date },
+  { key: "createdAt", visible: true, name: "Crée le", type: Date },
 ];
 
 export default TicketsTable;
