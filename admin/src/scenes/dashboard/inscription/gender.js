@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 
-export default ({ filter }) => {
+export default function Gender({ filter }) {
   const [gender, setGender] = useState(null);
 
   useEffect(() => {
@@ -19,9 +19,10 @@ export default ({ filter }) => {
       };
 
       if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
-      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
-      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
+      if (filter.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filter.academy } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery("young", body);
       if (responses.length) {
@@ -53,7 +54,7 @@ export default ({ filter }) => {
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );
-};
+}
 
 const Content = styled.div`
   display: flex;

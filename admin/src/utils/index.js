@@ -1,8 +1,7 @@
-import { translate } from "snu-lib/translation";
 import passwordValidator from "password-validator";
 import api from "../services/api";
 export * from "snu-lib";
-export * from "./translateHistoric";
+export * from "./translateFieldsModel";
 import { environment } from "../config";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
@@ -88,11 +87,12 @@ export const copyToClipboard = (text) => {
   }
 };
 
-export const replaceSpaces = (v) => v.replace(/\s+/g, "+");
+export const replaceSpaces = (v) => v?.replace(/\s+/g, "+");
 export const getLink = ({ base = "/", filter, filtersUrl = [] }) => {
-  if (filter?.region) filtersUrl.push(`REGION=%5B"${replaceSpaces(filter?.region)}"%5D`);
-  if (filter?.cohort) filtersUrl.push(`COHORT=%5B"${replaceSpaces(filter?.cohort)}"%5D`);
-  if (filter?.department) filtersUrl.push(`DEPARTMENT=%5B"${replaceSpaces(filter?.department)}"%5D`);
+  if (filter?.region?.length) filtersUrl.push(`REGION=%5B${replaceSpaces(filter?.region?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
+  if (filter?.cohort?.length) filtersUrl.push(`COHORT=%5B${replaceSpaces(filter?.cohort?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
+  if (filter?.department?.length) filtersUrl.push(`DEPARTMENT=%5B${replaceSpaces(filter?.department?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
+  if (filter?.academy?.length) filtersUrl.push(`ACADEMY=%5B${replaceSpaces(filter?.academy?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
   let res = base;
   if (filtersUrl?.length) res += `?${filtersUrl.join("&")}`;
   return res;

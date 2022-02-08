@@ -1,0 +1,57 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 8083",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint --ext .js,.jsx --fix"
+  },
+  "prettier": {
+    "printWidth": 180
+  },
+  "dependencies": {
+    "@headlessui/react": "1.4.2",
+    "@sentry/nextjs": "6.16.1",
+    "dayjs": "1.10.7",
+    "emoji-mart": "3.0.1",
+    "is-email": "^1.0.2",
+    "is-hotkey": "0.2.0",
+    "is-url": "1.2.4",
+    "next": "latest",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-loader-spinner": "4.0.0",
+    "react-modal": "3.14.4",
+    "react-paginate": "^8.1.0",
+    "react-toastify": "8.1.0",
+    "slate": "0.72.0",
+    "slate-history": "0.66.0",
+    "slate-hyperscript": "0.67.0",
+    "slate-paste-linkify": "0.7.0",
+    "slate-react": "0.72.1",
+    "slugify": "1.6.4",
+    "snu-lib": "file:../lib",
+    "sortablejs": "1.14.0",
+    "swr": "1.1.1",
+    "urijs": "1.19.7"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.2",
+    "eslint": "8.7.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-prettier": "4.0.0",
+    "eslint-plugin-react": "7.28.0",
+    "eslint-plugin-react-hooks": "4.3.0",
+    "postcss": "^8.4.6",
+    "prettier": "^2.5.1",
+    "prettier-plugin-tailwindcss": "^0.1.5",
+    "tailwindcss": "^3.0.19"
+  },
+  "engines": {
+    "node": "^16.10",
+    "npm": "^8.0",
+    "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
+  }
+}

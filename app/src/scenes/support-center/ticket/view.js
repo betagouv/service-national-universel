@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById, translateState } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -19,7 +18,7 @@ const updateHeightElement = (e) => {
   e.style.height = `${e.scrollHeight}px`;
 };
 
-export default (props) => {
+export default function TicketView(props) {
   const [ticket, setTicket] = useState();
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState();
@@ -30,7 +29,7 @@ export default (props) => {
     try {
       const id = props.match?.params?.id;
       if (!id) return setTicket(null);
-      const { data, ok } = await api.get(`/support-center/ticket/${id}`);
+      const { data, ok } = await api.get(`/zammad-support-center/ticket/${id}`);
       if (data.error || !ok) return setTicket(null);
       return setTicket(data);
     } catch (e) {
@@ -49,7 +48,7 @@ export default (props) => {
     setSending(true);
     if (!message) return setSending(false);
     const id = props.match?.params?.id;
-    const { data } = await api.put(`/support-center/ticket/${id}`, { message, ticket });
+    await api.put(`/zammad-support-center/ticket/${id}`, { message, ticket });
     setMessage("");
     updateHeightElement(inputRef?.current);
     getTicket();
@@ -59,25 +58,25 @@ export default (props) => {
   if (ticket === undefined) return <Loader />;
 
   const displayState = (state) => {
-    if (state === "ouvert")
+    if (state === "open")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          ouvert
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "fermé")
+    if (state === "closed")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          fermé
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "nouveau")
+    if (state === "new")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          nouveau
+          {translateState(state)}
         </StateContainer>
       );
   };
@@ -85,7 +84,7 @@ export default (props) => {
   return (
     <Container>
       <BackButtonContainer>
-        <BackButton to={`/besoin-d-aide`}>{"<"} Retour à l'accueil</BackButton>
+        <BackButton to={`/besoin-d-aide`}>{"<"} Retour à mes demandes</BackButton>
       </BackButtonContainer>
       <div style={{ padding: 0, display: "flex", flexDirection: "column", height: "calc(100vh - 180px)" }}>
         <Heading>
@@ -100,6 +99,7 @@ export default (props) => {
         <Messages>
           {ticket?.articles
             ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            ?.filter((article) => !article.internal)
             ?.map((article, i) => (
               <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
             ))}
@@ -125,7 +125,7 @@ export default (props) => {
       </div>
     </Container>
   );
-};
+}
 
 const Message = ({ from, date, content, fromMe }) => {
   if (!content || !content.length) return null;

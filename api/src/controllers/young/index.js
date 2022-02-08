@@ -10,23 +10,27 @@ const Joi = require("joi");
 const config = require("../../config");
 const { capture } = require("../../sentry");
 const { encrypt } = require("../../cryptoUtils");
-const { getQPV } = require("../../qpv");
+const { getQPV, getDensity } = require("../../geo");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
-const CohesionCenterObject = require("../../models/cohesionCenter");
+const SessionPhase1 = require("../../models/sessionPhase1");
 const ApplicationModel = require("../../models/application");
 const MissionModel = require("../../models/mission");
 const AuthObject = require("../../auth");
+const MeetingPointModel = require("../../models/meetingPoint");
+const BusModel = require("../../models/bus");
 const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
   validatePassword,
-  updatePlacesCenter,
   signinLimiter,
-  assignNextYoungFromWaitingList,
+  // assignNextYoungFromWaitingList,
   ERRORS,
   inSevenDays,
   isYoung,
+  // updateApplicationsWithYoungOrMission,
+  updatePlacesBus,
+  updatePlacesSessionPhase1,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -41,9 +45,7 @@ router.post("/logout", (req, res) => YoungAuth.logout(req, res));
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
-router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) =>
-  YoungAuth.resetPassword(req, res)
-);
+router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => YoungAuth.resetPassword(req, res));
 
 router.post("/signup", async (req, res) => {
   try {
@@ -52,21 +54,24 @@ router.post("/signup", async (req, res) => {
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       password: Joi.string().required(),
+      birthdateAt: Joi.string().trim().required(),
     })
       .unknown()
       .validate(req.body);
 
     if (error) {
       if (error.details.find((e) => e.path === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
-      if (error.details.find((e) => e.path === "password"))
-        return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+      if (error.details.find((e) => e.path === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
       return res.status(400).send({ ok: false, code: error.toString() });
     }
 
-    const { password, email, lastName, firstName } = value;
+    const { password, email, lastName, firstName, birthdateAt } = value;
     if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
-    const user = await YoungObject.create({ password, email, firstName, lastName });
+    const countDocuments = await YoungObject.countDocuments({ lastName, firstName, birthdateAt });
+    if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+
+    const user = await YoungObject.create({ password, email, firstName, lastName, birthdateAt });
     const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
 
@@ -137,13 +142,8 @@ router.post("/signup_invite", async (req, res) => {
 
 router.post("/file/:key", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const rootKeys = ["cniFiles", "highSkilledActivityProofFiles", "parentConsentmentFiles", "autoTestPCRFiles", "imageRightFiles"];
-    const militaryKeys = [
-      "militaryPreparationFilesIdentity",
-      "militaryPreparationFilesCensus",
-      "militaryPreparationFilesAuthorization",
-      "militaryPreparationFilesCertificate",
-    ];
+    const rootKeys = ["cniFiles", "highSkilledActivityProofFiles", "parentConsentmentFiles", "autoTestPCRFiles", "imageRightFiles", "dataProcessingConsentmentFiles", "rulesFiles"];
+    const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
     const { error: keyError, value: key } = Joi.string()
       .required()
       .valid(...[...rootKeys, ...militaryKeys])
@@ -156,7 +156,7 @@ router.post("/file/:key", passport.authenticate("young", { session: false, failW
     const {
       error: namesError,
       value: { names },
-    } = Joi.object({ names: Joi.array().items(Joi.string().required()).required() }).validate(JSON.parse(body), { stripUnknown: true });
+    } = Joi.object({ names: Joi.array().items(Joi.string()).required() }).validate(JSON.parse(body), { stripUnknown: true });
     if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: namesError.message });
 
     const user = await YoungObject.findById(req.user._id);
@@ -289,11 +289,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
   }
 });
 
-router.get(
-  "/:id/patches",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req, res) => await patches.get(req, res, YoungObject)
-);
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, YoungObject));
 
 router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -319,8 +315,9 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
 
     // young can only update their own mission phase3.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    // eslint-disable-next-line no-unused-vars
     const { id, ...values } = value;
     values.phase3Token = crypto.randomBytes(20).toString("hex");
 
@@ -347,6 +344,70 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
   }
 });
 
+router.post("/:id/archive", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const young = await YoungObject.findById(value.id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const previousEmail = young.email;
+    young.set({
+      email: "reliquat-2021+" + young.email.replace("reliquat-2021+", ""),
+      lastName: "Reliquat 2021 " + young.lastName.replace("Reliquat 2021 ", ""),
+    });
+    await young.save({ fromUser: req.user });
+    await sendTemplate(SENDINBLUE_TEMPLATES.young.ARCHIVED, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: previousEmail }],
+      params: { cta: `${config.APP_URL}/inscription/profil` },
+    });
+    return res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.post("/:id/deplacementPhase1Autonomous", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const young = await YoungObject.findById(value.id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
+    const bus = await BusModel.findById(meetingPoint?.busId);
+
+    young.set({
+      deplacementPhase1Autonomous: "true",
+      meetingPointId: null,
+    });
+    await young.save();
+
+    // if there is a bus, we need to remove the young from it
+    if (bus) await updatePlacesBus(bus);
+
+    return res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.put("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body, req.user);
@@ -354,8 +415,9 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    delete value.firstName;
-    delete value.lastName;
+
+    // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
@@ -368,12 +430,18 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       await young.save({ fromUser: req.user });
     }
 
+    // Check quartier prioritaires.
+    if (value.cityCode) {
+      const populationDensity = await getDensity(value.cityCode);
+      young.set({ populationDensity });
+      await young.save({ fromUser: req.user });
+    }
+
     // if withdrawn, cascade withdrawn on every status
-    if (
-      young.status === "WITHDRAWN" &&
-      (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")
-    ) {
-      young.set({ statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" });
+    if (young.status === "WITHDRAWN" && (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")) {
+      if (young.statusPhase1 !== "DONE") young.set({ statusPhase1: "WITHDRAWN" });
+      if (young.statusPhase2 !== "VALIDATED") young.set({ statusPhase2: "WITHDRAWN" });
+      if (young.statusPhase3 !== "VALIDATED") young.set({ statusPhase3: "WITHDRAWN" });
       await young.save({ fromUser: req.user });
     }
 
@@ -384,20 +452,21 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     }
 
     // if they had a cohesion center, we check if we need to update the places taken / left
-    if (req.user.statusPhase1 !== young.statusPhase1 && young.cohesionCenterId) {
-      const center = await CohesionCenterObject.findById(young.cohesionCenterId);
-      if (center) await updatePlacesCenter(center);
+    if (young.sessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
     }
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
 //todo : add operation unauthorized:
 // taking a user and a target, check if the user can send the template to the target
-router.post("/:id/email/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/email/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -406,21 +475,27 @@ router.post("/:id/email/:template", passport.authenticate("referent", { session:
       prevStatus: Joi.string().allow(null, ""),
       missionName: Joi.string().allow(null, ""),
       structureName: Joi.string().allow(null, ""),
+      cta: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-    const { id, template, message, prevStatus, missionName, structureName } = value;
+    // eslint-disable-next-line no-unused-vars
+    const { id, template, message, prevStatus, missionName, structureName, cta } = value;
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
 
-    let cta = config.APP_URL;
-    if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) cta = `${config.APP_URL}/ma-preparation-militaire`;
+    let buttonCta = cta || config.APP_URL;
+    if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
+    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) buttonCta = `${config.APP_URL}/inscription/coordonnees`;
 
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { firstName: young.firstName, lastName: young.lastName, cta, message, missionName, structureName },
+      params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName },
     });
 
     return res.status(200).send({ ok: true });
@@ -437,7 +512,7 @@ router.get("/:id/application", passport.authenticate(["referent", "young"], { se
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     if (isYoung(req.user) && req.user._id.toString() !== id) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     let data = await ApplicationModel.find({ youngId: id });
@@ -479,9 +554,7 @@ router.post("/france-connect/authorization-url", async (req, res) => {
 
 // Get user information for authorized user on France Connect.
 router.post("/france-connect/user-info", async (req, res) => {
-  const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required() })
-    .unknown()
-    .validate(req.body, { stripUnknown: true });
+  const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
   // Get token…
@@ -500,7 +573,7 @@ router.post("/france-connect/user-info", async (req, res) => {
   const token = await tokenResponse.json();
 
   if (!token["access_token"] || !token["id_token"]) {
-    return res.sendStatus(401, token);
+    return res.sendStatus(403, token);
   }
 
   // … then get user info.
@@ -521,7 +594,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canDeleteYoung(req.user, young)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     await young.remove();
     console.log(`Young ${id} has been deleted`);

@@ -8,7 +8,7 @@ import Historic from "./history";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
 
-export default ({ ...props }) => {
+export default function Index({ ...props }) {
   const [mission, setMission] = useState();
   const [tutor, setTutor] = useState();
   const [structure, setStructure] = useState();
@@ -61,4 +61,4 @@ export default ({ ...props }) => {
       <Route path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />
     </Switch>
   );
-};
+}

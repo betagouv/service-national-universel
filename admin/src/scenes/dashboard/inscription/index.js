@@ -3,68 +3,90 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
-import YearPicker from "../components/YearPicker";
-import Checkbox from "../components/Checkbox";
+import MultiSelect from "../components/MultiSelect";
+
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
-import Schools from "./schools";
+//import Schools from "./schools";
 import Gender from "./gender";
 
 import Status from "./status";
 import Goals from "./goals";
 
 import BirthDate from "./birthdate";
-import ScholarshopSituation from "./scolarshipSituation";
+import ScholarshipSituation from "./scolarshipSituation";
+import ScholarshipGrade from "./scolarshipGrade";
 import ParticularSituation from "./particularSituation";
 import PriorityArea from "./priorityArea";
 import RuralArea from "./ruralArea";
-import { YOUNG_STATUS, translate, ROLES } from "../../../utils";
+import { YOUNG_STATUS, translate, ROLES, academyList } from "../../../utils";
+import UnavailableFeature from "../../../components/unavailableFeature";
 
-export default () => {
+export default function Index({ onChangeFilter = () => {} }) {
   const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
 
   function updateFilter(n) {
-    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" }), ...n });
+    setFilter({
+      ...(filter || { status: Object.keys(YOUNG_STATUS), academy: [], region: [], department: [], cohort: filter?.cohort || ["Février 2022", "Juin 2022", "Juillet 2022"] }),
+      ...n,
+    });
   }
 
   useEffect(() => {
-    const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
+    const status = Object.keys(YOUNG_STATUS).filter((e) => !["IN_PROGRESS", "NOT_ELIGIBLE"].includes(e));
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: user.department, status });
-    } else if (user.role === ROLES.REFERENT_REGION) {
-      updateFilter({ region: user.region, status });
+      updateFilter({ department: [user.department], status });
+    } else if (user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR) {
+      updateFilter({ region: [user.region], status });
     } else {
       updateFilter();
     }
   }, []);
 
+  useEffect(() => {
+    onChangeFilter(filter);
+  }, [filter]);
+
+  const getOptionsStatus = () => {
+    let STATUS = Object.keys(YOUNG_STATUS).map((s) => ({ label: translate(YOUNG_STATUS[s]), value: s }));
+    if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => !["IN_PROGRESS", "NOT_ELIGIBLE"].includes(e.value));
+    return STATUS;
+  };
+
   return (
     <>
-      <Row style={{}}>
-        <Col md={6}>
+      <Row>
+        <Col style={{ display: "flex" }}>
           <Title>Inscriptions</Title>
-        </Col>
-        <Col md={6}>
           {filter ? (
-            <>
-              <FiltersList>
-                <FilterRegion updateFilter={updateFilter} filter={filter} />
-                <FilterDepartment updateFilter={updateFilter} filter={filter} />
-                <FilterWrapper>
-                  <YearPicker
-                    options={[
-                      { key: "2019", label: "2019" },
-                      { key: "2020", label: "2020" },
-                      { key: "2021", label: "2021" },
-                      { key: "", label: "Toutes" },
-                    ]}
-                    onChange={(cohort) => updateFilter({ cohort })}
-                    value={filter.cohort}
-                  />
-                </FilterWrapper>
-              </FiltersList>
-            </>
+            <FiltersList>
+              {user.role === ROLES.ADMIN ? (
+                <MultiSelect
+                  label="Académie(s)"
+                  options={academyList.map((a) => ({ value: a, label: a }))}
+                  value={filter.academy}
+                  onChange={(academy) => updateFilter({ academy })}
+                />
+              ) : null}
+              <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} />
+
+              <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
+              <MultiSelect
+                label="Cohorte(s)"
+                options={[
+                  { value: "2019", label: "2019" },
+                  { value: "2020", label: "2020" },
+                  { value: "2021", label: "2021" },
+                  { value: "Février 2022", label: "Février 2022" },
+                  { value: "Juin 2022", label: "Juin 2022" },
+                  { value: "Juillet 2022", label: "Juillet 2022" },
+                ]}
+                onChange={(cohort) => updateFilter({ cohort })}
+                value={filter.cohort}
+              />
+              <MultiSelect label="Statut(s)" options={getOptionsStatus()} value={filter.status} onChange={(status) => updateFilter({ status })} />
+            </FiltersList>
           ) : null}
         </Col>
       </Row>
@@ -83,9 +105,6 @@ export default () => {
           </Row>
           <Status filter={filter} />
           <SubTitle>Dans le détails</SubTitle>
-          <FiltersList>
-            <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
-          </FiltersList>
           <Row>
             <Col md={12} lg={6}>
               <BirthDate filter={filter} />
@@ -94,7 +113,10 @@ export default () => {
               <ParticularSituation filter={filter} />
             </Col>
             <Col md={12}>
-              <ScholarshopSituation filter={filter} />
+              <ScholarshipSituation filter={filter} />
+            </Col>
+            <Col md={12}>
+              <ScholarshipGrade filter={filter} />
             </Col>
             <Col md={12} lg={4}>
               <Gender filter={filter} />
@@ -106,40 +128,20 @@ export default () => {
               <RuralArea filter={filter} />
             </Col>
             <Col md={12}>
-              <Schools filter={filter} />
+              <UnavailableFeature
+                functionality="Tableau des établissements"
+                text="Pour consulter les établissements de vos volontaires et des volontaires scolarisés dans votre département, rendez-vous sur les exports volontaires :"
+                link="https://admin.snu.gouv.fr/volontaire"
+                textLink="Cliquez ici"
+              />
+              {/* <Schools filter={filter} /> */}
             </Col>
           </Row>
         </>
       )}
     </>
   );
-};
-
-const FilterStatus = ({ value = [], onChange }) => {
-  const user = useSelector((state) => state.Auth.user);
-
-  function updateStatus(e) {
-    const i = value.indexOf(e);
-    if (i == -1) return onChange([...value, e]);
-    const newArr = [...value];
-    newArr.splice(i, 1);
-    return onChange(newArr);
-  }
-
-  let STATUS = Object.keys(YOUNG_STATUS);
-  if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => e !== "IN_PROGRESS");
-  return (
-    <div style={{ display: "flex", flexWrap: "wrap" }}>
-      {STATUS.map((e, i) => {
-        return (
-          <FilterWrapper key={i}>
-            <Checkbox isChecked={value.includes(YOUNG_STATUS[e])} onChange={(status) => updateStatus(status)} name={e} label={translate(YOUNG_STATUS[e])} />
-          </FilterWrapper>
-        );
-      })}
-    </div>
-  );
-};
+}
 
 // Title line with filters
 const Title = styled.h2`
@@ -156,11 +158,10 @@ const SubTitle = styled.h3`
   font-weight: normal;
 `;
 const FiltersList = styled.div`
+  gap: 1rem;
+  flex: 1;
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
   margin-bottom: 10px;
-`;
-const FilterWrapper = styled.div`
-  margin: 0 5px 10px;
 `;

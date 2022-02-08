@@ -1,7 +1,8 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
+import { requiredMessage } from "../../../components/errorMessage";
 
-export default ({ title, name, value, handleChange, disabled, options, required = false, placeholder = "" }) => {
+export default function SelectComponent({ title, name, value, handleChange, disabled, options, required = false, placeholder = "" }) {
   const renderSelect = () => (
     <select disabled={disabled} className="form-control" name={name} value={value} onChange={handleChange} validate={(v) => required && !v && requiredMessage}>
       <option key={-1} value="" label={placeholder}>
@@ -29,4 +30,4 @@ export default ({ title, name, value, handleChange, disabled, options, required 
       )}
     </Row>
   );
-};
+}

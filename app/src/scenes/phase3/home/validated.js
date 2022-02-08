@@ -22,7 +22,7 @@ export default () => {
             <p>
               <strong>Mon engagement prolongé</strong>
               <br />
-              Retrouver l'historique de votre mission de phase 3
+              Retrouver l&apos;historique de votre mission de phase 3
               <br />
               <Link to="/phase3/valider">Consulter ma mission {">"}</Link>
             </p>
@@ -36,11 +36,11 @@ export default () => {
               </DownloadAttestationButton>
             </p>
             <p>
-              <strong>S'engager au-delà du SNU</strong>
+              <strong>S&apos;engager au-delà du SNU</strong>
               <br />
               Si vous le souhaitez, vous pouvez prolonger encore votre engagement
               <br />
-              <Link to="/les-programmes">Les possibilités d'engagement {">"}</Link>
+              <Link to="/les-programmes">Les possibilités d&apos;engagement {">"}</Link>
               <br />
               <Link to="/phase3/mission">Trouver une mission {">"}</Link>
             </p>

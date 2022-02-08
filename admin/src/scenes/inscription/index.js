@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import styled from "styled-components";
 import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
@@ -14,14 +13,28 @@ import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, isInRuralArea, formatDateFRTimezoneUTC, formatLongDateFR, ES_NO_LIMIT, ROLES, colors } from "../../utils";
-import { RegionFilter, DepartmentFilter } from "../../components/filters";
+import {
+  translate,
+  getFilterLabel,
+  formatStringLongDate,
+  YOUNG_STATUS,
+  isInRuralArea,
+  formatDateFRTimezoneUTC,
+  formatLongDateFR,
+  ES_NO_LIMIT,
+  ROLES,
+  colors,
+  departmentLookUp,
+} from "../../utils";
+import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
+const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL", "COHORT", "PPS", "PAI", "QPV", "HANDICAP", "ZRR", "GRADE", "ACADEMY", "COUNTRY"];
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import Badge from "../../components/Badge";
+import plausibleEvent from "../../services/pausible";
 
-export default () => {
+export default function Inscription() {
   const [young, setYoung] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } } });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -37,17 +50,30 @@ export default () => {
               <Title>Inscriptions</Title>
               <div style={{ display: "flex" }}>
                 <Link to="/volontaire/create">
-                  <VioletButton>
+                  <VioletButton onClick={() => plausibleEvent("Inscriptions/CTA - Nouvelle inscription")}>
                     <p>Nouvelle inscription</p>
                   </VioletButton>
                 </Link>
                 <ExportComponent
+                  handleClick={() => plausibleEvent("Inscriptions/CTA - Exporter inscriptions")}
                   title="Exporter les inscriptions"
                   defaultQuery={getExportQuery}
                   exportTitle="Candidatures"
                   index="young"
                   react={{ and: FILTERS }}
-                  transform={(all) => {
+                  transform={async (data) => {
+                    let all = data;
+                    const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                    if (schoolsId?.length) {
+                      const { responses } = await api.esQuery("school", {
+                        query: { bool: { must: { ids: { values: schoolsId } } } },
+                        size: ES_NO_LIMIT,
+                      });
+                      if (responses.length) {
+                        const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                        all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                      }
+                    }
                     return all.map((data) => {
                       return {
                         _id: data._id,
@@ -55,6 +81,9 @@ export default () => {
                         Prénom: data.firstName,
                         Nom: data.lastName,
                         "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
+                        "Pays de naissance": data.birthCountry || "France",
+                        "Ville de naissance": data.birthCity,
+                        "Code postal de naissance": data.birthCityZip,
                         Sexe: translate(data.gender),
                         Email: data.email,
                         Téléphone: data.phone,
@@ -63,13 +92,23 @@ export default () => {
                         Ville: data.city,
                         Département: data.department,
                         Région: data.region,
+                        Académie: data.academy,
+                        Pays: data.country,
+                        "Nom de l'hébergeur": data.hostLastName,
+                        "Prénom de l'hébergeur": data.hostFirstName,
+                        "Lien avec l'hébergeur": data.hostRelationship,
+                        "Adresse - étranger": data.foreignAddress,
+                        "Code postal - étranger": data.foreignZip,
+                        "Ville - étranger": data.foreignCity,
+                        "Pays - étranger": data.foreignCountry,
                         Situation: translate(data.situation),
-                        "Type d'établissement": data.schoolType,
-                        "Nom de l'établissement": data.schoolName,
                         Niveau: data.grade,
-                        "Code postal de l'établissement": data.schoolZip,
-                        "Ville de l'établissement": data.schoolCity,
-                        "Département de l'établissement": data.schoolDepartment,
+                        "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                        "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                        "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                        "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                        "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                        "UAI de l'établissement": data.esSchool?.uai,
                         "Quartier Prioritaire de la ville": translate(data.qpv),
                         "Zone Rurale": translate(isInRuralArea(data)),
                         Handicap: translate(data.handicap),
@@ -82,11 +121,17 @@ export default () => {
                         "Ville de la structure médico-sociale": data.medicosocialStructureCity,
                         "Aménagement spécifique": translate(data.specificAmenagment),
                         "Nature de l'aménagement spécifique": data.specificAmenagmentType,
+                        "Aménagement pour mobilité réduite": translate(data.reducedMobilityAccess),
+                        "Besoin d'être affecté(e) dans le département de résidence": translate(data.handicapInSameDepartment),
+                        "Allergies ou intolérances alimentaires": translate(data.allergies),
                         "Activité de haut-niveau": translate(data.highSkilledActivity),
                         "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
+                        "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
                         "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
                         "Consentement des représentants légaux": translate(data.parentConsentment),
                         "Droit à l'image": translate(data.imageRight),
+                        "Autotest PCR": translate(data.autoTestPCR),
+                        "Règlement intérieur": translate(data.rulesYoung),
                         "fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
                         "Statut représentant légal 1": translate(data.parent1Status),
                         "Prénom représentant légal 1": data.parent1FirstName,
@@ -153,6 +198,23 @@ export default () => {
               </FilterRow>
 
               <FilterRow visible={filterVisible}>
+                <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Pays"
+                  componentId="COUNTRY"
+                  dataField="country.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COUNTRY") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <MultiDropdownList
                   style={{ display: "none" }}
                   defaultQuery={getDefaultQuery}
@@ -161,8 +223,90 @@ export default () => {
                   react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
                   URLParams={true}
                 />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Classe"
+                  componentId="GRADE"
+                  dataField="grade.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "GRADE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Cohorte"
+                  componentId="COHORT"
+                  dataField="cohort.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="PPS"
+                  componentId="PPS"
+                  dataField="ppsBeneficiary.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PPS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "PPS", "PPS")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="PAI"
+                  componentId="PAI"
+                  dataField="paiBeneficiary.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PAI") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "PAI", "PAI")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="QPV"
+                  componentId="QPV"
+                  dataField="qpv.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "QPV") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "QPV", "QPV")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="HANDICAP"
+                  componentId="HANDICAP"
+                  dataField="handicap.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "HANDICAP") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
+                />
               </FilterRow>
             </Filter>
             <ResultTable>
@@ -206,7 +350,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, index, onClick, selected }) => {
   dayjs.extend(relativeTime).locale("fr");
@@ -222,7 +366,7 @@ const Hit = ({ hit, index, onClick, selected }) => {
       <td>
         <MultiLine>
           <h2>
-            {hit.firstName} {hit.lastName}
+            {hit.firstName} {hit.lastName} <Badge text={hit.cohort} />
           </h2>
           <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
         </MultiLine>
@@ -247,10 +391,17 @@ const Action = ({ hit }) => {
         </DropdownToggle>
         <DropdownMenu>
           <DropdownItem className="dropdown-item">
+            <Link to={`/volontaire/${hit._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
+              Consulter le profil
+            </Link>
+          </DropdownItem>
+          <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Inscriptions/CTA - Modifier profil jeune")}>
             <Link to={`/volontaire/${hit._id}/edit`}>Modifier le profil</Link>
           </DropdownItem>
           <DropdownItem className="dropdown-item">
-            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
+            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
+              Prendre sa place
+            </a>
           </DropdownItem>
         </DropdownMenu>
       </UncontrolledDropdown>

@@ -3,17 +3,21 @@ import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector, connect } from "react-redux";
 import { environment } from "../../config";
-import { ROLES, colors } from "../../utils";
+import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
 import SuccessIcon from "../SuccessIcon";
 import QuestionMark from "../../assets/QuestionMark";
 import api from "../../services/api";
-import { totalNewTickets, totalOpenedTickets, totalClosedTickets } from "../../utils";
+import Badge from "../Badge";
+import plausibleEvent from "../../services/pausible";
 
-const DrawerTab = ({ title, to, onClick }) => (
+const DrawerTab = ({ title, to, onClick, beta }) => (
   <li onClick={onClick}>
-    <NavLink to={to}>{title}</NavLink>
+    <NavLink to={to}>
+      {title}
+      {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
+    </NavLink>
   </li>
 );
 
@@ -26,11 +30,16 @@ const BlankSeparator = () => (
 );
 
 const HelpButton = ({ onClick, to }) => (
-  <div className="help-button-container" onClick={onClick}>
+  <div
+    className="help-button-container"
+    onClick={() => {
+      plausibleEvent("Menu/CTA - Besoin Aide");
+      onClick();
+    }}>
     <NavLink className="help-button" to={to}>
       <QuestionMark className="icon" />
       <div className="help-button-text">
-        <div className="help-button-text-primary">Besoin d'aide ?</div>
+        <div className="help-button-text-primary">Besoin d&apos;aide ?</div>
         <div className="help-button-text-secondary">Tutoriels, contacts</div>
       </div>
     </NavLink>
@@ -62,7 +71,7 @@ function responsible({ user, onClick }) {
   );
 }
 
-function supervisor({ user, onClick }) {
+function supervisor({ onClick }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -151,12 +160,22 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
   );
 }
 
-function headCenter({ user, onClick }) {
+function headCenter({ onClick, user }) {
   return (
     <>
+      {user.cohesionCenterId && <DrawerTab to={`/centre/${user.cohesionCenterId}`} title="Mon Centre" onClick={onClick} />}
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
+      <BlankSeparator />
+      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
+    </>
+  );
+}
+
+function visitor({ onClick }) {
+  return (
+    <>
       <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
@@ -183,7 +202,7 @@ const Drawer = (props) => {
       else if (user?.role === ROLES.REFERENT_REGION) tags.push(["AGENT_Référent_Région", `REGION_${user.region}`]);
 
       const getTickets = async (tags) => {
-        const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
+        const { data } = await api.post(`/zammad-support-center/ticket/search-by-tags?withArticles=true`, { tags });
         props.dispatchTickets(data);
       };
       if (tags.length) getTickets(tags);
@@ -207,6 +226,7 @@ const Drawer = (props) => {
     if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
     if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
     if (user.role === ROLES.HEAD_CENTER) return "espace chef de centre";
+    if (user.role === ROLES.VISITOR) return "Espace visiteur";
     return "";
   }
 
@@ -235,6 +255,7 @@ const Drawer = (props) => {
         {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
         {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
         {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+        {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
       </ul>
     </Sidebar>
   );

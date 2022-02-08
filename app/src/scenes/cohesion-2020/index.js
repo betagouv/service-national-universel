@@ -31,7 +31,7 @@ const Step2020 = ({ step }) => {
   );
 };
 
-export default () => {
+export default function Index() {
   return (
     <Switch>
       <Route path="/cohesion/consentements" component={() => <Step2020 step={STEPS_2020.CONSENTEMENTS} />} />
@@ -41,7 +41,7 @@ export default () => {
       <Route path="/cohesion/done" component={() => <Step2020 step={STEPS_2020.DONE} />} />
     </Switch>
   );
-};
+}
 
 const Wrapper = styled.div`
   margin: 20px auto;

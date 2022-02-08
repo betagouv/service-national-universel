@@ -2,8 +2,9 @@ import React from "react";
 import { Col } from "reactstrap";
 import styled from "styled-components";
 import { Field } from "formik";
+import ErrorMessage from "../../inscription/components/errorMessage";
 
-export const SelectTag = ({ options, name, value, title, selectPlaceholder, handleChange }) => {
+export const SelectTag = ({ options, name, value, errors, touched, values, validate, title, selectPlaceholder, handleChange }) => {
   return (
     <Col style={{ marginTop: 20 }}>
       <Label>{title}</Label>
@@ -12,12 +13,12 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
         className="form-control"
         name={name}
         value={value || ""}
+        validate={validate}
         onChange={(e) => {
           const value = options.find((o) => o.id === e.target.value);
           handleChange({ target: { name, value } });
-        }}
-      >
-        <option value="" disabled>
+        }}>
+        <option disabled key={-1} value="" selected={!values[name]} label={selectPlaceholder}>
           {selectPlaceholder}
         </option>
         {options?.map((option, i) => (
@@ -26,6 +27,7 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
           </option>
         ))}
       </Field>
+      {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
     </Col>
   );
 };
@@ -87,6 +89,54 @@ export const step2Question = {
     id: "PHASE_3",
     label: "Phase 3 - L'engagement",
     tags: ["TAG_phase_3"],
+  },
+  OTHER: {
+    parentId: "QUESTION",
+    id: "OTHER",
+    label: "Autre",
+    tags: ["TAG_autre"],
+  },
+};
+
+export const step2TechnicalPublic = {
+  DOWNLOAD: {
+    parentId: "TECHNICAL",
+    id: "DOWNLOAD",
+    label: "Je n'arrive pas à télécharger un document depuis la plateforme",
+    tags: ["TAG_téléchargment"],
+  },
+  UPLOAD: {
+    parentId: "TECHNICAL",
+    id: "UPLOAD",
+    label: "Je n'arrive pas à téléverser (déposer) un document",
+    tags: ["TAG_téléversement"],
+  },
+  LOGIN: {
+    parentId: "TECHNICAL",
+    id: "LOGIN",
+    label: "Je n'arrive pas à me connecter (Identifiant ou mot de passe incorrect)",
+    tags: ["TAG_probleme_connexion"],
+  },
+  OTHER: {
+    parentId: "TECHNICAL",
+    id: "OTHER",
+    label: "J'ai un autre problème",
+    tags: ["TAG_autre"],
+  },
+};
+
+export const step2QuestionPublic = {
+  PHASE_0: {
+    parentId: "QUESTION",
+    id: "PHASE_0",
+    label: "Les inscriptions des volontaires",
+    tags: ["TAG_phase_0"],
+  },
+  STRUCTURE: {
+    parentId: "QUESTION",
+    id: "STRUCTURE",
+    label: "L'inscription des structures",
+    tags: ["TAG_créer_compte_structure"],
   },
   OTHER: {
     parentId: "QUESTION",

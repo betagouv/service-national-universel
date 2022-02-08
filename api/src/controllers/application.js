@@ -78,7 +78,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 
     // A young can only update create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     const data = await ApplicationObject.create(value);
@@ -105,7 +105,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
 
     // A young can only update his own application.
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     application.set(value);
@@ -136,23 +136,19 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.post(
-  "/notify/docs-military-preparation/:template",
-  passport.authenticate("young", { session: false, failWithError: true }),
-  async (req, res) => {
-    const { error, value: template } = Joi.string().required().validate(req.params.template);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+router.post("/notify/docs-military-preparation/:template", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  const { error, value: template } = Joi.string().required().validate(req.params.template);
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const toReferent = await getReferentManagerPhase2(req.user.department);
-    if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  const toReferent = await getReferentManagerPhase2(req.user.department);
+  if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const mail = await sendTemplate(parseInt(template), {
-      emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
-      params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
-    });
-    return res.status(200).send({ ok: true, data: mail });
-  }
-);
+  const mail = await sendTemplate(parseInt(template), {
+    emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
+    params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
+  });
+  return res.status(200).send({ ok: true, data: mail });
+});
 
 router.post("/:id/notify/:template", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -175,7 +171,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && req.user._id.toString() !== application.youngId) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     let template = defaultTemplate;
@@ -191,6 +187,8 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
       params = { ...params, cta: `${APP_URL}/candidature` };
     } else if (template === SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION) {
+      emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+    } else if (template === SENDINBLUE_TEMPLATES.referent.ABANDON_APPLICATION) {
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
     } else if (template === SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION) {
       emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];

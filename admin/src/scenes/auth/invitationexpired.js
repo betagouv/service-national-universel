@@ -13,7 +13,7 @@ import { translate, colors } from "../../utils";
 import LoginBox from "./components/loginBox";
 import AuthWrapper from "./components/authWrapper";
 
-export default () => {
+export default function InvitationExpired() {
   const urlParams = new URLSearchParams(window.location.search);
 
   return (
@@ -24,7 +24,7 @@ export default () => {
         <Thumb />
         <div>
           <LoginBox>
-            <Title>Votre lien d'invitation a expiré</Title>
+            <Title>Votre lien d&apos;invitation a expiré</Title>
             <Formik
               initialValues={{ email: urlParams.get("email") || "" }}
               onSubmit={async (values, actions) => {
@@ -36,8 +36,7 @@ export default () => {
                   toastr.error("Erreur !", translate(e.code));
                 }
                 actions.setSubmitting(false);
-              }}
-            >
+              }}>
               {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
                 return (
                   <form onSubmit={handleSubmit}>
@@ -71,7 +70,7 @@ export default () => {
       </AuthWrapper>
     </div>
   );
-};
+}
 
 const Thumb = styled.div`
   min-height: 400px;

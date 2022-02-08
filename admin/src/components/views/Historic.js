@@ -5,7 +5,7 @@ import { formatStringLongDate, translateOperationName, translateModelFields, tra
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 
-export default ({ model, value }) => {
+export default function Historic({ model, value }) {
   const [data, setData] = useState();
 
   const getPatches = async () => {
@@ -47,9 +47,14 @@ export default ({ model, value }) => {
       </div>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, model }) => {
+  function isIsoDate(str) {
+    if (!Date.parse(str)) return false;
+    var d = new Date(str);
+    return d.toISOString() === str;
+  }
   return (
     <>
       {hit.ops?.map((e, i) => {
@@ -62,8 +67,8 @@ const Hit = ({ hit, model }) => {
             <td>
               <Op>{`${translateOperationName(e.op)}`}</Op> : {`${translateModelFields(model, e.path.substring(1))}`}
             </td>
-            <td>{(Date.parse(originalValue) ? formatStringLongDate(originalValue) : originalValue) || "-"}</td>
-            <td>{(Date.parse(value) ? formatStringLongDate(value) : value) || "-"}</td>
+            <td>{(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || "-"}</td>
+            <td>{(isIsoDate(value) ? formatStringLongDate(value) : value) || "-"}</td>
             <td>{formatStringLongDate(hit.date)}</td>
           </tr>
         );
@@ -78,7 +83,6 @@ const Table = styled.table`
   margin-top: 10px;
   background-color: #fff;
   th {
-    border-top: 1px solid #f4f5f7;
     border-bottom: 1px solid #f4f5f7;
     padding: 15px;
     font-weight: 400;

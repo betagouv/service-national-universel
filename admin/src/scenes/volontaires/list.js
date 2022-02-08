@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ExportComponent from "../../components/ExportXlsx";
@@ -10,14 +10,28 @@ import ExportComponent from "../../components/ExportXlsx";
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
 import api from "../../services/api";
-import { apiURL, appURL } from "../../config";
+import { apiURL, appURL, supportURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
-import { translate, getFilterLabel, YOUNG_STATUS_COLORS, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT, ROLES, formatLongDateUTC, colors } from "../../utils";
-import { Link } from "react-router-dom";
+import {
+  translate,
+  getFilterLabel,
+  YOUNG_STATUS_COLORS,
+  isInRuralArea,
+  formatLongDateFR,
+  getAge,
+  ES_NO_LIMIT,
+  ROLES,
+  formatDateFRTimezoneUTC,
+  colors,
+  getLabelWithdrawnReason,
+  departmentLookUp,
+  YOUNG_STATUS,
+} from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
+import plausibleEvent from "../../services/pausible";
 
 const FILTERS = [
   "SEARCH",
@@ -34,11 +48,20 @@ const FILTERS = [
   "MEDICAL_FILE_RECEIVED",
   "COHESION_PRESENCE",
   "MILITARY_PREPARATION_FILES_STATUS",
+  "PPS",
+  "PAI",
+  "QPV",
+  "HANDICAP",
+  "ZRR",
+  "GRADE",
 ];
 
-export default () => {
+export default function VolontaireList() {
+  const user = useSelector((state) => state.Auth.user);
+
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
+  const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
 
@@ -59,6 +82,10 @@ export default () => {
       const { data } = await api.get("/meeting-point/all");
       setMeetingPoints(data);
     })();
+    (async () => {
+      const { data } = await api.get("/session-phase1/");
+      setSessionsPhase1(data);
+    })();
   }, []);
   const getDefaultQuery = () => ({
     query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } } } },
@@ -74,135 +101,214 @@ export default () => {
               <div>
                 <Title>Volontaires</Title>
               </div>
-              <ExportComponent
-                title="Exporter les volontaires"
-                defaultQuery={getExportQuery}
-                exportTitle="Volontaires"
-                index="young"
-                react={{ and: FILTERS }}
-                transform={(all) => {
-                  return all.map((data) => {
-                    let center = {};
-                    if (data.cohesionCenterId && centers) {
-                      center = centers.find((c) => c._id === data.cohesionCenterId);
-                      if (!center) center = {};
+              <div style={{ display: "flex", flexWrap: "wrap", gap: ".25rem", justifyContent: "flex-end" }}>
+                <ExportComponent
+                  handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
+                  title="Exporter les volontaires"
+                  defaultQuery={getExportQuery}
+                  exportTitle="Volontaires"
+                  index="young"
+                  react={{ and: FILTERS }}
+                  transform={async (data) => {
+                    let all = data;
+                    const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                    if (schoolsId?.length) {
+                      const { responses } = await api.esQuery("school", {
+                        query: { bool: { must: { ids: { values: schoolsId } } } },
+                        size: ES_NO_LIMIT,
+                      });
+                      if (responses.length) {
+                        const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                        all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                      }
                     }
-                    let meetingPoint = {};
-                    if (data.meetingPointId && meetingPoints) {
-                      meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
-                      if (!meetingPoint) meetingPoint = {};
-                    }
-                    return {
-                      _id: data._id,
-                      Cohorte: data.cohort,
-                      Prénom: data.firstName,
-                      Nom: data.lastName,
-                      "Date de naissance": formatLongDateUTC(data.birthdateAt),
-                      Sexe: translate(data.gender),
-                      Email: data.email,
-                      Téléphone: data.phone,
-                      "Adresse postale": data.address,
-                      "Code postal": data.zip,
-                      Ville: data.city,
-                      Département: data.department,
-                      Région: data.region,
-                      Situation: translate(data.situation),
-                      Niveau: translate(data.grade),
-                      "Type d'établissement": translate(data.schoolType),
-                      "Nom de l'établissement": data.schoolName,
-                      "Code postal de l'établissement": data.schoolZip,
-                      "Ville de l'établissement": data.schoolCity,
-                      "Département de l'établissement": data.schoolDepartment,
-                      "Quartier Prioritaire de la ville": translate(data.qpv),
-                      "Zone Rurale": translate(isInRuralArea(data)),
-                      Handicap: translate(data.handicap),
-                      "Bénéficiaire d'un PPS": translate(data.ppsBeneficiary),
-                      "Bénéficiaire d'un PAI": translate(data.paiBeneficiary),
-                      "Structure médico-sociale": translate(data.medicosocialStructure),
-                      "Nom de la structure médico-sociale": data.medicosocialStructureName,
-                      "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
-                      "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
-                      "Ville de la structure médico-sociale": data.medicosocialStructureCity,
-                      "Aménagement spécifique": translate(data.specificAmenagment),
-                      "Nature de l'aménagement spécifique": translate(data.specificAmenagmentType),
-                      "Activité de haut-niveau": translate(data.highSkilledActivity),
-                      "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
-                      "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
-                      "Consentement des représentants légaux": translate(data.parentConsentment),
-                      "Droit à l'image": translate(data.imageRight),
-                      "Autotest PCR": translate(data.autoTestPCR),
-                      "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
-                      "Présent au séjour de cohésion": translate(data.cohesionStayPresence),
-                      "Statut représentant légal 1": translate(data.parent1Status),
-                      "Prénom représentant légal 1": data.parent1FirstName,
-                      "Nom représentant légal 1": data.parent1LastName,
-                      "Email représentant légal 1": data.parent1Email,
-                      "Téléphone représentant légal 1": data.parent1Phone,
-                      "Adresse représentant légal 1": data.parent1Address,
-                      "Code postal représentant légal 1": data.parent1Zip,
-                      "Ville représentant légal 1": data.parent1City,
-                      "Département représentant légal 1": data.parent1Department,
-                      "Région représentant légal 1": data.parent1Region,
-                      "Statut représentant légal 2": translate(data.parent2Status),
-                      "Prénom représentant légal 2": data.parent2FirstName,
-                      "Nom représentant légal 2": data.parent2LastName,
-                      "Email représentant légal 2": data.parent2Email,
-                      "Téléphone représentant légal 2": data.parent2Phone,
-                      "Adresse représentant légal 2": data.parent2Address,
-                      "Code postal représentant légal 2": data.parent2Zip,
-                      "Ville représentant légal 2": data.parent2City,
-                      "Département représentant légal 2": data.parent2Department,
-                      "Région représentant légal 2": data.parent2Region,
-                      "Motivations à participer au SNU": data.motivations,
-                      "Domaine de MIG 1": data.domains[0],
-                      "Domaine de MIG 2": data.domains[1],
-                      "Domaine de MIG 3": data.domains[2],
-                      "Projet professionnel": translate(data.professionnalProject),
-                      "Information supplémentaire sur le projet professionnel": data.professionnalProjectPrecision,
-                      "Période privilégiée pour réaliser des missions": data.period,
-                      "Choix 1 période": translate(data.periodRanking[0]),
-                      "Choix 2 période": translate(data.periodRanking[1]),
-                      "Choix 3 période": translate(data.periodRanking[2]),
-                      "Choix 4 période": translate(data.periodRanking[3]),
-                      "Choix 5 période": translate(data.periodRanking[4]),
-                      "Mobilité aux alentours de son établissement": translate(data.mobilityNearSchool),
-                      "Mobilité aux alentours de son domicile": translate(data.mobilityNearHome),
-                      "Mobilité aux alentours d'un de ses proches": translate(data.mobilityNearRelative),
-                      "Informations du proche":
-                        data.mobilityNearRelative &&
-                        [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity].filter((e) => e)?.join(", "),
-                      "Mode de transport": data.mobilityTransport?.map((t) => translate(t)).join(", "),
-                      "Autre mode de transport": data.mobilityTransportOther,
-                      "Format de mission": translate(data.missionFormat),
-                      "Engagement dans une structure en dehors du SNU": translate(data.engaged),
-                      "Description engagement ": data.engagedDescription,
-                      "Souhait MIG": data.desiredLocation,
-                      Phase: translate(data.phase),
-                      "Créé lé": formatLongDateFR(data.createdAt),
-                      "Mis à jour le": formatLongDateFR(data.updatedAt),
-                      "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                      Statut: translate(data.status),
-                      "Statut Phase 1": translate(data.statusPhase1),
-                      "Statut Phase 2": translate(data.statusPhase2),
-                      "Statut Phase 3": translate(data.statusPhase3),
-                      "Dernier statut le": formatLongDateFR(data.lastStatusAt),
-                      "Message de desistement": data.withdrawnMessage,
-                      "ID centre": center._id || "",
-                      "Code centre": center.code || "",
-                      "Nom du centre": center.name || "",
-                      "Ville du centre": data.cohesionCenterCity || "",
-                      "Département du centre": center.department || "",
-                      "Région du centre": center.region || "",
-                      "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
-                      "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
-                      "Bus n˚": meetingPoint?.busExcelId,
-                      "Adresse point de rassemblement": meetingPoint?.departureAddress,
-                      "Date aller": meetingPoint?.departureAtString,
-                      "Date retour": meetingPoint?.returnAtString,
-                    };
-                  });
-                }}
-              />
+                    return all.map((data) => {
+                      let center = {};
+                      if (data.sessionPhase1Id && centers && sessionsPhase1) {
+                        center = centers.find((c) => sessionsPhase1.find((sessionPhase1) => sessionPhase1._id === data.sessionPhase1Id)?.cohesionCenterId === c._id);
+                        if (!center) center = {};
+                      }
+                      let meetingPoint = {};
+                      if (data.meetingPointId && meetingPoints) {
+                        meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
+                        if (!meetingPoint) meetingPoint = {};
+                      }
+                      return {
+                        _id: data._id,
+                        Cohorte: data.cohort,
+                        Prénom: data.firstName,
+                        Nom: data.lastName,
+                        "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
+                        "Pays de naissance": data.birthCountry || "France",
+                        "Ville de naissance": data.birthCity,
+                        "Code postal de naissance": data.birthCityZip,
+                        Sexe: translate(data.gender),
+                        Email: data.email,
+                        Téléphone: data.phone,
+                        "Adresse postale": data.address,
+                        "Code postal": data.zip,
+                        Ville: data.city,
+                        Département: data.department,
+                        Région: data.region,
+                        Académie: data.academy,
+                        Pays: data.country,
+                        "Nom de l'hébergeur": data.hostLastName,
+                        "Prénom de l'hébergeur": data.hostFirstName,
+                        "Lien avec l'hébergeur": data.hostRelationship,
+                        "Adresse - étranger": data.foreignAddress,
+                        "Code postal - étranger": data.foreignZip,
+                        "Ville - étranger": data.foreignCity,
+                        "Pays - étranger": data.foreignCountry,
+                        Situation: translate(data.situation),
+                        Niveau: translate(data.grade),
+                        "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                        "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                        "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                        "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                        "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                        "UAI de l'établissement": data.esSchool?.uai,
+                        "Quartier Prioritaire de la ville": translate(data.qpv),
+                        "Zone Rurale": translate(isInRuralArea(data)),
+                        Handicap: translate(data.handicap),
+                        "Bénéficiaire d'un PPS": translate(data.ppsBeneficiary),
+                        "Bénéficiaire d'un PAI": translate(data.paiBeneficiary),
+                        "Structure médico-sociale": translate(data.medicosocialStructure),
+                        "Nom de la structure médico-sociale": data.medicosocialStructureName,
+                        "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
+                        "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
+                        "Ville de la structure médico-sociale": data.medicosocialStructureCity,
+                        "Aménagement spécifique": translate(data.specificAmenagment),
+                        "Nature de l'aménagement spécifique": translate(data.specificAmenagmentType),
+                        "Aménagement pour mobilité réduite": translate(data.reducedMobilityAccess),
+                        "Besoin d'être affecté(e) dans le département de résidence": translate(data.handicapInSameDepartment),
+                        "Allergies ou intolérances alimentaires": translate(data.allergies),
+                        "Activité de haut-niveau": translate(data.highSkilledActivity),
+                        "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
+                        "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
+                        "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
+                        "Consentement des représentants légaux": translate(data.parentConsentment),
+                        "Droit à l'image": translate(data.imageRight),
+                        "Autotest PCR": translate(data.autoTestPCR),
+                        "Règlement intérieur": translate(data.rulesYoung),
+                        "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
+                        "Présent au séjour de cohésion": translate(data.cohesionStayPresence),
+                        "Statut représentant légal 1": translate(data.parent1Status),
+                        "Prénom représentant légal 1": data.parent1FirstName,
+                        "Nom représentant légal 1": data.parent1LastName,
+                        "Email représentant légal 1": data.parent1Email,
+                        "Téléphone représentant légal 1": data.parent1Phone,
+                        "Adresse représentant légal 1": data.parent1Address,
+                        "Code postal représentant légal 1": data.parent1Zip,
+                        "Ville représentant légal 1": data.parent1City,
+                        "Département représentant légal 1": data.parent1Department,
+                        "Région représentant légal 1": data.parent1Region,
+                        "Statut représentant légal 2": translate(data.parent2Status),
+                        "Prénom représentant légal 2": data.parent2FirstName,
+                        "Nom représentant légal 2": data.parent2LastName,
+                        "Email représentant légal 2": data.parent2Email,
+                        "Téléphone représentant légal 2": data.parent2Phone,
+                        "Adresse représentant légal 2": data.parent2Address,
+                        "Code postal représentant légal 2": data.parent2Zip,
+                        "Ville représentant légal 2": data.parent2City,
+                        "Département représentant légal 2": data.parent2Department,
+                        "Région représentant légal 2": data.parent2Region,
+                        "Motivations à participer au SNU": data.motivations,
+                        "Domaine de MIG 1": data.domains[0],
+                        "Domaine de MIG 2": data.domains[1],
+                        "Domaine de MIG 3": data.domains[2],
+                        "Projet professionnel": translate(data.professionnalProject),
+                        "Information supplémentaire sur le projet professionnel": data.professionnalProjectPrecision,
+                        "Période privilégiée pour réaliser des missions": data.period,
+                        "Choix 1 période": translate(data.periodRanking[0]),
+                        "Choix 2 période": translate(data.periodRanking[1]),
+                        "Choix 3 période": translate(data.periodRanking[2]),
+                        "Choix 4 période": translate(data.periodRanking[3]),
+                        "Choix 5 période": translate(data.periodRanking[4]),
+                        "Mobilité aux alentours de son établissement": translate(data.mobilityNearSchool),
+                        "Mobilité aux alentours de son domicile": translate(data.mobilityNearHome),
+                        "Mobilité aux alentours d'un de ses proches": translate(data.mobilityNearRelative),
+                        "Informations du proche":
+                          data.mobilityNearRelative &&
+                          [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity]
+                            .filter((e) => e)
+                            ?.join(", "),
+                        "Mode de transport": data.mobilityTransport?.map((t) => translate(t)).join(", "),
+                        "Autre mode de transport": data.mobilityTransportOther,
+                        "Format de mission": translate(data.missionFormat),
+                        "Engagement dans une structure en dehors du SNU": translate(data.engaged),
+                        "Description engagement ": data.engagedDescription,
+                        "Souhait MIG": data.desiredLocation,
+                        Phase: translate(data.phase),
+                        "Créé lé": formatLongDateFR(data.createdAt),
+                        "Mis à jour le": formatLongDateFR(data.updatedAt),
+                        "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
+                        Statut: translate(data.status),
+                        "Statut Phase 1": translate(data.statusPhase1),
+                        "Statut Phase 2": translate(data.statusPhase2),
+                        "Statut Phase 3": translate(data.statusPhase3),
+                        "Dernier statut le": formatLongDateFR(data.lastStatusAt),
+                        "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
+                        "Message de desistement": data.withdrawnMessage,
+                        "ID centre": center._id || "",
+                        "Code centre (2021)": center.code || "",
+                        "Code centre (2022)": center.code2022 || "",
+                        "Nom du centre": center.name || "",
+                        "Ville du centre": center.city || "",
+                        "Département du centre": center.department || "",
+                        "Région du centre": center.region || "",
+                        "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
+                        "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
+                        "Bus n˚": meetingPoint?.busExcelId,
+                        "Adresse point de rassemblement": meetingPoint?.departureAddress,
+                        "Date aller": meetingPoint?.departureAtString,
+                        "Date retour": meetingPoint?.returnAtString,
+                      };
+                    });
+                  }}
+                />
+                {user.role === ROLES.REFERENT_DEPARTMENT && (
+                  <ExportComponent
+                    title="Exporter les volontaires scolarisés dans le département"
+                    defaultQuery={getExportQuery}
+                    exportTitle="Volontaires"
+                    index="young-having-school-in-department"
+                    react={{ and: FILTERS }}
+                    transform={async (data) => {
+                      let all = data;
+                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                      if (schoolsId?.length) {
+                        const { responses } = await api.esQuery("school", {
+                          query: { bool: { must: { ids: { values: schoolsId } } } },
+                          size: ES_NO_LIMIT,
+                        });
+                        if (responses.length) {
+                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                        }
+                      }
+                      return all.map((data) => {
+                        return {
+                          _id: data._id,
+                          Cohorte: data.cohort,
+                          Prénom: data.firstName,
+                          Nom: data.lastName,
+                          Département: data.department,
+                          Situation: translate(data.situation),
+                          Niveau: translate(data.grade),
+                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                          "UAI de l'établissement": data.esSchool?.uai,
+                          Statut: translate(data.status),
+                          "Statut Phase 1": translate(data.statusPhase1),
+                        };
+                      });
+                    }}
+                  />
+                )}
+              </div>
             </Header>
             <Filter>
               <FilterRow visible>
@@ -233,6 +339,7 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
+                  defaultValue={[YOUNG_STATUS.VALIDATED]}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -365,6 +472,90 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut documents Préparation Militaire")}
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Classe"
+                  componentId="GRADE"
+                  dataField="grade.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "GRADE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Cohorte"
+                  componentId="COHORT"
+                  dataField="cohort.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="PPS"
+                  componentId="PPS"
+                  dataField="ppsBeneficiary.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PPS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "PPS", "PPS")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="PAI"
+                  componentId="PAI"
+                  dataField="paiBeneficiary.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PAI") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "PAI", "PAI")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="QPV"
+                  componentId="QPV"
+                  dataField="qpv.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "QPV") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "QPV", "QPV")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="HANDICAP"
+                  componentId="HANDICAP"
+                  dataField="handicap.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "HANDICAP") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
+                />
                 <Help onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)}>
                   {infosClick ? <LockIcon src={LockedSvg} /> : <LockIcon src={UnlockedSvg} />}
                   Aide
@@ -380,15 +571,15 @@ export default () => {
                     <span className="title">Statut :</span>statut du parcours SNU du volontaire
                   </div>
                   <div>
-                    <span className="title">Cohorte :</span>année d'inscription
+                    <span className="title">Cohorte :</span>année d&apos;inscription
                   </div>
                   <div>
                     <span className="title">Régions et Départements :</span>origine du volontaire
                   </div>
                   <div>
-                    <span className="title">Statut de phase :</span>pour en savoir plus consultez le{" "}
-                    <a href="https://snu.crisp.help/fr/" target="_blank">
-                      centre d'aide
+                    <span className="title">Statut de phase :</span>pour en savoir plus consultez la{" "}
+                    <a href={`${supportURL}/base-de-connaissance/les-phases-du-snu-1`} target="_blank" rel="noreferrer">
+                      base de connaissance
                     </a>
                   </div>
                   <div>
@@ -398,24 +589,24 @@ export default () => {
                     <span className="title">Fiche sanitaire :</span> reçue (Oui ou Non) (phase 1)
                   </div>
                   <div>
-                    <span className="title">Statut de mission :</span> s'active dès la 1ère candidature et concerne le statut de sa candidature. Pour en savoir plus sur les
-                    statuts, consultez le{" "}
-                    <a href="https://snu.crisp.help/fr/article/phase-2-les-statuts-volontaire-2ipjp1/" target="_blank">
-                      centre d'aide
+                    <span className="title">Statut de mission :</span> s&apos;active dès la 1ère candidature et concerne le statut de sa candidature. Pour en savoir plus sur les
+                    statuts, consultez la{" "}
+                    <a href={`${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig`} target="_blank" rel="noreferrer">
+                      base de connaissance
                     </a>
                   </div>
                   <div>
-                    <span className="title">Statut documents Préparation Militaire :</span>s'active dès la 1ère candidature à une Préparation Militaire. Pour en savoir plus sur les
-                    statuts de ce filtre consultez le{" "}
-                    <a href="https://snu.crisp.help/fr/" target="_blank">
-                      centre d'aide
+                    <span className="title">Statut documents Préparation Militaire :</span>s&apos;active dès la 1ère candidature à une Préparation Militaire. Pour en savoir plus
+                    sur les statuts de ce filtre consultez la{" "}
+                    <a href={`${supportURL}/base-de-connaissance/je-consulte-les-pieces-justificatives-pour-une-pm`} target="_blank" rel="noreferrer">
+                      base de connaissance
                     </a>{" "}
                     (phase 2)
                   </div>
                   <div>
                     <span className="title">Statut contrats :</span>Lorsque la candidature de mission est validée par la structure, le contrat généré est en{" "}
                     <strong>Brouillon</strong>. Il est ensuite rempli et envoyé par la structure aux parties-prenantes via la plateforme, son statut devient{" "}
-                    <strong>Envoyée</strong> . Lorsque toutes les parties-prenantes l'ont validé, son statut passe en <strong>Validée</strong>.
+                    <strong>Envoyée</strong> . Lorsque toutes les parties-prenantes l&apos;ont validé, son statut passe en <strong>Validée</strong>.
                   </div>
                 </div>
               </HelpText>
@@ -443,7 +634,7 @@ export default () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit, i) => (
+                      {data.map((hit) => (
                         <Hit key={hit._id} hit={hit} onClick={() => setVolontaire(hit)} selected={volontaire?._id === hit._id} />
                       ))}
                     </tbody>
@@ -462,7 +653,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, selected }) => {
   const getBackgroundColor = () => {
@@ -479,12 +670,13 @@ const Hit = ({ hit, onClick, selected }) => {
           </p>
         </MultiLine>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>
+      <td>
         <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
+        {hit.status === "WITHDRAWN" && <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} />}
+
         <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} />
         <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} />
         <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} />
-        {hit.status === "WITHDRAWN" ? <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} /> : null}
       </td>
       <td onClick={(e) => e.stopPropagation()}>
         <Action hit={hit} />
@@ -519,14 +711,14 @@ const Action = ({ hit }) => {
           <Chevron color="#444" />
         </DropdownToggle>
         <DropdownMenu>
-          <Link to={`/volontaire/${hit._id}`}>
+          <Link to={`/volontaire/${hit._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
             <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
           </Link>
-          <Link to={`/volontaire/${hit._id}/edit`}>
+          <Link to={`/volontaire/${hit._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
             <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
           </Link>
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
-            <DropdownItem className="dropdown-item">
+            <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
               <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
             </DropdownItem>
           ) : null}

@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 
 import MultiSelect from "../../components/Multiselect";
-import AddressInput from "../../components/addressInput";
+import AddressInput from "../../components/addressInputV2";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import {
   translate,
@@ -28,7 +28,7 @@ import Loader from "../../components/Loader";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 
-export default (props) => {
+export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
   const [structure, setStructure] = useState();
   const [structures, setStructures] = useState();
@@ -147,8 +147,9 @@ export default (props) => {
           location: "",
           department: "",
           region: "",
-          period: [],
+          mainDomain: "",
           domains: [],
+          period: [],
           subPeriod: [],
         }
       }
@@ -169,11 +170,6 @@ export default (props) => {
         //if edit mission, add modified delta to placesLeft
         else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
 
-        //get the period given the subperiods
-        values.subPeriod.forEach((p) => {
-          if (MISSION_PERIOD_DURING_HOLIDAYS[p] && values.period.indexOf(PERIOD.DURING_HOLIDAYS) === -1) values.period.push(PERIOD.DURING_HOLIDAYS);
-          if (MISSION_PERIOD_DURING_SCHOOL[p] && values.period.indexOf(PERIOD.DURING_SCHOOL) === -1) values.period.push(PERIOD.DURING_SCHOOL);
-        });
         try {
           //if mission doesn't have location, put one from city and zip code
           //or put Paris location
@@ -182,6 +178,7 @@ export default (props) => {
           }
 
           values.duration = values.duration?.toString();
+          if (!values.domains.includes(values.mainDomain)) values.domains = [values.mainDomain, ...values.domains];
 
           const { ok, code, data: mission } = values._id ? await api.put(`/mission/${values._id}`, values) : await api.post("/mission", values);
 
@@ -201,9 +198,8 @@ export default (props) => {
           });
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
-      }}
-    >
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      }}>
+      {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'une mission"}</Title>
@@ -216,20 +212,12 @@ export default (props) => {
                 onClick={() => {
                   handleChange({ target: { value: "DRAFT", name: "status" } });
                   handleSubmit();
-                }}
-              >
+                }}>
                 Enregistrer
               </LoadingButton>
             ) : null}
 
-            <LoadingButton
-              loading={loadings.submitButton}
-              disabled={loadings.saveButton || loadings.changeStructureButton}
-              onClick={() => {
-                handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-                handleSubmit();
-              }}
-            >
+            <LoadingButton loading={loadings.submitButton} disabled={loadings.saveButton || loadings.changeStructureButton} onClick={handleSubmit}>
               {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
             </LoadingButton>
           </Header>
@@ -245,21 +233,48 @@ export default (props) => {
                         <span>*</span>NOM DE LA MISSION
                       </label>
                       <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                        Privilégiez une phrase précisant l'action du volontaire.
+                        Privilégiez une phrase précisant l&apos;action du volontaire.
                         <br />
-                        Exemple: "Je fais les courses de produits pour mes voisins les plus fragiles"
+                        Exemple: « Je fais les courses de produits pour mes voisins les plus fragiles »
                       </p>
                       <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="Nom de votre mission" />
                       <ErrorMessage errors={errors} touched={touched} name="name" />
                     </FormGroup>
                     <FormGroup>
-                      <label>DOMAINES D'ACTION</label>
+                      <label>
+                        <span>*</span>DOMAINE D&apos;ACTION PRINCIPAL
+                      </label>
+                      {!values.mainDomain && values.domains.length > 1 ? (
+                        <ul style={{ color: "#a0aec1", fontSize: 12, marginBottom: "1rem" }}>
+                          <li>Précédemment, vous aviez sélectionné plusieurs domaines :</li>
+                          {values?.domains.map((domain) => (
+                            <li key={domain}>• {translate(domain)}</li>
+                          ))}
+                          <li>Merci de sélectionner un domaine principal (requis), ainsi qu&apos;un ou plusieurs domaine(s) secondaire(s) (facultatif)</li>
+                        </ul>
+                      ) : null}
+                      <Field component="select" value={values.mainDomain} onChange={handleChange} name="mainDomain" validate={(v) => !v && requiredMessage}>
+                        <option value="" label="Sélectionnez un domaine principal">
+                          Sélectionnez un domaine principal
+                        </option>
+                        {Object.keys(MISSION_DOMAINS).map((el) => (
+                          <option key={el} value={el}>
+                            {translate(el)}
+                          </option>
+                        ))}
+                      </Field>
+                      <ErrorMessage errors={errors} touched={touched} name="mainDomain" />
+                    </FormGroup>
+                    <FormGroup>
+                      <label>DOMAINE(S) D&apos;ACTION SECONDAIRE(S)</label>
                       <MultiSelect
                         value={values.domains || []}
+                        valueToExclude={values.mainDomain}
                         onChange={handleChange}
                         name="domains"
+                        // eslint-disable-next-line no-prototype-builtins
                         options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
-                        placeholder="Sélectionnez un ou plusieurs domains"
+                        placeholder="Sélectionnez un ou plusieurs domaines"
                       />
                     </FormGroup>
                     <FormGroup>
@@ -280,6 +295,10 @@ export default (props) => {
                       <label>
                         <span>*</span>OBJECTIFS DE LA MISSION
                       </label>
+                      <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                        En cas de modification de ce champ après validation de votre mission, cette dernière repassera en attente de validation et devra être de nouveau étudiée par
+                        votre référent départemental.
+                      </p>
                       <Field
                         validate={(v) => !v && requiredMessage}
                         name="description"
@@ -295,6 +314,10 @@ export default (props) => {
                       <label>
                         <span>*</span>ACTIONS CONCRÈTES CONFIÉES AU(X) VOLONTAIRE(S)
                       </label>
+                      <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                        En cas de modification de ce champ après validation de votre mission, cette dernière repassera en attente de validation et devra être de nouveau étudiée par
+                        votre référent départemental.
+                      </p>
                       <Field
                         validate={(v) => !v && requiredMessage}
                         name="actions"
@@ -381,11 +404,11 @@ export default (props) => {
                         </Row>
                       </FormGroup>
                       <FormGroup>
-                        <label>Durée de la mission</label>
-                        <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d'heures prévisionnelles pour la réalisation de la mission</p>
+                        <label htmlFor="duration">Durée de la mission</label>
+                        <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</p>
                         <Row>
                           <Col>
-                            <Input type="number" name="duration" onChange={handleChange} value={values.duration} />
+                            <Input type="number" name="duration" id="duration" onChange={handleChange} value={values.duration} />
                           </Col>
                           <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
                         </Row>
@@ -404,16 +427,37 @@ export default (props) => {
                         />
                       </FormGroup>
                       <FormGroup>
-                        <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION</label>
+                        <label>Période de réalisation de la mission :</label>
                         <MultiSelect
-                          value={values.subPeriod}
+                          value={values.period}
+                          valueRenderer={(values) => {
+                            const valuesFiltered = values.map((el) => el.label);
+                            return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
+                          }}
                           onChange={handleChange}
-                          name="subPeriod"
-                          options={Object.keys(MISSION_PERIOD_DURING_SCHOOL)
-                            .concat(Object.keys(MISSION_PERIOD_DURING_HOLIDAYS))
-                            .concat(values.subPeriod.filter((e) => !(MISSION_PERIOD_DURING_SCHOOL.hasOwnProperty(e) || MISSION_PERIOD_DURING_HOLIDAYS.hasOwnProperty(e))))}
-                          placeholder="Sélectionnez une ou plusieurs périodes"
+                          name="period"
+                          options={Object.keys(PERIOD)}
                         />
+                        {values.period?.length ? (
+                          <>
+                            <label style={{ marginTop: "10px" }}>Précisez :</label>
+                            <MultiSelect
+                              value={values.subPeriod}
+                              valueRenderer={(values) => {
+                                const valuesFiltered = values.map((el) => el.label);
+                                return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
+                              }}
+                              onChange={handleChange}
+                              name="subPeriod"
+                              options={(() => {
+                                let options = [];
+                                if (values.period?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
+                                if (values.period?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
+                                return options;
+                              })()}
+                            />
+                          </>
+                        ) : null}
                       </FormGroup>
                       <FormGroup>
                         <label>NOMBRE DE VOLONTAIRES RECHERCHÉS POUR CETTE MISSION</label>
@@ -431,7 +475,7 @@ export default (props) => {
                         <span>*</span>TUTEUR
                       </label>
                       <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                        Sélectionner le tuteur qui va s'occuper de la mission. <br />
+                        Sélectionner le tuteur qui va s&apos;occuper de la mission. <br />
                         {/* todo invite tuteur */}
                         {structure && (
                           <span>
@@ -441,8 +485,7 @@ export default (props) => {
                                 style={{ textDecoration: "underline", cursor: "pointer" }}
                                 onClick={() => {
                                   setShowTutor(true);
-                                }}
-                              >
+                                }}>
                                 ajouter un nouveau tuteur
                               </a>
                             </u>{" "}
@@ -467,13 +510,14 @@ export default (props) => {
                   <Wrapper>
                     <BoxTitle>Lieu où se déroule la mission</BoxTitle>
                     <AddressInput
-                      keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
+                      keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", addressVerified: "addressVerified" }}
                       values={values}
                       handleChange={handleChange}
                       errors={errors}
                       touched={touched}
+                      validateField={validateField}
+                      required={true}
                     />
-                    <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l'adresse n'est pas reconnue, veuillez saisir le nom de la ville.</p>
                   </Wrapper>
                 </Col>
               </Row>
@@ -510,8 +554,7 @@ export default (props) => {
                               disabled={loadings.saveButton || loadings.submitButton}
                               onClick={() => {
                                 modifyStructure();
-                              }}
-                            >
+                              }}>
                               Modifier la structure
                             </LoadingButton>
                           </div>
@@ -524,8 +567,9 @@ export default (props) => {
                 <Loader />
               )
             ) : null}
-
-            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
+            {Object.values(errors).filter((e) => !!e).length ? (
+              <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3>
+            ) : null}
             <Header style={{ justifyContent: "flex-end" }}>
               {!defaultValue ? (
                 <LoadingButton
@@ -536,20 +580,12 @@ export default (props) => {
                   onClick={() => {
                     handleChange({ target: { value: "DRAFT", name: "status" } });
                     handleSubmit();
-                  }}
-                >
+                  }}>
                   Enregistrer
                 </LoadingButton>
               ) : null}
 
-              <LoadingButton
-                loading={loadings.submitButton}
-                disabled={loadings.saveButton || loadings.changeStructureButton}
-                onClick={() => {
-                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-                  handleSubmit();
-                }}
-              >
+              <LoadingButton loading={loadings.submitButton} disabled={loadings.saveButton || loadings.changeStructureButton} onClick={handleSubmit}>
                 {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
               </LoadingButton>
             </Header>
@@ -558,7 +594,7 @@ export default (props) => {
       )}
     </Formik>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 2rem;
@@ -627,28 +663,4 @@ const Title = styled.div`
   font-size: 24px;
   margin-bottom: 10px;
   flex: 1;
-`;
-
-const ButtonContainer = styled.div`
-  button {
-    background-color: #5245cc;
-    color: #fff;
-    &.white-button {
-      color: #000;
-      background-color: #fff;
-      :hover {
-        background: #ddd;
-      }
-    }
-    margin-left: 1rem;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
 `;

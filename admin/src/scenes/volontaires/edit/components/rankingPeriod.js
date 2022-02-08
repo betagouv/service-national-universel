@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import { MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, translate } from "../../../../utils";
 
-export default ({ title, period, handleChange, name, values }) => {
+export default function RankingPeriod({ title, period, handleChange, name, values }) {
   const [items, setItems] = useState(values[name]);
 
   const updateList = (value) => {
@@ -58,7 +58,7 @@ export default ({ title, period, handleChange, name, values }) => {
       </Col>
     </Row>
   );
-};
+}
 
 const Item = ({ value, values, index, updateList, name }) => {
   const handleMove = (index, delta) => {

@@ -5,7 +5,7 @@ import DateInput from "../../../components/dateInput";
 import { translate } from "../../../utils";
 import Error, { requiredMessage } from "../../../components/errorMessage";
 
-export default ({ title, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) => {
+export default function Item({ title, placeholder, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) {
   const renderInput = () => {
     if (type === "date") {
       return (
@@ -31,6 +31,7 @@ export default ({ title, values, name, handleChange, type = "text", disabled = f
           onChange={handleChange}
           type={type}
           validate={(v) => required && !v && requiredMessage}
+          placeholder={placeholder || title}
         />
         {errors && touched && <Error errors={errors} touched={touched} name={name} />}
       </>
@@ -44,4 +45,4 @@ export default ({ title, values, name, handleChange, type = "text", disabled = f
       <Col md={8}>{renderInput()}</Col>
     </Row>
   );
-};
+}

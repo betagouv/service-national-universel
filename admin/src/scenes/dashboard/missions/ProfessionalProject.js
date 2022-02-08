@@ -4,7 +4,7 @@ import CircularProgress, { CircularLine, CircularLineIndex } from "../components
 import { translate, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "../../../utils";
 import { Box, BoxTitleCircular as BoxTitle } from "../../../components/box";
 
-export default ({ youngsProfessionnalProjectPrecision, youngsProfessionnalProject }) => {
+export default function ProfessionnalProject({ youngsProfessionnalProjectPrecision, youngsProfessionnalProject }) {
   const total1 = Object.keys(youngsProfessionnalProject).reduce((acc, a) => acc + youngsProfessionnalProject[a], 0);
   const total2 = Object.keys(youngsProfessionnalProjectPrecision).reduce((acc, a) => acc + youngsProfessionnalProjectPrecision[a], 0);
 
@@ -68,4 +68,4 @@ export default ({ youngsProfessionnalProjectPrecision, youngsProfessionnalProjec
       </Box>
     </React.Fragment>
   );
-};
+}

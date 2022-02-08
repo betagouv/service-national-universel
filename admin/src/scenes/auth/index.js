@@ -8,7 +8,7 @@ import SignupInvite from "./signupInvite";
 import Signup from "./signup";
 import InvitationExpired from "./invitationexpired";
 
-export default () => {
+export default function AuthIndex() {
   return (
     <div style={{ backgroundColor: "fff", flex: 1, display: "flex" }}>
       <Switch>
@@ -21,4 +21,4 @@ export default () => {
       </Switch>
     </div>
   );
-};
+}

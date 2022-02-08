@@ -7,25 +7,48 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter } from "../../utils";
 import VioletButton from "../../components/buttons/VioletButton";
 import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine, SubTd } from "../../components/list";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import plausibleEvent from "../../services/pausible";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE"];
+const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION"];
 
-export default () => {
+export default function List() {
   const [center, setCenter] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
+  // List of sessionPhase1 IDS currently displayed in results
+  const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
+  // List of cohesionCenter associated to the sessionPhase1
+  const [sessionsPhase1, setSessionsPhase1] = useState([]);
+
+  // list of cohorts selected, used for filtering the sessionPhase1 displayed inline
+  const [filterCohorts, setFilterConhorts] = useState([]);
+
   const user = useSelector((state) => state.Auth.user);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
     return { query: { match_all: {} } };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
+
+  useEffect(() => {
+    (async () => {
+      if (cohesionCenterIds?.length) {
+        const { responses } = await api.esQuery("sessionphase1", {
+          size: ES_NO_LIMIT,
+          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohesionCenterId.keyword": cohesionCenterIds } }] } },
+        });
+        if (responses.length) {
+          setSessionsPhase1(responses[0]?.hits?.hits || []);
+        }
+      }
+    })();
+  }, [cohesionCenterIds]);
 
   return (
     <div>
@@ -37,6 +60,7 @@ export default () => {
                 <Title>Centres</Title>
               </div>
               <ExportComponent
+                handleClick={() => plausibleEvent("Centres/CTA - Exporter centres")}
                 title="Exporter les centres"
                 defaultQuery={getExportQuery}
                 exportTitle="Centres_de_cohesion"
@@ -46,9 +70,12 @@ export default () => {
                   return all.map((data) => {
                     return {
                       Nom: data.name,
-                      Code: data.code,
-                      Pays: data.country,
+                      id: data._id,
+                      "Code (2021)": data.code,
+                      "Code (2022)": data.code2022,
+                      "Cohorte(s)": data.cohorts?.join(", "),
                       COR: data.COR,
+                      "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
                       Adresse: data.address,
                       Ville: data.city,
                       "Code Postal": data.zip,
@@ -65,8 +92,8 @@ export default () => {
                   });
                 }}
               />
-              {user.role === ROLES.ADMIN ? (
-                <Link to={`/centre/create`}>
+              {canCreateOrUpdateCohesionCenter(user) ? (
+                <Link to={`/centre/nouveau`} onClick={() => plausibleEvent("Centres/CTA - Créer centre")}>
                   <VioletButton>
                     <p>Créer un nouveau centre</p>
                   </VioletButton>
@@ -80,7 +107,7 @@ export default () => {
                   showIcon={false}
                   placeholder="Rechercher par mots clés, ville, code postal..."
                   componentId="SEARCH"
-                  dataField={["name", "city", "zip", "code"]}
+                  dataField={["name", "city", "zip", "code", "code2022"]}
                   react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                   // fuzziness={1}
                   style={{ flex: 1, marginRight: "1rem" }}
@@ -88,27 +115,26 @@ export default () => {
                   URLParams={true}
                   autosuggest={false}
                 />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
-                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
-              </FilterRow>
-
-              <FilterRow visible={filterVisible}>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  componentId="STATUS"
-                  dataField="status.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                  componentId="COHORT"
+                  dataField="cohorts.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut")}
+                  renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
+                  onValueChange={setFilterConhorts}
                 />
-
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -120,6 +146,7 @@ export default () => {
                   URLParams={true}
                   sortBy="asc"
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
                 />
               </FilterRow>
             </Filter>
@@ -127,18 +154,30 @@ export default () => {
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
+                onData={({ rawData }) => {
+                  if (rawData?.hits?.hits) setCohesionCenterIds(rawData.hits.hits.map((e) => e._id));
+                }}
                 render={({ data }) => (
                   <Table>
                     <thead>
                       <tr>
-                        <th style={{ width: "40%" }}>Centres</th>
-                        <th style={{ width: "30%" }}>Places</th>
-                        <th style={{ width: "30%" }}>Disponibilité</th>
+                        <th style={{ width: "40%" }}>Centre</th>
+                        <th style={{ width: "20%" }}>Cohorte(s)</th>
+                        <th style={{ width: "20%" }}>Places</th>
+                        <th style={{ width: "20%" }}>Disponibilité</th>
                       </tr>
                     </thead>
                     <tbody>
                       {data.map((hit) => (
-                        <Hit key={hit._id} hit={hit} onClick={() => setCenter(hit)} selected={center?._id === hit._id} />
+                        <Hit
+                          key={hit._id}
+                          hit={hit}
+                          sessionsPhase1={sessionsPhase1
+                            .filter((e) => e?._source?.cohesionCenterId === hit._id && (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)))
+                            .map((e) => e)}
+                          onClick={() => setCenter(hit)}
+                          selected={center?._id === hit._id}
+                        />
                       ))}
                     </tbody>
                   </Table>
@@ -151,29 +190,43 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
-const Hit = ({ hit, onClick, selected }) => {
-  // console.log("h", hit);
+const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
         <MultiLine>
-          <h2>{hit.name}</h2>
-          <p>{`${hit.city || ""} • ${hit.department || ""}`}</p>
+          <h2>
+            {hit?.name}
+            {/* <span style={{ fontSize: ".7rem", color: "#9C9C9C" }}> #{hit?._id}</span> */}
+          </h2>
+
+          <p>{`${hit?.city || ""} • ${hit?.department || ""}`}</p>
         </MultiLine>
       </td>
       <td>
-        <MultiLine>
-          <h2>{hit.placesLeft} places disponibles</h2>
-          <p>sur {hit.placesTotal} places proposées</p>
-        </MultiLine>
-        {/* {hit.placesTotal <= 1 ? `${hit.placesTotal} place` : `${hit.placesTotal} places`}
-        <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
-          {hit.placesTotal - hit.placesLeft} / {hit.placesTotal}
-        </div> */}
+        {sessionsPhase1.map((sessionPhase1) => (
+          <SubTd key={sessionPhase1._id}>
+            <Badge text={sessionPhase1._source.cohort} />
+          </SubTd>
+        ))}
       </td>
-      <td>{hit.placesLeft > 0 ? <Badge text="Places disponibles" color="#6CC763" /> : <Badge text="Complet" />}</td>
+      <td>
+        {sessionsPhase1.map((sessionPhase1) => (
+          <SubTd key={sessionPhase1._id}>
+            <MultiLine>
+              <h2>{sessionPhase1._source.placesLeft} places disponibles</h2>
+              <p>sur {sessionPhase1._source.placesTotal} places proposées</p>
+            </MultiLine>
+          </SubTd>
+        ))}
+      </td>
+      <td>
+        {sessionsPhase1.map((sessionPhase1) => (
+          <SubTd key={sessionPhase1._id}>{sessionPhase1._source.placesLeft > 0 ? <Badge text="Places disponibles" color="#6CC763" /> : <Badge text="Complet" />}</SubTd>
+        ))}
+      </td>
     </tr>
   );
 };

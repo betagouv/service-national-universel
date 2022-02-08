@@ -10,12 +10,13 @@ export const ModalContainer = styled.div`
   padding-top: 2rem;
   border-radius: 1rem;
   overflow: hidden;
-  img {
+  .close-icon {
     position: absolute;
     right: 0;
     top: 0;
     margin: 1rem;
     cursor: pointer;
+    color: ${colors.grey};
   }
 `;
 

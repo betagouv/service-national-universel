@@ -7,13 +7,16 @@ const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
 const logger = require("morgan");
+const passport = require("passport");
 require("./mongo");
 
-const { PORT, APP_URL, ADMIN_URL, ENVIRONMENT } = require("./config.js");
+const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, ENVIRONMENT } = require("./config.js");
 
 if (process.env.NODE_ENV !== "test") {
   console.log("APP_URL", APP_URL);
   console.log("ADMIN_URL", ADMIN_URL);
+  console.log("SUPPORT_URL", SUPPORT_URL);
+  console.log("KNOWLEDGEBASE_URL", KNOWLEDGEBASE_URL);
   console.log("ENVIRONMENT: ", ENVIRONMENT);
 }
 
@@ -24,6 +27,7 @@ if (ENVIRONMENT === "development") {
   app.use(logger("dev"));
 }
 
+// eslint-disable-next-line no-unused-vars
 function handleError(err, req, res, next) {
   const output = {
     error: {
@@ -36,7 +40,7 @@ function handleError(err, req, res, next) {
   res.status(statusCode).json(output);
 }
 
-const origin = [APP_URL, ADMIN_URL];
+const origin = [APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, "https://inscription.snu.gouv.fr"];
 app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json());
 app.use(bodyParser.text({ type: "application/x-ndjson" }));
@@ -46,6 +50,8 @@ require("./crons");
 app.use(cookieParser());
 app.use(fileUpload({ limits: { fileSize: 10 * 1024 * 1024 } })); // 10 Mo
 app.use(express.static(__dirname + "/../public"));
+
+app.use(passport.initialize());
 
 app.use("/es", require("./controllers/es"));
 app.use("/mission", require("./controllers/mission"));
@@ -57,14 +63,20 @@ app.use("/contract", require("./controllers/contract"));
 app.use("/program", require("./controllers/program"));
 app.use("/event", require("./controllers/event"));
 app.use("/inscription-goal", require("./controllers/inscription-goal"));
+app.use("/cohort-session", require("./controllers/cohort-session"));
 app.use("/department-service", require("./controllers/department-service"));
 app.use("/waiting-list", require("./controllers/waiting-list"));
 app.use("/cohesion-center", require("./controllers/cohesion-center"));
+app.use("/session-phase1", require("./controllers/session-phase1"));
 app.use("/email", require("./controllers/email"));
 app.use("/meeting-point", require("./controllers/meeting-point"));
 app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
-app.use("/support-center", require("./controllers/support-center"));
+app.use("/zammad-support-center", require("./controllers/zammad-support-center"));
+app.use("/support-center/user", require("./controllers/supportUser"));
+app.use("/support-center/ticket", require("./controllers/supportTicket"));
+app.use("/support-center/knowledge-base", require("./controllers/knowledgeBase"));
+app.use("/signin", require("./controllers/signin"));
 app.use(handleError);
 
 app.get("/", async (req, res) => {
@@ -72,6 +84,6 @@ app.get("/", async (req, res) => {
   res.status(200).send("SNU " + d.toLocaleString());
 });
 
-require("./passport")(app);
+require("./passport")();
 
 app.listen(PORT, () => console.log("Listening on port " + PORT));

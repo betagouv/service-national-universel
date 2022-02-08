@@ -81,7 +81,9 @@ describe("Referent", () => {
     it("should return 200", async () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
-      res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar" });
+      res = await request(getAppHelper())
+        .post("/referent/signup")
+        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
       expect(res.status).toBe(200);
       expect(res.body.token).toBeTruthy();
     });
@@ -90,7 +92,7 @@ describe("Referent", () => {
       const fixture = getNewReferentFixture();
       res = await request(getAppHelper())
         .post("/referent/signup")
-        .send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar" });
+        .send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
       expect(res.body.user.firstName).toBe("Foo");
       expect(res.body.user.lastName).toBe("BAR");
       expect(res.body.user.email).toBe(fixture.email.toLowerCase());
@@ -100,8 +102,17 @@ describe("Referent", () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
       await createReferentHelper({ ...fixture, email });
-      res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar" });
+      res = await request(getAppHelper())
+        .post("/referent/signup")
+        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
       expect(res.status).toBe(409);
+    });
+    it("should return 400 when user doesnt specify CGU choice", async () => {
+      const fixture = getNewReferentFixture();
+      const email = fixture.email.toLowerCase();
+      await createReferentHelper({ ...fixture, email });
+      let res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar" });
+      expect(res.status).toBe(400);
     });
   });
   describe("POST /referent/logout", () => {

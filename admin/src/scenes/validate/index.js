@@ -12,7 +12,7 @@ import Loader from "../../components/Loader";
 import Done from "./done.js";
 import { colors } from "../../utils";
 
-export default () => {
+export default function Index() {
   const [young, setYoung] = useState(null);
   const [done, setDone] = useState(false);
   const params = queryString.parse(location.search);
@@ -25,7 +25,7 @@ export default () => {
   useEffect(() => {
     (async () => {
       try {
-        const { ok, data, code } = await api.get(`/young/validate_phase3/${young_id}/${token}`);
+        const { ok, data } = await api.get(`/young/validate_phase3/${young_id}/${token}`);
         if (!ok) return;
         setYoung(data);
       } catch (e) {
@@ -42,15 +42,14 @@ export default () => {
           initialValues={young}
           onSubmit={async (values) => {
             try {
-              const { ok, data, code } = await api.put(`/young/validate_phase3/${young_id}/${token}`, values);
+              const { ok } = await api.put(`/young/validate_phase3/${young_id}/${token}`, values);
               if (!ok) return;
               setDone(true);
             } catch (e) {
               console.log(e);
               return toastr.error("Erreur détectée", e);
             }
-          }}
-        >
+          }}>
           {({ values, isSubmitting, handleChange, handleSubmit }) => {
             return (
               <Form onSubmit={handleSubmit}>
@@ -92,7 +91,7 @@ export default () => {
                   Valider la participation
                 </Submit>
                 <Register>
-                  <a href="mailto:support@snu.gouv.fr">Contacter l'administration du SNU ›</a>
+                  <a href="mailto:support@snu.gouv.fr">Contacter l&apos;administration du SNU ›</a>
                 </Register>
               </Form>
             );
@@ -100,7 +99,7 @@ export default () => {
         </Formik>
       </Container>
     );
-};
+}
 
 const Bold = ({ children }) => <span style={{ fontWeight: "500" }}>{children}</span>;
 
@@ -188,39 +187,6 @@ const StyledFormGroup = styled(FormGroup)`
     font-weight: 700;
   }
 `;
-const InputField = styled(Field)`
-  background-color: #fff;
-  outline: 0;
-  display: block;
-  width: 100%;
-  padding: 12px 20px;
-  border: 1px solid #e2e8f0;
-  border-radius: 5px;
-  color: #798fb0;
-  -webkit-transition: border 0.2s ease;
-  transition: border 0.2s ease;
-  line-height: 1.2;
-  ::placeholder {
-    color: #798fb0;
-  }
-  &:focus {
-    outline: none;
-    border: 1px solid rgba(66, 153, 225, 0.5);
-    & + label {
-      color: #434190;
-    }
-    ::placeholder {
-      color: #ccd5e0;
-    }
-  }
-`;
-const Forgot = styled.div`
-  margin-bottom: 20px;
-  a {
-    color: ${colors.purple};
-    font-size: 14px;
-  }
-`;
 
 const Submit = styled(LoadingButton)`
   display: block;
@@ -241,17 +207,4 @@ const Submit = styled(LoadingButton)`
   :focus {
     box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   }
-`;
-
-const ErrorLogin = styled.div`
-  background-color: #fff5f5;
-  display: block;
-  width: 100%;
-  padding: 15px;
-  margin-top: 3px;
-  margin-bottom: 0;
-  border: 1px solid #fc8180;
-  color: #c73738;
-  line-height: 1.2;
-  border-radius: 5px;
 `;

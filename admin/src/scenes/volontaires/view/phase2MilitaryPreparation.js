@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { translate as t, APPLICATION_STATUS_COLORS, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { translate, APPLICATION_STATUS_COLORS, SENDINBLUE_TEMPLATES } from "../../../utils";
 import Badge from "../../../components/Badge";
 import { Box, BoxTitle, Separator } from "../../../components/box";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -13,9 +13,8 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
-import { adminURL, appURL } from "../../../config";
 
-export default ({ young }) => {
+export default function Phase2militaryPrepartion({ young }) {
   const [applicationsToMilitaryPreparation, setApplicationsToMilitaryPreparation] = useState(null);
   const [modal, setModal] = useState({ isOpen: false, template: null, data: null });
   const history = useHistory();
@@ -56,7 +55,7 @@ export default ({ young }) => {
         if (!responseApplication.ok)
           toastr.error(
             translate(responseApplication.code),
-            `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`
+            `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
           );
       }
       setModal({ isOpen: false, template: null, data: null });
@@ -67,7 +66,7 @@ export default ({ young }) => {
       }
     } catch (e) {
       console.error(e);
-      toastr.error("Une erreur est survenue", t(e.code));
+      toastr.error("Une erreur est survenue", translate(e.code));
     }
     //Refresh
     history.go(0);
@@ -92,7 +91,7 @@ export default ({ young }) => {
       if (!responseApplication.ok)
         toastr.error(
           translate(responseApplication.code),
-          `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`
+          `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
         );
     }
     await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION}`, { message });
@@ -122,7 +121,7 @@ export default ({ young }) => {
       if (!responseApplication.ok)
         toastr.error(
           translate(responseApplication.code),
-          `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`
+          `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
         );
     }
     await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REFUSED}`, { message });
@@ -163,14 +162,13 @@ export default ({ young }) => {
       <Box>
         <Bloc
           title="Documents - Préparation militaire"
-          titleRight={<Badge text={t(young.statusMilitaryPreparationFiles)} color={APPLICATION_STATUS_COLORS[young.statusMilitaryPreparationFiles]} />}
-        >
+          titleRight={<Badge text={translate(young.statusMilitaryPreparationFiles)} color={APPLICATION_STATUS_COLORS[young.statusMilitaryPreparationFiles]} />}>
           {applicationsToMilitaryPreparation.map((a, i) => (
             <div key={i}>
               <LinkStyled href={`/mission/${a.missionId}`} target="_blank">
                 {a?.mission?.name || a.missionName}
               </LinkStyled>
-              <Badge text={t(a.status)} color={APPLICATION_STATUS_COLORS[a.status]} />
+              <Badge text={translate(a.status)} color={APPLICATION_STATUS_COLORS[a.status]} />
             </div>
           ))}
           <Line>
@@ -225,7 +223,7 @@ export default ({ young }) => {
       </Box>
     </>
   );
-};
+}
 
 const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderLeft, disabled }) => {
   return (
@@ -235,13 +233,11 @@ const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderLe
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}
-    >
+      }}>
       <Wrapper
         style={{
           width: "100%",
-        }}
-      >
+        }}>
         <div style={{ display: "flex", width: "100%" }}>
           <BoxTitle>
             <div>{title}</div>

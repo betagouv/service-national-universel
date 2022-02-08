@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { ENABLE_PM } from "../../../utils";
 
-export default ({ value, onChange }) => {
+export default function ApplyDoneModal({ value, onChange }) {
   if (!value) return <div />;
 
   const renderText = () => {
@@ -41,7 +41,7 @@ export default ({ value, onChange }) => {
       </ModalContainer>
     </Modal>
   );
-};
+}
 
 const ModalContainer = styled.div`
   display: flex;

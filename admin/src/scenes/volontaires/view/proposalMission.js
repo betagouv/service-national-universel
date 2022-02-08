@@ -9,8 +9,9 @@ import api from "../../../services/api";
 import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel, SENDINBLUE_TEMPLATES } from "../../../utils";
 import { Link } from "react-router-dom";
 import Loadingbutton from "../../../components/buttons/LoadingButton";
+import plausibleEvent from "../../../services/pausible";
 
-export default ({ young, onSend }) => {
+export default function xxxxxxx({ young, onSend }) {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
 
@@ -122,7 +123,7 @@ export default ({ young, onSend }) => {
       </ReactiveBase>
     </>
   );
-};
+}
 
 const HitMission = ({ hit, onSend }) => {
   const [sending, setSending] = useState(false);
@@ -160,11 +161,11 @@ const HitMission = ({ hit, onSend }) => {
       <td onClick={(e) => e.stopPropagation()}>
         <Loadingbutton
           onClick={() => {
+            plausibleEvent("Volontaires/profil/phase2 CTA - Proposer mission existante");
             setSending(true);
             onSend();
           }}
-          loading={sending}
-        >
+          loading={sending}>
           Proposer cette mission
         </Loadingbutton>
       </td>

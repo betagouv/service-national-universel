@@ -8,7 +8,7 @@ import { HeroContainer, Hero, Content, Alert, InterTitle, WhiteButton, VioletBut
 import api from "../../services/api";
 import { translate } from "../../utils";
 
-export default () => {
+export default function WaitingAcceptation() {
   const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
   const dispatch = useDispatch();
@@ -55,7 +55,7 @@ export default () => {
           {showAlert && (
             <Alert>
               <div className="text">
-                <strong>EN ATTENTE D'ACCEPTATION</strong>
+                <strong>EN ATTENTE D&apos;ACCEPTATION</strong>
               </div>
               <img src={require("../../assets/close.svg")} height={15} onClick={() => setShowAlert(false)} />
             </Alert>
@@ -65,11 +65,11 @@ export default () => {
               <strong>{young.firstName},</strong> vous avez été affecté à un centre !
             </h1>
             <p>
-              Nous avons le plaisir de vous indiquer qu'une place vous est proposée pour participer au séjour de cohésion du Service National Universel du 21 juin au 2 juillet 2021
-              !
+              Nous avons le plaisir de vous indiquer qu&apos;une place vous est proposée pour participer au séjour de cohésion du Service National Universel du 21 juin au 2 juillet
+              2021 !
             </p>
             <p>
-              <strong>Votre lieu d'affectation</strong>
+              <strong>Votre lieu d&apos;affectation</strong>
               <br />
               Vous avez été affecté(e) au centre de séjour de :
               <br />
@@ -86,17 +86,17 @@ export default () => {
             <HeroContainer>
               <Hero>
                 <Content style={{ width: "100%", textAlign: "center" }}>
-                  <h2>Oui, je participe au séjour de cohésion et j'effectue les modalités de départ</h2>
+                  <h2>Oui, je participe au séjour de cohésion et j&apos;effectue les modalités de départ</h2>
                   <VioletButton style={{ margin: "1rem 0" }} onClick={handleAccept}>
                     Valider ma participation
                   </VioletButton>
                   <p style={{ fontSize: "1rem" }}>
                     <strong>LES PROCHAINES ÉTAPES</strong>
                     <br />
-                    Vous avez jusqu'au 4 juin pour transmettre les documents requis pour votre participation :
+                    Vous avez jusqu&apos;au 4 juin pour transmettre les documents requis pour votre participation :
                     <br />
                     <br />
-                    <b>Le consentement relatif au droit à l'image</b>
+                    <b>Le consentement relatif au droit à l&apos;image</b>
                     <br />
                     <b>La fiche sanitaire</b>
                   </p>
@@ -118,4 +118,4 @@ export default () => {
       </HeroContainer>
     </>
   );
-};
+}

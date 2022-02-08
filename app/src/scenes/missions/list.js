@@ -16,7 +16,7 @@ import MilitaryPreparationCard from "./components/MilitaryPreparationCard";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
-export default () => {
+export default function List() {
   const young = useSelector((state) => state.Auth.young);
   const [targetLocation, setTargetLocation] = useState("");
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -105,7 +105,7 @@ export default () => {
       ) : null}
       <Heading>
         <p>Phase 2</p>
-        <h1>Trouvez une mission d'intérêt général</h1>
+        <h1>Trouvez une mission d&apos;intérêt général</h1>
       </Heading>
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <Filters>
@@ -125,7 +125,7 @@ export default () => {
                 <option value="">A proximité de mon domicile ({young.city})</option>
                 {young.mobilityNearRelativeZip && (
                   <option value="relative">
-                    A proximité d'un proche ({young.mobilityNearRelativeName} - {young.mobilityNearRelativeZip})
+                    A proximité d&apos;un proche ({young.mobilityNearRelativeName} - {young.mobilityNearRelativeZip})
                   </option>
                 )}
               </select>
@@ -232,7 +232,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Filters = styled(Container)`
   margin-bottom: 1.5rem;

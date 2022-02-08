@@ -1,19 +1,21 @@
 import React from "react";
 import styled from "styled-components";
 
-export default () => {
+export default function Settings() {
   return (
     <Wrapper>
       <Title>Paramètres de compte</Title>
       <Legend>Votre adresse email</Legend>
       <FormGroup>
-        <p style={{ color: "#a0aec1", fontSize: 12 }}>Sélectionner le tuteur qui va s'occuper de la mission. Vous pouvez également ajouter un nouveau tuteur à votre équipe.</p>
+        <p style={{ color: "#a0aec1", fontSize: 12 }}>
+          Sélectionner le tuteur qui va s&apos;occuper de la mission. Vous pouvez également ajouter un nouveau tuteur à votre équipe.
+        </p>
         <label>
           <span>*</span>ADRESSE EMAIL
         </label>
         <input placeholder="Email" />
       </FormGroup>
-      <Button>Modifier l'email</Button>
+      <Button>Modifier l&apos;email</Button>
       <Legend>Votre mot de passe</Legend>
       <p style={{ color: "#a0aec1", fontSize: 12 }}>Assurez vous de modifier votre mot de passe régulièrement pour améliorer la sécurité de votre compte.</p>
       <FormGroup>
@@ -38,7 +40,7 @@ export default () => {
       <Button>Modifier le mot de passe</Button>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 40px;

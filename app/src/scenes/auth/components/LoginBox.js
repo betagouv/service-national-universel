@@ -2,13 +2,13 @@ import React from "react";
 import styled from "styled-components";
 import { HERO_IMAGES_LIST } from "../../../utils";
 
-export default ({ children }) => {
+export default function LoginBox({ children }) {
   return (
     <AuthWrapper>
-      <LoginBox>{children}</LoginBox>
+      <Box>{children}</Box>
     </AuthWrapper>
   );
-};
+}
 
 const AuthWrapper = styled.div`
   display: flex;
@@ -35,7 +35,7 @@ const AuthWrapper = styled.div`
   }
 `;
 
-const LoginBox = styled.div`
+const Box = styled.div`
   max-width: 450px;
   width: 100%;
   padding: 40px 30px 20px;

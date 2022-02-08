@@ -1,15 +1,15 @@
 import React from "react";
 import styled from "styled-components";
 
-const ProgressBar = ({ backgroundColor, backgroundColorCompleted, completed }) => {
+export default function ProgressBar({ backgroundColor, backgroundColorCompleted, completed }) {
   return (
     <Container backgroundColor={backgroundColorCompleted}>
       <Filler backgroundColor={backgroundColor} completed={completed}>
-        <Label>{`${completed} %`}</Label>
+        <Label>{`${completed}`} %</Label>
       </Filler>
     </Container>
   );
-};
+}
 
 const Container = styled.div`
   height: 20;
@@ -37,5 +37,3 @@ const Label = styled.span`
   color: white;
   font-weight: 500;
 `;
-
-export default ProgressBar;

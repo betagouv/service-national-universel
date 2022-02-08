@@ -38,6 +38,8 @@ function serializeSchools(body) {
       postcode: hit.postcode,
       name2: hit.name2,
       type: hit.type,
+      fullName: hit.fullName,
+      uai: hit.uai,
     };
   });
 }

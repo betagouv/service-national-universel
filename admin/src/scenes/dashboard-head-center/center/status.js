@@ -6,17 +6,28 @@ import { colors } from "../../../utils";
 
 import api from "../../../services/api";
 
-export default () => {
+export default function Status() {
   const [placesTotal, setPlacesTotal] = useState(0);
   const [placesLeft, setPlacesLeft] = useState(0);
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
-      const { data, ok, code } = await api.get(`/cohesion-center/${user.cohesionCenterId}`);
-      if (!ok) return console.log(code);
-      setPlacesTotal(data.placesTotal);
-      setPlacesLeft(data.placesLeft);
+      const bodySession = {
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { headCenterId: user._id } }] } },
+        aggs: {
+          placesTotal: { sum: { field: "placesTotal" } },
+          placesLeft: { sum: { field: "placesLeft" } },
+        },
+        size: 0,
+      };
+
+      const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
+
+      if (responsesSession.length) {
+        setPlacesTotal(responsesSession[0].aggregations.placesTotal.value);
+        setPlacesLeft(responsesSession[0].aggregations.placesLeft.value);
+      }
     })();
   }, []);
 
@@ -33,4 +44,4 @@ export default () => {
       </Col>
     </Row>
   );
-};
+}

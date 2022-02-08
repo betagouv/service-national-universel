@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import YoungMissionCard from "../components/YoungMissionCard";
 
-export default () => {
+export default function Validated() {
   return (
     <Wrapper>
       <SuccessMessage>
@@ -17,7 +17,7 @@ export default () => {
       <YoungMissionCard />
     </Wrapper>
   );
-};
+}
 
 const Logo = styled.div`
   width: 5rem;

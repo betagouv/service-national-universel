@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { translate, formatStringLongDate, YOUNG_STATUS_COLORS, colors } from "../utils";
 import Badge from "../components/Badge";
 
-export default ({ value }) => {
+export default function HistoricComponent({ value }) {
   if (!value) return <div />;
 
   return (
@@ -13,7 +13,7 @@ export default ({ value }) => {
       ))}
     </Historic>
   );
-};
+}
 
 const HistoricItem = ({ item }) => {
   const getLabel = () =>

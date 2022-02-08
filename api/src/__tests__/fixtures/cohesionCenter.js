@@ -20,6 +20,7 @@ function getNewCohesionCenterFixture() {
     observations: faker.lorem.word(),
     waitingList: [faker.lorem.word(), faker.lorem.word()],
     COR: faker.lorem.word(),
+    cohorts: ["2020"],
   };
 }
 

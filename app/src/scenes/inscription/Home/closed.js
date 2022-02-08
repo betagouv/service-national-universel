@@ -10,7 +10,7 @@ import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
 import ModalButton from "../../../components/buttons/ModalButton";
 
-export default ({ location }) => {
+export default function Closed({ location }) {
   const [mail, setMail] = useState();
   const [birthdateAt, setBirthdateAt] = useState();
 
@@ -23,7 +23,7 @@ export default ({ location }) => {
       return toastr.error(
         "Oups, une erreur s'est produite",
         "Il semblerait que le format de votre date de naissance soit invalide. Merci de réessayer en utilisant le format jj/mm/aaaa",
-        { timeOut: 3000 }
+        { timeOut: 3000 },
       );
     const { ok, code } = await api.post("/waiting-list", { mail, birthdateAt });
     if (!ok) toastr.error("Oups, une erreur s'est produite", translate(code));
@@ -68,8 +68,8 @@ export default ({ location }) => {
         </CardsContainer>
         <Container>
           <Text>
-            Les inscriptions sont malheureusement closes pour l'<b>édition 2021</b>.<br /> Vous pouvez cependant nous laisser vos coordonnées pour être recontacté(e) par
-            l’administration lors de la prochaine campagne d'inscription du SNU.
+            Les inscriptions sont malheureusement closes pour l&apos;<b>édition 2021</b>.<br /> Vous pouvez cependant nous laisser vos coordonnées pour être recontacté(e) par
+            l’administration lors de la prochaine campagne d&apos;inscription du SNU.
           </Text>
           <input
             type="email"
@@ -99,7 +99,7 @@ export default ({ location }) => {
       </StartButtonContainer>
     </div>
   );
-};
+}
 
 const Container = styled.div`
   display: flex;
@@ -201,7 +201,7 @@ const CardsContainer = styled.div`
   }
 `;
 
-const CardPhase = ({ upText, title, downText, color }) => {
+const CardPhase = ({ upText, title, downText }) => {
   return (
     <Card>
       <div>

@@ -17,7 +17,7 @@ import api from "../../services/api";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 
-export default (props) => {
+export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState();
   const [networks, setNetworks] = useState([]);
   const [referents, setReferents] = useState([]);
@@ -98,8 +98,7 @@ export default (props) => {
           console.log(e);
           toastr.error("Erreur!");
         }
-      }}
-    >
+      }}>
       {({ values, handleChange, handleSubmit, errors, touched }) => (
         <Wrapper>
           <Header>
@@ -109,8 +108,7 @@ export default (props) => {
                 handleChange({ target: { value: "VALIDATED", name: "status" } });
                 handleSubmit();
               }}
-              loading={loading}
-            >
+              loading={loading}>
               {defaultValue ? "Enregistrer les modifications" : "Créer la structure"}
             </LoadingButton>
           </Header>
@@ -120,7 +118,7 @@ export default (props) => {
               <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                 <Wrapper>
                   {/*<pre>{JSON.stringify(values, null, 2)}</pre>*/}
-                  <BoxTitle>Informations sur la structure d'accueil</BoxTitle>
+                  <BoxTitle>Informations sur la structure d&apos;accueil</BoxTitle>
                   <FormGroup>
                     <label>
                       <span>*</span>NOM DE LA STRUCTURE
@@ -151,7 +149,7 @@ export default (props) => {
                   </FormGroup>
                   {values.legalStatus === "ASSOCIATION" && (
                     <FormGroup>
-                      <label>DISPOSEZ-VOUS D'UN AGRÉMENT ?</label>
+                      <label>DISPOSEZ-VOUS D&apos;UN AGRÉMENT ?</label>
                       <MultiSelect
                         value={values.associationTypes?.filter((e) => e.length) || []}
                         onChange={handleChange}
@@ -200,15 +198,14 @@ export default (props) => {
                       {["Service de l'Etat", "Etablissement public"].includes(values.structurePubliqueType) && (
                         <FormGroup>
                           <label>
-                            <span>*</span>TYPE DE SERVICE DE L'ETAT
+                            <span>*</span>TYPE DE SERVICE DE L&apos;ETAT
                           </label>
                           <Field
                             validate={(v) => !v && requiredMessage}
                             component="select"
                             name="structurePubliqueEtatType"
                             value={values.structurePubliqueEtatType}
-                            onChange={handleChange}
-                          >
+                            onChange={handleChange}>
                             <option key="" value="" />
                             {publicEtatTypes.map((e) => {
                               return (
@@ -269,8 +266,8 @@ export default (props) => {
                   <FormGroup>
                     <label>RÉSEAU NATIONAL</label>
                     <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                      Si l’organisation est membre d'un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettez ainsi au superviseur de
-                      votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
+                      Si l’organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettez ainsi au superviseur
+                      de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
                     </p>
                     <Field component="select" name="networkId" value={values.networkId} onChange={handleChange}>
                       <option key="" value="" />
@@ -318,7 +315,7 @@ export default (props) => {
                 <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                   <Wrapper>
                     <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
-                    {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
+                    {referents.length ? null : <i>Aucun compte n&apos;est associé à cette structure.</i>}
                     {referents.map((referent) => (
                       <Link to={`/user/${referent._id}`} key={referent._id}>
                         <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }}>
@@ -344,7 +341,7 @@ export default (props) => {
                     errors={errors}
                     touched={touched}
                   />
-                  <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l'adresse n'est pas reconnue, veuillez saisir le nom de la ville.</p>
+                  <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la ville.</p>
                 </Wrapper>
               </Col>
             </Row>
@@ -356,8 +353,7 @@ export default (props) => {
                 handleChange({ target: { value: "VALIDATED", name: "status" } });
                 handleSubmit();
               }}
-              loading={loading}
-            >
+              loading={loading}>
               {defaultValue ? "Enregistrer les modifications" : "Créer la structure"}
             </LoadingButton>
           </Header>
@@ -365,7 +361,7 @@ export default (props) => {
       )}
     </Formik>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 3rem;
@@ -435,28 +431,4 @@ const Title = styled.div`
   font-size: 24px;
   margin-bottom: 10px;
   flex: 1;
-`;
-
-const ButtonContainer = styled.div`
-  button {
-    background-color: #5245cc;
-    color: #fff;
-    &.white-button {
-      color: #000;
-      background-color: #fff;
-      :hover {
-        background: #ddd;
-      }
-    }
-    margin-left: 1rem;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
 `;

@@ -15,9 +15,7 @@ class Auth {
   }
 
   async signin(req, res) {
-    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() })
-      .unknown()
-      .validate(req.body);
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() }).unknown().validate(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_AND_PASSWORD_REQUIRED });
 
     const { password, email } = value;
@@ -36,10 +34,12 @@ class Auth {
       const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       return res.status(200).send({
         ok: true,
         token,
-        user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user),
+        user: data,
+        data,
       });
     } catch (error) {
       capture(error);
@@ -65,7 +65,8 @@ class Auth {
       const { user } = req;
       user.set({ lastLoginAt: Date.now() });
       await user.save();
-      res.send({ ok: true, token: value.token, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      res.send({ ok: true, token: value.token, user: data, data });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

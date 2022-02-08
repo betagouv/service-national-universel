@@ -1,9 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
-import { copyToClipboard } from "../utils";
+import { copyToClipboard, colors } from "../utils";
+import TickDone from "../assets/TickDone";
+import Copy from "../assets/Copy";
 
-export const Info = ({ children, title, id }) => {
+export const Info = ({ children, title }) => {
   return (
     <div className="info">
       <div style={{ position: "relative" }}>
@@ -14,24 +15,31 @@ export const Info = ({ children, title, id }) => {
   );
 };
 
-export const Details = ({ title, value, copy, to }) => {
+export const Details = ({ title, value, copy }) => {
   if (!value) return <div />;
+  const [copied, setCopied] = React.useState(false);
   if (typeof value === "function") value = value();
+  React.useEffect(() => {
+    if (copied) {
+      setTimeout(() => setCopied(false), 3000);
+    }
+  }, [copied]);
   return (
     <div className="detail">
-      {/* `${title}&nbsp;:` */}
-      <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
-      {copy ? (
-        <div
-          className="icon"
-          icon={require(`../assets/copy.svg`)}
-          onClick={() => {
-            copyToClipboard(value);
-            toastr.success(`'${title}' a été copié dans le presse papier.`);
-          }}
-        />
-      ) : null}
+      <div className="detail-title">{title}&nbsp;:</div>
+      <div style={{ display: "flex" }}>
+        <div className="detail-text">{value}</div>
+        {copy ? (
+          <div
+            className="icon"
+            onClick={() => {
+              copyToClipboard(value);
+              setCopied(true);
+            }}>
+            {copied ? <TickDone color={colors.green} width={17} height={17} /> : <Copy color={colors.darkPurple} width={17} height={17} />}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 };
@@ -93,10 +101,13 @@ export default styled.div`
     }
   }
   .detail {
+    border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
+    padding: 5px 0;
     display: flex;
     font-size: 14px;
     text-align: left;
     align-items: flex-end;
+    justify-content: space-between;
     margin-top: 10px;
     &-title {
       font-weight: bold;
@@ -118,7 +129,7 @@ export default styled.div`
       font-size: 0.8rem;
     }
     .quote {
-      font-size: 18px;
+      font-size: 0.9rem;
       font-weight: 400;
       font-style: italic;
     }
@@ -126,12 +137,6 @@ export default styled.div`
   .icon {
     cursor: pointer;
     margin: 0 0.5rem;
-    width: 15px;
-    height: 15px;
-    background: ${`url(${require("../assets/copy.svg")})`};
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 15px 15px;
   }
   .application-detail {
     display: flex;
@@ -157,7 +162,7 @@ export default styled.div`
     }
   }
   .quote {
-    font-size: 18px;
+    font-size: 0.9rem;
     font-weight: 400;
     font-style: italic;
   }

@@ -1,32 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { translate, ROLES, ES_NO_LIMIT, copyToClipboard } from "../../utils";
+import { translate, ROLES, ES_NO_LIMIT, copyToClipboard, canUpdateReferent, canDeleteReferent } from "../../utils";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import styled from "styled-components";
+import ModalConfirm from "../../components/modals/ModalConfirm";
+import plausibleEvent from "../../services/pausible";
 
-// Sorry about that: return true, return false, false, true, false.
-function canModify(user, value) {
-  if (user.role === ROLES.ADMIN) return true;
-  // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-  if (user.role === ROLES.REFERENT_REGION) {
-    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(value.role) && user.region === value.region) return true;
-    return false;
-  }
-  if (user.role === ROLES.REFERENT_DEPARTMENT) {
-    if (user.role === value.role && user.department === value.department) return true;
-    return false;
-  }
-  return false;
-}
-
-export default ({ onChange, value }) => {
+export default function UserPanel({ onChange, value }) {
   if (!value) return <div />;
   const [structure, setStructure] = useState();
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
@@ -35,6 +21,7 @@ export default ({ onChange, value }) => {
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   useEffect(() => {
     setStructure(null);
@@ -87,8 +74,9 @@ export default ({ onChange, value }) => {
 
   const handleImpersonate = async () => {
     try {
+      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${value._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
       history.push("/dashboard");
       if (token) api.setToken(token);
       if (data) dispatch(setUser(data));
@@ -98,6 +86,27 @@ export default ({ onChange, value }) => {
     }
   };
 
+  const onClickDelete = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: onConfirmDelete,
+      title: `Êtes-vous sûr(e) de vouloir supprimer le compte de ${value.firstName} ${value.lastName} ?`,
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async () => {
+    try {
+      const { ok, code } = await api.remove(`/referent/${value._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Ce profil a été supprimé.");
+      return history.go(0);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
+    }
+  };
   return (
     <Panel>
       <div className="info">
@@ -105,14 +114,15 @@ export default ({ onChange, value }) => {
           <div className="title">{`${value.firstName} ${value.lastName}`}</div>
           <div className="close" onClick={onChange} />
         </div>
-        {canModify(user, value) && (
+        {canUpdateReferent({ actor: user, originalTarget: value, structure: structure }) && (
           <div style={{ display: "flex", flexWrap: "wrap" }}>
             <Link to={`/user/${value._id}`}>
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
-            <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+            {user.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
+            {canDeleteReferent({ actor: user, originalTarget: value }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
             {structure ? (
-              <Link to={`/structure/${structure._id}`}>
+              <Link to={`/structure/${structure._id}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
                 <PanelActionButton icon="eye" title="Voir la structure" />
               </Link>
             ) : null}
@@ -127,16 +137,20 @@ export default ({ onChange, value }) => {
         <Details title="Fonction" value={translate(value.subRole)} />
         <Details title="Région" value={value.region} />
         <Details title="Département" value={value.department} />
+        <Details title="Tel fixe" value={value.phone} />
+        <Details title="Tel Mobile" value={value.mobile} />
       </Info>
       {structure ? (
         <React.Fragment>
           <Info title="Structure">
             <div className="detail">
               <div className="detail-title">Nom :</div>
-              <div className="detail-text">{structure.name}</div>
-              <Link to={`/structure/${structure._id}`}>
-                <IconLink />
-              </Link>
+              <div style={{ display: "flex" }}>
+                <div className="detail-text">{structure.name}</div>
+                <Link to={`/structure/${structure._id}`}>
+                  <IconLink />
+                </Link>
+              </div>
             </div>
             <Details title="Région" value={structure?.region} />
             <Details title="Dép." value={structure?.department} />
@@ -198,9 +212,19 @@ export default ({ onChange, value }) => {
           return <div>{`${e}:${value[e]}`}</div>;
         })}
       </div> */}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Panel>
   );
-};
+}
 
 const Button = styled.button`
   margin: 0 0.5rem;

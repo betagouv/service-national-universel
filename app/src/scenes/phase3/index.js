@@ -1,7 +1,6 @@
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route, useHistory } from "react-router-dom";
 import { permissionPhase3 } from "../../utils";
-import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import Home from "./home";
@@ -9,7 +8,7 @@ import Missions from "./missions";
 import Mission from "./mission";
 import Valider from "./valider";
 
-export default () => {
+export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   if (!young || !permissionPhase3(young)) history.push("/");
@@ -24,4 +23,4 @@ export default () => {
       </Switch>
     </div>
   );
-};
+}

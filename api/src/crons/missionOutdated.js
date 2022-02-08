@@ -1,11 +1,13 @@
 require("dotenv").config({ path: "./../../.env-staging" });
 require("../mongo");
-const { capture, captureMessage } = require("../sentry");
+const { capture } = require("../sentry");
 const Mission = require("../models/mission");
 const Referent = require("../models/referent");
+const ApplicationObject = require("../models/application");
 const { sendTemplate } = require("../sendinblue");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { ADMIN_URL } = require("../config");
+const slack = require("../slack");
+const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
+const { ADMIN_URL, APP_URL } = require("../config");
 
 const clean = async () => {
   let countAutoArchived = 0;
@@ -15,6 +17,7 @@ const clean = async () => {
     console.log(`${mission._id} ${mission.name} archived.`);
     mission.set({ status: "ARCHIVED" });
     await mission.save();
+    await cancelApplications(mission);
 
     // notify structure
     if (mission.tutorId) {
@@ -29,11 +32,10 @@ const clean = async () => {
         });
     }
   });
-  console.log(`${Date.now()} - ${countAutoArchived} missions has been archived`);
+  slack.success({ title: "outdated mission", text: `${countAutoArchived} missions has been archived !` });
 };
 
 const notify1Week = async () => {
-  console.log({ ADMIN_URL });
   let countNotice = 0;
   const now = Date.now();
   const cursor = await Mission.find({ endAt: { $lt: addDays(now, 8), $gte: addDays(now, 7) }, status: "VALIDATED" }).cursor();
@@ -56,30 +58,64 @@ const notify1Week = async () => {
         });
     }
   });
-  console.log(`${Date.now()} - ${countNotice} missions has been noticed`);
+  slack.success({ title: "1 week notice outdated mission", text: `${countNotice} missions has been noticed !` });
+};
+
+const cancelApplications = async (mission) => {
+  const applications = await ApplicationObject.find({
+    missionId: mission._id,
+    status: {
+      $in: [
+        APPLICATION_STATUS.WAITING_VALIDATION,
+        APPLICATION_STATUS.WAITING_ACCEPTATION,
+        APPLICATION_STATUS.WAITING_VERIFICATION,
+        // todo maybe add other status later
+      ],
+    },
+  });
+  for (let application of applications) {
+    let statusComment = "La mission a été archivée.";
+    let sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_ARCHIVED_AUTO;
+
+    application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
+    await application.save();
+
+    if (sendinblueTemplate) {
+      await sendTemplate(sendinblueTemplate, {
+        emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+        params: {
+          cta: `${APP_URL}/phase2`,
+          missionName: mission.name,
+          message: mission.statusComment,
+        },
+      });
+    }
+  }
 };
 
 exports.handler = async () => {
-  captureMessage(`${Date.now()} - check outdated mission`);
+  // slack.info({ title: "outdated mission", text: "I'm checking if there is any outdated mission in our database !" });
   try {
     clean();
   } catch (e) {
     capture(`ERROR`, JSON.stringify(e));
     capture(e);
+    slack.error({ title: "outdated mission", text: JSON.stringify(e) });
   }
 };
 
 exports.handlerNotice1Week = async () => {
-  captureMessage(`${Date.now()} - check outdated mission 1 week notice`);
+  // slack.info({ title: "1 week notice outdated mission", text: "I'm checking if there is any mission in our database that will be expired in 1 week !" });
   try {
     notify1Week();
   } catch (e) {
     capture(`ERROR`, JSON.stringify(e));
     capture(e);
+    slack.error({ title: "1 week notice outdated mission", text: JSON.stringify(e) });
   }
 };
 
-addDays = (d, days = 1) => {
+const addDays = (d, days = 1) => {
   var date = new Date(d);
   date.setDate(date.getDate() + days);
   date.setUTCHours(0, 0, 0, 0);

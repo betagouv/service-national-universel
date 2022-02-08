@@ -8,16 +8,16 @@ import { useSelector } from "react-redux";
 
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { ticketStateNameById, colors } from "../../utils";
+import { ticketStateNameById, colors, translateState } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
-import { referentArticles, adminArticles, structureArticles } from "./articles";
+import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles } from "./articles";
+import { supportURL } from "../../config";
 
-export default () => {
+const Dashboard = () => {
   const [userTickets, setUserTickets] = useState(null);
   const [articles, setArticles] = useState(null);
-  const [link, setLink] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
   dayjs.extend(relativeTime).locale("fr");
@@ -25,17 +25,18 @@ export default () => {
   useEffect(() => {
     if (user.role === "responsible" || user.role === "supervisor") {
       setArticles(structureArticles);
-      setLink("2-responsable-de-structure");
     } else if (user.role === "referent_department" || user.role === "referent_region") {
       setArticles(referentArticles);
-      setLink("1-referent");
+    } else if (user.role === "head_center") {
+      setArticles(headCenterArticles);
+    } else if (user.role === "visitor") {
+      setArticles(visitorArticles);
     } else {
       setArticles(adminArticles);
-      setLink("");
     }
     const fetchTickets = async () => {
       try {
-        const response = await api.get("/support-center/ticket?withArticles=true");
+        const response = await api.get("/zammad-support-center/ticket?withArticles=true");
         if (!response.ok) return setUserTickets([]);
         setUserTickets(response.data);
       } catch (error) {
@@ -46,30 +47,31 @@ export default () => {
   }, []);
 
   const getLastContactName = (array) => {
+    if (!array || array?.error) return "-";
     const lastTicketFromAgent = array?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))?.find((e) => e.created_by !== user.email);
     return lastTicketFromAgent?.from || "-";
   };
 
   const displayState = (state) => {
-    if (state === "ouvert")
+    if (state === "open")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "fermé")
+    if (state === "closed")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "nouveau")
+    if (state === "new")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translateState(state)}
         </StateContainer>
       );
   };
@@ -77,29 +79,29 @@ export default () => {
   return (
     <HeroContainer>
       <Container>
-        <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
+        <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous rencontrez une difficulté, avez besoin d'assistance pour réaliser une action ou avez besoin d'informations sur la plateforme&nbsp;?
+              Vous rencontrez une difficulté, avez besoin d&apos;assistance pour réaliser une action ou avez besoin d&apos;informations sur la plateforme&nbsp;?
               <br />
-              N'hésitez pas à consulter notre{" "}
+              N&apos;hésitez pas à consulter notre{" "}
               <strong>
-                <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/1-referent" target="_blank" rel="noopener noreferrer">
+                <a className="link" href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
                   base de connaissance
                 </a>
               </strong>
               &nbsp;!
             </div>
             <div className="buttons">
-              <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/1-referent" target="_blank" rel="noopener noreferrer">
+              <LinkButton href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
                 Trouver&nbsp;ma&nbsp;réponse
               </LinkButton>
             </div>
           </div>
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous n'avez pas trouvé de réponse à votre demande ?<br />
+              Vous n&apos;avez pas trouvé de réponse à votre demande ?<br />
               Contactez notre{" "}
               <strong>
                 <NavLink className="link" to="/besoin-d-aide/ticket">
@@ -109,7 +111,7 @@ export default () => {
               .
             </div>
             <div className="buttons">
-              <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu'un</InternalLink>
+              <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu&apos;un</InternalLink>
             </div>
           </div>
         </div>
@@ -117,7 +119,7 @@ export default () => {
       <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
       <ArticlesBlock articles={articles} />
       <hr style={{ margin: "2rem" }} />
-      <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations en cours</h4>
+      <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations :</h4>
       <List>
         <section className="ticket titles">
           <p>Nº demande</p>
@@ -134,15 +136,17 @@ export default () => {
             <NavLink to={`/besoin-d-aide/ticket/${ticket.id}`} key={ticket.id} className="ticket">
               <p>{ticket.number}</p>
               <p>{ticket.title}</p>
-              <p>{getLastContactName(ticket?.articles)}</p>
+              <p>{getLastContactName(ticket?.articles || [])}</p>
               <p>{displayState(ticketStateNameById(ticket.state_id))}</p>
-              <p className="ticket-date">{dayjs(new Date(ticket.updated_at)).fromNow()}</p>
+              <div className="ticket-date">{dayjs(new Date(ticket.updated_at)).fromNow()}</div>
             </NavLink>
           ))}
       </List>
     </HeroContainer>
   );
 };
+
+export default Dashboard;
 
 export const ArticlesBlock = ({ articles }) => (
   <Articles>
@@ -154,7 +158,7 @@ export const ArticlesBlock = ({ articles }) => (
         </div>
         <p>{article.body}</p>
         <p>
-          <a className="block-link" href={article.url} target="_blank">
+          <a className="block-link" href={article.url} target="_blank" rel="noreferrer">
             Lire la suite
           </a>
         </p>
@@ -171,6 +175,8 @@ const StateContainer = styled.div`
 export const HeroContainer = styled.div`
   flex: 1;
   padding: 1rem;
+  max-width: 1300px;
+  margin: 0 auto;
   @media (max-width: 768px) {
     padding: 1rem 0;
   }
@@ -229,6 +235,7 @@ const LinkButton = styled.a`
     background: #463bad;
   }
 `;
+
 const InternalLink = styled(NavLink)`
   max-width: 230px;
   margin: 0.3rem;

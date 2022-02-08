@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
+import { Col } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -15,7 +15,7 @@ import { translate } from "../../utils";
 import FormFooter from "../../components/form/FormFooter";
 import FormRow from "../../components/form/FormRow";
 
-export default () => {
+export default function Consentements() {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -63,8 +63,7 @@ export default () => {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
           }
-        }}
-      >
+        }}>
         {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormRow>
@@ -93,8 +92,7 @@ export default () => {
                   <a
                     style={{ color: "#5145cd", textDecoration: "underline" }}
                     href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU-_Consentement_du_repre%CC%81sentant_le%CC%81gal_-_2020.pdf"
-                    target="blank"
-                  >
+                    target="blank">
                     ci-joint
                   </a>{" "}
                   , le compléter, le dater, le signer, le photographier ou le scanner et le déposer ici.
@@ -111,7 +109,7 @@ export default () => {
                       return toastr.error(
                         "Le fichier semble corrompu",
                         "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                        { timeOut: 0 }
+                        { timeOut: 0 },
                       );
                     }
 
@@ -193,8 +191,8 @@ export default () => {
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment5" />
                 <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
-                  * Les informations relatives au formulaire du droit à l'image, à la fiche de sanitaire et aux vaccinations seront disponibles dès la confirmation de l'inscription
-                  dans l'espace personnel de <strong>{young.firstName}</strong>.
+                  * Les informations relatives au formulaire du droit à l&apos;image, à la fiche de sanitaire et aux vaccinations seront disponibles dès la confirmation de
+                  l&apos;inscription dans l&apos;espace personnel de <strong>{young.firstName}</strong>.
                 </div>
               </Col>
             </FormRow>
@@ -219,7 +217,7 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 40px;

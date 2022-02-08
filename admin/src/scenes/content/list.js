@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Col, Container, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
@@ -11,7 +10,7 @@ import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
 import { translate, ROLES } from "../../utils";
 
-export default () => {
+export default function List() {
   const [programs, setPrograms] = useState();
   const user = useSelector((state) => state.Auth.user);
 
@@ -25,8 +24,8 @@ export default () => {
   }, []);
 
   const getTitle = () => {
-    if (user.role === ROLES.HEAD_CENTER) return <Title>Outils pour les professionnels d'État</Title>;
-    return <Title>Les grands programmes d'engagement</Title>;
+    if (user.role === ROLES.HEAD_CENTER) return <Title>Outils pour les professionnels d&apos;État</Title>;
+    return <Title>Les grands programmes d&apos;engagement</Title>;
   };
 
   if (!programs) return <Loader />;
@@ -58,7 +57,7 @@ export default () => {
       </Wrapper>
     </>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 2rem;
@@ -73,28 +72,10 @@ const Title = styled.div`
   font-size: 24px;
 `;
 
-const Subtitle = styled.div`
-  color: #6b7280;
-  font-size: 18px;
-`;
-
 const Header = styled.div`
   padding: 0 25px 0;
   display: flex;
   margin: 25px 0;
   align-items: flex-start;
   /* justify-content: space-between; */
-`;
-
-const Heading = styled.div`
-  margin: 2rem 0;
-  h1 {
-    color: #161e2e;
-    font-size: 2px;
-    font-weight: 700;
-  }
-  p {
-    color: #6b7280;
-    font-size: 18px;
-  }
 `;

@@ -23,11 +23,11 @@ export default () => {
           <Hero>
             <div className="content">
               <h1>
-                Réalisez votre <strong>mission d'intérêt général</strong>
+                Réalisez votre <strong>mission d&apos;intérêt général</strong>
               </h1>
               <p>
-                Partez à la découverte de l'engagement en réalisant 84 heures de mission d'intérêt général, au sein d'une ou plusieurs structures, en contribuant à leurs activités
-                concrètes !
+                Partez à la découverte de l&apos;engagement en réalisant 84 heures de mission d&apos;intérêt général, au sein d&apos;une ou plusieurs structures, en contribuant à
+                leurs activités concrètes !
               </p>
               <p>A vous de jouez : candidatez directement sur des missions parmi celles proposées dans cet espace !</p>
             </div>

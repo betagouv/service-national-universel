@@ -6,7 +6,7 @@ import { Field } from "formik";
 import { Row } from "reactstrap";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
 
-export default ({ title, handleChange, values, errors, touched }) => {
+export default function TransportCard({ title, handleChange, values, errors, touched }) {
   const onClick = (value) => {
     const d = values.mobilityTransport;
     const index = d.indexOf(value);
@@ -58,7 +58,7 @@ export default ({ title, handleChange, values, errors, touched }) => {
       ) : null}
     </Container>
   );
-};
+}
 
 const Container = styled.div`
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);

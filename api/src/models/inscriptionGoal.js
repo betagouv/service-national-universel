@@ -17,13 +17,32 @@ const Schema = new mongoose.Schema({
       description: "Nom de la région (peut être déduit du département)",
     },
   },
+  academy: {
+    type: String,
+    documentation: {
+      description: "Nom de l'académie (peut être déduit du département)",
+    },
+  },
   max: {
     type: Number,
     documentation: {
       description: "Jauge (nombre maximum de volontaires acceptés)",
     },
   },
-
+  cohort: {
+    type: String,
+    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2021"],
+    default: "2021",
+    documentation: {
+      description: "Cohorte des jeunes",
+    },
+  },
+  fillingRate: {
+    type: Number,
+    documentation: {
+      description: "taux de remplissage (en pourcentage)",
+    },
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

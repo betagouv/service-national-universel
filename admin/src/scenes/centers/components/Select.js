@@ -3,9 +3,8 @@ import { Col, Row } from "reactstrap";
 import { Field } from "formik";
 
 import Error, { requiredMessage } from "../../../components/errorMessage";
-import { translate } from "../../../utils";
 
-export default ({ title, name, values, handleChange, disabled, options, required = false, errors, touched }) => {
+export default function Select({ title, name, values, handleChange, disabled, options, required = false, errors, touched }) {
   return (
     <Row className="detail">
       <Col md={4}>
@@ -25,4 +24,4 @@ export default ({ title, name, values, handleChange, disabled, options, required
       </Col>
     </Row>
   );
-};
+}

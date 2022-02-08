@@ -6,7 +6,7 @@ import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, formatDa
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 
-export default ({ onChange, value }) => {
+export default function PanelView({ onChange, value }) {
   const [young, setYoung] = useState(null);
 
   useEffect(() => {
@@ -99,9 +99,9 @@ export default ({ onChange, value }) => {
       )}
     </Panel>
   );
-};
+}
 
-const Info = ({ children, title, id }) => {
+const Info = ({ children, title }) => {
   return (
     <div className="info">
       <div style={{ position: "relative" }}>
@@ -177,9 +177,11 @@ const Panel = styled.div`
     }
   }
   .detail {
+    border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
+    padding: 5px 0;
     display: flex;
     align-items: flex-end;
-    padding: 5px 20px;
+    justify-content: space-between;
     font-size: 14px;
     text-align: left;
     &-title {

@@ -6,7 +6,15 @@ import { getPasswordErrorMessage } from "../utils";
 import EyeOpen from "../assets/eye.svg";
 import EyeClose from "../assets/eye-slash.svg";
 
-export default ({ value, onChange, showError = true, autoComplete = "new-password", placeholder = "Tapez votre mot de passe", name = "password", validate = () => {} }) => {
+export default function PasswordEye({
+  value,
+  onChange,
+  showError = true,
+  autoComplete = "new-password",
+  placeholder = "Tapez votre mot de passe",
+  name = "password",
+  validate = () => {},
+}) {
   const [passwordText, setPasswordText] = useState(false);
 
   return (
@@ -24,7 +32,7 @@ export default ({ value, onChange, showError = true, autoComplete = "new-passwor
       <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
     </ContainerPassword>
   );
-};
+}
 
 const ContainerPassword = styled.div`
   position: relative;
@@ -38,6 +46,7 @@ const EyeIcon = styled.img`
   right: 15px;
   top: 50%;
   height: 18px;
+  width: 25px;
   opacity: 0.7;
   transform: translateY(-50%);
   font-size: 18px;

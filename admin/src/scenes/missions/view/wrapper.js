@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
-import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
@@ -16,7 +15,7 @@ import Badge from "../../../components/Badge";
 import Title from "../../../components/views/Title";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-export default ({ mission, tab, children }) => {
+export default function Wrapper({ mission, tab, children }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -124,7 +123,7 @@ export default ({ mission, tab, children }) => {
       />
     </div>
   );
-};
+}
 
 const Header = styled.div`
   padding: 0 25px 0;

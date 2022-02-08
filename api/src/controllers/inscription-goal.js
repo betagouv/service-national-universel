@@ -8,9 +8,12 @@ const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
 
-// Update all inscription goals
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  // Validate params.
+// Update all inscription goals for a cohort
+router.post("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  // Validate cohort...
+  const { error: errorCohort, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params);
+  if (errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorCohort });
+  // ... then body
   const { error, value: inscriptionsGoals } = Joi.array()
     .items({
       department: Joi.string().required(),
@@ -18,12 +21,16 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       max: Joi.number().allow(null),
     })
     .validate(req.body, { stripUnknown: true });
-
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
   try {
     const promises = inscriptionsGoals.map((item) => {
-      return InscriptionGoalModel.findOneAndUpdate({ department: item.department }, item, { new: true, upsert: true, useFindAndModify: false });
+      return InscriptionGoalModel.findOneAndUpdate(
+        // 2021 can be empty in database. This could be removed once all data is migrated.
+        { cohort: value.cohort === "2021" ? ["2021", null] : value.cohort, department: item.department },
+        { ...item, cohort: value.cohort },
+        { new: true, upsert: true, useFindAndModify: false },
+      );
     });
     await Promise.all(promises);
     return res.status(200).send({ ok: true });
@@ -33,9 +40,12 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
-router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const data = await InscriptionGoalModel.find({});
+    const { error, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    // 2021 can be empty in database. This could be removed once all data is migrated.
+    const data = await InscriptionGoalModel.find({ cohort: value.cohort === "2021" ? ["2021", null] : value.cohort });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -52,6 +62,21 @@ router.get("/:department/current", passport.authenticate("referent", { session: 
     const yWL = await YoungModel.find({ status: "WAITING_LIST", department: value.department }).count();
     const data = { registered: y2020 + y2021, waitingList: yWL };
     return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/:cohort/department/:department", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  const { error, value } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params);
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+  try {
+    const { department, cohort } = value;
+    const youngCount = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).count();
+    const inscriptionGoal = await InscriptionGoalModel.findOne({ department, cohort });
+    const fillingRate = (youngCount || 0) / (inscriptionGoal.max || 1);
+    return res.status(200).send({ ok: true, data: fillingRate });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

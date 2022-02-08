@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { translate } from "../../../../utils";
 import { CardArrow, Card, CardTitle, CardSection, CardValueWrapper, CardValue, CardPercentage, Subtitle } from "../../../../components/dashboard";
 
-export default ({ sectionTitle, title, obj, filterName, colors, data, getLink, filter }) => {
+export default function StatusMap({ sectionTitle, title, obj, filterName, colors, data, getLink, filter }) {
   const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
   return (
     <>
@@ -37,4 +37,4 @@ export default ({ sectionTitle, title, obj, filterName, colors, data, getLink, f
       </Row>
     </>
   );
-};
+}

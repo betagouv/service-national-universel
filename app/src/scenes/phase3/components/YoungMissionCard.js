@@ -4,8 +4,9 @@ import { useSelector } from "react-redux";
 import { Col, Row } from "reactstrap";
 
 import { translate, YOUNG_STATUS_COLORS, formatStringDateTimezoneUTC } from "../../../utils";
+import Loader from "../../../components/Loader";
 
-export default () => {
+export default function YoungMissionCard() {
   const young = useSelector((state) => state.Auth.young);
   const getTags = () => {
     const tags = [];
@@ -46,7 +47,7 @@ export default () => {
       <Footer young={young} />
     </>
   );
-};
+}
 
 const Footer = ({ young }) => (
   <>

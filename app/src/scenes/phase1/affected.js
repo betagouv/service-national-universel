@@ -6,42 +6,34 @@ import { useSelector } from "react-redux";
 import { HeroContainer, Hero, Content, Separator, AlertBoxInformation } from "../../components/Content";
 import NextStep from "./nextStep";
 import api from "../../services/api";
-import { translate } from "../../utils";
-import DownloadConvocationButton from "../../components/buttons/DownloadConvocationButton";
+import { translate, translateCohort } from "../../utils";
+import ConvocationDetails from "./components/ConvocationDetails";
+import { supportURL } from "../../config";
+import Case from "../../assets/case";
+import Question from "../../assets/question";
+import Bouclier from "../../assets/bouclier";
+import right from "../../assets/right.svg";
 
-import SelectMeetingPoint from "./SelectMeetingPoint";
-import Convocation from "./components/Convocation";
-
-export default () => {
+export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
-  const [showInfoMessage, setShowInfoMessage] = useState(true);
+  const [meetingPoint, setMeetingPoint] = useState();
+  const [showInfoMessage, setShowInfoMessage] = useState(false);
 
-  const isFromDOMTOM = () => {
-    return ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
-      young.department
-    );
-  };
-  const showConvocation = () => {
-    return isFromDOMTOM() || young.meetingPointId || young.deplacementPhase1Autonomous === "true";
-  };
-
-  const goToConvocation = () => {
-    if (document.getElementById) {
-      const yOffset = -70; // header's height
-      const element = document.getElementById("convocationPhase1");
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo(0, y);
-    }
+  const getMeetingPoint = async () => {
+    const { data, ok } = await api.get(`/young/${young._id}/meeting-point`);
+    if (!ok) setMeetingPoint(null);
+    setMeetingPoint(data);
   };
 
   useEffect(() => {
     (async () => {
-      const { data, code, ok } = await api.get(`/cohesion-center/young/${young._id}`);
+      const { data, code, ok } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
       if (!ok) return toastr.error("error", translate(code));
       setCenter(data);
+      getMeetingPoint();
     })();
-  }, []);
+  }, [young]);
 
   if (!center) return <div />;
   return (
@@ -54,105 +46,175 @@ export default () => {
             onClose={() => setShowInfoMessage(false)}
           />
         ) : null}
-        <Hero>
-          <div className="content">
-            <h1>
-              <strong>Mon séjour de cohésion</strong>
-            </h1>
-            <p>
-              Le SNU vous donne l'opportunité de découvrir la vie collective au sein d'un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens nouveaux
-              et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
-            </p>
-            <p>Cette année, il se déroule du 21 juin au 2 juillet 2021. </p>
-            <Separator />
-            <p>
-              <strong>Votre lieu d'affectation</strong>
-              <br />
-              Vous êtes actuellement affecté(e) à un centre de cohésion.
-              <br />
-              <span style={{ color: "#5145cd" }}>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</span>
-            </p>
-            {showConvocation() ? (
-              <>
-                <p>
-                  <a>
-                    <strong style={{ textDecoration: "underline", cursor: "pointer" }} onClick={goToConvocation}>
-                      Voir votre convocation
-                    </strong>
-                  </a>
-                </p>
-                <p>
-                  <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU_-_Réglement_intérieur.pdf" target="blank">
-                    <strong style={{ textDecoration: "underline", cursor: "pointer", color: "#6b7280" }}>Voir règlement intérieur</strong>
-                  </a>
-                </p>
-                <p>
-                  <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Protocole_sanitaire_ACM_avec_hebergement_post_CIC_070621.pdf" target="blank">
-                    <strong style={{ textDecoration: "underline", cursor: "pointer", color: "#6b7280" }}>Voir protocole sanitaire des centres de séjour</strong>
-                  </a>
-                </p>
-              </>
-            ) : null}
+        <Hero style={{ flexDirection: "column" }}>
+          <Section className="hero-container">
+            <section className="content">
+              <h1>
+                <strong>Mon séjour de cohésion </strong>
+                <br /> <span>{translateCohort(young.cohort)}</span>
+              </h1>
+              <p>
+                Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région (sauf exception) pour
+                créer ainsi des liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
+              </p>
+              <Separator style={{ width: "150px" }} />
+              <p>
+                <strong style={{ color: "black" }}>Votre lieu d&apos;affectation</strong>
+                <br />
+                <strong>
+                  <span>Vous êtes actuellement affecté(e) au centre de cohésion de :</span>
+                </strong>
+                <br />
+                <span style={{ color: "#5145cd" }}>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</span>
+              </p>
+            </section>
+            <div className="thumb" />
+          </Section>
+          <Separator style={{ margin: 0 }} />
+          <Protocole href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/protocole-sanitaire-cohesion-2022.pdf" target="_blank" rel="noreferrer">
+            <span>
+              <Bouclier />
+              <p>
+                Protocole sanitaire en vigueur pour les Accueils Collectifs de Mineur
+                <br />
+                <em style={{ fontWeight: "bold" }}>Il est recommandé de réaliser un test PCR, antigénique ou autotest moins de 24h avant le départ en séjour.</em>
+              </p>
+            </span>
+            <img src={right} />
+          </Protocole>
+        </Hero>
+      </HeroContainer>
+      <GoodToKnow>
+        <section className="good-article">
+          <Case />
+          <div className="good-article-text">
+            <p>Dans ma valise, il y a...</p>
+            <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`} target="_blank" rel="noreferrer">
+              Comment bien <span>préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
+            </a>
           </div>
-          <div className="thumb" />
-        </Hero>
-      </HeroContainer>
-      {isFromDOMTOM() ? (
-        <HeroContainer>
-          <Hero>
-            <ContentHorizontal>
-              <div>
-                <h2>Point de rassemblement</h2>
-                <p>Votre point de rassemblement vous sera communiqué par votre service régional</p>
-              </div>
-            </ContentHorizontal>
-          </Hero>
-        </HeroContainer>
-      ) : (
-        <SelectMeetingPoint />
-      )}
-      <NextStep />
-      <HeroContainer>
+        </section>
+        <section className="good-article">
+          <Question />
+          <div className="good-article-text">
+            <p>Vous avez des questions sur le séjour ?</p>
+            <a href={`${supportURL}/base-de-connaissance/phase-1-le-sejour-de-cohesion`} target="_blank" rel="noreferrer">
+              Consulter notre <span>base&nbsp;de&nbsp;connaissance&nbsp;›</span>
+            </a>
+          </div>
+        </section>
+      </GoodToKnow>
+      <HeroContainer id="convocationPhase1">
         <Hero>
-          <ContentHorizontal>
-            <div>
-              <h2>Comment bien préparer votre séjour de cohésion</h2>
-              <p>Consultez le trousseau indicatif pour être sûr(e) de ne rien oublier</p>
-            </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "auto" }}>
-              <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/trousseauIndicatif.pdf">
-                <ContinueButton>Consulter</ContinueButton>
-              </a>
-            </div>
-          </ContentHorizontal>
+          <Content style={{ width: "100%", padding: "3.2rem" }}>
+            <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} />
+          </Content>
         </Hero>
       </HeroContainer>
-      {showConvocation() ? (
-        <HeroContainer id="convocationPhase1">
-          <Hero>
-            <ContentHorizontal>
-              <div>
-                <h2>Votre convocation</h2>
-                <p>
-                  Votre convocation sera à présenter à votre arrivée muni d'une pièce d'identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures
-                  (recommandé)
-                </p>
-              </div>
-              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "auto", padding: "1rem" }}>
-                <ContinueButton>
-                  <DownloadConvocationButton young={young} uri="cohesion">
-                    Télécharger&nbsp;ma&nbsp;convocation
-                  </DownloadConvocationButton>
-                </ContinueButton>
-              </div>
-            </ContentHorizontal>
-          </Hero>
-          <Convocation />
-        </HeroContainer>
-      ) : null}
+      <Documents>Documents à renseigner</Documents>
+      <NextStep />
     </>
   );
-};
+}
+
+const Section = styled.section`
+  display: flex;
+  h1 span {
+    color: #2e2e2e;
+    font-weight: 400;
+  }
+  p span {
+    color: #888888;
+  }
+`;
+
+const Protocole = styled.a`
+  padding: 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  span {
+    display: grid;
+    grid-template-columns: 4rem 2fr;
+    align-items: center;
+    p {
+      color: black;
+      margin-bottom: 0;
+    }
+  }
+  svg {
+    min-width: 2rem;
+    margin-right: 0.5rem;
+  }
+  img {
+    display: none;
+  }
+  @media (min-width: 768px) {
+    span {
+      font-size: 1.2rem;
+    }
+    img {
+      display: block;
+      width: 0.8rem;
+    }
+  }
+`;
+
+const GoodToKnow = styled.article`
+  max-width: 1280px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  .good-article {
+    margin: 2rem;
+    display: flex;
+    align-items: center;
+    &-text {
+      margin-left: 1rem;
+    }
+    svg {
+      min-width: 48px;
+    }
+  }
+  a {
+    color: #6c6c6c;
+  }
+  span {
+    color: #5245cc;
+    text-decoration: underline;
+  }
+  img {
+    width: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  p {
+    margin: 0;
+    color: black;
+    font-weight: bold;
+  }
+  @media (min-width: 1335px) {
+    justify-content: center;
+  }
+  @media (max-width: 360px) {
+    .good-article {
+      flex-direction: column;
+    }
+    svg {
+      margin-bottom: 0.5rem;
+    }
+  }
+`;
+
+const Documents = styled.h2`
+  max-width: 1280px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+  color: #6b7280;
+  font-weight: bold;
+  font-size: 2.25rem;
+`;
 
 const ContentHorizontal = styled(Content)`
   display: flex;
@@ -167,25 +229,5 @@ const ContentHorizontal = styled(Content)`
     margin-top: 0.5rem;
     font-weight: 400;
     cursor: pointer;
-  }
-`;
-
-const ContinueButton = styled.button`
-  color: #fff;
-  background-color: #5145cd;
-  padding: 9px 20px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 1rem;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  display: block;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  :hover {
-    opacity: 0.9;
   }
 `;

@@ -11,6 +11,7 @@ const BoxStyled = styled.div`
   background-color: #fff;
   margin-bottom: 33px;
   border-radius: 8px;
+  box-shadow: 0px 3px 2px #edf2f7;
 `;
 
 export const BoxContent = styled.div`

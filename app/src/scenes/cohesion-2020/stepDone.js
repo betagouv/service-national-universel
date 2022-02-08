@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 
-export default () => {
+export default function Done() {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
 
@@ -27,7 +27,7 @@ export default () => {
       </Footer>
     </Wrapper>
   );
-};
+}
 
 const Logo = styled.div`
   width: 7rem;

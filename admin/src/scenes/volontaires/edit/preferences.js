@@ -1,6 +1,5 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
-import { useSelector } from "react-redux";
 import { MISSION_DOMAINS, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION, PERIOD, TRANSPORT, translate } from "../../../utils";
 import { Box, BoxContent, BoxHeadTitle, BoxTitleCircular } from "../../../components/box";
 import Item from "../components/Item";
@@ -8,9 +7,7 @@ import MultiSelect from "../../../components/Multiselect";
 import Select from "../components/Select";
 import RankingPeriod from "./components/rankingPeriod";
 
-export default ({ values, handleChange, required = {}, errors, touched }) => {
-  const user = useSelector((state) => state.Auth.user);
-
+export default function Preference({ values, handleChange }) {
   return (
     <>
       <Col md={6} style={{ marginBottom: "20px" }}>
@@ -152,7 +149,7 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
       </Col>
     </>
   );
-};
+}
 
 const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder }) => {
   return (

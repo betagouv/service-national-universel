@@ -59,7 +59,7 @@ describe("Cohesion Center", () => {
       passport.user.role = ROLES.RESPONSIBLE;
 
       const res = await request(getAppHelper()).post("/cohesion-center").send(getNewCohesionCenterFixture());
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
 
       passport.user.role = ROLES.ADMIN;
     });
@@ -268,7 +268,7 @@ describe("Cohesion Center", () => {
       res = await request(getAppHelper())
         .get("/cohesion-center/young/" + secondYoung._id)
         .send();
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
 
       passport.user = previous;
     });
@@ -276,16 +276,15 @@ describe("Cohesion Center", () => {
 
   describe("PUT /cohesion-center/:id", () => {
     it("should return 404 when cohesion center is not found", async () => {
-      const res = await request(getAppHelper()).put("/cohesion-center/").send({
-        _id: notExistingCohesionCenterId,
+      const res = await request(getAppHelper()).put("/cohesion-center/" + notExistingCohesionCenterId).send({
+        name: 'newname',
       });
       expect(res.status).toBe(404);
     });
     it("should return 200 when cohesion center is found", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const res = await request(getAppHelper()).put("/cohesion-center/").send({
+      const res = await request(getAppHelper()).put("/cohesion-center/" + cohesionCenter._id).send({
         name: "new name",
-        _id: cohesionCenter._id,
       });
       expect(res.status).toBe(200);
       expect(res.body.data.name).toBe("new name");
@@ -296,10 +295,9 @@ describe("Cohesion Center", () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
       const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), centerId: cohesionCenter._id });
 
-      const res = await request(getAppHelper()).put("/cohesion-center/").send({
+      const res = await request(getAppHelper()).put("/cohesion-center/" + cohesionCenter._id).send({
         name: "new name",
         code: "new code",
-        _id: cohesionCenter._id,
       });
 
       const updatedReferent = await getReferentByIdHelper(referent._id);
@@ -313,10 +311,10 @@ describe("Cohesion Center", () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const res = await request(getAppHelper()).put("/cohesion-center/").send({
-        _id: cohesionCenter._id,
+      const res = await request(getAppHelper()).put("/cohesion-center/" + cohesionCenter._id).send({
+        name: 'nonono',
       });
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
   });
@@ -360,7 +358,7 @@ describe("Cohesion Center", () => {
     const res = await request(getAppHelper())
       .delete("/cohesion-center/" + cohesionCenter._id)
       .send();
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
     passport.user.role = ROLES.ADMIN;
   });
 

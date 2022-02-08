@@ -18,6 +18,7 @@ const {
   CELLAR_KEYID,
   CELLAR_KEYSECRET,
   BUCKET_NAME,
+  PUBLIC_BUCKET_NAME,
   ENVIRONMENT,
   API_ASSOCIATION_CELLAR_ENDPOINT,
   API_ASSOCIATION_CELLAR_KEYID,
@@ -51,6 +52,24 @@ function uploadFile(path, file) {
       Body: file.data,
       ContentEncoding: file.encoding,
       ContentType: file.mimetype,
+      Metadata: { "Cache-Control": "max-age=31536000" },
+    };
+    s3bucket.upload(params, function (err, data) {
+      if (err) return reject(`error in callback:${err}`);
+      resolve(data);
+    });
+  });
+}
+
+function uploadPublicPicture(path, file) {
+  return new Promise((resolve, reject) => {
+    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const params = {
+      Bucket: PUBLIC_BUCKET_NAME,
+      Key: path,
+      Body: file.data,
+      ContentType: file.mimetype,
+      ACL: "public-read",
       Metadata: { "Cache-Control": "max-age=31536000" },
     };
     s3bucket.upload(params, function (err, data) {
@@ -147,9 +166,7 @@ const updatePlacesCenter = async (center) => {
   console.log(`update place center ${center?._id} ${center?.name}`);
   try {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
-    const placesTaken = youngs.filter(
-      (young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED"
-    ).length;
+    const placesTaken = youngs.filter((young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED").length;
     const placesLeft = Math.max(0, center.placesTotal - placesTaken);
     if (center.placesLeft !== placesLeft) {
       console.log(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
@@ -163,6 +180,29 @@ const updatePlacesCenter = async (center) => {
     console.log(e);
   }
   return center;
+};
+
+// first iteration
+// duplicate of updatePlacesCenter
+// we'll remove the updatePlacesCenter function once the migration is done
+const updatePlacesSessionPhase1 = async (sessionPhase1) => {
+  console.log(`update place sessionPhase1 ${sessionPhase1?._id}`);
+  try {
+    const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
+    const placesTaken = youngs.filter((young) => ["AFFECTED", "WAITING_AFFECTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED").length;
+    const placesLeft = Math.max(0, sessionPhase1.placesTotal - placesTaken);
+    if (sessionPhase1.placesLeft !== placesLeft) {
+      console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left from ${sessionPhase1.placesLeft} to ${placesLeft}`);
+      sessionPhase1.set({ placesLeft });
+      await sessionPhase1.save();
+      await sessionPhase1.index();
+    } else {
+      console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left not changed ${sessionPhase1.placesLeft}`);
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  return sessionPhase1;
 };
 
 const updateCenterDependencies = async (center) => {
@@ -213,13 +253,13 @@ const deleteCenterDependencies = async (center) => {
 const updatePlacesBus = async (bus) => {
   console.log(`update bus ${bus.id} - ${bus.idExcel}`);
   try {
-    const meetingPoints = await MeetingPointModel.find({ busId: bus.id });
+    const meetingPoints = await MeetingPointModel.find({ busId: bus.id, cohort: bus.cohort });
     if (!meetingPoints?.length) return console.log("meetingPoints not found");
     const idsMeetingPoints = meetingPoints.map((e) => e._id);
     console.log(`idsMeetingPoints for bus ${bus.id}`, idsMeetingPoints);
     const youngs = await YoungModel.find({
       status: "VALIDATED",
-      statusPhase1: "AFFECTED",
+      statusPhase1: { $in: ["AFFECTED", "WAITING_AFFECTATION", "DONE"] },
       meetingPointId: {
         $in: idsMeetingPoints,
       },
@@ -259,10 +299,10 @@ const sendAutoAffectationMail = async (nextYoung, center) => {
       .replace(/{{centerName}}/, center.name)
       .replace(/{{centerAddress}}/, center.address + " " + center.zip + " " + center.city)
       .replace(/{{centerDepartement}}/, center.department)
-      .replace(/{{ctaAccept}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
-      .replace(/{{ctaDocuments}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
-      .replace(/{{ctaWithdraw}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1"),
-    { cc }
+      .replace(/{{ctaAccept}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
+      .replace(/{{ctaDocuments}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
+      .replace(/{{ctaWithdraw}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1"),
+    { cc },
   );
 };
 
@@ -282,7 +322,7 @@ const sendAutoCancelMeetingPoint = async (young) => {
       .replace(/{{firstName}}/, young.firstName)
       .replace(/{{lastName}}/, young.lastName)
       .replace(/{{cta}}/g, `${APP_URL}/auth/login?redirect=phase1`),
-    { cc }
+    { cc },
   );
 };
 
@@ -302,7 +342,7 @@ const sendAutoAffectationNotFoundMails = async (to, young, center) => {
       .replace(/{{youngFirstName}}/, young.firstName)
       .replace(/{{youngLastName}}/, young.lastName)
       .replace(/{{centerName}}/, center.name)
-      .replace(/{{cta}}/, `${ADMIN_URL}/auth?redirect=centre/${center._id}/affectation`)
+      .replace(/{{cta}}/, `${ADMIN_URL}/auth?redirect=centre/${center._id}/affectation`),
   );
 };
 
@@ -370,13 +410,13 @@ async function updateYoungPhase2Hours(young) {
       applications
         .filter((application) => application.status === "DONE")
         .map((application) => Number(application.missionDuration || 0))
-        .reduce((acc, current) => acc + current, 0)
+        .reduce((acc, current) => acc + current, 0),
     ),
     phase2NumberHoursEstimated: String(
       applications
         .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
         .map((application) => Number(application.missionDuration || 0))
-        .reduce((acc, current) => acc + current, 0)
+        .reduce((acc, current) => acc + current, 0),
     ),
   });
   await young.save();
@@ -429,6 +469,48 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
+async function updateApplicationsWithYoungOrMission({ young, newYoung, mission, newMission }) {
+  if (young && Object.keys(young).length !== 0) {
+    const noNeedToUpdate = isObjectKeysIsEqual(young, newYoung, ["firstName", "lastName", "email", "birthdateAt", "city", "department", "cohort"]);
+    if (noNeedToUpdate) return;
+
+    const applications = await ApplicationModel.find({ youngId: young._id });
+    for (const application of applications) {
+      application.youngFirstName = newYoung.firstName;
+      application.youngLastName = newYoung.lastName;
+      application.youngEmail = newYoung.email;
+      application.youngBirthdateAt = newYoung.birthdateAt;
+      application.youngCity = newYoung.city;
+      application.youngDepartment = newYoung.department;
+      application.youngCohort = newYoung.cohort;
+      await application.save();
+      console.log(`Update application ${application._id}`);
+    }
+  } else if (mission && Object.keys(mission).length !== 0) {
+    const noNeedToUpdate = isObjectKeysIsEqual(mission, newMission, ["name", "department", "region"]);
+    console.log(noNeedToUpdate);
+    if (noNeedToUpdate) return;
+
+    const applications = await ApplicationModel.find({ missionId: mission._id });
+    for (const application of applications) {
+      application.missionName = newMission.name;
+      application.missionDepartment = newMission.department;
+      application.missionRegion = newMission.region;
+      await application.save();
+      console.log(`Update application ${application._id}`);
+    }
+  }
+}
+
+const isObjectKeysIsEqual = (object, newObject, keys) => {
+  for (const key of keys) {
+    if (object[key] !== newObject[key] && Date.parse(object[key]) !== Date.parse(newObject[key])) {
+      return false;
+    }
+  }
+  return true;
+};
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -450,6 +532,7 @@ const ERRORS = {
   PASSWORD_INVALID: "PASSWORD_INVALID",
   EMAIL_INVALID: "EMAIL_INVALID",
   EMAIL_AND_PASSWORD_REQUIRED: "EMAIL_AND_PASSWORD_REQUIRED",
+  EMAIL_ALREADY_USED: "EMAIL_ALREADY_USED",
   PASSWORDS_NOT_MATCH: "PASSWORDS_NOT_MATCH",
   USER_NOT_EXISTS: "USER_NOT_EXISTS",
   NEW_PASSWORD_IDENTICAL_PASSWORD: "NEW_PASSWORD_IDENTICAL_PASSWORD",
@@ -458,12 +541,14 @@ const ERRORS = {
 
 module.exports = {
   uploadFile,
+  uploadPublicPicture,
   getFile,
   fileExist,
   validatePassword,
   ERRORS,
   getSignedUrl,
   updatePlacesCenter,
+  updatePlacesSessionPhase1,
   updateCenterDependencies,
   deleteCenterDependencies,
   assignNextYoungFromWaitingList,
@@ -480,4 +565,5 @@ module.exports = {
   updateYoungPhase2Hours,
   updateStatusPhase2,
   getSignedUrlForApiAssociation,
+  updateApplicationsWithYoungOrMission,
 };

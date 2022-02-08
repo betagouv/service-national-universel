@@ -8,7 +8,7 @@ import SelectStatus from "../../../components/selectStatus";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
 
-export default ({ young }) => {
+export default function Phase3({ young }) {
   const getText = () => {
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.WAITING_VALIDATION) return "Le tuteur n'a pas encore validé la mission";
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) return "Le tuteur a validé la mission";
@@ -21,7 +21,14 @@ export default ({ young }) => {
           <Bloc title="Réalisation d'une nouvelle mission d'intérêt général">
             <div style={{ display: "flex" }}>
               <p style={{ flex: 1 }}>Le volontaire doit réaliser sa phase 3 avant ses 25 ans.</p>
-              {young.statusPhase3 ? <SelectStatus hit={young} statusName="statusPhase3" phase={YOUNG_PHASE.CONTINUE} options={Object.keys(YOUNG_STATUS_PHASE3)} /> : null}
+              {young.statusPhase3 ? (
+                <SelectStatus
+                  hit={young}
+                  statusName="statusPhase3"
+                  phase={YOUNG_PHASE.CONTINUE}
+                  options={Object.keys(YOUNG_STATUS_PHASE3).filter((e) => e !== YOUNG_STATUS_PHASE3.WITHDRAWN)}
+                />
+              ) : null}
             </div>
           </Bloc>
         </Box>
@@ -48,13 +55,13 @@ export default ({ young }) => {
         ) : null}
         {young.statusPhase3 === "VALIDATED" ? (
           <DownloadAttestationButton young={young} uri="3">
-            Télécharger l'attestation de réalisation de la phase 3
+            Télécharger l&apos;attestation de réalisation de la phase 3
           </DownloadAttestationButton>
         ) : null}
       </WrapperPhase3>
     </div>
   );
-};
+}
 
 const Details = ({ title, value }) => {
   if (!value) return <div />;
@@ -75,8 +82,7 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}
-    >
+      }}>
       <Wrapper>
         <div style={{ display: "flex" }}>
           <BoxTitle>{title}</BoxTitle>

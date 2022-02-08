@@ -3,10 +3,10 @@ import { Switch, Route } from "react-router-dom";
 
 import List from "./list";
 
-export default () => {
+export default function Index() {
   return (
     <Switch>
       <Route path="/association" component={List} />
     </Switch>
   );
-};
+}

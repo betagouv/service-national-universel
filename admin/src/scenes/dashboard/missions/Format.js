@@ -4,7 +4,7 @@ import CircularProgress, { CircularLine, CircularLineIndex } from "../components
 import { translate, FORMAT } from "../../../utils";
 import { Box, BoxTitleCircular as BoxTitle } from "../../../components/box";
 
-export default ({ youngsFormat, missionsFormat }) => {
+export default function Format({ youngsFormat, missionsFormat }) {
   const totalMissions = Object.keys(missionsFormat).reduce((acc, a) => acc + missionsFormat[a], 0);
   const totalYoungs = Object.keys(youngsFormat).reduce((acc, a) => acc + youngsFormat[a], 0);
 
@@ -55,4 +55,4 @@ export default ({ youngsFormat, missionsFormat }) => {
       </Box>
     </React.Fragment>
   );
-};
+}

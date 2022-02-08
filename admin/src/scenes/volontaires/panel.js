@@ -1,18 +1,33 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate } from "../../utils";
+import {
+  YOUNG_SITUATIONS,
+  translate as t,
+  YOUNG_STATUS,
+  isInRuralArea,
+  getAge,
+  formatDateFRTimezoneUTC,
+  formatStringLongDate,
+  getLabelWithdrawnReason,
+  ROLES,
+  colors,
+} from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
+import ActionButtonArchive from "../../components/buttons/ActionButtonArchive";
+import plausibleEvent from "../../services/pausible";
 
-export default ({ onChange, value }) => {
+export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -47,21 +62,31 @@ export default ({ onChange, value }) => {
             Né(e) le {formatDateFRTimezoneUTC(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
           </div>
         )}
-        <div style={{ display: "flex" }}>
-          <Link to={`/volontaire/${young._id}`}>
+        {young.birthCity && young.birthCountry ? (
+          <div>
+            à {young.birthZip} {young.birthCity}, {young.birthCountry}
+          </div>
+        ) : null}
+        <div style={{ display: "flex", flexWrap: "wrap" }}>
+          <Link to={`/volontaire/${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
-          <Link to={`/volontaire/${young._id}/edit`}>
+          <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
+          <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+            <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+          </a>
+          {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
         </div>
-        <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
-          <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-        </a>
         <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
+        <Link to={`/user?DEPARTMENT=%5B"${young.department}"%5D&ROLE=%5B"${ROLES.REFERENT_DEPARTMENT}"%5D`}>
+          <TextButton>Voir équipe de référents ({young.department}) ›</TextButton>
+        </Link>
       </div>
       {young.status === YOUNG_STATUS.WITHDRAWN ? (
         <Info title="Motif du désistement">
+          {young.withdrawnReason ? <div className="quote">{getLabelWithdrawnReason(young.withdrawnReason)}</div> : null}
           <div className="quote">{young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
         </Info>
       ) : null}
@@ -73,21 +98,21 @@ export default ({ onChange, value }) => {
                 .sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0))
                 .map((a, i) => <ApplicationDetails key={a._id} application={a} i={i + 1} />)}
             <Link to={`/volontaire/${young._id}/phase2`}>
-              <div style={{ textAlign: "center", color: "#5245cc" }}>{"Voir toutes ses candidatures >"}</div>
+              <TextButton>Voir toutes ses candidatures ›</TextButton>
             </Link>
           </>
         ) : (
-          <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>
+          <NoResult>Aucune candidature n&apos;est liée à ce volontaire.</NoResult>
         )}
         <Details title="Contact phase 2" value={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
       </Info>
       <Info title="Coordonnées" id={young._id}>
         <Details title="E-mail" value={young.email} copy />
         <Details title="Tel" value={young.phone} />
-        <Details title="Région" value={young.region} />
-        <Details title="Dép" value={young.department} />
-        <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
         <Details title="Adresse" value={young.address} />
+        <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
+        <Details title="Dép" value={young.department} />
+        <Details title="Région" value={young.region} />
       </Info>
       <Info title="Situation" id={young._id}>
         <Details
@@ -120,13 +145,41 @@ export default ({ onChange, value }) => {
         <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
         <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
         <Details title="Handicap" value={t(young.handicap)} />
+        <Details title="Allergies" value={t(young.allergies)} />
         <Details title="PPS" value={t(young.ppsBeneficiary)} />
         <Details title="PAI" value={t(young.paiBeneficiary)} />
-        <Details title="Suivi médicosociale" value={t(young.medicosocialStructure)} />
-        <Details title="Aménagement spécifique" value={t(young.specificAmenagment)} />
+        <Details title="Suivi médicosocial" value={t(young.medicosocialStructure)} />
+        <Details title="Aménagement spécifique" value={t(young.specificAmenagment) || "Non"} />
+        <Details title="Aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess) || "Non"} />
+        <Details title="Affecté dans son département de résidence" value={t(young.handicapInSameDepartment) || "Non"} />
         <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
+        <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment) || "Non"} />
       </Info>
-      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
+      <Info title="Représentant légal n°1" id={young._id}>
+        <Details title="Statut" value={t(young.parent1Status)} />
+        <Details title="Prénom" value={young.parent1FirstName} />
+        <Details title="Nom" value={young.parent1LastName} />
+        <Details title="E-mail" value={young.parent1Email} />
+        <Details title="Tel" value={young.parent1Phone} />
+        <Details title="Adresse" value={young.parent1Address} />
+        <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
+        <Details title="Dép" value={young.parent1Department} />
+        <Details title="Région" value={young.parent1Region} />
+      </Info>
+      {young.parent2Status && (
+        <Info title="Représentant légal n°2" id={young._id}>
+          <Details title="Statut" value={t(young.parent2Status)} />
+          <Details title="Prénom" value={young.parent2FirstName} />
+          <Details title="Nom" value={young.parent2LastName} />
+          <Details title="E-mail" value={young.parent2Email} />
+          <Details title="Tel" value={young.parent2Phone} />
+          <Details title="Adresse" value={young.parent2Address} />
+          <Details title="Ville" value={young.parent2City && young.parent2Zip && `${young.parent2City} (${young.parent2Zip})`} />
+          <Details title="Dép" value={young.parent2Department} />
+          <Details title="Région" value={young.parent2Region} />
+        </Info>
+      )}
+      <div className="info">{young?.historic?.length > 0 && <Historic value={young.historic} />}</div>
       {young.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>
@@ -135,7 +188,7 @@ export default ({ onChange, value }) => {
       )}
     </Panel>
   );
-};
+}
 
 const ApplicationDetails = ({ application, i }) => {
   const history = useHistory();
@@ -154,9 +207,8 @@ const ApplicationDetails = ({ application, i }) => {
           style={{ margin: 0 }}
           onClick={() => {
             history.push(`/volontaire/${application.youngId}/phase2/application/${application._id}/contrat`);
-          }}
-        >
-          Contrat d'engagement &gt;
+          }}>
+          Contrat d&apos;engagement &gt;
         </ContractLink>
       ) : null}
     </div>
@@ -167,4 +219,15 @@ const NoResult = styled.div`
   text-align: center;
   font-style: italic;
   margin: 1rem;
+`;
+
+const TextButton = styled.div`
+  margin: 0.5rem;
+  text-align: center;
+  color: ${colors.purple};
+  :hover {
+    cursor: pointer;
+    color: ${colors.purple};
+    text-decoration: underline;
+  }
 `;

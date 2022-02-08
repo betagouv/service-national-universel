@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+import plausibleEvent from "../../services/pausible";
 
 import SelectStatusApplication from "../../components/selectStatusApplication";
 import api from "../../services/api";
@@ -19,7 +20,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
-export default () => {
+export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState();
   const [panel, setPanel] = useState(null);
@@ -77,6 +78,7 @@ export default () => {
                 <Title>Volontaires</Title>
               </div>
               <ExportComponent
+                handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
                 defaultQuery={getExportQuery}
                 title="Exporter les volontaires"
                 exportTitle="Volontaires"
@@ -213,7 +215,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, selected, mission }) => {
   const history = useHistory();
@@ -253,7 +255,7 @@ const Hit = ({ hit, onClick, selected, mission }) => {
           {mission.placesTotal - mission.placesLeft} / {mission.placesTotal}
         </div>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>
+      <td>
         <SelectStatusApplication
           hit={hit}
           callback={(status) => {
@@ -266,9 +268,8 @@ const Hit = ({ hit, onClick, selected, mission }) => {
           <ContractLink
             onClick={() => {
               history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id}/contrat`);
-            }}
-          >
-            Contrat d'engagement &gt;
+            }}>
+            Contrat d&apos;engagement &gt;
           </ContractLink>
         ) : null}
       </td>

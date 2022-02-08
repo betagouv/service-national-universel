@@ -18,8 +18,10 @@ function cookieOptions() {
 function logoutCookieOptions() {
   if (config.ENVIRONMENT === "development") {
     return { httpOnly: true, secure: false };
-  } else {
+  } else if (config.ENVIRONMENT === "staging") {
     return { httpOnly: true, secure: true, sameSite: "none" };
+  } else {
+    return { httpOnly: true, secure: true, domain: ".snu.gouv.fr", sameSite: "Lax" };
   }
 }
 

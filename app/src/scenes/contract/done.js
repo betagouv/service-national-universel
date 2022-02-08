@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import { Box } from "../../components/box";
 
-export default () => {
+export default function Validated() {
   return (
     <div>
       <div style={{ display: "flex" }}>
@@ -13,15 +13,15 @@ export default () => {
         <Box style={{ margin: "auto", maxWidth: "600px" }}>
           <ContractContainer>
             <div style={{ textAlign: "center", marginTop: "-1rem" }}>
-              <h2>Contrat d'engagement validé</h2>
-              <p>Merci d'avoir pris le temps de valider le contrat d'engagement en mission d'intérêt général du volontaire.</p>
+              <h2>Contrat d&apos;engagement validé</h2>
+              <p>Merci d&apos;avoir pris le temps de valider le contrat d&apos;engagement en mission d&apos;intérêt général du volontaire.</p>
             </div>
           </ContractContainer>
         </Box>
       </div>
     </div>
   );
-};
+}
 
 const ContractContainer = styled.div`
   font-size: 1rem;

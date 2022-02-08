@@ -10,7 +10,18 @@ import SelectStatusApplication from "../../../components/selectStatusApplication
 import api from "../../../services/api";
 import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
-import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT, colors, SENDINBLUE_TEMPLATES, ROLES } from "../../../utils";
+import {
+  formatStringLongDate,
+  formatLongDateUTC,
+  formatLongDateUTCWithoutTime,
+  getFilterLabel,
+  translate,
+  getAge,
+  ES_NO_LIMIT,
+  colors,
+  SENDINBLUE_TEMPLATES,
+  ROLES,
+} from "../../../utils";
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
@@ -21,7 +32,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
-export default ({ mission, applications }) => {
+export default function Youngs({ mission, applications }) {
   const [missionTemp, setMissionTemp] = useState(mission);
   const [young, setYoung] = useState();
   const handleClick = async (application) => {
@@ -76,6 +87,7 @@ export default ({ mission, applications }) => {
                         Prénom: data.youngFirstName,
                         Nom: data.youngLastName,
                         Email: data.youngEmail,
+                        "Date de naissance": formatLongDateUTCWithoutTime(data.youngBirthdateAt),
                         Téléphone: data.young.phone,
                         "Adresse du volontaire": data.young.address,
                         "Code postal du volontaire": data.young.zip,
@@ -95,8 +107,8 @@ export default ({ mission, applications }) => {
                         "Nom de la mission": data.missionName,
                         "Département de la mission": data.missionDepartment,
                         "Région de la mission": data.missionRegion,
-                        "Candidature créée lé": data.createdAt,
-                        "Candidature mise à jour le": data.updatedAt,
+                        "Candidature créée lé": formatLongDateUTC(data.createdAt),
+                        "Candidature mise à jour le": formatLongDateUTC(data.updatedAt),
                         "Statut de la candidature": translate(data.status),
                       };
                     });
@@ -176,7 +188,7 @@ export default ({ mission, applications }) => {
       </div>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -202,9 +214,8 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
           <ContractLink
             onClick={() => {
               history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id}/contrat`);
-            }}
-          >
-            Contrat d'engagement &gt;
+            }}>
+            Contrat d&apos;engagement &gt;
           </ContractLink>
         ) : null}
         {hit.status === "WAITING_VALIDATION" && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role) && (
@@ -225,8 +236,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
                     }
                   },
                 });
-              }}
-            >
+              }}>
               ✉️ Renvoyer un mail à la structure
             </CopyLink>
             <ModalConfirm
@@ -259,8 +269,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
                     }
                   },
                 });
-              }}
-            >
+              }}>
               ✉️ Envoyer un rappel au volontaire
             </CopyLink>
             <ModalConfirm

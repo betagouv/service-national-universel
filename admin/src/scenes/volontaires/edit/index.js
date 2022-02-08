@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
+import { Row } from "reactstrap";
 import { Formik } from "formik";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -8,12 +8,14 @@ import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
+import plausibleEvent from "../../../services/pausible";
 
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import { translate, ROLES } from "../../../utils";
 import api from "../../../services/api";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { appURL, environment } from "../../../config";
+import ActionButtonArchive from "../../../components/buttons/ActionButtonArchive";
+import { appURL } from "../../../config";
 import Loader from "../../../components/Loader";
 
 import DeleteButton from "../components/DeleteButton";
@@ -29,13 +31,14 @@ import Preferences from "./preferences";
 import Consentement from "./consentement";
 import ConsentementImage from "./consentement-image";
 import ConsentementPCR from "./consentement-pcr";
+import Rules from "./rules";
 import InformationsSupplementaires from "./informations-supplementaires";
 import MilitaryPreparation from "./military-preparation";
 import JDC from "./JDC";
 import CohesionCenter from "./cohesion-center";
 import MeetingPoint from "./meeting-point";
 
-export default (props) => {
+export default function VolontaireEdit(props) {
   const [young, setYoung] = useState();
   const user = useSelector((state) => state.Auth.user);
 
@@ -62,18 +65,19 @@ export default (props) => {
     <Wrapper>
       <Formik
         initialValues={young}
+        validateOnChange={false}
+        validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
+            const { ok, code } = await api.put(`/referent/young/${values._id}`, values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, isSubmitting, validateField, errors, touched, setFieldValue }) => (
           <>
             <TitleWrapper>
               <div>
@@ -81,10 +85,11 @@ export default (props) => {
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
               <div style={{ display: "flex" }}>
+                {user.role === ROLES.ADMIN ? <ActionButtonArchive young={values} /> : null}
                 <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
                   <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                 </a>
-                <Link to={`/volontaire/${young._id}`}>
+                <Link to={`/volontaire/${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
                   <PanelActionButton icon="eye" title="Consulter" />
                 </Link>
                 <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
@@ -92,11 +97,14 @@ export default (props) => {
                 </LoadingButton>
               </div>
             </TitleWrapper>
+            {Object.values(errors).filter((e) => !!e).length ? (
+              <Alert>Vous ne pouvez pas enregistrer ce volontaires car tous les champs ne sont pas correctement renseignés.</Alert>
+            ) : null}
             <Row>
               <Identite values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <Historic young={young} />
-              <Coordonnees values={values} handleChange={handleChange} />
-              <Situation values={values} handleChange={handleChange} />
+              <Coordonnees values={values} handleChange={handleChange} validateField={validateField} errors={errors} touched={touched} />
+              <Situation values={values} handleChange={handleChange} setFieldValue={setFieldValue} errors={errors} touched={touched} />
               <SituationsParticulieres values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <Motivation values={values} />
             </Row>
@@ -114,6 +122,7 @@ export default (props) => {
               <Consentement values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <ConsentementImage values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <ConsentementPCR values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
+              <Rules values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>
             <Row>
               <InterTitle>Séjour de cohésion</InterTitle>
@@ -132,6 +141,9 @@ export default (props) => {
             <Row>
               <MilitaryPreparation values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>
+            {Object.values(errors).filter((e) => !!e).length ? (
+              <Alert>Vous ne pouvez pas enregistrer ce volontaires car tous les champs ne sont pas correctement renseignés.</Alert>
+            ) : null}
             <TitleWrapper>
               <DeleteButton young={young} />
               <div style={{ display: "flex" }}>
@@ -151,7 +163,7 @@ export default (props) => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 20px 40px;
@@ -170,6 +182,17 @@ const InterTitle = styled.h2`
   font-weight: 450;
   font-size: 0.9rem;
   text-transform: uppercase;
+`;
+
+const Alert = styled.h3`
+  border: 1px solid #fc8181;
+  border-radius: 0.25em;
+  background-color: #fff5f5;
+  color: #c53030;
+  font-weight: 400;
+  font-size: 12px;
+  padding: 1em;
+  text-align: center;
 `;
 
 const Title = styled.h2`

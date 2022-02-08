@@ -9,7 +9,7 @@ const getInitials = (word = "") => {
     .substring(0, 3);
 };
 
-export default ({ name, logo, size = "medium", onClick, menuOpened }) => {
+export default function Avatar({ name, logo, size = "medium", onClick, menuOpened }) {
   if (!logo) {
     return (
       <Round size={size} onClick={onClick} menuOpened={menuOpened}>
@@ -24,7 +24,7 @@ export default ({ name, logo, size = "medium", onClick, menuOpened }) => {
       </span>
     </Round>
   );
-};
+}
 
 const Round = styled.div`
   width: ${({ size }) => {

@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import api from "../../../services/api";
-import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
@@ -16,8 +15,10 @@ import Tab from "../../../components/views/Tab";
 import Title from "../../../components/views/Title";
 import { appURL } from "../../../config";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ActionButtonArchive from "../../../components/buttons/ActionButtonArchive";
+import plausibleEvent from "../../../services/pausible";
 
-export default ({ children, young, tab }) => {
+export default function Wrapper({ children, young, tab }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -79,13 +80,14 @@ export default ({ children, young, tab }) => {
               </Col>
             </Row>
             <Row style={{ marginTop: "0.5rem" }}>
-              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
+              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
                 <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
               </a>
-              <Link to={`/volontaire/${young._id}/edit`}>
+              <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
                 <PanelActionButton icon="pencil" title="Modifier" />
               </Link>
               <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+              {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
             </Row>
           </Col>
         </Row>
@@ -103,7 +105,7 @@ export default ({ children, young, tab }) => {
       />
     </div>
   );
-};
+}
 
 const Header = styled.div`
   padding: 0 25px 0;

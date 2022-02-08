@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { Col, Container, CustomInput, Row } from "reactstrap";
 import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
@@ -12,7 +11,7 @@ import api from "../../services/api";
 
 const FILTERS = ["DOMAIN", "SEARCH"];
 
-export default () => {
+export default function MissionsComponent() {
   return (
     <div>
       <Missions>
@@ -77,7 +76,7 @@ export default () => {
             //     ],
             //   };
             // }}
-            renderResultStats={({ numberOfResults, time }) => {
+            renderResultStats={() => {
               return <div />;
               // return <div className="results">{`${numberOfResults} résultats trouvés en ${time}ms`}</div>;
             }}
@@ -89,7 +88,7 @@ export default () => {
       </Missions>
     </div>
   );
-};
+}
 
 const Filters = styled(Row)`
   > * {
@@ -168,22 +167,6 @@ const Heading = styled.div`
     @media (max-width: 1000px) {
       font-size: 0.8rem;
     }
-  }
-`;
-
-const Modifybutton = styled(Link)`
-  border: 1px solid #d2d6dc;
-  padding: 10px 15px 10px 30px;
-  color: #3d4151;
-  font-size: 12px;
-  border-radius: 4px;
-  background: url(${require("../../assets/pen.svg")}) left 5px center no-repeat;
-  background-size: 18px;
-  position: absolute;
-  right: 40px;
-  top: 20px;
-  :hover {
-    color: #333;
   }
 `;
 

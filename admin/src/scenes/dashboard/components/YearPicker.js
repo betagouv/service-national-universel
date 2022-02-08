@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ options, value, onChange }) => {
+export default function YearPicker({ options, value, onChange }) {
   return (
     <YearPickerWrapper>
       {options.map(({ key, label }) => {
@@ -13,7 +13,7 @@ export default ({ options, value, onChange }) => {
       })}
     </YearPickerWrapper>
   );
-};
+}
 
 const YearPickerWrapper = styled.div`
   display: flex;

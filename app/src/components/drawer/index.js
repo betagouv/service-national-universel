@@ -1,23 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, Link } from "react-router-dom";
 import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
-import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
 
-import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, permissionPhase1, permissionPhase2, permissionPhase3, translate } from "../../utils";
+import { YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, permissionPhase1, permissionPhase2, permissionPhase3 } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
-import DownloadAttestationButton from "../buttons/DownloadAttestationButton";
 import SubMenuPhase2 from "./SubMenuPhase2";
 import SubMenuPhase3 from "./SubMenuPhase3";
 import { environment } from "../../config";
-import ModalConfirm from "../../components/modals/ModalConfirm";
-import ModalConfirmWithMessage from "../../components/modals/ModalConfirmWithMessage";
-import api from "../../services/api";
-import { setYoung } from "../../redux/auth/actions";
-import QuestionMark from "../../assets/QuestionMark";
+import HelpButton from "../buttons/HelpButton";
+import plausibleEvent from "../../services/plausible";
 
-export default (props) => {
+export default function Drawer(props) {
   const [open, setOpen] = useState();
   const [status1, setStatus1] = useState(PHASE_STATUS.IN_COMING);
   const [status2, setStatus2] = useState(PHASE_STATUS.IN_COMING);
@@ -38,20 +33,27 @@ export default (props) => {
   }, [props.open]);
 
   useEffect(() => {
-    // if the young is not validated yet
-
     if (young.status === YOUNG_STATUS.WITHDRAWN) {
-      setStatus1(young.status);
-      setStatus2(young.status);
-      setStatus3(young.status);
+      setStatus1(young.statusPhase1);
+      setStatus2(young.statusPhase2);
+      setStatus3(young.statusPhase3);
     }
 
+    // si le jeune n'est pas validé, ni désisté
+    // -> on ne le considère pas encore dans le snu et on affiche donc les status "IN_COMING"
+    // ou les status lié au moment de son désistement
     if (young.status !== YOUNG_STATUS.VALIDATED) return;
 
     young.statusPhase1 && setStatus1(young.statusPhase1);
-    if (young.phase === YOUNG_PHASE.COHESION_STAY || young.phase === YOUNG_PHASE.INSCRIPTION) return;
+    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) {
+      setStatus2(YOUNG_STATUS_PHASE2.WITHDRAWN);
+      setStatus3(YOUNG_STATUS_PHASE3.WITHDRAWN);
+      return;
+    }
+    if (![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) return;
 
     young.statusPhase2 && setStatus2(young.statusPhase2);
+    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) return setStatus3(YOUNG_STATUS_PHASE3.WITHDRAWN);
     if (young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED) return;
 
     young.statusPhase3 && setStatus3(young.statusPhase3);
@@ -102,8 +104,7 @@ export default (props) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6"
-              ></path>
+                d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6"></path>
             </svg>
           </div>
           Accueil
@@ -117,8 +118,7 @@ export default (props) => {
             to="/phase1"
             disabled={getDisabled(DRAWER_TABS.PHASE1)}
             handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
-            open={activeTab === DRAWER_TABS.PHASE1}
-          >
+            open={activeTab === DRAWER_TABS.PHASE1}>
             {/* <ul className="subNav">
               {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
                 <li>
@@ -137,8 +137,7 @@ export default (props) => {
             to="/phase2"
             disabled={getDisabled(DRAWER_TABS.PHASE2)}
             handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}
-            open={activeTab === DRAWER_TABS.PHASE2}
-          >
+            open={activeTab === DRAWER_TABS.PHASE2}>
             <SubMenuPhase2 young={young} handleClick={handleClick} />
           </Item>
           <Item
@@ -149,8 +148,7 @@ export default (props) => {
             to="/phase3"
             disabled={getDisabled(DRAWER_TABS.PHASE3)}
             handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}
-            open={activeTab === DRAWER_TABS.PHASE3}
-          >
+            open={activeTab === DRAWER_TABS.PHASE3}>
             <SubMenuPhase3 young={young} handleClick={handleClick} />
           </Item>
         </MainNav>
@@ -166,7 +164,12 @@ export default (props) => {
             Mes documents
           </NavLink>
         </li> */}
-            <HelpButton to="/besoin-d-aide" />
+            <HelpButton
+              to={`/besoin-d-aide?from=${window.location.pathname}`}
+              onClick={() => {
+                plausibleEvent("Compte/CTA - Aide", { url: decodeURIComponent(window.location.search).split("?from=")[1] });
+              }}
+            />
             {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
             <DrawerButton>
               <DownloadAttestationButton young={young} uri="snu">
@@ -174,7 +177,7 @@ export default (props) => {
               </DownloadAttestationButton>
             </DrawerButton>
           ) : null} */}
-            {young.status === YOUNG_STATUS.VALIDATED ? (
+            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) ? (
               <DrawerButton>
                 <DeleteAccountButton young={young} />
               </DrawerButton>
@@ -185,7 +188,7 @@ export default (props) => {
               <DiagorienteButton>
                 <NavLink to="/diagoriente" onClick={(event) => handleClick(event, DRAWER_TABS.HOME)}>
                   <img src={require("../../assets/logo-diagoriente-white.png")} />
-                  Outil d'aide à l'orientation
+                  Outil d&apos;aide à l&apos;orientation
                 </NavLink>
               </DiagorienteButton>
             )}
@@ -195,72 +198,13 @@ export default (props) => {
       </Sidebar>
     </>
   );
-};
-
-const HelpButton = ({ to }) => (
-  <div className="help-button-container">
-    <NavLink className="help-button" to={to}>
-      <QuestionMark className="icon" />
-      <div className="help-button-text">
-        <div className="help-button-text-primary">Besoin d'aide ?</div>
-        <div className="help-button-text-secondary">Tutoriels, contacts</div>
-      </div>
-    </NavLink>
-  </div>
-);
+}
 
 const DeleteAccountButton = ({ young }) => {
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const [modalConfirmWithMessage, setModalConfirmWithMessage] = useState({ isOpen: false, onConfirm: null });
   const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
   const getLabel = () => (mandatoryPhasesDone ? "Supprimer mon compte" : "Se désister du SNU");
-  const dispatch = useDispatch();
 
-  const onConfirm = async (status, note) => {
-    young.historic.push({ phase: young.phase, userName: `${young.firstName} ${young.lastName}`, userId: young._id, status, note });
-    young.status = status;
-    if (note) young.withdrawnMessage = note;
-    young.lastStatusAt = Date.now();
-    try {
-      const { ok, code, data } = await api.put(`/young`, young);
-      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
-      logout();
-    } catch (e) {
-      console.log(e);
-      toastr.error("Oups, une erreur est survenue :", translate(e.code));
-    }
-  };
-
-  async function logout() {
-    await api.post(`/young/logout`);
-    dispatch(setYoung(null));
-  }
-
-  return (
-    <>
-      <div onClick={mandatoryPhasesDone ? () => setModal({ isOpen: true }) : () => setModalConfirmWithMessage({ isOpen: true })}>{getLabel()}</div>
-      <ModalConfirm
-        isOpen={modal?.isOpen}
-        title="Suppression du compte SNU"
-        message="Vous êtes sur le point de supprimer votre compte. Vous serez immédiatement déconnecté(e). Souhaitez-vous réellement supprimer votre compte ?"
-        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={() => {
-          onConfirm(YOUNG_STATUS.DELETED);
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-      />
-      <ModalConfirmWithMessage
-        isOpen={modalConfirmWithMessage.isOpen}
-        title="Désistement du SNU"
-        message="Veuillez précisez le motif de votre désistement ci-dessous avant de valider."
-        onChange={() => setModalConfirmWithMessage({ isOpen: false, data: null })}
-        onConfirm={(msg) => {
-          onConfirm(YOUNG_STATUS.WITHDRAWN, msg);
-          setModalConfirmWithMessage({ isOpen: false, onConfirm: null });
-        }}
-      />
-    </>
-  );
+  return <Link to="/desistement">{getLabel()}</Link>;
 };
 
 const SocialMedia = () => {
@@ -281,11 +225,13 @@ const SocialMedia = () => {
   return (
     <IconsBar>
       {medias.map((el, index) => (
-        <IconContainer key={index} onClick={() => window.open(el.link, "_blank").focus()}>
-          <svg width="24" height="24" viewBox="0 0 24 24">
-            <path d={el.svg}></path>
-          </svg>
-        </IconContainer>
+        <a key={index} href={el.link} target="_blank" style={{ decoration: "none", borderRadius: "100%", padding: "0" }} rel="noreferrer">
+          <IconContainer>
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path d={el.svg}></path>
+            </svg>
+          </IconContainer>
+        </a>
       ))}
     </IconsBar>
   );
@@ -463,43 +409,6 @@ const MyNav = styled.ul`
     font-size: 0.75rem;
     padding: 12px 15px;
     border-radius: 6px;
-  }
-  .help-button-container {
-    margin: 0.5rem;
-    justify-content: center;
-    display: flex;
-    .help-button {
-      border: 1px solid #7786cf;
-      border-radius: 0.3rem;
-      padding: 0.5rem;
-      align-items: center;
-      display: flex;
-      .icon {
-        height: 1.5rem;
-        width: 1.5rem;
-        color: #7786cf;
-        margin-right: 0.5rem;
-      }
-      .help-button-text {
-        color: white;
-        text-align: center;
-        .help-button-text-primary {
-          font-weight: 400;
-          font-size: 0.9rem;
-        }
-        .help-button-text-secondary {
-          font-weight: 300;
-          font-size: 0.6rem;
-        }
-      }
-      :hover {
-        background: #7786cf;
-        cursor: pointer;
-        .icon {
-          color: #fff;
-        }
-      }
-    }
   }
 `;
 

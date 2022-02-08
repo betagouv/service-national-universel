@@ -3,7 +3,7 @@ import { Spinner, Button } from "reactstrap";
 import styled from "styled-components";
 import { colors } from "../../utils";
 
-export default ({ loading, children, disabled, loadingText, ...rest }) => {
+export default function LoadingButton({ loading, children, disabled, loadingText, ...rest }) {
   return (
     <VioletButtonHeader
       disabled={loading || disabled}
@@ -14,8 +14,7 @@ export default ({ loading, children, disabled, loadingText, ...rest }) => {
         opacity: loading ? 0.7 : 1,
         cursor: loading || disabled ? "not-allowed" : "pointer",
       }}
-      {...rest}
-    >
+      {...rest}>
       {loading && loadingText && (
         <>
           <Spinner size="sm" key={loadingText} style={{ borderWidth: "0.1em", marginRight: "0.5rem" }} />
@@ -26,7 +25,7 @@ export default ({ loading, children, disabled, loadingText, ...rest }) => {
       {!loading && children}
     </VioletButtonHeader>
   );
-};
+}
 
 const VioletButtonHeader = styled(Button)`
   white-space: nowrap;

@@ -16,10 +16,24 @@ import Submit from "./components/Submit";
 import Register from "./components/Register";
 import ErrorLogin from "./components/ErrorLogin";
 import ModalInProgress from "../../components/modals/ModalInProgress";
-import { isInscription2021Closed } from "../../utils";
 import { toastr } from "react-redux-toastr";
+import PasswordEye from "../../components/PasswordEye";
 
-export default () => {
+/*
+
+About Redirect after signin
+
+we use this signin screen in the `app`, but also outside the app in `knowledge-base` which is not in the same origin
+
+-> signin and redirect within the app would be an url like http://localhost:8081/auth?redirect=/my-page
+|-> redirection is made with `if (young) return <Redirect to={"/" + (redirect || "")} />;`
+
+-> signin and redirect outside the app would be an url like http://localhost:8081/auth?redirect=http(s)://localhost:8083/
+|-> redirection is made with `if (redirect.startsWith('http')) return window.location.href = redirect;`
+
+*/
+
+export default function Signin() {
   const [modal, setModal] = useState(null);
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -52,12 +66,9 @@ export default () => {
             try {
               const { user: young, token } = await api.post(`/young/signin`, { email, password });
               if (young) {
-                if (young.status === "IN_PROGRESS" && isInscription2021Closed()) {
-                  setModal("inProgress");
-                } else {
-                  if (token) api.setToken(token);
-                  dispatch(setYoung(young));
-                }
+                if (redirect?.startsWith("http")) return (window.location.href = redirect);
+                if (token) api.setToken(token);
+                dispatch(setYoung(young));
               }
             } catch (e) {
               console.log("e", e);
@@ -67,8 +78,7 @@ export default () => {
               }
             }
             actions.setSubmitting(false);
-          }}
-        >
+          }}>
           {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
             return (
               <form onSubmit={handleSubmit}>
@@ -100,15 +110,7 @@ export default () => {
                 </StyledFormGroup>
                 <StyledFormGroup>
                   <div>
-                    <InputField
-                      // validate={(v) => validator.isEmpty(v) && "This field is Required"}
-                      name="password"
-                      type="password"
-                      id="password"
-                      placeholder="Votre mot de passe"
-                      value={values.password}
-                      onChange={handleChange}
-                    />
+                    <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
                     <label htmlFor="password">Mot de passe</label>
                   </div>
                   <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.password}</p>
@@ -123,15 +125,13 @@ export default () => {
             );
           }}
         </Formik>
-        {!isInscription2021Closed() && (
-          <>
-            <Title>
-              <span>Vous n'êtes pas encore inscrit ?</span>
-            </Title>
-            <Register to="/inscription/profil">Commencer l'inscription</Register>
-          </>
-        )}
+        <>
+          <Title>
+            <span>Vous n&apos;êtes pas encore inscrit ?</span>
+          </Title>
+          <Register to="/inscription/profil">Commencer l&apos;inscription</Register>
+        </>
       </LoginBox>
     </div>
   );
-};
+}

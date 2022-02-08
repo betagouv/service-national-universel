@@ -15,7 +15,7 @@ import Association from "./components/Association";
 
 const FILTERS = ["SEARCH", "REGION", "DEPARTMENT", "DOMAIN"];
 
-export default () => {
+export default function List() {
   const [associations, setAssociations] = useState([]);
   const [missionsInfo, setMissionsInfo] = useState({});
   const user = useSelector((state) => state.Auth.user);
@@ -195,7 +195,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const StatsResult = styled.div`
   font-style: normal;

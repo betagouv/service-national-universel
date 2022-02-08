@@ -7,7 +7,7 @@ import api from "../../services/api";
 import DownloadButton from "../buttons/DownloadButton";
 import { Box, BoxTitle } from "../box";
 
-export default ({ young }) => {
+export default function DetailsVolontaires({ young }) {
   return (
     <Box>
       <Row>
@@ -97,7 +97,7 @@ export default ({ young }) => {
       </Row>
     </Box>
   );
-};
+}
 
 const Bloc = ({ children, title, last }) => {
   return (
@@ -125,15 +125,16 @@ const Details = ({ title, value }) => {
 
 const Wrapper = styled.div`
   padding: 3rem;
+  width: 100%;
   .detail {
+    border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
     display: flex;
-    align-items: flex-start;
+    justify-content: space-between;
     font-size: 14px;
     text-align: left;
     margin-top: 1rem;
     &-title {
       min-width: 90px;
-      width: 90px;
       margin-right: 1rem;
       color: #798399;
     }

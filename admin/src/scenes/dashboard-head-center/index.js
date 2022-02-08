@@ -1,29 +1,36 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
+import { useHistory, useParams } from "react-router-dom";
 
 import Volontaires from "./volontaires";
 import Center from "./center";
 
-export default () => {
-  const [currentTab, setCurrentTab] = useState("volontaires");
+export default function Index() {
+  const history = useHistory();
+  const { currentTab } = useParams();
+
+  useEffect(() => {
+    const listTab = ["centre", "volontaires"];
+    if (!listTab.includes(currentTab)) history.push(`/dashboard/volontaires`);
+  }, [currentTab]);
 
   return (
     <>
       <TabNavigation>
         <TabNavigationList>
-          <TabItem onClick={() => setCurrentTab("volontaires")} isActive={currentTab === "volontaires"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires`)} isActive={currentTab === "volontaires"}>
             Volontaires
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("center")} isActive={currentTab === "center"}>
+          <TabItem onClick={() => history.push(`/dashboard/centre`)} isActive={currentTab === "centre"}>
             Centre
           </TabItem>
         </TabNavigationList>
       </TabNavigation>
       <Wrapper>{currentTab === "volontaires" && <Volontaires />}</Wrapper>
-      <Wrapper>{currentTab === "center" && <Center />}</Wrapper>
+      <Wrapper>{currentTab === "centre" && <Center />}</Wrapper>
     </>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 20px 40px;

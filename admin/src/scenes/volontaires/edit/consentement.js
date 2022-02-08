@@ -7,7 +7,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Documents from "../components/Documents";
 import DndFileInput from "../../../components/dndFileInput";
 
-export default ({ values, handleChange, handleSubmit }) => {
+export default function Consentement({ values, handleChange, handleSubmit }) {
   function isFromFranceConnect(values) {
     return values.parent1FromFranceConnect === "true" && (!values.parent2Status || values.parent2FromFranceConnect === "true");
   }
@@ -40,7 +40,7 @@ export default ({ values, handleChange, handleSubmit }) => {
                     return toastr.error(
                       "Le fichier semble corrompu",
                       "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                      { timeOut: 0 }
+                      { timeOut: 0 },
                     );
                   }
                   if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
@@ -55,4 +55,4 @@ export default ({ values, handleChange, handleSubmit }) => {
       </Box>
     </Col>
   );
-};
+}

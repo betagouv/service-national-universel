@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { capture } = require("../sentry");
 const Joi = require("joi");
+
+const { capture } = require("../sentry");
 const BusModel = require("../models/bus");
 const { ERRORS } = require("../utils");
 const { serializeBus } = require("../utils/serializer");

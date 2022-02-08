@@ -5,17 +5,17 @@ import styled from "styled-components";
 
 import MissionCard from "./components/missionCard";
 
-export default () => {
+export default function Mission() {
   return (
     <Container>
       <Wrapper>
         <LeftBox style={{ padding: "50px 40px" }}>
           <div className="heading">
             <p>MISSION</p>
-            <h2>Connaissance du fonctionnement d'une Association de bénévoles</h2>
+            <h2>Connaissance du fonctionnement d&apos;une Association de bénévoles</h2>
           </div>
           <div className="title">
-            <span>DOMAINE D'ACTION</span>
+            <span>DOMAINE D&apos;ACTION</span>
           </div>
           <div style={{ marginBottom: 60 }}>
             <div className="domain">Citoyenneté</div>
@@ -24,8 +24,8 @@ export default () => {
             <span>DESCRIPTIF DE LA MISSION</span>
           </div>
           <div className="text" style={{ marginBottom: 60 }}>
-            Connaître le fonctionnement d'une association de bénévoles Accompagner les bénévoles et en partager avec eux la réalisation de leurs actions en faveur des jeunes :
-            rencontres avec enseignants ou responsables d'entreprises, interventions devant des jeunes, participation aux visites, debriefing des actions, …
+            Connaître le fonctionnement d&apos;une association de bénévoles Accompagner les bénévoles et en partager avec eux la réalisation de leurs actions en faveur des jeunes :
+            rencontres avec enseignants ou responsables d&apos;entreprises, interventions devant des jeunes, participation aux visites, debriefing des actions, …
           </div>
           <div className="title">
             <span>CONTRAINTES</span>
@@ -74,7 +74,7 @@ export default () => {
       </Others>
     </Container>
   );
-};
+}
 const Wrapper = styled.div`
   background-color: #fff;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;

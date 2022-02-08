@@ -18,7 +18,7 @@ import Subtitle from "./components/subtitle";
 import { colors } from "../../utils";
 import PasswordEye from "../../components/PasswordEye";
 
-export default () => {
+export default function Signin() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
@@ -58,9 +58,8 @@ export default () => {
                   toastr.error("Erreur détectée");
                 }
                 actions.setSubmitting(false);
-              }}
-            >
-              {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
+              }}>
+              {({ values, isSubmitting, handleChange, handleSubmit }) => {
                 return (
                   <form onSubmit={handleSubmit}>
                     {!userIsValid && (
@@ -109,12 +108,18 @@ export default () => {
             <Register>
               Vous êtes une structure ? <Link to="/auth/signup">Publiez vos missions</Link>
             </Register>
+            <Register>
+              Vous avez besoin d&apos;aide ?{" "}
+              <Link to="/public-besoin-d-aide" target="_blank">
+                Cliquez ici
+              </Link>
+            </Register>
           </div>
         </LoginBox>
       </AuthWrapper>
     </div>
   );
-};
+}
 
 const Thumb = styled.div`
   min-height: 400px;

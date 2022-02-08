@@ -3,11 +3,10 @@ import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { toastr } from "react-redux-toastr";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
-import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT, ROLES } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT, ROLES, canUpdateReferent, canDeleteReferent } from "../../utils";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
@@ -19,8 +18,10 @@ import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiL
 import Badge from "../../components/Badge";
 import ExportComponent from "../../components/ExportXlsx";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import ModalConfirm from "../../components/modals/ModalConfirm";
+import plausibleEvent from "../../services/pausible";
 
-export default () => {
+export default function List() {
   const [responsable, setResponsable] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const [structureIds, setStructureIds] = useState();
@@ -63,6 +64,7 @@ export default () => {
                 <Title>Utilisateurs</Title>
               </div>
               <ExportComponent
+                handleClick={() => plausibleEvent("Utilisateurs/CTA - Exporter utilisateurs")}
                 title="Exporter les utilisateurs"
                 exportTitle="Utilisateurs"
                 index="referent"
@@ -166,12 +168,19 @@ export default () => {
                         <th>Rôle</th>
                         <th>Crée le</th>
                         <th>Dernière connexion le</th>
-                        {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && <th>Actions</th>}
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {data.map((hit) => (
-                        <Hit key={hit._id} hit={hit} user={user} onClick={() => setResponsable(hit)} selected={responsable?._id === hit._id} />
+                        <Hit
+                          structure={structures?.find((s) => s._id === hit.structureId)}
+                          key={hit._id}
+                          hit={hit}
+                          user={user}
+                          onClick={() => setResponsable(hit)}
+                          selected={responsable?._id === hit._id}
+                        />
                       ))}
                     </tbody>
                   </Table>
@@ -184,9 +193,11 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
-const Hit = ({ hit, onClick, user, selected }) => {
+const Hit = ({ hit, onClick, user, selected, structure }) => {
+  const displayActionButton = canUpdateReferent({ actor: user, originalTarget: hit, structure });
+
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
@@ -198,23 +209,28 @@ const Hit = ({ hit, onClick, user, selected }) => {
       <td>{hit.role && <Badge text={translate(hit.role)} />}</td>
       <td>{formatStringLongDate(hit.createdAt)}</td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
-      {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && (
+      {displayActionButton ? (
         <td onClick={(e) => e.stopPropagation()}>
-          <Action hit={hit} />
+          <Action hit={hit} structure={structure} />
         </td>
+      ) : (
+        <td />
       )}
     </tr>
   );
 };
 
-const Action = ({ hit, color }) => {
+const Action = ({ hit, structure }) => {
+  const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const handleImpersonate = async () => {
     try {
+      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${hit._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
       if (token) api.setToken(token);
       if (data) dispatch(setUser(data));
       history.push("/dashboard");
@@ -223,22 +239,62 @@ const Action = ({ hit, color }) => {
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
     }
   };
+  const onClickDelete = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: onConfirmDelete,
+      title: `Êtes-vous sûr(e) de vouloir supprimer le compte de ${hit.firstName} ${hit.lastName} ?`,
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async () => {
+    try {
+      const { ok, code } = await api.remove(`/referent/${hit._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Ce profil a été supprimé.");
+      return history.go(0);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
+    }
+  };
   return (
-    <ActionBox color={"#444"}>
-      <UncontrolledDropdown setActiveFromChild>
-        <DropdownToggle tag="button">
-          Choisissez une action
-          <Chevron color="#444" />
-        </DropdownToggle>
-        <DropdownMenu>
-          <Link to={`/user/${hit._id}`}>
-            <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
-          </Link>
-          <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
-            Prendre sa place
-          </DropdownItem>
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    </ActionBox>
+    <>
+      <ActionBox color={"#444"}>
+        <UncontrolledDropdown setActiveFromChild>
+          <DropdownToggle tag="button">
+            Choisissez une action
+            <Chevron color="#444" />
+          </DropdownToggle>
+          <DropdownMenu>
+            <Link to={`/user/${hit._id}`}>
+              <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
+            </Link>
+            {user.role === ROLES.ADMIN ? (
+              <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
+                Prendre sa place
+              </DropdownItem>
+            ) : null}
+            {canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? (
+              <DropdownItem className="dropdown-item" onClick={onClickDelete}>
+                Supprimer le profil
+              </DropdownItem>
+            ) : null}
+          </DropdownMenu>
+        </UncontrolledDropdown>
+      </ActionBox>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </>
   );
 };

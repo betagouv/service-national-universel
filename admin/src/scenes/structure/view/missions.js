@@ -8,7 +8,7 @@ import { formatStringDateTimezoneUTC } from "../../../utils";
 import SelectStatusMission from "../../../components/selectStatusMission";
 import Loader from "../../../components/Loader";
 
-export default ({ structure }) => {
+export default function Mission({ structure }) {
   const [data, setData] = useState([]);
   const [mission, setMission] = useState();
 
@@ -58,7 +58,7 @@ export default ({ structure }) => {
       />
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick }) => {
   return (

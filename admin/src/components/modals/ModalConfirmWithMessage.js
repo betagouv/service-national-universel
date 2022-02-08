@@ -3,14 +3,27 @@ import { Modal } from "reactstrap";
 
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
+import CloseSvg from "../../assets/Close";
 
-export default ({ isOpen, topTitle = "alerte", title, message, defaultInput, onChange, onConfirm, placeholder = "Votre message...", type = "textarea" }) => {
+export default function ModalConfirmWithMessage({
+  isOpen,
+  topTitle = "alerte",
+  title,
+  message,
+  defaultInput,
+  onChange,
+  onConfirm,
+  placeholder = "Votre message...",
+  type = "textarea",
+}) {
   const [messageTextArea, setMessageTextArea] = useState(defaultInput);
   const [sending, setSending] = useState(false);
 
   const submit = async () => {
     setSending(true);
     onConfirm(messageTextArea);
+    setSending(false);
+    setMessageTextArea("");
   };
   const renderInput = () => {
     if (type === "textarea") return <textarea placeholder={placeholder} rows="15" value={messageTextArea} onChange={(e) => setMessageTextArea(e.target.value)} />;
@@ -18,9 +31,9 @@ export default ({ isOpen, topTitle = "alerte", title, message, defaultInput, onC
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={onChange}>
+    <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
-        <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
+        <CloseSvg className="close-icon" height={10} onClick={onChange} />
         <Header>{topTitle}</Header>
         <Content>
           <h1>{title}</h1>
@@ -38,4 +51,4 @@ export default ({ isOpen, topTitle = "alerte", title, message, defaultInput, onC
       </ModalContainer>
     </Modal>
   );
-};
+}

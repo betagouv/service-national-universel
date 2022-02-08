@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import api from "../services/api";
 
-export default ({ url, route, onUpload, onError }) => {
+export default function ImageInputComponent({ url, route, onUpload, onError }) {
   const [img, setImg] = useState(url);
 
   function handleChange(evt) {
@@ -30,7 +30,7 @@ export default ({ url, route, onUpload, onError }) => {
       <input accept=".gif,.jpg,.jpeg,.png,.svg" hidden type="file" onChange={handleChange} />
     </ImageInput>
   );
-};
+}
 
 const ImageInput = styled.label`
   position: relative;

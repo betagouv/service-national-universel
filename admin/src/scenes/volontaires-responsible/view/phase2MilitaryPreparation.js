@@ -9,7 +9,7 @@ import { Box, BoxTitle } from "../../../components/box";
 import DownloadButton from "../../../components/buttons/DownloadButton";
 import api from "../../../services/api";
 
-export default ({ young }) => {
+export default function Phase2MilitaryPreparation({ young }) {
   const history = useHistory();
 
   if (young.statusMilitaryPreparationFiles !== "VALIDATED") {
@@ -22,8 +22,7 @@ export default ({ young }) => {
       <Box>
         <Bloc
           title="Documents - Préparation militaire"
-          titleRight={<Badge text={t(young.statusMilitaryPreparationFiles)} color={APPLICATION_STATUS_COLORS[young.statusMilitaryPreparationFiles]} />}
-        >
+          titleRight={<Badge text={t(young.statusMilitaryPreparationFiles)} color={APPLICATION_STATUS_COLORS[young.statusMilitaryPreparationFiles]} />}>
           <Line>
             {(young.militaryPreparationFilesIdentity || []).map((e, i) => (
               <DownloadButton
@@ -64,7 +63,7 @@ export default ({ young }) => {
       </Box>
     </>
   );
-};
+}
 
 const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderLeft, disabled }) => {
   return (
@@ -74,13 +73,11 @@ const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderLe
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}
-    >
+      }}>
       <Wrapper
         style={{
           width: "100%",
-        }}
-      >
+        }}>
         <div style={{ display: "flex", width: "100%" }}>
           <BoxTitle>
             <div>{title}</div>

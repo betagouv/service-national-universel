@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { adminURL } from "../config";
@@ -11,6 +12,8 @@ function sendMessage(chat, message) {
     session_id: chat.sessionId,
   });
 }
+
+//! Pour Raph : on fait quoi avec ce fichier ?
 
 export default function Zammad() {
   const young = useSelector((state) => state.Auth.young);
@@ -42,13 +45,13 @@ export default function Zammad() {
             const info = [
               `🧑‍🎓 <a href="${adminURL}/volontaire/${young._id}">${young.firstName + " " + young.lastName}</a> ${young.email}`,
               `🔋 Statut : <b>${translate(young.status)}</b> (phase1: ${translate(young.statusPhase1)} - phase2: ${translate(young.statusPhase2)} - phase3: ${translate(
-                young.statusPhase2
+                young.statusPhase2,
               )} )`,
             ];
             // We have to create a ticket before initializing first chat message
             // because we have to include link.
             api
-              .post("/support-center/ticket", {
+              .post("/zammad-support-center/ticket", {
                 subject: `${young.firstName} ${young.lastName} - ${new Date().toLocaleString()}`,
                 type: "💬 Chat",
                 message: "Chat initialisé",
@@ -57,9 +60,9 @@ export default function Zammad() {
                 chat.waitingForTicketAdditionalInformation = true;
                 chat.ticketId = res.data.id;
                 // Actually send the message when ticket is created
-                sendMessage(chat, [...info, `📝 Ticket : https://support.snu.gouv.fr/#ticket/zoom/${res.data.id}`]);
+                sendMessage(chat, [...info, `📝 Ticket : https://zammad.snu.gouv.fr/#ticket/zoom/${res.data.id}`]);
               })
-              .catch((e) => {
+              .catch(() => {
                 // We don't care about errors.
                 sendMessage(chat, [...info, `Échec de la création du ticket, il faut le créer manuellement`]);
               });
@@ -82,10 +85,10 @@ export default function Zammad() {
         if (chat.waitingForTicketAdditionalInformation && data?.message?.chat_session_id) {
           chat.waitingForTicketAdditionalInformation = false;
           api
-            .put(`/support-center/ticket/${chat.ticketId}`, {
-              message: `https://support.snu.gouv.fr/#customer_chat/session/${data.message.chat_session_id}`,
+            .put(`/zammad-support-center/ticket/${chat.ticketId}`, {
+              message: `https://zammad.snu.gouv.fr/#customer_chat/session/${data.message.chat_session_id}`,
             })
-            .then((res) => {
+            .then(() => {
               //
             });
         }

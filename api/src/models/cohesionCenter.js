@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
+const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
-
 const MODELNAME = "cohesioncenter";
 
 const Schema = new mongoose.Schema({
@@ -15,6 +15,12 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Code du centre",
+    },
+  },
+  code2022: {
+    type: String,
+    documentation: {
+      description: "Code du centre utilisé en 2022",
     },
   },
   country: {
@@ -65,6 +71,12 @@ const Schema = new mongoose.Schema({
       description: "Région du centre",
     },
   },
+  addressVerified: {
+    type: String,
+    documentation: {
+      description: "Adresse validée",
+    },
+  },
   placesTotal: {
     type: Number,
     documentation: {
@@ -95,9 +107,44 @@ const Schema = new mongoose.Schema({
       description: "Liste ordonnée des jeunes en liste d'attente sur ce cente de cohésion",
     },
   },
+  pmr: {
+    type: String,
+    enum: ["true", "false", ""],
+    documentation: {
+      description: "Accessibilité aux personnes à mobilité réduite",
+    },
+  },
+  cohorts: {
+    type: [String],
+    documentation: {
+      description: "Liste des cohortes concernées par ce centre de cohésion",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+});
+
+Schema.virtual("fromUser").set(function (fromUser) {
+  if (fromUser) {
+    const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
+    this._user = { _id, role, department, region, email, firstName, lastName, model };
+  }
+});
+
+Schema.pre("save", function (next, params) {
+  this.fromUser = params?.fromUser;
+  next();
+});
+
+Schema.plugin(patchHistory, {
+  mongoose,
+  name: `${MODELNAME}Patches`,
+  trackOriginalValue: true,
+  includes: {
+    modelName: { type: String, required: true, default: MODELNAME },
+    user: { type: Object, required: false, from: "_user" },
+  },
 });
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);

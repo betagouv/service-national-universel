@@ -2,12 +2,12 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-export default () => {
+export default function NextStep() {
   return (
     <Hero style={{ flexDirection: "column" }}>
       <Content style={{ width: "100%" }}>
         <h1>Prochaine étape</h1>
-        <p>Vous devez désormais réaliser votre mission d'intérêt général de Phase 2.</p>
+        <p>Vous devez désormais réaliser votre mission d&apos;intérêt général de Phase 2.</p>
       </Content>
       <ContentHorizontal style={{ width: "100%" }} id="sanitaire">
         <div className="icon">
@@ -16,13 +16,12 @@ export default () => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-            ></path>
+              d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
           </svg>
         </div>
         <div>
           <h2>Préférences de mission</h2>
-          <p>Ces choix permettront à l'administration de vous proposer des missions en cohérence avec vos motivations.</p>
+          <p>Ces choix permettront à l&apos;administration de vous proposer des missions en cohérence avec vos motivations.</p>
         </div>
         <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
           <Link to="/preferences">
@@ -37,7 +36,7 @@ export default () => {
           </svg>
         </div>
         <div>
-          <h2>Votre mission d'intérêt général</h2>
+          <h2>Votre mission d&apos;intérêt général</h2>
           <p>Consulter des milliers de missions disponibles pour la réalisation de votre phase 2.</p>
         </div>
         <div style={{ minWidth: "30%", width: "100%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
@@ -48,7 +47,7 @@ export default () => {
       </ContentHorizontal>
     </Hero>
   );
-};
+}
 
 const Hero = styled.div`
   border-radius: 0.5rem;

@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
-import { useSelector } from "react-redux";
-import { NavLink, Link, useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
 
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import api from "../../../services/api";
 import { ticketStateNameById, copyToClipboard, translate, getAge, formatDateFRTimezoneUTC } from "../../../utils";
-import Loader from "../../../components/Loader";
-import { appURL, adminURL } from "../../../config";
+import { appURL } from "../../../config";
 
-export default ({ ticket }) => {
+export default function TicketInfos({ ticket }) {
   const [user, setUser] = useState([]);
   const [tag, setTag] = useState("");
   const history = useHistory();
@@ -20,12 +18,12 @@ export default ({ ticket }) => {
     (async () => {
       if (!ticket?.articles?.length) return;
       const email = ticket.articles[0].created_by;
-      const { tags } = await api.get(`/support-center/ticket/${ticket.id}/tags`);
+      const { tags } = await api.get(`/zammad-support-center/ticket/${ticket.id}/tags`);
       if (tags?.includes("EMETTEUR_Volontaire")) {
         const { data } = await api.get(`/young?email=${email}`);
         setUser(data);
         setTag("EMETTEUR_Volontaire");
-      } else if (tags?.find(tag => tag.includes("EMETTEUR"))) {
+      } else if (tags?.find((tag) => tag.includes("EMETTEUR"))) {
         const response = await api.get(`/referent?email=${email}`);
         setUser(response.data);
         setTag("EMETTEUR_other");
@@ -47,7 +45,7 @@ export default ({ ticket }) => {
   }, [user]);
 
   const resolveTicket = async () => {
-    const response = await api.put(`/support-center/ticket/${ticket.id}`, {
+    const response = await api.put(`/zammad-support-center/ticket/${ticket.id}`, {
       state: "closed",
     });
     if (!response.ok) console.log(response.status, "error");
@@ -114,7 +112,7 @@ export default ({ ticket }) => {
           </>
         </>
       );
-    };
+    }
   };
 
   if (!user)
@@ -133,7 +131,7 @@ export default ({ ticket }) => {
         <div />
       ) : (
         <>
-          {ticketStateNameById(ticket?.state_id) !== "fermé" ? (
+          {ticketStateNameById(ticket?.state_id) !== "closed" ? (
             <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
               <button className="button" onClick={resolveTicket}>
                 Archiver la demande
@@ -148,7 +146,7 @@ export default ({ ticket }) => {
       )}
     </HeroContainer>
   );
-};
+}
 
 const Item = ({ title, content, copy = false }) => {
   if (!content) return null;

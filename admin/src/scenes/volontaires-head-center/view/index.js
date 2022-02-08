@@ -6,7 +6,7 @@ import Details from "../../../components/volontaires-view/Details";
 import Wrapper from "./wrapper";
 import Phase1 from "./phase1";
 
-export default ({ ...props }) => {
+export default function VolontaireHeadCenter({ ...props }) {
   const [young, setYoung] = useState();
 
   useEffect(() => {
@@ -34,4 +34,4 @@ export default ({ ...props }) => {
       />
     </Switch>
   );
-};
+}

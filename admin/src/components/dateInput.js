@@ -17,7 +17,7 @@ const MONTH = {
   11: "dec.",
 };
 
-export default ({ value, onChange, placeholder, onSelect }) => {
+export default function DateInput({ value, onChange }) {
   const [y, m, d] = value ? value.substring(0, 10).split("-") : ["", "", ""];
   const [day, setDay] = useState(parseInt(d));
   const [month, setMonth] = useState(parseInt(m - 1));
@@ -34,7 +34,7 @@ export default ({ value, onChange, placeholder, onSelect }) => {
   };
 
   useEffect(() => {
-    if (!day || !month || !year) return;
+    if (!day || !Object.keys(MONTH).includes(month.toString()) || !year) return;
     const date = new Date(Date.UTC(parseInt(year), parseInt(month), parseInt(day)));
     const dateFormat = date.toISOString();
     onChange(dateFormat);
@@ -75,7 +75,7 @@ export default ({ value, onChange, placeholder, onSelect }) => {
       </Input>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   display: flex;

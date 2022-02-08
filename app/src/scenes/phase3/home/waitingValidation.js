@@ -20,9 +20,9 @@ export default () => {
             <p>
               <strong>Suivre la validation de mon engagement prolongé</strong>
               <br />
-              Vous pouvez suivre l'avancement de la validation de votre mission par votre tuteur.
+              Vous pouvez suivre l&apos;avancement de la validation de votre mission par votre tuteur.
               <br />
-              <Link to="/phase3/valider">Suivre l'avancement {">"}</Link>
+              <Link to="/phase3/valider">Suivre l&apos;avancement {">"}</Link>
             </p>
           </div>
           <div className="thumb" />

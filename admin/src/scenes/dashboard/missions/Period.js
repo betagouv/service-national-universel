@@ -4,7 +4,7 @@ import CircularProgress, { CircularLine, CircularLineIndex } from "../components
 import { translate, PERIOD } from "../../../utils";
 import { Box, BoxTitleCircular as BoxTitle } from "../../../components/box";
 
-export default ({ youngsPeriod, missionsPeriod }) => {
+export default function Period({ youngsPeriod, missionsPeriod }) {
   const totalMissions = Object.keys(missionsPeriod).reduce((acc, a) => acc + missionsPeriod[a], 0);
   const totalYoungs = Object.keys(youngsPeriod).reduce((acc, a) => acc + youngsPeriod[a], 0);
 
@@ -55,4 +55,4 @@ export default ({ youngsPeriod, missionsPeriod }) => {
       </Box>
     </React.Fragment>
   );
-};
+}

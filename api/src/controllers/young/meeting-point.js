@@ -11,7 +11,7 @@ const { ERRORS, updatePlacesBus, isYoung } = require("../../utils");
 const { serializeMeetingPoint, serializeYoung } = require("../../utils/serializer");
 const { validateId } = require("../../utils/validator");
 
-router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
@@ -68,7 +68,7 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
 
     // A young can only update their own meeting points.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     let bus = null;

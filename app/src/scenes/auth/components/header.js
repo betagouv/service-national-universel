@@ -1,9 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 
-export default () => {
+export default function Header() {
   return (
-    <Header>
+    <HeaderContainer>
       <Logos>
         <a href="https://www.snu.gouv.fr/">
           <img className="mobileHide" src={require("../../../assets/fr.png")} height={80} />
@@ -16,11 +16,11 @@ export default () => {
         <h1>Connexion à votre espace</h1>
         <h3>Suivez les étapes de votre parcours SNU</h3>
       </Title>
-    </Header>
+    </HeaderContainer>
   );
-};
+}
 
-const Header = styled.div`
+const HeaderContainer = styled.div`
   padding: 24px;
   background-color: #fff;
   width: 100%;

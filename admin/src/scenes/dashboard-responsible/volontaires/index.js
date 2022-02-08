@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import { colors, copyToClipboard } from "../../../utils";
 import Applications from "./applications";
 
-export default ({ referentManagerPhase2 }) => {
+export default function Index({ referentManagerPhase2 }) {
   return (
     <>
       <Row style={{}}>
@@ -32,7 +32,7 @@ export default ({ referentManagerPhase2 }) => {
       <Applications />
     </>
   );
-};
+}
 
 // Title line with filters
 const Title = styled.h2`

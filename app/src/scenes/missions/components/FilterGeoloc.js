@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import { Col, Row } from "reactstrap";
 
-export default ({ componentId = "FILTER", young, targetLocation }) => {
+export default function FilterGeoloc({ componentId = "FILTER", young, targetLocation }) {
   return <ReactiveComponent componentId={componentId} render={(data) => <SubComponent young={young} targetLocation={targetLocation} {...data} />} />;
-};
+}
 
 const SubComponent = ({ setQuery, young, targetLocation }) => {
   const [distance, setDistance] = useState("50");

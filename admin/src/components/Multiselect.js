@@ -3,8 +3,9 @@ import MultiSelect from "react-multi-select-component";
 import styled from "styled-components";
 import { translate } from "../utils";
 
-export default ({ value, name, onChange, options, placeholder }) => {
-  const transformOptions = options.map((e) => {
+export default function MultiSelectComponent({ value, name, onChange, options, placeholder, valueToExclude, valueRenderer = () => {}, filterOptions = (options) => options }) {
+  const filteredOptions = options.filter((o) => o !== valueToExclude);
+  const transformOptions = filteredOptions.map((e) => {
     return { label: translate(e), value: e };
   });
 
@@ -13,6 +14,7 @@ export default ({ value, name, onChange, options, placeholder }) => {
     for (let i in values) {
       const value = values[i];
       const option = options.find((e) => e.value === value);
+      if (!option) continue;
       const obj = { label: option.label, value: option.value };
       arr.push(obj);
     }
@@ -29,14 +31,16 @@ export default ({ value, name, onChange, options, placeholder }) => {
       <MultiSelect
         hasSelectAll={false}
         disableSearch={true}
+        valueRenderer={valueRenderer}
         options={transformOptions}
+        filterOptions={filterOptions}
         value={selected}
         onChange={(v) => handleChange(v)}
         overrideStrings={{ selectSomeItems: placeholder, allItemsAreSelected: "Toutes les options." }}
       />
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   .dropdown-container:focus-within,

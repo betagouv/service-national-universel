@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 
 import { STEPS_2020 } from "../inscription/utils";
 
-export default ({ step }) => {
+export default function Nav({ step }) {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
 
@@ -50,7 +50,7 @@ export default ({ step }) => {
       </Topbar>
     </>
   );
-};
+}
 
 const Topbar = styled.ul`
   background-color: #fff;

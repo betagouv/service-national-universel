@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
-import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
@@ -13,7 +12,7 @@ import Tab from "../../../components/views/Tab";
 import Badge from "../../../components/Badge";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-export default ({ children, structure, tab }) => {
+export default function Wrapper({ children, structure, tab }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const isResponsible = user.role === ROLES.RESPONSIBLE;
@@ -88,7 +87,7 @@ export default ({ children, structure, tab }) => {
       />
     </div>
   );
-};
+}
 
 const Title = styled.div`
   color: rgb(38, 42, 62);

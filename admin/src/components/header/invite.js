@@ -5,9 +5,8 @@ import styled from "styled-components";
 import ReactSelect from "react-select";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { colors } from "../../utils";
-
 import {
+  colors,
   translate,
   departmentList,
   regionList,
@@ -17,17 +16,26 @@ import {
   REFERENT_REGION_SUBROLE,
   ROLES,
   SENDINBLUE_TEMPLATES,
+  VISITOR_SUBROLES,
 } from "../../utils";
-import LoadingButton from "../../components/buttons/LoadingButton";
+
+import { Footer } from "../../components/modals/Modal";
+import ModalButton from "../../components/buttons/ModalButton";
 import api from "../../services/api";
 
-export default ({ setOpen, open, label = "Inviter un référent", role = "" }) => {
+export default function InviteHeader({ setOpen, open, label = "Inviter un référent" }) {
+  const { user } = useSelector((state) => state.Auth);
+
   const [centers, setCenters] = useState(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await api.get("/cohesion-center");
+        let { data } = await api.get("/cohesion-center");
+
+        if (user.role === ROLES.REFERENT_REGION) data = data.filter((e) => e.region === user.region);
+        if (user.role === ROLES.REFERENT_DEPARTMENT) data = data.filter((e) => e.department === user.department);
+
         const c = data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         setCenters(c);
       } catch (e) {
@@ -36,51 +44,60 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
     })();
   }, []);
 
-  const getSubRole = (role) => {
-    let subRole = [];
-    if (role === ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
-    if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
-    return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
+  const getSubRoleOptions = (subRoles) => {
+    return Object.keys(subRoles).map((e) => ({ value: e, label: translate(subRoles[e]) }));
   };
+
   return (
     <Invitation style={{ marginBottom: 10, textAlign: "right" }}>
       <Modal isOpen={open} toggle={() => setOpen(false)} size="lg">
         <Invitation>
-          <ModalHeader toggle={() => setOpen(false)}>{label}</ModalHeader>
-          <ModalBody>
-            <Formik
-              validateOnChange={false}
-              validateOnBlur={false}
-              initialValues={{
-                firstName: "",
-                lastName: "",
-                role: "",
-                subRole: "",
-                email: "",
-                region: "",
-                department: "",
-                cohesionCenterName: "",
-                cohesionCenterId: "",
-              }}
-              onSubmit={async (values, { setSubmitting }) => {
-                try {
-                  const obj = { ...values };
-                  if (obj.role === ROLES.REFERENT_DEPARTMENT) obj.region = department2region[obj.department];
-                  if (obj.role === ROLES.REFERENT_REGION) obj.department = null;
-                  if (obj.department && !obj.region) obj.region = department2region[obj.department];
-                  await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
-                  toastr.success("Invitation envoyée");
-                  setOpen();
-                  setOpen(false);
-                } catch (e) {
-                  console.log(e);
-                  toastr.error("Erreur !", translate(e.code));
+          <ModalHeader style={{ border: "none" }} toggle={() => setOpen(false)}>
+            {label}
+          </ModalHeader>
+          <Formik
+            validateOnChange={false}
+            validateOnBlur={false}
+            initialValues={{
+              firstName: "",
+              lastName: "",
+              role: "",
+              subRole: "",
+              email: "",
+              region: "",
+              department: "",
+              cohesionCenterName: "",
+              cohesionCenterId: "",
+              sessionPhase1Id: "",
+            }}
+            onSubmit={async (values, { setSubmitting }) => {
+              try {
+                const obj = { ...values };
+                if (obj.role === ROLES.REFERENT_DEPARTMENT) obj.region = department2region[obj.department];
+                if (obj.role === ROLES.REFERENT_REGION) obj.department = null;
+                if (obj.role !== ROLES.HEAD_CENTER) {
+                  obj.cohesionCenterId = null;
+                  obj.cohesionCenterName = null;
+                  obj.sessionPhase1Id = null;
                 }
-                setSubmitting(false);
-              }}
-            >
-              {({ values, handleChange, handleSubmit, isSubmitting, errors }) => (
-                <React.Fragment>
+                if (obj.department && !obj.region) obj.region = department2region[obj.department];
+                const { data: referent } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
+
+                if (values.sessionPhase1Id) {
+                  await api.put(`/session-phase1/${values.sessionPhase1Id}`, { headCenterId: referent._id });
+                }
+                toastr.success("Invitation envoyée");
+                setOpen();
+                setOpen(false);
+              } catch (e) {
+                console.log(e);
+                toastr.error("Erreur !", translate(e.code));
+              }
+              setSubmitting(false);
+            }}>
+            {({ values, handleChange, handleSubmit, isSubmitting, errors }) => (
+              <React.Fragment>
+                <ModalBody>
                   <Row>
                     <Col md={6}>
                       <FormGroup>
@@ -109,53 +126,85 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                       </FormGroup>
                     </Col>
                   </Row>
-                  {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER].includes(values.role) ? (
+                  {values.role === ROLES.REFERENT_REGION && (
                     <Row>
-                      <>
-                        <Col md={6}>
-                          {values.role === ROLES.REFERENT_DEPARTMENT ? (
-                            <FormGroup>
-                              <div>Département</div>
-                              <ChooseDepartment validate={(v) => !v} value={values.department} onChange={handleChange} />
-                            </FormGroup>
-                          ) : null}
-                          {values.role === ROLES.REFERENT_REGION ? (
-                            <FormGroup>
-                              <div>Région</div>
-                              <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
-                            </FormGroup>
-                          ) : null}
-                          {values.role === ROLES.HEAD_CENTER ? (
-                            <FormGroup>
-                              <ChooseCenter validate={(v) => !v} value={values} onChange={handleChange} centers={centers} />
-                            </FormGroup>
-                          ) : null}
-                        </Col>
-                        {values.role !== ROLES.HEAD_CENTER && (
-                          <Col md={6}>
-                            <FormGroup>
-                              <div>Fonction</div>
-                              <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRole(values.role)} />
-                            </FormGroup>
-                          </Col>
-                        )}
-                      </>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Région</div>
+                          <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Fonction</div>
+                          <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
+                        </FormGroup>
+                      </Col>
                     </Row>
-                  ) : null}
-                  <br />
-                  <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
-                    Envoyer l'invitation
-                  </LoadingButton>
-                  {Object.keys(errors).length ? <h3>Merci de remplir tous les champs avant d'envoyer une invitation.</h3> : null}
-                </React.Fragment>
-              )}
-            </Formik>
-          </ModalBody>
+                  )}
+                  {values.role === ROLES.REFERENT_DEPARTMENT && (
+                    <Row>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Département</div>
+                          <ChooseDepartment validate={(v) => !v} value={values.department} onChange={handleChange} />
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Fonction</div>
+                          <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  )}
+                  {values.role === ROLES.VISITOR && (
+                    <Row>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Région</div>
+                          <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Fonction</div>
+                          <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRoleOptions(VISITOR_SUBROLES)} />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  )}
+                  {values.role === ROLES.HEAD_CENTER && (
+                    <Row>
+                      <Col md={6}>
+                        <FormGroup>
+                          <ChooseCenter value={values} onChange={handleChange} centers={centers} />
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <ChooseSessionPhase1 value={values} onChange={handleChange} />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  )}
+                </ModalBody>
+
+                <br />
+                <Footer>
+                  <ModalButton loading={isSubmitting} onClick={handleSubmit} primary>
+                    Envoyer l&apos;invitation
+                  </ModalButton>
+                  {Object.keys(errors).length ? <h3>Merci de remplir tous les champs avant d&apos;envoyer une invitation.</h3> : null}
+                </Footer>
+              </React.Fragment>
+            )}
+          </Formik>
         </Invitation>
       </Modal>
     </Invitation>
   );
-};
+}
 
 const ChooseDepartment = ({ value, onChange, validate }) => {
   const { user } = useSelector((state) => state.Auth);
@@ -181,8 +230,7 @@ const ChooseDepartment = ({ value, onChange, validate }) => {
       placeholder="Département"
       name="department"
       value={value}
-      onChange={onChange}
-    >
+      onChange={onChange}>
       <option disabled value="" label=""></option>
       {list.map((e) => {
         return (
@@ -213,8 +261,7 @@ const ChooseRegion = ({ value, onChange, validate }) => {
       placeholder="Région"
       name="region"
       value={value}
-      onChange={onChange}
-    >
+      onChange={onChange}>
       <option key={-1} value="" label=""></option>
       {regionList.map((e) => {
         return (
@@ -227,7 +274,7 @@ const ChooseRegion = ({ value, onChange, validate }) => {
   );
 };
 
-const ChooseCenter = ({ value, onChange, centers, onSelect }) => {
+const ChooseCenter = ({ onChange, centers, onSelect, value }) => {
   const { user } = useSelector((state) => state.Auth);
 
   useEffect(() => {
@@ -237,17 +284,49 @@ const ChooseCenter = ({ value, onChange, centers, onSelect }) => {
   }, []);
 
   return (
-    <ReactSelect
-      disabled={user.role === ROLES.HEAD_CENTER}
-      options={centers}
-      placeholder="Choisir un centre"
-      noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
-      onChange={(e) => {
-        onChange({ target: { value: e._id, name: "cohesionCenterId" } });
-        onChange({ target: { value: e.value, name: "cohesionCenterName" } });
-        onSelect?.(e);
-      }}
-    />
+    <>
+      <Field hidden value={value.cohesionCenterName} name="cohesionCenterName" onChange={onChange} validate={(v) => !v} />
+      <Field hidden value={value.cohesionCenterId} name="cohesionCenterId" onChange={onChange} validate={(v) => !v} />
+      <ReactSelect
+        disabled={user.role === ROLES.HEAD_CENTER}
+        options={centers}
+        placeholder="Choisir un centre"
+        noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
+        onChange={(e) => {
+          onChange({ target: { value: e._id, name: "cohesionCenterId" } });
+          onChange({ target: { value: e.value, name: "cohesionCenterName" } });
+          onSelect?.(e);
+        }}
+      />
+    </>
+  );
+};
+
+const ChooseSessionPhase1 = ({ onChange, value }) => {
+  const [sessions, setSessions] = useState([]);
+  useEffect(() => {
+    if (!value.cohesionCenterId) return;
+
+    (async () => {
+      const { ok, error, data } = await api.get(`/cohesion-center/${value.cohesionCenterId}/session-phase1`);
+      if (!ok) return toastr.error("Erreur", error);
+      setSessions(data.map((e) => ({ label: e.cohort, value: e._id })));
+    })();
+  }, [value.cohesionCenterId]);
+
+  return (
+    <>
+      <Field hidden value={value.sessionPhase1Id} name="sessionPhase1Id" onChange={onChange} validate={(v) => !v} />
+      <ReactSelect
+        options={sessions}
+        placeholder="Choisir une session"
+        noOptionsMessage={() => "Aucune session ne correspond à cette recherche."}
+        onChange={(e) => {
+          onChange({ target: { value: e.value, name: "sessionPhase1Id" } });
+        }}
+      />
+    </>
+
   );
 };
 
@@ -257,6 +336,7 @@ const ChooseRole = ({ value, onChange, validate }) => {
   return (
     <Field as="select" validate={validate} className="form-control" placeholder="Rôle" name="role" value={value} onChange={onChange}>
       <option value=""></option>
+      {user.role === ROLES.ADMIN ? <option value={ROLES.VISITOR}>{translate(ROLES.VISITOR)}</option> : null}
       <option value={ROLES.HEAD_CENTER}>{translate(ROLES.HEAD_CENTER)}</option>
       <option value={ROLES.REFERENT_DEPARTMENT}>{translate(ROLES.REFERENT_DEPARTMENT)}</option>
       {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_REGION ? <option value={ROLES.REFERENT_REGION}>{translate(ROLES.REFERENT_REGION)}</option> : null}
@@ -264,6 +344,7 @@ const ChooseRole = ({ value, onChange, validate }) => {
     </Field>
   );
 };
+
 const ChooseSubRole = ({ value, onChange, options }) => {
   return (
     <Input type="select" name="subRole" value={value} onChange={onChange}>

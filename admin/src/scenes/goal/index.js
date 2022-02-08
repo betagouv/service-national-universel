@@ -10,19 +10,22 @@ import PlusSVG from "../../assets/plus.svg";
 import CrossSVG from "../../assets/cross.svg";
 import { region2department, departmentList, department2region } from "../../utils";
 
-export default () => {
+import YearPicker from "../dashboard/components/YearPicker";
+export default function Goal() {
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const [loading, setLoading] = useState(false);
   const [blocsOpened, setBlocsOpened] = useState([]);
+  const [cohort, setCohort] = useState("2021");
 
   const getInscriptionGoals = async () => {
-    const { data, ok, code } = await api.get("/inscription-goal");
-    if (!ok) return toastr.error("nope");
+    if (!cohort) return;
+    const { data, ok } = await api.get(`/inscription-goal/${cohort}`);
+    if (!ok) return toastr.error("Impossible de charger les objectifs d'inscription");
     setInscriptionGoals(departmentList.map((d) => data.find((e) => e.department === d) || { department: d, region: department2region[d], max: null }));
   };
   useEffect(() => {
     getInscriptionGoals();
-  }, []);
+  }, [cohort]);
 
   if (!inscriptionGoals) return <Loader />;
 
@@ -30,19 +33,32 @@ export default () => {
     <>
       <Header>
         <div style={{ flex: 1 }}>
-          <Title>Objectifs d'inscriptions au SNU 2021</Title>
+          <Title>Objectifs d&apos;inscriptions au SNU 2021</Title>
         </div>
         <LoadingButton
           loading={loading}
           onClick={async () => {
             setLoading(true);
-            await api.post("/inscription-goal", inscriptionGoals);
+            await api.post(`/inscription-goal/${cohort}`, inscriptionGoals);
             setLoading(false);
-          }}
-        >
+          }}>
           Enregistrer
         </LoadingButton>
       </Header>
+      <div style={{ marginLeft: "2rem", display: "flex" }}>
+        {cohort ? (
+          <YearPicker
+            options={[
+              { key: "2021", label: "2021" },
+              { key: "Février 2022", label: "Février 2022" },
+              { key: "Juin 2022", label: "Juin 2022" },
+              { key: "Juillet 2022", label: "Juillet 2022" },
+            ]}
+            onChange={(c) => setCohort(c)}
+            value={cohort}
+          />
+        ) : null}
+      </div>
       <div style={{ flex: "2 1 0%", position: "relative", padding: "3rem" }}>
         {Object.entries(region2department).map(([region, departements]) => {
           const total = inscriptionGoals
@@ -60,8 +76,7 @@ export default () => {
               key={region}
               onClick={() => {
                 setBlocsOpened(blocsOpened.includes(region) ? blocsOpened.filter((b) => b !== region) : [...blocsOpened, region]);
-              }}
-            >
+              }}>
               {departements.map((department) => {
                 return (
                   <Departement key={department}>
@@ -95,7 +110,7 @@ export default () => {
       </div>
     </>
   );
-};
+}
 
 const Departement = styled.div`
   border-top: #eee 1px solid;
@@ -112,8 +127,7 @@ const ToggleBloc = ({ children, title, borderBottom, borderRight, borderLeft, di
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}
-    >
+      }}>
       <Wrapper>
         <div onClick={onClick} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
           <Legend>{title}</Legend>

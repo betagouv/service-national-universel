@@ -3,15 +3,17 @@ import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
-import { getLink, replaceSpaces } from "../../../utils";
+import { getLink, replaceSpaces, ROLES } from "../../../utils";
+import { useSelector } from "react-redux";
 
 function round1Decimal(num) {
   return Math.round((num + Number.EPSILON) * 10) / 10;
 }
 
-export default ({ filter }) => {
+export default function Schools({ filter }) {
   const [schools, setSchools] = useState([]);
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -27,9 +29,10 @@ export default ({ filter }) => {
       };
 
       if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
-      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
-      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (filter.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filter.academy } });
 
       const { responses } = await api.esQuery("young", body);
 
@@ -38,7 +41,8 @@ export default ({ filter }) => {
         const arr = responses[0].aggregations.names.buckets.map((e) => {
           const schoolInfo = e.firstUser?.hits?.hits[0]?._source;
           const total = e.doc_count;
-          const inDepartment = (e.departments?.buckets?.find((f) => f.key === schoolInfo.schoolDepartment) || {}).doc_count || 0;
+          const isThereDep = e.departments?.buckets?.find((f) => f.key === schoolInfo.department) || {};
+          const inDepartment = isThereDep.doc_count || 0;
 
           return {
             id: e.key,
@@ -82,7 +86,11 @@ export default ({ filter }) => {
         <tbody>
           {schools.map((e, i) => {
             return (
-              <TableRow key={i} onClick={() => handleClick(getLink({ base: `/inscription`, filter, filtersUrl: [`SCHOOL=%5B"${replaceSpaces(e.name)}"%5D`] }))}>
+              <TableRow
+                key={i}
+                onClick={() =>
+                  user.role === ROLES.VISITOR ? null : handleClick(getLink({ base: `/inscription`, filter, filtersUrl: [`SCHOOL=%5B"${replaceSpaces(e.name)}"%5D`] }))
+                }>
                 <TableCell>
                   {e.name}
                   <div>
@@ -117,7 +125,7 @@ export default ({ filter }) => {
       </TableLoadMoreWrapper> */}
     </TableWrapper>
   );
-};
+}
 
 // Table
 const TableWrapper = styled.div`
@@ -195,18 +203,4 @@ const TableCellPercentage = styled.span`
   border-radius: 10px;
   font-size: 14px;
   color: #7c7c7c;
-`;
-const TableLoadMoreWrapper = styled.div`
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-const TableLoadMoreButton = styled.button`
-  text-transform: uppercase;
-  color: #372f78;
-  font-weight: bold;
-  font-size: 14px;
-  background-color: transparent;
-  border: 0;
 `;

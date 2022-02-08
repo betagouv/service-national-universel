@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import plausibleEvent from "../../services/pausible";
 
 import api from "../../services/api";
-import { apiURL, environment } from "../../config";
+import { apiURL } from "../../config";
 import Panel from "./panel";
 import DownloadAllAttestation from "../../components/buttons/DownloadAllAttestation";
 import ExportComponent from "../../components/ExportXlsx";
@@ -18,11 +19,11 @@ import {
   getAge,
   confirmMessageChangePhase1Presence,
   ES_NO_LIMIT,
+  getLabelWithdrawnReason,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
 import { ResultTable, Filter, Table, FilterRow } from "../../components/list";
-import ToggleSwitch from "../../components/ToogleSwitch";
 import Chevron from "../../components/Chevron";
 import Select from "./components/Select";
 import { toastr } from "react-redux-toastr";
@@ -43,9 +44,14 @@ const FILTERS = [
   "CONTRACT_STATUS",
   "MEDICAL_FILE_RECEIVED",
   "COHESION_PRESENCE",
+  "QPV",
+  "HANDICAP",
+  "SEXE",
+  "ZRR",
+  "GRADE",
 ];
 
-export default () => {
+export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const [volontaire, setVolontaire] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
@@ -63,7 +69,7 @@ export default () => {
     })();
   }, []);
   const getDefaultQuery = () => ({
-    query: { bool: { filter: [{ term: { "cohesionCenterId.keyword": user.cohesionCenterId } }, { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }] } },
+    query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }] } },
     sort: [{ "lastName.keyword": "asc" }],
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -79,27 +85,7 @@ export default () => {
               </div>
               <div style={{ display: "flex" }}>
                 <ExportComponent
-                  title="Export pour les cas particuliers"
-                  defaultQuery={getExportQuery}
-                  exportTitle="Volontaires_cas_particuliers"
-                  index="young"
-                  react={{ and: FILTERS }}
-                  transform={(all) => {
-                    return all.map((data) => {
-                      return {
-                        _id: data._id,
-                        Prénom: data.firstName,
-                        Nom: data.lastName,
-                        "Code centre": center.code || "",
-                        "Nom du centre": center.name || "",
-                        "Présence au séjour de cohésion": data.cohesionStayPresence || "",
-                        "Cas particulier qui valide sa JDC malgré son absence au séjour de cohésion (oui/non)": "",
-                        "Commentaires (Décrivez pourquoi)": "",
-                      };
-                    });
-                  }}
-                />
-                <ExportComponent
+                  handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
                   defaultQuery={getExportQuery}
                   title="Exporter les volontaires"
                   exportTitle="Volontaires"
@@ -145,12 +131,17 @@ export default () => {
                         "Ville de la structure médico-sociale": data.medicosocialStructureCity,
                         "Aménagement spécifique": translate(data.specificAmenagment),
                         "Nature de l'aménagement spécifique": data.specificAmenagmentType,
+                        "Aménagement pour mobilité réduite": translate(data.reducedMobilityAccess),
+                        "Besoin d'être affecté(e) dans le département de résidence": translate(data.handicapInSameDepartment),
+                        "Allergies ou intolérances alimentaires": translate(data.allergies),
                         "Activité de haut-niveau": translate(data.highSkilledActivity),
                         "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
+                        "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
                         "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
                         "Consentement des représentants légaux": data.parentConsentment,
                         "Droit à l'image": translate(data.imageRight),
                         "Autotest PCR": translate(data.autoTestPCR),
+                        "Règlement intérieur": translate(data.rulesYoung),
                         "fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
                         "Statut représentant légal 1": translate(data.parent1Status),
                         "Prénom représentant légal 1": data.parent1FirstName,
@@ -182,6 +173,7 @@ export default () => {
                         "Statut Phase 2": translate(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
                         "Dernier statut le": formatLongDateFR(data.lastStatusAt),
+                        "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
                         "Message de desistement": data.withdrawnMessage,
                         "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
                         "se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
@@ -193,7 +185,7 @@ export default () => {
                     });
                   }}
                 />
-                <DownloadAllAttestation cohesionCenterId={user.cohesionCenterId}>
+                <DownloadAllAttestation sessionPhase1={user.sessionPhase1Id}>
                   <div>Exporter les attestations</div>
                 </DownloadAllAttestation>
               </div>
@@ -288,6 +280,76 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Classe"
+                  componentId="GRADE"
+                  dataField="grade.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "GRADE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="QPV"
+                  componentId="QPV"
+                  dataField="qpv.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "QPV") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "QPV", "QPV")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="HANDICAP"
+                  componentId="HANDICAP"
+                  dataField="handicap.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "HANDICAP") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="SEXE"
+                  componentId="SEXE"
+                  dataField="gender.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SEXE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Sexe")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="ZRR"
+                  componentId="ZRR"
+                  dataField="populationDensity.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "ZRR") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "ZRR")}
+                />
               </FilterRow>
             </Filter>
             <ResultTable>
@@ -334,7 +396,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, selected, callback }) => {
   const [value, setValue] = useState(null);

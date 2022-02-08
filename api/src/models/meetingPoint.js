@@ -5,6 +5,13 @@ const esClient = require("../es");
 const MODELNAME = "meetingpoint";
 
 const Schema = new mongoose.Schema({
+  cohort: {
+    type: String,
+    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2021"],
+    documentation: {
+      description: "Cohorte",
+    },
+  },
   busId: {
     type: String,
     documentation: {
@@ -50,11 +57,17 @@ const Schema = new mongoose.Schema({
   departureAtString: {
     type: String,
   },
+  realDepartureAtString: {
+    type: String,
+  },
   // date de retour
   returnAt: {
     type: Date,
   },
   returnAtString: {
+    type: String,
+  },
+  realReturnAtString: {
     type: String,
   },
 

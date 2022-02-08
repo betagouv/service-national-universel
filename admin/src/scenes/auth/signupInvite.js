@@ -11,14 +11,17 @@ import { setUser } from "../../redux/auth/actions";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import PasswordEye from "../../components/PasswordEye";
 import Header from "./components/header";
+import { adminURL } from "../../config";
 
 import { translate, ROLES, colors } from "../../utils";
 import Loader from "../../components/Loader";
 import LoginBox from "./components/loginBox";
 import AuthWrapper from "./components/authWrapper";
+import { requiredMessage } from "../../components/errorMessage";
 
-export default () => {
+export default function SignupInvite() {
   const [invitation, setInvitation] = useState("");
   const [newuser, setNewUser] = useState(null);
 
@@ -29,7 +32,7 @@ export default () => {
     (async () => {
       try {
         if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
-        const { data, code, token } = await api.post(`/referent/signup_verify`, { invitationToken });
+        const { data, token } = await api.post(`/referent/signup_verify`, { invitationToken });
         if (token) api.setToken(token);
         setNewUser(data);
       } catch (error) {
@@ -49,6 +52,7 @@ export default () => {
 
   let title;
   if (newuser.department && newuser.role === ROLES.REFERENT_DEPARTMENT) {
+    // eslint-disable-next-line no-irregular-whitespace
     title = `Activez votre compte de Référent du département : ${newuser.department}`;
   } else {
     title = "Activez votre compte";
@@ -59,113 +63,146 @@ export default () => {
       <Header />
       <AuthWrapper>
         <Thumb />
-        <div>
-          <LoginBox>
-            <Title>{title}</Title>
-            <Formik
-              initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "" }}
-              onSubmit={async (values, actions) => {
-                try {
-                  const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken });
-                  actions.setSubmitting(false);
-                  if (ok && token) api.setToken(token);
-                  if (ok && user) dispatch(setUser(user));
-                } catch (e) {
-                  actions.setSubmitting(false);
-                  console.log("e", e);
-                  if (e.code === "PASSWORD_NOT_VALIDATED")
-                    return toastr.error(
-                      "Mot de passe incorrect",
-                      "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
-                      { timeOut: 10000 }
-                    );
-                  if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
-                  return toastr.error("Problème", translate(e.code));
-                }
-              }}
-            >
-              {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
-                return (
-                  <form onSubmit={handleSubmit}>
-                    <StyledFormGroup>
-                      <label>ADRESSE EMAIL</label>
-                      <InputField
-                        validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
-                        name="email"
-                        type="email"
-                        value={values.email}
-                        onChange={handleChange}
-                        placeholder="Email"
-                        haserror={errors.email}
+        <LoginBox>
+          <Title>{title}</Title>
+          <Formik
+            initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", repassword: "", acceptCGU: "" }}
+            onSubmit={async (values, actions) => {
+              try {
+                const { data: user, token, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken, acceptCGU: values.acceptCGU });
+                actions.setSubmitting(false);
+                if (ok && token) api.setToken(token);
+                if (ok && user) dispatch(setUser(user));
+              } catch (e) {
+                actions.setSubmitting(false);
+                console.log("e", e);
+                if (e.code === "PASSWORD_NOT_VALIDATED")
+                  return toastr.error(
+                    "Mot de passe incorrect",
+                    "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
+                    { timeOut: 10000 },
+                  );
+                if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
+                return toastr.error("Problème", translate(e.code));
+              }
+            }}>
+            {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
+              return (
+                <form onSubmit={handleSubmit}>
+                  <StyledFormGroup>
+                    <label>ADRESSE EMAIL</label>
+                    <InputField
+                      validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
+                      name="email"
+                      type="email"
+                      value={values.email}
+                      onChange={handleChange}
+                      placeholder="Email"
+                      haserror={errors.email}
+                    />
+                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
+                  </StyledFormGroup>
+                  <Row noGutters>
+                    <Col>
+                      <StyledFormGroup>
+                        <label htmlFor="firstName">Prénom</label>
+                        <InputField
+                          validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
+                          name="firstName"
+                          type="name"
+                          id="firstName"
+                          value={values.firstName}
+                          onChange={handleChange}
+                          placeholder="Prénom"
+                          haserror={errors.firstName}
+                        />
+                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.firstName}</p>
+                      </StyledFormGroup>
+                    </Col>
+                    <div style={{ width: 10 }} />
+                    <Col>
+                      <StyledFormGroup>
+                        <label htmlFor="lastName">Nom</label>
+                        <InputField
+                          validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
+                          name="lastName"
+                          type="lastName"
+                          id="lastName"
+                          value={values.lastName}
+                          onChange={handleChange}
+                          placeholder="Nom"
+                          haserror={errors.lastName}
+                        />
+                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.lastName}</p>
+                      </StyledFormGroup>
+                    </Col>
+                  </Row>
+                  <StyledFormGroup>
+                    <label htmlFor="password">
+                      <span>*</span>Mot de passe
+                    </label>
+                    <p style={{ fontSize: 12, color: colors.grey }}>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
+                    <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} name="password" id="password" />
+                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
+                  </StyledFormGroup>
+                  <StyledFormGroup>
+                    <label htmlFor="repassword">
+                      <span>*</span>Confirmation mot de passe
+                    </label>
+                    <PasswordEye
+                      validate={() => values.password !== values.repassword && "Les mots de passe ne correspondent pas."}
+                      autoComplete="new-password"
+                      value={values.repassword}
+                      onChange={handleChange}
+                      name="repassword"
+                      id="repassword"
+                      placeholder="Confirmez votre mot de passe"
+                    />
+                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.repassword}</p>
+                  </StyledFormGroup>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", marginBottom: "1rem" }}>
+                      <CheckBox
+                        id="checkboxCGU"
+                        validate={(v) => (!v || v === "false") && requiredMessage}
+                        type="checkbox"
+                        value="true"
+                        onChange={(e) => handleChange({ target: { name: "acceptCGU", value: e.target.checked ? "true" : "false" } })}
+                        name="acceptCGU"
+                        checked={values.acceptCGU === "true"}
+                        style={{ display: "flex" }}
                       />
-                      <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
-                    </StyledFormGroup>
-                    <Row noGutters>
-                      <Col>
-                        <StyledFormGroup>
-                          <label htmlFor="firstName">Prénom</label>
-                          <InputField
-                            validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                            name="firstName"
-                            type="name"
-                            id="firstName"
-                            value={values.firstName}
-                            onChange={handleChange}
-                            placeholder="Prénom"
-                            haserror={errors.firstName}
-                          />
-                          <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.firstName}</p>
-                        </StyledFormGroup>
-                      </Col>
-                      <div style={{ width: 10 }} />
-                      <Col>
-                        <StyledFormGroup>
-                          <label htmlFor="lastName">Nom</label>
-                          <InputField
-                            validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                            name="lastName"
-                            type="lastName"
-                            id="lastName"
-                            value={values.lastName}
-                            onChange={handleChange}
-                            placeholder="Nom"
-                            haserror={errors.lastName}
-                          />
-                          <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.lastName}</p>
-                        </StyledFormGroup>
-                      </Col>
-                    </Row>
-                    <StyledFormGroup>
-                      <label htmlFor="password">Mot de passe</label>
-                      <InputField
-                        validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                        autoComplete="new-password"
-                        name="password"
-                        type="password"
-                        id="repassword"
-                        value={values.password}
-                        onChange={handleChange}
-                        placeholder="Choisissez votre mot de passe"
-                        haserror={errors.password}
-                      />
-                      <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
-                    </StyledFormGroup>
-                    <Submit loading={isSubmitting} type="submit" color="primary">
-                      Activer mon compte
-                    </Submit>
-                    <Account>
-                      Vous avez déjà un compte ? <Link to="/auth/signin">Connectez-vous</Link>
-                    </Account>
-                  </form>
-                );
-              }}
-            </Formik>
-          </LoginBox>
-        </div>
+                      <label htmlFor="checkboxCGU" style={{ flex: 1, margin: 0 }}>
+                        <p style={{ marginBottom: "0" }}>
+                          J&apos;ai lu et j&apos;accepte les{" "}
+                          <a
+                            href={`${adminURL}/conditions-generales-utilisation`}
+                            target="_blank"
+                            style={{ textDecoration: "underline", color: colors.darkPurple }}
+                            rel="noreferrer">
+                            conditions générales d&apos;utilisation{" "}
+                          </a>
+                          de la plateforme du Service national universel
+                        </p>
+                      </label>
+                    </div>
+                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.acceptCGU}</p>
+                  </div>
+                  <Submit loading={isSubmitting} type="submit" color="primary">
+                    Activer mon compte
+                  </Submit>
+                  <Account>
+                    Vous avez déjà un compte ? <Link to="/auth/signin">Connectez-vous</Link>
+                  </Account>
+                </form>
+              );
+            }}
+          </Formik>
+        </LoginBox>
       </AuthWrapper>
     </div>
   );
-};
+}
 
 const Thumb = styled.div`
   min-height: 400px;
@@ -247,5 +284,22 @@ const Account = styled.div`
     color: #262a3e;
     font-weight: 600;
     margin-left: 5px;
+  }
+`;
+const CheckBox = styled(Field)`
+  display: flex;
+  margin-right: 1rem;
+  background-color: #fff;
+  color: #606266;
+  outline: 0;
+  padding: 9px 20px;
+  border-radius: 4px;
+  border: 1px solid;
+  border-color: ${({ haserror }) => (haserror ? "red" : "#dcdfe6")};
+  ::placeholder {
+    color: #d6d6e1;
+  }
+  :focus {
+    border: 1px solid #aaa;
   }
 `;

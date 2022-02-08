@@ -5,12 +5,13 @@ import { useSelector } from "react-redux";
 
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
+import FilterCohorte from "../components/FilterCohorte";
 
 import Status from "./status";
 
 import { REFERENT_ROLES } from "../../../utils";
 
-export default () => {
+export default function Index() {
   const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
 
@@ -20,26 +21,25 @@ export default () => {
 
   useEffect(() => {
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: user.department });
+      updateFilter({ department: [user.department] });
     } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
-      updateFilter({ region: user.region });
+      updateFilter({ region: [user.region] });
     } else {
-      updateFilter({ region: "", department: "" });
+      updateFilter({ region: [], department: [] });
     }
   }, []);
 
   return (
     <>
-      <Row style={{}}>
-        <Col md={6}>
+      <Row>
+        <Col style={{ display: "flex" }}>
           <Title>Centres</Title>
-        </Col>
-        <Col md={6}>
           {filter && (
             <>
               <FiltersList>
-                <FilterRegion updateFilter={updateFilter} filter={filter} />
-                <FilterDepartment updateFilter={updateFilter} filter={filter} />
+                <FilterCohorte onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} filter={filter} />
+                <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
+                <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
               </FiltersList>
             </>
           )}
@@ -48,7 +48,7 @@ export default () => {
       {filter && <Status filter={filter} />}
     </>
   );
-};
+}
 
 // Title line with filters
 const Title = styled.h2`
@@ -58,6 +58,8 @@ const Title = styled.h2`
   margin-bottom: 10px;
 `;
 const FiltersList = styled.div`
+  gap: 1rem;
+  flex: 1;
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;

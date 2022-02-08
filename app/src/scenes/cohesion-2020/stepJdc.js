@@ -12,7 +12,7 @@ import { translate } from "../../utils";
 import FormFooter from "../../components/form/FormFooter";
 import FormRadioLabelTrueFalse from "../../components/form/FormRadioLabelTrueFalse";
 
-export default () => {
+export default function JdcComponent() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -26,7 +26,7 @@ export default () => {
     <Wrapper>
       <Heading>
         <h2>Journée de Défense et Citoyenneté</h2>
-        <p>Informez ci-dessous l'administration de votre situation</p>
+        <p>Informez ci-dessous l&apos;administration de votre situation</p>
       </Heading>
       <Formik
         initialValues={young}
@@ -44,9 +44,8 @@ export default () => {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormRadioLabelTrueFalse
               title="Avez-vous réalisé votre Journée de Défense et Citoyenneté ?"
@@ -62,7 +61,7 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 40px;

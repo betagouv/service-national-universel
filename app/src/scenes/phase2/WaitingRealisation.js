@@ -24,23 +24,23 @@ export default () => {
           <Hero>
             <div className="content">
               <h1>
-                Réalisez vos <strong>84 heures de mission d'intérêt général</strong>
+                Réalisez vos <strong>84 heures de mission d&apos;intérêt général</strong>
               </h1>
               <p>
-                Partez à la découverte de l'engagement en réalisant 84 heures de mission d'intérêt général, au sein d'une ou plusieurs structures, en contribuant à leurs activités
-                concrètes !
+                Partez à la découverte de l&apos;engagement en réalisant 84 heures de mission d&apos;intérêt général, au sein d&apos;une ou plusieurs structures, en contribuant à
+                leurs activités concrètes !
               </p>
               <p>A vous de jouez : candidatez directement sur des missions parmi celles proposées dans cet espace !</p>
               <Separator />
               <p>
                 <strong>Préférences de missions</strong>
                 <br />
-                Ces choix permettront à l'administration de vous proposer des missions en cohérence avec vos motivations.
+                Ces choix permettront à l&apos;administration de vous proposer des missions en cohérence avec vos motivations.
                 <br />
                 <Link to="/preferences">Renseigner mes préférences de missions {">"}</Link>
               </p>
               <p>
-                <strong>Vos missions d'intérêt général</strong>
+                <strong>Vos missions d&apos;intérêt général</strong>
                 <br />
                 Consulter des milliers de missions disponibles pour la réalisation de votre phase 2, candidatez-y, classez vos choix et suivez vos candidatures
                 <br />

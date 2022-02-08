@@ -3,7 +3,7 @@ import { Col, Row } from "reactstrap";
 import { Subtitle, CardComponentPercentage } from "../../../components/dashboard";
 import { colors } from "../../../utils";
 
-export default ({ data, getLink }) => {
+export default function CohesionStayMedicalFileReceived({ data, getLink }) {
   const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
   return (
     <React.Fragment>
@@ -35,4 +35,4 @@ export default ({ data, getLink }) => {
       </Row>
     </React.Fragment>
   );
-};
+}

@@ -4,6 +4,7 @@ const passport = require("passport");
 const { capture } = require("../sentry");
 
 const CohesionCenterModel = require("../models/cohesionCenter");
+const SessionPhase1 = require("../models/sessionPhase1");
 const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
@@ -23,8 +24,8 @@ const {
 const renderFromHtml = require("../htmlToPdf");
 const { ROLES, canCreateOrUpdateCohesionCenter } = require("snu-lib/roles");
 const Joi = require("joi");
-const { serializeCohesionCenter, serializeYoung, serializeReferent } = require("../utils/serializer");
-const { validateNewCohesionCenter, validateUpdateCohesionCenter } = require("../utils/validator");
+const { serializeCohesionCenter, serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
+const { validateNewCohesionCenter, validateUpdateCohesionCenter, validateId } = require("../utils/validator");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -47,10 +48,21 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { error, value } = validateNewCohesionCenter(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const data = await CohesionCenterModel.create(value);
-    return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
+    const cohesionCenter = await CohesionCenterModel.create(value);
+
+    // create sessionPhase1 documents linked to this cohesion center
+    if (cohesionCenter.cohorts.length > 0) {
+      for (let cohort of cohesionCenter.cohorts) {
+        const cohesionCenterId = cohesionCenter._id;
+        const placesTotal = cohesionCenter.placesTotal;
+        const placesLeft = cohesionCenter.placesLeft;
+        await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft });
+      }
+    }
+
+    return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -130,42 +142,38 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
-router.post(
-  "/:centerId/assign-young-waiting-list/:youngId",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req, res) => {
-    try {
-      const { error, value } = Joi.object({ youngId: Joi.string().required(), centerId: Joi.string().required() })
-        .unknown()
-        .validate({ ...req.params }, { stripUnknown: true });
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ youngId: Joi.string().required(), centerId: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-      const { youngId, centerId } = value;
-      const young = await YoungModel.findById(youngId);
-      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const center = await CohesionCenterModel.findById(centerId);
-      if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const { youngId, centerId } = value;
+    const young = await YoungModel.findById(youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const center = await CohesionCenterModel.findById(centerId);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      // update youngs infos
-      young.set({
-        statusPhase1: "WAITING_LIST",
-        cohesionCenterId: center._id,
-        cohesionCenterName: center.name,
-        cohesionCenterCity: center.city,
-        cohesionCenterZip: center.zip,
-      });
-      await young.save({ fromUser: req.user });
+    // update youngs infos
+    young.set({
+      statusPhase1: "WAITING_LIST",
+      cohesionCenterId: center._id,
+      cohesionCenterName: center.name,
+      cohesionCenterCity: center.city,
+      cohesionCenterZip: center.zip,
+    });
+    await young.save({ fromUser: req.user });
 
-      center.waitingList.push(young._id);
-      await center.save();
+    center.waitingList.push(young._id);
+    await center.save();
 
-      return res.status(200).send({ data: serializeCohesionCenter(center), ok: true });
-    } catch (error) {
-      capture(error);
-      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-    }
+    return res.status(200).send({ data: serializeCohesionCenter(center), ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
-);
+});
 
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -176,6 +184,41 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/:id/cohort/:cohort/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ id: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const center = await CohesionCenterModel.findById(value.id);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort: value.cohort });
+    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    return res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionPhase1) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const center = await CohesionCenterModel.findById(value.id);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
+    if (!sessionsPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    return res.status(200).send({ ok: true, data: sessionsPhase1.map(serializeSessionPhase1) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -219,7 +262,7 @@ router.get("/young/:youngId", passport.authenticate(["referent", "young"], { ses
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && req.user._id.toString() !== id) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
@@ -229,18 +272,53 @@ router.get("/young/:youngId", passport.authenticate(["referent", "young"], { ses
   }
 });
 
-router.put("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const { error, value: newCenter } = validateUpdateCohesionCenter(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const center = await CohesionCenterModel.findById(newCenter._id);
+    const center = await CohesionCenterModel.findById(checkedId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    const previousCohorts = center.cohorts || [];
     center.set(newCenter);
     await center.save();
+
+    // if we change the cohorts, we need to update the sessionPhase1
+    if (newCenter?.cohorts?.length) {
+      const addedCohorts = newCenter.cohorts.filter((cohort) => !previousCohorts.includes(cohort));
+      const deletedCohorts = previousCohorts.filter((cohort) => !newCenter.cohorts.includes(cohort));
+
+      // add sessionPhase1 documents linked to this cohesion center
+      if (addedCohorts?.length > 0) {
+        for (let cohort of addedCohorts) {
+          const cohesionCenterId = center._id;
+          const placesTotal = center.placesTotal;
+          const placesLeft = center.placesTotal;
+          const session = await SessionPhase1.findOne({ cohesionCenterId, cohort });
+          if (session) {
+            session.set({ placesTotal, placesLeft });
+            await session.save();
+          } else {
+            await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft });
+          }
+        }
+      }
+
+      // ! MAYBE DANGEROUS ?
+      // delete sessionPhase1 documents linked to this cohesion center
+      if (deletedCohorts?.length > 0) {
+        for (let cohort of deletedCohorts) {
+          const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort });
+          await sessionPhase1?.remove();
+        }
+      }
+    }
 
     const data = await updatePlacesCenter(center);
     await updateCenterDependencies(center);
@@ -257,13 +335,17 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     await center.remove();
     await deleteCenterDependencies({ _id: id });
+    const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
+    for (let sessionPhase1 of sessionsPhase1) {
+      await sessionPhase1.remove();
+    }
     console.log(`Center ${id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
@@ -329,7 +411,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
         .replace(/{{COHESION_CENTER_NAME}}/g, young.cohesionCenterName || "")
         .replace(/{{COHESION_CENTER_LOCATION}}/g, COHESION_CENTER_LOCATION)
         .replace(/{{GENERAL_BG}}/g, template)
-        .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))
+        .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })),
     );
   }
 

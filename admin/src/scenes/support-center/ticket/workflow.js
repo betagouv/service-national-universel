@@ -17,8 +17,7 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
           const value = options.find((o) => o.id === e.target.value);
           handleChange({ target: { name, value } });
         }}
-        validate={(v) => !v && requiredMessage}
-      >
+        validate={(v) => !v && requiredMessage}>
         <option value="" disabled>
           {selectPlaceholder}
         </option>
@@ -31,6 +30,19 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
       {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
     </Col>
   );
+};
+
+export const step1 = {
+  TECHNICAL: {
+    id: "TECHNICAL",
+    label: "J'ai un problème technique",
+    tags: ["TAG_problème_technique", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
+  },
+  QUESTION: {
+    id: "QUESTION",
+    label: "J'ai une question",
+    tags: ["TAG_question", "AGENT_Startup_Support", "AGENT_Référent_Département", "AGENT_Référent_Région"],
+  },
 };
 
 export const typesReferent = {
@@ -94,6 +106,7 @@ export const subjectsReferent = {
     label: "Phase 3 - L'engagement",
     tags: ["TAG_phase_3"],
   },
+  // eslint-disable-next-line no-dupe-keys
   OTHER: {
     parentId: "SPECIAL_CASE",
     id: "OTHER",
@@ -206,6 +219,54 @@ export const subjectsStructure = {
   QUESTION_OTHER: {
     parentId: "QUESTION",
     id: "QUESTION_OTHER",
+    label: "Autre",
+    tags: ["TAG_autre"],
+  },
+};
+
+export const step2TechnicalPublic = {
+  DOWNLOAD: {
+    parentId: "TECHNICAL",
+    id: "DOWNLOAD",
+    label: "Je n'arrive pas à télécharger un document depuis la plateforme",
+    tags: ["TAG_téléchargment"],
+  },
+  UPLOAD: {
+    parentId: "TECHNICAL",
+    id: "UPLOAD",
+    label: "Je n'arrive pas à téléverser (déposer) un document",
+    tags: ["TAG_téléversement"],
+  },
+  LOGIN: {
+    parentId: "TECHNICAL",
+    id: "LOGIN",
+    label: "Je n'arrive pas à me connecter (Identifiant ou mot de passe incorrect)",
+    tags: ["TAG_probleme_connexion"],
+  },
+  OTHER: {
+    parentId: "TECHNICAL",
+    id: "OTHER",
+    label: "J'ai un autre problème",
+    tags: ["TAG_autre"],
+  },
+};
+
+export const step2QuestionPublic = {
+  PHASE_0: {
+    parentId: "QUESTION",
+    id: "PHASE_0",
+    label: "Les inscriptions des volontaires",
+    tags: ["TAG_phase_0"],
+  },
+  STRUCTURE: {
+    parentId: "QUESTION",
+    id: "STRUCTURE",
+    label: "L'inscription des structures",
+    tags: ["TAG_créer_compte_structure"],
+  },
+  OTHER: {
+    parentId: "QUESTION",
+    id: "OTHER",
     label: "Autre",
     tags: ["TAG_autre"],
   },

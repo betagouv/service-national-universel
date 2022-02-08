@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ title, subtitle, handleChange, name, values, value }) => {
+export default function DomainItem({ title, subtitle, handleChange, name, values, value }) {
   const onClick = () => {
     const d = values[name];
     const index = d.indexOf(value);
@@ -24,7 +24,7 @@ export default ({ title, subtitle, handleChange, name, values, value }) => {
       <p className="subtitle">{subtitle}</p>
     </Container>
   );
-};
+}
 
 const Container = styled.div`
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);

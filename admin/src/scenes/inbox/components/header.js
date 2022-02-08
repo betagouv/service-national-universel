@@ -3,10 +3,10 @@ import styled from "styled-components";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
-import { ticketStateIdByName } from "../../../utils";
 import { useSelector } from "react-redux";
+import { supportURL } from "../../../config.js";
 
-export default () => {
+export default function Header() {
   const openedTickets = useSelector((state) => state.Tickets.open);
   const newTickets = useSelector((state) => state.Tickets.new);
   const closedTickets = useSelector((state) => state.Tickets.closed);
@@ -29,13 +29,13 @@ export default () => {
         </Notification>
       </NotifcationContainer>
       <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-        <a href="https://support.snu.gouv.fr/help/fr-fr" className="button" target="_blank">
+        <a href={`${supportURL}/base-de-connaissance`} className="button" target="_blank" rel="noreferrer">
           Base de connaissance
         </a>
       </div>
     </HeaderContainer>
   );
-};
+}
 
 const HeaderContainer = styled.div`
   display: flex;

@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 import CircularProgress from "../components/CircularProgress";
 
 import api from "../../../services/api";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
+import { getLink, ROLES } from "../../../utils";
+import { useSelector } from "react-redux";
 
-export default ({ filter }) => {
+export default function PriorityArea({ filter }) {
   const [value, setValue] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -19,9 +23,10 @@ export default ({ filter }) => {
       };
 
       if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
-      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
-      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (filter.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filter.academy } });
 
       const { responses } = await api.esQuery("young", body);
       if (responses.length) {
@@ -39,21 +44,34 @@ export default ({ filter }) => {
     const noPercent = ((no * 100) / (no + yes)).toFixed(1);
     const yesPercent = ((yes * 100) / (no + yes)).toFixed(1);
 
+    if (user.role === ROLES.VISITOR) {
+      return (
+        <Content>
+          <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non" />
+          <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="Oui" />
+        </Content>
+      );
+    }
+
     return (
       <Content>
-        <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non" />
-        <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="Oui" />
+        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: ['QPV=%5B"false"%5D'] })}>
+          <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non" />
+        </Link>
+        <Link to={getLink({ base: `/inscription`, filter, filtersUrl: ['QPV=%5B"true"%5D'] })}>
+          <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="Oui" />
+        </Link>
       </Content>
     );
   }
 
   return (
     <Box style={{ height: "fit-content" }}>
-      <BoxHeadTitle>Issus d'un Quartier Prioritaire de la Ville</BoxHeadTitle>
+      <BoxHeadTitle>Issus d&apos;un Quartier Prioritaire de la Ville</BoxHeadTitle>
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );
-};
+}
 
 const Content = styled.div`
   display: flex;

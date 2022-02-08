@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-export default () => {
+export default function Index() {
   return (
     <Documents>
       <Heading>
@@ -17,7 +17,7 @@ export default () => {
       </Heading>
     </Documents>
   );
-};
+}
 
 const Documents = styled.div`
   overflow: hidden;

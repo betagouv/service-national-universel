@@ -9,7 +9,7 @@ import SelectStatusApplication from "../../components/selectStatusApplication";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel from "../../components/Panel";
 
-export default ({ onChange, value, application }) => {
+export default function PanelView({ onChange, value, application }) {
   const [young, setYoung] = useState(null);
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export default ({ onChange, value, application }) => {
       )}
     </Panel>
   );
-};
+}
 
 const Info = ({ children, title }) => {
   return (
@@ -134,19 +134,3 @@ const ApplicationDetails = ({ application }) => {
     </Link>
   );
 };
-
-const Button = styled(LoadingButton)`
-  color: #555;
-  background: ${({ icon }) => `url(${icon}) left 15px center no-repeat`};
-  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
-  border: 0;
-  outline: 0;
-  border-radius: 5px;
-  padding: 0.2rem 1rem;
-  padding-left: 2.5rem;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-right: 5px;
-  margin-top: 1rem;
-`;

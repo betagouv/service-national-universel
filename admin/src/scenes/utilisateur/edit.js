@@ -6,14 +6,25 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import ReactSelect from "react-select";
-import { Link } from "react-router-dom";
 
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, department2region, translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, colors } from "../../utils";
+import {
+  departmentList,
+  regionList,
+  department2region,
+  translate,
+  ROLES,
+  VISITOR_SUBROLES,
+  REFERENT_DEPARTMENT_SUBROLE,
+  REFERENT_REGION_SUBROLE,
+  colors,
+  canUpdateReferent,
+  canDeleteReferent,
+} from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../components/Loader";
@@ -22,13 +33,16 @@ import { setUser as ReduxSetUser } from "../../redux/auth/actions";
 import Emails from "../../components/views/Emails";
 import HistoricComponent from "../../components/views/Historic";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import { requiredMessage } from "../../components/errorMessage";
+import plausibleEvent from "../../services/pausible";
 
-export default (props) => {
+export default function Edit(props) {
   const [user, setUser] = useState();
   const [service, setService] = useState();
   const [centers, setCenters] = useState();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
+  const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
   const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const currentUser = useSelector((state) => state.Auth.user);
@@ -52,6 +66,8 @@ export default (props) => {
         const responseCenter = await api.get(`/cohesion-center`);
         const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         setCenters(c);
+        const responseSession = await api.get(`/referent/${id}/session-phase1`);
+        setSessionsWhereUserIsHeadCenter(responseSession.data);
       } catch (e) {
         console.log(e);
         return toastr.error("Une erreur s'est produite lors du chargement de cet utilisateur");
@@ -73,11 +89,8 @@ export default (props) => {
     handleChange({ target: { name: "department", value: "" } });
   };
 
-  const getSubRole = (role) => {
-    let subRole = [];
-    if (role === ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
-    if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
-    return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
+  const getSubRoleOptions = (subRoles) => {
+    return Object.keys(subRoles).map((e) => ({ value: e, label: translate(subRoles[e]) }));
   };
 
   async function modifyStructure() {
@@ -97,24 +110,11 @@ export default (props) => {
     }
   }
 
-  function canModify(user, value) {
-    if (user.role === ROLES.ADMIN) return true;
-    // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-    if (user.role === ROLES.REFERENT_REGION) {
-      if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(value.role) && user.region === value.region) return true;
-      return false;
-    }
-    if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      if (user.role === value.role && user.department === value.department) return true;
-      return false;
-    }
-    return false;
-  }
-
   const handleImpersonate = async () => {
     try {
+      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${user._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
       history.push("/dashboard");
       if (token) api.setToken(token);
       if (data) dispatch(ReduxSetUser(data));
@@ -128,7 +128,7 @@ export default (props) => {
     setModal({
       isOpen: true,
       onConfirm: () => onConfirmDelete(),
-      title: "Êtes-vous sûr(e) de vouloir supprimer ce profil ?",
+      title: `Êtes-vous sûr(e) de vouloir supprimer le profil de ${user.firstName} ${user.lastName} ?`,
       message: "Cette action est irréversible.",
     });
   };
@@ -152,11 +152,12 @@ export default (props) => {
         initialValues={user}
         onSubmit={async (values) => {
           try {
+            plausibleEvent("Utilisateur/Profil CTA - Enregistrer profil utilisateur");
             // if structure has changed but no saved
             if (
               user.structureId !== structure?._id &&
               !confirm(
-                'Attention, vous avez modifié la structure de cet utilisateur sans valider. Si vous continuez, ce changement de structure ne sera pas pris en compte. Pour valider ce changement, cliquez sur annuler et valider en cliquant sur "Modifier la structure".'
+                'Attention, vous avez modifié la structure de cet utilisateur sans valider. Si vous continuez, ce changement de structure ne sera pas pris en compte. Pour valider ce changement, cliquez sur annuler et valider en cliquant sur "Modifier la structure".',
               )
             )
               return;
@@ -169,9 +170,8 @@ export default (props) => {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, isSubmitting }) => (
           <>
             <TitleWrapper>
               <div>
@@ -180,7 +180,7 @@ export default (props) => {
               </div>
               <div style={{ display: "flex" }}>
                 {values.structureId ? (
-                  <Link to={`/structure/${values.structureId}`}>
+                  <Link to={`/structure/${values.structureId}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
                     <PanelActionButton icon="eye" title="Voir la structure" />
                   </Link>
                 ) : null}
@@ -210,7 +210,7 @@ export default (props) => {
                   </BoxContent>
                 </Box>
               </Col>
-              {canModify(currentUser, values) && (
+              {canUpdateReferent({ actor: currentUser, originalTarget: values }) && (
                 <Col md={6} style={{ marginBottom: "20px" }}>
                   <Box>
                     <BoxHeadTitle>Information</BoxHeadTitle>
@@ -226,10 +226,12 @@ export default (props) => {
                         }}
                         allowEmpty={false}
                         title="Rôle"
-                        options={[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].map((key) => ({
-                          value: key,
-                          label: translate(key),
-                        }))}
+                        options={[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR].map(
+                          (key) => ({
+                            value: key,
+                            label: translate(key),
+                          }),
+                        )}
                       />
                       {values.role === ROLES.HEAD_CENTER ? (
                         centers ? (
@@ -262,9 +264,16 @@ export default (props) => {
                           <Loader />
                         )
                       ) : null}
-                      {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(values.role) ? (
-                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
+                      {values.role === ROLES.REFERENT_DEPARTMENT ? (
+                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
                       ) : null}
+                      {values.role === ROLES.REFERENT_REGION ? (
+                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
+                      ) : null}
+                      {values.role === ROLES.VISITOR ? (
+                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(VISITOR_SUBROLES)} />
+                      ) : null}
+
                       {values.role === ROLES.REFERENT_DEPARTMENT ? (
                         <Select
                           disabled={currentUser.role !== ROLES.ADMIN}
@@ -294,6 +303,14 @@ export default (props) => {
                           options={regionList.map((r) => ({ value: r, label: r }))}
                         />
                       ) : null}
+                      {values.role === ROLES.HEAD_CENTER ? (
+                        <Row className="detail">
+                          <Col md={4}>
+                            <label>Séjours </label>
+                          </Col>
+                          <Col md={8}>{sessionsWhereUserIsHeadCenter.map((session) => session.cohort).join(", ")}</Col>
+                        </Row>
+                      ) : null}
                     </BoxContent>
                   </Box>
                 </Col>
@@ -309,58 +326,91 @@ export default (props) => {
           <HistoricComponent model="referent" value={user} />
         </Box>
       ) : null}
-      {currentUser.role === ROLES.ADMIN ||
-      ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) ? (
+      {canDeleteReferent({ actor: currentUser, originalTarget: user }) ? (
         <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn>
       ) : null}
-      {canModify(currentUser, user) && user.role === ROLES.REFERENT_DEPARTMENT && (
-        <Formik
-          initialValues={service || { department: user.department }}
-          onSubmit={async (values) => {
-            try {
-              const { ok, code, data } = await api.post(`/department-service`, values);
-              if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-              setService(data);
-              toastr.success("Service departemental mis à jour !");
-            } catch (e) {
-              console.log(e);
-              toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-            }
-          }}
-        >
-          {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
-            <>
-              <TitleWrapper>
-                <div>
-                  <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
-                </div>
-                <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                  Enregistrer
-                </SaveBtn>
-              </TitleWrapper>
-              <Row>
-                <Col md={6} style={{ marginBottom: "20px" }}>
-                  <Box>
-                    <BoxHeadTitle>{`Service Départemental`}</BoxHeadTitle>
-                    <BoxContent direction="column">
-                      <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
-                      <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
-                      <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
-                      <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
-                      <Item title="Ville" values={values} name="city" handleChange={handleChange} />
-                    </BoxContent>
-                    <BoxHeadTitle>Contact convocation</BoxHeadTitle>
-                    <BoxContent direction="column">
-                      <Item title="Nom du Contact" values={values} name="contactName" handleChange={handleChange} />
-                      <Item title="Tel." values={values} name="contactPhone" handleChange={handleChange} />
-                      <Item title="Email" values={values} name="contactMail" handleChange={handleChange} />
-                    </BoxContent>
-                  </Box>
-                </Col>
-              </Row>
-            </>
-          )}
-        </Formik>
+      {canUpdateReferent({ actor: currentUser, originalTarget: user }) && user.role === ROLES.REFERENT_DEPARTMENT && (
+        <>
+          <Formik
+            initialValues={service || { department: user.department }}
+            onSubmit={async (values) => {
+              try {
+                const { ok, code, data } = await api.post(`/department-service`, values);
+                if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+                setService(data);
+                toastr.success("Service departemental mis à jour !");
+              } catch (e) {
+                console.log(e);
+                toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+              }
+            }}>
+            {({ values, handleChange, handleSubmit, isSubmitting }) => (
+              <>
+                <TitleWrapper>
+                  <div>
+                    <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
+                  </div>
+                </TitleWrapper>
+                <Row>
+                  <Col md={6} style={{ marginBottom: "20px" }}>
+                    <Box>
+                      <BoxHeadTitle>{`Service Départemental`}</BoxHeadTitle>
+                      <BoxContent direction="column">
+                        <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
+                        <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
+                        <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
+                        <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
+                        <Item title="Ville" values={values} name="city" handleChange={handleChange} />
+                      </BoxContent>
+                      <div style={{ display: "flex", justifyContent: "flex-end", padding: "0 2rem" }}>
+                        <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                          Enregistrer
+                        </SaveBtn>
+                      </div>
+                    </Box>
+                  </Col>
+                </Row>
+              </>
+            )}
+          </Formik>
+          <Row>
+            {["Février 2022", "Juin 2022", "Juillet 2022", "2021"].map((cohort) => (
+              <Formik
+                key={`contact-${cohort}`}
+                initialValues={service?.contacts?.find((e) => e.cohort === cohort) || {}}
+                onSubmit={async (values) => {
+                  try {
+                    // return console.log("✍️ ~ values", values);
+                    const { ok, code, data } = await api.post(`/department-service/${service._id}/cohort/${cohort}/contact`, { ...values, cohort });
+                    if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+                    setService(data);
+                    toastr.success("Service departemental mis à jour !");
+                  } catch (e) {
+                    console.log(e);
+                    toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+                  }
+                }}>
+                {({ values, handleChange, handleSubmit, isSubmitting }) => (
+                  <Col md={6} style={{ marginBottom: "20px" }}>
+                    <Box>
+                      <BoxHeadTitle>Contacts convocation ({cohort})</BoxHeadTitle>
+                      <BoxContent direction="column">
+                        <Item title="Nom du Contact" values={values} name="contactName" handleChange={handleChange} />
+                        <Item title="Tel." values={values} name="contactPhone" handleChange={handleChange} />
+                        <Item title="Email" values={values} name="contactMail" handleChange={handleChange} />
+                      </BoxContent>
+                      <div style={{ display: "flex", justifyContent: "flex-end", padding: "0 2rem" }}>
+                        <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                          Enregistrer
+                        </SaveBtn>
+                      </div>
+                    </Box>
+                  </Col>
+                )}
+              </Formik>
+            ))}
+          </Row>
+        </>
       )}
       <ModalConfirm
         isOpen={modal?.isOpen}
@@ -374,7 +424,7 @@ export default (props) => {
       />
     </Wrapper>
   );
-};
+}
 
 const Item = ({ title, values, name, handleChange, type = "text", disabled = false }) => {
   const renderInput = () => {
@@ -415,7 +465,7 @@ const Item = ({ title, values, name, handleChange, type = "text", disabled = fal
   );
 };
 
-const Select = ({ title, name, values, onChange, disabled, errors, touched, validate, options, allowEmpty = true }) => {
+const Select = ({ title, name, values, onChange, disabled, options, allowEmpty = true }) => {
   return (
     <Row className="detail">
       <Col md={4}>
@@ -498,8 +548,7 @@ const AutocompleteSelectStructure = ({ options, structure, setStructure, onClick
               marginTop: "1rem",
               marginLeft: "0",
               padding: "7px 20px",
-            }}
-          >
+            }}>
             Modifier la structure
           </LoadingButton>
         </Col>

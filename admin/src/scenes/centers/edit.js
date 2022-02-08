@@ -2,33 +2,61 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { Formik } from "formik";
+import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-import { translate, departmentList, regionList, department2region } from "../../utils";
+import { translate } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import Item from "./components/Item";
 import Select from "./components/Select";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import AddressInput from "../../components/addressInputV2";
+import MultiSelect from "../../components/Multiselect";
+import Error, { requiredMessage } from "../../components/errorMessage";
 
-export default (props) => {
+export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
+  const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const isNew = !props?.match?.params?.id;
+  const user = useSelector((state) => state.Auth.user);
 
-  async function initCenter() {
+  async function init() {
     if (isNew) return setDefaultValue(null);
     const id = props.match && props.match.params && props.match.params.id;
-    const { data } = await api.get(`/cohesion-center/${id}`);
-    setDefaultValue(data);
+    const { data: center } = await api.get(`/cohesion-center/${id}`);
+    let obj = center;
+
+    if (!center || !center?.cohorts || !center?.cohorts?.length) return;
+
+    let sessionsAdded = [];
+    for (const cohort of center.cohorts) {
+      const sessionPhase1Response = await api.get(`/cohesion-center/${id}/cohort/${cohort}/session-phase1`);
+      if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
+      sessionsAdded.push(sessionPhase1Response.data);
+      obj[sessionPhase1Response.data.cohort] = sessionPhase1Response.data.placesTotal;
+    }
+
+    setDefaultValue(obj);
+    setSessions(sessionsAdded);
   }
 
   useEffect(() => {
-    initCenter();
+    init();
   }, []);
+
+  const updateSessions = async (newValues) => {
+    for (const session of sessions) {
+      if (session.placesTotal !== newValues[session.cohort]) {
+        const { ok, code } = await api.put(`/session-phase1/${session._id}`, { placesTotal: newValues[session.cohort] });
+        if (!ok) return toastr.error(`Oups, une erreur est survenue lors de la mise à jour de la session ${session.cohort}`, translate(code));
+      }
+    }
+  };
 
   if (!defaultValue && !isNew) return <Loader />;
 
@@ -43,7 +71,8 @@ export default (props) => {
           if (isNew) values.placesLeft = values.placesTotal;
           else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
 
-          const { ok, code, data } = values._id ? await api.put("/cohesion-center", values) : await api.post("/cohesion-center", values);
+          const { ok, code, data } = values._id ? await api.put(`/cohesion-center/${values._id}`, values) : await api.post("/cohesion-center", values);
+          await updateSessions(values);
 
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));
@@ -53,9 +82,8 @@ export default (props) => {
           setLoading(false);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre", e?.error?.message);
         }
-      }}
-    >
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      }}>
+      {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'un centre"}</Title>
@@ -68,72 +96,86 @@ export default (props) => {
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxHeadTitle>Informations générales</BoxHeadTitle>
+                  <BoxHeadTitle>Informations générales sur le centre</BoxHeadTitle>
                   <BoxContent direction="column">
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item title="Code" values={values} name={"code"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" handleChange={handleChange} />
+                    <Item disabled={user.role !== "admin"} title="Code 2022" values={values} name="code2022" handleChange={handleChange} />
+                    <Select
+                      name="pmr"
+                      values={values}
+                      handleChange={handleChange}
+                      title="Accessibilité aux personnes à mobilité réduite"
+                      options={[
+                        { value: "true", label: "Oui" },
+                        { value: "false", label: "Non" },
+                      ]}
+                      required
+                      errors={errors}
+                      touched={touched}
+                    />
+                    <MultiSelectWithTitle
+                      required
+                      errors={errors}
+                      touched={touched}
+                      title="Séjour(s) de cohésion concerné(s)"
+                      value={values.cohorts}
+                      onChange={handleChange}
+                      name="cohorts"
+                      options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
+                      placeholder="Sélectionner un ou plusieurs séjour de cohésion"
+                    />
                   </BoxContent>
                 </Box>
               </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxHeadTitle>Coordonnées</BoxHeadTitle>
+                  <BoxHeadTitle>Adresse du centre</BoxHeadTitle>
                   <BoxContent direction="column">
-                    <Item title="Adresse" values={values} name={"address"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item title="Ville" values={values} name={"city"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item title="Code Postal" values={values} name={"zip"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Select
-                      handleChange={handleChange}
-                      name="department"
-                      values={values}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        handleChange({ target: { name: "department", value } });
-                        const region = department2region[value];
-                        handleChange({ target: { name: "region", value: region } });
+                    <AddressInput
+                      keys={{
+                        country: "country",
+                        city: "city",
+                        zip: "zip",
+                        address: "address",
+                        location: "location",
+                        department: "department",
+                        region: "region",
+                        addressVerified: "addressVerified",
                       }}
-                      title="Département"
-                      options={departmentList.map((d) => ({ value: d, label: d }))}
+                      values={values}
+                      departAndRegionVisible={true}
+                      handleChange={handleChange}
                       errors={errors}
                       touched={touched}
-                      required
-                    />
-                    <Select
-                      handleChange={handleChange}
-                      name="region"
-                      values={values}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        handleChange({ target: { name: "region", value } });
-                        handleChange({ target: { name: "department", value: "" } });
-                      }}
-                      title="Région"
-                      options={regionList.map((r) => ({ value: r, label: r }))}
-                      errors={errors}
-                      touched={touched}
+                      validateField={validateField}
                       required
                     />
                   </BoxContent>
                 </Box>
               </Col>
-              {/* <Col md={6} style={{ marginBottom: "20px" }}>
+            </Row>
+            <Row>
+              <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxHeadTitle>Informations complémentaires</BoxHeadTitle>
+                  <BoxHeadTitle>Nombre de places disponibles par séjour</BoxHeadTitle>
                   <BoxContent direction="column">
-                    <Select
-                      name="outfitDelivered"
-                      values={values}
-                      handleChange={handleChange}
-                      title="Tenue livrées"
-                      options={[
-                        { value: "true", label: "Oui" },
-                        { value: "false", label: "Non" },
-                      ]}
-                    />
+                    {sessions.map((session) => (
+                      <Item
+                        key={session._id}
+                        title={session.cohort}
+                        values={values}
+                        name={session.cohort}
+                        placeholder="Nombre de place"
+                        handleChange={handleChange}
+                        required
+                        errors={errors}
+                        touched={touched}
+                      />
+                    ))}
                   </BoxContent>
                 </Box>
-              </Col> */}
+              </Col>
             </Row>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
@@ -145,6 +187,20 @@ export default (props) => {
         </div>
       )}
     </Formik>
+  );
+}
+const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder, required, errors, touched }) => {
+  return (
+    <Row className="detail">
+      <Col md={4}>
+        <label>{title}</label>
+      </Col>
+      <Col md={8}>
+        <Field hidden value={value} name={name} onChange={onChange} validate={(v) => required && !v?.length && requiredMessage} />
+        <MultiSelect value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} />
+        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
+      </Col>
+    </Row>
   );
 };
 

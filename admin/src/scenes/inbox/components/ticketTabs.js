@@ -10,14 +10,14 @@ import SuccessIcon from "../../../components/SuccessIcon";
 
 import api from "../../../services/api";
 
-export default ({ setTicket, selectedTicket }) => {
+export default function TicketTabs({ setTicket, selectedTicket }) {
   const [stateFilter, setStateFilter] = useState();
   const [tickets, setTickets] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
   const getTickets = async (tags) => {
     try {
-      const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
+      const { data } = await api.post(`/zammad-support-center/ticket/search-by-tags?withArticles=true`, { tags });
       setTickets(data);
     } catch (err) {
       console.log("Oups, une erreur s'est produite.");
@@ -48,19 +48,19 @@ export default ({ setTicket, selectedTicket }) => {
   };
 
   const displayState = (state) => {
-    if (state === "ouvert")
+    if (state === "open")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
         </StateContainer>
       );
-    if (state === "fermé")
+    if (state === "closed")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
         </StateContainer>
       );
-    if (state === "nouveau")
+    if (state === "new")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
@@ -75,13 +75,13 @@ export default ({ setTicket, selectedTicket }) => {
           <TabItem onClick={() => setStateFilter()} isActive={!stateFilter}>
             Tous
           </TabItem>
-          <TabItem onClick={() => setStateFilter(ticketStateIdByName("nouveau"))} isActive={stateFilter === ticketStateIdByName("nouveau")}>
+          <TabItem onClick={() => setStateFilter(ticketStateIdByName("new"))} isActive={stateFilter === ticketStateIdByName("new")}>
             Non&nbsp;lu(s)
           </TabItem>
-          <TabItem onClick={() => setStateFilter(ticketStateIdByName("ouvert"))} isActive={stateFilter === ticketStateIdByName("ouvert")}>
+          <TabItem onClick={() => setStateFilter(ticketStateIdByName("open"))} isActive={stateFilter === ticketStateIdByName("open")}>
             Ouvert(s)
           </TabItem>
-          <TabItem onClick={() => setStateFilter(ticketStateIdByName("fermé"))} isActive={stateFilter === ticketStateIdByName("fermé")}>
+          <TabItem onClick={() => setStateFilter(ticketStateIdByName("closed"))} isActive={stateFilter === ticketStateIdByName("closed")}>
             Archivé(s)
           </TabItem>
           {/* todo other filters */}
@@ -118,7 +118,7 @@ export default ({ setTicket, selectedTicket }) => {
       </List>
     </HeroContainer>
   );
-};
+}
 
 const StateContainer = styled.div`
   display: flex;

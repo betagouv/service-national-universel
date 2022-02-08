@@ -9,12 +9,12 @@ import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { useSelector } from "react-redux";
 
-export default () => {
+export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const [programs, setPrograms] = useState();
   useEffect(() => {
     (async () => {
-      const { data, ok, code } = await api.get("/program");
+      const { data, ok } = await api.get("/program");
       if (!ok) return toastr.error("nope");
       setPrograms(data);
     })();
@@ -23,7 +23,7 @@ export default () => {
   return (
     <Container>
       <Heading>
-        <h1>Les grands programmes d'engagement</h1>
+        <h1>Les grands programmes d&apos;engagement</h1>
         <p>Rejoignez plus 100 000 jeunes français déjà engagés dans de grandes causes</p>
       </Heading>
       <Row>
@@ -43,7 +43,7 @@ export default () => {
       </Row>
     </Container>
   );
-};
+}
 
 const Heading = styled.div`
   margin-bottom: 40px;

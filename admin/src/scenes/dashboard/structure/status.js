@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
 import { translate, YOUNG_STATUS_COLORS, getLink } from "../../../utils";
 
 import api from "../../../services/api";
@@ -9,12 +8,10 @@ import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage
 
 const legalStatusTypes = ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"];
 
-export default ({ filter }) => {
+export default function Status({ filter }) {
   const [status, setStatus] = useState({});
   const [withNetworkId, setWithNetworkId] = useState(0);
   const [total, setTotal] = useState(0);
-
-  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     async function initStatus() {
@@ -28,8 +25,8 @@ export default ({ filter }) => {
         size: 0,
       };
 
-      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery("structure", body);
       if (responses.length) {
@@ -89,4 +86,4 @@ export default ({ filter }) => {
       </Row>
     </>
   );
-};
+}

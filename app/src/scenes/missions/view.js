@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Container } from "reactstrap";
+import { Container, Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
@@ -13,8 +12,9 @@ import ApplyDoneModal from "./components/ApplyDoneModal";
 import Loader from "../../components/Loader";
 import Badge from "../../components/Badge";
 import DomainThumb from "../../components/DomainThumb";
+import plausibleEvent from "../../services/plausible";
 
-export default (props) => {
+export default function View(props) {
   const [mission, setMission] = useState();
   const [modal, setModal] = useState(null);
 
@@ -112,7 +112,7 @@ export default (props) => {
       </Footer>
     </Container>
   );
-};
+}
 
 const ApplyButton = ({ applied, placesLeft, setModal }) => {
   return applied ? (
@@ -124,7 +124,13 @@ const ApplyButton = ({ applied, placesLeft, setModal }) => {
     </>
   ) : (
     <>
-      <Button onClick={() => setModal("APPLY")}>Candidater</Button>
+      <Button
+        onClick={() => {
+          setModal("APPLY");
+          plausibleEvent("Phase2/CTA missions - Candidater");
+        }}>
+        Candidater
+      </Button>
       <p className="button-subtitle">{`${placesLeft} volontaire${placesLeft > 1 ? "s" : ""} recherché${placesLeft > 1 ? "s" : ""}`}</p>
     </>
   );

@@ -6,7 +6,7 @@ import { Col, Row } from "reactstrap";
 import Badge from "../../../components/Badge";
 import DomainThumb from "../../../components/DomainThumb";
 
-export default ({ id, title, domain, subtitle, tags = [], places, location, onClick, applied, isMilitaryPreparation }) => {
+export default function MissionCard({ id, title, domain, subtitle, tags = [], places, location, applied, isMilitaryPreparation }) {
   return (
     <>
       <Card>
@@ -44,14 +44,7 @@ export default ({ id, title, domain, subtitle, tags = [], places, location, onCl
       </Card>
     </>
   );
-};
-
-const Separator = styled.hr`
-  margin: 0 2.5rem;
-  height: 1px;
-  border-style: none;
-  background-color: #e5e7eb;
-`;
+}
 
 const Card = styled(Row)`
   margin-bottom: 30px;

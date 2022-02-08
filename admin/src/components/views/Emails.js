@@ -1,14 +1,14 @@
+/* eslint-disable no-useless-escape */
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { formatLongDateUTC } from "../../utils";
+import { formatLongDateUTC, ROLES, colors } from "../../utils";
 import api from "../../services/api";
 import { Box } from "../../components/box";
-import { ROLES, colors } from "../../utils";
 
-export default ({ email }) => {
+export default function Emails({ email }) {
   const [emails, setEmails] = useState();
   const user = useSelector((state) => state.Auth.user);
   const [minify, setMinify] = useState(true);
@@ -40,6 +40,7 @@ export default ({ email }) => {
             <thead>
               <tr>
                 <th>id</th>
+                <th>Template id</th>
                 <th style={{ width: "40%" }}>Objet</th>
                 <th>Evenement</th>
                 <th>Date</th>
@@ -58,12 +59,12 @@ export default ({ email }) => {
         </>
       ) : (
         <NoResult>
-          <b>{email}</b> n'a reçu aucun mail.
+          <b>{email}</b> n&apos;a reçu aucun mail.
         </NoResult>
       )}
     </Box>
   );
-};
+}
 
 const Hit = ({ hit }) => {
   const translate = (t) => {
@@ -106,7 +107,8 @@ const Hit = ({ hit }) => {
   };
   return (
     <tr>
-      <td>{hit._id}</td>
+      <td style={{ fontSize: "0.8rem" }}>{hit._id}</td>
+      <td>{hit.templateId || "-"}</td>
       <td>{hit.subject}</td>
       <td>{translate(hit.event)}</td>
       <td>{formatLongDateUTC(hit.date)}</td>

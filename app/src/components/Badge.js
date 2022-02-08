@@ -1,16 +1,16 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ text, textColor, backgroundColor, tooltipText, ...rest }) => {
+export default function Badge({ text, textColor, backgroundColor, tooltipText, ...rest }) {
   return (
-    <Badge {...rest} textColor={textColor} backgroundColor={backgroundColor}>
+    <BadgeContainer {...rest} textColor={textColor} backgroundColor={backgroundColor}>
       {text}
       {tooltipText ? <div className="tooltiptext">{tooltipText}</div> : null}
-    </Badge>
+    </BadgeContainer>
   );
-};
+}
 
-const Badge = styled.div`
+const BadgeContainer = styled.div`
   position: relative;
   display: inline-block;
   padding: 0.25rem 1rem;

@@ -11,11 +11,13 @@ import api from "../../../services/api";
 import AssignMeetingPoint from "../components/AssignMeetingPoint";
 import { translate, canAssignMeetingPoint, colors } from "../../../utils";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import LoadingButton from "../../../components/buttons/LoadingButton";
 
-export default ({ values, handleChange, handleSubmit }) => {
+export default function MeetingPointView({ values, handleChange, handleSubmit }) {
   const [meetingPoint, setMeetingPoint] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const user = useSelector((state) => state.Auth.user);
+  const [isLoading, setIsLoading] = useState(false);
 
   const getData = async () => {
     const { data, code, ok } = await api.get(`/young/${values._id}/meeting-point`);
@@ -23,10 +25,31 @@ export default ({ values, handleChange, handleSubmit }) => {
     setMeetingPoint(data);
   };
 
+  const onClickDeplacementPhase1Autonomous = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: onConfirmDeplacementPhase1Autonomous,
+      title: `Êtes-vous sûr de vouloir déclarer que ${values.firstName} se rendra au centre de cohésion par ses propres moyens ?`,
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDeplacementPhase1Autonomous = async () => {
+    const { data, code, ok } = await api.post(`/young/${values._id}/deplacementPhase1Autonomous`);
+    if (!ok) {
+      setIsLoading(false);
+      return toastr.error("error", translate(code));
+    }
+    handleChange({ target: { name: "meetingPointId", value: undefined } });
+    handleChange({ target: { name: "deplacementPhase1Autonomous", value: "true" } });
+    handleSubmit();
+    setIsLoading(false);
+  };
+
   const onClickCancel = () => {
     setModal({
       isOpen: true,
-      onConfirm: () => onConfirmCancel(),
+      onConfirm: onConfirmCancel,
       title: "Êtes-vous sûr de vouloir supprimer ce choix de point de rassemblement ?",
       message: "Cette action est irréversible.",
     });
@@ -34,7 +57,7 @@ export default ({ values, handleChange, handleSubmit }) => {
 
   const onConfirmCancel = async () => {
     try {
-      const { data, code, ok } = await api.put(`/young/${values._id}/meeting-point/cancel`);
+      const { code, ok } = await api.put(`/young/${values._id}/meeting-point/cancel`);
       if (!ok) return toastr.error("error", translate(code));
       handleChange({ target: { name: "deplacementPhase1Autonomous", value: undefined } });
       handleChange({ target: { name: "meetingPointId", value: undefined } });
@@ -68,16 +91,9 @@ export default ({ values, handleChange, handleSubmit }) => {
                   </CancelButton>
                 ) : null}
                 {canAssignMeetingPoint(user) && !meetingPoint && values.deplacementPhase1Autonomous !== "true" ? (
-                  <CancelButton
-                    color={colors.darkPurple}
-                    onClick={() => {
-                      handleChange({ target: { name: "meetingPointId", value: undefined } });
-                      handleChange({ target: { name: "deplacementPhase1Autonomous", value: "true" } });
-                      handleSubmit();
-                    }}
-                  >
+                  <LoadingButton loading={isLoading} disabled={isLoading} onClick={onClickDeplacementPhase1Autonomous}>
                     {values.firstName} se rendra au centre de cohésion par ses propres moyens.
-                  </CancelButton>
+                  </LoadingButton>
                 ) : null}
               </>
             )}
@@ -96,7 +112,7 @@ export default ({ values, handleChange, handleSubmit }) => {
       />
     </>
   );
-};
+}
 
 const MeetingPoint = ({ value }) => {
   return (

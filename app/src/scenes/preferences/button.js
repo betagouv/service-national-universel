@@ -3,7 +3,7 @@ import { requiredMessage } from "./errorMessage";
 import styled from "styled-components";
 import { Field } from "formik";
 
-export default ({ title, handleChange, name, value, values, onClick }) => {
+export default function Button({ title, handleChange, name, value, values, onClick }) {
   const handleClick = () => {
     if (values[name] === value) value = "";
     if (onClick) onClick();
@@ -23,7 +23,7 @@ export default ({ title, handleChange, name, value, values, onClick }) => {
       {title}
     </Container>
   );
-};
+}
 
 const Container = styled.div`
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);

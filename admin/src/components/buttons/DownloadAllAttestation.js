@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import LoadingButton from "./LoadingButton";
 import downloadPDF from "../../utils/download-pdf";
 
-export default ({ cohesionCenterId, children, disabled, uri }) => {
+export default function DownloadAllAttestation({ sessionPhase1, children }) {
   const [loading, setLoading] = useState();
 
   const viewAttestation = async () => {
     setLoading(true);
     await downloadPDF({
-      url: `/cohesion-center/${cohesionCenterId}/certificate`,
+      url: `/session-phase1/${sessionPhase1}/certificate`,
       body: { options: { landscape: true } },
       fileName: `attestations.pdf`,
     });
@@ -19,4 +19,4 @@ export default ({ cohesionCenterId, children, disabled, uri }) => {
       {children}
     </LoadingButton>
   );
-};
+}

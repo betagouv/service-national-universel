@@ -1,10 +1,14 @@
 import React from "react";
 import styled from "styled-components";
-import { STEPS } from "../utils";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-export default ({ step }) => {
+import { STEPS } from "../utils";
+import HelpButton from "../../../components/buttons/HelpButton";
+import { YOUNG_STATUS } from "../../../utils";
+import plausibleEvent from "../../../services/plausible";
+
+export default function InscriptionDrawer({ step }) {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
 
@@ -41,21 +45,20 @@ export default ({ step }) => {
               </a>
             </Logos>
           </Header>
-          <a onClick={() => history.push("/inscription/coordonnees")}>
-            <div className="icon">
-              <img src={require("../../../assets/logo-snu.png")} height={36} />
-            </div>
-            <div style={{ color: "white" }}>
-              Inscription
-              <span>En cours</span>
-            </div>
-          </a>
+          {young && ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young?.status) ? (
+            <a className="back-button" onClick={() => history.push("/")}>
+              {"<"} Retour à mon espace
+            </a>
+          ) : null}
           <ul className="stepNav">
             <Element status={getStatus(STEPS.PROFIL)}>
               <a onClick={() => handleClick(STEPS.PROFIL)}>Mon profil</a>
             </Element>
             <Element status={getStatus(STEPS.COORDONNEES)}>
               <a onClick={() => handleClick(STEPS.COORDONNEES)}>Coordonnées</a>
+            </Element>
+            <Element status={getStatus(STEPS.AVAILABILITY)}>
+              <a onClick={() => handleClick(STEPS.AVAILABILITY)}>Disponibilités</a>
             </Element>
             <Element status={getStatus(STEPS.PARTICULIERES)}>
               <a onClick={() => handleClick(STEPS.PARTICULIERES)}>Situations particulières</a>
@@ -66,12 +69,30 @@ export default ({ step }) => {
             <Element status={getStatus(STEPS.CONSENTEMENTS)}>
               <a onClick={() => handleClick(STEPS.CONSENTEMENTS)}>Consentements</a>
             </Element>
+            <Element status={getStatus(STEPS.DOCUMENTS)}>
+              <a onClick={() => handleClick(STEPS.DOCUMENTS)}>Pièces justificatives</a>
+            </Element>
           </ul>
         </li>
       </MainNav>
+      <HelpButton
+        to={`/public-besoin-d-aide?from=${window.location.pathname}`}
+        onClick={() => {
+          plausibleEvent("Funnel Inscription/CTA - Aide", { url: decodeURIComponent(window.location.search).split("?from=")[1] });
+        }}
+      />
+      {young &&
+      [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) ? (
+        <DrawerButton
+          onClick={() => {
+            plausibleEvent("Funnel Inscription/CTA - Se désister", { step: step });
+          }}>
+          <Link to="/inscription/desistement">Se désister du SNU</Link>
+        </DrawerButton>
+      ) : null}
     </Sidebar>
   );
-};
+}
 
 const Logos = styled.div`
   cursor: pointer;
@@ -105,23 +126,6 @@ const Sidebar = styled.div`
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   @media (max-width: 768px) {
     display: none;
-  }
-  a {
-    font-size: 12px;
-    /* color: #b4c6fc; */
-    color: #fff;
-    display: flex;
-    align-items: center;
-    font-weight: 500;
-    text-transform: uppercase;
-    .icon {
-      height: 24px;
-      width: 24px;
-      margin-right: 20px;
-      svg {
-        stroke: #8da2fb;
-      }
-    }
   }
 `;
 
@@ -198,6 +202,33 @@ const Element = styled.li`
 `;
 
 const MainNav = styled.ul`
+  .back-button {
+    padding: 0;
+    margin: 1rem;
+    height: fit-content;
+    color: white;
+    font-weight: normal;
+    :hover {
+      text-decoration: underline;
+    }
+  }
+  a {
+    font-size: 12px;
+    /* color: #b4c6fc; */
+    color: #fff;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    text-transform: uppercase;
+    .icon {
+      height: 24px;
+      width: 24px;
+      margin-right: 20px;
+      svg {
+        stroke: #8da2fb;
+      }
+    }
+  }
   > li {
     background-size: 20px;
     padding-left: 0;
@@ -262,7 +293,7 @@ const MainNav = styled.ul`
     }
   }
   .stepNav {
-    padding-left: 80px;
+    padding-left: 35px;
     a {
       cursor: pointer;
       display: block;
@@ -270,6 +301,7 @@ const MainNav = styled.ul`
       position: relative;
       margin-bottom: 20px;
       padding-left: 25px;
+      font-size: 14px;
       :hover {
         color: #fff;
         font-weight: 600;
@@ -288,6 +320,44 @@ const MainNav = styled.ul`
         top: 50%;
         transform: translatey(-50%);
         z-index: 1;
+      }
+    }
+  }
+`;
+
+const DrawerButton = styled.div`
+  margin-bottom: 0.5rem;
+  padding: 2px 20px;
+  > * {
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 12px 15px;
+    border-radius: 6px;
+    color: ${({ color }) => (color ? color : "#fff")};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    &.active,
+    :hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      background-color: ${({ color }) => (color ? "transparent" : "#5145cd")};
+      border: ${({ color }) => (color ? "" : "none")};
+      color: ${({ color }) => (color ? color : "#fff")};
+    }
+    &.disabled {
+      cursor: default;
+    }
+    &.disabled:hover {
+      background-color: transparent;
+      box-shadow: none;
+    }
+    .icon {
+      height: 24px;
+      width: 24px;
+      margin-right: 20px;
+      svg {
+        stroke: #8da2fb;
       }
     }
   }

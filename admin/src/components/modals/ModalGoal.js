@@ -4,12 +4,13 @@ import styled from "styled-components";
 
 import ModalButton from "../buttons/ModalButton";
 import { colors } from "../../utils";
+import CloseSvg from "../../assets/Close";
 
-export default ({ isOpen, onChange, onValidate, callback }) => {
+export default function ModalGoal({ isOpen, onChange, onValidate, callback }) {
   return (
-    <Modal isOpen={isOpen} toggle={onChange}>
+    <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
-        <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
+        <CloseSvg className="close-icon" height={10} onClick={onChange} />
         <Header>attention</Header>
         <Content>
           <h1>Jauge de candidats atteinte</h1>
@@ -28,7 +29,7 @@ export default ({ isOpen, onChange, onValidate, callback }) => {
       </ModalContainer>
     </Modal>
   );
-};
+}
 
 const ModalContainer = styled.div`
   display: flex;

@@ -9,33 +9,34 @@ import { useSelector } from "react-redux";
 import { HeroContainer } from "../../components/Content";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { ticketStateNameById, colors } from "../../utils";
+import { ticketStateNameById, colors, translateState } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
+import { supportURL } from "../../config";
 
 const articles = [
   {
-    title: "Code de la route",
-    emoji: "🚗",
-    body: `L’accès à la plateforme en ligne d’apprentissage du code de la route...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/3-volontaire/21-prise-en-charge-du-e-learning-et-de-l-examen-du-code-de-la-route",
+    title: "SNU phase 0 : Le parcours des inscriptions",
+    emoji: "📄",
+    body: `Rédaction du dossier d'inscription : Le jeune remplit son dossier...`,
+    url: `${supportURL}/base-de-connaissance/phase-0-le-parcours-des-inscriptions`,
   },
   {
-    title: "Je cherche une MIG",
-    emoji: "🔍",
-    body: `Depuis l'onglet Mission d'intérêt général, cliquez sur la rubrique...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/33-je-cherche-une-mission-mig",
+    title: "Phase 1 : L'organisation du séjour de cohésion",
+    emoji: "🌲",
+    body: `Lorsque l'inscription du volontaire est validée, il entre dans la phase 1...`,
+    url: `${supportURL}/base-de-connaissance/phase-1-lorganisation-du-sejour-de-cohesion`,
   },
   {
-    title: "Comment se déroule ma phase 3 ?",
-    emoji: "🌟",
-    body: `Optionnelle, la phase 3 vous permet de poursuivre votre...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/14-phase-3-l-engagement/61-comment-se-deroule-ma-phase-3",
+    title: "Phase 2 : Le parcours d'une MIG",
+    emoji: "🤝",
+    body: `La publication d'une MIG : la structure s'inscrit sur la plateforme...`,
+    url: `${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig`,
   },
 ];
 
-export default () => {
+export default function Dashboard() {
   const [userTickets, setUserTickets] = useState(null);
   const young = useSelector((state) => state.Auth.young);
 
@@ -44,7 +45,7 @@ export default () => {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const response = await api.get("/support-center/ticket?withArticles=true");
+        const response = await api.get("/zammad-support-center/ticket?withArticles=true");
         if (!response.ok) return console.log(response);
         setUserTickets(response.data);
       } catch (error) {
@@ -60,55 +61,65 @@ export default () => {
   };
 
   const displayState = (state) => {
-    if (state === "ouvert")
+    if (state === "open")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "fermé")
+    if (state === "closed")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "nouveau")
+    if (state === "new")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translateState(state)}
         </StateContainer>
       );
   };
+  /* @ts-ignore */
+  // @ts-nocheck
+  /* tslint:disable */
 
   return (
     <HeroContainer>
+      <NavLink style={{ color: "#32257F", fontWeight: "bold" }} to="/">
+        {" "}
+        <svg width="8" height="11" viewBox="0 0 6 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4.42367 0L0.423279 4.00716L4.42367 8.01432L5.41483 7.02148L2.4056 4.00716L5.41483 0.992838L4.42367 0Z" fill="#32257F" />
+        </svg>{" "}
+        Retour à mon espace
+      </NavLink>
       <Container>
-        <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
+        <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
               Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;?
               <br />
-              N'hésitez pas à consulter notre{" "}
+              N&apos;hésitez pas à consulter notre{" "}
               <strong>
-                <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
+                <a className="link" href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
                   base de connaissance
                 </a>
               </strong>
               &nbsp;!
             </div>
             <div className="buttons">
-              <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
+              <LinkButton href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
                 Trouver&nbsp;ma&nbsp;réponse
               </LinkButton>
             </div>
           </div>
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous n'avez pas trouvé de réponse à votre demande ?<br />
+              Vous n&apos;avez pas trouvé de réponse à votre demande ?<br />
               Contactez notre{" "}
               <strong>
                 <NavLink className="link" to="/besoin-d-aide/ticket">
@@ -118,14 +129,14 @@ export default () => {
               .
             </div>
             <div className="buttons">
-              <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu'un</InternalLink>
+              <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu&apos;un</InternalLink>
             </div>
           </div>
         </div>
       </Container>
       <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
       <Articles>
-        {articles.map((article) => (
+        {articles?.map((article) => (
           <div className="block" key={article.url} onClick={() => window.open(article.url)}>
             <div className="block-title">
               <p>{article.emoji}</p>
@@ -133,7 +144,7 @@ export default () => {
             </div>
             <p>{article.body}</p>
             <p>
-              <a className="block-link" href={article.url} target="_blank">
+              <a className="block-link" href={article.url} target="_blank" rel="noreferrer">
                 Lire la suite
               </a>
             </p>
@@ -166,7 +177,7 @@ export default () => {
       </List>
     </HeroContainer>
   );
-};
+}
 
 const StateContainer = styled.div`
   display: flex;
@@ -192,9 +203,11 @@ const Container = styled.div`
     grid-template-rows: 2fr 1fr;
     text-align: center;
   }
-  ${'' /* .help-section-text {
+  ${
+    "" /* .help-section-text {
     flex: 3;
-  } */}
+  } */
+  }
   .link {
     color: #6b7280;
     :hover {

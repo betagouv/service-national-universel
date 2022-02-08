@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import LoadingButton from "./LoadingButton";
 
-export default function DownloadButton({ icon, title, ...rest }) {
+export default function PanelActionButton({ icon, title, ...rest }) {
   return (
     <Button icon={icon ? require(`../../assets/${icon}.svg`) : null} color="#fff" {...rest}>
       {title}

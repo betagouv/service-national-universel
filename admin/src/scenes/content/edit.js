@@ -13,11 +13,10 @@ import Loader from "../../components/Loader";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 
-export default (props) => {
+export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
   const isNew = !props?.match?.params?.id;
 
   useEffect(() => {
@@ -52,7 +51,7 @@ export default (props) => {
           setLoading(true);
           if (values.visibility === "DEPARTMENT") values.region = department2region[values.department];
 
-          const { ok, code, data } = values._id ? await api.put(`/program/${values._id}`, values) : await api.post("/program", values);
+          const { ok, code } = values._id ? await api.put(`/program/${values._id}`, values) : await api.post("/program", values);
 
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette possibilité d'engagement", translate(code));
@@ -62,9 +61,8 @@ export default (props) => {
           setLoading(false);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette possibilité d'engagement", e?.error?.message);
         }
-      }}
-    >
-      {({ values, handleChange, handleSubmit, isValid, errors, touched }) => (
+      }}>
+      {({ values, handleChange, handleSubmit, errors, touched }) => (
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Nouvelle possibilité d'engagement"}</Title>
@@ -88,7 +86,7 @@ export default (props) => {
                     </FormGroup>
                     <FormGroup>
                       <label>
-                        <span>*</span>Qu'est ce que c'est ?
+                        <span>*</span>Qu&apos;est ce que c&apos;est ?
                       </label>
                       <Field
                         validate={(v) => !v && requiredMessage}
@@ -102,7 +100,7 @@ export default (props) => {
                       <ErrorMessage errors={errors} touched={touched} name="description" />
                     </FormGroup>
                     <FormGroup>
-                      <label>C'est pour ?</label>
+                      <label>C&apos;est pour ?</label>
                       <Field name="descriptionFor" component="textarea" rows={2} value={values.descriptionFor} onChange={handleChange} placeholder="Message..." />
                     </FormGroup>
                     <FormGroup>
@@ -110,7 +108,7 @@ export default (props) => {
                       <Field name="descriptionMoney" component="textarea" rows={2} value={values.descriptionMoney} onChange={handleChange} placeholder="Message..." />
                     </FormGroup>
                     <FormGroup>
-                      <label>Quelle durée d'engagement ?</label>
+                      <label>Quelle durée d&apos;engagement ?</label>
                       <Field name="descriptionDuration" component="textarea" rows={2} value={values.descriptionDuration} onChange={handleChange} placeholder="Message..." />
                     </FormGroup>
                     <FormGroup>
@@ -121,7 +119,7 @@ export default (props) => {
                       <ErrorMessage errors={errors} touched={touched} name="url" />
                     </FormGroup>
                     <FormGroup>
-                      <label>URL de l'image</label>
+                      <label>URL de l&apos;image</label>
                       <Field value={values.imageFile} onChange={handleChange} name="imageFile" placeholder="www.site.com/ma-super-image.jpg" />
                     </FormGroup>
                   </Wrapper>
@@ -184,7 +182,7 @@ export default (props) => {
       )}
     </Formik>
   );
-};
+}
 
 const ChooseVisibility = ({ value, onChange, validate }) => {
   const { user } = useSelector((state) => state.Auth);
@@ -336,28 +334,4 @@ const Title = styled.div`
   font-size: 24px;
   margin-bottom: 10px;
   flex: 1;
-`;
-
-const ButtonContainer = styled.div`
-  button {
-    background-color: #5245cc;
-    color: #fff;
-    &.white-button {
-      color: #000;
-      background-color: #fff;
-      :hover {
-        background: #ddd;
-      }
-    }
-    margin-left: 1rem;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
 `;

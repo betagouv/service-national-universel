@@ -15,7 +15,7 @@ import AuthWrapper from "./components/authWrapper";
 import Title from "./components/title";
 import Subtitle from "./components/subtitle";
 
-export default () => {
+export default function Forgot() {
   const [mail, setMail] = useState("");
 
   return (
@@ -36,8 +36,7 @@ export default () => {
                     toastr.error("Erreur !", translate(e.code));
                   }
                   actions.setSubmitting(false);
-                }}
-              >
+                }}>
                 {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
                   return (
                     <form onSubmit={handleSubmit}>
@@ -54,7 +53,7 @@ export default () => {
                       ) : (
                         <>
                           <Title>Réinitialisation du mot de passe</Title>
-                          <Subtitle>Pour réinitialiser votre mot de passe, entrez l'adresse mail que vous avez utilisée pour vous connecter à la plateforme</Subtitle>
+                          <Subtitle>Pour réinitialiser votre mot de passe, entrez l&apos;adresse mail que vous avez utilisée pour vous connecter à la plateforme</Subtitle>
                           <StyledFormGroup>
                             <div>
                               <label>ADRESSE EMAIL</label>
@@ -91,7 +90,7 @@ export default () => {
       </AuthWrapper>
     </div>
   );
-};
+}
 
 const Thumb = styled.div`
   min-height: 400px;

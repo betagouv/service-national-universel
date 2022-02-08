@@ -1,16 +1,13 @@
 import React from "react";
 import styled from "styled-components";
-import api from "../../../services/api";
 import { useHistory } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
 
-import { translate } from "../../../utils";
 import Badge from "../../../components/Badge";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import Title from "../../../components/views/Title";
 
-export default ({ children, young, tab }) => {
+export default function Wrapper({ children, young, tab }) {
   const history = useHistory();
   if (!young) return null;
   return (
@@ -33,7 +30,7 @@ export default ({ children, young, tab }) => {
       {children}
     </div>
   );
-};
+}
 
 const Header = styled.div`
   padding: 0 25px 0;

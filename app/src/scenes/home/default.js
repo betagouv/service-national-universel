@@ -1,28 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { translate, PHASE_STATUS_COLOR } from "../../utils";
-import { HeroContainer, Hero, Content, Alert } from "../../components/Content";
+import { translate, PHASE_STATUS_COLOR, YOUNG_STATUS_PHASE1 } from "../../utils";
+import { HeroContainer, Hero, Content } from "../../components/Content";
 import Badge from "../../components/Badge";
 import { Link } from "react-router-dom";
 
-export default () => {
+export default function HomeDefault() {
   const young = useSelector((state) => state.Auth.young);
-  const is2020 = young.cohort === "2020";
-  const [showAlert, setShowAlert] = useState(!is2020);
-
   return (
     <HeroContainer>
       <Hero>
-        {showAlert && (
-          <Alert color="#31c48d">
-            <div className="text">
-              <strong>INSCRIPTION VALIDÉE</strong>
-            </div>
-            <img src={require("../../assets/close.svg")} height={15} onClick={() => setShowAlert(false)} />
-          </Alert>
-        )}
-        <Content showAlert={showAlert}>
+        <Content>
           <h1>
             <strong>{young.firstName},</strong> ravis de vous retrouver !
           </h1>
@@ -36,7 +25,7 @@ export default () => {
           </WrapperItem>
           <WrapperItem to="/phase2">
             <div className="title">
-              <span className="link">2. Une première mission d'intérêt général</span>{" "}
+              <span className="link">2. Une première mission d&apos;intérêt général</span>{" "}
               <Badge style={{ margin: 0 }} text={translate(young.statusPhase2)} color={PHASE_STATUS_COLOR[young.statusPhase2]} />
             </div>
           </WrapperItem>
@@ -46,12 +35,28 @@ export default () => {
               <Badge style={{ margin: 0 }} text={translate(young.statusPhase3)} color={PHASE_STATUS_COLOR[young.statusPhase3]} />
             </div>
           </WrapperItem>
+          {[YOUNG_STATUS_PHASE1.AFFECTED].includes(young.statusPhase1) ? (
+            <InfoContainer to="/phase1">
+              <div>
+                <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M16 8A8 8 0 110 8a8 8 0 0116 0zM9 4a1 1 0 11-2 0 1 1 0 012 0zM7 7a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2V8a1 1 0 00-1-1H7z"
+                    fill="#32257F"
+                  />
+                </svg>
+                Préparez votre séjour de cohésion
+              </div>
+              Documents à fournir →
+            </InfoContainer>
+          ) : null}
         </Content>
         <div className="thumb" />
       </Hero>
     </HeroContainer>
   );
-};
+}
 
 const WrapperItem = styled(Link)`
   .title {
@@ -76,5 +81,22 @@ const WrapperItem = styled(Link)`
         margin-right: 0.5rem;
       }
     }
+  }
+`;
+const InfoContainer = styled(Link)`
+  display: flex;
+  justify-content: space-between;
+  background: rgba(79, 70, 229, 0.1);
+  padding: 1rem;
+  color: #32257f;
+  border-radius: 6px;
+  font-size: 1rem;
+  svg {
+    margin-right: 0.3rem;
+  }
+  :hover {
+    color: #32257f;
+    opacity: 0.8;
+    cursor: pointer;
   }
 `;

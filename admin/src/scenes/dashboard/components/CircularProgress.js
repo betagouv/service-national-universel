@@ -1,7 +1,16 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ sqSize = 70, strokeWidth = 3, percentage = 25, circleStrokeColor = "#ddd", circleProgressColor = "red", textColor = "black", title, subtitle }) => {
+export default function CircularProgress({
+  sqSize = 70,
+  strokeWidth = 3,
+  percentage = 25,
+  circleStrokeColor = "#ddd",
+  circleProgressColor = "red",
+  textColor = "black",
+  title,
+  subtitle,
+}) {
   // SVG centers the stroke width on the radius, subtract out so circle fits in square
   const radius = (sqSize - strokeWidth) / 2;
   // Enclose cicle in a circumscribing square
@@ -34,7 +43,7 @@ export default ({ sqSize = 70, strokeWidth = 3, percentage = 25, circleStrokeCol
       </CircularProgressTextContent>
     </CircularProgressWrapper>
   );
-};
+}
 
 // CircularProgress
 const CircularProgressWrapper = styled.div`

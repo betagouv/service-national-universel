@@ -1,8 +1,25 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { colors } from "../../../utils";
+import { useSelector, useDispatch } from "react-redux";
+import api from "../../../services/api";
+import { setYoung } from "../../../redux/auth/actions";
+import plausibleEvent from "../../../services/plausible";
 
-export default ({ showMessage = true, location }) => {
+export default function HeaderComponent({ location }) {
+  const dispatch = useDispatch();
+  const young = useSelector((state) => state.Auth.young);
+
+  const logout = async () => {
+    try {
+      await api.post(`/young/logout`);
+    } catch (error) {
+      console.log({ error });
+    }
+    dispatch(setYoung(null));
+  };
+
   return (
     <Header>
       <Logos>
@@ -13,42 +30,41 @@ export default ({ showMessage = true, location }) => {
           <img src={require("../../../assets/logo-snu.png")} />
         </a>
       </Logos>
-      {showMessage ? (
-        <Title className="mobileHide">
-          <h1>
-            Inscriptions <span>au Service National Universel</span>
-          </h1>
-          <h3>Ouvertes jusqu'au 30 avril 2021</h3>
-        </Title>
-      ) : null}
-      <AvatarContainer to={{ pathname: "/auth/login", search: location?.search }}>
-        <Avatar src={require("../../../assets/avatar.jpg")} />
-        <AvatarText>connexion</AvatarText>
-      </AvatarContainer>
+      <CTAContainer>
+        {young ? (
+          <AvatarText onClick={logout} to={{ pathname: "/", search: location?.search }}>
+            Se deconnecter
+          </AvatarText>
+        ) : (
+          <AvatarText onClick={() => plausibleEvent("LP CTA - Connexion")} to={{ pathname: "/auth/login", search: location?.search }}>
+            Se connecter
+          </AvatarText>
+        )}
+        <AvatarText to={{ pathname: "/inscription/profil" }}>S&apos;inscrire</AvatarText>
+      </CTAContainer>
     </Header>
   );
-};
+}
 
-const AvatarContainer = styled(Link)`
+const CTAContainer = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-self: stretch;
+  justify-content: space-between;
+  align-items: flex-end;
 `;
 
-const AvatarText = styled.div`
+const AvatarText = styled(Link)`
   color: #aaa;
   text-transform: uppercase;
-  font-size: 0.8rem;
-`;
-
-const Avatar = styled.img`
-  width: 32px;
-  height: 32px;
-  background-color: #aaa;
-  border-radius: 50%;
-  object-fit: cover;
-  object-fit: contain;
+  font-size: 0.9rem;
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+  }
   cursor: pointer;
+  :hover {
+    color: ${colors.purple};
+  }
 `;
 
 const Header = styled.div`
@@ -84,30 +100,6 @@ const Logos = styled.div`
       .mobileHide {
         height: 80px;
       }
-    }
-  }
-`;
-
-const Title = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  text-align: center;
-  h1 {
-    color: #151d2f;
-    font-size: 1.5rem;
-    font-weight: 700;
-  }
-  h3 {
-    color: #6a7181;
-    font-size: 1.5rem;
-  }
-  @media (max-width: 768px) {
-    h1 {
-      font-size: 1.2rem;
-    }
-    h3 {
-      font-size: 0.8rem;
     }
   }
 `;

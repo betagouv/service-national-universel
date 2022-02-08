@@ -15,6 +15,9 @@ const { getYoungsHelper, createYoungHelper, notExistingYoungId, deleteYoungByEma
 //cohesion center
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
+const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
+const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
+
 const { ROLES } = require("snu-lib/roles");
 
 jest.mock("../sendinblue", () => ({
@@ -22,9 +25,9 @@ jest.mock("../sendinblue", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
-jest.mock("../qpv", () => ({
-  ...jest.requireActual("../qpv"),
-  getQPV: (a) => Promise.resolve(a === "qpvShouldWork"),
+jest.mock("../geo", () => ({
+  ...jest.requireActual("../geo"),
+  getQPV: (a) => Promise.resolve(a === "geoShouldWork"),
 }));
 
 jest.mock("../utils", () => ({
@@ -74,14 +77,14 @@ describe("Young", () => {
       const res = await request(getAppHelper()).get(`/young/${notExistingYoungId}/patches`).send();
       expect(res.statusCode).toEqual(404);
     });
-    it("should return 401 if not admin", async () => {
+    it("should return 403 if not admin", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       young.firstName = "MY NEW NAME";
       await young.save();
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper()).get(`/young/${young._id}/patches`).send();
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if young found with patches", async () => {
@@ -134,7 +137,7 @@ describe("Young", () => {
       const previous = passport.user;
       passport.user = me;
       const res = await request(getAppHelper()).put(`/young/${they._id}/validate-mission-phase3`).send();
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
       passport.user = previous;
     });
   });
@@ -193,7 +196,7 @@ describe("Young", () => {
 
     it("should update QPV to true", async () => {
       const { updatedYoung, response } = await selfUpdateYoung({
-        zip: "qpvShouldWork",
+        zip: "geoShouldWork",
         city: "foo",
         address: "bar",
       });
@@ -217,13 +220,33 @@ describe("Young", () => {
       expect(updatedYoung.qpv).toEqual("false");
     });
 
-    it("should cascade status to WITHDRAWN", async () => {
-      const { updatedYoung, response } = await selfUpdateYoung({ status: "WITHDRAWN" });
+    it("should cascade status to WITHDRAWN if not validated", async () => {
+      const young = await createYoungHelper({...getNewYoungFixture(), statusPhase1: "WAITING_AFFECTATION", statusPhase2:'WAITING_REALISATION', statusPhase3: 'WAITING_REALISATION'});
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const response = await request(getAppHelper()).put("/young").send({ status: "WITHDRAWN" });
+      const updatedYoung = response.body.data;
       expect(response.statusCode).toEqual(200);
       expect(updatedYoung.status).toEqual("WITHDRAWN");
       expect(updatedYoung.statusPhase1).toEqual("WITHDRAWN");
       expect(updatedYoung.statusPhase2).toEqual("WITHDRAWN");
       expect(updatedYoung.statusPhase3).toEqual("WITHDRAWN");
+      passport.user = previous;
+    });
+    it("should not cascade status to WITHDRAWN if validated", async () => {
+      const young = await createYoungHelper({...getNewYoungFixture(), statusPhase1: "DONE", statusPhase2:'VALIDATED', statusPhase3: 'VALIDATED'});
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const response = await request(getAppHelper()).put("/young").send({ status: "WITHDRAWN" });
+      const updatedYoung = response.body.data;
+      expect(response.statusCode).toEqual(200);
+      expect(updatedYoung.status).toEqual("WITHDRAWN");
+      expect(updatedYoung.statusPhase1).toEqual("DONE");
+      expect(updatedYoung.statusPhase2).toEqual("VALIDATED");
+      expect(updatedYoung.statusPhase3).toEqual("VALIDATED");
+      passport.user = previous;
     });
 
     it("should update young birthCountry", async () => {
@@ -233,16 +256,16 @@ describe("Young", () => {
     });
 
     it("should remove places when sending to cohesion center", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const placesLeft = cohesionCenter.placesLeft;
+      const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
+      const placesLeft = sessionPhase1.placesLeft;
       const { updatedYoung, response } = await selfUpdateYoung({
-        cohesionCenterId: cohesionCenter._id,
+        sessionPhase1Id: sessionPhase1._id,
         status: "VALIDATED",
         statusPhase1: "DONE",
       });
       expect(response.statusCode).toEqual(200);
-      const updatedCohesionCenter = await getCohesionCenterById(updatedYoung.cohesionCenterId);
-      expect(updatedCohesionCenter.placesLeft).toEqual(placesLeft - 1);
+      const updatedSessionPhase1 = await getSessionPhase1ById(updatedYoung.sessionPhase1Id);
+      expect(updatedSessionPhase1.placesLeft).toEqual(placesLeft - 1);
     });
 
     it("should be only accessible by young", async () => {
@@ -479,7 +502,7 @@ describe("Young", () => {
 
       // Failed request (not allowed)
       res = await request(getAppHelper()).get("/young/" + secondYoung._id + "/application");
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
 
       passport.user = previous;
     });

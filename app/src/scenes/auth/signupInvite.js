@@ -15,7 +15,7 @@ import LoginBox from "./components/LoginBox";
 import InputField from "./components/InputField";
 import { translate } from "../../utils";
 
-export default () => {
+export default function SignupInvite() {
   const [invitation, setInvitation] = useState("");
   const [newuser, setNewUser] = useState(null);
 
@@ -26,7 +26,7 @@ export default () => {
     (async () => {
       if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
       try {
-        const { data: u, code, token } = await api.post(`/young/signup_verify`, { invitationToken });
+        const { data: u, token } = await api.post(`/young/signup_verify`, { invitationToken });
         if (token) api.setToken(token);
         setNewUser(u);
       } catch (e) {
@@ -55,7 +55,7 @@ export default () => {
           initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "" }}
           onSubmit={async (values, actions) => {
             try {
-              const { data: user, token, code, ok } = await api.post(`/young/signup_invite`, { ...values, invitationToken });
+              const { data: user, token } = await api.post(`/young/signup_invite`, { ...values, invitationToken });
               actions.setSubmitting(false);
               if (token) api.setToken(token);
               if (user) {
@@ -68,13 +68,12 @@ export default () => {
                 return toastr.error(
                   "Mot de passe incorrect",
                   "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
-                  { timeOut: 10000 }
+                  { timeOut: 10000 },
                 );
               if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
               return toastr.error("Problème", translate(e.code));
             }
-          }}
-        >
+          }}>
           {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
             return (
               <form onSubmit={handleSubmit}>
@@ -118,4 +117,4 @@ export default () => {
       </LoginBox>
     </div>
   );
-};
+}

@@ -4,7 +4,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
-const { SUB_ROLES_LIST, ROLES_LIST } = require("snu-lib/roles");
+const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib/roles");
 const zammad = require("../zammad");
 
 const MODELNAME = "referent";
@@ -44,6 +44,13 @@ const Schema = new mongoose.Schema({
     select: false,
     documentation: {
       description: "Mot de passe de l'utilisateur",
+    },
+  },
+  acceptCGU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "l'utilisateur a accepté les CGU",
     },
   },
   lastLoginAt: {
@@ -110,8 +117,15 @@ const Schema = new mongoose.Schema({
   },
   subRole: {
     type: String,
-    enum: SUB_ROLES_LIST,
+    enum: [...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST],
   },
+  sessionPhase1Id: {
+    type: String,
+    documentation: {
+      description: "Id de la session de cohésion d'accueil pour la phase 1",
+    },
+  },
+  // *** START LEGACY COHESION CENTER ***
   cohesionCenterId: {
     type: String,
     documentation: {
@@ -124,6 +138,7 @@ const Schema = new mongoose.Schema({
       description: "Nom du centre de cohésion d'accueil pour la phase 1",
     },
   },
+  // *** END LEGACY COHESION CENTER ***
   phone: {
     type: String,
     documentation: {

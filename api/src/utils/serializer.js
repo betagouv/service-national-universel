@@ -35,6 +35,17 @@ function serializeCohesionCenter(center, user) {
   });
 }
 
+function serializeSessionPhase1(session, user) {
+  return session.toObject({
+    transform: (_doc, ret) => {
+      if (isYoung(user)) {
+        delete ret.waitingList;
+      }
+      return ret;
+    },
+  });
+}
+
 function serializeYoung(young, user) {
   return young.toObject({
     transform: (_doc, ret) => {
@@ -125,6 +136,7 @@ module.exports = {
   serializeApplication,
   serializeBus,
   serializeCohesionCenter,
+  serializeSessionPhase1,
   serializeYoung,
   serializeReferent,
   serializeMission,

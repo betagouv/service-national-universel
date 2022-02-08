@@ -10,7 +10,7 @@ import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
-export default ({ center, onAffect, onClick }) => {
+export default function ComboBoxYoungs({ center, onAffect, onClick }) {
   const getDefaultQuery = () => ({
     query: {
       bool: {
@@ -114,7 +114,7 @@ export default ({ center, onAffect, onClick }) => {
       </ReactiveBase>
     </>
   );
-};
+}
 
 const HitYoung = ({ hit, handleAffect, handleWaitingList, onClick }) => {
   const user = useSelector((state) => state.Auth.user);

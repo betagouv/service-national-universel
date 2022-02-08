@@ -10,7 +10,7 @@ import Volunteer from "./Volunteer";
 import { getLink } from "../../../utils";
 import api from "../../../services/api";
 
-export default ({ filter }) => {
+export default function Places({ filter }) {
   const [youngsDomains, setYoungsDomains] = useState({});
   const [youngsPeriod, setYoungsPeriod] = useState({});
   const [youngsFormat, setYoungsFormat] = useState({});
@@ -44,8 +44,8 @@ export default ({ filter }) => {
         },
         size: 0,
       };
-      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
       const { responses: missionResponse } = await api.esQuery("mission", body);
 
       const body2 = {
@@ -64,13 +64,13 @@ export default ({ filter }) => {
         },
         size: 0,
       };
-      if (filter.region) body2.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body2.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.region?.length) body2.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body2.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
       const { responses: youngResponse } = await api.esQuery("young", body2);
 
       if (missionResponse.length) {
-        setMissionsStatus(missionResponse[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionsDomains(missionResponse[0].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMissionsStatus(missionResponse[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionsPeriod(missionResponse[0].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionsFormat(missionResponse[0].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionPlaceTotal(missionResponse[0].aggregations.placesTotal.value);
@@ -104,4 +104,4 @@ export default ({ filter }) => {
       <Volunteer youngsEngaged={youngsEngaged} />
     </React.Fragment>
   );
-};
+}

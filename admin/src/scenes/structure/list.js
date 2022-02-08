@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -15,6 +14,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from 
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Chevron from "../../components/Chevron";
+import plausibleEvent from "../../services/pausible";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION"];
 const formatLongDate = (date) => {
@@ -23,7 +23,7 @@ const formatLongDate = (date) => {
   return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
 };
 
-export default () => {
+export default function List() {
   const [structure, setStructure] = useState(null);
   // List of structure IDS currently displayed in results
   const [structureIds, setStructureIds] = useState([]);
@@ -60,12 +60,13 @@ export default () => {
                 <Title>Structures</Title>
               </div>
               <div style={{ display: "flex" }}>
-                <Link to="/structure/create">
+                <Link to="/structure/create" onClick={() => plausibleEvent("Structure/CTA - Inviter nouvelle structure")}>
                   <VioletButton>
                     <p>Inviter une nouvelle structure</p>
                   </VioletButton>
                 </Link>
                 <ExportComponent
+                  handleClick={() => plausibleEvent("Structure/CTA - Exporter structure")}
                   title="Exporter les structures"
                   defaultQuery={getExportQuery}
                   exportTitle="Structures"
@@ -263,7 +264,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, selected, missions }) => {
   const missionsInfo = {

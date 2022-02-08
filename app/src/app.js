@@ -5,7 +5,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
-
 import queryString from "query-string";
 import styled from "styled-components";
 
@@ -20,27 +19,32 @@ import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Diagoriente from "./scenes/diagoriente";
 import SupportCenter from "./scenes/support-center";
-import Documents from "./scenes/documents";
 import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
 import Applications from "./scenes/applications";
-import Cohesion from "./scenes/cohesion-2020/";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
 import Loader from "./components/Loader";
 import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
+import Cookie from "./components/cookie";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
+import CGU from "./scenes/CGU";
+import PublicSupport from "./scenes/public-support-center";
+import Desistement from "./scenes/desistement";
 
 import api from "./services/api";
-import { SENTRY_URL, environment } from "./config";
+import { SENTRY_URL, environment, appURL } from "./config";
+import ModalCGU from "./components/modals/ModalCGU";
 
 import "./index.css";
 import { YOUNG_STATUS, ENABLE_PM } from "./utils";
 import Zammad from "./components/Zammad";
+import GoogleTags from "./components/GoogleTags";
+import { toastr } from "react-redux-toastr";
 
 if (environment === "production") {
   Sentry.init({
@@ -51,7 +55,7 @@ if (environment === "production") {
   });
 }
 
-export default () => {
+export default function App() {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -82,29 +86,60 @@ export default () => {
     <Router>
       <ScrollToTop />
       <Zammad />
+      <GoogleTags />
       <div className="main">
         <Switch>
           <Route path="/bug" component={Bug} />
+          <Route path="/conditions-generales-utilisation" component={CGU} />
+          <Route path="/public-besoin-d-aide" component={PublicSupport} />
+          <Route path="/besoin-d-aide" component={SupportCenter} />
           <Route path="/validate-contract/done" component={ContractDone} />
           <Route path="/validate-contract" component={Contract} />
           <Route path="/inscription" component={Inscription} />
           <Route path="/auth" component={Auth} />
           <Route path="/" component={Espace} />
         </Switch>
+        <Cookie />
         <Footer />
       </div>
     </Router>
   );
-};
+}
 
 const Espace = () => {
   const [menuVisible, setMenuVisible] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
   const young = useSelector((state) => state.Auth.young);
+  useEffect(() => {
+    if (young && young.acceptCGU !== "true") {
+      setModal({
+        isOpen: true,
+        title: "Conditions générales d'utilisation",
+        message: (
+          <>
+            <p>Les conditions générales d&apos;utilisation du SNU ont été mises à jour. Vous devez les accepter afin de continuer à accéder à votre compte SNU.</p>
+            <a href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
+              Consulter les CGU ›
+            </a>
+          </>
+        ),
+        onConfirm: async () => {
+          // todo add field in young model
+          const { ok, code } = await api.put(`/young`, { acceptCGU: "true" });
+          if (!ok) return toastr.error(`Une erreur est survenue : ${code}`);
+          return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
+        },
+        confirmText: "J'accepte les conditions générales d'utilisation",
+      });
+    }
+  }, [young]);
+
   if (!young) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
     return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/inscription" }} />;
   }
-  if (young.status === YOUNG_STATUS.IN_PROGRESS) return <Redirect to="/inscription/coordonnees" />;
+  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status)) return <Redirect to="/inscription/coordonnees" />;
 
   return (
     <>
@@ -122,17 +157,25 @@ const Espace = () => {
             <Route path="/phase2" component={Phase2} />
             <Route path="/phase3" component={Phase3} />
             <Route path="/les-programmes" component={Engagement} />
-            <Route path="/documents" component={Documents} />
             <Route path="/preferences" component={Preferences} />
             <Route path="/mission" component={Missions} />
             <Route path="/candidature" component={Applications} />
-            <Route path="/cohesion" component={Cohesion} />
+            <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
-            <Route path="/besoin-d-aide" component={SupportCenter} />
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>
         </Content>
+        <ModalCGU
+          isOpen={modal?.isOpen}
+          title={modal?.title}
+          message={modal?.message}
+          confirmText={modal?.confirmText}
+          onConfirm={() => {
+            modal?.onConfirm();
+            setModal({ isOpen: false, onConfirm: null });
+          }}
+        />
       </div>
     </>
   );

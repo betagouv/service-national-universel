@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
-import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById, translateState } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -19,7 +17,7 @@ const updateHeightElement = (e) => {
   e.target.style.height = `${e.target.scrollHeight}px`;
 };
 
-export default ({ ticket: propTicket }) => {
+export default function TicketMessage({ ticket: propTicket }) {
   const [ticket, setTicket] = useState(propTicket);
   const [message, setMessage] = useState();
   const user = useSelector((state) => state.Auth.user);
@@ -30,7 +28,7 @@ export default ({ ticket: propTicket }) => {
       if (!id) {
         return setTicket(undefined);
       }
-      const { data, ok } = await api.get(`/support-center/ticket/${id}`);
+      const { data, ok } = await api.get(`/zammad-support-center/ticket/${id}`);
       if (data.error || !ok) return setTicket(propTicket);
       return setTicket(data);
     } catch (e) {
@@ -53,7 +51,7 @@ export default ({ ticket: propTicket }) => {
     // then send the message
     // todo : we may be able to reset the status in only one call
     // but im not sure the POST for a message can take state in its body
-    const responseMessage = await api.put(`/support-center/ticket/${ticket?.id}`, { message, ticket });
+    await api.put(`/zammad-support-center/ticket/${ticket?.id}`, { message, ticket });
 
     // reset ticket and input message
     setMessage("");
@@ -64,25 +62,25 @@ export default ({ ticket: propTicket }) => {
   if (ticket === null) return <Loader />;
 
   const displayState = (state) => {
-    if (state === "ouvert")
+    if (state === "open")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          ouvert
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "fermé")
+    if (state === "closed")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          archivé
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "nouveau")
+    if (state === "new")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          nouveau
+          {translateState(state)}
         </StateContainer>
       );
   };
@@ -139,7 +137,7 @@ export default ({ ticket: propTicket }) => {
       )}
     </Container>
   );
-};
+}
 
 const Message = ({ from, date, content, fromMe, internal }) => {
   if (!content || !content.length) return null;
@@ -191,12 +189,11 @@ const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  height: 100px;
-  ${"" /* flex: 0; */}
+  flex: 0;
   textarea {
     resize: none;
     overflow: none;
-    min-height: 50px;
+    min-height: 100px;
     max-height: 300px;
     border: none;
   }
@@ -253,14 +250,6 @@ const MessageDate = styled.div`
 const MessageContent = styled.div`
   font-weight: 400;
   color: ${({ color }) => color};
-`;
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  ${"" /* height: 100%; */}
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 1rem 0;
 `;
 
 const Heading = styled(Container)`

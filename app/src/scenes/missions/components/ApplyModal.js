@@ -5,11 +5,11 @@ import { useSelector } from "react-redux";
 import Loader from "../../../components/Loader";
 
 import api from "../../../services/api";
-import { APPLICATION_STATUS, ENABLE_PM, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { APPLICATION_STATUS, ENABLE_PM, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 
 import { toastr } from "react-redux-toastr";
 
-export default ({ value, onChange, onSend }) => {
+export default function ApplyModal({ value, onChange, onSend }) {
   const [sending, setSending] = useState(false);
   const young = useSelector((state) => state.Auth.young);
 
@@ -67,7 +67,7 @@ export default ({ value, onChange, onSend }) => {
       </ModalContainer>
     </Modal>
   );
-};
+}
 
 const ModalContainer = styled.div`
   display: flex;

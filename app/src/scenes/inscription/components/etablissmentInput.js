@@ -1,130 +1,248 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
 import Autosuggest from "react-autosuggest";
-import { Row, Col, Input } from "reactstrap";
+import styled from "styled-components";
+import { Row, Col } from "reactstrap";
 import { Field } from "formik";
+import ErrorMessage, { requiredMessage } from "../components/errorMessage";
+import api from "../../../services/api";
+import countries from "i18n-iso-countries";
 import { departmentLookUp } from "../../../utils";
 
-import api from "../../../services/api";
+countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
+const countriesList = countries.getNames("fr", { select: "official" });
+const NORESULTMESSAGE = "Aucun résultat trouvé";
 
-export default ({ handleChange, values }) => {
-  const [other, setOther] = useState(false);
-
+export default function EtablissmentInput({ handleChange, values, keys, errors, touched, setFieldValue }) {
   useEffect(() => {
     if (document.getElementsByTagName) {
       const inputElements = document.getElementsByTagName("input");
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
     }
+    if (!values[keys.schoolCountry]) setFieldValue(keys.schoolCountry, "France");
   }, []);
 
   return (
     <Row>
-      <Col md={12} style={{ marginTop: 15 }}>
-        <AutoComplete
-          onSelect={(suggestion) => {
-            setOther(suggestion.type === "AUTRE");
+      <Col md={12}>
+        <Label>Pays de l&apos;établissement</Label>
+        <Field
+          as="select"
+          validate={(v) => !v && requiredMessage}
+          className="form-control"
+          placeholder="Pays"
+          name={keys.schoolCountry}
+          value={values[keys.schoolCountry]}
+          onChange={(e) => {
+            handleChange(e);
+            setFieldValue(keys.schoolName, "");
+            setFieldValue(keys.schoolCity, "");
+            setFieldValue(keys.schoolId, "");
+            setFieldValue(keys.schoolDepartment, "");
+          }}>
+          {Object.values(countriesList)
+            .sort((a, b) => a.localeCompare(b))
+            .map((countryName) => (
+              <option key={countryName} value={countryName}>
+                {countryName}
+              </option>
+            ))}
+        </Field>
+      </Col>
 
-            function getDepartment() {
-              if (!suggestion.department) return "";
-              let d = suggestion.department;
-              d = d.replace(/^0+/, "");
-              if (d < 10) d = "0" + d;
-              d = departmentLookUp[d];
-              return d;
-            }
+      <Col md={12}>
+        {values[keys.schoolCountry] === "France" && (
+          <>
+            <Label>Ville de l&apos;établissement</Label>
+            <SchoolCityTypeahead
+              initialValue={values[keys.schoolCity] || ""}
+              onChange={({ name, department }) => {
+                setFieldValue(keys.schoolCity, name);
+                setFieldValue(keys.schoolDepartment, department);
+                setFieldValue(keys.schoolName, "");
+                setFieldValue(keys.schoolId, "");
+              }}
+            />
+            <ErrorMessage errors={errors} touched={touched} name={keys.schoolCity} />
+          </>
+        )}
 
-            let depart = getDepartment();
-
-            handleChange({ target: { name: "schoolId", value: suggestion._id } });
-            handleChange({ target: { name: "schoolCity", value: suggestion.city } });
-            handleChange({ target: { name: "schoolZip", value: suggestion.postcode } });
-            handleChange({ target: { name: "schoolDepartment", value: depart } });
-            handleChange({ target: { name: "schoolName", value: suggestion.name2 } });
-            handleChange({ target: { name: "schoolType", value: suggestion.type } });
+        <Label>Nom de l&apos;établissement</Label>
+        <SchoolNameTypeahead
+          initialValue={values[keys.schoolName] || ""}
+          country={values[keys.schoolCountry]}
+          city={values[keys.schoolCity]}
+          disabled={values[keys.schoolCountry] === "France" && !values[keys.schoolCity]}
+          onChange={({ name, id }) => {
+            setFieldValue(keys.schoolName, name);
+            setFieldValue(keys.schoolId, id);
           }}
-          placeholder="Recherche par nom, code postal, ville ..."
         />
-      </Col>
-      <Col md={6} style={{ marginTop: 15 }}>
-        <Label>Ville</Label>
-        <Field disabled={!other} style={{ maxWidth: 500 }} className="form-control" placeholder="Ville" name="schoolCity" value={values.schoolCity} onChange={handleChange} />
-      </Col>
-      <Col md={4} style={{ marginTop: 15 }}>
-        <Label>Code postal</Label>
-        <Field disabled={!other} style={{ maxWidth: 500 }} className="form-control" placeholder="Code postal" name="schoolZip" value={values.schoolZip} onChange={handleChange} />
-      </Col>
-      <Col md={12} style={{ marginTop: 15 }}>
-        <Label>Type d'établissement</Label>
-        <Input disabled style={{ maxWidth: 500 }} name="schoolType" placeholder="Type d'établissement" value={values.schoolType} onChange={handleChange} />
-      </Col>
-      <Col md={12} style={{ marginTop: 15 }}>
-        <Label>Etablissement scolaire</Label>
-        <Input disabled={!other} placeholder="Nom de l'établissement scolaire" name="schoolName" value={values.schoolName} onChange={handleChange} />
+        <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />
+        <Label>Niveau scolaire</Label>
+        <Field
+          as="select"
+          className="form-control"
+          name={keys.grade}
+          value={values[keys.grade]}
+          validate={(v) => !v && requiredMessage}
+          onChange={(e) => {
+            const value = e.target.value;
+            handleChange({ target: { name: keys.grade, value } });
+          }}>
+          <option key="" value="" disabled>
+            Sélectionner votre niveau scolaire
+          </option>
+          {[
+            { label: "3ème", value: "3eme" },
+            { label: "2nd", value: "2nd" },
+            { label: "1ère", value: "1ere" },
+            { label: "1ère année CAP", value: "1ere CAP" },
+            { label: "Terminale", value: "Terminale" },
+            { label: "Terminale CAP", value: "Terminale CAP" },
+            { label: "SEGPA", value: "SEGPA" },
+            { label: "Classe relais", value: "Classe relais" },
+            { label: "Autre", value: "Autre" },
+          ].map((rank) => (
+            <option key={rank.value} value={rank.value}>
+              {`${rank.label}`}
+            </option>
+          ))}
+        </Field>
+        <ErrorMessage errors={errors} touched={touched} name={keys.grade} />
       </Col>
     </Row>
   );
-};
+}
 
-const AutoComplete = ({ placeholder, onSelect }) => {
-  const [hits, setHits] = useState([]);
+function SchoolCityTypeahead({ onChange, initialValue }) {
+  const [suggestions, setSuggestions] = useState([]);
   const [value, setValue] = useState("");
 
-  const onSuggestionsFetchRequested = async ({ value }) => {
-    setHits(await getSuggestions(value));
-  };
-
-  const onSuggestionsClearRequested = () => {
-    setHits([]);
-  };
-
-  const onSuggestionSelected = async (event, { suggestion }) => {
-    onSelect(suggestion);
-  };
-
-  const renderSuggestion = (suggestion) => (
-    <div style={{ fontSize: 12 }}>
-      <strong>{suggestion.name2 || "RENTREZ MANUELLEMENT L'ETABLISSEMENT"}</strong>
-      <div>
-        {suggestion.city} {suggestion.city && ","} {suggestion.postcode}
-      </div>
-      <div style={{ color: "#aaa" }}>{suggestion.type}</div>
-    </div>
-  );
-  const getSuggestionValue = () => "";
-
-  const getSuggestions = async (text) => {
-    const { responses } = await api.esQuery("school", { query: { multi_match: { query: text, type: "most_fields", fields: ["name2", "city", "type", "postcode"] } } });
-    console.log("responses", responses);
-    const hits = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-    // if (hits.length) return setHits(hits);
-    hits.push({ name2: "", city: "", postcode: "", type: "AUTRE" });
-    return hits;
-  };
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
 
   return (
-    <Wrapper>
+    <TypeaheadWrapper>
       <Autosuggest
-        suggestions={hits}
-        onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-        onSuggestionsClearRequested={onSuggestionsClearRequested}
-        getSuggestionValue={getSuggestionValue}
-        onSuggestionSelected={onSuggestionSelected}
-        renderSuggestion={renderSuggestion}
+        suggestions={suggestions}
+        onSuggestionsFetchRequested={async ({ value: text }) => {
+          try {
+            const response = await fetch(`https://geo.api.gouv.fr/communes?nom=${text}&boost=population&fields=departement&limit=10`, {
+              mode: "cors",
+              method: "GET",
+              headers: { "Content-Type": "application/json" },
+            });
+            const res = await response.json();
+            return setSuggestions(res.slice(0, 10));
+          } catch (error) {
+            console.log(error);
+          }
+        }}
+        onSuggestionsClearRequested={() => setSuggestions([])}
+        getSuggestionValue={(suggestion) => (suggestion !== "noresult" ? `${suggestion.nom}` : "")}
+        onSuggestionSelected={(event, { suggestion }) => {}}
+        renderSuggestion={(suggestion) => (
+          <div>
+            {suggestion !== "noresult" ? (
+              <>
+                <b>{suggestion.nom}</b>, {suggestion.departement?.code} - {suggestion.departement?.nom}
+              </>
+            ) : (
+              NORESULTMESSAGE
+            )}
+          </div>
+        )}
         inputProps={{
+          placeholder: "Indiquez un nom de ville",
           value,
-          onChange: (event, { newValue }) => setValue(newValue),
-          placeholder,
+          onChange: (event, { newValue }) => {
+            setValue(newValue);
+            const departmentCode = suggestions.find((e) => e.nom === newValue)?.departement?.code;
+            const department = departmentLookUp[departmentCode] || "";
+            onChange({ name: newValue, department });
+          },
           className: "form-control",
         }}
       />
-    </Wrapper>
+    </TypeaheadWrapper>
   );
-};
+}
 
-const Wrapper = styled.div`
+function SchoolNameTypeahead({ onChange, country, city, initialValue, disabled = false }) {
+  const [suggestions, setSuggestions] = useState([]);
+  const [value, setValue] = useState("");
+
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
+  return (
+    <TypeaheadWrapper>
+      <Autosuggest
+        suggestions={suggestions}
+        onSuggestionsFetchRequested={async ({ value: text }) => {
+          let filter = [{ term: { "version.keyword": "2" } }];
+          if (country === "France") {
+            filter.push({ term: { "city.keyword": city } });
+          } else {
+            filter.push({ term: { "country.keyword": country } });
+          }
+          const { responses } = await api.esQuery("school", {
+            query: {
+              bool: {
+                must: { match_bool_prefix: { fullName: { operator: "and", query: (text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "") } } },
+                filter,
+              },
+            },
+            size: 100,
+          });
+
+          const hitsFormatted = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })).sort((a, b) => a.fullName.localeCompare(b.fullName));
+          setSuggestions(hitsFormatted);
+        }}
+        onSuggestionsClearRequested={() => setSuggestions([])}
+        getSuggestionValue={(suggestion) => (suggestion !== "noresult" ? `${suggestion.fullName}` : "")}
+        renderSuggestion={(suggestion) => (
+          <div>
+            {suggestion !== "noresult" ? (
+              <>
+                <b>{suggestion.fullName}</b>, {suggestion.postcode} {suggestion.city}
+              </>
+            ) : (
+              NORESULTMESSAGE
+            )}
+          </div>
+        )}
+        inputProps={{
+          placeholder: disabled ? "Vous pouvez indiquer le nom seulement après avoir renseigné la ville" : "Indiquez le nom de l'établissement",
+          value,
+          disabled,
+          onChange: (event, { newValue }) => {
+            setValue(newValue);
+            onChange({ name: newValue, id: suggestions.find((e) => e.fullName === newValue)?._id || "" });
+          },
+          className: "form-control",
+        }}
+      />
+    </TypeaheadWrapper>
+  );
+}
+
+const Label = styled.div`
+  color: #374151;
+  font-size: 14px;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+`;
+
+const TypeaheadWrapper = styled.div`
   .react-autosuggest__container {
     position: relative;
-    max-width: 500px;
+    > input {
+      width: 100%;
+      max-width: 100%;
+    }
   }
   .react-autosuggest__suggestions-list {
     position: absolute;
@@ -137,24 +255,21 @@ const Wrapper = styled.div`
     border: 1px solid #ddd;
     padding: 5px 0;
     border-radius: 6px;
-    max-height: 300px;
-    overflow-y: auto;
   }
   .react-autosuggest__suggestions-list li {
     cursor: pointer;
-    padding: 7px 10px;
-    text-transform: capitalize;
+    font-size: 14px;
+    padding: 5px 7px;
+    color: #777;
     :hover {
       background-color: #f3f3f3;
+    }
+    b {
+      font-weight: 500;
+      color: #000;
     }
   }
   .react-autosuggest__suggestion--highlighted {
     background-color: #f3f3f3;
   }
-`;
-
-const Label = styled.div`
-  color: #374151;
-  font-size: 14px;
-  margin-bottom: 10px;
 `;

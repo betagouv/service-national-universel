@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Col, Row } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 
@@ -7,7 +7,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Documents from "../components/Documents";
 import DndFileInput from "../../../components/dndFileInput";
 
-export default ({ values, handleChange, handleSubmit }) => {
+export default function MilitaryPreparation({ values, handleChange, handleSubmit }) {
   const files = [
     { name: "militaryPreparationFilesIdentity", placeholder: "Pièce d’identité en cours de validité (CNI, passeport)" },
     { name: "militaryPreparationFilesCensus", placeholder: "Attestation de recensement" },
@@ -22,7 +22,7 @@ export default ({ values, handleChange, handleSubmit }) => {
         <BoxContent direction="column">
           <Row>
             {files.map((file) => (
-              <Col md={6}>
+              <Col md={6} key={file.name}>
                 <Documents key={file.name}>
                   <h4>{file.placeholder}</h4>
                   <DndFileInput
@@ -37,7 +37,7 @@ export default ({ values, handleChange, handleSubmit }) => {
                         return toastr.error(
                           "Le fichier semble corrompu",
                           "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                          { timeOut: 0 }
+                          { timeOut: 0 },
                         );
                       }
                       if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
@@ -54,4 +54,4 @@ export default ({ values, handleChange, handleSubmit }) => {
       </Box>
     </Col>
   );
-};
+}

@@ -1,34 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Formulaire Autotest PCR - SNU</title>
-    <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
-  </head>
 
-  <body id="convocation-cohesion">
-    <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="recto" />
-    <div class="referent">
-      <div class="referent-name">Affaire suivie par : {{REFERENT_NAME}}</div>
-      <div class="referent-phone">{{REFERENT_PHONE}}</div>
-    </div>
-    <div class="infos-young">
-      Paris, le {{DATE}}<br />
-      {{FIRST_NAME}} {{LAST_NAME}}<br />
-      Né(e) le {{BIRTHDATE}}<br />
-      {{ADDRESS}}<br />
-      {{ZIP}} {{CITY}}
-    </div>
-    <div class="center">{{COHESION_CENTER_NAME}}, {{COHESION_CENTER_ADDRESS}} {{COHESION_CENTER_ZIP}} {{COHESION_CENTER_CITY}}</div>
-    <div class="meeting-point">
-      <div><b>Le</b> {{MEETING_DATE}}</div>
-      <div><b>Lieu de rassemblement prévu : </b>{{MEETING_ADDRESS}}</div>
-      <div>{{TRANPORT}}</div>
-    </div>
-    <div class="meeting-point-date-return">
-      Le RDV de fin de séjour se déroule selon les mêmes modalités que le départ. Il est prévu le
-      <b>{{MEETING_DATE_RETURN}} {{MEETING_ADDRESS_RETURN}}</b>.<br />
-      Votre représentant légal se présentera au lieu et horaire indiqués ci-dessus. Il veillera à bien respecter l'horaire indiqué.
-    </div>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <title>Formulaire Autotest PCR - SNU</title>
+  <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
+</head>
+
+<body id="convocation-cohesion">
+  <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="recto" />
+  <div class="referent">
+    <div class="referent-name">Affaire suivie par : {{REFERENT_NAME}}</div>
+    <div class="referent-phone">{{REFERENT_PHONE}}</div>
+    <div class="referent-mail">{{REFERENT_MAIL}}</div>
+  </div>
+  <div class="infos-young">
+    Paris, le {{DATE}}<br />
+    {{FIRST_NAME}} {{LAST_NAME}}<br />
+    Né(e) le {{BIRTHDATE}}<br />
+    {{ADDRESS}}<br />
+    {{ZIP}} {{CITY}}
+  </div>
+  <div class="infos-center">
+    Je suis heureuse de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service
+    national universel, du {{COHESION_STAY_DATE_STRING}}, a été retenue. Votre séjour se déroulera au:
+    {{COHESION_CENTER_NAME}}, {{COHESION_CENTER_ADDRESS}} {{COHESION_CENTER_ZIP}}
+    {{COHESION_CENTER_CITY}}.
+  </div>
+  <!-- <div class="center">{{COHESION_CENTER_NAME}}, {{COHESION_CENTER_ADDRESS}} {{COHESION_CENTER_ZIP}}
+    {{COHESION_CENTER_CITY}}</div> -->
+  <div class="meeting-point">
+    <div>Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants:</div>
+    <div><b>Le</b> {{MEETING_DATE}}</div>
+    <div><b>Au : </b>{{MEETING_ADDRESS}}</div>
+    <div>{{TRANPORT}}</div>
+  </div>
+  <div class="meeting-point-date-return">
+    Le RDV de fin de séjour se déroule selon les mêmes modalités que le départ. Il est prévu le
+    <b>{{MEETING_DATE_RETURN}} {{MEETING_ADDRESS_RETURN}}</b>.<br />
+    Votre représentant légal se présentera au lieu et horaire indiqués ci-dessus. Il veillera à bien respecter
+    l'horaire
+    indiqué.
+  </div>
+</body>
+
 </html>
