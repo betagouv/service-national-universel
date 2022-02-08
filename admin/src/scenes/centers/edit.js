@@ -158,7 +158,7 @@ export default function Edit(props) {
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxHeadTitle>Nombre de places disponibles pour les sessions</BoxHeadTitle>
+                  <BoxHeadTitle>Nombre de places disponibles par séjour</BoxHeadTitle>
                   <BoxContent direction="column">
                     {sessions.map((session) => (
                       <Item
