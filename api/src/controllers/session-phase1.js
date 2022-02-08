@@ -140,7 +140,7 @@ router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent
     //if the young has already a meetingPoint and therefore a place taken in a bus
     let bus = null;
     if (young.meetingPointId) {
-      console.log(`affect ${young.id} but is already in meetingPoint ${young.meetingPointId}`);
+      console.log(`affecting ${young.id} but is already in meetingPoint ${young.meetingPointId}`);
       const meetingPoint = await MeetingPointObject.findById(young.meetingPointId);
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       bus = await BusObject.findById(meetingPoint.busId);
@@ -148,7 +148,7 @@ router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent
       console.log(`${young.id} is in bus ${bus.idExcel}`);
     }
 
-    // if young has confirmed their meetingPoint, as we will cancel it, we notify them
+    // if young has confirmed their meetingPoint, we will cancel it
     if (young.meetingPointId || young.deplacementPhase1Autonomous === "true") {
       young.set({ meetingPointId: undefined, deplacementPhase1Autonomous: undefined });
     }
