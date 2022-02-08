@@ -15,6 +15,7 @@ import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
 import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import plausibleEvent from "../../services/pausible";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION"];
 
@@ -66,6 +67,7 @@ export default function List() {
                 </Link>
               ) : null}
               <ExportComponent
+                handleClick={() => plausibleEvent("Mission/CTA - Exporter missions")}
                 title="Exporter les missions"
                 defaultQuery={getExportQuery}
                 exportTitle="Missions"
@@ -92,8 +94,9 @@ export default function List() {
                       "Nom du tuteur": data.tutor?.lastName,
                       "Prénom du tuteur": data.tutor?.firstName,
                       "Email du tuteur": data.tutor?.email,
-                      "Téléphone du tuteur": data.tutor?.mobile ? data.tutor?.mobile : data.tutor?.phone,
-                      "Liste des domaines de la mission": data.domains?.map(translate)?.join(", "),
+                      "Téléphone du tuteur": data.tutor?.mobile || data.tutor?.phone,
+                      "Domaine principal de la mission": data.mainDomain || "Non renseigné",
+                      "Domaine(s) secondaire(s) de la mission": data.mainDomain ? data.domains.filter((d) => d !== data.mainDomain) : data.domains,
                       "Date du début": formatDateFRTimezoneUTC(data.startAt),
                       "Date de fin": formatDateFRTimezoneUTC(data.endAt),
                       Format: translate(data.format),

@@ -16,6 +16,7 @@ import Title from "../../../components/views/Title";
 import { appURL } from "../../../config";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ActionButtonArchive from "../../../components/buttons/ActionButtonArchive";
+import plausibleEvent from "../../../services/pausible";
 
 export default function Wrapper({ children, young, tab }) {
   const history = useHistory();
@@ -79,10 +80,10 @@ export default function Wrapper({ children, young, tab }) {
               </Col>
             </Row>
             <Row style={{ marginTop: "0.5rem" }}>
-              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
+              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
                 <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
               </a>
-              <Link to={`/volontaire/${young._id}/edit`}>
+              <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
                 <PanelActionButton icon="pencil" title="Modifier" />
               </Link>
               <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />

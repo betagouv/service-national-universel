@@ -12,6 +12,7 @@ import Panel, { Info, Details } from "../../components/Panel";
 import { appURL } from "../../config";
 import Badge from "../../components/Badge";
 import ActionButtonArchive from "../../components/buttons/ActionButtonArchive";
+import plausibleEvent from "../../services/pausible";
 
 export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
@@ -60,13 +61,13 @@ export default function InscriptionPanel({ onChange, value }) {
         ) : null}
         {value.frenchNationality === "true" ? <div style={{ fontStyle: "italic", fontSize: "0.9rem" }}>🇫🇷 Nationalité française</div> : null}
         <div style={{ display: "flex", flexWrap: "wrap" }}>
-          <Link to={`/volontaire/${value._id}`}>
+          <Link to={`/volontaire/${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
-          <Link to={`/volontaire/${value._id}/edit`}>
+          <Link to={`/volontaire/${value._id}/edit`} onClick={() => plausibleEvent("Inscriptions/CTA - Modifier profil jeune")}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
-          <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`}>
+          <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>
           {user.role === ROLES.ADMIN ? <ActionButtonArchive young={value} /> : null}

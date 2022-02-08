@@ -19,21 +19,44 @@ import Error, { requiredMessage } from "../../components/errorMessage";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
+  const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const isNew = !props?.match?.params?.id;
   const user = useSelector((state) => state.Auth.user);
 
-  async function initCenter() {
+  async function init() {
     if (isNew) return setDefaultValue(null);
     const id = props.match && props.match.params && props.match.params.id;
-    const { data } = await api.get(`/cohesion-center/${id}`);
-    setDefaultValue(data);
+    const { data: center } = await api.get(`/cohesion-center/${id}`);
+    let obj = center;
+
+    if (!center || !center?.cohorts || !center?.cohorts?.length) return;
+
+    let sessionsAdded = [];
+    for (const cohort of center.cohorts) {
+      const sessionPhase1Response = await api.get(`/cohesion-center/${id}/cohort/${cohort}/session-phase1`);
+      if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
+      sessionsAdded.push(sessionPhase1Response.data);
+      obj[sessionPhase1Response.data.cohort] = sessionPhase1Response.data.placesTotal;
+    }
+
+    setDefaultValue(obj);
+    setSessions(sessionsAdded);
   }
 
   useEffect(() => {
-    initCenter();
+    init();
   }, []);
+
+  const updateSessions = async (newValues) => {
+    for (const session of sessions) {
+      if (session.placesTotal !== newValues[session.cohort]) {
+        const { ok, code } = await api.put(`/session-phase1/${session._id}`, { placesTotal: newValues[session.cohort] });
+        if (!ok) return toastr.error(`Oups, une erreur est survenue lors de la mise à jour de la session ${session.cohort}`, translate(code));
+      }
+    }
+  };
 
   if (!defaultValue && !isNew) return <Loader />;
 
@@ -49,6 +72,7 @@ export default function Edit(props) {
           else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
 
           const { ok, code, data } = values._id ? await api.put(`/cohesion-center/${values._id}`, values) : await api.post("/cohesion-center", values);
+          await updateSessions(values);
 
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));
@@ -77,7 +101,6 @@ export default function Edit(props) {
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" handleChange={handleChange} />
                     <Item disabled={user.role !== "admin"} title="Code 2022" values={values} name="code2022" handleChange={handleChange} />
-                    <Item type="number" title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Select
                       name="pmr"
                       values={values}
@@ -128,6 +151,28 @@ export default function Edit(props) {
                       validateField={validateField}
                       required
                     />
+                  </BoxContent>
+                </Box>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={6} style={{ marginBottom: "20px" }}>
+                <Box>
+                  <BoxHeadTitle>Nombre de places disponibles pour les sessions</BoxHeadTitle>
+                  <BoxContent direction="column">
+                    {sessions.map((session) => (
+                      <Item
+                        key={session._id}
+                        title={session.cohort}
+                        values={values}
+                        name={session.cohort}
+                        placeholder="Nombre de place"
+                        handleChange={handleChange}
+                        required
+                        errors={errors}
+                        touched={touched}
+                      />
+                    ))}
                   </BoxContent>
                 </Box>
               </Col>

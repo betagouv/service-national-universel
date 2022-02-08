@@ -11,6 +11,7 @@ import Center from "./centers";
 import VioletButton from "../../components/buttons/VioletButton";
 import ExportAll from "./inscription/ExportAll";
 import { ROLES } from "../../utils";
+import plausibleEvent from "../../services/pausible";
 
 export default function Dashboard() {
   const history = useHistory();
@@ -45,7 +46,11 @@ export default function Dashboard() {
         </TabNavigationList>
         <div style={{ display: "flex", marginTop: "1rem" }}>
           {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll filter={filter} /> : null}
-          <VioletButton onClick={() => print()}>
+          <VioletButton
+            onClick={() => {
+              plausibleEvent("Dashboard/CTA - Exporter statistiques");
+              print();
+            }}>
             <p>Exporter les statistiques</p>
           </VioletButton>
         </div>

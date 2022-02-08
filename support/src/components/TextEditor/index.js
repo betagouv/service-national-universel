@@ -171,7 +171,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
         </Slate>
       </div>
       {!readOnly && (
-        <div className="py-2 px-8 pt-8 box-border w-full flex-shrink-0 b-0 l-0 r-0 border-t-2 overflow-hidden flex items-center justify-around">
+        <div className="py-2 px-8 pt-8 box-border w-full shrink-0 b-0 l-0 r-0 border-t-2 overflow-hidden flex items-center justify-around">
           <button onClick={onSaveRequest} disabled={!isSaveable} className="px-8 py-2 box-border">
             Enregistrer
           </button>

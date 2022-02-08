@@ -6,7 +6,7 @@ import { Editor, Transforms, Element as SlateElement, Range } from "slate";
 import { TextEditorButton, Icon } from "./components";
 import Modal from "../Modal";
 import { Button, CancelButton } from "../Buttons";
-import KnowledgeBaseAdminTree from "../KnowledgeBaseAdminTree";
+import KnowledgeBaseAdminTree from "../knowledge-base/KnowledgeBaseAdminTree";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
 export const isLinkActive = (editor) => {

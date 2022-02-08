@@ -7,6 +7,7 @@ import { departmentLookUp, department2region, departmentToAcademy, translate, tr
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import plausibleEvent from "../../../services/pausible";
 
 // TODO (fix): Export not only for 2021.
 export default function ExportAll({ filter }) {
@@ -15,6 +16,7 @@ export default function ExportAll({ filter }) {
   const [loadingText, setLoadingText] = useState();
 
   const onClick = () => {
+    plausibleEvent("Dashboard/CTA - Exporter rapport");
     setModal({
       isOpen: true,
       onConfirm: run,

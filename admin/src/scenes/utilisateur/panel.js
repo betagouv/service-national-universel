@@ -10,6 +10,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import styled from "styled-components";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import plausibleEvent from "../../services/pausible";
 
 export default function UserPanel({ onChange, value }) {
   if (!value) return <div />;
@@ -73,6 +74,7 @@ export default function UserPanel({ onChange, value }) {
 
   const handleImpersonate = async () => {
     try {
+      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${value._id}`);
       if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
       history.push("/dashboard");
@@ -120,7 +122,7 @@ export default function UserPanel({ onChange, value }) {
             {user.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
             {canDeleteReferent({ actor: user, originalTarget: value }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
             {structure ? (
-              <Link to={`/structure/${structure._id}`}>
+              <Link to={`/structure/${structure._id}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
                 <PanelActionButton icon="eye" title="Voir la structure" />
               </Link>
             ) : null}

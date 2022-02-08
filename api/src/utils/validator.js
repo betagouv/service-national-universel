@@ -22,6 +22,8 @@ function validateMission(mission) {
     .keys({
       name: Joi.string().allow(null, ""),
       domains: Joi.array().items(Joi.string().allow(null, "")),
+      mainDomain: Joi.string().allow(null, ""),
+      sideDomain: Joi.string().allow(null, ""),
       startAt: Joi.string().allow(null, ""),
       endAt: Joi.string().allow(null, ""),
       duration: Joi.string().allow(null, ""),
@@ -282,7 +284,7 @@ function validateYoung(young, user) {
     birthCountry: Joi.string().allow(null, ""),
     birthCity: Joi.string().allow(null, ""),
     birthCityZip: Joi.string().allow(null, ""),
-    email: Joi.string().allow(null, ""),
+    email: Joi.string().lowercase().trim().email().allow(null, ""),
     phone: Joi.string().allow(null, ""),
     gender: Joi.string().allow(null, ""),
     birthdateAt: Joi.string().allow(null, ""),

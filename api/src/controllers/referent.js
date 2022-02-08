@@ -35,7 +35,7 @@ const {
   //  updateApplicationsWithYoungOrMission,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
-const { serializeYoung, serializeReferent } = require("../utils/serializer");
+const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { department2region } = require("snu-lib/region-and-departments");
@@ -723,6 +723,19 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+
+    const sessions = await SessionPhase1.find({ headCenterId: checkedId });
+    return res.status(200).send({ ok: true, data: sessions.map(serializeSessionPhase1) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });

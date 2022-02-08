@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import plausibleEvent from "../../services/pausible";
 
 import api from "../../services/api";
 import { apiURL } from "../../config";
@@ -84,6 +85,7 @@ export default function List() {
               </div>
               <div style={{ display: "flex" }}>
                 <ExportComponent
+                  handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
                   defaultQuery={getExportQuery}
                   title="Exporter les volontaires"
                   exportTitle="Volontaires"
@@ -139,6 +141,7 @@ export default function List() {
                         "Consentement des représentants légaux": data.parentConsentment,
                         "Droit à l'image": translate(data.imageRight),
                         "Autotest PCR": translate(data.autoTestPCR),
+                        "Règlement intérieur": translate(data.rulesYoung),
                         "fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
                         "Statut représentant légal 1": translate(data.parent1Status),
                         "Prénom représentant légal 1": data.parent1FirstName,
@@ -182,7 +185,7 @@ export default function List() {
                     });
                   }}
                 />
-                <DownloadAllAttestation cohesionCenterId={user.cohesionCenterId}>
+                <DownloadAllAttestation sessionPhase1={user.sessionPhase1Id}>
                   <div>Exporter les attestations</div>
                 </DownloadAllAttestation>
               </div>

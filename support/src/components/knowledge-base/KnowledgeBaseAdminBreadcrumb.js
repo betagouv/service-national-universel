@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
-import useKnowledgeBaseData from "../hooks/useKnowledgeBaseData";
-import Breadcrumb from "./BreadCrumb";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import Breadcrumb from "../BreadCrumb";
 
 const computeCrumb = (items, slug) => {
   if (!slug) return [];

@@ -32,6 +32,7 @@ const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL", "COHORT",
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Badge from "../../components/Badge";
+import plausibleEvent from "../../services/pausible";
 
 export default function Inscription() {
   const [young, setYoung] = useState(null);
@@ -49,11 +50,12 @@ export default function Inscription() {
               <Title>Inscriptions</Title>
               <div style={{ display: "flex" }}>
                 <Link to="/volontaire/create">
-                  <VioletButton>
+                  <VioletButton onClick={() => plausibleEvent("Inscriptions/CTA - Nouvelle inscription")}>
                     <p>Nouvelle inscription</p>
                   </VioletButton>
                 </Link>
                 <ExportComponent
+                  handleClick={() => plausibleEvent("Inscriptions/CTA - Exporter inscriptions")}
                   title="Exporter les inscriptions"
                   defaultQuery={getExportQuery}
                   exportTitle="Candidatures"
@@ -129,6 +131,7 @@ export default function Inscription() {
                         "Consentement des représentants légaux": translate(data.parentConsentment),
                         "Droit à l'image": translate(data.imageRight),
                         "Autotest PCR": translate(data.autoTestPCR),
+                        "Règlement intérieur": translate(data.rulesYoung),
                         "fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
                         "Statut représentant légal 1": translate(data.parent1Status),
                         "Prénom représentant légal 1": data.parent1FirstName,
@@ -388,13 +391,17 @@ const Action = ({ hit }) => {
         </DropdownToggle>
         <DropdownMenu>
           <DropdownItem className="dropdown-item">
-            <Link to={`/volontaire/${hit._id}`}>Consulter le profil</Link>
+            <Link to={`/volontaire/${hit._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
+              Consulter le profil
+            </Link>
           </DropdownItem>
-          <DropdownItem className="dropdown-item">
+          <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Inscriptions/CTA - Modifier profil jeune")}>
             <Link to={`/volontaire/${hit._id}/edit`}>Modifier le profil</Link>
           </DropdownItem>
           <DropdownItem className="dropdown-item">
-            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
+            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
+              Prendre sa place
+            </a>
           </DropdownItem>
         </DropdownMenu>
       </UncontrolledDropdown>

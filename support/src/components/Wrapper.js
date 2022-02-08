@@ -6,7 +6,7 @@ import { adminURL, appURL, supportURL } from "../config";
 import useUser from "../hooks/useUser";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
-import Search from "./Search";
+import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearch";
 import SeeAsContext from "../hooks/useSeeAs";
 import { useRouter } from "next/router";
 import ProfileButton from "./ProfileButton";
@@ -43,7 +43,7 @@ const Wrapper = ({ children }) => {
             </Link>
           </div>
           <div className="order-3 w-full md:order-2 md:flex-1 md:w-1/2">
-            <Search
+            <KnowledgeBaseSearch
               path="/base-de-connaissance"
               className="transition-colors border rounded-md border-gray-300 focus:border-gray-400"
               showNoAnswerButton
@@ -120,23 +120,23 @@ const Wrapper = ({ children }) => {
         <div className="flex flex-col gap-6 wrapper w-full">
           <div className="flex items-center gap-4 justify-center max-w-full  flex-wrap">
             <Link href="https://www.snu.gouv.fr/mentions-legales-10">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">Mentions légales</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">Mentions légales</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://www.snu.gouv.fr/accessibilite-du-site-24">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">Accessibilité</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">Accessibilité</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">Données personnelles et cookies</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">Données personnelles et cookies</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://moncompte.snu.gouv.fr/conditions-generales-utilisation">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">Conditions générales d'utilisation</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">Conditions générales d'utilisation</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://www.snu.gouv.fr/">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">SNU</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">SNU</span>
             </Link>
           </div>
           <div className="flex items-center gap-4 justify-center max-w-full  flex-wrap">
@@ -146,35 +146,35 @@ const Wrapper = ({ children }) => {
           </div>
           <div className="flex items-center gap-4 justify-center max-w-full  flex-wrap">
             <Link href="https://www.gouvernement.fr/">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">gouvernement.fr</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">gouvernement.fr</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://www.education.gouv.fr/">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">education.gouv.fr</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">education.gouv.fr</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://jeunes.gouv.fr/">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">jeunes.gouv.fr</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">jeunes.gouv.fr</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://presaje.sga.defense.gouv.fr/">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">majdc.fr</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">majdc.fr</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://www.service-public.fr/">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">service-public.fr</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">service-public.fr</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://www.legifrance.gouv.fr/">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">legifrance.gouv.fr</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">legifrance.gouv.fr</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span>
             <Link href="https://www.data.gouv.fr/fr/">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">data.gouv.fr</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">data.gouv.fr</span>
             </Link>
           </div>
           {/* <span href="#">
-              <span className="text-[#6A6A6A] text-xs cursor-pointer flex-shrink-0">Plan du site</span>
+              <span className="text-[#6A6A6A] text-xs cursor-pointer shrink-0">Plan du site</span>
             </Link>
             <span className="text-[#E5E5E5] text-base hidden md:block">|</span> */}
         </div>

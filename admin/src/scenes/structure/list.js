@@ -14,6 +14,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from 
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Chevron from "../../components/Chevron";
+import plausibleEvent from "../../services/pausible";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION"];
 const formatLongDate = (date) => {
@@ -59,12 +60,13 @@ export default function List() {
                 <Title>Structures</Title>
               </div>
               <div style={{ display: "flex" }}>
-                <Link to="/structure/create">
+                <Link to="/structure/create" onClick={() => plausibleEvent("Structure/CTA - Inviter nouvelle structure")}>
                   <VioletButton>
                     <p>Inviter une nouvelle structure</p>
                   </VioletButton>
                 </Link>
                 <ExportComponent
+                  handleClick={() => plausibleEvent("Structure/CTA - Exporter structure")}
                   title="Exporter les structures"
                   defaultQuery={getExportQuery}
                   exportTitle="Structures"
