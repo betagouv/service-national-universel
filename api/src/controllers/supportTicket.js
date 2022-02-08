@@ -30,4 +30,17 @@ router.get("/", passport.authenticate("support-user", { session: false, failWith
   }
 });
 
+router.get("/:id", passport.authenticate("support-user", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const query = { _id: req.params.id };
+
+    const ticket = await TicketModel.findOne(query);
+
+    return res.status(200).send({ ok: true, data: ticket });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 module.exports = router;

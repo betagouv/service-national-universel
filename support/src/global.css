@@ -257,3 +257,17 @@ body {
     width: 0 !important;
   }
 }
+
+/*
+
+TICKETS
+
+
+*/
+
+.ticket-message {
+  overflow-wrap: anywhere;
+}
+.ticket-message blockquote {
+  display: none;
+}

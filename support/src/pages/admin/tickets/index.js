@@ -27,13 +27,13 @@ const Tickets = () => {
     <>
       <Layout title="Tickets" className="flex flex-col">
         <Header>🚧 Tickets (EN COURS DE DÉVELOPPEMENT) 🚧</Header>
-        <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
+        <div className="relative flex h-full w-full flex-shrink flex-grow overflow-hidden border-t-2 bg-coolGray-200">
           <TicketsFolders />
-          <div className="flex flex-grow flex-col flex-shrink-1 w-full overflow-hidden">
-            <div className="flex flex-grow flex-col overflow-auto w-full">
+          <div className="flex-shrink-1 flex w-full flex-grow flex-col overflow-hidden">
+            <div className="flex w-full flex-grow flex-col overflow-auto">
               <TicketsInbox onTicketClick={handleTicketClick} />
             </div>
-            {!!activeTicketsIds.length && <TicketsPreview activeTicketsIds={activeTicketsIds} handleRemoveTicketFromPreview={handleRemoveTicketFromPreview} />}
+            <TicketsPreview activeTicketsIds={activeTicketsIds} handleRemoveTicketFromPreview={handleRemoveTicketFromPreview} />
           </div>
           {/* <TicketsRightDrawer /> */}
         </div>
