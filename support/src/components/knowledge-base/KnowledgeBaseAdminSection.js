@@ -1,20 +1,20 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import SortableJS from "sortablejs";
 import { toast } from "react-toastify";
-import withAuth from "../hocs/withAuth";
-import API from "../services/api";
+import { SUPPORT_ROLES } from "snu-lib/roles";
+import { Popover } from "@headlessui/react";
+import withAuth from "../../hocs/withAuth";
+import API from "../../services/api";
 import KnowledgeBaseSectionCard from "./KnowledgeBaseSectionCard";
 import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
 import KnowledgeBaseAdminItemCreate from "./KnowledgeBaseAdminItemCreate";
-import Tags from "./Tags";
-import useKnowledgeBaseData from "../hooks/useKnowledgeBaseData";
-import Loader from "./Loader";
-import Modal from "./Modal";
+import Tags from "../Tags";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import Loader from "../Loader";
+import Modal from "../Modal";
 import KnowledgeBasePublicContent from "./KnowledgeBasePublicContent";
 import KnowledgeBasePublicHome from "./KnowledgeBasePublicHome";
-import SeeAsContext from "../hooks/useSeeAs";
-import { SUPPORT_ROLES } from "snu-lib/roles";
-import { Popover } from "@headlessui/react";
+import SeeAsContext from "../../hooks/useSeeAs";
 
 const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
   const { setSeeAs, seeAs } = useContext(SeeAsContext);

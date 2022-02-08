@@ -3,7 +3,7 @@ import NavLink from "./NavLink";
 
 const NavBar = () => {
   return (
-    <nav className="bg-snu-purple-900 drop-shadow-md list-none border-r border-white flex-shrink-0 flex flex-col h-full w-14 hover:w-60 items-start transition-all duration-300 py-2 text-white">
+    <nav className="bg-snu-purple-900 drop-shadow-md list-none border-r border-white flex-shrink-0 flex flex-col h-full w-14 hover:w-60 items-start transition-all duration-300 hover:delay-300 py-2 text-white">
       <div className="flex items-center justify-center w-14 h-10 mb-10 ">
         <Image src="/assets/logo-snu.png" width={38} height={38} />
       </div>

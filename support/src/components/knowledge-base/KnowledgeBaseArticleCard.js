@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Tags from "./Tags";
+import Tags from "../Tags";
 
 const KnowledgeBaseArticleCard = ({ _id, position, title, slug, path, allowedRoles = [], className = "", contentClassName = "" }) => {
   return (

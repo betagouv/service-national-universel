@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
-import API from "../services/api";
+import API from "../../services/api";
 
 const initColumns = [
   { key: "number", visible: true, name: "Numéro", type: Number },
@@ -36,6 +36,7 @@ const initColumns = [
 const TicketsTable = ({ onTicketClick }) => {
   const { data } = useSWR(API.getUrl({ path: "/support-center/ticket" }));
   const tickets = data?.data || [];
+  const ticketsIds = tickets.map((t) => t._id);
 
   const [columns] = useState(() => JSON.parse(localStorage.getItem("snu-tickets-table")) || initColumns);
   const tableRef = useRef(null);
@@ -47,7 +48,7 @@ const TicketsTable = ({ onTicketClick }) => {
           {columns
             .filter((c) => c.visible)
             .map(({ key, name }) => (
-              <ResizableColumn height={tableRef?.current?.getBoundingClientRect().height} key={key} columnKey={key}>
+              <ResizableColumn height={tableRef?.current?.getBoundingClientRect().height} key={key} columnKey={key} ticketsIds={ticketsIds}>
                 {name}
               </ResizableColumn>
             ))}
@@ -76,7 +77,7 @@ const TicketsTable = ({ onTicketClick }) => {
   );
 };
 
-const ResizableColumn = ({ height, children, columnKey }) => {
+const ResizableColumn = ({ height, children, columnKey, ticketsIds }) => {
   const col = useRef(null);
   const xPosition = useRef(null);
   const currentWidth = useRef(null);
@@ -126,7 +127,7 @@ const ResizableColumn = ({ height, children, columnKey }) => {
         cell.style.width = `${newWidth}px`;
       }
     }
-  }, [colWidth]);
+  }, [colWidth, style, ticketsIds]);
 
   return (
     <div ref={col} scope="col" className="text-sm font-medium bg-white text-gray-900 px-6 py-2 text-left h-auto border flex-shrink-0 flex-grow-0 relative" style={style}>

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { useRouter } from "next/router";
 import API from "../../services/api";
-import KnowledgeBasePublicContent from "../../components/KnowledgeBasePublicContent";
+import KnowledgeBasePublicContent from "../../components/knowledge-base/KnowledgeBasePublicContent";
 import useUser from "../../hooks/useUser";
 import Modal from "../../components/Modal";
 import Link from "next/link";

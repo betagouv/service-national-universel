@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { RedIcon } from "./IconsPicker";
-import Tags from "./Tags";
+import { RedIcon } from "../IconsPicker";
+import Tags from "../Tags";
 
 const contentSummary = (sectionChildren) => {
   const answers = sectionChildren.filter((child) => child.type === "article");

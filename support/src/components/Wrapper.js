@@ -6,7 +6,7 @@ import { adminURL, appURL, supportURL } from "../config";
 import useUser from "../hooks/useUser";
 import { useSWRConfig } from "swr";
 import API from "../services/api";
-import Search from "./Search";
+import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearch";
 import SeeAsContext from "../hooks/useSeeAs";
 import { useRouter } from "next/router";
 import ProfileButton from "./ProfileButton";
@@ -43,7 +43,7 @@ const Wrapper = ({ children }) => {
             </Link>
           </div>
           <div className="order-3 w-full md:order-2 md:flex-1 md:w-1/2">
-            <Search
+            <KnowledgeBaseSearch
               path="/base-de-connaissance"
               className="transition-colors border rounded-md border-gray-300 focus:border-gray-400"
               showNoAnswerButton

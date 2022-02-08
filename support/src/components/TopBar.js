@@ -1,4 +1,4 @@
-import Search from "./Search";
+import KnowledgeBaseSearch from "./knowledge-base/KnowledgeBaseSearch";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSWRConfig } from "swr";
@@ -20,7 +20,7 @@ const TopBar = () => {
   return (
     <div className="text-snu-purple-900 list-none flex-shrink-0 flex-grow-0 flex w-full pr-4 py-2 bg-white transition-transform">
       <div className="flex-shrink flex-grow">
-        <Search path="/admin/base-de-connaissance" placeholder="Recherche" restriction="admin" showAllowedRoles noAnswer="Il n'y a pas de résultat 👀" />
+        <KnowledgeBaseSearch path="/admin/base-de-connaissance" placeholder="Recherche" restriction="admin" showAllowedRoles noAnswer="Il n'y a pas de résultat 👀" />
       </div>
       <ProfileButton onLogout={onLogout} user={user}>
         <Link href={`/base-de-connaissance/${router?.query?.slug}`}>
