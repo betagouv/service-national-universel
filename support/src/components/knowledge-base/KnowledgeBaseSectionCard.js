@@ -16,11 +16,11 @@ const contentSummary = (sectionChildren) => {
 const KnowledgeBaseSectionCard = ({ _id, imageSrc, position, title, group, icon, slug, allowedRoles, sectionChildren, path, isRoot }) => {
   return (
     <Link key={_id} href={`${path}/${slug}${path === "/base-de-connaissance" ? "?loadingType=section" : ""}`} passHref>
-      <a href="#" data-position={position} data-id={_id} className="mx-2 my-4 w-72 flex flex-shrink flex-grow-0 min-w-1/4">
+      <a href="#" data-position={position} data-id={_id} className="mx-2 my-4 w-72 flex flex-shrink grow-0 min-w-1/4">
         <article className="overflow-hidden rounded-lg shadow-lg flex flex-col flex-grow bg-white">
           {!!imageSrc ? (
-            <div className="h-32 w-full bg-gray-300 flex flex-shrink-0 items-center justify-center overflow-hidden">
-              <img alt={title.title} className="relative h-32 w-full bg-gray-300 flex-shrink-0 object-cover" src={imageSrc} />
+            <div className="h-32 w-full bg-gray-300 flex shrink-0 items-center justify-center overflow-hidden">
+              <img alt={title.title} className="relative h-32 w-full bg-gray-300 shrink-0 object-cover" src={imageSrc} />
             </div>
           ) : !!icon ? (
             <div className="w-full flex items-center overflow-hidden px-8 pt-8">
@@ -35,7 +35,7 @@ const KnowledgeBaseSectionCard = ({ _id, imageSrc, position, title, group, icon,
             {!!group && <h4 className="text-sm text-red-500 font-bold uppercase text-left mb-2">{group}</h4>}
             <h3 className="text-xl text-black font-bold">{title}</h3>
           </header>
-          {!!isRoot && <div className="spacer flex-grow flex-shrink-0 h-32" />}
+          {!!isRoot && <div className="spacer flex-grow shrink-0 h-32" />}
           {!!sectionChildren && <p className="flex flex-wrap text-coolGray-500 px-8  mb-2">{contentSummary(sectionChildren)}</p>}
           {allowedRoles?.length && (
             <footer className="flex flex-col items-start justify-between leading-none px-8 mb-4 -ml-2">

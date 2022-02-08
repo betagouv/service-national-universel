@@ -69,7 +69,7 @@ const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions,
       data-type="section"
       className={`flex flex-col ml-${level * horizontalSpacing} ${className}`}
     >
-      <span className={` text-warmGray-500  max-w-full inline-block overflow-hidden overflow-ellipsis whitespace-nowrap ${isActive ? "font-bold" : ""}`}>
+      <span className={` text-warmGray-500  max-w-full inline-block overflow-hidden text-ellipsis whitespace-nowrap ${isActive ? "font-bold" : ""}`}>
         <small className="text-trueGray-400 mr-1 w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
           {open ? "\u25BC" : "\u25B6"}
         </small>
@@ -124,7 +124,7 @@ const Answer = ({ article, level, onIsActive, position, parentId, onClick }) => 
       data-id={article._id}
       href="#"
       onClick={() => onClick(article.slug)}
-      className={`text-warmGray-500 cursor-pointer  overflow-hidden overflow-ellipsis whitespace-nowrap block ml-${level * horizontalSpacing} ${isActive ? "font-bold" : ""}`}
+      className={`text-warmGray-500 cursor-pointer  overflow-hidden text-ellipsis whitespace-nowrap block ml-${level * horizontalSpacing} ${isActive ? "font-bold" : ""}`}
     >
       {"📃 "} <span className={`${article.status === "DRAFT" ? "italic opacity-40" : ""}`}>{article.title}</span>
     </a>

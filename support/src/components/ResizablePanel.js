@@ -66,10 +66,10 @@ const ResizablePanel = ({ children, name, position, className }) => {
 
   return (
     <aside ref={panelRef} className={className} style={style}>
-      {position === "right" && <div className="w-1 bg-coolGray-300  h-full flex-shrink-0 cursor-col-resize" onMouseDown={handleMouseDown} />}
-      {position === "bottom" && <div className="h-1 bg-coolGray-300  w-full flex-shrink-0 cursor-row-resize" onMouseDown={handleMouseDown} />}
+      {position === "right" && <div className="w-1 bg-coolGray-300  h-full shrink-0 cursor-col-resize" onMouseDown={handleMouseDown} />}
+      {position === "bottom" && <div className="h-1 bg-coolGray-300  w-full shrink-0 cursor-row-resize" onMouseDown={handleMouseDown} />}
       {children}
-      {position === "left" && <div className="w-1 bg-coolGray-300  h-full flex-shrink-0 cursor-col-resize" onMouseDown={handleMouseDown} />}
+      {position === "left" && <div className="w-1 bg-coolGray-300  h-full shrink-0 cursor-col-resize" onMouseDown={handleMouseDown} />}
     </aside>
   );
 };

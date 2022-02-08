@@ -18,7 +18,7 @@ const TopBar = () => {
     router.push("/admin/auth");
   };
   return (
-    <div className="text-snu-purple-900 list-none flex-shrink-0 flex-grow-0 flex w-full pr-4 py-2 bg-white transition-transform">
+    <div className="text-snu-purple-900 list-none shrink-0 grow-0 flex w-full pr-4 py-2 bg-white transition-transform">
       <div className="flex-shrink flex-grow">
         <KnowledgeBaseSearch path="/admin/base-de-connaissance" placeholder="Recherche" restriction="admin" showAllowedRoles noAnswer="Il n'y a pas de résultat 👀" />
       </div>
