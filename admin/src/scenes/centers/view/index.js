@@ -67,7 +67,7 @@ export default function Index({ ...props }) {
       } else {
         setAvailableCohorts(allSessions.data.filter((session) => session.headCenterId === user._id).map((session) => session.cohort));
       }
--    })();
+    })();
   }, [center]);
 
   const updateCenter = async () => {
