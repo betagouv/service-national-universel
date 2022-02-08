@@ -23,7 +23,7 @@ export default function ModalConfirm({
 
   const submit = async () => {
     setSending(true);
-    onConfirm();
+    await onConfirm();
     setSending(false);
   };
 

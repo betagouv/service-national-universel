@@ -3,6 +3,7 @@ import { toastr } from "react-redux-toastr";
 import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
+import { useHistory } from "react-router-dom";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
@@ -17,16 +18,18 @@ export default function AssignCenter({ young, onAffect }) {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
   const [modal, setModal] = useState({ isOpen: false, message: "", onConfirm: () => {} });
+  const history = useHistory();
 
   const handleAffectation = async (center) => {
     try {
-      setModal((prevState) => ({ ...prevState, isOpen: false }));
       const session = await api.get(`/cohesion-center/${center._id}/cohort/${center.session}/session-phase1`);
       const response = await api.post(`/session-phase1/${session.data._id}/assign-young/${young._id}`);
       if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
       toastr.success(`${response.young.firstName} a été affecté(e) au centre ${center.name} !`);
       setSearchedValue("");
-      return onAffect?.(response.data, response.young);
+      onAffect?.(response.data, response.young);
+      history.go(0);
+      setModal((prevState) => ({ ...prevState, isOpen: false }));
     } catch (error) {
       if (error.code === "OPERATION_NOT_ALLOWED")
         return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune. Il semblerait que ce centre soit déjà complet", translate(error?.code), {
