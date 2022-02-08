@@ -9,7 +9,7 @@ const IconsPicker = ({ isOpen, onRequestClose, onSelect }) => {
     <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
       <div className="overflow-hidden">
         <div className="w-screen-3/4 overflow-hidden flex flex-col  h-full flex-shrink">
-          <input onChange={(e) => setSearch(e.target.value)} className="p-2 border-2 mb-2 w-full flex-shrink-0" placeholder="Rechercher..." />
+          <input onChange={(e) => setSearch(e.target.value)} className="p-2 border-2 mb-2 w-full shrink-0" placeholder="Rechercher..." />
           <div className="overflow-auto flex-grow flex-shrink">
             <div className="overflow-auto flex-grow flex-shrink">
               {forSearch

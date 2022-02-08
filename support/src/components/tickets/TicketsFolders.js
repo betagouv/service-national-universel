@@ -1,34 +1,64 @@
+import React, { useState, useMemo } from "react";
 import { Popover } from "@headlessui/react";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { fakeTicketsFolders } from "../../utils/ticketsFolders";
 import ResizablePanel from "../ResizablePanel";
 import TicketsFolder from "./TicketsFolder";
 
-const TicketsFolders = ({ onFolderClick }) => {
+const foldersInSections = fakeTicketsFolders.reduce(
+  (sections, folder) => {
+    if (!sections.find(({ sectionName }) => sectionName === folder.section)) {
+      sections.push({ sectionName: folder.section, folders: [] });
+    }
+    return sections.map((section) => {
+      if (section.sectionName === folder.section) {
+        return {
+          ...section,
+          folders: [...section.folders, folder],
+        };
+      }
+      return section;
+    });
+  },
+  [{ sectionName: "main", folders: [] }]
+);
+
+const TicketsFolders = () => {
   return (
-    <ResizablePanel className={`flex-grow-0 flex-shrink-0 border-l-2 z-10 overflow-hidden flex w-80`} position="left" name="admin-tickets-left-panel">
+    <ResizablePanel className={`grow-0 shrink-0 border-l-2 z-10 overflow-hidden flex w-80`} position="left" name="admin-tickets-left-panel">
       <div className="relative flex flex-col overflow-hidden w-full p-3">
         <aside className="rounded-lg w-full h-full bg-white drop-shadow-md p-3">
-          <TicketsFolder onClick={onFolderClick} name="Boîte de réception" number="5" active />
-          <TicketsFolder onClick={onFolderClick} name="Corbeille" number="5" />
-          <div className="h-3 flex-shrink-0" />
-          <Section />
+          {foldersInSections.map((section) => (
+            <React.Fragment key={section.sectionName}>
+              <Section section={section} />
+              <div className="h-3 shrink-0" />
+            </React.Fragment>
+          ))}
         </aside>
       </div>
     </ResizablePanel>
   );
 };
 
-const Section = ({ onFolderClick }) => {
+const Section = ({ section }) => {
   const [showMoreButton, setShowMoreButton] = useState(false);
+  const router = useRouter();
+
+  if (section.sectionName === "main") {
+    return section.folders.map((folder) => <TicketsFolder folder={folder} key={folder._id} />);
+  }
+
+  const isOpen = useMemo(() => section.folders.map((f) => f._id).includes(router.query?.inbox), [router.query?.inbox]);
 
   return (
-    <details className="w-full">
+    <details className="w-full" open={isOpen}>
       <summary className="font-bold justify-between w-full relative" onMouseEnter={() => setShowMoreButton(true)} onMouseLeave={() => setShowMoreButton(false)}>
-        <span className="inline-block mr-auto">Phase 1</span>
+        <span className="inline-block mr-auto">{section.sectionName}</span>
         <SectionButton setShowMoreButton={setShowMoreButton} showMoreButton={showMoreButton} />
       </summary>
-      <TicketsFolder onClick={onFolderClick} name="Mon premier groupe" number="5" />
-      <TicketsFolder onClick={onFolderClick} name="Mon deuxième groupe" number="5" />
+      {section.folders.map((folder) => (
+        <TicketsFolder folder={folder} key={folder._id} />
+      ))}
     </details>
   );
 };

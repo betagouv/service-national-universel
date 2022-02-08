@@ -1,12 +1,23 @@
-const TicketsFolder = ({ name, onClick, number, active, id }) => {
+import { useRouter } from "next/router";
+import { useMemo } from "react";
+
+const TicketsFolder = ({ folder }) => {
+  const router = useRouter();
+  const isActive = useMemo(() => router.query?.inbox === folder._id, [router.query?.inbox]);
+
+  const onClick = () => {
+    router.query.inbox = folder._id;
+    router.push(router, undefined, { shallow: true });
+  };
+
   return (
     <button
       onClick={onClick}
-      data-id={id}
-      className={`inline-flex rounded-md border-none shadow-none w-full px-3 justify-between font-normal ${active ? "bg-snu-purple-900" : "bg-white text-gray-900"}`}
+      data-id={folder._id}
+      className={`inline-flex rounded-md border-none shadow-none w-full px-3 justify-between font-normal ${isActive ? "bg-snu-purple-900" : "bg-white text-gray-900"}`}
     >
-      {name}
-      <em className={`font-normal not-italic px-3 rounded-full bg-gray-100 ${active ? "text-gray-900" : "text-gray-600"}`}>{number}</em>
+      {folder.name}
+      <em className={`font-normal not-italic px-3 rounded-full bg-gray-100 ${isActive ? "text-gray-900" : "text-gray-600"}`}>{folder.number}</em>
     </button>
   );
 };

@@ -142,12 +142,8 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
 
   return (
     <>
-      <ResizablePanel
-        className={`flex-grow-0 flex-shrink-0 border-l-2 z-10 overflow-hidden flex ${visible ? "w-80" : "w-0 hidden"}`}
-        name="admin-knowledge-base-metadata"
-        position="right"
-      >
-        <form onSubmit={onSubmit} className="flex-grow-0 flex-shrink-0  px-4 py-6 flex flex-col w-full overflow-auto h-full items-start" key={item._id}>
+      <ResizablePanel className={`grow-0 shrink-0 border-l-2 z-10 overflow-hidden flex ${visible ? "w-80" : "w-0 hidden"}`} name="admin-knowledge-base-metadata" position="right">
+        <form onSubmit={onSubmit} className="grow-0 shrink-0  px-4 py-6 flex flex-col w-full overflow-auto h-full items-start" key={item._id}>
           <p className="mb-5">
             <em>Nombre de vues: {item.read}</em>
             <br />
@@ -201,7 +197,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
             Description
           </label>
           <textarea
-            className="p-2 border-2 mb-5 w-full flex-shrink-0"
+            className="p-2 border-2 mb-5 w-full shrink-0"
             placeholder={`Description ${item.type === "section" ? "de la rubrique" : "de l'article"}`}
             name="description"
             defaultValue={item.description}
@@ -209,14 +205,14 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
           <label className="font-bold" htmlFor="description">
             Mots clés
           </label>
-          <input className="p-2 border-2 mb-5 w-full flex-shrink-0" placeholder="Mots clés" name="description" defaultValue={item.keywords} />
+          <input className="p-2 border-2 mb-5 w-full shrink-0" placeholder="Mots clés" name="description" defaultValue={item.keywords} />
           {item.type === "section" && (
             <>
               <label className="font-bold" htmlFor="imageSrc">
                 Image (option)
               </label>
               <input
-                className={`p-2 border-2 mb-2 w-full flex-shrink-0 ${!itemImageSrc ? "mb-5" : ""}`}
+                className={`p-2 border-2 mb-2 w-full shrink-0 ${!itemImageSrc ? "mb-5" : ""}`}
                 accept="image/jpeg,image/png"
                 name="imageSrc"
                 type="file"
@@ -225,8 +221,8 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
                 disabled={isSettingImg}
               />
               {!!itemImageSrc && (
-                <div className="relative h-40 w-full mb-5 bg-gray-300 flex-shrink-0 flex items-center justify-center overflow-hidden show-button-on-hover rounded-t-lg ">
-                  <img alt={item.title} className="relative h-40 w-full bg-gray-300 flex-shrink-0 object-contain" src={item.imageSrc} />
+                <div className="relative h-40 w-full mb-5 bg-gray-300 shrink-0 flex items-center justify-center overflow-hidden show-button-on-hover rounded-t-lg ">
+                  <img alt={item.title} className="relative h-40 w-full bg-gray-300 shrink-0 object-contain" src={item.imageSrc} />
                   <div className="w-full h-full absolute flex items-center justify-center button-container bg-gray-800 bg-opacity-80 transition-opacity">
                     <CancelButton className="absolute m-auto" onClick={onDeleteImage} loading={isDeletingImg} disabled={isDeletingImg}>
                       Supprimer
