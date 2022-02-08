@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
-import API from "../services/api";
-import ResizablePanel from "./ResizablePanel";
+import API from "../../services/api";
+import ResizablePanel from "../ResizablePanel";
 
 const TicketsPreview = ({ activeTicketsIds, handleRemoveTicketFromPreview }) => {
   const { data } = useSWR(API.getUrl({ path: "/support-center/ticket", query: { ticketsIds: activeTicketsIds.join(",") } }));

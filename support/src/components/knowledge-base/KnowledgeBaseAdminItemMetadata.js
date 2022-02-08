@@ -3,14 +3,14 @@ import { useRouter } from "next/router";
 import { SUPPORT_ROLES } from "snu-lib/roles";
 import { toast } from "react-toastify";
 import slugify from "slugify";
-import API from "../services/api";
-import useKnowledgeBaseData from "../hooks/useKnowledgeBaseData";
-import InputWithEmojiPicker from "./InputWithEmojiPicker";
-import IconsPicker, { RedIcon } from "./IconsPicker";
-import { Button, CancelButton } from "./Buttons";
-import Modal from "./Modal";
 import Link from "next/link";
-import ResizablePanel from "./ResizablePanel";
+import API from "../../services/api";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import InputWithEmojiPicker from "../InputWithEmojiPicker";
+import IconsPicker, { RedIcon } from "../IconsPicker";
+import { Button, CancelButton } from "../Buttons";
+import Modal from "../Modal";
+import ResizablePanel from "../ResizablePanel";
 
 const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
   const router = useRouter();

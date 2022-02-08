@@ -1,6 +1,6 @@
 import { Popover } from "@headlessui/react";
 import { useState } from "react";
-import ResizablePanel from "./ResizablePanel";
+import ResizablePanel from "../ResizablePanel";
 import TicketsFolder from "./TicketsFolder";
 
 const TicketsFolders = ({ onFolderClick }) => {

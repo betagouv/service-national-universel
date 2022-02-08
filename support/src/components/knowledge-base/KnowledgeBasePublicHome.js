@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
-import Wrapper from "./Wrapper";
+import Wrapper from "../Wrapper";
 import KnowledgeBasePublicSection from "./KnowledgeBasePublicSection";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
-import LoaderSection from "./LoaderSection";
-import LoaderArticle from "./LoaderArticle";
+import LoaderSection from "../LoaderSection";
+import LoaderArticle from "../LoaderArticle";
 
 const KnowledgeBasePublicHome = ({ item, isLoading = false }) => {
   const [showLoading, setShowLoading] = useState(true);

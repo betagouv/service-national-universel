@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import KnowledgeBaseSectionCard from "./KnowledgeBaseSectionCard";
 import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
-import LoaderArticle from "./LoaderArticle";
-import LoaderSection from "./LoaderSection";
+import LoaderArticle from "../LoaderArticle";
+import LoaderSection from "../LoaderSection";
 
 const KnowledgeBasePublicSection = ({ item, isRoot, isLoading }) => {
   const [sections, setSections] = useState(item?.children?.filter((c) => c.type === "section") || []);

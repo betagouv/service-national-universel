@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import Header from "../../../components/Header";
 import Layout from "../../../components/Layout";
-import TicketsPreview from "../../../components/TicketsPreview";
-import TicketsFolders from "../../../components/TicketsFolders";
+import TicketsPreview from "../../../components/tickets/TicketsPreview";
+import TicketsFolders from "../../../components/tickets/TicketsFolders";
 // import TicketsRightDrawer from "../../../components/TicketsRightDrawer";
+import TicketsTable from "../../../components/tickets/TicketsTable";
 import withAuth from "../../../hocs/withAuth";
-import TicketsTable from "../../../components/TicketsTable";
 
 const Tickets = () => {
   const [activeFolder, setActiveFolder] = useState(() => JSON.parse(localStorage.getItem("snu-tickets-active-folder-id")) || null);

@@ -1,4 +1,4 @@
-import ResizablePanel from "./ResizablePanel";
+import ResizablePanel from "../ResizablePanel";
 
 const TicketsRightDrawer = () => {
   return (
