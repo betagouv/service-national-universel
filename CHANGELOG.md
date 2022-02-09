@@ -1,3 +1,15 @@
+# [1.40.0](https://github.com/betagouv/service-national-universel/compare/v1.39.0...v1.40.0) (2022-02-09)
+
+
+### Bug Fixes
+
+* **supp:** lint ([#1230](https://github.com/betagouv/service-national-universel/issues/1230)) ([351f358](https://github.com/betagouv/service-national-universel/commit/351f358677439c0b5d130551b3bfeca2c3fad9e8))
+
+
+### Features
+
+* **admin:** ajouter message erreurs dans la modal invitation ([#1215](https://github.com/betagouv/service-national-universel/issues/1215)) ([cc611bb](https://github.com/betagouv/service-national-universel/commit/cc611bb8a1b0021ea5b6bd3a9aca48cdadf3c2f5)), closes [#1202](https://github.com/betagouv/service-national-universel/issues/1202) [#1202](https://github.com/betagouv/service-national-universel/issues/1202)
+
 # [1.39.0](https://github.com/betagouv/service-national-universel/compare/v1.38.0...v1.39.0) (2022-02-08)
 
 
