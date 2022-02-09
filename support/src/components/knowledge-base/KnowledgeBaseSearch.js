@@ -1,11 +1,11 @@
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-import API from "../services/api";
+import API from "../../services/api";
 import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
-import Loader from "./Loader";
+import Loader from "../Loader";
 
-const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAnswer, placeholder = "Comment pouvons-nous vous aider ?", className = "" }) => {
+const KnowledgeBaseSearch = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAnswer, placeholder = "Comment pouvons-nous vous aider ?", className = "" }) => {
   const [search, setSearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [items, setItems] = useState([]);
@@ -85,4 +85,4 @@ const Search = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAns
   );
 };
 
-export default Search;
+export default KnowledgeBaseSearch;

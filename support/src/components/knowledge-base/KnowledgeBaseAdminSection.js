@@ -1,20 +1,20 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import SortableJS from "sortablejs";
 import { toast } from "react-toastify";
-import withAuth from "../hocs/withAuth";
-import API from "../services/api";
+import { SUPPORT_ROLES } from "snu-lib/roles";
+import { Popover } from "@headlessui/react";
+import withAuth from "../../hocs/withAuth";
+import API from "../../services/api";
 import KnowledgeBaseSectionCard from "./KnowledgeBaseSectionCard";
 import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
 import KnowledgeBaseAdminItemCreate from "./KnowledgeBaseAdminItemCreate";
-import Tags from "./Tags";
-import useKnowledgeBaseData from "../hooks/useKnowledgeBaseData";
-import Loader from "./Loader";
-import Modal from "./Modal";
+import Tags from "../Tags";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import Loader from "../Loader";
+import Modal from "../Modal";
 import KnowledgeBasePublicContent from "./KnowledgeBasePublicContent";
 import KnowledgeBasePublicHome from "./KnowledgeBasePublicHome";
-import SeeAsContext from "../hooks/useSeeAs";
-import { SUPPORT_ROLES } from "snu-lib/roles";
-import { Popover } from "@headlessui/react";
+import SeeAsContext from "../../hooks/useSeeAs";
 
 const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
   const { setSeeAs, seeAs } = useContext(SeeAsContext);
@@ -89,7 +89,7 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
         </Popover>
       </header>
       <main className={`flex h-full ${isRoot ? "flex-col" : ""} w-full max-w-screen-2xl flex-shrink overflow-y-auto`}>
-        <section className={`flex flex-col  ${isRoot ? "w-full order-2" : ""} flex-grow-[4] flex-shrink-0 border-r-2 pt-6 px-12`}>
+        <section className={`flex flex-col  ${isRoot ? "w-full order-2" : ""} flex-grow-[4] shrink-0 border-r-2 pt-6 px-12`}>
           <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
             Sujets
             <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="article" />
@@ -109,7 +109,7 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
             {!articles.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
           </div>
         </section>
-        <section className={`flex flex-col ${isRoot ? "w-full" : ""} flex-grow-[2] flex-shrink-0  pt-6`}>
+        <section className={`flex flex-col ${isRoot ? "w-full" : ""} flex-grow-[2] shrink-0  pt-6`}>
           <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
             Catégories
             <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="section" />

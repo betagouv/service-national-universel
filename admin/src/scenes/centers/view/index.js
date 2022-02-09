@@ -14,6 +14,7 @@ import { translate, CENTER_ROLES, ROLES } from "../../../utils";
 
 export default function Index({ ...props }) {
   const [center, setCenter] = useState();
+  const [sessions, setSessions] = useState([]);
   const [focusedCohort, setFocusedCohort] = useState();
   const [focusedSession, setFocusedSession] = useState();
   const [focusedTab, setFocusedTab] = useState("equipe");
@@ -32,6 +33,16 @@ export default function Index({ ...props }) {
         return history.push("/center");
       }
       setCenter(centerResponse.data);
+
+      if (!centerResponse.data || !centerResponse.data?.cohorts || !centerResponse.data?.cohorts?.length) return;
+
+      let sessionsAdded = [];
+      for (const cohort of centerResponse.data.cohorts) {
+        const sessionPhase1Response = await api.get(`/cohesion-center/${id}/cohort/${cohort}/session-phase1`);
+        if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
+        sessionsAdded.push(sessionPhase1Response.data);
+      }
+      setSessions(sessionsAdded);
     })();
   }, [props.match.params.id]);
 
@@ -41,8 +52,12 @@ export default function Index({ ...props }) {
   }, [center]);
 
   useEffect(() => {
+    setFocusedSession(sessions.find((e) => e.cohort === focusedCohort));
+  }, [focusedCohort, sessions]);
+
+  useEffect(() => {
     (async () => {
-      if (!center || !center?.cohorts || !center?.cohorts?.length || !focusedCohort) return;
+      if (!center || !center?.cohorts || !center?.cohorts?.length) return;
       const allSessions = await api.get(`/cohesion-center/${center._id}/session-phase1`);
       if (!allSessions.ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des sessions", translate(allSessions.code));
@@ -52,13 +67,8 @@ export default function Index({ ...props }) {
       } else {
         setAvailableCohorts(allSessions.data.filter((session) => session.headCenterId === user._id).map((session) => session.cohort));
       }
-      const sessionPhase1 = await api.get(`/cohesion-center/${center._id}/cohort/${focusedCohort}/session-phase1`);
-      if (!sessionPhase1.ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1.code));
-      }
-      setFocusedSession(sessionPhase1.data);
     })();
-  }, [center, focusedCohort]);
+  }, [center]);
 
   const updateCenter = async () => {
     const { data, ok } = await api.get(`/cohesion-center/${center._id}`);
@@ -124,7 +134,7 @@ export default function Index({ ...props }) {
   if (!center) return <div />;
   return (
     <>
-      <CenterInformations center={center} />
+      <CenterInformations center={center} sessions={sessions} />
       <div style={{ padding: "0 3rem" }}>
         <Nav
           tab={focusedTab}

@@ -1,3 +1,27 @@
+# [1.39.0](https://github.com/betagouv/service-national-universel/compare/v1.38.0...v1.39.0) (2022-02-08)
+
+
+### Bug Fixes
+
+* **support:**  folders org ([#1209](https://github.com/betagouv/service-national-universel/issues/1209)) ([674fd15](https://github.com/betagouv/service-national-universel/commit/674fd152e770287d4be1d00fa0a62ce4e7e12101))
+* **support:** tailwind styling for v3 ([#1212](https://github.com/betagouv/service-national-universel/issues/1212)) ([779b06c](https://github.com/betagouv/service-national-universel/commit/779b06cac29b92d72778ec6c150f13e4d90ed42e))
+
+
+### Features
+
+* **admin:** permettre de mettre à jour les capacités des `sessionPhase1` ([#1188](https://github.com/betagouv/service-national-universel/issues/1188)) ([baae113](https://github.com/betagouv/service-national-universel/commit/baae1137bb247dfde5c29a274695f2e9021b7849))
+* **admin,api:** permettre à un admin de changer un volontaire de session ([#1190](https://github.com/betagouv/service-national-universel/issues/1190)) ([a2577f0](https://github.com/betagouv/service-national-universel/commit/a2577f0adad2d68e36e5bb035b68b0128ee52abb))
+* **admin,api:** repasser la mission en validation si changement de champs critiques + UX ([#1208](https://github.com/betagouv/service-national-universel/issues/1208)) ([1dbfec1](https://github.com/betagouv/service-national-universel/commit/1dbfec1d5cfbe060c222b0703b95c51c6d3c0c4f))
+* **support:** add pagination ([#1210](https://github.com/betagouv/service-national-universel/issues/1210)) ([ad6d84b](https://github.com/betagouv/service-national-universel/commit/ad6d84bb40e489d771ae11f6b02940ac702cf3dd))
+* **support:** can display ticket ([#1214](https://github.com/betagouv/service-national-universel/issues/1214)) ([ec4b31c](https://github.com/betagouv/service-national-universel/commit/ec4b31c9911c6dcbfe14a0ca8f635c2d3f97285d))
+
+# [1.38.0](https://github.com/betagouv/service-national-universel/compare/v1.37.0...v1.38.0) (2022-02-07)
+
+
+### Features
+
+* **admin:** add required fields ([#1200](https://github.com/betagouv/service-national-universel/issues/1200)) ([42fc95a](https://github.com/betagouv/service-national-universel/commit/42fc95abb385400ae8ae74ec1121b7f40c4b820a))
+
 # [1.37.0](https://github.com/betagouv/service-national-universel/compare/v1.36.0...v1.37.0) (2022-02-04)
 
 

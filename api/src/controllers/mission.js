@@ -183,7 +183,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       checkedMission.status = "WAITING_VALIDATION";
     }
 
-    console.log("MISSION CHANGES", checkedMission);
     const oldStatus = mission.status;
     mission.set(checkedMission);
     await mission.save({ fromUser: req.user });

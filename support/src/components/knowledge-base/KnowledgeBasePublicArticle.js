@@ -1,4 +1,4 @@
-import TextEditor from "./TextEditor";
+import TextEditor from "../TextEditor";
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   if (isLoading) return <ArticleLoader />;
