@@ -22,6 +22,8 @@ import {
 import { Footer } from "../../components/modals/Modal";
 import ModalButton from "../../components/buttons/ModalButton";
 import api from "../../services/api";
+import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
+
 
 export default function InviteHeader({ setOpen, open, label = "Inviter un référent" }) {
   const { user } = useSelector((state) => state.Auth);
@@ -95,26 +97,29 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
               }
               setSubmitting(false);
             }}>
-            {({ values, handleChange, handleSubmit, isSubmitting, errors }) => (
+            {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
               <React.Fragment>
                 <ModalBody>
                   <Row>
                     <Col md={6}>
                       <FormGroup>
                         <div>Prénom</div>
-                        <Field validate={(v) => !v} name="firstName" value={values.firstName} onChange={handleChange} />
+                        <Field validate={(v) => !v && requiredMessage} name="firstName" value={values.firstName} onChange={handleChange} />
+                        <ErrorMessage errors={errors} touched={touched} name="firstName" />
                       </FormGroup>
                     </Col>
                     <Col md={6}>
                       <FormGroup>
                         <div>Nom</div>
-                        <Field validate={(v) => !v} name="lastName" value={values.lastName} onChange={handleChange} />
+                        <Field validate={(v) => !v && requiredMessage} name="lastName" value={values.lastName} onChange={handleChange} />
+                        <ErrorMessage errors={errors} touched={touched} name="lastName" />
                       </FormGroup>
                     </Col>
                     <Col md={6}>
                       <FormGroup>
                         <div>Email</div>
-                        <Field validate={(v) => !v} name="email" value={values.email} onChange={handleChange} />
+                        <Field validate={(v) => !v && requiredMessage} name="email" value={values.email} onChange={handleChange} />
+                        <ErrorMessage errors={errors} touched={touched} name="email" />
                       </FormGroup>
                     </Col>
                   </Row>
@@ -122,7 +127,8 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                     <Col md={6}>
                       <FormGroup>
                         <div>Rôle</div>
-                        <ChooseRole validate={(v) => !v} value={values.role} onChange={handleChange} />
+                        <ChooseRole validate={(v) => !v && requiredMessage} name="role" value={values.role} onChange={handleChange} />
+                        <ErrorMessage errors={errors} touched={touched} name="role" />
                       </FormGroup>
                     </Col>
                   </Row>
@@ -131,13 +137,15 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       <Col md={6}>
                         <FormGroup>
                           <div>Région</div>
-                          <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
+                          <ChooseRegion validate={(v) => !v && requiredMessage} name ="region" value={values.region} onChange={handleChange} />
+                          <ErrorMessage errors={errors} touched={touched} name="region" />
                         </FormGroup>
                       </Col>
                       <Col md={6}>
                         <FormGroup>
                           <div>Fonction</div>
-                          <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
+                          <ChooseSubRole validate={(v) => !v && requiredMessage} name="subRole" value={values.subRole} onChange={handleChange} options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
+                          <ErrorMessage errors={errors} touched={touched} name="subRole" />
                         </FormGroup>
                       </Col>
                     </Row>
@@ -147,13 +155,15 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       <Col md={6}>
                         <FormGroup>
                           <div>Département</div>
-                          <ChooseDepartment validate={(v) => !v} value={values.department} onChange={handleChange} />
+                          <ChooseDepartment validate={(v) => !v && requiredMessage} name="department" value={values.department} onChange={handleChange} />
+                          <ErrorMessage errors={errors} touched={touched} name="department" />
                         </FormGroup>
                       </Col>
                       <Col md={6}>
                         <FormGroup>
                           <div>Fonction</div>
-                          <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
+                          <ChooseSubRole validate={(v) => !v && requiredMessage} name="subRole" value={values.subRole} onChange={handleChange} options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
+                          <ErrorMessage errors={errors} touched={touched} name="subRole" />
                         </FormGroup>
                       </Col>
                     </Row>
@@ -163,13 +173,15 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       <Col md={6}>
                         <FormGroup>
                           <div>Région</div>
-                          <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
+                          <ChooseRegion validate={(v) => !v && requiredMessage} name="region" value={values.region} onChange={handleChange} />
+                          <ErrorMessage errors={errors} touched={touched} name="region" />
                         </FormGroup>
                       </Col>
                       <Col md={6}>
                         <FormGroup>
                           <div>Fonction</div>
-                          <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRoleOptions(VISITOR_SUBROLES)} />
+                          <ChooseSubRole validate={(v) => !v && requiredMessage} name="subRole" value={values.subRole} onChange={handleChange} options={getSubRoleOptions(VISITOR_SUBROLES)} />
+                          <ErrorMessage errors={errors} touched={touched} name="subRole" />
                         </FormGroup>
                       </Col>
                     </Row>
@@ -178,12 +190,14 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                     <Row>
                       <Col md={6}>
                         <FormGroup>
-                          <ChooseCenter value={values} onChange={handleChange} centers={centers} />
+                          <ChooseCenter validate={(v) => !v && requiredMessage} value={values} name="cohesionCenterId" onChange={handleChange} centers={centers} />
+                          <ErrorMessage errors={errors} touched={touched} name="cohesionCenterId" />
                         </FormGroup>
                       </Col>
                       <Col md={6}>
                         <FormGroup>
-                          <ChooseSessionPhase1 value={values} onChange={handleChange} />
+                          <ChooseSessionPhase1 validate={(v) => !v && requiredMessage} value={values} name="sessionPhase1Id" onChange={handleChange} />
+                          <ErrorMessage errors={errors} touched={touched} name="sessionPhase1Id" />
                         </FormGroup>
                       </Col>
                     </Row>
@@ -274,7 +288,7 @@ const ChooseRegion = ({ value, onChange, validate }) => {
   );
 };
 
-const ChooseCenter = ({ onChange, centers, onSelect, value }) => {
+const ChooseCenter = ({ onChange, centers, onSelect, value, validate }) => {
   const { user } = useSelector((state) => state.Auth);
 
   useEffect(() => {
@@ -285,13 +299,14 @@ const ChooseCenter = ({ onChange, centers, onSelect, value }) => {
 
   return (
     <>
-      <Field hidden value={value.cohesionCenterName} name="cohesionCenterName" onChange={onChange} validate={(v) => !v} />
-      <Field hidden value={value.cohesionCenterId} name="cohesionCenterId" onChange={onChange} validate={(v) => !v} />
+      <Field hidden value={value.cohesionCenterName} name="cohesionCenterName" onChange={onChange} validate={validate} />
+      <Field hidden value={value.cohesionCenterId} name="cohesionCenterId" onChange={onChange} validate={validate} />
       <ReactSelect
         disabled={user.role === ROLES.HEAD_CENTER}
         options={centers}
         placeholder="Choisir un centre"
         noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
+        validate={validate}
         onChange={(e) => {
           onChange({ target: { value: e._id, name: "cohesionCenterId" } });
           onChange({ target: { value: e.value, name: "cohesionCenterName" } });
@@ -302,7 +317,7 @@ const ChooseCenter = ({ onChange, centers, onSelect, value }) => {
   );
 };
 
-const ChooseSessionPhase1 = ({ onChange, value }) => {
+const ChooseSessionPhase1 = ({ onChange, value, validate }) => {
   const [sessions, setSessions] = useState([]);
   useEffect(() => {
     if (!value.cohesionCenterId) return;
@@ -316,11 +331,12 @@ const ChooseSessionPhase1 = ({ onChange, value }) => {
 
   return (
     <>
-      <Field hidden value={value.sessionPhase1Id} name="sessionPhase1Id" onChange={onChange} validate={(v) => !v} />
+      <Field hidden value={value.sessionPhase1Id} name="sessionPhase1Id" onChange={onChange} validate={validate} />
       <ReactSelect
         options={sessions}
         placeholder="Choisir une session"
         noOptionsMessage={() => "Aucune session ne correspond à cette recherche."}
+        validate={validate}
         onChange={(e) => {
           onChange({ target: { value: e.value, name: "sessionPhase1Id" } });
         }}
@@ -345,16 +361,16 @@ const ChooseRole = ({ value, onChange, validate }) => {
   );
 };
 
-const ChooseSubRole = ({ value, onChange, options }) => {
+const ChooseSubRole = ({ value, onChange, options, validate }) => {
   return (
-    <Input type="select" name="subRole" value={value} onChange={onChange}>
+    <Field as="select" className="form-control" name="subRole" validate={validate} value={value} onChange={onChange}>
       <option value=""></option>
       {options.map((o, i) => (
         <option key={i} value={o.value} label={o.label}>
           {o.label}
         </option>
       ))}
-    </Input>
+    </Field>
   );
 };
 
