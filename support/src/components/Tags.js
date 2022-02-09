@@ -8,7 +8,7 @@ const filterTags = (tag, index, tags) => {
 
 const Tags = ({ tags = [] }) =>
   tags.filter(filterTags).map((tag) => (
-    <span className="bg-snu-purple-100 px-2 py-0.5 rounded-md ml-2 mb-2 text-xs text-snu-purple-700" key={tag}>
+    <span className="text-snu-purple-700 ml-2 mb-2 rounded-md bg-snu-purple-100 px-2 py-0.5 text-xs" key={tag}>
       {SUPPORT_ROLES[tag]}
     </span>
   ));

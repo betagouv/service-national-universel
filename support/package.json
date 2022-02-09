@@ -5,7 +5,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint --ext .js,.jsx --fix"
+    "lint:fix": "eslint . --ext .js,.jsx --fix"
   },
   "prettier": {
     "printWidth": 180

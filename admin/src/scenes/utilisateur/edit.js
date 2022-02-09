@@ -271,8 +271,21 @@ export default function Edit(props) {
                         <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
                       ) : null}
                       {values.role === ROLES.VISITOR ? (
-                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(VISITOR_SUBROLES)} />
-                      ) : null}
+                        <>
+                          <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(VISITOR_SUBROLES)} />
+                          <Select
+                            name="region"
+                            values={values}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              handleChange({ target: { name: "region", value } });
+                              handleChange({ target: { name: "department", value: "" } });
+                            }}
+                            title="Région"
+                            options={regionList.map((r) => ({ value: r, label: r }))}
+                          />
+                        </>                      
+                        ) : null}
 
                       {values.role === ROLES.REFERENT_DEPARTMENT ? (
                         <Select

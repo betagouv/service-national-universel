@@ -7,7 +7,7 @@ export const TextEditorButton = React.forwardRef(({ className, active, reversed,
   <span
     {...props}
     ref={ref}
-    className={`${reversed ? (active ? "text-white" : "text-gray-300") : active ? "text-black" : "text-coolGray-400"} cursor-pointer mr-2 ${className || ""}`}
+    className={`${reversed ? (active ? "text-white" : "text-gray-300") : active ? "text-black" : "text-coolGray-400"} mr-2 cursor-pointer ${className || ""}`}
   />
 ));
 
@@ -17,9 +17,9 @@ export const EditorValue = React.forwardRef(({ className, value, ...props }, ref
     .toArray()
     .join("\n");
   return (
-    <div ref={ref} {...props} className={`mt-8 -mx-5 ${className || ""}`}>
-      <div className={`text-sm py-1 px-5 text-gray-600 border-2 bg-gray-200 ${className}`}>Slate's value as text</div>
-      <div className={`text-xs font-mono whitespace-pre-wrap py-3 px-5 text-gray-600 border-2 bg-gray-200 ${className || ""}`}>{textLines}</div>
+    <div ref={ref} {...props} className={`-mx-5 mt-8 ${className || ""}`}>
+      <div className={`border-2 bg-gray-200 py-1 px-5 text-sm text-gray-600 ${className}`}>Slate's value as text</div>
+      <div className={`whitespace-pre-wrap border-2 bg-gray-200 py-3 px-5 font-mono text-xs text-gray-600 ${className || ""}`}>{textLines}</div>
     </div>
   );
 });
@@ -27,7 +27,7 @@ export const EditorValue = React.forwardRef(({ className, value, ...props }, ref
 export const Icon = React.forwardRef(({ className, ...props }, ref) => <span {...props} ref={ref} className={`material-icons align-text-bottom text-2xl ${className || ""}`} />);
 
 export const Instruction = React.forwardRef(({ className, ...props }, ref) => (
-  <div {...props} ref={ref} className={`whitespace-pre-wrap -mx-5 mb-2 py-3 px-5 text-sm bg-gray-200 ${className || ""}`} />
+  <div {...props} ref={ref} className={`-mx-5 mb-2 whitespace-pre-wrap bg-gray-200 py-3 px-5 text-sm ${className || ""}`} />
 ));
 
 export const Menu = React.forwardRef(({ className, children, ...props }, ref) => (
@@ -41,7 +41,7 @@ export const Portal = ({ children }) => {
 };
 
 export const Toolbar = React.forwardRef(({ className, ...props }, ref) => (
-  <Menu {...props} ref={ref} className={`relative pt-1 px-5 mb-5 border-2 flex shrink-0 ${className || ""}`} />
+  <Menu {...props} ref={ref} className={`relative mb-5 flex shrink-0 border-2 px-5 pt-1 ${className || ""}`} />
 ));
 
 export const Spacer = React.forwardRef(({ className, ...props }, ref) => <div {...props} ref={ref} className={`relative w-6 ${className || ""}`} />);

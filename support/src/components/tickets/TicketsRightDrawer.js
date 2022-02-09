@@ -2,8 +2,8 @@ import ResizablePanel from "../ResizablePanel";
 
 const TicketsRightDrawer = () => {
   return (
-    <ResizablePanel className={`grow-0 shrink-0 border-l-2 z-10 overflow-hidden flex w-80`} position="right" name="admin-tickets-right-panel">
-      <div className="relative flex flex-col pr-2 overflow-hidden w-full"></div>
+    <ResizablePanel className={`z-10 flex w-80 shrink-0 grow-0 overflow-hidden border-l-2`} position="right" name="admin-tickets-right-panel">
+      <div className="relative flex w-full flex-col overflow-hidden pr-2"></div>
     </ResizablePanel>
   );
 };

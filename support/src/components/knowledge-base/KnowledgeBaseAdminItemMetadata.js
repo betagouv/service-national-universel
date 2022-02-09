@@ -142,8 +142,8 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
 
   return (
     <>
-      <ResizablePanel className={`grow-0 shrink-0 border-l-2 z-10 overflow-hidden flex ${visible ? "w-80" : "w-0 hidden"}`} name="admin-knowledge-base-metadata" position="right">
-        <form onSubmit={onSubmit} className="grow-0 shrink-0  px-4 py-6 flex flex-col w-full overflow-auto h-full items-start" key={item._id}>
+      <ResizablePanel className={`z-10 flex shrink-0 grow-0 overflow-hidden border-l-2 ${visible ? "w-80" : "hidden w-0"}`} name="admin-knowledge-base-metadata" position="right">
+        <form onSubmit={onSubmit} className="flex h-full  w-full shrink-0 grow-0 flex-col items-start overflow-auto px-4 py-6" key={item._id}>
           <p className="mb-5">
             <em>Nombre de vues: {item.read}</em>
             <br />
@@ -159,7 +159,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
           </label>
           <InputWithEmojiPicker
             inputClassName="p-2"
-            className="border-2 mb-5 bg-white w-full"
+            className="mb-5 w-full border-2 bg-white"
             placeholder={`Titre ${item.type === "section" ? "de la rubrique" : "de l'article"}`}
             name="title"
             value={title}
@@ -170,7 +170,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
           </label>
           <InputWithEmojiPicker
             inputClassName="p-2"
-            className="border-2 mb-5 bg-white w-full"
+            className="mb-5 w-full border-2 bg-white"
             placeholder="Phase 1, Phase 2, Mon Compte..."
             name="group"
             defaultValue={item.group}
@@ -179,14 +179,14 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
             Slug (Url)
           </label>
           <input
-            className="p-2 border-2 mb-5 w-full"
+            className="mb-5 w-full border-2 p-2"
             placeholder={`Slug ${item.type === "section" ? "de la rubrique" : "de l'article"}`}
             name="slug"
             value={itemSlug}
             onChange={onItemSlugChange}
           />
           {shouldChangeSlug() && (
-            <span className=" text-gray-500 italic text-sm -mt-5 mb-5 cursor-pointer" onClick={() => setItemSlug(makeTitleSlug(title))}>
+            <span className=" -mt-5 mb-5 cursor-pointer text-sm italic text-gray-500" onClick={() => setItemSlug(makeTitleSlug(title))}>
               {`Remplacer le slug actuel par\u00A0:`}
               <br />
               <span className="underline">{makeTitleSlug(title)}</span>
@@ -197,7 +197,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
             Description
           </label>
           <textarea
-            className="p-2 border-2 mb-5 w-full shrink-0"
+            className="mb-5 w-full shrink-0 border-2 p-2"
             placeholder={`Description ${item.type === "section" ? "de la rubrique" : "de l'article"}`}
             name="description"
             defaultValue={item.description}
@@ -205,14 +205,14 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
           <label className="font-bold" htmlFor="description">
             Mots clés
           </label>
-          <input className="p-2 border-2 mb-5 w-full shrink-0" placeholder="Mots clés" name="description" defaultValue={item.keywords} />
+          <input className="mb-5 w-full shrink-0 border-2 p-2" placeholder="Mots clés" name="description" defaultValue={item.keywords} />
           {item.type === "section" && (
             <>
               <label className="font-bold" htmlFor="imageSrc">
                 Image (option)
               </label>
               <input
-                className={`p-2 border-2 mb-2 w-full shrink-0 ${!itemImageSrc ? "mb-5" : ""}`}
+                className={`mb-2 w-full shrink-0 border-2 p-2 ${!itemImageSrc ? "mb-5" : ""}`}
                 accept="image/jpeg,image/png"
                 name="imageSrc"
                 type="file"
@@ -221,9 +221,9 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
                 disabled={isSettingImg}
               />
               {!!itemImageSrc && (
-                <div className="relative h-40 w-full mb-5 bg-gray-300 shrink-0 flex items-center justify-center overflow-hidden show-button-on-hover rounded-t-lg ">
-                  <img alt={item.title} className="relative h-40 w-full bg-gray-300 shrink-0 object-contain" src={item.imageSrc} />
-                  <div className="w-full h-full absolute flex items-center justify-center button-container bg-gray-800 bg-opacity-80 transition-opacity">
+                <div className="show-button-on-hover relative mb-5 flex h-40 w-full shrink-0 items-center justify-center overflow-hidden rounded-t-lg bg-gray-300 ">
+                  <img alt={item.title} className="relative h-40 w-full shrink-0 bg-gray-300 object-contain" src={item.imageSrc} />
+                  <div className="button-container absolute flex h-full w-full items-center justify-center bg-gray-800 bg-opacity-80 transition-opacity">
                     <CancelButton className="absolute m-auto" onClick={onDeleteImage} loading={isDeletingImg} disabled={isDeletingImg}>
                       Supprimer
                     </CancelButton>
@@ -236,7 +236,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
               {!!itemIcon && <RedIcon icon={itemIcon} showText={false} />}
               <Button
                 type="button"
-                className="bg-white mt-2 mb-5 !border-2 border-snu-purple-300  !text-snu-purple-300"
+                className="mt-2 mb-5 !border-2 border-snu-purple-300 bg-white  !text-snu-purple-300"
                 onClick={onChooseIcon}
                 loading={isSettingIcon}
                 disabled={isSettingIcon}
@@ -248,8 +248,8 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
           )}
           <fieldset className="mb-5">
             <legend className="">Visible par:</legend>
-            <span className="mb-2 text-xs italic text-gray-500 leading-none block">Note: seul les rôles autorisés par l'entité parent sont disponibles</span>
-            <div className="flex flex-col ml-4">
+            <span className="mb-2 block text-xs italic leading-none text-gray-500">Note: seul les rôles autorisés par l'entité parent sont disponibles</span>
+            <div className="ml-4 flex flex-col">
               {Object.keys(SUPPORT_ROLES).map((role) => {
                 const disabled = !!parent && !parent?.allowedRoles.includes(role);
                 return (
@@ -262,7 +262,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
                       name={`allowedRoles.${role}`}
                       defaultChecked={item.allowedRoles?.includes(role)}
                     />
-                    <label className={`mr-2 ${disabled ? "text-gray-300 italic" : ""}`} id={role} disabled={disabled} htmlFor={`allowedRoles.${role}`}>
+                    <label className={`mr-2 ${disabled ? "italic text-gray-300" : ""}`} id={role} disabled={disabled} htmlFor={`allowedRoles.${role}`}>
                       {SUPPORT_ROLES[role]}
                     </label>
                   </div>
@@ -270,14 +270,14 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
               })}
             </div>
           </fieldset>
-          <div className="flex justify-start items-center">
+          <div className="flex items-center justify-start">
             <label htmlFor="status">Visibilité: </label>
-            <select className="border-2 ml-5 p-2" name="status" defaultValue={item.status}>
+            <select className="ml-5 border-2 p-2" name="status" defaultValue={item.status}>
               <option value="PUBLISHED">Publié</option>
               <option value="DRAFT">Brouillon</option>
             </select>
           </div>
-          <div className="flex flex-wrap justify-around items-center mt-8 mb-2 w-full">
+          <div className="mt-8 mb-2 flex w-full flex-wrap items-center justify-around">
             <Button type="submit" className="mb-2" loading={isSubmitting} disabled={isSubmitting || isDeleting}>
               Enregistrer
             </Button>
@@ -288,8 +288,8 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
         </form>
       </ResizablePanel>
       <Modal isOpen={!!references} onRequestClose={() => setReferences(null)}>
-        <div className="w-full h-full flex flex-col p-12 items-center">
-          <h2 className="font-bold text-lg mb-8">⛔️ Cet article est réferencé dans d'autres articles</h2>
+        <div className="flex h-full w-full flex-col items-center p-12">
+          <h2 className="mb-8 text-lg font-bold">⛔️ Cet article est réferencé dans d'autres articles</h2>
           <p className="text-justify">
             Il y a une référence de cet article que vous souhaitez supprimer dans d'autres articles.
             <br /> Il faut les mettre à jour avant de pouvoir supprimer celui-ci.
@@ -302,7 +302,7 @@ const KnowledgeBaseAdminItemMetadata = ({ visible }) => {
             {references?.map((reference) => (
               <React.Fragment key={reference._id}>
                 <Link href={`/admin/base-de-connaissance/${reference.slug}`} passHref>
-                  <a href="#" target="_blank" className="underline leading-7">
+                  <a href="#" target="_blank" className="leading-7 underline">
                     {reference.title}
                   </a>
                 </Link>
