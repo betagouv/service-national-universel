@@ -437,7 +437,6 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayPresence}
           name="cohesionStayPresence"
-          disabled={true}
           handleChange={(e) => {
             const value = e.target.value;
             setModal({
@@ -460,7 +459,6 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayMedicalFileReceived}
           name="cohesionStayMedicalFileReceived"
-          disabled={true}
           handleChange={(e) => {
             const value = e.target.value;
             updateYoung({ cohesionStayMedicalFileReceived: value });

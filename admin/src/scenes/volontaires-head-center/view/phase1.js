@@ -16,7 +16,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 export default function Phase1(props) {
   const [young, setYoung] = useState(props.young);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const disabled = true;
+  const disabled = false;
 
   const updateYoung = async (v) => {
     const { data, ok, code } = await api.put(`/referent/young/${young._id}`, v);

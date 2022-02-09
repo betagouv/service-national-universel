@@ -311,20 +311,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       // await assignNextYoungFromWaitingList(young);
     }
 
-    // if a referent said that a young is present in the cohesion stay, we validate its phase1
-    if (newYoung.cohesionStayPresence === "true" && young.statusPhase1 !== "DONE") {
-      newYoung = { ...newYoung, statusPhase1: "DONE" };
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE_1_VALIDATED, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          ctaDownloadAttestation: `${config.APP_URL}/phase1`,
-          ctaPhase2: `${config.APP_URL}/phase2`,
-        },
-      });
-    } else if (newYoung.cohesionStayPresence === "false" && young.statusPhase1 !== "NOT_DONE" && !["CANCEL", "EXEMPTED"].includes(young.statusPhase1)) {
-      newYoung = { ...newYoung, statusPhase1: "NOT_DONE" };
-    }
-
     // Check quartier prioritaires.
     if (newYoung.zip && newYoung.city && newYoung.address) {
       const qpv = await getQPV(newYoung.zip, newYoung.city, newYoung.address);
