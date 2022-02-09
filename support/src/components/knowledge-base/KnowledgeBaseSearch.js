@@ -48,20 +48,20 @@ const KnowledgeBaseSearch = ({ restriction, path, showAllowedRoles, showNoAnswer
   }, [router?.query?.slug]);
 
   return (
-    <div className="relative flex flex-col items-center w-full">
-      <div className="relative flex items-center w-full">
+    <div className="relative flex w-full flex-col items-center">
+      <div className="relative flex w-full items-center">
         <input
-          className={`pl-10 py-2.5 w-full pr-3 text-gray-500 transition-colors text-sm ${className}`}
+          className={`w-full py-2.5 pl-10 pr-3 text-sm text-gray-500 transition-colors ${className}`}
           type="text"
           placeholder={placeholder}
           onChange={(e) => setSearch(e.target.value)}
           value={search}
         />
-        <span className="material-icons absolute text-xl text-gray-400 left-3">search</span>
+        <span className="material-icons absolute left-3 text-xl text-gray-400">search</span>
       </div>
-      <div className="relative flex items-center w-full">
+      <div className="relative flex w-full items-center">
         {!hideItems && (search.length > 0 || isSearching || items.length) > 0 && (
-          <div className="absolute w-full top-0 left-0 bg-white max-h-80 overflow-auto z-20">
+          <div className="absolute top-0 left-0 z-20 max-h-80 w-full overflow-auto bg-white">
             {search.length > 0 && isSearching && !items.length && <Loader size={20} className="my-4" />}
             {search.length > 0 && !isSearching && !items.length && <span className="block py-2 px-8 text-sm text-black">{noAnswer}</span>}
             {items?.map((item) => (

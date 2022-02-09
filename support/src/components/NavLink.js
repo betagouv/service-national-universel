@@ -20,7 +20,7 @@ const NavLink = ({ href, children, exact = false, className = "" }) => {
 
   return (
     <Link href={href} passHref>
-      <li className={`px-4 py-4 text-sm cursor-pointer  flex flex-nowrap ${activeClassName} ${className}`}>{children}</li>
+      <li className={`flex cursor-pointer flex-nowrap px-4  py-4 text-sm ${activeClassName} ${className}`}>{children}</li>
     </Link>
   );
 };

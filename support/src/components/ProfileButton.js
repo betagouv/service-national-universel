@@ -3,24 +3,24 @@ import { SUPPORT_ROLES } from "snu-lib/roles";
 
 const ProfileButton = ({ children, className = "", onLogout, user, showNameAndRole = false }) => {
   return (
-    <Popover className={`relative flex justify-end grow-0 order-2 ${className} md:flex-none`}>
-      <Popover.Button className="flex items-start justify-center gap-3 p-0 text-left bg-white border-none rounded-none shadow-none">
-        <span className="rounded-full h-10 w-10 border-red-500 border-4 text-snu-purple-900 uppercase flex justify-center items-center">
+    <Popover className={`relative order-2 flex grow-0 justify-end ${className} md:flex-none`}>
+      <Popover.Button className="flex items-start justify-center gap-3 rounded-none border-none bg-white p-0 text-left shadow-none">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full border-4 border-red-500 uppercase text-snu-purple-900">
           {user.firstName?.[0]}
           {user.lastName?.[0]}
         </span>
         {showNameAndRole && (
-          <div className="flex flex-col justify-center h-full">
+          <div className="flex h-full flex-col justify-center">
             <span className="text-sm font-medium text-gray-700">{user.firstName}</span>
             {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[user.role]}</span>}
           </div>
         )}
       </Popover.Button>
 
-      <Popover.Panel className="absolute right-0 min-w-[208px] lg:min-w-[200px] z-10 top-10">
-        <div className="flex flex-col gap-4 px-4 py-3 bg-white border border-gray-300 rounded-md">
+      <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] lg:min-w-[200px]">
+        <div className="flex flex-col gap-4 rounded-md border border-gray-300 bg-white px-4 py-3">
           {children}
-          <a onClick={onLogout} className="text-sm font-medium text-gray-700 cursor-pointer">
+          <a onClick={onLogout} className="cursor-pointer text-sm font-medium text-gray-700">
             Déconnexion
           </a>
         </div>

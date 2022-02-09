@@ -11,7 +11,7 @@ const InputWithEmojiPicker = ({ className, inputClassName, name, defaultValue, v
   };
 
   return (
-    <div className={`flex relative justify-between items-center ${className}`}>
+    <div className={`relative flex items-center justify-between ${className}`}>
       <input className={`w-full ${inputClassName}`} ref={inputRef} name={name} defaultValue={defaultValue} value={value} onChange={onChange} />
       <EmojiPicker insertEmoji={onInsertEmoji} />
     </div>

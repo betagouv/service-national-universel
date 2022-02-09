@@ -81,14 +81,14 @@ const EmojiPicker = ({ insertEmoji, className }) => {
         ref={pickerButtonRef}
         onClick={onOpenEmojiPicker}
         xmlns="http://www.w3.org/2000/svg"
-        className={`relative h-6 w-6 cursor-pointer text-gray-400 mr-2 ${className}`}
+        className={`relative mr-2 h-6 w-6 cursor-pointer text-gray-400 ${className}`}
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
       >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
-      <div className="fixed z-10 with-emoji" style={pickerPosition}>
+      <div className="with-emoji fixed z-10" style={pickerPosition}>
         {!!showEmojiPicker && <Picker i18n={i18n} set="emojione" enableFrequentEmojiSort onSelect={onSelect} native theme={theme} title="SNU" />}
       </div>
     </>

@@ -3,12 +3,12 @@ import NavLink from "./NavLink";
 
 const NavBar = () => {
   return (
-    <nav className="bg-snu-purple-900 drop-shadow-md list-none border-r border-white shrink-0 flex flex-col h-full w-14 hover:w-60 items-start transition-all duration-300 hover:delay-300 py-2 text-white">
-      <div className="flex items-center justify-center w-14 h-10 mb-10 ">
+    <nav className="flex h-full w-14 shrink-0 list-none flex-col items-start border-r border-white bg-snu-purple-900 py-2 text-white drop-shadow-md transition-all duration-300 hover:w-60 hover:delay-300">
+      <div className="mb-10 flex h-10 w-14 items-center justify-center ">
         <Image src="/assets/logo-snu.png" width={38} height={38} />
       </div>
       <NavLink href="/admin" exact>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="mr-6 h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -18,7 +18,7 @@ const NavBar = () => {
         <span className="shrink-0 flex-nowrap text-ellipsis">Accueil</span>
       </NavLink>
       <NavLink href="/admin/base-de-connaissance">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="mr-6 h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -28,13 +28,13 @@ const NavBar = () => {
         <span className="shrink-0 flex-nowrap text-ellipsis">Base de connaissance</span>
       </NavLink>
       <NavLink href="/admin/tickets">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="mr-6 h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
         </svg>
         <span className="shrink-0 flex-nowrap text-ellipsis">Tickets</span>
       </NavLink>
       <NavLink href="/admin/settings">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="mr-6 h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"

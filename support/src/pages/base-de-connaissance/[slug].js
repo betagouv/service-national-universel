@@ -53,10 +53,10 @@ const Content = () => {
         className="flex flex-col items-start"
       >
         <Link href="/base-de-connaissance">
-          <span className="text-sm font-medium text-black underline transition-colors -mt-6 cursor-pointer hover:text-gray-600">Retour à l'accueil</span>
+          <span className="-mt-6 cursor-pointer text-sm font-medium text-black underline transition-colors hover:text-gray-600">Retour à l'accueil</span>
         </Link>
-        <h2 className="font-bold ml-4 mb-16 mt-6 text-xl">Vous devez vous connecter pour accéder à cet article</h2>
-        <div className="flex items-center justify-center w-full flex-col gap-3">
+        <h2 className="ml-4 mb-16 mt-6 text-xl font-bold">Vous devez vous connecter pour accéder à cet article</h2>
+        <div className="flex w-full flex-col items-center justify-center gap-3">
           <Link href={`/admin/auth?redirect=${supportURL}/base-de-connaissance/${slug}`} onClick={() => cache.clear()}>
             <button>Espace professionnel</button>
           </Link>

@@ -6,7 +6,7 @@ const Modal = ({ children, isOpen, onRequestClose, fullScreen, closeButton, clas
   return (
     <ReactModal
       isOpen={isOpen}
-      className={`flex relative min-w-min ${fullScreen ? "h-screen w-screen p-0" : "max-h-3/4 p-12 rounded-lg border-2 border-snu-purple-900"} bg-white overflow-auto ${className}`}
+      className={`min-w-min relative flex ${fullScreen ? "h-screen w-screen p-0" : "max-h-3/4 rounded-lg border-2 border-snu-purple-900 p-12"} overflow-auto bg-white ${className}`}
       overlayClassName="bg-opacity-75	z-50 bg-black flex w-screen h-screen fixed inset-0 items-center justify-center"
       shouldCloseOnOverlayClick
       shouldCloseOnEsc={true}
@@ -25,7 +25,7 @@ const Modal = ({ children, isOpen, onRequestClose, fullScreen, closeButton, clas
       ) : (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 absolute top-6 right-6 cursor-pointer"
+          className="absolute top-6 right-6 h-6 w-6 cursor-pointer"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
