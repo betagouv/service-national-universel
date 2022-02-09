@@ -240,7 +240,7 @@ const Drawer = (props) => {
     <Sidebar open={open} id="drawer">
       <Logo>
         <HeaderSideBar to="/">
-          <img src={require("../../assets/logo-snu.png")} height={38} />
+          <img src={require("../../assets/logo-snu.png")} width={38} height={38} />
           {getName()}
           <Burger onClick={handleClick} src={require("../../assets/burger.svg")} />
         </HeaderSideBar>
