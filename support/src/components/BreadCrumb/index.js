@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const Breadcrumb = ({ parents, path }) => {
   return (
-    <div id="breadcrumb" className="text-sm font-normal shrink-0 w-full bg-snu-purple-900 print:hidden">
+    <div id="breadcrumb" className="w-full shrink-0 bg-snu-purple-900 text-sm font-normal print:hidden">
       <ul>
         <Crumb href={path} className="root">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

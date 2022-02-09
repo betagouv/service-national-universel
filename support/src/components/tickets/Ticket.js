@@ -5,7 +5,7 @@ import TicketHeader from "./TicketHeader";
 const Ticket = ({ ticket }) => {
   const router = useRouter();
 
-  const handleTicketClose = (e) => router.back();
+  const handleTicketClose = () => router.back();
 
   return (
     <div className="flex w-full flex-1 flex-col overflow-hidden bg-white">

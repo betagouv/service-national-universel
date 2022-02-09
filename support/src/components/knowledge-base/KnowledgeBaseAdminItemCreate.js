@@ -42,22 +42,22 @@ const KnowledgeBaseAdminItemCreate = ({ type, position, parentId = null }) => {
   return (
     <>
       <Modal isOpen={!!open} onRequestClose={() => setOpen(false)}>
-        <form onSubmit={onSubmit} className="flex flex-col w-screen-3/4 items-start">
-          <h2 className="font-bold ml-4 mb-4 text-xl">Créer {type === "section" ? "une rubrique" : "un article"}</h2>
+        <form onSubmit={onSubmit} className="flex w-screen-3/4 flex-col items-start">
+          <h2 className="ml-4 mb-4 text-xl font-bold">Créer {type === "section" ? "une rubrique" : "un article"}</h2>
           <div className="flex w-full">
-            <div className="flex flex-col flex-grow">
+            <div className="flex flex-grow flex-col">
               <label htmlFor="title">Titre</label>
-              <InputWithEmojiPicker inputClassName="p-2" className="border-2  mb-5" placeholder={`Titre ${type === "section" ? "de la rubrique" : "de l'article"}`} name="title" />
+              <InputWithEmojiPicker inputClassName="p-2" className="mb-5  border-2" placeholder={`Titre ${type === "section" ? "de la rubrique" : "de l'article"}`} name="title" />
               {/* <label htmlFor="slug">Slug (Url)</label>
               <input className="p-2 border-2 mb-5" placeholder={`Slug ${type === "section" ? "de la rubrique" : "de l'article"}`} name="slug" /> */}
               <label htmlFor="description">Description</label>
-              <textarea className="p-2 border-2 mb-5" placeholder={`Description ${type === "section" ? "de la rubrique" : "de l'article"}`} name="description" />
+              <textarea className="mb-5 border-2 p-2" placeholder={`Description ${type === "section" ? "de la rubrique" : "de l'article"}`} name="description" />
             </div>
-            <div className="ml-10 flex flex-col flex-grow">
+            <div className="ml-10 flex flex-grow flex-col">
               <fieldset className="mb-5">
                 <div className=" flex flex-row">
                   <legend>Visible par:</legend>
-                  <div className="flex flex-col ml-10">
+                  <div className="ml-10 flex flex-col">
                     {Object.keys(SUPPORT_ROLES).map((role) => (
                       <div className="flex items-center" key={role}>
                         <input className="mr-4" id={`allowedRoles.${role}`} type="checkbox" name={`allowedRoles.${role}`} defaultChecked />
@@ -71,7 +71,7 @@ const KnowledgeBaseAdminItemCreate = ({ type, position, parentId = null }) => {
               </fieldset>
             </div>
           </div>
-          <div className="flex justify-evenly mt-3.5 w-full">
+          <div className="mt-3.5 flex w-full justify-evenly">
             <Button type="submit" className="w-auto" disabled={isCreating} loading={isCreating}>
               Créer
             </Button>
@@ -81,7 +81,7 @@ const KnowledgeBaseAdminItemCreate = ({ type, position, parentId = null }) => {
           </div>
         </form>
       </Modal>
-      <button className="flex justify-center items-center text-center w-8 h-8 rounded-full p-0 ml-3" onClick={() => setOpen(true)}>
+      <button className="ml-3 flex h-8 w-8 items-center justify-center rounded-full p-0 text-center" onClick={() => setOpen(true)}>
         +
       </button>
     </>
