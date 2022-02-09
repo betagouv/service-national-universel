@@ -333,6 +333,20 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       else newYoung.qpv = "";
     }
 
+    if (newYoung.department !== young.department) {
+      const referents = await ReferentModel.find({ department: newYoung.department, role: ROLES.REFERENT_DEPARTMENT });
+      for (let referent of referents) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: {
+            youngFirstName: newYoung.firstName,
+            youngLastName: newYoung.lastName,
+            cta: `${config.ADMIN_URL}/volontaire/${newYoung._id}`,
+          },
+        });
+      }
+    }
+
     // Check quartier prioritaires.
     if (newYoung.cityCode) {
       const populationDensity = await getDensity(newYoung.cityCode);
