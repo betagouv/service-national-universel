@@ -310,7 +310,16 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       // disable the 08 jun 21
       // await assignNextYoungFromWaitingList(young);
     }
+    if (newYoung.cohesionStayPresence === "true" && young.statusPhase1 !== "DONE") {
+      let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
+      if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
 
+      //! TODO change template
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE_1_VALIDATED, {
+        emailTo,
+        params: {},
+      });
+    }
     // Check quartier prioritaires.
     if (newYoung.zip && newYoung.city && newYoung.address) {
       const qpv = await getQPV(newYoung.zip, newYoung.city, newYoung.address);
