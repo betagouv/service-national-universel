@@ -27,7 +27,11 @@ export default function List() {
   const [filterVisible, setFilterVisible] = useState(false);
   const history = useHistory();
   const handleShowFilter = () => setFilterVisible(!filterVisible);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } } }, sort: [{ "youngLastName.keyword": "asc" }] });
+  const getDefaultQuery = () => ({
+    query: { bool: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } } },
+    sort: [{ "youngLastName.keyword": "asc" }],
+    track_total_hits: true,
+  });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   async function appendMissions(structure) {

@@ -35,6 +35,7 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
   const getDefaultQuery = () => ({
     query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { term: { "cohort.keyword": focusedCohort } }] } },
     sort: [{ "lastName.keyword": "asc" }],
+    track_total_hits: true,
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 

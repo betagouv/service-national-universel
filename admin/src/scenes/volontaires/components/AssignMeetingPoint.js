@@ -19,6 +19,7 @@ export default function AssignMeetingPoint({ young, onAffect, onClick }) {
         filter: [{ term: { "cohort.keyword": young.cohort } }, { term: { "departureDepartment.keyword": young.department } }],
       },
     },
+    track_total_hits: true,
   });
 
   const handleAffectation = async (meetingPoint) => {
