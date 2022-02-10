@@ -11,7 +11,7 @@ import { ResultTable } from "../../../components/list";
 import styled from "styled-components";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
-import { getResultLabel, isInRuralArea, translate, getDistanceBetweenTwoPointsInKM, SENDINBLUE_TEMPLATES, APPLICATION_STATUS, ROLES } from "../../../utils";
+import { getResultLabel, isInRuralArea, translate, SENDINBLUE_TEMPLATES, APPLICATION_STATUS, ROLES } from "../../../utils";
 
 const FILTERS = ["SEARCH"];
 
@@ -21,11 +21,14 @@ export default function ProposeMission({ mission }) {
   const [search, setSearch] = useState(undefined);
 
   const getDefaultQuery = () => {
-    let query = { bool: { must: { match_all: {} }, filter: [] } };
-    if (user.role === ROLES.REFERENT_DEPARTMENT) query.bool.filter.push({ term: { "department.keyword": user.department } });
-    if (user.role === ROLES.REFERENT_REGION) query.bool.filter.push({ term: { "region.keyword": user.region } });
+    let defaultQuery = { query: { bool: { must: { match_all: {} }, filter: [] } } };
+    if (user.role === ROLES.REFERENT_DEPARTMENT) defaultQuery.query.bool.filter.push({ term: { "department.keyword": user.department } });
+    if (user.role === ROLES.REFERENT_REGION) defaultQuery.query.bool.filter.push({ term: { "region.keyword": user.region } });
 
-    return { query };
+    if (mission.location?.lat && mission.location?.lon) {
+      defaultQuery["sort"] = { _geo_distance: { location: `${mission.location?.lat},${mission.location?.lon}`, order: "asc", unit: "km" } };
+    }
+    return defaultQuery;
   };
 
   return (
@@ -146,17 +149,6 @@ const Hit = ({ hit, mission, applicationsToTheMission, onClick }) => {
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
 
-  const distanceInKm = useMemo(() => {
-    if (!hit.location || !mission.location) return "";
-    const distance = getDistanceBetweenTwoPointsInKM({
-      departLat: hit.location.lat,
-      departLon: hit.location.lon,
-      arriveLat: mission.location.lat,
-      arriveLon: mission.location.lon,
-    });
-    return `~ ${Math.round(distance)} km`;
-  }, [JSON.stringify(hit.location), JSON.stringify(mission.location)]);
-
   const specificity = useMemo(() => {
     let temp = [];
     if (hit.handicap === "true") temp.push("Handicap");
@@ -202,7 +194,7 @@ const Hit = ({ hit, mission, applicationsToTheMission, onClick }) => {
             </p>
           </div>
           <div style={{ flex: "1" }}>
-            <p style={{ textAlign: "right", overflow: "hidden", whiteSpace: "nowrap" }}>{distanceInKm}</p>
+            <p style={{ textAlign: "right", overflow: "hidden", whiteSpace: "nowrap" }}>{`~ ${Math.round(hit.sort[0])} km`}</p>
           </div>
         </div>
         <hr />

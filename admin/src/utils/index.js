@@ -144,19 +144,4 @@ export const getLink = ({ base = "/", filter, filtersUrl = [] }) => {
   return res;
 };
 
-function degreesToRadians(degrees) {
-  return (degrees * Math.PI) / 180;
-}
-
-export const getDistanceBetweenTwoPointsInKM = ({ departLon, departLat, arriveLon, arriveLat }) => {
-  let R = 6378137;
-  let dLat = degreesToRadians(departLat - arriveLat);
-  let dLon = degreesToRadians(departLon - arriveLon);
-  let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(degreesToRadians(arriveLat)) * Math.cos(degreesToRadians(arriveLat)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-  let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  let distance = R * c;
-  return distance / 1000;
-};
-
 export const ENABLE_PM = true;
