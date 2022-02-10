@@ -30,8 +30,8 @@ export default function List() {
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
-    if (user.role === ROLES.SUPERVISOR) return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
-    else return { query: { match_all: {} } };
+    if (user.role === ROLES.SUPERVISOR) return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } }, track_total_hits: true };
+    else return { query: { match_all: {} }, track_total_hits: true };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   useEffect(() => {

@@ -38,6 +38,7 @@ export default function xxxxxxx({ young, onSend }) {
           ],
         },
       },
+      track_total_hits: true,
     };
   };
 
