@@ -58,7 +58,7 @@ export default function AssignMeetingPoint({ young, onAffect, onClick }) {
               renderResultStats={(e) => {
                 return (
                   <div>
-                    <BottomResultStats>{getResultLabel(e)}</BottomResultStats>
+                    <BottomResultStats>{getResultLabel(e, 3)}</BottomResultStats>
                   </div>
                 );
               }}
