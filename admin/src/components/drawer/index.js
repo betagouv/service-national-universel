@@ -13,16 +13,16 @@ import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
 
 const DrawerTab = ({ title, to, onClick, beta }) => (
-  <li onClick={onClick}>
-    <NavLink to={to}>
+  <div onClick={onClick} class=" hover:bg-snu-purple-800 hover:shadow-lg block active:bg-snu-purple-600 py-2 px-2">
+    <NavLink to={to} className={({isActive}) => isActive ? 'bg-snu-purple-600' : 'bg-snu-purple-900'}>
       {title}
       {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
     </NavLink>
-  </li>
+  </div>
 );
 
 const BlankSeparator = () => (
-  <li
+  <div
     style={{
       height: "1.5rem",
     }}
@@ -48,14 +48,14 @@ const HelpButton = ({ onClick, to }) => (
 
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
-    <li onClick={onClick}>
+    <div onClick={onClick} class="py-2 px-2">
       <NavLink to={to}>
         <div style={{ display: "flex", alignContent: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
           <div>{title}</div>
           <div style={{ display: "flex" }}>{children}</div>
         </div>
       </NavLink>
-    </li>
+    </div>
   );
 };
 
@@ -88,7 +88,13 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
-      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
+      <div onClick={onClick} class=" hover:bg-snu-purple-800 hover:shadow-lg block active:bg-snu-purple-600 py-2 px-2">
+    <NavLink to="/mission" className={({ isActive }) =>
+    isActive ? 'bg-green-500 font-bold' : 'bg-red-500 font-thin'
+  }>
+      Missions
+    </NavLink>
+  </div>
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
@@ -102,18 +108,18 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           <div />
         ) : (
           <>
-            <IconContainer style={{ background: "#F1545B" }}>
+            <div style={{ background: "#F1545B" }}>
               <MailCloseIcon />
               <div style={{ marginLeft: "4px" }}>{newTickets}</div>
-            </IconContainer>
-            <IconContainer style={{ background: "#FEB951" }}>
+            </div>
+            <div style={{ background: "#FEB951" }}>
               <MailOpenIcon />
               <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
-            </IconContainer>
-            <IconContainer style={{ background: "#6BC762" }}>
+            </div>
+            <div style={{ background: "#6BC762" }}>
               <SuccessIcon color="#FFF" />
               <div style={{ marginLeft: "4px" }}>{closedTickets}</div>
-            </IconContainer>
+            </div>
           </>
         )}
       </DrawerTabWithIcons>
@@ -139,18 +145,18 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           <div />
         ) : (
           <>
-            <IconContainer style={{ background: "#F1545B" }}>
+            <div style={{ background: "#F1545B" }}>
               <MailCloseIcon />
               <div style={{ marginLeft: "4px" }}>{newTickets}</div>
-            </IconContainer>
-            <IconContainer style={{ background: "#FEB951" }}>
+            </div>
+            <div style={{ background: "#FEB951" }}>
               <MailOpenIcon />
               <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
-            </IconContainer>
-            <IconContainer style={{ background: "#6BC762" }}>
+            </div>
+            <div style={{ background: "#6BC762" }}>
               <SuccessIcon color="#FFF" />
               <div style={{ marginLeft: "4px" }}>{closedTickets}</div>
-            </IconContainer>
+            </div>
           </>
         )}
       </DrawerTabWithIcons>
@@ -237,16 +243,16 @@ const Drawer = (props) => {
   }
 
   return (
-    <Sidebar open={open} id="drawer">
-      <Logo>
-        <HeaderSideBar to="/">
-          <img src={require("../../assets/logo-snu.png")} width={38} height={38} />
-          {getName()}
-          <Burger onClick={handleClick} src={require("../../assets/burger.svg")} />
-        </HeaderSideBar>
-      </Logo>
+    <nav open={open} id="drawer" class="bg-snu-purple-900 text-white text-xl font-normal no-underline py-2">
+      <h1>
+        <Link to="/" class="flex items-center space-x-2">
+          <img src={require("../../assets/logo-snu.png")} class="h-9 w-9 " />
+            <span class=""> {getName() } </span>
+          <img onClick={handleClick} src={require("../../assets/burger.svg")} class="hidden" />
+        </Link>
+      </h1>
       {environment !== "production" && environmentBannerVisible ? (
-        <EnvironmentBanner onClick={() => setEnvironmentBannerVisible(false)}>{getTextEnvironmentBanner()}</EnvironmentBanner>
+        <div onClick={() => setEnvironmentBannerVisible(false)} class="py-2 px-2 bg-orange-600">{getTextEnvironmentBanner()}</div>
       ) : null}
       <ul>
         <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
@@ -257,7 +263,7 @@ const Drawer = (props) => {
         {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
         {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
       </ul>
-    </Sidebar>
+    </nav>
   );
 };
 
@@ -279,179 +285,6 @@ let container = connect(null, mapDispatchToProps)(Drawer);
 
 export default container;
 
-const HeaderSideBar = styled(Link)`
-  display: flex;
-  @media (max-width: 1550px) {
-    flex-direction: column;
-  }
-`;
 
-const IconContainer = styled.div`
-  display: flex;
-  align-content: center;
-  justify-content: center;
-  border-radius: 0.5rem;
-  margin-right: 10px;
-  padding-right: 8px;
-  padding-left: 8px;
-  width: 60px;
-`;
 
-const EnvironmentBanner = styled.div`
-  background: ${colors.red};
-  color: white;
-  font-style: italic;
-  font-weight: 500;
-  text-align: center;
-  padding: 5px;
-  cursor: pointer;
 
-  :hover {
-    opacity: 0.5;
-  }
-`;
-const Burger = styled.img`
-  display: none;
-  @media (max-width: 1000px) {
-    margin-left: auto;
-    margin-right: 0 !important;
-    display: block;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    object-fit: contain;
-    cursor: pointer;
-  }
-`;
-
-const Logo = styled.h1`
-  background: ${colors.darkPurple};
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 0;
-  padding: 15px 20px 15px;
-
-  a {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    color: #161e2e;
-    font-size: 13px;
-    font-weight: 500;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    text-decoration: none;
-  }
-
-  img {
-    margin-right: 1rem;
-    vertical-align: top;
-  }
-`;
-
-const Sidebar = styled.div`
-  ::-webkit-scrollbar {
-    display: none;
-  }
-
-  @media (max-width: 1000px) {
-    transform: translateX(${({ open }) => (open ? 0 : "-105%")});
-    opacity: 1;
-    visibility: visible;
-    height: 100vh;
-    width: 60vw;
-    z-index: 11;
-    position: fixed;
-  }
-  background-color: ${colors.darkPurple};
-  width: 15%;
-  position: sticky;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 20;
-  height: 100vh;
-  min-width: 250px;
-  overflow-y: auto;
-  transition: 0.2s;
-
-  ul {
-    list-style: none;
-
-    a {
-      text-decoration: none;
-      padding: 15px 20px;
-      display: block;
-      color: #fff;
-      font-weight: 400;
-      font-size: 16px;
-      border-bottom: 1px solid ${colors.transPurple};
-      transition: 0.2s;
-
-      i {
-        font-size: 0.7rem;
-      }
-    }
-
-    a:hover {
-      background: ${colors.transPurple};
-      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    a.active {
-      font-weight: 700;
-      background: ${colors.purple};
-      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
-    }
-    .help-button-container {
-      justify-content: center;
-      display: flex;
-      margin-bottom: 1rem;
-      .help-button {
-        border: 1px solid #7786cf;
-        border-radius: 0.3rem;
-        padding: 0.5rem;
-        align-items: center;
-        display: flex;
-        .icon {
-          height: 1.5rem;
-          width: 1.5rem;
-          color: #7786cf;
-          margin-right: 0.5rem;
-        }
-        .help-button-text {
-          color: white;
-          text-align: center;
-          .help-button-text-primary {
-            font-weight: 400;
-            font-size: 0.9rem;
-          }
-          .help-button-text-secondary {
-            font-weight: 300;
-            font-size: 0.6rem;
-          }
-        }
-        :hover {
-          background: #7786cf;
-          cursor: pointer;
-          .icon {
-            color: #fff;
-          }
-        }
-      }
-    }
-  }
-
-  .has-child ul {
-    display: none;
-
-    a {
-      padding-left: 40px;
-    }
-  }
-
-  .has-child.open ul {
-    display: block;
-  }
-`;
