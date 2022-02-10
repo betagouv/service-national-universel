@@ -518,6 +518,10 @@ Ensure the default browser behavior of the `hidden` attribute.
   visibility: visible !important;
 }
 
+.static{
+  position: static;
+}
+
 .absolute{
   position: absolute;
 }
@@ -594,6 +598,10 @@ Ensure the default browser behavior of the `hidden` attribute.
   height: 5rem;
 }
 
+.h-6{
+  height: 1.5rem;
+}
+
 .w-14{
   width: 3.5rem;
 }
@@ -642,8 +650,20 @@ Ensure the default browser behavior of the `hidden` attribute.
   place-content: center;
 }
 
+.content-center{
+  align-content: center;
+}
+
 .items-center{
   align-items: center;
+}
+
+.justify-center{
+  justify-content: center;
+}
+
+.justify-between{
+  justify-content: space-between;
 }
 
 .space-x-2 > :not([hidden]) ~ :not([hidden]){

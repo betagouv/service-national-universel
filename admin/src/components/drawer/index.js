@@ -48,10 +48,10 @@ const HelpButton = ({ onClick, to }) => (
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
     <div onClick={onClick} className="hover:bg-snu-purple-800 hover:shadow-lg block" >
-      <NavLink to={to}  className="block py-3 px-3 text-base" activeClassName="block bg-snu-purple-300 py-2 px-2 font-bold">
-        <div style={{ display: "flex", alignContent: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
-          <div >{title}</div>
-          <div >{children}</div>
+      <NavLink to={to}  className=" py-3 px-3 text-base block" activeClassName=" bg-snu-purple-300 py-2 px-2 font-bold">
+        <div className=" content-center justify-center flex-wrap">
+          <div className="py-1 px-3" >{title}</div>
+          <div className="w-12 h-12 flex justify-center" >{children}</div>
         </div>
       </NavLink>
     </div>
