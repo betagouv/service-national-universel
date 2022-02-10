@@ -112,7 +112,7 @@ export default function List() {
                   showIcon={false}
                   placeholder="Rechercher par prénom, nom, email..."
                   componentId="SEARCH"
-                  dataField={["email.keyword", "firstName", "lastName"]}
+                  dataField={["email.keyword", "firstName.folded", "lastName"]}
                   react={{ and: FILTERS }}
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
@@ -121,6 +121,11 @@ export default function List() {
                   URLParams={true}
                   queryFormat="and"
                 />
+                <SearchElastic
+                
+                
+                />
+
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
