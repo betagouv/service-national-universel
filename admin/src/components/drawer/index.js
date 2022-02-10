@@ -13,8 +13,8 @@ import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
 
 const DrawerTab = ({ title, to, onClick, beta }) => (
-  <div onClick={onClick} class=" hover:bg-snu-purple-800 hover:shadow-lg block active:bg-snu-purple-600 py-2 px-2">
-    <NavLink to={to} className={({isActive}) => isActive ? 'bg-snu-purple-600' : 'bg-snu-purple-900'}>
+  <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block">
+    <NavLink to={to} className="block py-2 px-2" activeClassName="block bg-snu-purple-300 py-2 px-2 rounded-md font-bold" >
       {title}
       {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
     </NavLink>
@@ -31,16 +31,17 @@ const BlankSeparator = () => (
 
 const HelpButton = ({ onClick, to }) => (
   <div
-    className="help-button-container"
+    class="help-button-container"
+    className="flex items-center border-2 rounded-md"
     onClick={() => {
       plausibleEvent("Menu/CTA - Besoin Aide");
       onClick();
     }}>
-    <NavLink className="help-button" to={to}>
-      <QuestionMark className="icon" />
-      <div className="help-button-text">
-        <div className="help-button-text-primary">Besoin d&apos;aide ?</div>
-        <div className="help-button-text-secondary">Tutoriels, contacts</div>
+    <NavLink class="help-button" className="flex" to={to}>
+      <QuestionMark class="icon" className="h-14 w-14 flex p-2" />
+      <div class="help-button-text" className="px-3 text-lg ">
+        <div class="help-button-text-primary">Besoin d&apos;aide ?</div>
+        <div class="help-button-text-secondary">Tutoriels, contacts</div>
       </div>
     </NavLink>
   </div>
@@ -48,7 +49,7 @@ const HelpButton = ({ onClick, to }) => (
 
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
-    <div onClick={onClick} class="py-2 px-2">
+    <div onClick={onClick} className="py-2 px-2">
       <NavLink to={to}>
         <div style={{ display: "flex", alignContent: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
           <div>{title}</div>
@@ -88,13 +89,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
-      <div onClick={onClick} class=" hover:bg-snu-purple-800 hover:shadow-lg block active:bg-snu-purple-600 py-2 px-2">
-    <NavLink to="/mission" className={({ isActive }) =>
-    isActive ? 'bg-green-500 font-bold' : 'bg-red-500 font-thin'
-  }>
-      Missions
-    </NavLink>
-  </div>
+      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
@@ -243,16 +238,16 @@ const Drawer = (props) => {
   }
 
   return (
-    <nav open={open} id="drawer" class="bg-snu-purple-900 text-white text-xl font-normal no-underline py-2">
+    <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-xl font-normal no-underline">
       <h1>
-        <Link to="/" class="flex items-center space-x-2">
-          <img src={require("../../assets/logo-snu.png")} class="h-9 w-9 " />
+        <Link to="/" className="flex items-center space-x-2">
+          <img src={require("../../assets/logo-snu.png")} className="h-14 w-14 p-2" />
             <span class=""> {getName() } </span>
-          <img onClick={handleClick} src={require("../../assets/burger.svg")} class="hidden" />
+          <img onClick={handleClick} src={require("../../assets/burger.svg")} className="hidden" />
         </Link>
       </h1>
       {environment !== "production" && environmentBannerVisible ? (
-        <div onClick={() => setEnvironmentBannerVisible(false)} class="py-2 px-2 bg-orange-600">{getTextEnvironmentBanner()}</div>
+        <div onClick={() => setEnvironmentBannerVisible(false)} className="py-2 px-2 bg-orange-600 rounded-md">{getTextEnvironmentBanner()}</div>
       ) : null}
       <ul>
         <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
