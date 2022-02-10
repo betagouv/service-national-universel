@@ -30,3 +30,21 @@ export const fakeTicketsFolders = [
     number: 15,
   },
 ];
+
+export const foldersInSections = fakeTicketsFolders.reduce(
+  (sections, folder) => {
+    if (!sections.find(({ sectionName }) => sectionName === folder.section)) {
+      sections.push({ sectionName: folder.section, folders: [] });
+    }
+    return sections.map((section) => {
+      if (section.sectionName === folder.section) {
+        return {
+          ...section,
+          folders: [...section.folders, folder],
+        };
+      }
+      return section;
+    });
+  },
+  [{ sectionName: "main", folders: [] }]
+);

@@ -1,59 +1,22 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Popover } from "@headlessui/react";
-import { fakeTicketsFolders } from "../../utils/ticketsFolders";
-import ResizablePanel from "../ResizablePanel";
-import TicketsFolder from "./TicketsFolder";
+import { useRouter } from "next/router";
 
-const foldersInSections = fakeTicketsFolders.reduce(
-  (sections, folder) => {
-    if (!sections.find(({ sectionName }) => sectionName === folder.section)) {
-      sections.push({ sectionName: folder.section, folders: [] });
-    }
-    return sections.map((section) => {
-      if (section.sectionName === folder.section) {
-        return {
-          ...section,
-          folders: [...section.folders, folder],
-        };
-      }
-      return section;
-    });
-  },
-  [{ sectionName: "main", folders: [] }]
-);
-
-const TicketsFolders = () => {
-  return (
-    <ResizablePanel className={`z-10 flex w-80 shrink-0 grow-0 overflow-hidden border-l-2`} position="left" name="admin-tickets-left-panel">
-      <div className="relative flex w-full flex-col overflow-hidden">
-        <aside className="my-2 mr-1 ml-2 flex-1 rounded-lg bg-white p-3 drop-shadow-md">
-          {foldersInSections.map((section) => (
-            <React.Fragment key={section.sectionName}>
-              <Section section={section} />
-              <div className="h-3 shrink-0" />
-            </React.Fragment>
-          ))}
-        </aside>
-      </div>
-    </ResizablePanel>
-  );
-};
-
-const Section = ({ section }) => {
+const FoldersSection = ({ section }) => {
   const [showMoreButton, setShowMoreButton] = useState(false);
 
   if (section.sectionName === "main") {
-    return section.folders.map((folder) => <TicketsFolder folder={folder} key={folder._id} />);
+    return section.folders.map((folder) => <Folder folder={folder} key={folder._id} />);
   }
 
   return (
-    <details className="w-full" open>
+    <details className="mt-4 w-full" open>
       <summary className="relative w-full justify-between font-bold" onMouseEnter={() => setShowMoreButton(true)} onMouseLeave={() => setShowMoreButton(false)}>
         <span className="mr-auto inline-block">{section.sectionName}</span>
         <SectionButton setShowMoreButton={setShowMoreButton} showMoreButton={showMoreButton} />
       </summary>
       {section.folders.map((folder) => (
-        <TicketsFolder folder={folder} key={folder._id} />
+        <Folder folder={folder} key={folder._id} />
       ))}
     </details>
   );
@@ -91,4 +54,24 @@ const SectionButton = ({ setShowMoreButton, showMoreButton }) => (
   </Popover>
 );
 
-export default TicketsFolders;
+const Folder = ({ folder }) => {
+  const router = useRouter();
+  const isActive = useMemo(() => (router.query?.inbox || "inbox") === folder._id, [router.query?.inbox]);
+
+  const onClick = () => {
+    router.query.inbox = folder._id;
+    router.push(router, undefined, { shallow: true });
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex w-full flex-nowrap justify-between rounded-md border-none px-3 font-normal shadow-none ${isActive ? "bg-snu-purple-900" : "bg-white text-gray-900"}`}
+    >
+      <span className="flex-nowrap truncate whitespace-nowrap">{folder.name}</span>
+      <em className={`rounded-full bg-gray-100 px-3 font-normal not-italic ${isActive ? "text-gray-900" : "text-gray-600"}`}>{folder.number}</em>
+    </button>
+  );
+};
+
+export default FoldersSection;
