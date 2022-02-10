@@ -8,7 +8,7 @@ const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
 
-exports.applicationPending = async () => {
+exports.handler = async () => {
   try {
     let countNotice = 0;
     const now = Date.now();
@@ -21,7 +21,7 @@ exports.applicationPending = async () => {
       const tutor = Referent.findById(application.tutorId);
       if (!tutor) return;
       // send a mail to the tutor
-      sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_RELANCE, {
+      sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER, {
         emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
         params: {
           cta: `${ADMIN_URL}/dashboard`,

@@ -9,7 +9,7 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
 const { previousMonday } = require("date-fns");
 
-exports.missionEnd = async () => {
+exports.handler = async () => {
   //endAt
   try {
     let countNotice = 0;
