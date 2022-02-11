@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 export default function MailOpenIcon({ ...props }) {
   return (
-    <div className=" flex items-center rounded-lg align-center"{...props}>
+    <div className=" flex items-center rounded-lg align-center w-8"{...props}>
       <svg align="center" width="20" height="20" viewBox="-2 -2 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           fillRule="evenodd"

@@ -121,11 +121,6 @@ export default function List() {
                   URLParams={true}
                   queryFormat="and"
                 />
-                <SearchElastic
-                
-                
-                />
-
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"

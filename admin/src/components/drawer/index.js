@@ -49,9 +49,9 @@ const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
     <div onClick={onClick} className="hover:bg-snu-purple-800 hover:shadow-lg block" >
       <NavLink to={to}  className=" py-3 px-3 text-base block" activeClassName=" bg-snu-purple-300 py-2 px-2 font-bold">
-        <div className=" content-center justify-center flex-wrap">
-          <div className="py-1 px-3" >{title}</div>
-          <div className="w-12 h-12 flex justify-center" >{children}</div>
+        <div className="flex content-center flex-wrap">
+          <div className="" >{title}</div>
+          <div className="flex space-x-4" >{children}</div>
         </div>
       </NavLink>
     </div>
@@ -101,17 +101,17 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           <div />
         ) : (
           <>
-            <div className ="rounded-lg" style={{ background: "#F1545B" }}>
+            <div className ="rounded-lg flex items-center" style={{ background: "#F1545B" }}>
               <MailCloseIcon />
-              <div style={{ marginLeft: "4px" }}>{newTickets}</div>
+              <div >{newTickets}</div>
             </div>
-            <div className ="rounded-lg" style={{ background: "#FEB951" }}>
+            <div className ="rounded-lg flex items-center" style={{ background: "#FEB951" }}>
               <MailOpenIcon />
-              <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
+              <div className="" >{openedTickets}</div>
             </div>
-            <div className ="rounded-lg" style={{ background: "#6BC762" }}>
+            <div className ="rounded-lg flex items-center" style={{ background: "#6BC762" }}>
               <SuccessIcon color="#FFF" />
-              <div style={{ marginLeft: "4px" }}>{closedTickets}</div>
+              <div >{closedTickets}</div>
             </div>
           </>
         )}
@@ -142,9 +142,9 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
               <MailCloseIcon />
               <div style={{ marginLeft: "4px" }}>{newTickets}</div>
             </div>
-            <div style={{ background: "#FEB951" }}>
+            <div className="justify-content" style={{ background: "#FEB951" }}>
               <MailOpenIcon />
-              <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
+              <div className="flex" >{openedTickets}</div>
             </div>
             <div style={{ background: "#6BC762" }}>
               <SuccessIcon color="#FFF" />
