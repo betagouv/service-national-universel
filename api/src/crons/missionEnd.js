@@ -14,10 +14,10 @@ exports.handler = async () => {
   try {
     let countNotice = 0;
     // We want the missions with an end date between last monday and now.
-    const cursor = Mission.find({ endAt: { $gte: previousMonday(new Date(Date.now())).toISOString(), $lt: new Date().toISOString() } }).cursor();
+    const cursor = await Mission.find({ endAt: { $gte: previousMonday(new Date(Date.now())).toISOString(), $lt: new Date().toISOString() } }).cursor();
     await cursor.eachAsync(async function (mission) {
       countNotice++;
-      const tutor = Referent.findById(mission.tutorId);
+      const tutor = await Referent.findById(mission.tutorId);
       if (!tutor) return;
       // send a mail to the tutor
       sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_END, {

@@ -12,13 +12,13 @@ exports.handler = async () => {
   try {
     let countNotice = 0;
     const now = Date.now();
-    const cursor = Application.find({
+    const cursor = await Application.find({
       status: "WAITING_VALIDATION",
       createdAt: { $lt: addDays(now, 8), $gte: addDays(now, 7) },
     }).cursor();
     await cursor.eachAsync(async function (application) {
       countNotice++;
-      const tutor = Referent.findById(application.tutorId);
+      const tutor = await Referent.findById(application.tutorId);
       if (!tutor) return;
       // send a mail to the tutor
       sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER, {

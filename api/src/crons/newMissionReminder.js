@@ -10,7 +10,7 @@ const { ADMIN_URL } = require("../config");
 
 const findReferent = async (mission) => {
   let referent;
-  const referents = Referent.find({ role: ROLES.REFERENT_DEPARTMENT, department: mission.department });
+  const referents = await Referent.find({ role: ROLES.REFERENT_DEPARTMENT, department: mission.department });
   referents.map((ref) => {
     switch (ref.subrole) {
       case SUB_ROLES.manager_phase2:
@@ -35,7 +35,7 @@ exports.handler = async () => {
   try {
     let countNotice = 0;
     const now = Date.now();
-    const cursor = Mission.find({
+    const cursor = await Mission.find({
       status: "WAITING_VALIDATION",
       createdAt: { $lt: addDays(now, 8), $gte: addDays(now, 7) },
     }).cursor();
