@@ -30,11 +30,7 @@ const TicketsTable = ({ onTicketClick, tickets }) => {
           .map((ticket, index) => {
             return (
               <React.Fragment key={ticket._id}>
-                <div
-                  data-ticketid={ticket._id}
-                  onClick={onTicketClick}
-                  className={`${index % 2 === 1 ? "bg-gray-100" : "bg-white"} flex w-min  cursor-pointer border-b hover:bg-gray-200`}
-                >
+                <div onClick={() => onTicketClick(ticket._id)} className={`${index % 2 === 1 ? "bg-gray-100" : "bg-white"} flex w-min  cursor-pointer border-b hover:bg-gray-200`}>
                   {columns
                     .filter((c) => c.visible)
                     .map(({ key }) => (

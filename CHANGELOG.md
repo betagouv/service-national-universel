@@ -1,3 +1,28 @@
+# [1.41.0](https://github.com/betagouv/service-national-universel/compare/v1.40.0...v1.41.0) (2022-02-10)
+
+
+### Bug Fixes
+
+* **admin:** pagination `NaN-NaN` dans certaine ReactiveList ([#1237](https://github.com/betagouv/service-national-universel/issues/1237)) ([ef0f8d4](https://github.com/betagouv/service-national-universel/commit/ef0f8d42f3892b07a8397e4abdf96a785b016af7))
+* **deps:** update dependency swr to v1.2.1 ([#1036](https://github.com/betagouv/service-national-universel/issues/1036)) ([1a0a0a3](https://github.com/betagouv/service-national-universel/commit/1a0a0a31507f7efc08721ebc4f5f10dd028dccfb))
+
+
+### Features
+
+* **api:** count more than 10k with es ([#1238](https://github.com/betagouv/service-national-universel/issues/1238)) ([07a35c8](https://github.com/betagouv/service-national-universel/commit/07a35c813a1de35e78ff3fa6abdc0cb5fc8c48ba))
+
+# [1.40.0](https://github.com/betagouv/service-national-universel/compare/v1.39.0...v1.40.0) (2022-02-09)
+
+
+### Bug Fixes
+
+* **supp:** lint ([#1230](https://github.com/betagouv/service-national-universel/issues/1230)) ([351f358](https://github.com/betagouv/service-national-universel/commit/351f358677439c0b5d130551b3bfeca2c3fad9e8))
+
+
+### Features
+
+* **admin:** ajouter message erreurs dans la modal invitation ([#1215](https://github.com/betagouv/service-national-universel/issues/1215)) ([cc611bb](https://github.com/betagouv/service-national-universel/commit/cc611bb8a1b0021ea5b6bd3a9aca48cdadf3c2f5)), closes [#1202](https://github.com/betagouv/service-national-universel/issues/1202) [#1202](https://github.com/betagouv/service-national-universel/issues/1202)
+
 # [1.39.0](https://github.com/betagouv/service-national-universel/compare/v1.38.0...v1.39.0) (2022-02-08)
 
 

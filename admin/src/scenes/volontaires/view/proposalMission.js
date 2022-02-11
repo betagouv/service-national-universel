@@ -38,6 +38,7 @@ export default function xxxxxxx({ young, onSend }) {
           ],
         },
       },
+      track_total_hits: true,
     };
   };
 
@@ -103,7 +104,7 @@ export default function xxxxxxx({ young, onSend }) {
                 renderResultStats={(e) => {
                   return (
                     <div>
-                      <BottomResultStats>{getResultLabel(e)}</BottomResultStats>
+                      <BottomResultStats>{getResultLabel(e, 3)}</BottomResultStats>
                     </div>
                   );
                 }}
