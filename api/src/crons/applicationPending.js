@@ -27,6 +27,7 @@ exports.handler = async () => {
           cta: `${ADMIN_URL}/dashboard`,
           youngFirstName: application.youngFirstName,
           youngLastName: application.youngLastName,
+          missionName: application.missionName,
         },
       });
     });
