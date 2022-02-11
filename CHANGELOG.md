@@ -1,3 +1,10 @@
+# [1.42.0](https://github.com/betagouv/service-national-universel/compare/v1.41.0...v1.42.0) (2022-02-11)
+
+
+### Features
+
+* **admin:** Chef de centre : pointage et validation ([#1231](https://github.com/betagouv/service-national-universel/issues/1231)) ([7be9e54](https://github.com/betagouv/service-national-universel/commit/7be9e547a5ed6c76aa1a026032a6b9d77656088c)), closes [#1228](https://github.com/betagouv/service-national-universel/issues/1228)
+
 # [1.41.0](https://github.com/betagouv/service-national-universel/compare/v1.40.0...v1.41.0) (2022-02-10)
 
 
