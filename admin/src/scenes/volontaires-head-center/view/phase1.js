@@ -3,7 +3,14 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik } from "formik";
 
-import { translate, YOUNG_STATUS_COLORS, confirmMessageChangePhase1Presence, formatStringLongDate, PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE } from "../../../utils";
+import {
+  translate,
+  YOUNG_STATUS_COLORS,
+  confirmMessageChangePhase1Presence,
+  formatStringLongDate,
+  PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE,
+  translateCohort,
+} from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import { Box, BoxTitle } from "../../../components/box";
@@ -117,8 +124,7 @@ export default function Phase1(props) {
                 {({ handleChange }) => (
                   <>
                     <Bloc title="Date de séjour" borderBottom disabled={disabled}>
-                      <Details title="Début" value={young.cohesionStartAt} />
-                      <Details title="Fin" value={young.cohesionEndAt} />
+                      <Details title="Date" value={translateCohort(young.cohort)} />
                       <Select
                         placeholder="Non renseigné"
                         title="Présence"
