@@ -49,7 +49,7 @@ const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
     <div onClick={onClick} className="hover:bg-snu-purple-800 hover:shadow-lg block" >
       <NavLink to={to}  className=" py-3 px-3 text-base block" activeClassName=" bg-snu-purple-300 py-2 px-2 font-bold">
-        <div className="flex content-center flex-wrap justify-center">
+        <div className="flex content-center flex-wrap">
           <div className="" >{title}</div>
           <div className="flex space-x-4" >{children}</div>
         </div>
