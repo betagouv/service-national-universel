@@ -21,7 +21,7 @@ export default function ModalConfirmWithMessage({
 
   const submit = async () => {
     setSending(true);
-    onConfirm(messageTextArea);
+    await onConfirm(messageTextArea);
     setSending(false);
     setMessageTextArea("");
   };
