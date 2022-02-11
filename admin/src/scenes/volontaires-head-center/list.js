@@ -20,6 +20,7 @@ import {
   confirmMessageChangePhase1Presence,
   ES_NO_LIMIT,
   getLabelWithdrawnReason,
+  PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
@@ -74,7 +75,6 @@ export default function List() {
     track_total_hits: true,
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
-
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -402,7 +402,6 @@ export default function List() {
 const Hit = ({ hit, onClick, selected, callback }) => {
   const [value, setValue] = useState(null);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-
   const updateYoung = async (v) => {
     const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
     if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
@@ -438,7 +437,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayPresence}
           name="cohesionStayPresence"
-          disabled={true}
+          disabled={PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE[value.cohort].getTime() > Date.now()}
           handleChange={(e) => {
             const value = e.target.value;
             setModal({
@@ -461,7 +460,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayMedicalFileReceived}
           name="cohesionStayMedicalFileReceived"
-          disabled={true}
+          disabled={PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE[value.cohort].getTime() > Date.now()}
           handleChange={(e) => {
             const value = e.target.value;
             updateYoung({ cohesionStayMedicalFileReceived: value });

@@ -35,10 +35,6 @@ export const confirmMessageChangePhase1Presence = (value) => {
   if (!value) return `Vous allez passer ce volontaire "Non renseigné" au séjour de cohésion. `;
   const label = value === "true" ? "Présent" : "Absent";
   let message = `Vous allez passer ce volontaire "${label}" au séjour de cohésion. `;
-  if (value === "true")
-    message +=
-      'L\'attestation de réalisation de la phase 1 du SNU lui sera rendu disponible au téléchargement depuis son espace volontaire. Son statut de phase 1 au séjour de cohésion passera à "Effectué"';
-  else message += 'Son statut de phase 1 au séjour de cohésion passera à "Non réalisé"';
   return message;
 };
 
