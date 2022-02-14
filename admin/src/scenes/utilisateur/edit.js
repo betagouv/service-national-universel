@@ -34,6 +34,7 @@ import Emails from "../../components/views/Emails";
 import HistoricComponent from "../../components/views/Historic";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import { requiredMessage } from "../../components/errorMessage";
+import plausibleEvent from "../../services/pausible";
 
 export default function Edit(props) {
   const [user, setUser] = useState();
@@ -111,6 +112,7 @@ export default function Edit(props) {
 
   const handleImpersonate = async () => {
     try {
+      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${user._id}`);
       if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
       history.push("/dashboard");
@@ -150,6 +152,7 @@ export default function Edit(props) {
         initialValues={user}
         onSubmit={async (values) => {
           try {
+            plausibleEvent("Utilisateur/Profil CTA - Enregistrer profil utilisateur");
             // if structure has changed but no saved
             if (
               user.structureId !== structure?._id &&
@@ -177,7 +180,7 @@ export default function Edit(props) {
               </div>
               <div style={{ display: "flex" }}>
                 {values.structureId ? (
-                  <Link to={`/structure/${values.structureId}`}>
+                  <Link to={`/structure/${values.structureId}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
                     <PanelActionButton icon="eye" title="Voir la structure" />
                   </Link>
                 ) : null}
@@ -268,8 +271,21 @@ export default function Edit(props) {
                         <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
                       ) : null}
                       {values.role === ROLES.VISITOR ? (
-                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(VISITOR_SUBROLES)} />
-                      ) : null}
+                        <>
+                          <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(VISITOR_SUBROLES)} />
+                          <Select
+                            name="region"
+                            values={values}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              handleChange({ target: { name: "region", value } });
+                              handleChange({ target: { name: "department", value: "" } });
+                            }}
+                            title="Région"
+                            options={regionList.map((r) => ({ value: r, label: r }))}
+                          />
+                        </>                      
+                        ) : null}
 
                       {values.role === ROLES.REFERENT_DEPARTMENT ? (
                         <Select

@@ -2,11 +2,7 @@ const colors = require("tailwindcss/colors");
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
   mode: "jit",
-  purge: {
-    mode: "all",
-    content: ["./src/{components,pages,layout}/**/*.{js,ts,jsx,tsx}", "node_modules/react-toastify/dist/ReactToastify.min.css"],
-  },
-  darkMode: false, // or 'media' or 'class'
+  content: ["./src/{components,pages,layout}/**/*.{js,ts,jsx,tsx}", "node_modules/react-toastify/dist/ReactToastify.min.css"],
   theme: {
     minWidth: {
       0: "0",
@@ -44,9 +40,9 @@ module.exports = {
         "snu-purple-300": "#5145cc",
         "snu-purple-200": "#4F46E5",
         "snu-purple-100": "#C7D2FE",
-        warmGray: colors.warmGray,
-        trueGray: colors.trueGray,
-        coolGray: colors.coolGray,
+        warmGray: colors.stone,
+        trueGray: colors.neutral,
+        coolGray: colors.gray,
       },
       font: {
         sans: ["Ubuntu", "ui-sans-serif", "system-ui"],
@@ -81,9 +77,6 @@ module.exports = {
       "3/4": "75%",
       full: "100%",
     },
-  },
-  variants: {
-    extend: {},
   },
   plugins: [],
 };

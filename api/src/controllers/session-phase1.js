@@ -7,9 +7,11 @@ const { capture } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const YoungModel = require("../models/young");
-const { ERRORS, updatePlacesSessionPhase1, getSignedUrl, getBaseUrl } = require("../utils");
+const MeetingPointObject = require("../models/meetingPoint");
+const BusObject = require("../models/bus");
+const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl } = require("../utils");
 const { ROLES, canCreateOrUpdateSessionPhase1 } = require("snu-lib/roles");
-const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
+const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
 
@@ -105,16 +107,10 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
   if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  let body = {
+  const body = {
     sessionPhase1Id: session._id,
     cohesionStayPresence: "true",
   };
-
-  if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(req.user.role) && req.user.region === "Bretagne") {
-    body = {
-      sessionPhase1Id: session._id,
-    };
-  }
 
   const youngs = await YoungModel.find(body);
 
@@ -199,6 +195,61 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ youngId: Joi.string().required(), sessionId: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const { youngId, sessionId } = value;
+    const young = await YoungModel.findById(youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const session = await SessionPhase1Model.findById(sessionId);
+    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
+
+    // update youngs infos
+    young.set({
+      status: "VALIDATED",
+      statusPhase1: "AFFECTED",
+      sessionPhase1Id: sessionId,
+    });
+
+    //if the young has already a meetingPoint and therefore a place taken in a bus
+    let bus = null;
+    if (young.meetingPointId) {
+      console.log(`affecting ${young.id} but is already in meetingPoint ${young.meetingPointId}`);
+      const meetingPoint = await MeetingPointObject.findById(young.meetingPointId);
+      if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      bus = await BusObject.findById(meetingPoint.busId);
+      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      console.log(`${young.id} is in bus ${bus.idExcel}`);
+    }
+
+    // if young has confirmed their meetingPoint, we will cancel it
+    if (young.meetingPointId || young.deplacementPhase1Autonomous === "true") {
+      young.set({ meetingPointId: undefined, deplacementPhase1Autonomous: undefined });
+    }
+
+    await young.save({ fromUser: req.user });
+
+    // update session infos
+    const data = await updatePlacesSessionPhase1(session);
+    if (oldSession) await updatePlacesSessionPhase1(oldSession);
+    if (bus) await updatePlacesBus(bus);
+
+    return res.status(200).send({
+      data: serializeSessionPhase1(data, req.user),
+      young: serializeYoung(young, req.user),
+      ok: true,
+    });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 

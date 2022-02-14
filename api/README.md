@@ -25,3 +25,14 @@ Lancer la commande `npm run dev` pour accéder à l'application via l'URL `http:
  - Au minimum, renvoyer un objet JSON avec `{ ok: true }` et à défaut d'autre chose on envoie un texte explicatif dans `msg`, par exemple : `{ ok: true, msg: "Le doc a été créé."}`. Exception : dans le cas d'un appel `GET` sur un document : on peut renvoyer directement le document en cas de succès.
  - Renvoyer le document concerné dans les requêtes PUT, POST et DELETE si possible.
  - Capturer les erreurs (sentry) en cas de 500
+
+### Ajout de fichier dans le Cellar CleverCloud
+
+ - télécharger le fichier `.s3cfg` de l'instance Cellar de CleverCloud et le placer dans le répertoire `~/.s3cfg`
+ - installer le package `s3cmd`
+  ```bash
+  brew install s3cmd
+  ``` 
+ - voir les fichier : `s3cmd ls [path]`
+ - ajouter un fichier dans le cellar : `s3cmd put [path] s3://[bucket]/[path]`
+ - ajouter l'option `--acl-public` pour rendre le fichier accessible en lecture publique

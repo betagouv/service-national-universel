@@ -1,3 +1,84 @@
+# [1.42.0](https://github.com/betagouv/service-national-universel/compare/v1.41.0...v1.42.0) (2022-02-11)
+
+
+### Features
+
+* **admin:** Chef de centre : pointage et validation ([#1231](https://github.com/betagouv/service-national-universel/issues/1231)) ([7be9e54](https://github.com/betagouv/service-national-universel/commit/7be9e547a5ed6c76aa1a026032a6b9d77656088c)), closes [#1228](https://github.com/betagouv/service-national-universel/issues/1228)
+
+# [1.41.0](https://github.com/betagouv/service-national-universel/compare/v1.40.0...v1.41.0) (2022-02-10)
+
+
+### Bug Fixes
+
+* **admin:** pagination `NaN-NaN` dans certaine ReactiveList ([#1237](https://github.com/betagouv/service-national-universel/issues/1237)) ([ef0f8d4](https://github.com/betagouv/service-national-universel/commit/ef0f8d42f3892b07a8397e4abdf96a785b016af7))
+* **deps:** update dependency swr to v1.2.1 ([#1036](https://github.com/betagouv/service-national-universel/issues/1036)) ([1a0a0a3](https://github.com/betagouv/service-national-universel/commit/1a0a0a31507f7efc08721ebc4f5f10dd028dccfb))
+
+
+### Features
+
+* **api:** count more than 10k with es ([#1238](https://github.com/betagouv/service-national-universel/issues/1238)) ([07a35c8](https://github.com/betagouv/service-national-universel/commit/07a35c813a1de35e78ff3fa6abdc0cb5fc8c48ba))
+
+# [1.40.0](https://github.com/betagouv/service-national-universel/compare/v1.39.0...v1.40.0) (2022-02-09)
+
+
+### Bug Fixes
+
+* **supp:** lint ([#1230](https://github.com/betagouv/service-national-universel/issues/1230)) ([351f358](https://github.com/betagouv/service-national-universel/commit/351f358677439c0b5d130551b3bfeca2c3fad9e8))
+
+
+### Features
+
+* **admin:** ajouter message erreurs dans la modal invitation ([#1215](https://github.com/betagouv/service-national-universel/issues/1215)) ([cc611bb](https://github.com/betagouv/service-national-universel/commit/cc611bb8a1b0021ea5b6bd3a9aca48cdadf3c2f5)), closes [#1202](https://github.com/betagouv/service-national-universel/issues/1202) [#1202](https://github.com/betagouv/service-national-universel/issues/1202)
+
+# [1.39.0](https://github.com/betagouv/service-national-universel/compare/v1.38.0...v1.39.0) (2022-02-08)
+
+
+### Bug Fixes
+
+* **support:**  folders org ([#1209](https://github.com/betagouv/service-national-universel/issues/1209)) ([674fd15](https://github.com/betagouv/service-national-universel/commit/674fd152e770287d4be1d00fa0a62ce4e7e12101))
+* **support:** tailwind styling for v3 ([#1212](https://github.com/betagouv/service-national-universel/issues/1212)) ([779b06c](https://github.com/betagouv/service-national-universel/commit/779b06cac29b92d72778ec6c150f13e4d90ed42e))
+
+
+### Features
+
+* **admin:** permettre de mettre à jour les capacités des `sessionPhase1` ([#1188](https://github.com/betagouv/service-national-universel/issues/1188)) ([baae113](https://github.com/betagouv/service-national-universel/commit/baae1137bb247dfde5c29a274695f2e9021b7849))
+* **admin,api:** permettre à un admin de changer un volontaire de session ([#1190](https://github.com/betagouv/service-national-universel/issues/1190)) ([a2577f0](https://github.com/betagouv/service-national-universel/commit/a2577f0adad2d68e36e5bb035b68b0128ee52abb))
+* **admin,api:** repasser la mission en validation si changement de champs critiques + UX ([#1208](https://github.com/betagouv/service-national-universel/issues/1208)) ([1dbfec1](https://github.com/betagouv/service-national-universel/commit/1dbfec1d5cfbe060c222b0703b95c51c6d3c0c4f))
+* **support:** add pagination ([#1210](https://github.com/betagouv/service-national-universel/issues/1210)) ([ad6d84b](https://github.com/betagouv/service-national-universel/commit/ad6d84bb40e489d771ae11f6b02940ac702cf3dd))
+* **support:** can display ticket ([#1214](https://github.com/betagouv/service-national-universel/issues/1214)) ([ec4b31c](https://github.com/betagouv/service-national-universel/commit/ec4b31c9911c6dcbfe14a0ca8f635c2d3f97285d))
+
+# [1.38.0](https://github.com/betagouv/service-national-universel/compare/v1.37.0...v1.38.0) (2022-02-07)
+
+
+### Features
+
+* **admin:** add required fields ([#1200](https://github.com/betagouv/service-national-universel/issues/1200)) ([42fc95a](https://github.com/betagouv/service-national-universel/commit/42fc95abb385400ae8ae74ec1121b7f40c4b820a))
+
+# [1.37.0](https://github.com/betagouv/service-national-universel/compare/v1.36.0...v1.37.0) (2022-02-04)
+
+
+### Features
+
+* **admin:** add rules young in export ([#1197](https://github.com/betagouv/service-national-universel/issues/1197)) ([616a8b2](https://github.com/betagouv/service-national-universel/commit/616a8b28cf3b81fb941bb4aaa198e6d815babf3f))
+* **app:** protocole sanitaire ([#1199](https://github.com/betagouv/service-national-universel/issues/1199)) ([d28caf1](https://github.com/betagouv/service-national-universel/commit/d28caf107cbd283874cad935d5b931346d237ee0))
+
+# [1.36.0](https://github.com/betagouv/service-national-universel/compare/v1.35.1...v1.36.0) (2022-02-03)
+
+
+### Bug Fixes
+
+* **admin:** add plausibleEvents ([4debbb3](https://github.com/betagouv/service-national-universel/commit/4debbb3eaf18b731488e3c23c65adf10d79f035e))
+* **admin:** restrict head center access ([#1182](https://github.com/betagouv/service-national-universel/issues/1182)) ([24cfad5](https://github.com/betagouv/service-national-universel/commit/24cfad5dfe13b541494e858baffa2eba946a51b2))
+* **api:** back to normal export young in center ([a2ba86d](https://github.com/betagouv/service-national-universel/commit/a2ba86d6ee52fd571e3fdbe0480bf0cf14de20c1))
+
+
+### Features
+
+* **admin:** change source of data in the dashboard (cohort -> session) ([#1181](https://github.com/betagouv/service-national-universel/issues/1181)) ([86e1d8b](https://github.com/betagouv/service-national-universel/commit/86e1d8bd06bbfc72c1bce2bfb93fb5c1fae2d217))
+* **admin:** event Plausible ([#1192](https://github.com/betagouv/service-national-universel/issues/1192)) ([b5ccaea](https://github.com/betagouv/service-national-universel/commit/b5ccaea2003b044a6ce5ca219b0831207b2c7454))
+* **admin:** remonter la session du chef de centre dans sa fiche utilisateur ([#1191](https://github.com/betagouv/service-national-universel/issues/1191)) ([cf48811](https://github.com/betagouv/service-national-universel/commit/cf48811f7e5d7e1459f4906dbf667a78cda32c3b))
+* **admin,api:** open certificate only bretagne ([#1194](https://github.com/betagouv/service-national-universel/issues/1194)) ([2985e34](https://github.com/betagouv/service-national-universel/commit/2985e34195106ed95918ad82b069507df34a03a3))
+
 ## [1.35.1](https://github.com/betagouv/service-national-universel/compare/v1.35.0...v1.35.1) (2022-02-02)
 
 

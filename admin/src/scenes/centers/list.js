@@ -32,7 +32,7 @@ export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
-    return { query: { match_all: {} } };
+    return { query: { match_all: {} }, track_total_hits: true };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 

@@ -1,14 +1,14 @@
 import { useState } from "react";
-import Modal from "./Modal";
+import Modal from "../Modal";
 
 const KnowledgeBasePublicNoAnswer = ({ className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      <Modal className="!w-[95vw] !max-w-4xl !h-auto rounded-xl overflow-hidden" fullScreen isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-        <div className="w-full h-full flex flex-col p-12 items-center">
-          <h2 className="font-bold text-lg mb-8">Je n'ai pas trouvé de réponse à ma question</h2>
+      <Modal className="!h-auto !w-[95vw] !max-w-4xl overflow-hidden rounded-xl" fullScreen isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
+        <div className="flex h-full w-full flex-col items-center p-12">
+          <h2 className="mb-8 text-lg font-bold">Je n'ai pas trouvé de réponse à ma question</h2>
           <p className="text-justify">
             Bonjour,
             <br />
@@ -28,7 +28,7 @@ const KnowledgeBasePublicNoAnswer = ({ className = "" }) => {
           e.preventDefault();
           setIsOpen(true);
         }}
-        className={`mx-2 bg-white hover:shadow-sm text-snu-purple-200 my-[70px] text-base font-normal shadow-base rounded-md border-0 py-3.5 px-5 smmd:mx-auto ${className} print:hidden`}
+        className={`mx-2 my-[70px] rounded-md border-0 bg-white py-3.5 px-5 text-base font-normal text-snu-purple-200 shadow-base hover:shadow-sm smmd:mx-auto ${className} print:hidden`}
       >
         Je n’ai pas trouvé de réponse à ma question
       </button>

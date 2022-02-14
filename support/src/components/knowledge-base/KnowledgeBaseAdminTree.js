@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import SortableJS from "sortablejs";
-import API from "../services/api";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
-import useKnowledgeBaseData from "../hooks/useKnowledgeBaseData";
-import Loader from "./Loader";
+import API from "../../services/api";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import Loader from "../Loader";
 
 const useIsActive = ({ slug }, onIsActive) => {
   const router = useRouter();
@@ -69,15 +69,15 @@ const Branch = ({ section, level, position, initShowOpen, cachedOpenedPositions,
       data-type="section"
       className={`flex flex-col ml-${level * horizontalSpacing} ${className}`}
     >
-      <span className={` text-warmGray-500  max-w-full inline-block overflow-hidden overflow-ellipsis whitespace-nowrap ${isActive ? "font-bold" : ""}`}>
-        <small className="text-trueGray-400 mr-1 w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
+      <span className={` inline-block  max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-warmGray-500 ${isActive ? "font-bold" : ""}`}>
+        <small className="mr-1 inline-block w-3 cursor-pointer text-trueGray-400" onClick={() => setIsOpen(!open)}>
           {open ? "\u25BC" : "\u25B6"}
         </small>
         <a onClick={() => onClick(section.slug || "")} className="cursor-pointer">
           {section.title ? (
             `${open ? "📂" : "📁"}${isDraft}${section.title} (${section.children?.length || 0})`
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline -mt-2 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="-mt-2 inline h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -124,7 +124,7 @@ const Answer = ({ article, level, onIsActive, position, parentId, onClick }) => 
       data-id={article._id}
       href="#"
       onClick={() => onClick(article.slug)}
-      className={`text-warmGray-500 cursor-pointer  overflow-hidden overflow-ellipsis whitespace-nowrap block ml-${level * horizontalSpacing} ${isActive ? "font-bold" : ""}`}
+      className={`block cursor-pointer  overflow-hidden text-ellipsis whitespace-nowrap text-warmGray-500 ml-${level * horizontalSpacing} ${isActive ? "font-bold" : ""}`}
     >
       {"📃 "} <span className={`${article.status === "DRAFT" ? "italic opacity-40" : ""}`}>{article.title}</span>
     </a>
@@ -193,8 +193,8 @@ const KnowledgeBaseAdminTree = ({ isSortable, onClick }) => {
     <>
       {/* TODO find a way for tailwind to not filter margins from compiling,
        because things like `ml-${level}` are not compiled */}
-      <div className="hidden ml-2 ml-3 ml-4 ml-5 ml-6 ml-7 ml-8 ml-9 ml-10 ml-11 ml-12 ml-13 ml-14 ml-15 ml-16"></div>
-      <div ref={rootRef} key={reloadTreeKey} className="overflow-auto pt-2 px-2 pb-10 dir-rtl">
+      <div className="ml-13 ml-15 ml-2 ml-3 ml-4 ml-5 ml-6 ml-7 ml-8 ml-9 ml-10 ml-11 ml-12 ml-14 ml-16 hidden"></div>
+      <div ref={rootRef} key={reloadTreeKey} className="dir-rtl overflow-auto px-2 pt-2 pb-10">
         <Branch
           section={tree}
           level={0}
@@ -208,7 +208,7 @@ const KnowledgeBaseAdminTree = ({ isSortable, onClick }) => {
         />
       </div>
       {!!isSaving && (
-        <div className="absolute w-full h-full top-0 left-0 bg-gray-500 opacity-25 pointer-events-none">
+        <div className="pointer-events-none absolute top-0 left-0 h-full w-full bg-gray-500 opacity-25">
           <Loader color="#bbbbbb" size={40} />
         </div>
       )}

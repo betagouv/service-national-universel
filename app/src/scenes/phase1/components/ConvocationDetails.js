@@ -63,9 +63,7 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
           <div>
             <h2>Votre convocation</h2>
             <p>
-              Votre convocation sera à présenter à votre arrivée muni d&apos;une <strong>pièce d&apos;identité valide</strong> et de votre{" "}
-              <strong>test PCR ou antigénique négatif de moins de 72 heures </strong>
-              (recommandé)
+              Votre convocation sera à présenter à votre arrivée muni d&apos;une <strong>pièce d&apos;identité valide</strong>.
             </p>
             <p className="show-convocation">
               En cas de problème de téléchargement : <span onClick={() => setShowConvocation((e) => !e)}>afficher ma convocation</span>

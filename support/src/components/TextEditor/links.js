@@ -6,7 +6,7 @@ import { Editor, Transforms, Element as SlateElement, Range } from "slate";
 import { TextEditorButton, Icon } from "./components";
 import Modal from "../Modal";
 import { Button, CancelButton } from "../Buttons";
-import KnowledgeBaseAdminTree from "../KnowledgeBaseAdminTree";
+import KnowledgeBaseAdminTree from "../knowledge-base/KnowledgeBaseAdminTree";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
 export const isLinkActive = (editor) => {
@@ -126,17 +126,17 @@ export const AddLinkModal = ({ isOpen, onRequestClose }) => {
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
-      <form onSubmit={onSubmit} className="flex flex-col w-screen-3/4 items-start overflow-hidden">
-        <h2 className="font-bold ml-4 mb-4 text-xl">{!!link ? "Éditer" : "Ajouter"} un lien</h2>
-        <div className="flex flex-col flex-shrink  w-full overflow-hidden">
+      <form onSubmit={onSubmit} className="flex w-screen-3/4 flex-col items-start overflow-hidden">
+        <h2 className="ml-4 mb-4 text-xl font-bold">{!!link ? "Éditer" : "Ajouter"} un lien</h2>
+        <div className="flex w-full flex-shrink  flex-col overflow-hidden">
           <label htmlFor="title">Veuillez saisir une url, ou cliquer sur un lien vers la base de connaissance ci-dessous</label>
-          <input className="p-2 border-2" placeholder="https://snu.gouv.fr/ ?" name="url" value={url} onChange={onUrlChange} />
-          <span className="text-red-500 text-xs mb-10 mt-1">{error}</span>
+          <input className="border-2 p-2" placeholder="https://snu.gouv.fr/ ?" name="url" value={url} onChange={onUrlChange} />
+          <span className="mb-10 mt-1 text-xs text-red-500">{error}</span>
           <div className="overflow-auto">
             <KnowledgeBaseAdminTree visible onClick={onSlugChange} />
           </div>
         </div>
-        <div className="flex justify-evenly mt-3.5 w-full">
+        <div className="mt-3.5 flex w-full justify-evenly">
           <Button type="submit" className="w-auto">
             Enregistrer
           </Button>

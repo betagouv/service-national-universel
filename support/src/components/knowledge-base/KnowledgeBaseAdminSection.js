@@ -1,20 +1,20 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import SortableJS from "sortablejs";
 import { toast } from "react-toastify";
-import withAuth from "../hocs/withAuth";
-import API from "../services/api";
+import { SUPPORT_ROLES } from "snu-lib/roles";
+import { Popover } from "@headlessui/react";
+import withAuth from "../../hocs/withAuth";
+import API from "../../services/api";
 import KnowledgeBaseSectionCard from "./KnowledgeBaseSectionCard";
 import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
 import KnowledgeBaseAdminItemCreate from "./KnowledgeBaseAdminItemCreate";
-import Tags from "./Tags";
-import useKnowledgeBaseData from "../hooks/useKnowledgeBaseData";
-import Loader from "./Loader";
-import Modal from "./Modal";
+import Tags from "../Tags";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import Loader from "../Loader";
+import Modal from "../Modal";
 import KnowledgeBasePublicContent from "./KnowledgeBasePublicContent";
 import KnowledgeBasePublicHome from "./KnowledgeBasePublicHome";
-import SeeAsContext from "../hooks/useSeeAs";
-import { SUPPORT_ROLES } from "snu-lib/roles";
-import { Popover } from "@headlessui/react";
+import SeeAsContext from "../../hooks/useSeeAs";
 
 const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
   const { setSeeAs, seeAs } = useContext(SeeAsContext);
@@ -57,21 +57,21 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
   }, []);
 
   return (
-    <article className="container bg-coolGray-100 mx-auto flex flex-col flex-grow h-full relative w-full flex-shrink overflow-hidden">
-      <header className="px-8 py-3 flex justify-between w-full border-2">
-        <h2 className="font-bold text-lg">
+    <article className="container relative mx-auto flex h-full w-full flex-shrink flex-grow flex-col overflow-hidden bg-coolGray-100">
+      <header className="flex w-full justify-between border-2 px-8 py-3">
+        <h2 className="text-lg font-bold">
           {isRoot ? "Home" : section.title}
           {!!section.description?.length && <p className="mt-1 text-sm italic">{section.description}</p>}
           {!!section.allowedRoles?.length && (
-            <p className="font-normal flex flex-wrap mt-3.5 text-sm">
+            <p className="mt-3.5 flex flex-wrap text-sm font-normal">
               Visible par: <Tags tags={section.allowedRoles} />
             </p>
           )}
         </h2>
         <Popover className="my-auto">
           <Popover.Button>Prévisualiser</Popover.Button>
-          <Popover.Panel className="absolute right-0 min-w-[208px] lg:min-w-0 z-10 top-10">
-            <div className="flex flex-col gap-4 px-4 py-3 bg-white border border-gray-300 rounded-md">
+          <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] lg:min-w-0">
+            <div className="flex flex-col gap-4 rounded-md border border-gray-300 bg-white px-4 py-3">
               {Object.keys(SUPPORT_ROLES).map((role) => (
                 <a
                   key={role}
@@ -79,7 +79,7 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
                     setReadOnly((r) => !r);
                     setSeeAs(role);
                   }}
-                  className={`text-sm font-${seeAs === role ? "bold" : "medium"} text-gray-700 cursor-pointer`}
+                  className={`text-sm font-${seeAs === role ? "bold" : "medium"} cursor-pointer text-gray-700`}
                 >
                   Voir en tant que {SUPPORT_ROLES[role]}
                 </a>
@@ -89,12 +89,12 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
         </Popover>
       </header>
       <main className={`flex h-full ${isRoot ? "flex-col" : ""} w-full max-w-screen-2xl flex-shrink overflow-y-auto`}>
-        <section className={`flex flex-col  ${isRoot ? "w-full order-2" : ""} flex-grow-[4] flex-shrink-0 border-r-2 pt-6 px-12`}>
-          <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
+        <section className={`flex flex-col  ${isRoot ? "order-2 w-full" : ""} shrink-0 flex-grow-[4] border-r-2 px-12 pt-6`}>
+          <h3 className="flex items-center px-10 text-sm font-bold uppercase text-snu-purple-900">
             Sujets
             <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="article" />
           </h3>
-          <div ref={gridAnswersRef} id="articles" className="flex flex-col h-full w-full flex-shrink overflow-y-auto">
+          <div ref={gridAnswersRef} id="articles" className="flex h-full w-full flex-shrink flex-col overflow-y-auto">
             {articles.map((article) => (
               <KnowledgeBaseArticleCard
                 key={article._id}
@@ -106,15 +106,15 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
                 path="/admin/base-de-connaissance"
               />
             ))}
-            {!articles.length && <span className="self-center w-full py-10 text-gray-400 block">Pas d'article</span>}
+            {!articles.length && <span className="block w-full self-center py-10 text-gray-400">Pas d'article</span>}
           </div>
         </section>
-        <section className={`flex flex-col ${isRoot ? "w-full" : ""} flex-grow-[2] flex-shrink-0  pt-6`}>
-          <h3 className="px-10 flex items-center font-bold uppercase text-sm text-snu-purple-900">
+        <section className={`flex flex-col ${isRoot ? "w-full" : ""} shrink-0 flex-grow-[2]  pt-6`}>
+          <h3 className="flex items-center px-10 text-sm font-bold uppercase text-snu-purple-900">
             Catégories
             <KnowledgeBaseAdminItemCreate position={section.children.length + 1} parentId={section._id} type="section" />
           </h3>
-          <div ref={gridSectionsRef} id="sections" className={`flex ${isRoot ? "justify-center" : ""} flex-wrap w-full flex-shrink overflow-y-auto px-12`}>
+          <div ref={gridSectionsRef} id="sections" className={`flex ${isRoot ? "justify-center" : ""} w-full flex-shrink flex-wrap overflow-y-auto px-12`}>
             {sections.map((section) => (
               <React.Fragment key={section._id}>
                 <KnowledgeBaseSectionCard
@@ -134,11 +134,11 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
                 {!!isRoot && <div className="mr-4" />}
               </React.Fragment>
             ))}
-            {!sections.length && <span className="w-full p-10 text-gray-400 block">Pas de rubrique</span>}
+            {!sections.length && <span className="block w-full p-10 text-gray-400">Pas de rubrique</span>}
           </div>
         </section>
         {!!isSaving && (
-          <div className="absolute w-full h-full top-0 left-0 bg-gray-500 opacity-25 pointer-events-none">
+          <div className="pointer-events-none absolute top-0 left-0 h-full w-full bg-gray-500 opacity-25">
             <Loader color="#bbbbbb" size={100} />
           </div>
         )}
@@ -148,7 +148,7 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
         isOpen={readOnly}
         onRequestClose={() => setReadOnly(false)}
         closeButton={
-          <button type="button" className="fixed h-16 top-0 w-full rounded-none" onClick={() => setReadOnly((r) => !r)}>
+          <button type="button" className="fixed top-0 h-16 w-full rounded-none" onClick={() => setReadOnly((r) => !r)}>
             Retour à l'édition
           </button>
         }

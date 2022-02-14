@@ -5,6 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { Formik, Field } from "formik";
 import Select from "react-select";
 import { useHistory } from "react-router-dom";
+import plausibleEvent from "../../../services/pausible";
 
 import MultiSelect from "../../../components/Multiselect";
 import LoadingButton from "../../../components/buttons/LoadingButton";
@@ -98,6 +99,7 @@ export default function CreateMission({ young, onSend }) {
         subPeriod: [],
       }}
       onSubmit={async (values) => {
+        plausibleEvent("Volontaires/profil/phase2 CTA - Créer mission personnalisée");
         values.placesLeft = values.placesTotal;
         if (values.duration) values.duration = values.duration.toString();
         if (!values.location) values.location = {};

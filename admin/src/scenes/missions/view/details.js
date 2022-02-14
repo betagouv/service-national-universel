@@ -10,18 +10,24 @@ import { Box, BoxTitle } from "../../../components/box";
 import TickDone from "../../../assets/TickDone";
 import Copy from "../../../assets/Copy";
 
+const rowStyle = { marginRight: 0, marginLeft: 0 };
+
 export default function DetailsView({ mission, structure, tutor }) {
   const user = useSelector((state) => state.Auth.user);
+  const domains = mission?.domains?.filter((d) => {
+    return d !== mission.mainDomain;
+  });
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <MissionView mission={mission} tab="details">
         <Box>
-          <Row>
-            <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
+          <Row style={rowStyle}>
+            <Col md={6} style={{ borderRight: "2px solid #f4f5f7", padding: 0 }}>
               <Bloc title="La mission">
                 <Details title="Format" value={translate(mission.format)} />
-                <Details title="Domaines" value={mission.domains.map((d) => translate(d)).join(", ")} />
+                {mission.mainDomain ? <Details title="Domaine principal" value={translate(mission.mainDomain)} /> : null}
+                {mission.domains ? <Details title="Domaine(s)" value={domains.map((d) => translate(d)).join(", ")} /> : null}
                 <Details title="Début" value={formatStringDateTimezoneUTC(mission.startAt)} />
                 <Details title="Fin" value={formatStringDateTimezoneUTC(mission.endAt)} />
                 {mission.duration ? <Details title="Durée" value={`${mission.duration} heure(s)`} /> : null}
@@ -41,8 +47,8 @@ export default function DetailsView({ mission, structure, tutor }) {
                 <Details title="Contraintes" value={mission.contraintes} />
               </Bloc>
             </Col>
-            <Col md={6}>
-              <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
+            <Col md={6} style={{ padding: 0 }}>
+              <Row style={{ borderBottom: "2px solid #f4f5f7", ...rowStyle }}>
                 {tutor ? (
                   <Bloc
                     title="Le tuteur"
@@ -57,10 +63,10 @@ export default function DetailsView({ mission, structure, tutor }) {
                   </Bloc>
                 ) : null}
               </Row>
-              <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
+              <Row style={{ borderBottom: "2px solid #f4f5f7", ...rowStyle }}>
                 {structure ? (
                   <Bloc
-                    title="Le structure"
+                    title="La structure"
                     titleRight={
                       <Link to={`/structure/${structure._id}`}>
                         <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
@@ -76,7 +82,7 @@ export default function DetailsView({ mission, structure, tutor }) {
                 ) : null}
               </Row>
               {[MISSION_STATUS.ARCHIVED, MISSION_STATUS.CANCEL]?.includes(mission.status) && mission.statusComment ? (
-                <Row>
+                <Row style={rowStyle}>
                   <Bloc title={mission.status === MISSION_STATUS.ARCHIVED ? "Archivage" : mission.status === MISSION_STATUS.CANCEL ? "Annulation" : ""}>
                     <Details title="Motif" value={mission.statusComment} />
                   </Bloc>
@@ -99,6 +105,8 @@ const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTo
         borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
+        padding: 0,
+        ...rowStyle,
       }}>
       <Wrapper
         style={{
@@ -127,39 +135,42 @@ const Details = ({ title, value, copy }) => {
   }, [copied]);
   return (
     <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
-      {copy ? (
-        <div
-          className="icon"
-          onClick={() => {
-            copyToClipboard(value);
-            setCopied(true);
-          }}>
-          {copied ? <TickDone color={colors.green} width={17} height={17} /> : <Copy color={colors.darkPurple} width={17} height={17} />}
-        </div>
-      ) : null}
+      <div className="detail-title">{title}&nbsp;:</div>
+      <div className="detail-text">
+        {value}
+        {copy ? (
+          <div
+            className="icon"
+            onClick={() => {
+              copyToClipboard(value);
+              setCopied(true);
+            }}>
+            {copied ? <TickDone color={colors.green} width={17} height={17} /> : <Copy color={colors.darkPurple} width={17} height={17} />}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 };
 
 const Wrapper = styled.div`
-  padding: 3rem;
+  padding: 2rem;
   flex: 1;
   .detail {
+    border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
     display: flex;
-    align-items: flex-start;
-    font-size: 1rem;
-    text-align: left;
+    justify-content: space-between;
+    font-size: 14px;
     margin-top: 1rem;
+    padding-bottom: 0.5rem;
     &-title {
       min-width: 120px;
-      width: 90px;
       margin-right: 1rem;
       color: #798399;
     }
     &-text {
       color: rgba(26, 32, 44);
+      display: flex;
       white-space: pre-line;
     }
   }
@@ -177,6 +188,7 @@ const Subtitle = styled.div`
 
 const SubtitleLink = styled(Subtitle)`
   color: #5245cc;
+  max-width: 200px;
   :hover {
     text-decoration: underline;
   }

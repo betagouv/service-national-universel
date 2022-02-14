@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import useKnowledgeBaseData from "../hooks/useKnowledgeBaseData";
-import API from "../services/api";
-import Modal from "./Modal";
-import Tags from "./Tags";
-import TextEditor from "./TextEditor";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import API from "../../services/api";
+import Modal from "../Modal";
+import Tags from "../Tags";
+import TextEditor from "../TextEditor";
 import KnowledgeBasePublicContent from "./KnowledgeBasePublicContent";
 
 const KnowledgeBaseAdminArticle = ({ article }) => {
@@ -23,14 +23,14 @@ const KnowledgeBaseAdminArticle = ({ article }) => {
   };
 
   return (
-    <div className="container bg-coolGray-100  mx-auto flex flex-col px-6 pt-3 flex-grow flex-shrink overflow-hidden w-full">
+    <div className="container mx-auto  flex w-full flex-shrink flex-grow flex-col overflow-hidden bg-coolGray-100 px-6 pt-3">
       {!readOnly && (
         <header className="flex w-full justify-between px-2">
           <h2 className="flex flex-col text-lg">
             <span className="font-bold">{article.title}</span>
             {!!article.description?.length && <p className="mt-1 text-sm italic">{article.description}</p>}
             {!!article.allowedRoles?.length && (
-              <p className="flex flex-wrap mt-3.5  text-sm">
+              <p className="mt-3.5 flex flex-wrap  text-sm">
                 Visible par:
                 <Tags tags={article.allowedRoles} />
               </p>
@@ -41,7 +41,7 @@ const KnowledgeBaseAdminArticle = ({ article }) => {
           </button>
         </header>
       )}
-      <div className="bg-white px-2 flex-grow flex-shrink flex flex-col  overflow-hidden">
+      <div className="flex flex-shrink flex-grow flex-col overflow-hidden bg-white  px-2">
         <TextEditor key={article._id + article.slug} content={article.content} _id={article._id} slug={article.slug} onSave={onSave} />
       </div>
       <Modal
@@ -49,7 +49,7 @@ const KnowledgeBaseAdminArticle = ({ article }) => {
         isOpen={readOnly}
         onRequestClose={() => setReadOnly(false)}
         closeButton={
-          <button type="button" className={!readOnly ? "absolute right-2 top-2" : "fixed h-16 top-0 w-full rounded-none"} onClick={() => setReadOnly((r) => !r)}>
+          <button type="button" className={!readOnly ? "absolute right-2 top-2" : "fixed top-0 h-16 w-full rounded-none"} onClick={() => setReadOnly((r) => !r)}>
             {!readOnly ? "Prévisualiser" : "Retour à l'édition"}
           </button>
         }

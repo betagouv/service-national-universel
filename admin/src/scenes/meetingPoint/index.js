@@ -14,7 +14,7 @@ export default function MeetingPoint() {
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
-    return { query: { match_all: {} } };
+    return { query: { match_all: {} }, track_total_hits: true };
   };
 
   return (

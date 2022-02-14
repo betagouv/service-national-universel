@@ -10,8 +10,8 @@ router.get("/", passport.authenticate("support-user", { session: false, failWith
   try {
     const query = {};
     // const query = { $or: [{ emitterYoungId: { $exists: true, $ne: null } }, { emitterUserId: { $exists: true, $ne: null } }] };
-    const limit = 50;
-    const skip = (req.query.page - 1) * limit;
+    const limit = parseInt(req.query.limit, 10) || 50;
+    const skip = req.query.page * limit;
 
     if (Object.keys(req.query).includes("ticketsIds")) {
       if (!req.query.ticketsIds?.length) return res.status(200).send({ ok: true, data: [] });
@@ -21,8 +21,22 @@ router.get("/", passport.authenticate("support-user", { session: false, failWith
     }
 
     const tickets = await TicketModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 });
+    const total = await TicketModel.countDocuments(query);
 
-    return res.status(200).send({ ok: true, data: tickets });
+    return res.status(200).send({ ok: true, data: tickets, total });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/:id", passport.authenticate("support-user", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const query = { _id: req.params.id };
+
+    const ticket = await TicketModel.findOne(query);
+
+    return res.status(200).send({ ok: true, data: ticket });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

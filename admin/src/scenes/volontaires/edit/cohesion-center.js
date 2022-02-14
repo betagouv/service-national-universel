@@ -1,41 +1,45 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Col } from "reactstrap";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import AssignCenter from "../components/AssignCenter";
-import { canAssignCohesionCenter } from "../../../utils";
+import { canAssignCohesionCenter, translate } from "../../../utils";
+import api from "../../../services/api";
 
 export default function CohesionCenter({ values, handleChange }) {
   const user = useSelector((state) => state.Auth.user);
+  const [cohesionCenter, setCohesionCenter] = useState();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await api.get(`/session-phase1/${values.sessionPhase1Id}/cohesion-center`);
+        setCohesionCenter(response.data);
+      } catch (e) {
+        console.log(e);
+        toastr.error("Oups, une erreur est survenue :", translate(e.code));
+      }
+    })();
+  }, [values.sessionPhase1Id]);
 
   return (
     <Col md={6} style={{ marginBottom: "20px" }}>
       <Box>
         <BoxHeadTitle>Centre de cohésion</BoxHeadTitle>
         <BoxContent direction="column">
-          {canAssignCohesionCenter(user) ? (
-            <AssignCenter
-              young={values}
-              onAffect={(center, young) => {
-                handleChange({ target: { name: "cohesionCenterId", value: center._id } });
-                handleChange({ target: { name: "cohesionCenterName", value: center.name } });
-                handleChange({ target: { name: "cohesionCenterZip", value: center.zip } });
-                handleChange({ target: { name: "cohesionCenterCity", value: center.city } });
-                handleChange({ target: { name: "status", value: young.status } });
-                handleChange({ target: { name: "statusPhase1", value: young.statusPhase1 } });
-                handleChange({ target: { name: "autoAffectationPhase1ExpiresAt", value: young.autoAffectationPhase1ExpiresAt } });
-
-                // handle if the meeting point has been canceled
-                handleChange({ target: { name: "meetingPointId", value: young.meetingPointId } });
-                handleChange({ target: { name: "deplacementPhase1Autonomous", value: young.deplacementPhase1Autonomous } });
-              }}
-            />
+          {canAssignCohesionCenter(user) && (
+            <AssignCenter young={values} onAffect={(session, young) => handleChange({ target: { value: young.sessionPhase1Id, name: "sessionPhase1Id" } })} />
+          )}
+          {cohesionCenter ? (
+            <>
+              <Item disabled title="Centre de cohésion" values={cohesionCenter} name="name" handleChange={handleChange} />
+              <Item disabled title="Code postal centre de cohésion" values={cohesionCenter} name="zip" handleChange={handleChange} />
+              <Item disabled title="Ville centre de cohésion" values={cohesionCenter} name="city" handleChange={handleChange} />
+            </>
           ) : null}
-          <Item disabled title="Centre de cohésion" values={values} name="cohesionCenterName" handleChange={handleChange} />
-          <Item disabled title="Code postal centre de cohésion" values={values} name="cohesionCenterZip" handleChange={handleChange} />
-          <Item disabled title="Ville centre de cohésion" values={values} name="cohesionCenterCity" handleChange={handleChange} />
         </BoxContent>
       </Box>
     </Col>

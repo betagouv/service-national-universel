@@ -90,6 +90,7 @@ export default function VolontaireList() {
   const getDefaultQuery = () => ({
     query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } } } },
     sort: [{ "lastName.keyword": "asc" }],
+    track_total_hits: true,
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   return (
@@ -189,6 +190,7 @@ export default function VolontaireList() {
                         "Consentement des représentants légaux": translate(data.parentConsentment),
                         "Droit à l'image": translate(data.imageRight),
                         "Autotest PCR": translate(data.autoTestPCR),
+                        "Règlement intérieur": translate(data.rulesYoung),
                         "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
                         "Présent au séjour de cohésion": translate(data.cohesionStayPresence),
                         "Statut représentant légal 1": translate(data.parent1Status),

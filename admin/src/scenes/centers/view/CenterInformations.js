@@ -7,77 +7,90 @@ import { translate, getDepartmentNumber, canCreateOrUpdateCohesionCenter } from 
 import { Box } from "../../../components/box";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
-export default function Details({ center }) {
+export default function Details({ center, sessions }) {
   const user = useSelector((state) => state.Auth.user);
   return (
     <div style={{ display: "flex", flexDirection: "column", padding: "2rem 3rem" }}>
-      <h1 style={{ marginBottom: "2rem" }}>{center.name}</h1>
-      <Box>
-        <Wrapper>
-          <Header>
-            <h4>
-              <strong>Centre</strong> <span style={{ color: "#9C9C9C", fontSize: "0.85rem" }}>#{center._id}</span>
-            </h4>
-            {canCreateOrUpdateCohesionCenter(user) ? (
-              <div style={{ flexBasis: "0" }}>
-                <Link to={`/centre/${center._id}/edit`}>
-                  <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />
-                </Link>
-              </div>
-            ) : null}
-          </Header>
-          <Container>
-            <section>
-              <div className="detail">
-                <div className="detail-title-first">Région :</div>
-                <div className="detail-text">{center.region}</div>
-              </div>
-              <div className="detail">
-                <div className="detail-title-first">Dép :</div>
-                <div className="detail-text">
-                  {center.department} ({getDepartmentNumber(center.department)})
-                </div>
-              </div>
-              <div className="detail">
-                <div className="detail-title-first">Ville :</div>
-                <div className="detail-text">
-                  {center.city} ({center.zip})
-                </div>
-              </div>
-              <div className="detail">
-                <div className="detail-title-first">Adresse</div>
-                <div className="detail-text">{center.address}</div>
-              </div>
-            </section>
-            <section>
-              {center.code ? (
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <h1 style={{ marginBottom: "2rem" }}>{center.name}</h1>
+        {canCreateOrUpdateCohesionCenter(user) ? (
+          <div style={{ flexBasis: "0" }}>
+            <Link to={`/centre/${center._id}/edit`}>
+              <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />
+            </Link>
+          </div>
+        ) : null}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gridGap: "1rem" }}>
+        <Box>
+          <Wrapper>
+            <Header>
+              <h4>
+                <strong>Centre</strong> <span style={{ color: "#9C9C9C", fontSize: "0.85rem" }}>#{center._id}</span>
+              </h4>
+            </Header>
+            <Container>
+              <section>
                 <div className="detail">
-                  <div className="detail-title-second">Code (2021) :</div>
-                  <div className="detail-text">{center.code}</div>
+                  <div className="detail-title-first">Région :</div>
+                  <div className="detail-text">{center.region}</div>
                 </div>
-              ) : null}
-              {center.code2022 ? (
                 <div className="detail">
-                  <div className="detail-title-second">Code (2022) :</div>
-                  <div className="detail-text">{center.code2022}</div>
-                </div>
-              ) : null}
-              <div className="detail">
-                <div className="detail-title-second">Accessibilité aux personnes à mobilité réduite (PMR) :</div>
-                <div className="detail-text">{translate(center.pmr)}</div>
-              </div>
-              <div className="detail">
-                <div className="detail-title-second">Séjour(s) de cohésion concerné(s) par le centre :</div>
-                {center.cohorts?.map((cohort) => (
-                  <div key={cohort} className="detail-text">
-                    <p className="detail-badge">{cohort}</p>
+                  <div className="detail-title-first">Dép :</div>
+                  <div className="detail-text">
+                    {center.department} ({getDepartmentNumber(center.department)})
                   </div>
-                ))}
-              </div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title-first">Ville :</div>
+                  <div className="detail-text">
+                    {center.city} ({center.zip})
+                  </div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title-first">Adresse</div>
+                  <div className="detail-text">{center.address}</div>
+                </div>
+              </section>
+              <section>
+                {center.code ? (
+                  <div className="detail">
+                    <div className="detail-title-second">Code (2021) :</div>
+                    <div className="detail-text">{center.code}</div>
+                  </div>
+                ) : null}
+                {center.code2022 ? (
+                  <div className="detail">
+                    <div className="detail-title-second">Code (2022) :</div>
+                    <div className="detail-text">{center.code2022}</div>
+                  </div>
+                ) : null}
+                <div className="detail">
+                  <div className="detail-title-second">Accessibilité aux personnes à mobilité réduite (PMR) :</div>
+                  <div className="detail-text">{translate(center.pmr)}</div>
+                </div>
+              </section>
+            </Container>
+          </Wrapper>
+        </Box>
+        <Box>
+          <Wrapper>
+            <Header>
+              <h4>
+                <strong>Séjours</strong>
+              </h4>
+            </Header>
+            <section>
+              {sessions.map((session) => (
+                <div className="detail" key={session.cohort}>
+                  <div className="detail-title-first">{session.cohort}&nbsp;:</div>
+                  <div className="detail-text">{session.placesTotal} places</div>
+                </div>
+              ))}
             </section>
-          </Container>
-        </Wrapper>
-      </Box>
+          </Wrapper>
+        </Box>
+      </div>
     </div>
   );
 }

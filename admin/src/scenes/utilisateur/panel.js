@@ -74,6 +74,7 @@ export default function UserPanel({ onChange, value }) {
 
   const handleImpersonate = async () => {
     try {
+      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${value._id}`);
       if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
       history.push("/dashboard");

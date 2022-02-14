@@ -8,6 +8,7 @@ import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
+import plausibleEvent from "../../../services/pausible";
 
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import { translate, ROLES } from "../../../utils";
@@ -88,7 +89,7 @@ export default function VolontaireEdit(props) {
                 <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
                   <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                 </a>
-                <Link to={`/volontaire/${young._id}`}>
+                <Link to={`/volontaire/${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
                   <PanelActionButton icon="eye" title="Consulter" />
                 </Link>
                 <LoadingButton loading={isSubmitting} onClick={handleSubmit}>

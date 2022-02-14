@@ -71,10 +71,14 @@ export default function Affected() {
             <div className="thumb" />
           </Section>
           <Separator style={{ margin: 0 }} />
-          <Protocole href="https://www.jeunes.gouv.fr/Les-Protocoles-sanitaires-dans-les" target="_blank" rel="noreferrer">
+          <Protocole href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/protocole-sanitaire-cohesion-2022.pdf" target="_blank" rel="noreferrer">
             <span>
               <Bouclier />
-              Protocole sanitaire en vigueur pour les Accueils Collectifs de Mineur
+              <p>
+                Protocole sanitaire en vigueur pour les Accueils Collectifs de Mineur
+                <br />
+                <em style={{ fontWeight: "bold" }}>Il est recommandé de réaliser un test PCR, antigénique ou autotest moins de 24h avant le départ en séjour.</em>
+              </p>
             </span>
             <img src={right} />
           </Protocole>
@@ -130,22 +134,24 @@ const Protocole = styled.a`
   justify-content: space-between;
   align-items: center;
   span {
-    color: black;
+    display: grid;
+    grid-template-columns: 4rem 2fr;
+    align-items: center;
+    p {
+      color: black;
+      margin-bottom: 0;
+    }
   }
   svg {
+    min-width: 2rem;
     margin-right: 0.5rem;
-    margin-bottom: 0.2rem;
   }
   img {
     display: none;
   }
   @media (min-width: 768px) {
-    svg {
-      margin-right: 3rem;
-    }
     span {
       font-size: 1.2rem;
-      display: block;
     }
     img {
       display: block;

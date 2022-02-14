@@ -3,7 +3,14 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik } from "formik";
 
-import { translate, YOUNG_STATUS_COLORS, confirmMessageChangePhase1Presence, formatStringLongDate } from "../../../utils";
+import {
+  translate,
+  YOUNG_STATUS_COLORS,
+  confirmMessageChangePhase1Presence,
+  formatStringLongDate,
+  PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE,
+  translateCohort,
+} from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import { Box, BoxTitle } from "../../../components/box";
@@ -16,7 +23,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 export default function Phase1(props) {
   const [young, setYoung] = useState(props.young);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const disabled = true;
+  const disabled = PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE[props.young?.cohort].getTime() > Date.now();
 
   const updateYoung = async (v) => {
     const { data, ok, code } = await api.put(`/referent/young/${young._id}`, v);
@@ -117,8 +124,7 @@ export default function Phase1(props) {
                 {({ handleChange }) => (
                   <>
                     <Bloc title="Date de séjour" borderBottom disabled={disabled}>
-                      <Details title="Début" value={young.cohesionStartAt} />
-                      <Details title="Fin" value={young.cohesionEndAt} />
+                      <Details title="Date" value={translateCohort(young.cohort)} />
                       <Select
                         placeholder="Non renseigné"
                         title="Présence"
