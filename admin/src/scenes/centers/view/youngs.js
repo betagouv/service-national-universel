@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { toastr } from "react-redux-toastr";
 
 import { apiURL } from "../../../config";
 import SelectStatus from "../../../components/selectStatus";
