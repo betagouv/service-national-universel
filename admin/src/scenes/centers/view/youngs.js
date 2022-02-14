@@ -9,9 +9,6 @@ import Chevron from "../../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../../components/filters";
 import Select from "../../volontaires-head-center/components/Select";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
-
-
-
 import {
   getFilterLabel,
   YOUNG_STATUS_PHASE1,
@@ -30,7 +27,7 @@ import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
 import DownloadAllAttestation from "../../../components/buttons/DownloadAllAttestation";
-const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
+const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 export default function Youngs({ center, updateCenter, focusedCohort, focusedSession }) {
@@ -212,6 +209,7 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                 <Filter>
                   <FilterRow visible>
                     <DataSearch
+                      defaultQuery={getDefaultQuery}
                       showIcon={false}
                       placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                       componentId="SEARCH"
@@ -224,6 +222,7 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       queryFormat="and"
                     />
                     <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
                       componentId="STATUS"
                       dataField="status.keyword"
@@ -237,6 +236,7 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       renderLabel={(items) => getFilterLabel(items, "Statut")}
                     />
                     <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
                       componentId="STATUS_PHASE_1"
                       dataField="statusPhase1.keyword"
@@ -324,7 +324,6 @@ const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
 
   if (!value) return <></>;
 
-
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
       <td>
@@ -346,7 +345,7 @@ const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
         />
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-      <Select
+        <Select
           placeholder="Non renseigné"
           options={[
             { value: "true", label: "Présent" },
