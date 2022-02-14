@@ -27,7 +27,7 @@ export default function Profil() {
     let subRole = [];
     if (role === ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
     if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
-    if(role === ROLES.VISITOR) subRole = VISITOR_SUBROLES;
+    if (role === ROLES.VISITOR) subRole = VISITOR_SUBROLES;
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
 
@@ -135,7 +135,6 @@ export default function Profil() {
                         </SaveBtn>
                       </Col>
                     </Row>
-                    
                   </BoxContent>
                 </Box>
               </>
