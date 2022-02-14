@@ -49,9 +49,9 @@ const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
     <div onClick={onClick} className="hover:bg-snu-purple-800 hover:shadow-lg block" >
       <NavLink to={to}  className=" py-3 px-3 text-base block" activeClassName=" bg-snu-purple-300 py-2 px-2 font-bold">
-        <div className="flex content-center flex-wrap">
-          <div className="" >{title}</div>
-          <div className="flex space-x-4" >{children}</div>
+        <div >
+          <div  >{title}</div>
+          <div className="flex content-center" >{children}</div>
         </div>
       </NavLink>
     </div>
@@ -138,17 +138,17 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           <div />
         ) : (
           <>
-            <div style={{ background: "#F1545B" }}>
+            <div className="flex justify-center content-center rounded-lg w-14 right-2.5 px-2  bg-rose-500" >
               <MailCloseIcon />
-              <div style={{ marginLeft: "4px" }}>{newTickets}</div>
+              <div >{newTickets}</div>
             </div>
-            <div className="justify-content" style={{ background: "#FEB951" }}>
+            <div className="flex justify-center content-center rounded-lg w-14 right-2.5 px-2  bg-amber-400" >
               <MailOpenIcon />
-              <div className="flex" >{openedTickets}</div>
+              <div  >{openedTickets}</div>
             </div>
-            <div style={{ background: "#6BC762" }}>
-              <SuccessIcon color="#FFF" />
-              <div style={{ marginLeft: "4px" }}>{closedTickets}</div>
+            <div className="flex justify-center content-center rounded-lg w-14 right-2.5 px-2  bg-green-500">
+              <SuccessIcon />
+              <div >{closedTickets}</div>
             </div>
           </>
         )}

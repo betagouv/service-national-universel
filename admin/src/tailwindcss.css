@@ -526,6 +526,14 @@ Ensure the default browser behavior of the `hidden` attribute.
   position: relative;
 }
 
+.right-2\.5{
+  right: 0.625rem;
+}
+
+.right-2{
+  right: 0.5rem;
+}
+
 .float-right{
   float: right;
 }
@@ -574,16 +582,8 @@ Ensure the default browser behavior of the `hidden` attribute.
   height: 3rem;
 }
 
-.h-6{
-  height: 1.5rem;
-}
-
-.h-20{
-  height: 5rem;
-}
-
-.h-8{
-  height: 2rem;
+.w-8{
+  width: 2rem;
 }
 
 .w-48{
@@ -594,36 +594,12 @@ Ensure the default browser behavior of the `hidden` attribute.
   width: 3.5rem;
 }
 
-.w-12{
-  width: 3rem;
-}
-
 .w-64{
   width: 16rem;
 }
 
-.w-24{
-  width: 6rem;
-}
-
-.w-36{
-  width: 9rem;
-}
-
 .w-20{
   width: 5rem;
-}
-
-.w-8{
-  width: 2rem;
-}
-
-.w-72{
-  width: 18rem;
-}
-
-.w-6{
-  width: 1.5rem;
 }
 
 .flex-shrink{
@@ -666,24 +642,6 @@ Ensure the default browser behavior of the `hidden` attribute.
   justify-content: center;
 }
 
-.space-x-4 > :not([hidden]) ~ :not([hidden]){
-  --tw-space-x-reverse: 0;
-  margin-right: calc(1rem * var(--tw-space-x-reverse));
-  margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
-}
-
-.space-x-8 > :not([hidden]) ~ :not([hidden]){
-  --tw-space-x-reverse: 0;
-  margin-right: calc(2rem * var(--tw-space-x-reverse));
-  margin-left: calc(2rem * calc(1 - var(--tw-space-x-reverse)));
-}
-
-.space-x-1 > :not([hidden]) ~ :not([hidden]){
-  --tw-space-x-reverse: 0;
-  margin-right: calc(0.25rem * var(--tw-space-x-reverse));
-  margin-left: calc(0.25rem * calc(1 - var(--tw-space-x-reverse)));
-}
-
 .divide-y > :not([hidden]) ~ :not([hidden]){
   --tw-divide-y-reverse: 0;
   border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
@@ -716,6 +674,11 @@ Ensure the default browser behavior of the `hidden` attribute.
   background-color: rgb(81 69 204 / var(--tw-bg-opacity));
 }
 
+.bg-rose-700{
+  --tw-bg-opacity: 1;
+  background-color: rgb(190 18 60 / var(--tw-bg-opacity));
+}
+
 .bg-snu-purple-900{
   --tw-bg-opacity: 1;
   background-color: rgb(50 37 127 / var(--tw-bg-opacity));
@@ -724,6 +687,41 @@ Ensure the default browser behavior of the `hidden` attribute.
 .bg-orange-600{
   --tw-bg-opacity: 1;
   background-color: rgb(234 88 12 / var(--tw-bg-opacity));
+}
+
+.bg-rose-600{
+  --tw-bg-opacity: 1;
+  background-color: rgb(225 29 72 / var(--tw-bg-opacity));
+}
+
+.bg-rose-500{
+  --tw-bg-opacity: 1;
+  background-color: rgb(244 63 94 / var(--tw-bg-opacity));
+}
+
+.bg-yellow-500{
+  --tw-bg-opacity: 1;
+  background-color: rgb(234 179 8 / var(--tw-bg-opacity));
+}
+
+.bg-yellow-400{
+  --tw-bg-opacity: 1;
+  background-color: rgb(250 204 21 / var(--tw-bg-opacity));
+}
+
+.bg-amber-400{
+  --tw-bg-opacity: 1;
+  background-color: rgb(251 191 36 / var(--tw-bg-opacity));
+}
+
+.bg-green-400{
+  --tw-bg-opacity: 1;
+  background-color: rgb(74 222 128 / var(--tw-bg-opacity));
+}
+
+.bg-green-500{
+  --tw-bg-opacity: 1;
+  background-color: rgb(34 197 94 / var(--tw-bg-opacity));
 }
 
 .fill-white{
