@@ -1,3 +1,16 @@
+# [1.43.0](https://github.com/betagouv/service-national-universel/compare/v1.42.0...v1.43.0) (2022-02-14)
+
+
+### Bug Fixes
+
+* restrict role change for visitors ([#1250](https://github.com/betagouv/service-national-universel/issues/1250)) ([09a7620](https://github.com/betagouv/service-national-universel/commit/09a7620bc9b202b0d72ebb7bc1aba8d7a0bc36f0))
+
+
+### Features
+
+* Pointage : ouverture aux admin depuis onglet centre ([#1253](https://github.com/betagouv/service-national-universel/issues/1253)) ([52e70ce](https://github.com/betagouv/service-national-universel/commit/52e70ce4895add349512a4e85bf0a5b6f52acbc9))
+* Visiteur : changement de fonction ([#1244](https://github.com/betagouv/service-national-universel/issues/1244)) ([e589463](https://github.com/betagouv/service-national-universel/commit/e589463c142a98e21ef8fd29ff2b117febea59b1))
+
 # [1.42.0](https://github.com/betagouv/service-national-universel/compare/v1.41.0...v1.42.0) (2022-02-11)
 
 
