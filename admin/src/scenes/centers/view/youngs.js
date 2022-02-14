@@ -7,6 +7,10 @@ import api from "../../../services/api";
 import Panel from "../../volontaires/panel";
 import Chevron from "../../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../../components/filters";
+import Select from "../../volontaires-head-center/components/Select";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
+
+
 
 import {
   getFilterLabel,
@@ -18,13 +22,15 @@ import {
   getAge,
   colors,
   getLabelWithdrawnReason,
+  confirmMessageChangePhase1Presence,
   ES_NO_LIMIT,
+  PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE,
 } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
 import DownloadAllAttestation from "../../../components/buttons/DownloadAllAttestation";
-const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
+const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 export default function Youngs({ center, updateCenter, focusedCohort, focusedSession }) {
@@ -243,6 +249,20 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
                     />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      componentId="COHESION_PRESENCE"
+                      dataField="cohesionStayPresence.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "COHESION_PRESENCE") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                    />
                     <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={() => setFilterVisible((e) => !e)} />
                   </FilterRow>
                   <FilterRow visible={filterVisible}>
@@ -260,8 +280,9 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       <Table>
                         <thead>
                           <tr>
-                            <th width="70%">Volontaire</th>
+                            <th width="65%">Volontaire</th>
                             <th>Affectation</th>
+                            <th>Présence</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -289,6 +310,21 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
 }
 
 const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
+  const [value, setValue] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const updateYoung = async (v) => {
+    const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
+    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
+    setValue(data);
+  };
+
+  useEffect(() => {
+    setValue(hit);
+  }, [hit._id]);
+
+  if (!value) return <></>;
+
+
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
       <td>
@@ -309,6 +345,39 @@ const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
           phase="COHESION_STAY"
         />
       </td>
+      <td onClick={(e) => e.stopPropagation()}>
+      <Select
+          placeholder="Non renseigné"
+          options={[
+            { value: "true", label: "Présent" },
+            { value: "false", label: "Absent" },
+          ]}
+          value={value.cohesionStayPresence}
+          name="cohesionStayPresence"
+          disabled={PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE[value.cohort].getTime() > Date.now()}
+          handleChange={(e) => {
+            const value = e.target.value;
+            setModal({
+              isOpen: true,
+              onConfirm: () => {
+                updateYoung({ cohesionStayPresence: value });
+              },
+              title: "Changement de présence",
+              message: confirmMessageChangePhase1Presence(value),
+            });
+          }}
+        />
+      </td>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </tr>
   );
 };
