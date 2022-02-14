@@ -217,7 +217,13 @@ export default function Edit(props) {
               </LoadingButton>
             ) : null}
 
-            <LoadingButton loading={loadings.submitButton} disabled={loadings.saveButton || loadings.changeStructureButton} onClick={handleSubmit}>
+            <LoadingButton
+              loading={loadings.submitButton}
+              disabled={loadings.saveButton || loadings.changeStructureButton}
+              onClick={() => {
+                defaultValue ? null : handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                handleSubmit();
+              }}>
               {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
             </LoadingButton>
           </Header>
@@ -585,7 +591,13 @@ export default function Edit(props) {
                 </LoadingButton>
               ) : null}
 
-              <LoadingButton loading={loadings.submitButton} disabled={loadings.saveButton || loadings.changeStructureButton} onClick={handleSubmit}>
+              <LoadingButton
+                loading={loadings.submitButton}
+                disabled={loadings.saveButton || loadings.changeStructureButton}
+                onClick={() => {
+                  defaultValue ? null : handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                  handleSubmit();
+                }}>
                 {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
               </LoadingButton>
             </Header>
