@@ -542,6 +542,11 @@ Ensure the default browser behavior of the `hidden` attribute.
   float: right;
 }
 
+.mx-3{
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
+}
+
 .mb-4{
   margin-bottom: 1rem;
 }
@@ -552,6 +557,10 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 .mr-2\.5{
   margin-right: 0.625rem;
+}
+
+.mr-3{
+  margin-right: 0.75rem;
 }
 
 .block{
@@ -598,6 +607,14 @@ Ensure the default browser behavior of the `hidden` attribute.
   height: 3rem;
 }
 
+.h-10{
+  height: 2.5rem;
+}
+
+.h-9{
+  height: 2.25rem;
+}
+
 .w-8{
   width: 2rem;
 }
@@ -616,6 +633,18 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 .w-64{
   width: 16rem;
+}
+
+.w-12{
+  width: 3rem;
+}
+
+.w-10{
+  width: 2.5rem;
+}
+
+.w-9{
+  width: 2.25rem;
 }
 
 .flex-shrink{

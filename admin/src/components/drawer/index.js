@@ -234,11 +234,11 @@ const Drawer = (props) => {
   }
 
   return (
-    <nav open={open} id="drawer" class="bg-snu-purple-900 text-white text-base font-normal no-underline w-64 ">
-      <h1 class="h-16">
+    <nav open={open} id="drawer" class="bg-snu-purple-900 text-white text-base font-normal no-underline  ">
+      <h1>
         <Link to="/" class="flex items-center py-2 hover:!text-white">
-          <img src={require("../../assets/logo-snu.png")} class="h-12 w-18 px-3 " />
-            <span class="" class="uppercase font-medium text-sm text-center "> {getName() } </span>
+          <img src={require("../../assets/logo-snu.png")} class="h-9 w-9 mx-3 " />
+            <span class="" class="uppercase font-medium text-sm text-center mr-3 "> {getName() } </span>
           <img onClick={handleClick} src={require("../../assets/burger.svg")} class="hidden" />
         </Link>
       </h1>
