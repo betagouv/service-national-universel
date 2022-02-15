@@ -152,17 +152,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
           },
         });
     }
-    if (data.status === MISSION_STATUS.VALIDATED) {
-      const responsible = await UserObject.findById(checkedMission.tutorId);
-      if (responsible)
-        await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_VALIDATED, {
-          emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
-          params: {
-            cta: `${ADMIN_URL}/dashboard`,
-            missionName: checkedMission.name,
-          },
-        });
-    }
 
     return res.status(200).send({ ok: true, data: serializeMission(data) });
   } catch (error) {

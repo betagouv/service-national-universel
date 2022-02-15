@@ -38,9 +38,9 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     applicationPending.handler();
   });
 
-  cron.schedule("0 9 * * 1", function () {
-    missionEnd.handler();
-  });
+  // cron.schedule("0 9 * * 1", function () {
+  //   missionEnd.handler();
+  // });
 
   cron.schedule("0 9 * * 1", function () {
     noticePushMission.handler();
