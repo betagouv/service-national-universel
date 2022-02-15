@@ -3,8 +3,8 @@ import styled from "styled-components";
 
 export default function SuccessIcon({ ...props }) {
   return (
-    <div className=" flex items-center rounded-lg fill-white w-8" {...props}>
-      <svg align="center" width="20" height="20" viewBox="-2 -2 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div className=" flex items-center rounded-lg align-center w-8"{...props}>
+      <svg className ="align-center w-5 h-5 fill-transparent" viewBox="-2 -2 20 20"  xmlns="http://www.w3.org/2000/svg">
         <path
           fillRule="evenodd"
           fill="white"
