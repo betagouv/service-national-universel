@@ -27,7 +27,7 @@ export default function ProposeMission({ mission }) {
     if (user.role === ROLES.REFERENT_REGION) defaultQuery.query.bool.filter.push({ term: { "region.keyword": user.region } });
 
     if (mission.location?.lat && mission.location?.lon) {
-      defaultQuery["sort"] = { _geo_distance: { location: `${mission.location?.lat},${mission.location?.lon}`, order: "asc", unit: "km" } };
+      defaultQuery["sort"] = { _geo_distance: { location: [mission.location?.lon, mission.location?.lat], order: "asc", unit: "km" } };
     }
     return defaultQuery;
   };
