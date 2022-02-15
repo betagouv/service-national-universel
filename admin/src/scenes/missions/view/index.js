@@ -5,6 +5,7 @@ import api from "../../../services/api";
 import Details from "./details";
 import Youngs from "./youngs";
 import Historic from "./history";
+import ProposeMission from "./propose-mission";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
 
@@ -58,6 +59,7 @@ export default function Index({ ...props }) {
     <Switch>
       <Route path="/mission/:id/youngs" component={() => <Youngs mission={mission} applications={applications} />} />
       <Route path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
+      <Route path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} />} />
       <Route path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />
     </Switch>
   );

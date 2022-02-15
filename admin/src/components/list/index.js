@@ -72,7 +72,7 @@ export const MultiLine = styled.div`
 
 export const ResultTable = styled.div`
   ${({ hide }) => (hide ? "display: none;" : "")}
-  background-color: #fff;
+  background-color: ${({ backgroundColor }) => backgroundColor || "#fff"};
   position: relative;
   margin: 20px 0;
   padding-bottom: 10px;
