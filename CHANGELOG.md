@@ -1,3 +1,17 @@
+# [1.44.0](https://github.com/betagouv/service-national-universel/compare/v1.43.0...v1.44.0) (2022-02-15)
+
+
+### Bug Fixes
+
+* **admin:** mission status ([#1254](https://github.com/betagouv/service-national-universel/issues/1254)) ([33a7914](https://github.com/betagouv/service-national-universel/commit/33a791450e6b4f9e6c903fcf4be63c89bc129821))
+
+
+### Features
+
+* **admin:** Proposer une mission à un volontaire depuis une mission ([#1229](https://github.com/betagouv/service-national-universel/issues/1229)) ([dad2351](https://github.com/betagouv/service-national-universel/commit/dad2351b270bebd94cc5b6fdd9a1e88e7818dd8a))
+* **api:**  batch2 sendinblue ([#1233](https://github.com/betagouv/service-national-universel/issues/1233)) ([3d08f43](https://github.com/betagouv/service-national-universel/commit/3d08f433cf98f29115c63fc21fd79244ffbee029))
+* **api:**  stats table youngs ([#1245](https://github.com/betagouv/service-national-universel/issues/1245)) ([541a7b9](https://github.com/betagouv/service-national-universel/commit/541a7b93e24ed97f2d94984159b891d375ea7a7f))
+
 # [1.43.0](https://github.com/betagouv/service-national-universel/compare/v1.42.0...v1.43.0) (2022-02-14)
 
 
