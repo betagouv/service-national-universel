@@ -118,8 +118,13 @@ exports.handler = async () => {
       if (!session) return console.log("NO SESSION 🌧️", young._id);
       const center = await Center.findById(session.cohesionCenterId);
       if (!center) return console.log("NO CENTER 😢", session._id);
+
       // Young entries 🧒
+
+      // on récupère un array d'objet et ce qui nous intéresse se situe dans doc
+      // celui-ci se trouve 5è position.
       const youngObject = Object.entries(young)[5];
+      // une fois la partie doc récupérée, on se retrouve avec un array composé littéralement de "doc" et ensuite l'objet young.
       Object.keys(youngObject[1]).forEach((key) => {
         if (whiteListYoung.includes(key)) {
           obj[`young_${key}`] = young[key];
