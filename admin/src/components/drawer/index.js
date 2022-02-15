@@ -12,10 +12,14 @@ import api from "../../services/api";
 import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
 
-const DrawerTab = ({ title, to, onClick, beta }) => (
+const DrawerTab = ({ title, subtitle, to, onClick, beta }) => (
   <li onClick={onClick}>
     <NavLink to={to}>
       {title}
+      <br />
+      <span>
+        <i>{subtitle}</i>
+      </span>
       {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
     </NavLink>
   </li>
@@ -160,10 +164,12 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
   );
 }
 
-function headCenter({ onClick, user }) {
+function headCenter({ onClick, user, centers }) {
   return (
     <>
-      {user.cohesionCenterId && <DrawerTab to={`/centre/${user.cohesionCenterId}`} title="Mon Centre" onClick={onClick} />}
+      {centers.map((center) => (
+        <DrawerTab to={`/centre/${center._id}`} title="Mon Centre" subtitle={center.name} onClick={onClick} key={center._id} />
+      ))}
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
@@ -189,6 +195,7 @@ const Drawer = (props) => {
   const closedTickets = useSelector((state) => state.Tickets.closed);
   const tickets = useSelector((state) => state.Tickets.tickets);
   const [open, setOpen] = useState();
+  const [centers, setCenters] = useState([]);
   const [environmentBannerVisible, setEnvironmentBannerVisible] = useState(true);
   useEffect(() => {
     setOpen(props.open);
@@ -210,6 +217,18 @@ const Drawer = (props) => {
       console.log("Oups, une erreur s'est produite.");
     }
   }, []);
+
+  useEffect(() => {
+    if (!user?._id) return;
+    try {
+      (async () => {
+        const { data } = await api.get(`/referent/${user._id}/cohesion-center`);
+        setCenters(data);
+      })();
+    } catch (e) {
+      console.log("Oups, une erreur s'est produite.");
+    }
+  }, [user]);
 
   const handleClick = () => {
     if (open) {
@@ -250,7 +269,7 @@ const Drawer = (props) => {
       ) : null}
       <ul>
         <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-        {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+        {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, centers })}
         {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
         {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
         {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
@@ -390,7 +409,7 @@ const Sidebar = styled.div`
       transition: 0.2s;
 
       i {
-        font-size: 0.7rem;
+        font-size: 0.8rem;
       }
     }
 
