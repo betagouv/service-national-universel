@@ -215,17 +215,28 @@ export default function Edit(props) {
                 }}>
                 Enregistrer
               </LoadingButton>
-            ) : null}
+            ) : (
+              <LoadingButton
+                color={"#fff"}
+                textColor={"#767697"}
+                loading={loadings.saveButton}
+                disabled={loadings.submitButton || loadings.changeStructureButton}
+                onClick={handleSubmit}>
+                Enregistrer les modifications
+              </LoadingButton>
+            )}
 
-            <LoadingButton
-              loading={loadings.submitButton}
-              disabled={loadings.saveButton || loadings.changeStructureButton}
-              onClick={() => {
-                defaultValue ? null : handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-                handleSubmit();
-              }}>
-              {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
-            </LoadingButton>
+            {!defaultValue || defaultValue.status === "DRAFT" ? (
+              <LoadingButton
+                loading={loadings.submitButton}
+                disabled={loadings.saveButton || loadings.changeStructureButton}
+                onClick={() => {
+                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                  handleSubmit();
+                }}>
+                Enregistrer et proposer la mission
+              </LoadingButton>
+            ) : null}
           </Header>
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
@@ -589,17 +600,27 @@ export default function Edit(props) {
                   }}>
                   Enregistrer
                 </LoadingButton>
+              ) : (
+                <LoadingButton
+                  color={"#fff"}
+                  textColor={"#767697"}
+                  loading={loadings.saveButton}
+                  disabled={loadings.submitButton || loadings.changeStructureButton}
+                  onClick={handleSubmit}>
+                  Enregistrer les modifications
+                </LoadingButton>
+              )}
+              {!defaultValue || defaultValue.status === "DRAFT" ? (
+                <LoadingButton
+                  loading={loadings.submitButton}
+                  disabled={loadings.saveButton || loadings.changeStructureButton}
+                  onClick={() => {
+                    handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                    handleSubmit();
+                  }}>
+                  Enregistrer et proposer la mission
+                </LoadingButton>
               ) : null}
-
-              <LoadingButton
-                loading={loadings.submitButton}
-                disabled={loadings.saveButton || loadings.changeStructureButton}
-                onClick={() => {
-                  defaultValue ? null : handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-                  handleSubmit();
-                }}>
-                {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
-              </LoadingButton>
             </Header>
           </Wrapper>
         </div>
