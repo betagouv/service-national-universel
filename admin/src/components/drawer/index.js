@@ -13,8 +13,8 @@ import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
 
 const DrawerTab = ({ title, to, onClick, beta }) => (
-  <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block">
-    <NavLink to={to} className="block py-3 px-3 text-base" activeClassName="block bg-snu-purple-300 py-2 px-2 font-bold" >
+  <div onClick={onClick} class=" hover:bg-snu-purple-800 hover:shadow-lg block">
+    <NavLink to={to} class="block py-3 px-3 text-base no-underline decoration-white hover:!text-white" activeClassName="block bg-snu-purple-300 py-2 px-2 font-bold" >
       {title}
       {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
     </NavLink>
@@ -31,27 +31,26 @@ const BlankSeparator = () => (
 
 const HelpButton = ({ onClick, to }) => (
   <div
-    class="help-button-container"
-    className=" h-16 w-48 border-2 rounded-md hover:bg-snu-purple-800 hover:shadow-lg"
+    class="justify-center flex mb-4 hover:bg-snu-purple-800 hover:shadow-lg"
     onClick={() => {
       plausibleEvent("Menu/CTA - Besoin Aide");
       onClick();
     }}>
-    <NavLink class="help-button" className="place-content-center"  activeClassName="flex bg-snu-purple-300 py-2 px-2" to={to}>
-        <QuestionMark class="icon" className="h-14 w-14 flex p-2 float-left" />
-        <div class="help-button-text-primary" className="text-medium float-right">Besoin d&apos;aide ?</div>
-        <div class="help-button-text-secondary" className="text-sm float-right">Tutoriels, contacts</div>
+    <NavLink  class=" items-center border rounded flex p-2 "  activeClassName="flex bg-snu-purple-300 p-2" to={to}>
+        <QuestionMark class="h-6 w-6 flex mr-2" />
+        <div class=" font-normal text-base text-center ">Besoin d&apos;aide ?</div>
+        <div class="font-light text-xs float-right text-center">Tutoriels, contacts</div>
     </NavLink>
   </div>
 );
 
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
-    <div onClick={onClick} className="hover:bg-snu-purple-800 hover:shadow-lg block" >
-      <NavLink to={to}  className=" py-3 px-3 text-base block" activeClassName=" bg-snu-purple-300 py-2 px-2 font-bold">
+    <div onClick={onClick} class="hover:bg-snu-purple-800 hover:shadow-lg block" >
+      <NavLink to={to}  class=" py-3 px-3 text-base block" activeClassName=" bg-snu-purple-300 py-2 px-2 font-bold">
         <div >
           <div  >{title}</div>
-          <div className="flex content-center" >{children}</div>
+          <div class="flex content-center" >{children}</div>
         </div>
       </NavLink>
     </div>
@@ -101,15 +100,15 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           <div />
         ) : (
           <>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500" >
+            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500" >
               <MailCloseIcon />
               <div >{newTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400" >
+            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400" >
               <MailOpenIcon />
               <div  >{openedTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
               <SuccessIcon />
               <div >{closedTickets}</div>
             </div>
@@ -117,7 +116,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
         )}
       </DrawerTabWithIcons>
       <BlankSeparator />
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} className="" />
+      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick}  />
     </>
   );
 }
@@ -138,15 +137,15 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           <div />
         ) : (
           <>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500" >
+            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500" >
               <MailCloseIcon />
               <div >{newTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400" >
+            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400" >
               <MailOpenIcon />
               <div  >{openedTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
               <SuccessIcon />
               <div >{closedTickets}</div>
             </div>
@@ -236,18 +235,18 @@ const Drawer = (props) => {
   }
 
   return (
-    <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-base font-normal no-underline w-64">
-      <h1 className="h-16">
-        <Link to="/" className="flex items-center py-2">
-          <img src={require("../../assets/logo-snu.png")} className="h-12 w-18 px-3 " />
-            <span class="" className="uppercase font-medium text-sm text-center"> {getName() } </span>
-          <img onClick={handleClick} src={require("../../assets/burger.svg")} className="hidden" />
+    <nav open={open} id="drawer" class="bg-snu-purple-900 text-white text-base font-normal no-underline w-64">
+      <h1 class="h-16">
+        <Link to="/" class="flex items-center py-2">
+          <img src={require("../../assets/logo-snu.png")} class="h-12 w-18 px-3 " />
+            <span class="" class="uppercase font-medium text-sm text-center"> {getName() } </span>
+          <img onClick={handleClick} src={require("../../assets/burger.svg")} class="hidden" />
         </Link>
       </h1>
       {environment !== "production" && environmentBannerVisible ? (
-        <div onClick={() => setEnvironmentBannerVisible(false)} className="py-1 bg-orange-600 font-italic items-center text-center">{getTextEnvironmentBanner()}</div>
+        <div onClick={() => setEnvironmentBannerVisible(false)} class="py-1 bg-orange-600 font-italic items-center text-center">{getTextEnvironmentBanner()}</div>
       ) : null}
-      <ul className="divide-y divide-slate-700">
+      <ul class="divide-y divide-slate-700">
         <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
         {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
         {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
