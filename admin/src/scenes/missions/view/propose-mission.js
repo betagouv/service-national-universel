@@ -12,6 +12,7 @@ import styled from "styled-components";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import { getResultLabel, isInRuralArea, translate, SENDINBLUE_TEMPLATES, APPLICATION_STATUS, ROLES } from "../../../utils";
+import PinLocation from "../../../assets/PinLocation";
 
 const FILTERS = ["SEARCH"];
 
@@ -21,7 +22,7 @@ export default function ProposeMission({ mission }) {
   const [search, setSearch] = useState(undefined);
 
   const getDefaultQuery = () => {
-    let defaultQuery = { query: { bool: { must: { match_all: {} }, filter: [] } } };
+    let defaultQuery = { query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED"] } }] } }, track_total_hits: true };
     if (user.role === ROLES.REFERENT_DEPARTMENT) defaultQuery.query.bool.filter.push({ term: { "department.keyword": user.department } });
     if (user.role === ROLES.REFERENT_REGION) defaultQuery.query.bool.filter.push({ term: { "region.keyword": user.region } });
 
@@ -131,7 +132,7 @@ const ResultBox = ({ getDefaultQuery, search, mission }) => {
           defaultQuery={getDefaultQuery}
           react={{ and: FILTERS }}
           size={12}
-          renderResultStats={(e) => <BottomResultStats>{getResultLabel(e)}</BottomResultStats>}
+          renderResultStats={(e) => <BottomResultStats>{getResultLabel(e, 12)}</BottomResultStats>}
           render={({ data }) => (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridGap: "1rem" }}>
               {data.map((hit) => (
@@ -174,7 +175,7 @@ const Hit = ({ hit, mission, applicationsToTheMission, onClick }) => {
   };
 
   return (
-    <div
+    <YoungCard
       style={{
         backgroundColor: "#fff",
         borderRadius: "10px",
@@ -190,17 +191,20 @@ const Hit = ({ hit, mission, applicationsToTheMission, onClick }) => {
               {hit.firstName} {hit.lastName}
             </p>
             <p style={{ color: "#6B7280" }}>
-              {hit.region} {hit.region && hit.department && ">"} {hit.department}
+              {hit.region}&nbsp;{hit.region && hit.department && "›"}&nbsp;{hit.department}
             </p>
           </div>
           <div style={{ flex: "1" }}>
-            <p style={{ textAlign: "right", overflow: "hidden", whiteSpace: "nowrap" }}>{`~ ${Math.round(hit.sort[0])} km`}</p>
+            <p style={{ textAlign: "right", overflow: "hidden", whiteSpace: "nowrap", display: "flex", justifyContent: "flex-end" }}>
+              <PinLocation width={15} color="#424242" />
+              {`${Math.round(hit.sort[0])} km`}
+            </p>
           </div>
         </div>
         <hr />
         <div style={{ fontSize: "0.9rem", color: "#777E90" }}>
           <p>
-            <b>Domaines privilégiés:</b> {hit.domains.length > 0 ? hit.domains?.join(" • ") : "Non renseigné"}
+            <b>Domaines privilégiés:</b> {hit.domains.length > 0 ? hit.domains?.map(translate)?.join(" • ") : "Non renseigné"}
           </p>
           <p>
             <b>Projet pro:</b> {proProject}
@@ -224,7 +228,7 @@ const Hit = ({ hit, mission, applicationsToTheMission, onClick }) => {
         onCancel={() => setModal(false)}
         onConfirm={handleClick}
       />
-    </div>
+    </YoungCard>
   );
 };
 
@@ -265,4 +269,11 @@ const BottomResultStats = styled.div`
   position: absolute;
   top: calc(100% - 50px);
   left: 0;
+`;
+
+const YoungCard = styled.div`
+  transition: all 0.2s ease-in-out;
+  :hover {
+    transform: scale(1.02);
+  }
 `;

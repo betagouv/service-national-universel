@@ -68,13 +68,15 @@ export default function Wrapper({ mission, tab, children }) {
             <Tab isActive={tab === "youngs"} onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
               Volontaires
             </Tab>
-            <Tab isActive={tab === "propose-mission"} onClick={() => history.push(`/mission/${mission._id}/propose-mission`)}>
-              Proposer cette mission
-            </Tab>
             {user.role === ROLES.ADMIN ? (
-              <Tab isActive={tab === "historique"} onClick={() => history.push(`/mission/${mission._id}/historique`)}>
-                Historique <i style={{ color: colors.purple, fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
-              </Tab>
+              <>
+                <Tab isActive={tab === "propose-mission"} onClick={() => history.push(`/mission/${mission._id}/propose-mission`)}>
+                  Proposer cette mission
+                </Tab>
+                <Tab isActive={tab === "historique"} onClick={() => history.push(`/mission/${mission._id}/historique`)}>
+                  Historique <i style={{ color: colors.purple, fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
+                </Tab>
+              </>
             ) : null}
           </TabList>
         </div>
