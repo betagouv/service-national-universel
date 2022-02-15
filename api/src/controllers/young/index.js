@@ -31,6 +31,7 @@ const {
   // updateApplicationsWithYoungOrMission,
   updatePlacesBus,
   updatePlacesSessionPhase1,
+  ROLES,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -418,8 +419,22 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
 
+    if (req.user.department !== young.department) {
+      const referents = await ReferentModel.find({ department: req.user.department, role: ROLES.REFERENT_DEPARTMENT });
+      for (let referent of referents) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: {
+            youngFirstName: young.firstName,
+            youngLastName: young.lastName,
+            cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
+          },
+        });
+      }
+    }
     young.set(value);
     await young.save({ fromUser: req.user });
+
 
     // Check quartier prioritaires.
     if (value.zip && value.city && value.address) {

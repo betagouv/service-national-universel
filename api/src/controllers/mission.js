@@ -200,6 +200,17 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
             },
           });
       }
+      if (mission.status === MISSION_STATUS.VALIDATED) {
+        const responsible = await UserObject.findById(mission.tutorId);
+        if (responsible)
+          await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_VALIDATED, {
+            emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
+            params: {
+              cta: `${ADMIN_URL}/dashboard`,
+              missionName: mission.name,
+            },
+          });
+      }
     }
 
     res.status(200).send({ ok: true, data: mission });
