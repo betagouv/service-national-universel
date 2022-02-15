@@ -126,7 +126,7 @@ export default function List() {
                   showIcon={false}
                   placeholder="Rechercher par mots clés, ville, code postal..."
                   componentId="SEARCH"
-                  dataField={["name", "structureName", "city", "zip"]}
+                  dataField={["name.folded", "structureName.folded", "city.folded", "zip"]}
                   react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                   // fuzziness={1}
                   style={{ flex: 1, marginRight: "1rem" }}
