@@ -749,7 +749,7 @@ router.get("/:id/cohesion-center", passport.authenticate("referent", { session: 
     for (let i = 0; i < sessions.length; i++) {
       const session = sessions[i];
       const center = await CohesionCenterModel.findById(session.cohesionCenterId);
-      centers.push(center);
+      if (!centers.some((c) => c._id.toString() === center._id.toString())) centers.push(center);
     }
     return res.status(200).send({ ok: true, data: centers.map(serializeCohesionCenter) });
   } catch (error) {

@@ -12,14 +12,18 @@ import api from "../../services/api";
 import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
 
-const DrawerTab = ({ title, subtitle, to, onClick, beta }) => (
+const DrawerTab = ({ title, upTitle, to, onClick, beta }) => (
   <li onClick={onClick}>
     <NavLink to={to}>
+      {upTitle ? (
+        <>
+          <span>
+            <i>{upTitle}</i>
+          </span>
+          <br />
+        </>
+      ) : null}
       {title}
-      <br />
-      <span>
-        <i>{subtitle}</i>
-      </span>
       {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
     </NavLink>
   </li>
@@ -164,11 +168,11 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
   );
 }
 
-function headCenter({ onClick, user, centers }) {
+function headCenter({ onClick, centers }) {
   return (
     <>
       {centers.map((center) => (
-        <DrawerTab to={`/centre/${center._id}`} title="Mon Centre" subtitle={center.name} onClick={onClick} key={center._id} />
+        <DrawerTab to={`/centre/${center._id}`} upTitle="Mon Centre" title={center.name} onClick={onClick} key={center._id} />
       ))}
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
