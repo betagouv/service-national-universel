@@ -159,11 +159,11 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
   );
 }
 
-function headCenter({ onClick, user, centers }) {
+function headCenter({ onClick, centers }) {
   return (
     <>
       {centers.map((center) => (
-        <DrawerTab to={`/centre/${center._id}`} title="Mon Centre" subtitle={center.name} onClick={onClick} key={center._id} />
+        <DrawerTab to={`/centre/${center._id}`} upTitle="Mon Centre" title={center.name} onClick={onClick} key={center._id} />
       ))}
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
