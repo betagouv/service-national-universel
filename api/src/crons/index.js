@@ -9,6 +9,7 @@ const noticePushMission = require("./noticePushMission");
 //const missionEnd = require("./missionEnd");
 //const applicationPending = require("./applicationPending");
 //const newMissionReminder = require("./newMissionReminder");
+const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
 
 // doubt ? -> https://crontab.guru/
 
@@ -29,7 +30,6 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   //   capture("START CRON RECAP REGION");
   //   sendRecapRegion();
   // });
-
   // cron.schedule("0 9 * * 1", function () {
   //   newMissionReminder.handler();
   // });
@@ -41,6 +41,9 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // cron.schedule("0 9 * * 1", function () {
   //   missionEnd.handler();
   // });
+  cron.schedule("0 1 * * *", function () {
+    syncYoungStatsMetabase.handler();
+  });
 
   cron.schedule("0 9 * * 1", function () {
     noticePushMission.handler();

@@ -1,3 +1,48 @@
+# [1.43.0](https://github.com/betagouv/service-national-universel/compare/v1.42.0...v1.43.0) (2022-02-14)
+
+
+### Bug Fixes
+
+* restrict role change for visitors ([#1250](https://github.com/betagouv/service-national-universel/issues/1250)) ([09a7620](https://github.com/betagouv/service-national-universel/commit/09a7620bc9b202b0d72ebb7bc1aba8d7a0bc36f0))
+
+
+### Features
+
+* Pointage : ouverture aux admin depuis onglet centre ([#1253](https://github.com/betagouv/service-national-universel/issues/1253)) ([52e70ce](https://github.com/betagouv/service-national-universel/commit/52e70ce4895add349512a4e85bf0a5b6f52acbc9))
+* Visiteur : changement de fonction ([#1244](https://github.com/betagouv/service-national-universel/issues/1244)) ([e589463](https://github.com/betagouv/service-national-universel/commit/e589463c142a98e21ef8fd29ff2b117febea59b1))
+
+# [1.42.0](https://github.com/betagouv/service-national-universel/compare/v1.41.0...v1.42.0) (2022-02-11)
+
+
+### Features
+
+* **admin:** Chef de centre : pointage et validation ([#1231](https://github.com/betagouv/service-national-universel/issues/1231)) ([7be9e54](https://github.com/betagouv/service-national-universel/commit/7be9e547a5ed6c76aa1a026032a6b9d77656088c)), closes [#1228](https://github.com/betagouv/service-national-universel/issues/1228)
+
+# [1.41.0](https://github.com/betagouv/service-national-universel/compare/v1.40.0...v1.41.0) (2022-02-10)
+
+
+### Bug Fixes
+
+* **admin:** pagination `NaN-NaN` dans certaine ReactiveList ([#1237](https://github.com/betagouv/service-national-universel/issues/1237)) ([ef0f8d4](https://github.com/betagouv/service-national-universel/commit/ef0f8d42f3892b07a8397e4abdf96a785b016af7))
+* **deps:** update dependency swr to v1.2.1 ([#1036](https://github.com/betagouv/service-national-universel/issues/1036)) ([1a0a0a3](https://github.com/betagouv/service-national-universel/commit/1a0a0a31507f7efc08721ebc4f5f10dd028dccfb))
+
+
+### Features
+
+* **api:** count more than 10k with es ([#1238](https://github.com/betagouv/service-national-universel/issues/1238)) ([07a35c8](https://github.com/betagouv/service-national-universel/commit/07a35c813a1de35e78ff3fa6abdc0cb5fc8c48ba))
+
+# [1.40.0](https://github.com/betagouv/service-national-universel/compare/v1.39.0...v1.40.0) (2022-02-09)
+
+
+### Bug Fixes
+
+* **supp:** lint ([#1230](https://github.com/betagouv/service-national-universel/issues/1230)) ([351f358](https://github.com/betagouv/service-national-universel/commit/351f358677439c0b5d130551b3bfeca2c3fad9e8))
+
+
+### Features
+
+* **admin:** ajouter message erreurs dans la modal invitation ([#1215](https://github.com/betagouv/service-national-universel/issues/1215)) ([cc611bb](https://github.com/betagouv/service-national-universel/commit/cc611bb8a1b0021ea5b6bd3a9aca48cdadf3c2f5)), closes [#1202](https://github.com/betagouv/service-national-universel/issues/1202) [#1202](https://github.com/betagouv/service-national-universel/issues/1202)
+
 # [1.39.0](https://github.com/betagouv/service-national-universel/compare/v1.38.0...v1.39.0) (2022-02-08)
 
 

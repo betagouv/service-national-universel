@@ -1,3 +1,4 @@
+import React from "react";
 import passwordValidator from "password-validator";
 import api from "../services/api";
 export * from "snu-lib";
@@ -32,14 +33,59 @@ export const publicEtatTypes = [
 export const corpsEnUniforme = ["SDIS (Service départemental d'Incendie et de Secours)", "Gendarmerie", "Police", "Armées"];
 
 export const confirmMessageChangePhase1Presence = (value) => {
-  if (!value) return `Vous allez passer ce volontaire "Non renseigné" au séjour de cohésion. `;
-  const label = value === "true" ? "Présent" : "Absent";
-  let message = `Vous allez passer ce volontaire "${label}" au séjour de cohésion. `;
+  if (!value)
+    return (
+      <>
+        <p>
+          Vous allez passer ce volontaire <b>&quot;Non&nbsp;renseigné&quot;</b> au séjour de cohésion.
+        </p>
+        <p>Un email automatique sera envoyé aux représentants légaux du volontaire pour leur confirmer son arrivée au centre.</p>
+        <p>
+          <i>
+            Pour toute information concernant le pointage des volontaires et les règles de validation au séjour,{" "}
+            <a href="https://support.snu.gouv.fr/base-de-connaissance/regles-de-presence-des-volontaires-sur-mon-centre" target="_blank" rel="noreferrer">
+              cliquez ici
+            </a>
+            .
+          </i>
+        </p>
+      </>
+    );
   if (value === "true")
-    message +=
-      'L\'attestation de réalisation de la phase 1 du SNU lui sera rendu disponible au téléchargement depuis son espace volontaire. Son statut de phase 1 au séjour de cohésion passera à "Effectué"';
-  else message += 'Son statut de phase 1 au séjour de cohésion passera à "Non réalisé"';
-  return message;
+    return (
+      <>
+        <p>
+          Vous allez passer ce volontaire <b>&quot;Présent&quot;</b> au séjour de cohésion.
+        </p>
+        <p>Un email automatique sera envoyé aux représentants légaux du volontaire pour leur confirmer son arrivée au centre.</p>
+        <p>
+          <i>
+            Pour toute information concernant le pointage des volontaires et les règles de validation au séjour,{" "}
+            <a href="https://support.snu.gouv.fr/base-de-connaissance/regles-de-presence-des-volontaires-sur-mon-centre" target="_blank" rel="noreferrer">
+              cliquez ici
+            </a>
+            .
+          </i>
+        </p>
+      </>
+    );
+  if (value === "false")
+    return (
+      <>
+        <p>
+          Vous allez passer ce volontaire <b>&quot;Absent&quot;</b> au séjour de cohésion.
+        </p>
+        <p>
+          <i>
+            Pour toute information concernant le pointage des volontaires et les règles de validation au séjour,{" "}
+            <a href="https://support.snu.gouv.fr/base-de-connaissance/regles-de-presence-des-volontaires-sur-mon-centre" target="_blank" rel="noreferrer">
+              cliquez ici
+            </a>
+            .
+          </i>
+        </p>
+      </>
+    );
 };
 
 export function getPasswordErrorMessage(v) {

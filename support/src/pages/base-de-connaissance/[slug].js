@@ -77,6 +77,4 @@ const AuthContent = () => {
   return <Content />;
 };
 
-const Home = () => <AuthContent />;
-
-export default Home;
+export default AuthContent;
