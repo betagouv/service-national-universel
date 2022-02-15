@@ -587,18 +587,6 @@ const Schema = new mongoose.Schema({
       description: "Région du centre",
     },
   },
-  center_placesTotal: {
-    type: Number,
-    documentation: {
-      description: "Nombre de places au total",
-    },
-  },
-  center_placesLeft: {
-    type: Number,
-    documentation: {
-      description: "Nombre de places disponibles",
-    },
-  },
   center_outfitDelivered: {
     type: String,
     documentation: {

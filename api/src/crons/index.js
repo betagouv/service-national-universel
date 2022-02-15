@@ -28,7 +28,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   //   sendRecapRegion();
   // });
 
-  cron.schedule("0 1 * * 1", function () {
+  cron.schedule("0 1 * * *", function () {
     syncYoungStatsMetabase.handler();
   });
 
