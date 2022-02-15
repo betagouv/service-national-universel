@@ -14,7 +14,7 @@ import plausibleEvent from "../../services/pausible";
 
 const DrawerTab = ({ title, to, onClick, beta }) => (
   <div onClick={onClick} class=" hover:bg-snu-purple-800 hover:shadow-lg block">
-    <NavLink to={to} class="block py-3 px-3 text-base no-underline decoration-white hover:!text-white" activeClassName="block bg-snu-purple-300 py-2 px-2 font-bold" >
+    <NavLink to={to} className="block py-3 px-3 text-base hover:!text-white" activeClassName="block bg-snu-purple-300 py-2 px-2 font-bold" >
       {title}
       {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
     </NavLink>
@@ -31,15 +31,18 @@ const BlankSeparator = () => (
 
 const HelpButton = ({ onClick, to }) => (
   <div
-    class="justify-center flex mb-4 hover:bg-snu-purple-800 hover:shadow-lg"
+    class="justify-center flex mb-4 p-8 "
     onClick={() => {
       plausibleEvent("Menu/CTA - Besoin Aide");
       onClick();
     }}>
-    <NavLink  class=" items-center border rounded flex p-2 "  activeClassName="flex bg-snu-purple-300 p-2" to={to}>
-        <QuestionMark class="h-6 w-6 flex mr-2" />
-        <div class=" font-normal text-base text-center ">Besoin d&apos;aide ?</div>
-        <div class="font-light text-xs float-right text-center">Tutoriels, contacts</div>
+    <NavLink  className=" items-center border rounded flex p-2 hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg"  activeClassName="flex bg-snu-purple-300 p-2" to={to}>
+        <QuestionMark class="h-6 w-6 flex mr-2 " />
+        <div>
+          <div class=" font-normal text-sm text-center  ">Besoin d&apos;aide ?</div>
+          <div class="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
+        </div>
+
     </NavLink>
   </div>
 );
@@ -47,7 +50,7 @@ const HelpButton = ({ onClick, to }) => (
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
     <div onClick={onClick} class="hover:bg-snu-purple-800 hover:shadow-lg block" >
-      <NavLink to={to}  class=" py-3 px-3 text-base block" activeClassName=" bg-snu-purple-300 py-2 px-2 font-bold">
+      <NavLink to={to}  className=" py-3 px-3 text-base block hover:!text-white" activeClassName=" bg-snu-purple-300 py-2 px-2 font-bold">
         <div >
           <div  >{title}</div>
           <div class="flex content-center" >{children}</div>
@@ -63,7 +66,6 @@ function responsible({ user, onClick }) {
       <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -76,7 +78,6 @@ function supervisor({ onClick }) {
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -115,7 +116,6 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           </>
         )}
       </DrawerTabWithIcons>
-      <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick}  />
     </>
   );
@@ -152,7 +152,6 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           </>
         )}
       </DrawerTabWithIcons>
-      <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -235,11 +234,11 @@ const Drawer = (props) => {
   }
 
   return (
-    <nav open={open} id="drawer" class="bg-snu-purple-900 text-white text-base font-normal no-underline w-64">
+    <nav open={open} id="drawer" class="bg-snu-purple-900 text-white text-base font-normal no-underline w-64 ">
       <h1 class="h-16">
-        <Link to="/" class="flex items-center py-2">
+        <Link to="/" class="flex items-center py-2 hover:!text-white">
           <img src={require("../../assets/logo-snu.png")} class="h-12 w-18 px-3 " />
-            <span class="" class="uppercase font-medium text-sm text-center"> {getName() } </span>
+            <span class="" class="uppercase font-medium text-sm text-center "> {getName() } </span>
           <img onClick={handleClick} src={require("../../assets/burger.svg")} class="hidden" />
         </Link>
       </h1>

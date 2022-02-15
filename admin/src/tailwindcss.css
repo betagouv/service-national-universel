@@ -526,24 +526,32 @@ Ensure the default browser behavior of the `hidden` attribute.
   position: relative;
 }
 
+.bottom-0{
+  bottom: 0px;
+}
+
+.right-0{
+  right: 0px;
+}
+
+.top-0{
+  top: 0px;
+}
+
 .float-right{
   float: right;
 }
 
-.float-left{
-  float: left;
-}
-
-.mr-2\.5{
-  margin-right: 0.625rem;
+.mb-4{
+  margin-bottom: 1rem;
 }
 
 .mr-2{
   margin-right: 0.5rem;
 }
 
-.mb-4{
-  margin-bottom: 1rem;
+.mr-2\.5{
+  margin-right: 0.625rem;
 }
 
 .block{
@@ -578,8 +586,8 @@ Ensure the default browser behavior of the `hidden` attribute.
   height: 1.25rem;
 }
 
-.h-14{
-  height: 3.5rem;
+.h-6{
+  height: 1.5rem;
 }
 
 .h-16{
@@ -590,10 +598,6 @@ Ensure the default browser behavior of the `hidden` attribute.
   height: 3rem;
 }
 
-.h-6{
-  height: 1.5rem;
-}
-
 .w-8{
   width: 2rem;
 }
@@ -602,16 +606,16 @@ Ensure the default browser behavior of the `hidden` attribute.
   width: 1.25rem;
 }
 
+.w-6{
+  width: 1.5rem;
+}
+
 .w-14{
   width: 3.5rem;
 }
 
 .w-64{
   width: 16rem;
-}
-
-.w-6{
-  width: 1.5rem;
 }
 
 .flex-shrink{
@@ -634,16 +638,8 @@ Ensure the default browser behavior of the `hidden` attribute.
   resize: both;
 }
 
-.list-none{
-  list-style-type: none;
-}
-
 .flex-wrap{
   flex-wrap: wrap;
-}
-
-.place-content-center{
-  place-content: center;
 }
 
 .content-center{
@@ -652,10 +648,6 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 .items-center{
   align-items: center;
-}
-
-.\!items-center{
-  align-items: center !important;
 }
 
 .justify-center{
@@ -723,20 +715,8 @@ Ensure the default browser behavior of the `hidden` attribute.
   padding: 0.5rem;
 }
 
-.p-3\.5{
-  padding: 0.875rem;
-}
-
-.p-3{
-  padding: 0.75rem;
-}
-
-.p-5{
-  padding: 1.25rem;
-}
-
-.p-10{
-  padding: 2.5rem;
+.p-8{
+  padding: 2rem;
 }
 
 .py-3{
@@ -764,28 +744,6 @@ Ensure the default browser behavior of the `hidden` attribute.
   padding-bottom: 0.25rem;
 }
 
-.px-3\.5{
-  padding-left: 0.875rem;
-  padding-right: 0.875rem;
-}
-
-.py-5{
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
-}
-
-.pr-3\.5{
-  padding-right: 0.875rem;
-}
-
-.pr-3{
-  padding-right: 0.75rem;
-}
-
-.pl-5{
-  padding-left: 1.25rem;
-}
-
 .text-center{
   text-align: center;
 }
@@ -795,14 +753,14 @@ Ensure the default browser behavior of the `hidden` attribute.
   line-height: 1.5rem;
 }
 
-.text-sm{
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
-
 .text-xs{
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.text-sm{
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 
 .font-bold{
@@ -813,12 +771,12 @@ Ensure the default browser behavior of the `hidden` attribute.
   font-weight: 400;
 }
 
-.font-medium{
-  font-weight: 500;
-}
-
 .font-light{
   font-weight: 300;
+}
+
+.font-medium{
+  font-weight: 500;
 }
 
 .uppercase{
@@ -846,11 +804,6 @@ Ensure the default browser behavior of the `hidden` attribute.
 .no-underline{
   -webkit-text-decoration-line: none;
           text-decoration-line: none;
-}
-
-.decoration-current{
-  -webkit-text-decoration-color: currentColor;
-          text-decoration-color: currentColor;
 }
 
 .decoration-white{
@@ -965,11 +918,6 @@ a:hover {
 .hover\:\!text-white:hover{
   --tw-text-opacity: 1 !important;
   color: rgb(255 255 255 / var(--tw-text-opacity)) !important;
-}
-
-.hover\:\!decoration-white:hover{
-  -webkit-text-decoration-color: #fff !important;
-          text-decoration-color: #fff !important;
 }
 
 .hover\:shadow-lg:hover{
