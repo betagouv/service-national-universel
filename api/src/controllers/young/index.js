@@ -48,7 +48,7 @@ router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => YoungAuth.resetPassword(req, res));
 
-const canUpdateSeveralStatus = async (newYoung, currentYoung) => {
+const canUpdateSeveralStatus = (newYoung, currentYoung) => {
   ["status", "statusPhase1", "statusPhase2", "statusPhase3", "statusMilitaryPreparationFiles", "statusPhase2Contract"].map((status) => {
     if (newYoung[status] !== currentYoung[status]) {
       if (newYoung[status] === "VALIDATED" || newYoung[status] === "DONE") {
