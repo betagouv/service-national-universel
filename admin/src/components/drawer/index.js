@@ -14,7 +14,7 @@ import plausibleEvent from "../../services/pausible";
 
 const DrawerTab = ({ title, to, onClick, beta }) => (
   <div onClick={onClick} class=" hover:bg-snu-purple-800 hover:shadow-lg block">
-    <NavLink to={to} className="block py-3 px-3 text-base hover:!text-white" activeClassName="block bg-snu-purple-300 py-2 px-2 font-bold" >
+    <NavLink to={to} className="block py-3 pl-3 text-base hover:!text-white" activeClassName="block bg-snu-purple-300 py-3 pl-3 font-bold" >
       {title}
       {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
     </NavLink>
@@ -50,7 +50,7 @@ const HelpButton = ({ onClick, to }) => (
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
     <div onClick={onClick} class="hover:bg-snu-purple-800 hover:shadow-lg block" >
-      <NavLink to={to}  className=" py-3 px-3 text-base block hover:!text-white" activeClassName=" bg-snu-purple-300 py-2 px-2 font-bold">
+      <NavLink to={to}  className=" py-3 pl-3 text-base block hover:!text-white" activeClassName=" bg-snu-purple-300 py-3 pl-3 font-bold">
         <div >
           <div  >{title}</div>
           <div class="flex content-center" >{children}</div>
@@ -234,7 +234,7 @@ const Drawer = (props) => {
   }
 
   return (
-    <nav open={open} id="drawer" class="bg-snu-purple-900 text-white text-base font-normal no-underline  ">
+    <nav open={open} id="drawer" class="bg-snu-purple-900 text-white text-base font-normal  ">
       <h1>
         <Link to="/" class="flex items-center py-2 hover:!text-white">
           <img src={require("../../assets/logo-snu.png")} class="h-9 w-9 mx-3 " />
