@@ -48,6 +48,14 @@ router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => YoungAuth.resetPassword(req, res));
 
+const canUpdateSeveralStatus = async (newYoung) => {
+  ["status", "statusPhase1", "statusPhase2", "statusPhase3", "statusMilitaryPreparationFiles", "statusPhase2Contract"].map((status) => {
+    if (newYoung[status] === "VALIDATED") {
+      return false;
+    }
+  });
+};
+
 router.post("/signup", async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -414,13 +422,17 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     const { error, value } = validateYoung(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
+    console.log("VALUE", value);
+
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
+    const canYoungUpdateStatus = await canUpdateSeveralStatus(value, res);
+    if (!canYoungUpdateStatus) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if (req.user.department !== young.department) {
-      const referents = await ReferentModel.find({ department: req.user.department, role: ROLES.REFERENT_DEPARTMENT });
+    if (value.department !== young.department) {
+      const referents = await ReferentModel.find({ department: value.department, role: ROLES.REFERENT_DEPARTMENT });
       for (let referent of referents) {
         await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
           emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
@@ -434,7 +446,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     }
     young.set(value);
     await young.save({ fromUser: req.user });
-
 
     // Check quartier prioritaires.
     if (value.zip && value.city && value.address) {
