@@ -48,16 +48,6 @@ router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => YoungAuth.resetPassword(req, res));
 
-const canUpdateSeveralStatus = (newYoung, currentYoung) => {
-  ["status", "statusPhase1", "statusPhase2", "statusPhase3", "statusMilitaryPreparationFiles", "statusPhase2Contract"].map((status) => {
-    if (newYoung[status] !== currentYoung[status]) {
-      if (newYoung[status] === "VALIDATED" || newYoung[status] === "DONE") {
-        return false;
-      }
-    } else return true;
-  });
-};
-
 router.post("/signup", async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -428,7 +418,13 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
-    if (!canUpdateSeveralStatus(value, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    ["status", "statusPhase1", "statusPhase2", "statusPhase3", "statusMilitaryPreparationFiles", "statusPhase2Contract"].map((s) => {
+      if (value[s] !== young[s]) {
+        if (value[s] === "VALIDATED" || value[s] === "DONE") {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        }
+      }
+    });
 
     if (value.department !== young.department) {
       const referents = await ReferentModel.find({ department: value.department, role: ROLES.REFERENT_DEPARTMENT });
