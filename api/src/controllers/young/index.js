@@ -54,7 +54,7 @@ const canUpdateSeveralStatus = (newYoung, currentYoung) => {
       if (newYoung[status] === "VALIDATED" || newYoung[status] === "DONE") {
         return false;
       }
-    }
+    } else return true;
   });
 };
 
