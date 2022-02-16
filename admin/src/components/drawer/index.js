@@ -180,6 +180,8 @@ function visitor({ onClick }) {
 }
 
 const Drawer = (props) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const user = useSelector((state) => state.Auth.user);
   const newTickets = useSelector((state) => state.Tickets.new);
   const openedTickets = useSelector((state) => state.Tickets.open);
@@ -234,27 +236,64 @@ const Drawer = (props) => {
   }
 
   return (
-    <nav open={open} id="drawer" class="bg-snu-purple-900 text-white text-base font-normal  ">
-      <h1>
-        <Link to="/" class="flex items-center py-2 hover:!text-white">
-          <img src={require("../../assets/logo-snu.png")} class="h-9 w-9 mx-3 " />
-            <span class="" class="uppercase font-medium text-sm text-center mr-3 "> {getName() } </span>
-          <img onClick={handleClick} src={require("../../assets/burger.svg")} class="hidden" />
-        </Link>
-      </h1>
-      {environment !== "production" && environmentBannerVisible ? (
-        <div onClick={() => setEnvironmentBannerVisible(false)} class="py-1 bg-orange-600 font-italic items-center text-center">{getTextEnvironmentBanner()}</div>
-      ) : null}
-      <ul class="divide-y divide-slate-700">
-        <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-        {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
-        {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
-        {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-        {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-        {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
-      </ul>
-    </nav>
+    <>
+    {!isOpen ?
+      (      
+        <>  
+         <div className="w-12 pl-2 bg-white h-12 flex items-center justify-between lg:hidden shadow-sm sticky top-0 left-0 z-20">
+            <img id="burger" className=" burger block w-8 h-8  cursor-contain lg:hidden" onClick={() => setIsOpen(!isOpen)} src={require("../../assets/burger.svg")} />
+          </div>
+          <nav open={open} id="drawer" class=" bg-snu-purple-900 text-white text-base font-normal  ">
+            <div class="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative transition duration-200 ease-in-out">
+              <h1>
+                <Link to="/" class="flex items-center py-2 hover:!text-white">
+                  <img src={require("../../assets/logo-snu.png")} class="h-9 w-9 mx-3 " />
+                  <span class="" class="uppercase font-medium text-sm text-center mr-3 "> {getName()} </span>
+                </Link>
+              </h1>
+              {environment !== "production" && environmentBannerVisible ? (
+                <div onClick={() => setEnvironmentBannerVisible(false)} class="py-1 bg-orange-600 font-italic items-center text-center">{getTextEnvironmentBanner()}</div>
+              ) : null}
+              <ul class="divide-y divide-slate-700">
+                <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+                {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+                {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+                {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+                {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+                {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+                {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
+              </ul>
+            </div>
+          </nav></>     ):
+          
+      (
+      <nav open={open} id="drawer" class=" bg-snu-purple-900 text-white text-base font-normal  ">
+        <div class="">
+          <h1>
+            <Link to="/" class="flex items-center py-2 hover:!text-white">
+              <img src={require("../../assets/logo-snu.png")} class="h-9 w-9 mx-3 " />
+                <span class="" class="uppercase font-medium text-sm text-center mr-3 "> {getName() } </span>
+                <img id="burger" className=" burger block w-8 h-8  cursor-contain lg:hidden " onClick={() => setIsOpen(!isOpen)} src={require("../../assets/burger.svg")} /> 
+            </Link>
+          </h1>
+          {environment !== "production" && environmentBannerVisible ? (
+            <div onClick={() => setEnvironmentBannerVisible(false)} class="py-1 bg-orange-600 font-italic items-center text-center">{getTextEnvironmentBanner()}</div>
+          ) : null}
+          <ul class="divide-y divide-slate-700">
+            <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+            {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+            {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+            {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+            {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+            {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+            {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
+          </ul>
+        </div>
+      </nav>
+        )
+      }
+
+    </>
   );
 };
 

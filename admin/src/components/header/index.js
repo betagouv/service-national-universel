@@ -5,6 +5,7 @@ import { ROLES } from "../../utils";
 
 import User from "./user";
 
+
 export default function HeaderIndex({ onClickBurger }) {
   const { user } = useSelector((state) => state.Auth);
   if (!user) return <div />;
@@ -19,52 +20,14 @@ export default function HeaderIndex({ onClickBurger }) {
   }
 
   return (
-    <Header>
-      <Burger onClick={onClickBurger} src={require("../../assets/burger.svg")} />
-      <Title>{getName()}</Title>
-      <div style={{ display: "flex", alignItems: "center" }}>
+    <div className="w-full pr-4 bg-white h-12 flex items-center justify-between lg:justify-end shadow-sm sticky top-0 left-0 z-20 p-1">
+      <div className="text-base font-bold lg:hidden">{getName()}</div>
+      <div className="flex items-center">
         <User />
       </div>
-    </Header>
+    </div>
   );
 }
 
-const Header = styled.div`
-  background-color: #fff;
-  padding-right: 20px;
-  width: 100%;
-  height: 68px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  @media (max-width: 1000px) {
-    justify-content: space-between;
-  }
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  left: 0;
-  top: 0;
-  z-index: 20;
-  padding: 1rem;
-`;
 
-const Burger = styled.img`
-  display: none;
-  @media (max-width: 1000px) {
-    display: block;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    object-fit: contain;
-    cursor: pointer;
-  }
-`;
 
-const Title = styled.div`
-  font-size: 1rem;
-  font-weight: 700;
-  @media (min-width: 1000px) {
-    display: none;
-  }
-`;
