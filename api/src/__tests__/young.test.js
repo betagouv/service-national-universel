@@ -177,8 +177,8 @@ describe("Young", () => {
   });
 
   describe("PUT /young", () => {
-    async function selfUpdateYoung(body = {}) {
-      const young = await createYoungHelper(getNewYoungFixture());
+    async function selfUpdateYoung(body = {}, fields = {}) {
+      const young = await createYoungHelper(getNewYoungFixture(fields));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
@@ -255,13 +255,14 @@ describe("Young", () => {
       expect(updatedYoung.birthCountry).toEqual("HOP");
     });
 
-    it("should remove places when sending to cohesion center", async () => {
+    it.only("should remove places when sending to cohesion center", async () => {
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
       const placesLeft = sessionPhase1.placesLeft;
       const { updatedYoung, response } = await selfUpdateYoung({
         sessionPhase1Id: sessionPhase1._id,
+      }, {
         status: "VALIDATED",
-        statusPhase1: "DONE",
+        statusPhase1: "DONE"
       });
       expect(response.statusCode).toEqual(200);
       const updatedSessionPhase1 = await getSessionPhase1ById(updatedYoung.sessionPhase1Id);
