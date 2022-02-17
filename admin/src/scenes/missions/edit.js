@@ -34,6 +34,7 @@ export default function Edit(props) {
   const [structures, setStructures] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
+  const [invited, setInvited] = useState();
   const [loadings, setLoadings] = useState({
     saveButton: false,
     submitButton: false,
@@ -120,7 +121,7 @@ export default function Edit(props) {
   }, [defaultValue]);
   useEffect(() => {
     initReferents();
-  }, [structure]);
+  }, [structure, invited]);
 
   if ((!defaultValue && !isNew) || !structure) return <Loader />;
   return (
@@ -510,14 +511,15 @@ export default function Edit(props) {
                           </span>
                         )}
                       </p>
-                      <Field component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
+                      <Field validate={(v) => !v && requiredMessage} component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
                         <option value="">Sélectionner un tuteur</option>
                         {referents &&
                           referents.map((referent) => {
                             return <option key={referent._id} value={referent._id}>{`${referent.firstName} ${referent.lastName}`}</option>;
                           })}
                       </Field>
-                      {structure && showTutor && <Invite structure={structure} />}
+                      {structure && showTutor && <Invite structure={structure} setInvited={setInvited} />}
+                      <ErrorMessage errors={errors} touched={touched} name="format" />
                     </FormGroup>
                   </Wrapper>
                 </Col>
