@@ -135,8 +135,9 @@ export default function Edit(props) {
 
   const onConfirmDelete = async () => {
     try {
-      const { ok, code } = await api.remove(`/referent/${user._id}`);
+      const { ok, code, message } = await api.remove(`/referent/${user._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && message === "tuteur") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");
       return history.push(`/user`);
@@ -284,7 +285,7 @@ export default function Edit(props) {
                             title="Région"
                             options={regionList.map((r) => ({ value: r, label: r }))}
                           />
-                        </>                      
+                        </>
                         ) : null}
 
                       {values.role === ROLES.REFERENT_DEPARTMENT ? (
