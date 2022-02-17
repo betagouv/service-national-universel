@@ -1,3 +1,10 @@
+## [1.44.1](https://github.com/betagouv/service-national-universel/compare/v1.44.0...v1.44.1) (2022-02-16)
+
+
+### Bug Fixes
+
+* **search:** search with/without accent ([#1256](https://github.com/betagouv/service-national-universel/issues/1256)) ([bb0b057](https://github.com/betagouv/service-national-universel/commit/bb0b0576806c0f5096164b248977d99d2c544507))
+
 # [1.44.0](https://github.com/betagouv/service-national-universel/compare/v1.43.0...v1.44.0) (2022-02-15)
 
 
