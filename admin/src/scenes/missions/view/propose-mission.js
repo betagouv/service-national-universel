@@ -60,7 +60,7 @@ const SearchBox = ({ getDefaultQuery, setSearch }) => {
           placeholder="Rechercher un volontaire..."
           react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
           componentId="SEARCH"
-          dataField={["email.keyword", "firstName", "lastName"]}
+          dataField={["email.keyword", "firstName.folded", "lastName.folded"]}
           style={{ flex: 1, marginRight: "1rem" }}
           innerClass={{ input: "searchbox" }}
           autosuggest={false}

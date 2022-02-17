@@ -68,7 +68,7 @@ export default function ComboBoxYoungs({ center, onAffect, onClick }) {
                 showIcon={false}
                 placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                 componentId="SEARCH"
-                dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
                 react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
