@@ -36,11 +36,9 @@ export default function Index({ ...props }) {
       setStructure(structureResponse.data);
 
       if (missionResponse.data.tutorId) {
-        console.log(missionResponse.data.tutorId);
         const tutorResponse = await api.get(`/referent/${missionResponse.data.tutorId}`);
         if (!tutorResponse.ok) {
-          toastr.error("Oups, une erreur est survenue lors de la récupération du tuteur", translate(tutorResponse.code));
-          return history.push("/mission");
+          setTutor(null);
         }
         setTutor(tutorResponse.data);
       }
