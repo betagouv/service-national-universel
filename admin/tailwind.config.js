@@ -2,7 +2,7 @@ const { Media } = require("reactstrap");
 const colors = require("tailwindcss/colors");
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
-  content: ['./src/**/*.js'],
+  content: ['./src/**/*.{js,ts,jsx,tsx}'],
   darkMode: Media, // or 'media' or 'class'
   theme: {
     minWidth: {
