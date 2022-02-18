@@ -1,3 +1,18 @@
+# [1.45.0](https://github.com/betagouv/service-national-universel/compare/v1.44.1...v1.45.0) (2022-02-18)
+
+
+### Bug Fixes
+
+* **admin:** add `showMissing` on mulitdropdownlist ([1fd7b46](https://github.com/betagouv/service-national-universel/commit/1fd7b46440e326484db2982c433d02094e901f43))
+* translation ([c17112f](https://github.com/betagouv/service-national-universel/commit/c17112f9b18e55e4a6ccb4c3c6b9bf6a8e20eb90))
+* **admin:** mettre `folded` sur les toutes les barres de recherches ([#1260](https://github.com/betagouv/service-national-universel/issues/1260)) ([284875f](https://github.com/betagouv/service-national-universel/commit/284875f65eb8d144b4ab14a1a1ea2aa696f940a6))
+* **api:** withdrawn phases if needed ([7c86d2f](https://github.com/betagouv/service-national-universel/commit/7c86d2f1ec07c62ad46c1a6c739fb298cedbe383))
+
+
+### Features
+
+* **admin:** options status ([6be305a](https://github.com/betagouv/service-national-universel/commit/6be305a02885e4d35c1b6db9c78b10d56e9737f6))
+
 ## [1.44.1](https://github.com/betagouv/service-national-universel/compare/v1.44.0...v1.44.1) (2022-02-16)
 
 
