@@ -519,7 +519,7 @@ export default function Edit(props) {
                           })}
                       </Field>
                       {structure && showTutor && <Invite structure={structure} setInvited={setInvited} />}
-                      <ErrorMessage errors={errors} touched={touched} name="format" />
+                      <ErrorMessage errors={errors} touched={touched} name="tutorId" />
                     </FormGroup>
                   </Wrapper>
                 </Col>

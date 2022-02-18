@@ -32,7 +32,7 @@ export default function Invite({ structure, onSent, setInvited }) {
             if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
             setSent(`${values.firstName} ${values.lastName}`);
             setInvited(`${values.firstName} ${values.lastName}`);
-            onSent();
+            onSent?.();
             return toastr.success("Invitation envoyée");
           } catch (e) {
             if (e.code === "USER_ALREADY_REGISTERED")
