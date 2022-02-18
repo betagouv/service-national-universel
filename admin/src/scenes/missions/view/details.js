@@ -62,7 +62,9 @@ export default function DetailsView({ mission, structure, tutor }) {
                     <Details title="Tel. mobile" value={mission.mobile} copy />
                   </Bloc>
                 ) : (
-                  <Bloc title="Le tuteur">{mission.tutorId ? <p>Le tuteur n&apos;a pas été trouvé ou a été supprimé</p> : <p>Cette mission n&apos;a pas de tuteur</p>}</Bloc>
+                  <Bloc title="Le tuteur">
+                    <p>Cette mission n&apos;a pas de tuteur</p>
+                  </Bloc>
                 )}
               </Row>
               <Row style={{ borderBottom: "2px solid #f4f5f7", ...rowStyle }}>

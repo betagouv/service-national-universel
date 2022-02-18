@@ -121,13 +121,7 @@ export default function PanelView({ onChange, mission }) {
             <Details title="Tel." value={tutor.phone} />
           </>
         ) : (
-          <>
-            {mission.tutorId ? (
-              <Details title="Tuteur" value="Le tuteur n'a pas été trouvé ou a été supprimé" />
-            ) : (
-              <Details title="Tuteur" value="Cette mission n'a pas de tuteur" />
-            )}
-          </>
+          <Details title="Tuteur" value="Cette mission n'a pas de tuteur" />
         )}
       </Info>
       <Info title="La mission">
