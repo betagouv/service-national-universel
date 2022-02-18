@@ -8,7 +8,7 @@ import api from "../../../services/api";
 import { translate, ROLES, SENDINBLUE_TEMPLATES } from "../../../utils";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 
-export default function Invite({ structure, onSent }) {
+export default function Invite({ structure, onSent, setInvited }) {
   const [sent, setSent] = useState();
   return sent ? (
     <Wrapper>
@@ -31,7 +31,8 @@ export default function Invite({ structure, onSent }) {
             const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, values);
             if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
             setSent(`${values.firstName} ${values.lastName}`);
-            onSent();
+            setInvited(`${values.firstName} ${values.lastName}`);
+            onSent?.();
             return toastr.success("Invitation envoyée");
           } catch (e) {
             if (e.code === "USER_ALREADY_REGISTERED")
