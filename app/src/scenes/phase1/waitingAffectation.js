@@ -4,6 +4,7 @@ import { HeroContainer, Hero } from "../../components/Content";
 import { translateCohort } from "../../utils";
 import { supportURL } from "../../config";
 import NextStep from "./nextStep";
+import { Link } from "react-router-dom";
 
 export default function WaitingAffectation({ young }) {
   return (
@@ -20,6 +21,9 @@ export default function WaitingAffectation({ young }) {
               Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
               nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
             </p>
+            <Button to="/changeSejour">
+                  Changer de séjour
+                </Button>
             <Divider />
             <p>
               <strong style={{ color: "#000" }}>Vous êtes en attente d&apos;affectation à un centre</strong>
@@ -53,4 +57,25 @@ const UnderTitle = styled.h2`
   color: #6b7280;
   margin: 0.5rem auto;
   text-align: center;
+`;
+
+const Button = styled(Link)`
+  color: #fff;
+  background-color: #5145cd;
+  padding: 9px 20px;
+  border: 0;
+  outline: 0;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 20px;
+  margin-right: 10px;
+  margin-top: 40px;
+  display: block;
+  text-align: center;
+  outline: 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  :hover {
+    opacity: 0.9;
+    color: #fff;
+  }
 `;

@@ -8,6 +8,10 @@ const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
 const { getDepartmentNumber } = require("snu-lib/region-and-departments");
+const { validateId } = require("../utils/validator");
+
+
+
 
 router.get("/availability/2022", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const young = req.user;
@@ -66,6 +70,27 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
     }
 
     return res.send({ ok: true, data: sessions });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.put("/:id", passport.authenticate(["referent","young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    console.log("###############")
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
+
+    const young = await YoungModel.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    console.log(young.statusPhase1);
+    young.set({statusPhase1: "WAITING_LIST", cohort:req.body.cohort});
+    console.log(young.statusPhase1);
+    await young.save();
+    console.log(young.statusPhase1);
+    return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

@@ -4,6 +4,7 @@ const http = require("http");
 const passwordValidator = require("password-validator");
 const YoungModel = require("../models/young");
 const CohesionCenterModel = require("../models/cohesionCenter");
+const SessionPhase1 = require("../models/sessionPhase1");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
@@ -377,9 +378,30 @@ const assignNextYoungFromWaitingList = async (young) => {
       const i = center.waitingList.indexOf(nextYoung._id);
       center.waitingList.splice(i, 1);
       await center.save();
+
+      
     }
   }
 };
+
+// pourrait être utile un jour
+
+// const assignYoungToWaitingList = async (young, newCohort) => {
+//   if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED || young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ) {
+//   young.set({ status: "VALIDATED", statusPhase1: "WAITING_AFFECTATION", cohort:"" });
+//   await young.save();  
+
+//   //add young to waiting list
+//   //todo sélectionner le centre avec la date newCohort
+//   const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+//   console.log(`add young ${young._id} to waiting list`)
+//   sessionPhase1.waitingList.push(young._id);
+//   await sessionPhase1.save();
+
+//   }
+
+
+// }
 
 const getYoungFromWaitingList = async (young) => {
   try {
@@ -399,6 +421,8 @@ const getYoungFromWaitingList = async (young) => {
     console.log(e);
   }
 };
+
+
 
 async function updateYoungPhase2Hours(young) {
   const applications = await ApplicationModel.find({

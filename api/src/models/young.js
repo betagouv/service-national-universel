@@ -89,6 +89,12 @@ const Schema = new mongoose.Schema({
       description: "Cohorte",
     },
   },
+  cohortChangeReason: {
+    type: String,
+    documentation: {
+      description: "Raison de changement de cohorte.",
+    },
+  },
   phase: {
     type: String,
     default: "INSCRIPTION",
