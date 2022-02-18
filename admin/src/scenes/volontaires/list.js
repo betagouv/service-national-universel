@@ -388,6 +388,8 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -402,6 +404,8 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}

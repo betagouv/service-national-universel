@@ -263,6 +263,8 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       URLParams={true}
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                      showMissing
+                      missingLabel="Non renseigné"
                     />
                     <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={() => setFilterVisible((e) => !e)} />
                   </FilterRow>
