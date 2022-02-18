@@ -172,7 +172,7 @@ export default function Inscription() {
                   showIcon={false}
                   placeholder="Rechercher une inscription..."
                   componentId="SEARCH"
-                  dataField={["email.keyword", "firstName", "lastName", "phone"]}
+                  dataField={["email.keyword", "firstName.folded", "lastName.folded", "phone"]}
                   react={{ and: FILTERS }}
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
