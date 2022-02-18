@@ -240,7 +240,7 @@ const Drawer = (props) => {
     {!isOpen ?
       (      
         <>  
-         <div className="w-12 pl-2 bg-white h-12 flex items-center justify-between lg:hidden shadow-sm sticky top-0 left-0 z-20">
+         <div className="w-12 pl-2 bg-white h-14 flex items-center justify-between lg:hidden shadow-sm sticky top-0 left-0 z-20">
             <img id="burger" className=" burger block w-8 h-8  cursor-contain lg:hidden" onClick={() => setIsOpen(!isOpen)} src={require("../../assets/burger.svg")} />
           </div>
           <nav open={open} id="drawer" class=" bg-snu-purple-900 text-white text-base font-normal  ">
