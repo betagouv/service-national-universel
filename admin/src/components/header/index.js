@@ -20,7 +20,7 @@ export default function HeaderIndex({ onClickBurger }) {
   }
 
   return (
-    <div className="w-full pr-4 bg-white h-12 flex items-center justify-between lg:justify-end shadow-sm sticky top-0 left-0 z-20 p-1">
+    <div className="w-full pr-4 bg-white h-14 flex items-center justify-between lg:justify-end shadow-sm sticky top-0 left-0 z-20 p-1">
       <div className="text-base font-bold lg:hidden">{getName()}</div>
       <div className="flex items-center">
         <User />

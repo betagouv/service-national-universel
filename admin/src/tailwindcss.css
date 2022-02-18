@@ -552,14 +552,6 @@ Ensure the default browser behavior of the `hidden` attribute.
   float: right;
 }
 
-.m-3{
-  margin: 0.75rem;
-}
-
-.m-2{
-  margin: 0.5rem;
-}
-
 .mx-3{
   margin-left: 0.75rem;
   margin-right: 0.75rem;
@@ -617,20 +609,20 @@ Ensure the default browser behavior of the `hidden` attribute.
   height: 1.5rem;
 }
 
-.h-9{
-  height: 2.25rem;
-}
-
-.h-32{
-  height: 8rem;
+.h-12{
+  height: 3rem;
 }
 
 .h-8{
   height: 2rem;
 }
 
-.h-12{
-  height: 3rem;
+.h-9{
+  height: 2.25rem;
+}
+
+.h-14{
+  height: 3.5rem;
 }
 
 .w-8{
@@ -649,24 +641,20 @@ Ensure the default browser behavior of the `hidden` attribute.
   width: 3.5rem;
 }
 
-.w-9{
-  width: 2.25rem;
+.w-12{
+  width: 3rem;
 }
 
-.w-32{
-  width: 8rem;
+.w-9{
+  width: 2.25rem;
 }
 
 .w-full{
   width: 100%;
 }
 
-.w-12{
-  width: 3rem;
-}
-
-.max-w-screen-2xl{
-  max-width: 1536px;
+.min-w-full{
+  min-width: 100%;
 }
 
 .flex-shrink{
@@ -704,10 +692,6 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 .items-center{
   align-items: center;
-}
-
-.justify-end{
-  justify-content: flex-end;
 }
 
 .justify-center{
@@ -761,6 +745,11 @@ Ensure the default browser behavior of the `hidden` attribute.
   background-color: rgb(34 197 94 / var(--tw-bg-opacity));
 }
 
+.bg-white{
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
 .bg-snu-purple-900{
   --tw-bg-opacity: 1;
   background-color: rgb(50 37 127 / var(--tw-bg-opacity));
@@ -769,11 +758,6 @@ Ensure the default browser behavior of the `hidden` attribute.
 .bg-orange-600{
   --tw-bg-opacity: 1;
   background-color: rgb(234 88 12 / var(--tw-bg-opacity));
-}
-
-.bg-white{
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
 .fill-transparent{
@@ -786,10 +770,6 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 .p-2{
   padding: 0.5rem;
-}
-
-.p-3{
-  padding: 0.75rem;
 }
 
 .p-1{
@@ -820,16 +800,12 @@ Ensure the default browser behavior of the `hidden` attribute.
   padding-left: 0.75rem;
 }
 
-.pr-4{
-  padding-right: 1rem;
-}
-
-.pl-4{
-  padding-left: 1rem;
-}
-
 .pl-2{
   padding-left: 0.5rem;
+}
+
+.pr-4{
+  padding-right: 1rem;
 }
 
 .text-center{
@@ -889,15 +865,15 @@ Ensure the default browser behavior of the `hidden` attribute.
           text-decoration-line: underline;
 }
 
-.shadow{
-  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
 .shadow-sm{
   --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow{
+  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
@@ -1031,20 +1007,6 @@ h4 {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
-@media (min-width: 768px){
-  .md\:block{
-    display: block;
-  }
-
-  .md\:flex{
-    display: flex;
-  }
-
-  .md\:hidden{
-    display: none;
-  }
-}
-
 @media (min-width: 1024px){
   .lg\:relative{
     position: relative;
@@ -1058,10 +1020,6 @@ h4 {
     display: none;
   }
 
-  .lg\:shrink-0{
-    flex-shrink: 0;
-  }
-
   .lg\:translate-x-0{
     --tw-translate-x: 0px;
     transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -1069,20 +1027,5 @@ h4 {
 
   .lg\:justify-end{
     justify-content: flex-end;
-  }
-
-  .lg\:justify-between{
-    justify-content: space-between;
-  }
-
-  .lg\:bg-snu-purple-900{
-    --tw-bg-opacity: 1;
-    background-color: rgb(50 37 127 / var(--tw-bg-opacity));
-  }
-}
-
-@media (min-width: 1536px){
-  .\32xl\:hidden{
-    display: none;
   }
 }
