@@ -126,11 +126,7 @@ const BadgeCohort = ({ young, onChange }) => {
     "Autre",
   ];
 
-  const defaultInput = `Bonjour ${young.firstName} ${
-    young.lastName
-  },\n\nVotre changement de séjour pour le Service National Universel a été pris en compte.\n\nVous êtes maintenant positionné(e) sur le séjour se déroulant ${translateCohort(
-    newCohort,
-  )}.\n\n[Zone de texte : Renseignez la raison du changement de cohorte]\n\nCordialement\nLes équipes du Service National Universel`;
+  const defaultInput = `[Zone de texte : Renseignez la raison du changement de cohorte]`;
 
   const handleChangeCohort = async (messageTextArea) => {
     try {
@@ -196,7 +192,7 @@ const BadgeCohort = ({ young, onChange }) => {
               </UncontrolledDropdown>
             </ActionBox>
             <p style={{ margin: 0 }}>Choix de la nouvelle cohorte :</p>
-            <CohortDropDown cohort={newCohort} color="#ffffff" onClick={(value) => {}} width="375px" />
+            <CohortDropDown cohort={newCohort} color="#ffffff" onClick={(value) => setNewCohort(value)} width="375px" />
           </div>
           <p style={{ margin: 0, marginTop: "16px" }}>
             Veuillez vous assurer de son éligibilité , pour en savoir plus consulter{" "}
@@ -208,11 +204,12 @@ const BadgeCohort = ({ young, onChange }) => {
       </ModalConfirm>
       <ModalConfirmWithMessage
         isOpen={modalConfirmWithMessage}
-        title="Changement de cohorte"
-        message="Veuillez éditer le message ci-dessous pour préciser le motif de changement de cohorte avant de l’envoyer"
+        title="Veuillez éditer le message ci-dessous pour préciser le motif de changement de cohorte avant de l’envoyer"
+        message={<p>Bonjour {young.firstName} {young.lastName},<br/> Votre changement de séjour pour le Service National Universel a été pris en compte.<br/> Vous êtes maintenant positionné(e) sur le séjour se déroulant {translateCohort(newCohort)}.</p>}
         defaultInput={defaultInput}
         onChange={() => setModalConfirmWithMessage(false)}
         onConfirm={handleChangeCohort}
+        endMessage={<p>Cordialement <br/> Les équipes du Service National Universel</p>}
       />
     </>
   );

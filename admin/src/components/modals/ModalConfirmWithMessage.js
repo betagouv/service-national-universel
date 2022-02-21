@@ -4,6 +4,8 @@ import { Modal } from "reactstrap";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 import CloseSvg from "../../assets/Close";
+import styled from "styled-components";
+
 
 export default function ModalConfirmWithMessage({
   isOpen,
@@ -15,6 +17,7 @@ export default function ModalConfirmWithMessage({
   onConfirm,
   placeholder = "Votre message...",
   type = "textarea",
+  endMessage,
 }) {
   const [messageTextArea, setMessageTextArea] = useState(defaultInput);
   const [sending, setSending] = useState(false);
@@ -35,10 +38,11 @@ export default function ModalConfirmWithMessage({
       <ModalContainer>
         <CloseSvg className="close-icon" height={10} onClick={onChange} />
         <Header>{topTitle}</Header>
-        <Content>
+        <Content >
           <h1>{title}</h1>
           <p>{message}</p>
           {renderInput()}
+          <p>{endMessage}</p>
         </Content>
         <Footer>
           <ModalButton loading={sending} disabled={sending || !messageTextArea} onClick={submit} primary>
