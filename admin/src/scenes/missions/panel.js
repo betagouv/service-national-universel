@@ -121,7 +121,12 @@ export default function PanelView({ onChange, mission }) {
             <Details title="Tel." value={tutor.phone} />
           </>
         ) : (
-          <Details title="Tuteur" value="Cette mission n'a pas de tuteur" />
+          <>
+            <Details title="Tuteur" value="Cette mission n'a pas de tuteur" />
+            <Link to={`/mission/${mission._id}/edit`}>
+              <PanelActionButton icon="pencil" title="Assigner un tuteur" />
+            </Link>
+          </>
         )}
       </Info>
       <Info title="La mission">
