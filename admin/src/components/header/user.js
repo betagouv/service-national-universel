@@ -36,7 +36,7 @@ export default function HeaderUser() {
             <p>
               {user.firstName} {user.lastName}
             </p>
-            <p>{user.email}</p>
+            <p className="italic">{user.email}</p>
           </UserInfo>
           <hr />
           <Item>

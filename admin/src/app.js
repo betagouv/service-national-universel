@@ -138,31 +138,33 @@ const Home = () => {
   }, [user]);
 
   return (
-    <div style={{ display: "flex" }}>
-      <Drawer/>
-      <ContentContainer>
-        <Header/>
-        <Switch>
-          <Route path="/auth" component={Auth} />
-          <RestrictedRoute path="/structure" component={Structure} />
-          <RestrictedRoute path="/settings" component={Settings} />
-          <RestrictedRoute path="/profil" component={Profil} />
-          <RestrictedRoute path="/volontaire" component={renderVolontaire} />
-          <RestrictedRoute path="/mission" component={Missions} />
-          <RestrictedRoute path="/inscription" component={Inscription} />
-          <RestrictedRoute path="/user" component={Utilisateur} />
-          <RestrictedRoute path="/contenu" component={Content} />
-          <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
-          <RestrictedRoute path="/centre" component={Center} />
-          <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
-          <RestrictedRoute path="/association" component={Association} />
-          <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
-          <RestrictedRoute path="/boite-de-reception" component={Inbox} />
-          <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
-          <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
-          <RestrictedRoute path="/" component={renderDashboard} />
-        </Switch>
-      </ContentContainer>
+    <div className="min-screen">
+      <Header />
+      <div className="flex">
+        <Drawer />
+        <ContentContainer>
+          <Switch>
+            <Route path="/auth" component={Auth} />
+            <RestrictedRoute path="/structure" component={Structure} />
+            <RestrictedRoute path="/settings" component={Settings} />
+            <RestrictedRoute path="/profil" component={Profil} />
+            <RestrictedRoute path="/volontaire" component={renderVolontaire} />
+            <RestrictedRoute path="/mission" component={Missions} />
+            <RestrictedRoute path="/inscription" component={Inscription} />
+            <RestrictedRoute path="/user" component={Utilisateur} />
+            <RestrictedRoute path="/contenu" component={Content} />
+            <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
+            <RestrictedRoute path="/centre" component={Center} />
+            <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
+            <RestrictedRoute path="/association" component={Association} />
+            <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
+            <RestrictedRoute path="/boite-de-reception" component={Inbox} />
+            <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
+            <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
+            <RestrictedRoute path="/" component={renderDashboard} />
+          </Switch>
+        </ContentContainer>
+      </div>
       <ModalCGU
         isOpen={modal?.isOpen}
         title={modal?.title}
