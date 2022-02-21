@@ -139,13 +139,9 @@ const Home = () => {
 
   return (
     <div style={{ display: "flex" }}>
-      <Drawer open={menuVisible} onOpen={setMenuVisible} />
+      <Drawer/>
       <ContentContainer>
-        <Header
-          onClickBurger={() => {
-            setMenuVisible(!menuVisible);
-          }}
-        />
+        <Header/>
         <Switch>
           <Route path="/auth" component={Auth} />
           <RestrictedRoute path="/structure" component={Structure} />

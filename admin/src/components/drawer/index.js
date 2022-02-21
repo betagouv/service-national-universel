@@ -241,14 +241,14 @@ const Drawer = (props) => {
       (      
         <>  
          <div className="w-12 pl-2 bg-white h-14 flex items-center justify-between lg:hidden shadow-sm sticky top-0 left-0 z-20">
-            <img id="burger" className=" burger block w-8 h-8  cursor-contain lg:hidden" onClick={() => setIsOpen(!isOpen)} src={require("../../assets/burger.svg")} />
+            <img id="burger" class=" block w-8 h-8  cursor-contain lg:hidden" onClick={() => setIsOpen(!isOpen)} src={require("../../assets/burger.svg")} />
           </div>
           <nav open={open} id="drawer" class=" bg-snu-purple-900 text-white text-base font-normal  ">
             <div class="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative transition duration-200 ease-in-out">
               <h1>
                 <Link to="/" class="flex items-center py-2 hover:!text-white">
                   <img src={require("../../assets/logo-snu.png")} class="h-9 w-9 mx-3 " />
-                  <span class="" class="uppercase font-medium text-sm text-center mr-3 "> {getName()} </span>
+                  <span class="uppercase font-medium text-sm text-center mr-3 "> {getName()} </span>
                 </Link>
               </h1>
               {environment !== "production" && environmentBannerVisible ? (
@@ -268,12 +268,12 @@ const Drawer = (props) => {
           
       (
       <nav open={open} id="drawer" class=" bg-snu-purple-900 text-white text-base font-normal  ">
-        <div class="">
+        <div >
           <h1>
             <Link to="/" class="flex items-center py-2 hover:!text-white">
               <img src={require("../../assets/logo-snu.png")} class="h-9 w-9 mx-3 " />
-                <span class="" class="uppercase font-medium text-sm text-center mr-3 "> {getName() } </span>
-                <img id="burger" className=" burger block w-8 h-8  cursor-contain lg:hidden " onClick={() => setIsOpen(!isOpen)} src={require("../../assets/burger.svg")} /> 
+                <span class="uppercase font-medium text-sm text-center mr-3 "> {getName() } </span>
+                <img id="burger" class="block w-6 h-6 mr-2 cursor-contain lg:hidden " onClick={() => setIsOpen(!isOpen)} src={require("../../assets/close.svg")} /> 
             </Link>
           </h1>
           {environment !== "production" && environmentBannerVisible ? (
