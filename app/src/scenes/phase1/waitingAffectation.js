@@ -38,7 +38,7 @@ export default function WaitingAffectation({ young }) {
           <div className="thumb" />
         </Hero>
       </HeroContainer>
-      <h2 class="text-stone-500 m-auto text-center">Documents à renseigner</h2>
+      <h2 className="text-stone-500 m-auto text-center">Documents à renseigner</h2>
       <NextStep />
     </>
   );
@@ -48,4 +48,3 @@ const Divider = styled.hr`
   width: 100px;
   margin: 2rem 0;
 `;
-

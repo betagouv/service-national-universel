@@ -22,14 +22,13 @@ export default function Forgot() {
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Header />
       <LoginBox>
-        <h2 class="relative text-center md:text-base text-xs font-bold mb-5 px-2.5 bg-white text-coolGray-900 left-0 border-b">
+        <h3 className="relative text-center md:text-base text-xs font-bold mb-3 px-2.5 bg-white text-coolGray-900 left-0">
           <span>Mon espace volontaire</span>
-        </h2>
-
+        </h3>
         {done ? (
           <>
-            <h2 class="text-center md:text-xl text-base font-medium mb-5 ">Un email de réinitialisation de mot de passe vous a été envoyé !</h2>
-            <h2 class="text-center md:text-xl text-base font-medium mb-5 ">
+            <h2 className="text-center md:text-xl text-base font-medium mb-5 ">Un email de réinitialisation de mot de passe vous a été envoyé !</h2>
+            <h2 className="text-center md:text-xl text-base font-medium mb-5 ">
               <span>{mail}</span>
             </h2>
             <Text>
@@ -40,7 +39,7 @@ export default function Forgot() {
           </>
         ) : (
           <>
-            <h2 class="text-center md:text-xl text-base font-medium mb-5 ">Réinitialiser mon mot de passe</h2>
+            <h2 className="text-center md:text-xl text-base font-medium mb-3 ">Réinitialiser mon mot de passe</h2>
 
             <Formik
               initialValues={{ email: "" }}
@@ -83,9 +82,9 @@ export default function Forgot() {
             </Formik>
           </>
         )}
-        <h2 class="relative text-center md:text-base text-xs font-bold mb-5 px-2.5 bg-white text-coolGray-900 left-0 border-b">
+        <h3 className="relative text-center md:text-base text-xs font-bold pt-3 px-2.5 bg-white text-coolGray-900 left-0 border-t">
           <span>Retourner à la connexion</span>
-        </h2>
+        </h3>
         <Register to="/auth/signin">Se connecter</Register>
       </LoginBox>
     </div>

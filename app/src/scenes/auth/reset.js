@@ -21,10 +21,10 @@ export default function Reset() {
       {redirect && <Redirect to="/auth" />}
       <Header />
       <LoginBox>
-        <h2 class="relative text-center md:text-base text-xs font-bold mb-5 px-2.5 bg-white text-coolGray-900 left-0 border-b">
+        <h3 className="relative text-center md:text-base text-xs font-bold mb-3 px-2.5 bg-white text-coolGray-900 left-0">
           <span>Mon espace volontaire</span>
-        </h2>
-        <h2 class="text-center md:text-xl text-base font-medium mb-5 ">Réinitialiser mon mot de passe</h2>
+        </h3>
+        <h2 className="text-center md:text-xl text-base font-medium mb-5 ">Réinitialiser mon mot de passe</h2>
         <Formik
           initialValues={{ password: "" }}
           validateOnChange={false}
@@ -60,9 +60,9 @@ export default function Reset() {
             );
           }}
         </Formik>
-        <h2 class="relative text-center md:text-base text-xs font-bold mb-5 px-2.5 bg-white text-coolGray-900 left-0 border-b">
+        <h3 className="relative text-center md:text-base text-xs font-bold pt-3 px-2.5 bg-white text-coolGray-900 left-0 border-t">
           <span>Retourner à la connexion</span>
-        </h2>
+        </h3>
         <Register to="/auth/signin">Se connecter</Register>
       </LoginBox>
     </div>

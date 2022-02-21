@@ -56,9 +56,9 @@ export default function Signin() {
       )}
       <Header />
       <LoginBox>
-        <h2 class="relative text-center md:text-base text-xs font-bold mb-5 px-2.5 bg-white text-coolGray-900 left-0 border-b">
+        <h3 className="relative text-center md:text-base text-xs font-bold mb-3 px-2.5 bg-white text-coolGray-900 left-0">
           <span>Mon espace volontaire</span>
-        </h2>
+        </h3>
         <Formik
           initialValues={{ email: "", password: "" }}
           onSubmit={async ({ email, password }, actions) => {
@@ -125,9 +125,9 @@ export default function Signin() {
           }}
         </Formik>
         <>
-          <h2 class="relative text-center md:text-base text-xs font-bold mb-5 px-2.5 bg-white text-coolGray-900 left-0 border-b">
+          <h3 className="relative text-center md:text-base text-xs font-bold pt-3 px-2.5 bg-white text-coolGray-900 left-0 border-t">
             <span>Vous n&apos;êtes pas encore inscrit ?</span>
-          </h2>
+          </h3>
           <Register to="/inscription/profil">Commencer l&apos;inscription</Register>
         </>
       </LoginBox>

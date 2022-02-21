@@ -111,7 +111,7 @@ export default function Affected() {
           </Content>
         </Hero>
       </HeroContainer>
-      <h2 class="max-w-7xl m-auto px-6 text-stone-500 font-bold text-4xl">Documents à renseigner</h2>
+      <h2 className="max-w-7xl m-auto px-6 text-stone-500 font-bold text-4xl">Documents à renseigner</h2>
       <NextStep />
     </>
   );
@@ -206,7 +206,6 @@ const GoodToKnow = styled.article`
     }
   }
 `;
-
 
 const ContentHorizontal = styled(Content)`
   display: flex;

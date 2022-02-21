@@ -47,9 +47,9 @@ export default function SignupInvite() {
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Header />
       <LoginBox>
-        <h2 class="relative text-center md:text-base text-xs font-bold mb-5 px-2.5 bg-white text-coolGray-900 left-0 border-b">
+        <h3 className="relative text-center md:text-base text-xs font-bold mb-3 px-2.5 bg-white text-coolGray-900 left-0">
           <span>Activer votre espace volontaire</span>
-        </h2>
+        </h3>
         <Formik
           initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "" }}
           onSubmit={async (values, actions) => {
