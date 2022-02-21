@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
-import styled from "styled-components";
 import { useSelector, connect } from "react-redux";
 import { environment } from "../../config";
 import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors } from "../../utils";
@@ -13,8 +12,8 @@ import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
 
 const DrawerTab = ({ title, to, onClick, beta }) => (
-  <div onClick={onClick} class=" hover:bg-snu-purple-800 hover:shadow-lg block">
-    <NavLink to={to} className="block py-3 pl-3 text-base hover:!text-white" activeClassName="block bg-snu-purple-300 py-3 pl-3 font-bold" >
+  <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block">
+    <NavLink to={to} className="block py-3 pl-3 text-base hover:!text-white" activeClassName="block bg-snu-purple-300 py-3 pl-3 font-bold">
       {title}
       {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
     </NavLink>
@@ -31,29 +30,28 @@ const BlankSeparator = () => (
 
 const HelpButton = ({ onClick, to }) => (
   <div
-    class="justify-center flex mb-4 p-8 "
+    className="justify-center flex mb-4 p-8 "
     onClick={() => {
       plausibleEvent("Menu/CTA - Besoin Aide");
       onClick();
     }}>
-    <NavLink  className=" items-center border rounded flex p-2 hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg"  activeClassName="flex bg-snu-purple-300 p-2" to={to}>
-        <QuestionMark class="h-6 w-6 flex mr-2 " />
-        <div>
-          <div class=" font-normal text-sm text-center  ">Besoin d&apos;aide ?</div>
-          <div class="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
-        </div>
-
+    <NavLink className=" items-center border rounded flex p-2 hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg" activeClassName="flex bg-snu-purple-300 p-2" to={to}>
+      <QuestionMark class="h-6 w-6 flex mr-2 " />
+      <div>
+        <div className=" font-normal text-sm text-center  ">Besoin d&apos;aide ?</div>
+        <div className="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
+      </div>
     </NavLink>
   </div>
 );
 
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
-    <div onClick={onClick} class="hover:bg-snu-purple-800 hover:shadow-lg block" >
-      <NavLink to={to}  className=" py-3 pl-3 text-base block hover:!text-white" activeClassName=" bg-snu-purple-300 py-3 pl-3 font-bold">
-        <div >
-          <div  >{title}</div>
-          <div class="flex content-center" >{children}</div>
+    <div onClick={onClick} className="hover:bg-snu-purple-800 hover:shadow-lg block">
+      <NavLink to={to} className=" py-3 pl-3 text-base block hover:!text-white" activeClassName=" bg-snu-purple-300 py-3 pl-3 font-bold">
+        <div>
+          <div>{title}</div>
+          <div className="flex content-center">{children}</div>
         </div>
       </NavLink>
     </div>
@@ -101,22 +99,22 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           <div />
         ) : (
           <>
-            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500" >
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
               <MailCloseIcon />
-              <div >{newTickets}</div>
+              <div>{newTickets}</div>
             </div>
-            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400" >
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
               <MailOpenIcon />
-              <div  >{openedTickets}</div>
+              <div>{openedTickets}</div>
             </div>
-            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
               <SuccessIcon />
-              <div >{closedTickets}</div>
+              <div>{closedTickets}</div>
             </div>
           </>
         )}
       </DrawerTabWithIcons>
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick}  />
+      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -137,17 +135,17 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           <div />
         ) : (
           <>
-            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500" >
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
               <MailCloseIcon />
-              <div >{newTickets}</div>
+              <div>{newTickets}</div>
             </div>
-            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400" >
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
               <MailOpenIcon />
-              <div  >{openedTickets}</div>
+              <div>{openedTickets}</div>
             </div>
-            <div class="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
               <SuccessIcon />
-              <div >{closedTickets}</div>
+              <div>{closedTickets}</div>
             </div>
           </>
         )}
@@ -237,24 +235,25 @@ const Drawer = (props) => {
 
   return (
     <>
-    {!isOpen ?
-      (      
-        <>  
-         <div className="w-12 pl-2 bg-white h-14 flex items-center justify-between lg:hidden shadow-sm sticky top-0 left-0 z-20">
-            <img id="burger" class=" block w-8 h-8  cursor-contain lg:hidden" onClick={() => setIsOpen(!isOpen)} src={require("../../assets/burger.svg")} />
+      {!isOpen ? (
+        <>
+          <div className="w-12 pl-2 bg-white h-14 flex items-center justify-between lg:hidden shadow-sm sticky top-0 left-0 z-20">
+            <img id="burger" className=" block w-8 h-8  cursor-contain lg:hidden" onClick={() => setIsOpen(!isOpen)} src={require("../../assets/burger.svg")} />
           </div>
-          <nav open={open} id="drawer" class=" bg-snu-purple-900 text-white text-base font-normal  ">
-            <div class="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative transition duration-200 ease-in-out">
+          <nav open={open} id="drawer" className=" bg-snu-purple-900 text-white text-base font-normal  ">
+            <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative transition duration-200 ease-in-out">
               <h1>
                 <Link to="/" class="flex items-center py-2 hover:!text-white">
-                  <img src={require("../../assets/logo-snu.png")} class="h-9 w-9 mx-3 " />
-                  <span class="uppercase font-medium text-sm text-center mr-3 "> {getName()} </span>
+                  <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 mx-3 " />
+                  <span className="uppercase font-medium text-sm text-center mr-3 "> {getName()} </span>
                 </Link>
               </h1>
               {environment !== "production" && environmentBannerVisible ? (
-                <div onClick={() => setEnvironmentBannerVisible(false)} class="py-1 bg-orange-600 font-italic items-center text-center">{getTextEnvironmentBanner()}</div>
+                <div onClick={() => setEnvironmentBannerVisible(false)} className="py-1 bg-orange-600 font-italic items-center text-center">
+                  {getTextEnvironmentBanner()}
+                </div>
               ) : null}
-              <ul class="divide-y divide-slate-700">
+              <ul className="divide-y divide-slate-700">
                 <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
                 {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
                 {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
@@ -264,35 +263,35 @@ const Drawer = (props) => {
                 {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
               </ul>
             </div>
-          </nav></>     ):
-          
-      (
-      <nav open={open} id="drawer" class=" bg-snu-purple-900 text-white text-base font-normal  ">
-        <div >
-          <h1>
-            <Link to="/" class="flex items-center py-2 hover:!text-white">
-              <img src={require("../../assets/logo-snu.png")} class="h-9 w-9 mx-3 " />
-                <span class="uppercase font-medium text-sm text-center mr-3 "> {getName() } </span>
-                <img id="burger" class="block w-6 h-6 mr-2 cursor-contain lg:hidden " onClick={() => setIsOpen(!isOpen)} src={require("../../assets/close.svg")} /> 
-            </Link>
-          </h1>
-          {environment !== "production" && environmentBannerVisible ? (
-            <div onClick={() => setEnvironmentBannerVisible(false)} class="py-1 bg-orange-600 font-italic items-center text-center">{getTextEnvironmentBanner()}</div>
-          ) : null}
-          <ul class="divide-y divide-slate-700">
-            <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-            {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
-            {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
-            {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-            {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-            {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-            {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
-          </ul>
-        </div>
-      </nav>
-        )
-      }
-
+          </nav>
+        </>
+      ) : (
+        <nav open={open} id="drawer" className=" bg-snu-purple-900 text-white text-base font-normal  ">
+          <div>
+            <h1>
+              <Link to="/" class="flex items-center py-2 hover:!text-white">
+                <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 mx-3 " />
+                <span className="uppercase font-medium text-sm text-center mr-3 "> {getName()} </span>
+                <img id="burger" className="block w-6 h-6 mr-2 cursor-contain lg:hidden " onClick={() => setIsOpen(!isOpen)} src={require("../../assets/close.svg")} />
+              </Link>
+            </h1>
+            {environment !== "production" && environmentBannerVisible ? (
+              <div onClick={() => setEnvironmentBannerVisible(false)} className="py-1 bg-orange-600 font-italic items-center text-center">
+                {getTextEnvironmentBanner()}
+              </div>
+            ) : null}
+            <ul className="divide-y divide-slate-700">
+              <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+              {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+              {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+              {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+              {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
+            </ul>
+          </div>
+        </nav>
+      )}
     </>
   );
 };
@@ -314,7 +313,3 @@ const mapDispatchToProps = (dispatch) => ({
 let container = connect(null, mapDispatchToProps)(Drawer);
 
 export default container;
-
-
-
-
