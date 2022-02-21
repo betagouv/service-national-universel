@@ -31,7 +31,7 @@ export default function HeaderIndex({ onClickBurger }) {
     <div className="w-full pr-4 bg-white h-14 flex items-center justify-between shadow-sm sticky top-0 left-0 z-20 p-1">
       <h1 className="flex items-center gap-2">
         <Link to="/" className="flex items-center group hover:text-black gap-2 mx-3">
-          <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 group-hover:scale-105 hidden md:flex" />
+          <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 group-hover:scale-105" />
           <span className="text-base font-bold justify-center group-hover:underline">{getName()}</span>
         </Link>
         {environment !== "production" && environmentBannerVisible ? (
