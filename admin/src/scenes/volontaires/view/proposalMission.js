@@ -84,7 +84,7 @@ export default function xxxxxxx({ young, onSend }) {
                 showIcon={false}
                 placeholder="Rechercher une mission par mots clés..."
                 componentId="SEARCH"
-                dataField={["name^10.folded", "description", "justifications", "contraintes", "frequence", "period"]}
+                dataField={["name.folded^10", "description", "justifications", "contraintes", "frequence", "period"]}
                 fuzziness={1}
                 style={{ flex: 2, border: "1px solid #f4f5f7" }}
                 innerClass={{ input: "searchbox" }}
