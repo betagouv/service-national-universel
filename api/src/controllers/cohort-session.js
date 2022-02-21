@@ -76,20 +76,14 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
   }
 });
 
-router.put("/:id", passport.authenticate(["referent","young"], { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    console.log("###############")
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-
-
     const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    console.log(young.statusPhase1);
-    young.set({statusPhase1: "WAITING_LIST", cohort:req.body.cohort});
-    console.log(young.statusPhase1);
+    young.set({ statusPhase1: "WAITING_LIST", cohort: req.body.cohort });
     await young.save();
-    console.log(young.statusPhase1);
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);

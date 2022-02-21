@@ -3,14 +3,12 @@ import React, { useState, useEffect } from "react";
 
 import styled from "styled-components";
 import Chevron from "../../components/Chevron";
-import { Field, Formik } from "formik";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../utils";
-import { YOUNG_STATUS_PHASE1 } from "../../utils";
 
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
@@ -43,14 +41,10 @@ export default function changeSejour() {
           schoolLevel: young.schoolLevel,
           department: young.department
         });
-        console.log(data);
-        console.log("######");
-        console.log(young.cohort);
-        console.log(young.cohortChangeReason);
         const sejourGoal = data.map(e => {
-          console.log(e.inscriptionLimitDate);
-          var date = new Date();
-          console.log(date.toISOString());
+          // les dates de fin d'inscription aux séjours ne sont pas renseignés pour le moment
+          //var date = new Date();
+          //console.log(date.toISOString());
           //if (e.inscriptionLimitDate > date.toISOSString())    date de fin de d'inscription aux séjours à récupérer         
           return { 'sejour': e.id, 'goal': e.goalReached }
         })
@@ -75,23 +69,20 @@ export default function changeSejour() {
       })
       //si le volontaire est en statut de phase 1 “affectée” et que les objectifs de recrutement sont atteint pour le nouveau séjour choisi
 
-      console.log("##########2"+isGoalTrue)
-
       if (isGoalTrue.length === 0) {
         setmodalConfirmControlOk(true);
       }
       else {
         setmodalConfirmGoalReached(true);
       }
+    } else {
+      toastr.info("Veuillez renseigner tous les champs");
     }
   }
 
   const handleChangeSejour = async () => {
     try {
-      console.log("handleChangeSejour");
-      console.log(newSejour.type);
-      console.log(typeof motif);
-      await api.put('/young', {cohortChangeReason: motif })
+      await api.put('/young', { cohortChangeReason: motif })
       await api.put('/young', { cohort: newSejour });
       toastr.success("Cohorte modifiée avec succès");
       setmodalConfirmControlOk(false);
@@ -102,8 +93,7 @@ export default function changeSejour() {
 
   const handleWaitingList = async () => {
     try {
-      console.log(['/cohort-session/'+young._id]);
-      await api.put('/cohort-session/'+young._id,{ cohort: newSejour } );
+      await api.put('/cohort-session/' + young._id, { cohort: newSejour });
       toastr.success("Vous avez été ajouté en liste d'attente");
       setmodalConfirmGoalReached(false);
     } catch (e) {

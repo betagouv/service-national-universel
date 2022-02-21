@@ -64,9 +64,9 @@ export default function Affected() {
                 Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région (sauf exception) pour
                 créer ainsi des liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
               </p>
-                <Button to="/changeSejour">
-                  Changer de séjour
-                </Button>
+              <Button to="/changeSejour">
+                Changer de séjour
+              </Button>
               <Separator style={{ width: "150px" }} />
               <p>
                 <strong style={{ color: "black" }}>Votre lieu d&apos;affectation</strong>
