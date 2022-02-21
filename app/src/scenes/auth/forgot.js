@@ -7,14 +7,12 @@ import { toastr } from "react-redux-toastr";
 import api from "../../services/api";
 import Header from "./components/header";
 import { translate } from "../../utils";
-import Title from "./components/Title";
 import InputField from "./components/InputField";
 import StyledFormGroup from "./components/StyledFormGroup";
 import Submit from "./components/Submit";
 import Register from "./components/Register";
 import LoginBox from "./components/LoginBox";
 import Text from "./components/Text";
-import Subtitle from "./components/Subtitle";
 
 export default function Forgot() {
   const [done, setDone] = useState(false);
@@ -24,16 +22,16 @@ export default function Forgot() {
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Header />
       <LoginBox>
-        <Title>
+        <h2 class="relative text-center md:text-base text-xs font-bold mb-5 px-2.5 bg-white text-coolGray-900 left-0 border-b">
           <span>Mon espace volontaire</span>
-        </Title>
+        </h2>
 
         {done ? (
           <>
-            <Subtitle>Un email de réinitialisation de mot de passe vous a été envoyé !</Subtitle>
-            <Subtitle>
+            <h2 class="text-center md:text-xl text-base font-medium mb-5 ">Un email de réinitialisation de mot de passe vous a été envoyé !</h2>
+            <h2 class="text-center md:text-xl text-base font-medium mb-5 ">
               <span>{mail}</span>
-            </Subtitle>
+            </h2>
             <Text>
               Cet email contient un lien permettant de réinitialiser votre mot de passe.
               <br />
@@ -42,7 +40,7 @@ export default function Forgot() {
           </>
         ) : (
           <>
-            <Subtitle>Réinitialiser mon mot de passe</Subtitle>
+            <h2 class="text-center md:text-xl text-base font-medium mb-5 ">Réinitialiser mon mot de passe</h2>
 
             <Formik
               initialValues={{ email: "" }}
@@ -85,9 +83,9 @@ export default function Forgot() {
             </Formik>
           </>
         )}
-        <Title>
+        <h2 class="relative text-center md:text-base text-xs font-bold mb-5 px-2.5 bg-white text-coolGray-900 left-0 border-b">
           <span>Retourner à la connexion</span>
-        </Title>
+        </h2>
         <Register to="/auth/signin">Se connecter</Register>
       </LoginBox>
     </div>

@@ -11,7 +11,7 @@ export default function Validated() {
 
   return (
     <HeroContainer>
-      <Hero>
+      <Hero >
         {showAlert && (
           <Alert color="#31c48d">
             <div className="text">
@@ -35,9 +35,9 @@ export default function Validated() {
               <p>Vous êtes actuellement en attente d’affectation à un lieu pour votre séjour de cohésion.</p>
             </p>
           </IconContainer>
-          <InfoContainer to="/phase1">
-            <div>
-              <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <Link class="flex justify-between bg-indigo-100 p-4  text-indigo-900 rounded-md text-sm hover:bg-indigo-200 hover:cursor-pointer" to="/phase1">
+            <div class="flex">
+              <svg class="mr-1" width="24" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
@@ -48,7 +48,7 @@ export default function Validated() {
               Préparez votre séjour de cohésion
             </div>
             Documents à fournir →
-          </InfoContainer>
+          </Link>
         </Content>
         <div className="thumb" />
       </Hero>
@@ -70,20 +70,4 @@ const IconContainer = styled.div`
     }
   }
 `;
-const InfoContainer = styled(Link)`
-  display: flex;
-  justify-content: space-between;
-  background: rgba(79, 70, 229, 0.1);
-  padding: 1rem;
-  color: #32257f;
-  border-radius: 6px;
-  font-size: 1rem;
-  svg {
-    margin-right: 0.3rem;
-  }
-  :hover {
-    color: #32257f;
-    opacity: 0.8;
-    cursor: pointer;
-  }
-`;
+

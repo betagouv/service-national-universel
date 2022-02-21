@@ -9,7 +9,7 @@ export default function ModalInProgress({ onChange }) {
   return (
     <Modal centered isOpen={true} toggle={onChange}>
       <ModalContainer>
-        <CloseSvg className="close-icon" height={10} onClick={onChange} />
+        <CloseSvg className="close-icon" height={10} width={10} onClick={onChange} />
         <Header>avertissement</Header>
         <Content>
           <h1>Les inscriptions sont closes</h1>

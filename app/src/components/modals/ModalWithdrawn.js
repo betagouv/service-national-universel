@@ -20,7 +20,7 @@ export default function ModalWithdrawn({ isOpen, title, message, onChange, onCon
   return (
     <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
-        <CloseSvg className="close-icon" height={10} onClick={onChange} />
+        <CloseSvg className="close-icon" height={10} width={10} onClick={onChange} />
         <RoundWarning style={{ marginBottom: "1.5rem" }} />
         <Content>
           <h1>{title}</h1>

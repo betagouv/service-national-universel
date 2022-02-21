@@ -8,12 +8,10 @@ import queryString from "query-string";
 import api from "../../services/api";
 import Header from "./components/header";
 import { translate } from "../../utils";
-import Title from "./components/Title";
 import StyledFormGroup from "./components/StyledFormGroup";
 import Submit from "./components/Submit";
 import Register from "./components/Register";
 import LoginBox from "./components/LoginBox";
-import Subtitle from "./components/Subtitle";
 
 export default function Reset() {
   const [redirect, setRedirect] = useState(false);
@@ -23,10 +21,10 @@ export default function Reset() {
       {redirect && <Redirect to="/auth" />}
       <Header />
       <LoginBox>
-        <Title>
+        <h2 class="relative text-center md:text-base text-xs font-bold mb-5 px-2.5 bg-white text-coolGray-900 left-0 border-b">
           <span>Mon espace volontaire</span>
-        </Title>
-        <Subtitle>Réinitialiser mon mot de passe</Subtitle>
+        </h2>
+        <h2 class="text-center md:text-xl text-base font-medium mb-5 ">Réinitialiser mon mot de passe</h2>
         <Formik
           initialValues={{ password: "" }}
           validateOnChange={false}
@@ -62,9 +60,9 @@ export default function Reset() {
             );
           }}
         </Formik>
-        <Title>
+        <h2 class="relative text-center md:text-base text-xs font-bold mb-5 px-2.5 bg-white text-coolGray-900 left-0 border-b">
           <span>Retourner à la connexion</span>
-        </Title>
+        </h2>
         <Register to="/auth/signin">Se connecter</Register>
       </LoginBox>
     </div>

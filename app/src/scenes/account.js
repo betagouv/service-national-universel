@@ -63,7 +63,7 @@ export default function Account() {
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
-            <Title>Email</Title>
+            <h2 class="md:text-3xl  text-2xl font-bold mb-6">Email</h2>
             <FormRow>
               <Item
                 name="email"
@@ -99,7 +99,7 @@ export default function Account() {
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
-            <Title>Mot de passe</Title>
+            <h2 class="md:text-3xl  text-2xl font-bold mb-6">Mot de passe</h2>
             <hr />
             <Item required name="password" title="Actuel" errors={errors} touched={touched}>
               <PasswordEye
@@ -152,7 +152,7 @@ export default function Account() {
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
-            <Title>Mon profil</Title>
+            <h2 class="md:text-3xl  text-2xl font-bold mb-6">Mon profil</h2>
             <FormRow>
               <Item name="firstName" values={values} handleChange={handleChange} title="Prénom" disabled />
               <Item name="lastName" values={values} handleChange={handleChange} title="Nom" disabled />
@@ -185,7 +185,7 @@ export default function Account() {
                 departAndRegionVisible={false}
               />
             </div>
-            <Title>Représentant Légal</Title>
+            <h2 class="md:text-3xl  text-2xl font-bold mb-6">Représentant Légal</h2>
             <FormRow>
               <Select
                 name="parent1Status"
@@ -320,16 +320,6 @@ const Heading = styled.div`
     }
     font-weight: 800;
   }
-`;
-
-const Title = styled.h2`
-  color: #161e2e;
-  font-size: 2rem;
-  @media (max-width: 767px) {
-    font-size: 1.5rem;
-  }
-  font-weight: 700;
-  margin-bottom: 25px;
 `;
 
 const FormRow = styled(Row)`
