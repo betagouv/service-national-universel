@@ -5,12 +5,12 @@ import { Container } from "reactstrap";
 export default function AlertBox({ onClose, title, message }) {
   return (
     <Alert>
-      <img src={require("../assets/information.svg")} height={15} />
+      <img src={require("../assets/information.svg")} height={15} width={15} />
       <div className="text">
         <strong>{title}</strong>
         <div>{message}</div>
       </div>
-      {onClose ? <img src={require("../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} /> : null}
+      {onClose ? <img src={require("../assets/close.svg")} height={15} width={15} onClick={onClose} style={{ cursor: "pointer" }} /> : null}
     </Alert>
   );
 }

@@ -12,7 +12,7 @@ export default function MilitaryPreparationCard({ onClose, title, message }) {
           <p>{message}</p>
         </Link>
       </div>
-      {onClose ? <img src={require("../../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} /> : null}
+      {onClose ? <img src={require("../../../assets/close.svg")} height={15} width={15} onClick={onClose} style={{ cursor: "pointer" }} /> : null}
     </Alert>
   );
 }
