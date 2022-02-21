@@ -218,11 +218,11 @@ const Drawer = (props) => {
 
   function getName() {
     if (user.role === ROLES.ADMIN) return "Espace modérateur";
-    if (user.role === ROLES.REFERENT_DEPARTMENT) return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
-    if (user.role === ROLES.REFERENT_REGION) return "ESPACE RÉFÉRENT REGIONAL";
+    if (user.role === ROLES.REFERENT_DEPARTMENT) return "Espace référent départemental";
+    if (user.role === ROLES.REFERENT_REGION) return "Espace référent Régional";
     if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
     if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
-    if (user.role === ROLES.HEAD_CENTER) return "espace chef de centre";
+    if (user.role === ROLES.HEAD_CENTER) return "Espace chef de centre";
     if (user.role === ROLES.VISITOR) return "Espace visiteur";
     return "";
   }
@@ -240,12 +240,12 @@ const Drawer = (props) => {
           <div className="w-12 pl-2 bg-white h-14 flex items-center justify-between lg:hidden shadow-sm sticky top-0 left-0 z-20">
             <img id="burger" className=" block w-8 h-8  cursor-contain lg:hidden" onClick={() => setIsOpen(!isOpen)} src={require("../../assets/burger.svg")} />
           </div>
-          <nav open={open} id="drawer" className=" bg-snu-purple-900 text-white text-base font-normal  ">
+          <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-base font-normal  ">
             <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative transition duration-200 ease-in-out">
               <h1>
                 <Link to="/" class="flex items-center py-2 hover:!text-white">
                   <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 mx-3 " />
-                  <span className="uppercase text-sm text-center mr-3">{getName()}</span>
+                  <span className="text-sm text-center mr-3">{getName()}</span>
                 </Link>
               </h1>
               {environment !== "production" && environmentBannerVisible ? (
