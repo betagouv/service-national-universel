@@ -47,6 +47,7 @@ export default function Youngs({ mission, applications }) {
         values: applications?.map((e) => e._id),
       },
     },
+    track_total_hits: true,
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 

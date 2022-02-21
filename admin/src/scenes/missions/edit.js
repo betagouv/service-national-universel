@@ -34,6 +34,7 @@ export default function Edit(props) {
   const [structures, setStructures] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
+  const [invited, setInvited] = useState();
   const [loadings, setLoadings] = useState({
     saveButton: false,
     submitButton: false,
@@ -120,7 +121,7 @@ export default function Edit(props) {
   }, [defaultValue]);
   useEffect(() => {
     initReferents();
-  }, [structure]);
+  }, [structure, invited]);
 
   if ((!defaultValue && !isNew) || !structure) return <Loader />;
   return (
@@ -215,11 +216,28 @@ export default function Edit(props) {
                 }}>
                 Enregistrer
               </LoadingButton>
-            ) : null}
+            ) : (
+              <LoadingButton
+                color={"#fff"}
+                textColor={"#767697"}
+                loading={loadings.saveButton}
+                disabled={loadings.submitButton || loadings.changeStructureButton}
+                onClick={handleSubmit}>
+                Enregistrer les modifications
+              </LoadingButton>
+            )}
 
-            <LoadingButton loading={loadings.submitButton} disabled={loadings.saveButton || loadings.changeStructureButton} onClick={handleSubmit}>
-              {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
-            </LoadingButton>
+            {!defaultValue || defaultValue.status === "DRAFT" ? (
+              <LoadingButton
+                loading={loadings.submitButton}
+                disabled={loadings.saveButton || loadings.changeStructureButton}
+                onClick={() => {
+                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                  handleSubmit();
+                }}>
+                Enregistrer et proposer la mission
+              </LoadingButton>
+            ) : null}
           </Header>
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
@@ -493,14 +511,15 @@ export default function Edit(props) {
                           </span>
                         )}
                       </p>
-                      <Field component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
+                      <Field validate={(v) => !v && requiredMessage} component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
                         <option value="">Sélectionner un tuteur</option>
                         {referents &&
                           referents.map((referent) => {
                             return <option key={referent._id} value={referent._id}>{`${referent.firstName} ${referent.lastName}`}</option>;
                           })}
                       </Field>
-                      {structure && showTutor && <Invite structure={structure} />}
+                      {structure && showTutor && <Invite structure={structure} setInvited={setInvited} />}
+                      <ErrorMessage errors={errors} touched={touched} name="tutorId" />
                     </FormGroup>
                   </Wrapper>
                 </Col>
@@ -583,11 +602,27 @@ export default function Edit(props) {
                   }}>
                   Enregistrer
                 </LoadingButton>
+              ) : (
+                <LoadingButton
+                  color={"#fff"}
+                  textColor={"#767697"}
+                  loading={loadings.saveButton}
+                  disabled={loadings.submitButton || loadings.changeStructureButton}
+                  onClick={handleSubmit}>
+                  Enregistrer les modifications
+                </LoadingButton>
+              )}
+              {!defaultValue || defaultValue.status === "DRAFT" ? (
+                <LoadingButton
+                  loading={loadings.submitButton}
+                  disabled={loadings.saveButton || loadings.changeStructureButton}
+                  onClick={() => {
+                    handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                    handleSubmit();
+                  }}>
+                  Enregistrer et proposer la mission
+                </LoadingButton>
               ) : null}
-
-              <LoadingButton loading={loadings.submitButton} disabled={loadings.saveButton || loadings.changeStructureButton} onClick={handleSubmit}>
-                {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
-              </LoadingButton>
             </Header>
           </Wrapper>
         </div>

@@ -15,6 +15,7 @@ import Error, { requiredMessage } from "../../components/errorMessage";
 import { Box, BoxContent } from "../../components/box";
 import { translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, getPasswordErrorMessage } from "../../utils";
 import PasswordEye from "../../components/PasswordEye";
+import { VISITOR_SUBROLES } from "snu-lib/roles";
 
 export default function Profil() {
   const user = useSelector((state) => state.Auth.user);
@@ -26,6 +27,7 @@ export default function Profil() {
     let subRole = [];
     if (role === ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
     if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
+    if (role === ROLES.VISITOR) subRole = VISITOR_SUBROLES;
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
 
@@ -123,7 +125,7 @@ export default function Profil() {
                         <Item title="Téléphone fixe" values={values} name="phone" handleChange={handleChange} type={"text"} />
                       </Col>
                     </Row>
-                    {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(values.role) ? (
+                    {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR].includes(values.role) ? (
                       <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
                     ) : null}
                     <Row>

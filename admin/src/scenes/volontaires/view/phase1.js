@@ -14,6 +14,7 @@ import {
   FORCE_DISABLED_ASSIGN_COHESION_CENTER,
   confirmMessageChangePhase1Presence,
   ROLES,
+  translateCohort,
 } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
@@ -192,8 +193,7 @@ export default function Phase1(props) {
                 {({ values, handleChange }) => (
                   <>
                     <Bloc title="Date de séjour" borderBottom disabled={disabled}>
-                      <Details title="Début" value={young.cohesionStartAt} />
-                      <Details title="Fin" value={young.cohesionEndAt} />
+                      <Details title="Date" value={translateCohort(young.cohort)} />
                       <Select
                         placeholder="Non renseigné"
                         title="Présence"

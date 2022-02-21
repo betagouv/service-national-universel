@@ -48,7 +48,9 @@ export default function List() {
 
   const user = useSelector((state) => state.Auth.user);
   const getDefaultQuery = () =>
-    user.role === ROLES.SUPERVISOR ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } };
+    user.role === ROLES.SUPERVISOR
+      ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } }, track_total_hits: true }
+      : { query: { match_all: {} }, track_total_hits: true };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   return (
     <div>

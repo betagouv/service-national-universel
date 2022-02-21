@@ -302,7 +302,9 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     // if withdrawn, cascade withdrawn on every status
     if (newYoung.status === "WITHDRAWN" && (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")) {
-      newYoung = { ...newYoung, statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" };
+      if (young.statusPhase1 !== "DONE") newYoung.statusPhase1 = "WITHDRAWN";
+      if (young.statusPhase2 !== "VALIDATED") newYoung.statusPhase2 = "WITHDRAWN";
+      if (young.statusPhase3 !== "VALIDATED") newYoung.statusPhase3 = "WITHDRAWN";
     }
 
     // if withdrawn from phase1 -> run the script that find a replacement for this young
@@ -310,27 +312,38 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       // disable the 08 jun 21
       // await assignNextYoungFromWaitingList(young);
     }
+    if (newYoung.cohesionStayPresence === "true" && young.cohesionStayPresence !== "true") {
+      let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
+      if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
 
-    // if a referent said that a young is present in the cohesion stay, we validate its phase1
-    if (newYoung.cohesionStayPresence === "true" && young.statusPhase1 !== "DONE") {
-      newYoung = { ...newYoung, statusPhase1: "DONE" };
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE_1_VALIDATED, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
+        emailTo,
         params: {
-          ctaDownloadAttestation: `${config.APP_URL}/phase1`,
-          ctaPhase2: `${config.APP_URL}/phase2`,
+          youngFirstName: young.firstName,
+          youngLastName: young.lastName,
         },
       });
-    } else if (newYoung.cohesionStayPresence === "false" && young.statusPhase1 !== "NOT_DONE" && !["CANCEL", "EXEMPTED"].includes(young.statusPhase1)) {
-      newYoung = { ...newYoung, statusPhase1: "NOT_DONE" };
     }
-
     // Check quartier prioritaires.
     if (newYoung.zip && newYoung.city && newYoung.address) {
       const qpv = await getQPV(newYoung.zip, newYoung.city, newYoung.address);
       if (qpv === true) newYoung.qpv = "true";
       else if (qpv === false) newYoung.qpv = "false";
       else newYoung.qpv = "";
+    }
+
+    if (newYoung.department !== young.department) {
+      const referents = await ReferentModel.find({ department: newYoung.department, role: ROLES.REFERENT_DEPARTMENT });
+      for (let referent of referents) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: {
+            youngFirstName: newYoung.firstName,
+            youngLastName: newYoung.lastName,
+            cta: `${config.ADMIN_URL}/volontaire/${newYoung._id}`,
+          },
+        });
+      }
     }
 
     // Check quartier prioritaires.

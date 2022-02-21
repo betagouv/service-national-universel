@@ -10,11 +10,11 @@ const Layout = ({ title, children, className = "" }) => {
       <Head>
         <title>SNU - Admin Support - {title}</title>
       </Head>
-      <div className="flex overflow-hidden w-full h-full max-w-full">
+      <div className="flex h-full w-full max-w-full overflow-hidden">
         <NavBar />
-        <div className="flex flex-col h-full flex-shrink flex-grow">
+        <div className="flex h-full flex-shrink flex-grow flex-col">
           <TopBar />
-          <div className={`content relative flex-grow flex-shrink  w-full h-full overflow-hidden transition-transform bg-coolGray-100 ${className}`}>{children}</div>
+          <div className={`content relative h-full w-full  flex-shrink flex-grow overflow-hidden bg-coolGray-100 transition-transform ${className}`}>{children}</div>
         </div>
       </div>
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop theme="colored" closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />

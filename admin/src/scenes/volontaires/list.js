@@ -90,6 +90,7 @@ export default function VolontaireList() {
   const getDefaultQuery = () => ({
     query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } } } },
     sort: [{ "lastName.keyword": "asc" }],
+    track_total_hits: true,
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   return (
@@ -317,7 +318,7 @@ export default function VolontaireList() {
                   showIcon={false}
                   placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                   componentId="SEARCH"
-                  dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                  dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
                   react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
@@ -387,6 +388,8 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -401,6 +404,8 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}

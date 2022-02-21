@@ -20,6 +20,7 @@ import {
   confirmMessageChangePhase1Presence,
   ES_NO_LIMIT,
   getLabelWithdrawnReason,
+  PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
@@ -71,9 +72,9 @@ export default function List() {
   const getDefaultQuery = () => ({
     query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }] } },
     sort: [{ "lastName.keyword": "asc" }],
+    track_total_hits: true,
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
-
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -196,7 +197,7 @@ export default function List() {
                   showIcon={false}
                   placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                   componentId="SEARCH"
-                  dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                  dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
                   react={{ and: FILTERS }}
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
@@ -265,6 +266,8 @@ export default function List() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -279,6 +282,8 @@ export default function List() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -401,7 +406,6 @@ export default function List() {
 const Hit = ({ hit, onClick, selected, callback }) => {
   const [value, setValue] = useState(null);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-
   const updateYoung = async (v) => {
     const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
     if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
@@ -437,7 +441,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayPresence}
           name="cohesionStayPresence"
-          disabled={true}
+          disabled={PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE[value.cohort].getTime() > Date.now()}
           handleChange={(e) => {
             const value = e.target.value;
             setModal({
@@ -460,7 +464,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayMedicalFileReceived}
           name="cohesionStayMedicalFileReceived"
-          disabled={true}
+          disabled={PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE[value.cohort].getTime() > Date.now()}
           handleChange={(e) => {
             const value = e.target.value;
             updateYoung({ cohesionStayMedicalFileReceived: value });

@@ -87,10 +87,10 @@ describe("Referent", () => {
   });
 
   describe("PUT /referent/young/:id", () => {
-    async function createYoungThenUpdate(params) {
+    async function createYoungThenUpdate(params, fields) {
       const youngFixture = getNewYoungFixture();
-      const originalYoung = await createYoungHelper(youngFixture);
-      const modifiedYoung = { ...youngFixture, ...params };
+      const originalYoung = await createYoungHelper({...youngFixture, ...fields});
+      const modifiedYoung = { ...youngFixture, ...fields, ...params };
       const response = await request(getAppHelper()).put(`/referent/young/${originalYoung._id}`).send(modifiedYoung);
       const young = await getYoungByIdHelper(originalYoung._id);
       await deleteYoungByIdHelper(originalYoung._id);
@@ -105,13 +105,13 @@ describe("Referent", () => {
       expect(response.statusCode).toEqual(200);
       expectYoungToEqual(young, modifiedYoung);
     });
-    it("should update young statuses when sending status WITHDRAWN", async () => {
+    it("should cascade young statuses when sending status WITHDRAWN", async () => {
       const { young, response } = await createYoungThenUpdate({
         status: "WITHDRAWN",
-        cohesionStayPresence: "",
-        statusPhase1: "",
-        statusPhase2: "",
-        statusPhase3: "",
+      },{
+        statusPhase1: "AFFECTED",
+        statusPhase2: "WAITING_REALISATION",
+        statusPhase3: "WAITING_REALISATION",
       });
       expect(response.statusCode).toEqual(200);
       expect(young.status).toEqual("WITHDRAWN");
@@ -119,16 +119,30 @@ describe("Referent", () => {
       expect(young.statusPhase2).toEqual("WITHDRAWN");
       expect(young.statusPhase3).toEqual("WITHDRAWN");
     });
+     it("should not cascade status to WITHDRAWN if validated", async () => {
+      const { young, response } = await createYoungThenUpdate({
+        status: "WITHDRAWN",
+      },{
+        statusPhase1: "DONE",
+        statusPhase2: "WAITING_REALISATION",
+        statusPhase3: "VALIDATED",
+      });
+      expect(response.statusCode).toEqual(200);
+      expect(young.status).toEqual("WITHDRAWN");
+      expect(young.statusPhase1).toEqual("DONE");
+      expect(young.statusPhase2).toEqual("WITHDRAWN");
+      expect(young.statusPhase3).toEqual("VALIDATED");
+    });
     it("should update young statuses when sending cohection stay presence true", async () => {
       const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" });
       expect(response.statusCode).toEqual(200);
-      expect(young.statusPhase1).toEqual("DONE");
+      expect(young.statusPhase1).toEqual("AFFECTED");
       expect(young.cohesionStayPresence).toEqual("true");
     });
     it("should update young statuses when sending cohection stay presence false", async () => {
       const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "false" });
       expect(response.statusCode).toEqual(200);
-      expect(young.statusPhase1).toEqual("NOT_DONE");
+      expect(young.statusPhase1).toEqual("AFFECTED");
       expect(young.cohesionStayPresence).toEqual("false");
     });
     it("should remove places when sending to cohesion center", async () => {

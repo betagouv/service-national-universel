@@ -126,12 +126,12 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
 
   return (
     <>
-      <div className={`py-2 px-2 flex-grow flex-shrink flex flex-col ${!readOnly ? "bg-white" : ""} print:bg-transparent overflow-hidden`}>
+      <div className={`flex flex-shrink flex-grow flex-col py-2 px-2 ${!readOnly ? "bg-white" : ""} overflow-hidden print:bg-transparent`}>
         <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
           {!readOnly && (
             <Toolbar>
               <TextEditorButton>
-                <EmojiPicker size={10} className="text-2xl my-[5px] !mr-0 !h-5 !w-5" insertEmoji={editor.insertText} />
+                <EmojiPicker size={10} className="my-[5px] !mr-0 !h-5 !w-5 text-2xl" insertEmoji={editor.insertText} />
               </TextEditorButton>
               <MarkButton format="bold" icon="format_bold" />
               <MarkButton format="italic" icon="format_italic" />
@@ -156,7 +156,7 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
               <InsertVideoButton />
             </Toolbar>
           )}
-          <div id="text-editor" className="overflow-auto flex-shrink flex-grow">
+          <div id="text-editor" className="flex-shrink flex-grow overflow-auto">
             <Editable
               readOnly={readOnly}
               renderElement={renderElement}
@@ -171,11 +171,11 @@ const TextEditor = ({ content, _id, readOnly, onSave }) => {
         </Slate>
       </div>
       {!readOnly && (
-        <div className="py-2 px-8 pt-8 box-border w-full shrink-0 b-0 l-0 r-0 border-t-2 overflow-hidden flex items-center justify-around">
-          <button onClick={onSaveRequest} disabled={!isSaveable} className="px-8 py-2 box-border">
+        <div className="b-0 l-0 r-0 box-border flex w-full shrink-0 items-center justify-around overflow-hidden border-t-2 py-2 px-8 pt-8">
+          <button onClick={onSaveRequest} disabled={!isSaveable} className="box-border px-8 py-2">
             Enregistrer
           </button>
-          <button onClick={onCancel} disabled={!isSaveable} className="px-8 py-2 box-border">
+          <button onClick={onCancel} disabled={!isSaveable} className="box-border px-8 py-2">
             Rétablir la dernière version
           </button>
         </div>
@@ -265,7 +265,7 @@ const InlineChromiumBugfix = () => (
 const LinkComponent = ({ attributes, children, element }) => {
   const selected = useSelected();
   return (
-    <a {...attributes} href={element.url} className={`${selected ? "border-2" : ""} underline text-blue-900`}>
+    <a {...attributes} href={element.url} className={`${selected ? "border-2" : ""} text-blue-900 underline`}>
       <InlineChromiumBugfix />
       {children}
       <InlineChromiumBugfix />
@@ -381,7 +381,7 @@ const Image = ({ attributes, children, element, readOnly }) => {
           alt={element.alt}
           onMouseEnter={() => setShowDelete(true)}
           onMouseLeave={() => setShowDelete(false)}
-          className={`block max-w-full max-h-80 ${selected && focused ? "shadow-lg" : ""}`}
+          className={`block max-h-80 max-w-full ${selected && focused ? "shadow-lg" : ""}`}
         />
         {!readOnly && !!showDelete && (
           <TextEditorButton
@@ -426,8 +426,8 @@ const VideoElement = ({ attributes, children, element, readOnly }) => {
   return (
     <div {...attributes}>
       <div contentEditable={false}>
-        <div className="pb-[56.25%] h-0 relative">
-          <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 h-full w-full left-0" />
+        <div className="relative h-0 pb-[56.25%]">
+          <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 left-0 h-full w-full" />
         </div>
         {!readOnly && (
           <MetaDataInput
@@ -463,7 +463,7 @@ const MetaDataInput = ({ initValue, onChange, label, name }) => {
         name={name}
         onClick={(e) => e.stopPropagation()}
         id="text-editor-metadata-input"
-        className="mt-1 box-border p-2 border-2 mb-5 w-full relative"
+        className="relative mt-1 mb-5 box-border w-full border-2 p-2"
         onChange={(e) => {
           const newUrl = e.target.value;
           setValue(newUrl);

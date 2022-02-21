@@ -78,6 +78,19 @@
   opacity: 0;
   pointer-events: none;
 }
+/*
+
+Toastify
+
+*/
+
+.Toastify button {
+  width: auto;
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+  border: none;
+}
 
 /*
 

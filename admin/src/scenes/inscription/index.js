@@ -36,7 +36,7 @@ import plausibleEvent from "../../services/pausible";
 
 export default function Inscription() {
   const [young, setYoung] = useState(null);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } } });
+  const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } }, track_total_hits: true });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
@@ -172,7 +172,7 @@ export default function Inscription() {
                   showIcon={false}
                   placeholder="Rechercher une inscription..."
                   componentId="SEARCH"
-                  dataField={["email.keyword", "firstName", "lastName", "phone"]}
+                  dataField={["email.keyword", "firstName.folded", "lastName.folded", "phone"]}
                   react={{ and: FILTERS }}
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
