@@ -6,10 +6,10 @@ export default function Header() {
     <HeaderContainer>
       <Logos>
         <a href="https://www.snu.gouv.fr/">
-          <img className="mobileHide" src={require("../../../assets/fr.png")} height={80} />
+          <img className="mobileHide" src={require("../../../assets/fr.png")} height={80} width={80} />
         </a>
         <a href="https://www.snu.gouv.fr/">
-          <img src={require("../../../assets/logo-snu.png")} height={80} />
+          <img src={require("../../../assets/logo-snu.png")} height={80} width={80} />
         </a>
       </Logos>
       <Title>

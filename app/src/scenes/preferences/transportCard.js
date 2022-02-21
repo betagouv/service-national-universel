@@ -23,7 +23,7 @@ export default function TransportCard({ title, handleChange, values, errors, tou
 
   return (
     <Container>
-      <Title>{title}</Title>
+      <h2 class="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>
       <Row>
         <Button
           name="mobilityTransport"
@@ -75,13 +75,4 @@ const Container = styled.div`
     max-width: 20rem;
     margin-bottom: 0.5rem;
   }
-`;
-
-const Title = styled.h2`
-  margin-bottom: 1rem;
-  font-size: 0.875rem !important;
-  letter-spacing: 0.05rem;
-  color: #161e2e;
-  text-transform: uppercase;
-  font-weight: 700;
 `;

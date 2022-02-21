@@ -8,7 +8,7 @@ import ErrorMessage, { requiredMessage } from "./errorMessage";
 export default function MobilityCard({ title, handleChange, values, errors, touched }) {
   return (
     <Container>
-      <Title>{title}</Title>
+      <h2 class="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>
       <Item values={values} handleChange={handleChange} name="mobilityNearSchool" label="Votre établissement" errors={errors} touched={touched} />
       <Item values={values} handleChange={handleChange} name="mobilityNearHome" label="Votre domicile" errors={errors} touched={touched} />
       <Item values={values} handleChange={handleChange} name="mobilityNearRelative" label="Hébergement chez un proche" errors={errors} touched={touched} />
@@ -107,14 +107,6 @@ const Container = styled.div`
   }
 `;
 
-const Title = styled.h2`
-  margin-bottom: 1rem;
-  font-size: 0.875rem !important;
-  letter-spacing: 0.05rem;
-  color: #161e2e;
-  text-transform: uppercase;
-  font-weight: 700;
-`;
 
 const ItemContainer = styled.div`
   border-top-width: 1px;

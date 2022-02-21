@@ -512,6 +512,26 @@ Ensure the default browser behavior of the `hidden` attribute.
   position: relative;
 }
 
+.left-0{
+  left: 0px;
+}
+
+.m-auto{
+  margin: auto;
+}
+
+.mb-6{
+  margin-bottom: 1.5rem;
+}
+
+.mb-5{
+  margin-bottom: 1.25rem;
+}
+
+.mb-4{
+  margin-bottom: 1rem;
+}
+
 .block{
   display: block;
 }
@@ -530,6 +550,10 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 .w-6{
   width: 1.5rem;
+}
+
+.max-w-7xl{
+  max-width: 80rem;
 }
 
 .flex-shrink{
@@ -556,6 +580,67 @@ Ensure the default browser behavior of the `hidden` attribute.
   border-width: 1px;
 }
 
+.border-b{
+  border-bottom-width: 1px;
+}
+
+.bg-white{
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.px-2\.5{
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+}
+
+.px-2{
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.px-6{
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.text-center{
+  text-align: center;
+}
+
+.text-2xl{
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.text-xs{
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.text-base{
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.text-4xl{
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.\!text-sm{
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+}
+
+.font-bold{
+  font-weight: 700;
+}
+
+.font-medium{
+  font-weight: 500;
+}
+
 .uppercase{
   text-transform: uppercase;
 }
@@ -568,9 +653,23 @@ Ensure the default browser behavior of the `hidden` attribute.
   font-style: italic;
 }
 
+.tracking-wider{
+  letter-spacing: 0.05em;
+}
+
 .text-indigo-700{
   --tw-text-opacity: 1;
   color: rgb(67 56 202 / var(--tw-text-opacity));
+}
+
+.text-stone-500{
+  --tw-text-opacity: 1;
+  color: rgb(120 113 108 / var(--tw-text-opacity));
+}
+
+.text-gray-800{
+  --tw-text-opacity: 1;
+  color: rgb(31 41 55 / var(--tw-text-opacity));
 }
 
 .underline{
@@ -704,4 +803,34 @@ a:hover {
 
 .modal-backdrop.show  {
   opacity: 0.88;
+}
+
+h2 {
+  margin-top: 2rem;
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+@media (min-width: 768px){
+  .md\:text-3xl{
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+
+  .md\:text-base{
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .md\:text-xl{
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
 }
