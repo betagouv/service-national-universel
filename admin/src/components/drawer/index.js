@@ -245,11 +245,11 @@ const Drawer = (props) => {
               <h1>
                 <Link to="/" class="flex items-center py-2 hover:!text-white">
                   <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 mx-3 " />
-                  <span className="uppercase font-medium text-sm text-center mr-3 "> {getName()} </span>
+                  <span className="uppercase text-sm text-center mr-3">{getName()}</span>
                 </Link>
               </h1>
               {environment !== "production" && environmentBannerVisible ? (
-                <div onClick={() => setEnvironmentBannerVisible(false)} className="py-1 bg-orange-600 font-italic items-center text-center">
+                <div onClick={() => setEnvironmentBannerVisible(false)} className="py-2 bg-orange-600 text-xs font-italic items-center text-center">
                   {getTextEnvironmentBanner()}
                 </div>
               ) : null}
