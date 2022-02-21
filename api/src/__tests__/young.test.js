@@ -255,7 +255,7 @@ describe("Young", () => {
       expect(updatedYoung.birthCountry).toEqual("HOP");
     });
 
-    it.only("should remove places when sending to cohesion center", async () => {
+    it("should remove places when sending to cohesion center", async () => {
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
       const placesLeft = sessionPhase1.placesLeft;
       const { updatedYoung, response } = await selfUpdateYoung({
