@@ -115,6 +115,7 @@ export default styled.div`
       margin-right: 0.5rem;
     }
     &-text {
+      text-align: right;
       color: rgba(26, 32, 44);
       a {
         color: #5245cc;

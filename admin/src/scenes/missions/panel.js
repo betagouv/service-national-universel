@@ -24,11 +24,9 @@ export default function PanelView({ onChange, mission }) {
     (async () => {
       if (!mission) return;
       if (mission.tutorId) {
-        const { ok: ok1, data: dataTutor, code: code1 } = await api.get(`/referent/${mission.tutorId}`);
-        if (!ok1) toastr.error("Oups, une erreur est survnue lors de la récupération du tuteur", translate(code1));
+        const { ok: ok1, data: dataTutor } = await api.get(`/referent/${mission.tutorId}`);
+        if (!ok1) setTutor(null);
         else setTutor(dataTutor);
-      } else {
-        setTutor(null);
       }
       const { ok: ok2, data: dataStructure, code: code2 } = await api.get(`/structure/${mission.structureId}`);
       if (!ok2) toastr.error("Oups, une erreur est survnue lors de la récupération de la structure", translate(code2));
@@ -122,7 +120,9 @@ export default function PanelView({ onChange, mission }) {
             <Details title="E-mail" value={tutor.email} />
             <Details title="Tel." value={tutor.phone} />
           </>
-        ) : null}
+        ) : (
+          <Details title="Tuteur" value="Cette mission n'a pas de tuteur" />
+        )}
       </Info>
       <Info title="La mission">
         {mission.mainDomain ? <Details title="Domaine principal" value={translate(mission.mainDomain)} /> : null}
