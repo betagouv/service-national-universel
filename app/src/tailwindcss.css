@@ -554,10 +554,6 @@ Ensure the default browser behavior of the `hidden` attribute.
   margin-bottom: 1rem;
 }
 
-.mb-2{
-  margin-bottom: 0.5rem;
-}
-
 .block{
   display: block;
 }
@@ -578,20 +574,12 @@ Ensure the default browser behavior of the `hidden` attribute.
   height: 3rem;
 }
 
-.min-h-full{
-  min-height: 100%;
-}
-
 .w-6{
   width: 1.5rem;
 }
 
 .w-12{
   width: 3rem;
-}
-
-.min-w-full{
-  min-width: 100%;
 }
 
 .max-w-7xl{

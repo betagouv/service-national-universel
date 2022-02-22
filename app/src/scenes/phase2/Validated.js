@@ -6,7 +6,7 @@ import DownloadAttestationButton from "../../components/buttons/DownloadAttestat
 import MailAttestationButton from "../../components/buttons/MailAttestationButton";
 import { HeroContainer, Hero, Content } from "../../components/Content";
 import api from "../../services/api";
-import Question from "../../assets/Question"
+import Question from "../../assets/question";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -72,10 +72,10 @@ export default () => {
         </HeroContainer>
         <GoodToKnow className="flex items-center justify-center">
           <Question class="h-12 w-12 border p-2 rounded-xl" />
-          <div class="ml-3">
-            <p class="!font-bold !text-black">Vous avez des questions sur la mission d'intérêt général ?</p>
-            <a href={`https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1`} target="_blank" rel="noreferrer" >
-              Consulter notre <span class="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
+          <div className="ml-3">
+            <p className="!font-bold !text-black">Vous avez des questions sur la mission d&apos;intérêt général ?</p>
+            <a href={`https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1`} target="_blank" rel="noreferrer">
+              Consulter notre <span className="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
             </a>
           </div>
         </GoodToKnow>
@@ -112,7 +112,7 @@ const StyledA = styled.a`
 `;
 
 const GoodToKnow = styled.div`
-    svg {
-      min-width: 48px;
-    }
+  svg {
+    min-width: 48px;
+  }
 `;

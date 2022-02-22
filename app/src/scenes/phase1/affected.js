@@ -85,20 +85,20 @@ export default function Affected() {
         </Hero>
       </HeroContainer>
       <GoodToKnow className=" smmd:flex smmd:flex-row flex flex-col items-center justify-center">
-          <Case class="h-12 w-12 border p-2 rounded-xl" />
-          <div class="ml-3 smmd:mr-20">
-            <p class="!font-bold !text-black">Dans ma valise, il y a...</p>
-            <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`} target="_blank" rel="noreferrer">
-              Comment bien <span class="!text-snu-purple-200">préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
-            </a>
-          </div>
-          <Question class="h-12 w-12 border p-2 rounded-xl"/>
-          <div class="ml-3">
-            <p class="!font-bold !text-black">Vous avez des questions sur le séjour ?</p>
-            <a href={`${supportURL}/base-de-connaissance/phase-1-le-sejour-de-cohesion`} target="_blank" rel="noreferrer">
-              Consulter notre <span class="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
-            </a>
-          </div>
+        <Case class="h-12 w-12 border p-2 rounded-xl" />
+        <div className="ml-3 smmd:mr-20">
+          <p className="!font-bold !text-black">Dans ma valise, il y a...</p>
+          <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`} target="_blank" rel="noreferrer">
+            Comment bien <span className="!text-snu-purple-200">préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
+          </a>
+        </div>
+        <Question class="h-12 w-12 border p-2 rounded-xl" />
+        <div className="ml-3">
+          <p className="!font-bold !text-black">Vous avez des questions sur le séjour ?</p>
+          <a href={`${supportURL}/base-de-connaissance/phase-1-le-sejour-de-cohesion`} target="_blank" rel="noreferrer">
+            Consulter notre <span className="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
+          </a>
+        </div>
       </GoodToKnow>
       <HeroContainer id="convocationPhase1">
         <Hero>
@@ -157,9 +157,9 @@ const Protocole = styled.a`
 `;
 
 const GoodToKnow = styled.div`
-    svg {
-      min-width: 48px;
-    }
+  svg {
+    min-width: 48px;
+  }
 `;
 
 const ContentHorizontal = styled(Content)`
