@@ -214,7 +214,7 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       showIcon={false}
                       placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                       componentId="SEARCH"
-                      dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                      dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
                       react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                       // fuzziness={2}
                       style={{ flex: 1, marginRight: "1rem" }}
@@ -263,6 +263,8 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       URLParams={true}
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                      showMissing
+                      missingLabel="Non renseigné"
                     />
                     <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={() => setFilterVisible((e) => !e)} />
                   </FilterRow>
@@ -329,7 +331,7 @@ const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
       <td>
         <MultiLine>
-          <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
+          <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
           <p>
             {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
           </p>

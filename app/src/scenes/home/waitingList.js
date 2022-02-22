@@ -15,7 +15,7 @@ export default function WaitingList() {
             <div className="text">
               <strong>INSCRIPTION SUR LISTE COMPLÉMENTAIRE</strong>
             </div>
-            <img src={require("../../assets/close.svg")} height={15} onClick={() => setShowAlert(false)} />
+            <img src={require("../../assets/close.svg")} height={15} width={15} onClick={() => setShowAlert(false)} />
           </Alert>
         )}
         <Content showAlert={showAlert}>

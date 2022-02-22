@@ -36,7 +36,7 @@ export default function RankingPeriod({ title, period, handleChange, name, value
 
   return (
     <Container>
-      <Title>{title}</Title>
+      <h2 class="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="list">
           {(provided) => (
@@ -127,15 +127,6 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: fit-content;
-`;
-
-const Title = styled.h2`
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
-  letter-spacing: 0.05rem;
-  color: #161e2e;
-  text-transform: uppercase;
-  font-weight: 700;
 `;
 
 const ItemContainer = styled.div`

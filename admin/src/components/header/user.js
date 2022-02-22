@@ -32,6 +32,16 @@ export default function HeaderUser() {
         </div>
         <Menu open={open}>
           <Close onClick={() => setOpen(false)}>&times;</Close>
+          <UserInfo>
+            <p>
+              {user.firstName} {user.lastName}
+            </p>
+            <p>{user.email}</p>
+          </UserInfo>
+          <hr />
+          <Item>
+            <NavLink to="/profil">Profil</NavLink>
+          </Item>
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
             <Item>
               <InviteReferent role={user.role} />
@@ -42,9 +52,6 @@ export default function HeaderUser() {
               <NavLink to={`/structure/${user.structureId}`}>Inviter un utilisateur</NavLink>
             </Item>
           ) : null}
-          <Item>
-            <NavLink to="/profil">Profil</NavLink>
-          </Item>
           <hr />
           <Item onClick={logout}>
             <NavLink style={{ color: colors.red }} to="/logout">
@@ -70,6 +77,13 @@ const InviteReferent = ({ role }) => {
     </div>
   );
 };
+
+const UserInfo = styled.div`
+  padding: 0 25px;
+  font-weight: 400;
+  font-size: 12px;
+  color: #606266;
+`;
 
 const Dropdown = styled.div`
   position: relative;

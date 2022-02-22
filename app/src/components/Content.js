@@ -5,12 +5,12 @@ import { HERO_IMAGES_LIST } from "../utils";
 
 export const AlertBoxInformation = ({ title, message, onClose }) => (
   <AlertBoxStyle>
-    <img src={require("../assets/information.svg")} height={15} />
+    <img src={require("../assets/information.svg")} height={15} width={15} />
     <div className="text">
       <strong>{title}</strong>
       <p>{message}</p>
     </div>
-    <img src={require("../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} />
+    <img src={require("../assets/close.svg")} height={15} width={15} onClick={onClose} style={{ cursor: "pointer" }} />
   </AlertBoxStyle>
 );
 

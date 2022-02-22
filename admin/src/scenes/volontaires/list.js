@@ -388,6 +388,8 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -402,6 +404,8 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -665,7 +669,7 @@ const Hit = ({ hit, onClick, selected }) => {
     <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
       <td>
         <MultiLine>
-          <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
+          <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
           <p>
             {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
           </p>

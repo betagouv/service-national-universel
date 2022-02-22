@@ -8,7 +8,6 @@ import { setYoung } from "../../redux/auth/actions";
 
 import api from "../../services/api";
 import Header from "./components/header";
-import Title from "./components/Title";
 import StyledFormGroup from "./components/StyledFormGroup";
 import Submit from "./components/Submit";
 import LoginBox from "./components/LoginBox";
@@ -48,9 +47,9 @@ export default function SignupInvite() {
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Header />
       <LoginBox>
-        <Title>
+        <h3 className="relative text-center md:text-base text-xs font-bold mb-3 px-2.5 bg-white text-coolGray-900 left-0">
           <span>Activer votre espace volontaire</span>
-        </Title>
+        </h3>
         <Formik
           initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "" }}
           onSubmit={async (values, actions) => {

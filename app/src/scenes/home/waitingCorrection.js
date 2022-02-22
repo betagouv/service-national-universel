@@ -18,7 +18,7 @@ export default function WaitingCorrection() {
             <div className="text">
               <strong>INSCRIPTION EN ATTENTE DE CORRECTION</strong>
             </div>
-            <img src={require("../../assets/close.svg")} height={15} onClick={() => setShowAlert(false)} />
+            <img src={require("../../assets/close.svg")} height={15} width={15} onClick={() => setShowAlert(false)} />
           </Alert>
         )}
         <Content showAlert={showAlert}>

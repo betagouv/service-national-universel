@@ -1,3 +1,37 @@
+# [1.46.0](https://github.com/betagouv/service-national-universel/compare/v1.45.0...v1.46.0) (2022-02-21)
+
+
+### Bug Fixes
+
+* **admin:** drawer style ([#1273](https://github.com/betagouv/service-national-universel/issues/1273)) ([7b322ed](https://github.com/betagouv/service-national-universel/commit/7b322edba4958480893a65078c279891cfd67b5b))
+* es search proposal mission ([80ac6b0](https://github.com/betagouv/service-national-universel/commit/80ac6b06a597e398349682cce490c93ae4036111))
+* **app:** more svg size ([68f02cb](https://github.com/betagouv/service-national-universel/commit/68f02cbae103bb1deb08194cf76066e63d1d4ae7))
+* **app:** svg size ([d33290b](https://github.com/betagouv/service-national-universel/commit/d33290ba673538ba635e58fd7bcb3ef093ea6e06))
+* **app:** tailwind fix-1 ([#1272](https://github.com/betagouv/service-national-universel/issues/1272)) ([e92abad](https://github.com/betagouv/service-national-universel/commit/e92abad35ffdf978927b0350fc3d5b3cbb4d1249))
+* **app:** tailwind in auth ([c906883](https://github.com/betagouv/service-national-universel/commit/c906883324bca5a44600e7a6cea04d27da4fa572))
+* profile modale ([0b4aaeb](https://github.com/betagouv/service-national-universel/commit/0b4aaebb10833046dd1b1d6964175905cdbaf3b9))
+
+
+### Features
+
+* **admin:** button add a tutor ([#1270](https://github.com/betagouv/service-national-universel/issues/1270)) ([5b35e91](https://github.com/betagouv/service-national-universel/commit/5b35e91a02991431c80b2588799fe6c7805813e4))
+* **admin,app:** tailwind-setup ([#1255](https://github.com/betagouv/service-national-universel/issues/1255)) ([cfd5021](https://github.com/betagouv/service-national-universel/commit/cfd5021b19c76503db7a7017c72ec68ea973f5d0))
+
+# [1.45.0](https://github.com/betagouv/service-national-universel/compare/v1.44.1...v1.45.0) (2022-02-18)
+
+
+### Bug Fixes
+
+* **admin:** add `showMissing` on mulitdropdownlist ([1fd7b46](https://github.com/betagouv/service-national-universel/commit/1fd7b46440e326484db2982c433d02094e901f43))
+* translation ([c17112f](https://github.com/betagouv/service-national-universel/commit/c17112f9b18e55e4a6ccb4c3c6b9bf6a8e20eb90))
+* **admin:** mettre `folded` sur les toutes les barres de recherches ([#1260](https://github.com/betagouv/service-national-universel/issues/1260)) ([284875f](https://github.com/betagouv/service-national-universel/commit/284875f65eb8d144b4ab14a1a1ea2aa696f940a6))
+* **api:** withdrawn phases if needed ([7c86d2f](https://github.com/betagouv/service-national-universel/commit/7c86d2f1ec07c62ad46c1a6c739fb298cedbe383))
+
+
+### Features
+
+* **admin:** options status ([6be305a](https://github.com/betagouv/service-national-universel/commit/6be305a02885e4d35c1b6db9c78b10d56e9737f6))
+
 ## [1.44.1](https://github.com/betagouv/service-national-universel/compare/v1.44.0...v1.44.1) (2022-02-16)
 
 

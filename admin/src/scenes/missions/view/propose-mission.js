@@ -60,7 +60,7 @@ const SearchBox = ({ getDefaultQuery, setSearch }) => {
           placeholder="Rechercher un volontaire..."
           react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
           componentId="SEARCH"
-          dataField={["email.keyword", "firstName", "lastName"]}
+          dataField={["email.keyword", "firstName.folded", "lastName.folded"]}
           style={{ flex: 1, marginRight: "1rem" }}
           innerClass={{ input: "searchbox" }}
           autosuggest={false}
@@ -187,9 +187,9 @@ const Hit = ({ hit, mission, applicationsToTheMission, onClick }) => {
       <div style={{ padding: "1.5rem 1.5rem 10px 1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div>
-            <p style={{ margin: 0, fontWeight: "bold" }}>
+            <a href={`/volontaire/${hit._id}`} target="_blank" rel="noreferrer" style={{ margin: 0, fontWeight: "bold", cursor: "pointer" }}>
               {hit.firstName} {hit.lastName}
-            </p>
+            </a>
             <p style={{ color: "#6B7280" }}>
               {hit.region}&nbsp;{hit.region && hit.department && "›"}&nbsp;{hit.department}
             </p>
@@ -212,14 +212,22 @@ const Hit = ({ hit, mission, applicationsToTheMission, onClick }) => {
           <p>{specificity.length > 0 && specificity.join(" • ")}</p>
         </div>
       </div>
-      <div style={{ backgroundColor: "#EFEEF2", borderRadius: "0 0 10px 10px", padding: "10px", display: "flex", justifyContent: "center" }}>
+      <div
+        onClick={() => {
+          if (isAlreadyApplied || (!isAlreadyApplied && loading)) return;
+          setModal(true);
+        }}
+        style={{
+          backgroundColor: "#EFEEF2",
+          borderRadius: "0 0 10px 10px",
+          padding: "10px",
+          display: "flex",
+          justifyContent: "center",
+          cursor: isAlreadyApplied || (!isAlreadyApplied && loading) ? "default" : "pointer",
+        }}>
         {isAlreadyApplied && <p style={{ margin: "0px", color: "#43994C" }}>Mission proposée</p>}
         {!isAlreadyApplied && loading && <Spinner size="sm" style={{ borderWidth: "0.125em", margin: "0.25rem" }} />}
-        {!isAlreadyApplied && !loading && (
-          <p onClick={() => setModal(true)} style={{ margin: "0px", color: "#5245CC", cursor: "pointer" }}>
-            Proposer la mission
-          </p>
-        )}
+        {!isAlreadyApplied && !loading && <p style={{ margin: "0px", color: "#5245CC" }}>Proposer la mission</p>}
       </div>
       <ModalConfirm
         isOpen={modal}

@@ -5,5 +5,8 @@ export default styled.div`
   a {
     color: #5145cd;
     font-size: 14px;
+    :hover {
+      text-decoration: underline;
+    }
   }
 `;

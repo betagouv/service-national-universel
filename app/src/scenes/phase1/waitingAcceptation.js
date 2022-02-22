@@ -57,7 +57,7 @@ export default function WaitingAcceptation() {
               <div className="text">
                 <strong>EN ATTENTE D&apos;ACCEPTATION</strong>
               </div>
-              <img src={require("../../assets/close.svg")} height={15} onClick={() => setShowAlert(false)} />
+              <img src={require("../../assets/close.svg")} height={15} width={15} onClick={() => setShowAlert(false)} />
             </Alert>
           )}
           <Content showAlert={showAlert}>

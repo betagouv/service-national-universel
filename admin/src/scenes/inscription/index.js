@@ -172,7 +172,7 @@ export default function Inscription() {
                   showIcon={false}
                   placeholder="Rechercher une inscription..."
                   componentId="SEARCH"
-                  dataField={["email.keyword", "firstName", "lastName", "phone"]}
+                  dataField={["email.keyword", "firstName.folded", "lastName.folded", "phone"]}
                   react={{ and: FILTERS }}
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
@@ -365,9 +365,9 @@ const Hit = ({ hit, index, onClick, selected }) => {
       <td>{index + 1}</td>
       <td>
         <MultiLine>
-          <h2>
+          <span className="font-bold text-black">
             {hit.firstName} {hit.lastName} <Badge text={hit.cohort} />
-          </h2>
+          </span>
           <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
         </MultiLine>
       </td>

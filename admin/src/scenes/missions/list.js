@@ -90,7 +90,7 @@ export default function List() {
                       Description: data.description,
                       "Id de la structure": data.structureId,
                       "Nom de la structure": data.structureName,
-                      "Id du tuteur": data.tutorId,
+                      "Id du tuteur": data.tutorId || "La mission n'a pas de tuteur",
                       "Nom du tuteur": data.tutor?.lastName,
                       "Prénom du tuteur": data.tutor?.firstName,
                       "Email du tuteur": data.tutor?.email,
@@ -287,7 +287,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={() => onClick(value)}>
       <td>
         <MultiLine>
-          <h2>{value.name}</h2>
+          <span className="font-bold text-black">{value.name}</span>
           <p>
             {value.structureName} {`• ${value.city} (${value.department})`}
           </p>

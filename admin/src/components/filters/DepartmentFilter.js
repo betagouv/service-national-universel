@@ -5,6 +5,12 @@ import { getDepartmentNumber } from "../../utils";
 export const DepartmentFilter = ({ defaultQuery, filters, dataField = "department.keyword", ...rest }) => (
   <MultiDropdownList
     defaultQuery={defaultQuery}
+    // transformData={(data) => {
+    //   return data.map(({ key, doc_count }) => ({
+    //     key: `${getDepartmentNumber(key)} ${key}`,
+    //     doc_count,
+    //   }));
+    // }}
     className="dropdown-filter"
     placeholder="Départements"
     componentId="DEPARTMENT"

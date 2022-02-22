@@ -98,7 +98,7 @@ const HitMeetingPoint = ({ hit, onSend }) => {
       </td>
       <td>
         <MultiLine>
-          <h2>{hit.departureAddress}</h2>
+          <span className="font-bold text-black">{hit.departureAddress}</span>
           <p>{hit.departureAtString}</p>
         </MultiLine>
       </td>

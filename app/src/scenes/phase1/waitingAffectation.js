@@ -38,7 +38,7 @@ export default function WaitingAffectation({ young }) {
           <div className="thumb" />
         </Hero>
       </HeroContainer>
-      <UnderTitle>Documents à renseigner</UnderTitle>
+      <h2 className="text-stone-500 m-auto text-center">Documents à renseigner</h2>
       <NextStep />
     </>
   );
@@ -47,10 +47,4 @@ export default function WaitingAffectation({ young }) {
 const Divider = styled.hr`
   width: 100px;
   margin: 2rem 0;
-`;
-
-const UnderTitle = styled.h2`
-  color: #6b7280;
-  margin: 0.5rem auto;
-  text-align: center;
 `;

@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS, colors } from "../../../utils";
+import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
 import TickDone from "../../../assets/TickDone";
@@ -61,7 +62,14 @@ export default function DetailsView({ mission, structure, tutor }) {
                     <Details title="Tel. fixe" value={tutor.phone} copy />
                     <Details title="Tel. mobile" value={mission.mobile} copy />
                   </Bloc>
-                ) : null}
+                ) : (
+                  <Bloc title="Le tuteur">
+                    <p>Cette mission n&apos;a pas de tuteur</p>
+                    <Link to={`/mission/${mission._id}/edit`}>
+                      <PanelActionButton title="Assigner un tuteur" icon="pencil" />
+                    </Link>
+                  </Bloc>
+                )}
               </Row>
               <Row style={{ borderBottom: "2px solid #f4f5f7", ...rowStyle }}>
                 {structure ? (

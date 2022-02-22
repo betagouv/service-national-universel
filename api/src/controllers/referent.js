@@ -302,7 +302,9 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     // if withdrawn, cascade withdrawn on every status
     if (newYoung.status === "WITHDRAWN" && (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")) {
-      newYoung = { ...newYoung, statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" };
+      if (young.statusPhase1 !== "DONE") newYoung.statusPhase1 = "WITHDRAWN";
+      if (young.statusPhase2 !== "VALIDATED") newYoung.statusPhase2 = "WITHDRAWN";
+      if (young.statusPhase3 !== "VALIDATED") newYoung.statusPhase3 = "WITHDRAWN";
     }
 
     // if withdrawn from phase1 -> run the script that find a replacement for this young
@@ -310,6 +312,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       // disable the 08 jun 21
       // await assignNextYoungFromWaitingList(young);
     }
+
     if (newYoung.cohesionStayPresence === "true" && young.cohesionStayPresence !== "true") {
       let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
       if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
@@ -321,7 +324,16 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
           youngLastName: young.lastName,
         },
       });
+
+      // autovalidate the phase 1 if the young is present in the session
+      newYoung.statusPhase1 = "DONE";
     }
+
+    if (newYoung.cohesionStayPresence === "false" && young.cohesionStayPresence !== "false") {
+      // reject the phase 1 if the young is NOT present in the session
+      newYoung.statusPhase1 = "NOT_DONE";
+    }
+
     // Check quartier prioritaires.
     if (newYoung.zip && newYoung.city && newYoung.address) {
       const qpv = await getQPV(newYoung.zip, newYoung.city, newYoung.address);
@@ -731,6 +743,8 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       structure = await StructureModel.findById(referent.structureId);
     }
     if (!canDeleteReferent({ actor: req.user, originalTarget: referent, structure })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
+    if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });

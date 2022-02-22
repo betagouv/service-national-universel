@@ -51,7 +51,7 @@ export default function ApplyModal({ value, onChange, onSend }) {
   return (
     <Modal isOpen={true} toggle={onChange} style={{}}>
       <ModalContainer>
-        <img src={require("../../../assets/close.svg")} height={10} onClick={onChange} />
+        <img src={require("../../../assets/close.svg")} height={10} width={10} onClick={onChange} />
         <h1>Je souhaite proposer ma candidature pour cette mission</h1>
         <h3>Votre profil sera proposé à la structure, elle disposera de vos coordonnées pour valider votre participation.</h3>
         {sending ? (

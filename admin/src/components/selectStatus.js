@@ -5,7 +5,16 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, /* isEndOfInscriptionManagement2021, ROLES, */ colors, SENDINBLUE_TEMPLATES, WITHRAWN_REASONS } from "../utils";
+import {
+  translate,
+  YOUNG_STATUS,
+  YOUNG_PHASE,
+  YOUNG_STATUS_COLORS,
+  /* isEndOfInscriptionManagement2021, ROLES, */ colors,
+  SENDINBLUE_TEMPLATES,
+  WITHRAWN_REASONS,
+  ROLES,
+} from "../utils";
 import { toastr } from "react-redux-toastr";
 
 import ModalCorrection from "./modals/ModalCorrection";
@@ -14,6 +23,24 @@ import ModalWithdrawn from "./modals/ModalWithdrawn";
 import Chevron from "./Chevron";
 import ModalConfirm from "./modals/ModalConfirm";
 import ModalConfirmMultiAction from "./modals/ModalConfirmMultiAction";
+
+const lookUpAuthorizedStatus = ({ status, role }) => {
+  switch (status) {
+    case YOUNG_STATUS.WAITING_VALIDATION:
+      return [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN];
+    case YOUNG_STATUS.WAITING_CORRECTION:
+      return [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN];
+    case YOUNG_STATUS.WAITING_LIST:
+      return [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
+    case YOUNG_STATUS.WITHDRAWN:
+      if (role === ROLES.ADMIN) return [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST];
+      else return [];
+    case YOUNG_STATUS.VALIDATED:
+      return [YOUNG_STATUS.WITHDRAWN];
+    default:
+      return [];
+  }
+};
 
 export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => {} }) {
   const [modal, setModal] = useState(null);
@@ -133,6 +160,10 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
     }
   };
 
+  if (statusName === "status") {
+    options = lookUpAuthorizedStatus({ status: young[statusName], role: user.role });
+  }
+
   return (
     <>
       <ModalConfirm
@@ -200,9 +231,9 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
       />
       <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]]}>
         <UncontrolledDropdown setActiveFromChild>
-          <DropdownToggle tag="button" disabled={disabled}>
+          <DropdownToggle tag="button" disabled={disabled || !options.length}>
             {translate(young[statusName])}
-            {!disabled && <Chevron color={YOUNG_STATUS_COLORS[young[statusName]]} />}
+            {!!options.length && !disabled && <Chevron color={YOUNG_STATUS_COLORS[young[statusName]]} />}
           </DropdownToggle>
           <DropdownMenu>
             {options

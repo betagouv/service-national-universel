@@ -8,7 +8,6 @@ import { setYoung } from "../../redux/auth/actions";
 import LoginBox from "./components/LoginBox";
 import api from "../../services/api";
 import Header from "./components/header";
-import Title from "./components/Title";
 import InputField from "./components/InputField";
 import StyledFormGroup from "./components/StyledFormGroup";
 import Forgot from "./components/Forgot";
@@ -57,9 +56,9 @@ export default function Signin() {
       )}
       <Header />
       <LoginBox>
-        <Title>
+        <h3 className="relative text-center md:text-base text-xs font-bold mb-3 px-2.5 bg-white text-coolGray-900 left-0">
           <span>Mon espace volontaire</span>
-        </Title>
+        </h3>
         <Formik
           initialValues={{ email: "", password: "" }}
           onSubmit={async ({ email, password }, actions) => {
@@ -126,9 +125,9 @@ export default function Signin() {
           }}
         </Formik>
         <>
-          <Title>
+          <h3 className="relative text-center md:text-base text-xs font-bold pt-3 px-2.5 bg-white text-coolGray-900 left-0 border-t">
             <span>Vous n&apos;êtes pas encore inscrit ?</span>
-          </Title>
+          </h3>
           <Register to="/inscription/profil">Commencer l&apos;inscription</Register>
         </>
       </LoginBox>

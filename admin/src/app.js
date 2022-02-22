@@ -44,6 +44,7 @@ import { SENTRY_URL, environment, adminURL } from "./config";
 import { ROLES, ROLES_LIST } from "./utils";
 
 import "./index.css";
+import "./tailwindcss.css";
 import ModalCGU from "./components/modals/ModalCGU";
 
 if (environment === "production") {
@@ -138,13 +139,9 @@ const Home = () => {
 
   return (
     <div style={{ display: "flex" }}>
-      <Drawer open={menuVisible} onOpen={setMenuVisible} />
+      <Drawer/>
       <ContentContainer>
-        <Header
-          onClickBurger={() => {
-            setMenuVisible(!menuVisible);
-          }}
-        />
+        <Header/>
         <Switch>
           <Route path="/auth" component={Auth} />
           <RestrictedRoute path="/structure" component={Structure} />
@@ -196,9 +193,8 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
 };
 
 const ContentContainer = styled.div`
-  margin-left: auto;
   width: 85%;
-  max-width: calc(100% - 250px);
+  max-width: calc(100%);
   @media (max-width: 1000px) {
     width: 100%;
     padding: 0;
