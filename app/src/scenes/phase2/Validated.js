@@ -6,6 +6,7 @@ import DownloadAttestationButton from "../../components/buttons/DownloadAttestat
 import MailAttestationButton from "../../components/buttons/MailAttestationButton";
 import { HeroContainer, Hero, Content } from "../../components/Content";
 import api from "../../services/api";
+import Question from "../../assets/Question"
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
