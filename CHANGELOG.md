@@ -1,3 +1,20 @@
+# [1.47.0](https://github.com/betagouv/service-national-universel/compare/v1.46.0...v1.47.0) (2022-02-22)
+
+
+### Bug Fixes
+
+* **admin:** cancel ([fb02e01](https://github.com/betagouv/service-national-universel/commit/fb02e015bcfc4e33d2f3392d94e95946d7ab3ce3))
+* **admin:** list UI & card mission propose ([29de6b6](https://github.com/betagouv/service-national-universel/commit/29de6b6c6f7a7215177a300646c0362c0c0827ba))
+* **admin:** search department by number ([4707ab6](https://github.com/betagouv/service-national-universel/commit/4707ab620689154436c98c3ec91bc72c892c40c7))
+* **api:** validate status is forbidden ([#1258](https://github.com/betagouv/service-national-universel/issues/1258)) ([bdcb57a](https://github.com/betagouv/service-national-universel/commit/bdcb57af64ce241fff33c55fac7dbcdab9d5849a))
+
+
+### Features
+
+* redirect inscription.snu.gouv.fr 👉 moncompte.snu.gouv.fr ([#612](https://github.com/betagouv/service-national-universel/issues/612)) ([035315e](https://github.com/betagouv/service-national-universel/commit/035315e9285cb85851d5c686104977a8fca235ee)), closes [#604](https://github.com/betagouv/service-national-universel/issues/604)
+* **api:** pointage presence -> change statusPhase1 ([#1278](https://github.com/betagouv/service-national-universel/issues/1278)) ([585732a](https://github.com/betagouv/service-national-universel/commit/585732aab1e8fbc62a056f302323cf6a68e72d0f))
+* **app:** Phase 2 - ajouter un renvoi vers la BDC ([#1279](https://github.com/betagouv/service-national-universel/issues/1279)) ([7c92a20](https://github.com/betagouv/service-national-universel/commit/7c92a206d50b522d58a473527a5c4a4ca4c43fd4))
+
 # [1.46.0](https://github.com/betagouv/service-national-universel/compare/v1.45.0...v1.46.0) (2022-02-21)
 
 
