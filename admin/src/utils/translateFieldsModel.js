@@ -292,6 +292,12 @@ const translateFieldYoung = (f) => {
       return "créé(e) le";
     case "updatedAt":
       return "mis(e) à jour le";
+    case "statusPhase2UpdatedAt":
+      return "Statut phase 2 mis(e) à jour le";
+    case "phase2NumberHoursEstimated":
+      return "Nombre d'heures estimées (phase 2)";
+    case "phase2NumberHoursDone":
+      return "Nombre d'heures effectuées (phase 2)";
     default:
       return f;
   }

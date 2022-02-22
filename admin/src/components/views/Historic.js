@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
 
-import { formatStringLongDate, translateOperationName, translateModelFields, translate } from "../../utils";
+import { formatStringLongDate, translateModelFields, translate } from "../../utils";
 import Loader from "../../components/Loader";
 import api from "../../services/api";
+import { HiOutlineChevronUp, HiOutlineChevronDown, HiArrowRight } from "react-icons/hi";
 
 export default function Historic({ model, value }) {
   const [data, setData] = useState();
@@ -26,106 +26,55 @@ export default function Historic({ model, value }) {
     <Loader />
   ) : (
     <div>
-      <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-        <Table>
-          <thead>
-            <tr>
-              <th>Acteur</th>
-              <th>Opération</th>
-              <th>Ancienne valeur</th>
-              <th>Nouvelle valeur</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          {data.length === 0 ? <NoResult>Aucune données</NoResult> : null}
-          <tbody>
-            {data.map((hit) => (
-              <Hit model={model} key={hit._id} hit={hit} />
-            ))}
-          </tbody>
-        </Table>
+      <div className="flex flex-col gap-3 w-full">
+        {data.length === 0 ? <div className="italic p-1">Aucune données</div> : null}
+        {data.map((hit) => (
+          <Hit model={model} key={hit._id} hit={hit} />
+        ))}
       </div>
     </div>
   );
 }
 
 const Hit = ({ hit, model }) => {
+  const [viewDetails, setViewDetails] = useState(true);
   function isIsoDate(str) {
     if (!Date.parse(str)) return false;
     var d = new Date(str);
     return d.toISOString() === str;
   }
   return (
-    <>
-      {hit.ops?.map((e, i) => {
-        const originalValue = translate(JSON.stringify(e.originalValue)?.replace(/"/g, ""));
-        const value = translate(JSON.stringify(e.value)?.replace(/"/g, ""));
-
-        return (
-          <tr key={i} style={{ borderBottom: i === hit.ops.length - 1 && "1px solid #ddd" }}>
-            <td>{hit.user && hit.user.firstName && hit.user.lastName ? `${hit.user.firstName} ${hit.user.lastName}` : "Non renseigné"}</td>
-            <td>
-              <Op>{`${translateOperationName(e.op)}`}</Op> : {`${translateModelFields(model, e.path.substring(1))}`}
-            </td>
-            <td>{(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || "-"}</td>
-            <td>{(isIsoDate(value) ? formatStringLongDate(value) : value) || "-"}</td>
-            <td>{formatStringLongDate(hit.date)}</td>
-          </tr>
-        );
-      })}
-    </>
+    <div className="bg-white shadow-md rounded-lg">
+      <div className="flex p-3 border-b justify-between items-center cursor-pointer" onClick={() => setViewDetails((e) => !e)}>
+        <div>
+          <span className="font-bold">{hit.user && hit.user.firstName && hit.user.lastName ? `${hit.user.firstName} ${hit.user.lastName}` : "Acteur non renseigné"}</span>
+          ,&nbsp;{formatStringLongDate(hit.date)}
+        </div>
+        <div className="flex gap-2 items-center text-coolGray-500">
+          <span className="italic">
+            {hit.ops.length} action{hit.ops.length > 1 ? "s" : ""}
+          </span>
+          {viewDetails ? <HiOutlineChevronUp /> : <HiOutlineChevronDown />}
+        </div>
+      </div>
+      {viewDetails
+        ? hit.ops?.map((e, i) => {
+            const originalValue = translate(JSON.stringify(e.originalValue)?.replace(/"/g, ""));
+            const value = translate(JSON.stringify(e.value)?.replace(/"/g, ""));
+            return (
+              <div className="flex p-3 justify-between" key={`${hit.date}-${i}`}>
+                <div className="flex-1 ">{`${translateModelFields(model, e.path.substring(1))}`}&nbsp;:</div>
+                <div className="flex-1 text-center">
+                  {(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || <span className="text-coolGray-500 italic">Vide</span>}
+                </div>
+                <div className="text-center">
+                  <HiArrowRight />
+                </div>
+                <div className="flex-1 text-center">{(isIsoDate(value) ? formatStringLongDate(value) : value) || "-"}</div>
+              </div>
+            );
+          })
+        : null}
+    </div>
   );
 };
-
-const Table = styled.table`
-  width: 100%;
-  color: #242526;
-  margin-top: 10px;
-  background-color: #fff;
-  th {
-    border-bottom: 1px solid #f4f5f7;
-    padding: 15px;
-    font-weight: 400;
-    font-size: 14px;
-    text-transform: uppercase;
-  }
-  td {
-    padding: 15px;
-    font-size: 14px;
-    font-weight: 300;
-    strong {
-      font-weight: 700;
-      margin-bottom: 5px;
-      display: block;
-    }
-  }
-  td:first-child,
-  th:first-child {
-    padding-left: 25px;
-  }
-
-  //each line (header included)
-  tr {
-    display: flex;
-    //each column
-    > * {
-      flex: 1;
-    }
-  }
-  tbody tr {
-    :hover {
-      background-color: #e6ebfa;
-    }
-  }
-`;
-
-const NoResult = styled.div`
-  font-style: italic;
-  padding: 1rem;
-`;
-
-const Op = styled.span`
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 0.7rem;
-`;
