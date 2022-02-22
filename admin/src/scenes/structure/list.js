@@ -277,7 +277,7 @@ const Hit = ({ hit, onClick, selected, missions }) => {
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
         <MultiLine>
-          <h2>{hit.name}</h2>
+          <span className="font-bold text-black">{hit.name}</span>
           <p>
             {translate(hit.legalStatus)} • Créée le {formatLongDate(hit.createdAt)}
           </p>

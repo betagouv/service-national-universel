@@ -200,7 +200,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
       <td>
         <MultiLine>
-          <h2>{`${hit.youngFirstName} ${hit.youngLastName}`}</h2>
+          <span className="font-bold text-black">{`${hit.youngFirstName} ${hit.youngLastName}`}</span>
           <p>
             {hit.youngBirthdateAt ? `${getAge(hit.youngBirthdateAt)} ans` : null} {`• ${hit.youngCity || ""} (${hit.youngDepartment || ""})`}
           </p>

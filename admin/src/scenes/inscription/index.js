@@ -365,9 +365,9 @@ const Hit = ({ hit, index, onClick, selected }) => {
       <td>{index + 1}</td>
       <td>
         <MultiLine>
-          <h2>
+          <span className="font-bold text-black">
             {hit.firstName} {hit.lastName} <Badge text={hit.cohort} />
-          </h2>
+          </span>
           <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
         </MultiLine>
       </td>
