@@ -84,26 +84,22 @@ export default function Affected() {
           </Protocole>
         </Hero>
       </HeroContainer>
-      <GoodToKnow>
-        <section className="good-article">
-          <Case />
-          <div className="good-article-text">
-            <p>Dans ma valise, il y a...</p>
+      <div class=" smmd:flex smmd:flex-row flex flex-col items-center justify-center">
+          <Case class="h-12 w-12 border p-2 rounded-xl min-w-full min-h-full"/>
+          <div class="ml-3 smmd:mr-20">
+            <p class="!font-bold !text-black">Dans ma valise, il y a...</p>
             <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`} target="_blank" rel="noreferrer">
-              Comment bien <span>préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
+              Comment bien <span class="!text-snu-purple-200">préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
             </a>
           </div>
-        </section>
-        <section className="good-article">
-          <Question />
-          <div className="good-article-text">
-            <p>Vous avez des questions sur le séjour ?</p>
+          <Question class="h-12 w-12 border p-2 rounded-xl"/>
+          <div class="ml-3">
+            <p class="!font-bold !text-black">Vous avez des questions sur le séjour ?</p>
             <a href={`${supportURL}/base-de-connaissance/phase-1-le-sejour-de-cohesion`} target="_blank" rel="noreferrer">
-              Consulter notre <span>base&nbsp;de&nbsp;connaissance&nbsp;›</span>
+              Consulter notre <span class="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
             </a>
           </div>
-        </section>
-      </GoodToKnow>
+      </div>
       <HeroContainer id="convocationPhase1">
         <Hero>
           <Content style={{ width: "100%", padding: "3.2rem" }}>
@@ -160,52 +156,6 @@ const Protocole = styled.a`
   }
 `;
 
-const GoodToKnow = styled.article`
-  max-width: 1280px;
-  margin: 2rem auto;
-  padding: 0 2rem;
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  .good-article {
-    margin: 2rem;
-    display: flex;
-    align-items: center;
-    &-text {
-      margin-left: 1rem;
-    }
-    svg {
-      min-width: 48px;
-    }
-  }
-  a {
-    color: #6c6c6c;
-  }
-  span {
-    color: #5245cc;
-    text-decoration: underline;
-  }
-  img {
-    width: 1.5rem;
-    margin-bottom: 1rem;
-  }
-  p {
-    margin: 0;
-    color: black;
-    font-weight: bold;
-  }
-  @media (min-width: 1335px) {
-    justify-content: center;
-  }
-  @media (max-width: 360px) {
-    .good-article {
-      flex-direction: column;
-    }
-    svg {
-      margin-bottom: 0.5rem;
-    }
-  }
-`;
 
 const ContentHorizontal = styled(Content)`
   display: flex;
