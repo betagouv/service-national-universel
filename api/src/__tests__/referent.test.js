@@ -134,15 +134,15 @@ describe("Referent", () => {
       expect(young.statusPhase3).toEqual("VALIDATED");
     });
     it("should update young statuses when sending cohection stay presence true", async () => {
-      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" });
+      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" }, {cohesionStayPresence: undefined});
       expect(response.statusCode).toEqual(200);
-      expect(young.statusPhase1).toEqual("AFFECTED");
+      expect(young.statusPhase1).toEqual("DONE");
       expect(young.cohesionStayPresence).toEqual("true");
     });
     it("should update young statuses when sending cohection stay presence false", async () => {
       const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "false" });
       expect(response.statusCode).toEqual(200);
-      expect(young.statusPhase1).toEqual("AFFECTED");
+      expect(young.statusPhase1).toEqual("NOT_DONE");
       expect(young.cohesionStayPresence).toEqual("false");
     });
     it("should remove places when sending to cohesion center", async () => {
