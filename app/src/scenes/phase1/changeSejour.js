@@ -7,9 +7,10 @@ import { Link } from "react-router-dom";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../utils";
+import { translate, translateCohort } from "../../utils";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import { HeroContainer, Hero } from "../../components/Content";
 
 export default function changeSejour() {
   const young = useSelector((state) => state.Auth.young);
@@ -98,123 +99,145 @@ export default function changeSejour() {
 
   return (
     <>
-      {isEligible ? (
-        <Wrapper>
-          <Heading>
-            <span>{`${young.firstName} ${young.lastName}`}</span>
-            <h1>Changement de séjour</h1>
-          </Heading>
-
-          <>
-            <h3 style={{ margin: 0 }}>Vous souhaitez changer de dates de séjour de cohésion ?</h3>
-            <div style={{ display: "grid", marginBlock: "20px", gridTemplateColumns: "1fr 375px", gridGap: "20px", alignItems: "center", justifyItems: "left", minWidth: "75%" }}>
-              <p style={{ margin: 0 }}>Choix du nouveau séjour de cohésion:</p>
-
-              <ActionBox color="#ffffff" width="375px">
-                <UncontrolledDropdown setActiveFromChild>
-                  <DropdownToggle tag="button">
-                    Séjour {newSejour}
-                    <Chevron color="#9a9a9a" />
-                  </DropdownToggle>
-                  <DropdownMenu>
-                    {sejours
-                      .filter((e) => e !== young.cohort)
-                      .map((status) => {
-                        return (
-                          <DropdownItem key={status} className="dropdown-item" onClick={() => setNewSejour(status)}>
-                            Séjour {status}
-                          </DropdownItem>
-                        );
-                      })}
-                  </DropdownMenu>
-                </UncontrolledDropdown>
-              </ActionBox>
-              <p style={{ margin: 0 }}>Précisez le motif de changement de séjour :</p>
-
-              <ActionBox color="#ffffff" width="375px">
-                <UncontrolledDropdown setActiveFromChild>
-                  <DropdownToggle tag="button">
-                    {motif || <p></p>}
-                    <Chevron color="#9a9a9a" />
-                  </DropdownToggle>
-                  <DropdownMenu>
-                    {motifs
-                      .filter((e) => e !== motif)
-                      .map((status) => {
-                        return (
-                          <DropdownItem key={status} className="dropdown-item" onClick={() => setMotif(status)}>
-                            {status}
-                          </DropdownItem>
-                        );
-                      })}
-                  </DropdownMenu>
-                </UncontrolledDropdown>
-              </ActionBox>
-            </div>
-            <p style={{ margin: 0, marginTop: "16px" }}>
-              Pourquoi je ne vois pas tous les séjours ?{" "}
-              <a href="https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
-                En savoir plus sur les séjours où je suis éligible.
-              </a>
-            </p>
-            <div style={{ display: "grid", marginBlock: "20px", gridTemplateColumns: "1fr 375px", gridGap: "20px", alignItems: "center", justifyItems: "center", minWidth: "75%" }}>
-              <p>
-                <ContinueButton style={{ marginLeft: 10 }} onClick={() => onConfirmer()}>
-                  Enregistrer
-                </ContinueButton>
-                <ModalConfirm
-                  size="lg"
-                  isOpen={modalConfirmControlOk}
-                  title="Changement de séjour"
-                  message={
-                    <>
-                      Êtes-vous sûr ? <br /> <br />
-                      Vous vous apprêtez à changer de séjour pour le {newSejour}. Cette action est irréversible, souhaitez-vous confirmer cette action ? <br />
-                    </>
-                  }
-                  onCancel={() => setmodalConfirmControlOk(false)}
-                  onConfirm={() => {
-                    handleChangeSejour();
-                  }}
-                  disableConfirm={!motif}
-                  showHeaderIcon={true}></ModalConfirm>
-                <ModalConfirm
-                  size="lg"
-                  isOpen={modalConfirmGoalReached}
-                  title="Changement de séjour"
-                  message={
-                    <>
-                      Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour . Vous allez être positionné(e) sur liste complémentaire et vous serez
-                      averti(e) si des places se libérent. <br /> <br />
-                      Souhaitez-vous maintenir votre choix de séjour ?
-                    </>
-                  }
-                  onCancel={() => setmodalConfirmGoalReached(false)}
-                  onConfirm={() => {
-                    handleWaitingList();
-                  }}
-                  disableConfirm={!motif}
-                  showHeaderIcon={true}></ModalConfirm>
-              </p>
-              <p>
-                <ContinueButton>
-                  <Button to="/phase1">Annuler</Button>
-                </ContinueButton>
-              </p>
-            </div>
-          </>
-        </Wrapper>
-      ) : (
-        <Wrapper>
-          <h2>Vous n&apos;êtes élégible à aucun séjour de cohésion pour le moment.</h2>
-          <a href="https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
-            En savoir plus sur les séjours où je suis éligible.
-          </a>
-        </Wrapper>
-      )}
+      <HeroContainer>
+        {isEligible ? (
+          <Hero style={{ flexDirection: "column" }}>
+            <Section className="hero-container">
+              <section className="content">
+                <h1>
+                  <strong>Changer mes dates de séjour de cohésion </strong>
+                </h1>
+                <p>
+                  <b>Une contrainte personnelle, familiale, scolaire ou professionnelle ?</b>
+                  <br />
+                  Vous pouvez modifier les dates de votre séjour initialement prévu {translateCohort(young.cohort)}.
+                </p>
+                <ActionBox color="#ffffff" width="375px">
+                  <UncontrolledDropdown setActiveFromChild>
+                    <DropdownToggle tag="button">
+                      Séjour {newSejour}
+                      <Chevron color="#9a9a9a" />
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      {sejours
+                        .filter((e) => e !== young.cohort)
+                        .map((status) => {
+                          return (
+                            <DropdownItem key={status} className="dropdown-item" onClick={() => setNewSejour(status)}>
+                              Séjour {status}
+                            </DropdownItem>
+                          );
+                        })}
+                    </DropdownMenu>
+                  </UncontrolledDropdown>
+                </ActionBox>
+                <p style={{ margin: 0, marginTop: "16px" }}>
+                  Pourquoi je ne vois pas tous les séjours ?{" "}
+                  <a href="https:support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
+                    En savoir plus sur les séjours où je suis éligible.
+                  </a>
+                </p>
+                <p style={{ margin: 0 }}>Précisez le motif de changement de séjour :</p>
+                <ActionBox color="#ffffff" width="375px">
+                  <UncontrolledDropdown setActiveFromChild>
+                    <DropdownToggle tag="button">
+                      {motif || <p></p>}
+                      <Chevron color="#9a9a9a" />
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      {motifs
+                        .filter((e) => e !== motif)
+                        .map((status) => {
+                          return (
+                            <DropdownItem key={status} className="dropdown-item" onClick={() => setMotif(status)}>
+                              {status}
+                            </DropdownItem>
+                          );
+                        })}
+                    </DropdownMenu>
+                  </UncontrolledDropdown>
+                </ActionBox>
+                <div
+                  style={{
+                    display: "grid",
+                    marginBlock: "20px",
+                    gridTemplateColumns: "1fr 375px",
+                    gridGap: "20px",
+                    alignItems: "center",
+                    justifyItems: "center",
+                    minWidth: "75%",
+                  }}>
+                  <p>
+                    <ContinueButton style={{ marginLeft: 10 }} onClick={() => onConfirmer()}>
+                      Enregistrer
+                    </ContinueButton>
+                    <ModalConfirm
+                      size="lg"
+                      isOpen={modalConfirmControlOk}
+                      title="Changement de séjour"
+                      message={
+                        <>
+                          Êtes-vous sûr ? <br /> <br />
+                          Vous vous apprêtez à changer de séjour pour le {newSejour}. Cette action est irréversible, souhaitez-vous confirmer cette action ? <br />
+                        </>
+                      }
+                      onCancel={() => setmodalConfirmControlOk(false)}
+                      onConfirm={() => {
+                        handleChangeSejour();
+                      }}
+                      disableConfirm={!motif}
+                      showHeaderIcon={true}></ModalConfirm>
+                    <ModalConfirm
+                      size="lg"
+                      isOpen={modalConfirmGoalReached}
+                      title="Changement de séjour"
+                      message={
+                        <>
+                          Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour . Vous allez être positionné(e) sur liste complémentaire et vous serez
+                          averti(e) si des places se libérent. <br /> <br />
+                          Souhaitez-vous maintenir votre choix de séjour ?
+                        </>
+                      }
+                      onCancel={() => setmodalConfirmGoalReached(false)}
+                      onConfirm={() => {
+                        handleWaitingList();
+                      }}
+                      disableConfirm={!motif}
+                      showHeaderIcon={true}></ModalConfirm>
+                  </p>
+                  <p>
+                    <ContinueButton>
+                      <Button to="/phase1">Annuler</Button>
+                    </ContinueButton>
+                  </p>
+                </div>
+              </section>
+              <div className="thumb" />
+            </Section>
+          </Hero>
+        ) : (
+          <Wrapper>
+            <h2>Vous n&apos;êtes élégible à aucun séjour de cohésion pour le moment.</h2>
+            <a href="https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
+              En savoir plus sur les séjours où je suis éligible.
+            </a>
+          </Wrapper>
+        )}
+      </HeroContainer>
     </>
   );
 }
+
+const Section = styled.section`
+  display: flex;
+  h1 span {
+    color: #2e2e2e;
+    font-weight: 400;
+  }
+  p span {
+    color: #888888;
+  }
+`;
 
 const Wrapper = styled.div`
   padding: 20px 40px;
