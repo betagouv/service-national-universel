@@ -477,7 +477,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
   } catch (error) {
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    console.log("ERROR 🚫", error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
