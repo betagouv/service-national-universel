@@ -84,8 +84,8 @@ export default function Affected() {
           </Protocole>
         </Hero>
       </HeroContainer>
-      <div class=" smmd:flex smmd:flex-row flex flex-col items-center justify-center">
-          <Case class="h-12 w-12 border p-2 rounded-xl min-w-full min-h-full"/>
+      <GoodToKnow className=" smmd:flex smmd:flex-row flex flex-col items-center justify-center">
+          <Case class="h-12 w-12 border p-2 rounded-xl" />
           <div class="ml-3 smmd:mr-20">
             <p class="!font-bold !text-black">Dans ma valise, il y a...</p>
             <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`} target="_blank" rel="noreferrer">
@@ -99,7 +99,7 @@ export default function Affected() {
               Consulter notre <span class="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
             </a>
           </div>
-      </div>
+      </GoodToKnow>
       <HeroContainer id="convocationPhase1">
         <Hero>
           <Content style={{ width: "100%", padding: "3.2rem" }}>
@@ -156,6 +156,11 @@ const Protocole = styled.a`
   }
 `;
 
+const GoodToKnow = styled.div`
+    svg {
+      min-width: 48px;
+    }
+`;
 
 const ContentHorizontal = styled(Content)`
   display: flex;

@@ -58,7 +58,7 @@ export default () => {
             <div className="thumb" />
           </Hero>
         </HeroContainer>
-            <div class="flex items-center justify-center">
+            <GoodToKnow className="flex items-center justify-center">
               <Question class="h-12 w-12 border p-2 rounded-xl" />
               <div class="ml-3">
                 <p class="!font-bold !text-black">Vous avez des questions sur la mission d'intérêt général ?</p>
@@ -66,7 +66,7 @@ export default () => {
                 Consulter notre <span class="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
                 </a>
               </div>
-            </div>
+            </GoodToKnow>
         {referentManagerPhase2 ? (
           <HeroContainer>
             <Hero>
@@ -99,3 +99,8 @@ const StyledA = styled.a`
   }
 `;
 
+const GoodToKnow = styled.div`
+    svg {
+      min-width: 48px;
+    }
+`;
