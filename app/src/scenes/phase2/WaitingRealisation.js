@@ -60,7 +60,7 @@ export default () => {
             <div className="thumb" />
           </Hero>
         </HeroContainer>
-        <GoodToKnow className="flex items-center justify-center">
+        <GoodToKnow className="flex items-center justify-center mb-3">
           <Question class="h-12 w-12 border p-2 rounded-xl" />
           <div class="ml-3">
             <p class="!font-bold !text-black">Vous avez des questions sur la mission d'intérêt général ?</p>
