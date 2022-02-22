@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { HeroContainer, Hero, Content } from "../../components/Content";
 import api from "../../services/api";
 import { ENABLE_PM } from "../../utils";
+import Question from "../../assets/question";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -58,6 +59,15 @@ export default () => {
             <div className="thumb" />
           </Hero>
         </HeroContainer>
+        <GoodToKnow className="flex items-center justify-center mb-3">
+          <Question class="h-12 w-12 border p-2 rounded-xl" />
+          <div className="ml-3">
+            <p className="!font-bold !text-black">Vous avez des questions sur la mission d&apos;intérêt général ?</p>
+            <a href={`https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1`} target="_blank" rel="noreferrer">
+              Consulter notre <span className="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
+            </a>
+          </div>
+        </GoodToKnow>
         {referentManagerPhase2 ? (
           <HeroContainer>
             <Hero>
@@ -87,5 +97,11 @@ const StyledA = styled.a`
   cursor: pointer;
   :hover {
     text-decoration: underline;
+  }
+`;
+
+const GoodToKnow = styled.div`
+  svg {
+    min-width: 48px;
   }
 `;
