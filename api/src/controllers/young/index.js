@@ -418,8 +418,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
-
-    if (value.department !== young.department) {
+    if (value?.department !== young?.department) {
       const referents = await ReferentModel.find({ department: value.department, role: ROLES.REFERENT_DEPARTMENT });
       for (let referent of referents) {
         await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
