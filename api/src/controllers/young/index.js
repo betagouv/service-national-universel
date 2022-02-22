@@ -39,7 +39,7 @@ const { validateYoung, validateId, validateFirstName } = require("../../utils/va
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
 const { canDeleteYoung } = require("snu-lib/roles");
-const { canUpdateStatus } = require("snu-lib");
+const { canUpdateYoungStatus } = require("snu-lib");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
@@ -419,7 +419,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
-    if (!canUpdateStatus(value, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (value?.department && young?.department && value.department !== young.department) {
       const referents = await ReferentModel.find({ department: value.department, role: ROLES.REFERENT_DEPARTMENT });
