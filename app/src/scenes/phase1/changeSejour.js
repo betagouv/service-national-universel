@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-
 import styled from "styled-components";
 import Chevron from "../../components/Chevron";
 import { useSelector } from "react-redux";
@@ -9,7 +8,6 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../utils";
-
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 
@@ -39,17 +37,17 @@ export default function changeSejour() {
         const { ok, code, data } = await api.post("/cohort-session/eligibility/2022", {
           birthDate: young.birthdateAt,
           schoolLevel: young.schoolLevel,
-          department: young.department
+          department: young.department,
         });
-        const sejourGoal = data.map(e => {
+        const sejourGoal = data.map((e) => {
           // les dates de fin d'inscription aux séjours ne sont pas renseignés pour le moment
           //var date = new Date();
           //console.log(date.toISOString());
-          //if (e.inscriptionLimitDate > date.toISOSString())    date de fin de d'inscription aux séjours à récupérer         
-          return { 'sejour': e.id, 'goal': e.goalReached }
-        })
+          //if (e.inscriptionLimitDate > date.toISOSString())    date de fin de d'inscription aux séjours à récupérer
+          return { sejour: e.id, goal: e.goalReached };
+        });
 
-        const sejour = sejourGoal.map(e => e.sejour)
+        const sejour = sejourGoal.map((e) => e.sejour);
 
         setSejours(sejour);
         setIsElegible(!!data);
@@ -57,51 +55,46 @@ export default function changeSejour() {
       } catch (e) {
         toastr.error("Oups, une erreur est survenue", translate(e.code));
       }
-
-    })()
-  }, [])
+    })();
+  }, []);
 
   const onConfirmer = () => {
     if (newSejour && motif) {
-      var isGoalTrue = sejourGoal.filter(obj => {
-        if (obj.goal === true && obj.goal === newSejour)
-          return obj.sejour === newSejour
-      })
+      var isGoalTrue = sejourGoal.filter((obj) => {
+        if (obj.goal === true && obj.goal === newSejour) return obj.sejour === newSejour;
+      });
       //si le volontaire est en statut de phase 1 “affectée” et que les objectifs de recrutement sont atteint pour le nouveau séjour choisi
 
       if (isGoalTrue.length === 0) {
         setmodalConfirmControlOk(true);
-      }
-      else {
+      } else {
         setmodalConfirmGoalReached(true);
       }
     } else {
       toastr.info("Veuillez renseigner tous les champs");
     }
-  }
+  };
 
   const handleChangeSejour = async () => {
     try {
-      await api.put('/young', { cohortChangeReason: motif })
-      await api.put('/young', { cohort: newSejour });
+      await api.put("/young", { cohortChangeReason: motif });
+      await api.put("/young", { cohort: newSejour });
       toastr.success("Cohorte modifiée avec succès");
       setmodalConfirmControlOk(false);
     } catch (e) {
       return toastr.error("Oups, une erreur est survenue lors de votre changement de cohorte :", translate(e.code));
     }
-  }
+  };
 
   const handleWaitingList = async () => {
     try {
-      await api.put('/cohort-session/' + young._id, { cohort: newSejour });
+      await api.put("/cohort-session/" + young._id, { cohort: newSejour });
       toastr.success("Vous avez été ajouté en liste d'attente");
       setmodalConfirmGoalReached(false);
     } catch (e) {
       return toastr.error("Oups, une erreur est survenue lors de votre changement de cohorte :", translate(e.code));
     }
-  }
-
-
+  };
 
   return (
     <>
@@ -161,11 +154,12 @@ export default function changeSejour() {
             <p style={{ margin: 0, marginTop: "16px" }}>
               Pourquoi je ne vois pas tous les séjours ?{" "}
               <a href="https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
-                En savoir plus sur les séjours où je suis éligible.</a>
+                En savoir plus sur les séjours où je suis éligible.
+              </a>
             </p>
             <div style={{ display: "grid", marginBlock: "20px", gridTemplateColumns: "1fr 375px", gridGap: "20px", alignItems: "center", justifyItems: "center", minWidth: "75%" }}>
               <p>
-                <ContinueButton style={{ marginLeft: 10 }} onClick={() => onConfirmer()} >
+                <ContinueButton style={{ marginLeft: 10 }} onClick={() => onConfirmer()}>
                   Enregistrer
                 </ContinueButton>
                 <ModalConfirm
@@ -175,8 +169,7 @@ export default function changeSejour() {
                   message={
                     <>
                       Êtes-vous sûr ? <br /> <br />
-                      Vous vous apprêtez à changer de séjour pour le {newSejour}.
-                      Cette action est irréversible, souhaitez-vous confirmer cette action ?  <br />
+                      Vous vous apprêtez à changer de séjour pour le {newSejour}. Cette action est irréversible, souhaitez-vous confirmer cette action ? <br />
                     </>
                   }
                   onCancel={() => setmodalConfirmControlOk(false)}
@@ -184,18 +177,16 @@ export default function changeSejour() {
                     handleChangeSejour();
                   }}
                   disableConfirm={!motif}
-                  showHeaderIcon={true}>
-                </ModalConfirm>
+                  showHeaderIcon={true}></ModalConfirm>
                 <ModalConfirm
                   size="lg"
                   isOpen={modalConfirmGoalReached}
                   title="Changement de séjour"
                   message={
                     <>
-                      Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour .
-                      Vous allez être positionné(e) sur liste complémentaire et vous serez averti(e) si des places se libérent. <br /> <br />
+                      Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour . Vous allez être positionné(e) sur liste complémentaire et vous serez
+                      averti(e) si des places se libérent. <br /> <br />
                       Souhaitez-vous maintenir votre choix de séjour ?
-
                     </>
                   }
                   onCancel={() => setmodalConfirmGoalReached(false)}
@@ -203,38 +194,27 @@ export default function changeSejour() {
                     handleWaitingList();
                   }}
                   disableConfirm={!motif}
-                  showHeaderIcon={true}>
-                </ModalConfirm>
+                  showHeaderIcon={true}></ModalConfirm>
               </p>
               <p>
                 <ContinueButton>
-                  <Button to="/phase1">
-                    Annuler
-                  </Button>
+                  <Button to="/phase1">Annuler</Button>
                 </ContinueButton>
               </p>
             </div>
           </>
         </Wrapper>
-      ) :
-        (
-          <Wrapper>
-            <h2>
-              Vous n&apos;êtes élégible à aucun séjour de cohésion pour le moment.
-            </h2>
-            <a href="https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
-              En savoir plus sur les séjours où je suis éligible.</a>
-          </Wrapper>
-        )
-      }
-
+      ) : (
+        <Wrapper>
+          <h2>Vous n&apos;êtes élégible à aucun séjour de cohésion pour le moment.</h2>
+          <a href="https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
+            En savoir plus sur les séjours où je suis éligible.
+          </a>
+        </Wrapper>
+      )}
     </>
   );
-
-};
-
-
-
+}
 
 const Wrapper = styled.div`
   padding: 20px 40px;
