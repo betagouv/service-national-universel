@@ -6,17 +6,13 @@ import { useSelector } from "react-redux";
 import { HeroContainer, Hero, Content, Separator, AlertBoxInformation } from "../../components/Content";
 import NextStep from "./nextStep";
 import api from "../../services/api";
-import { translate, translateCohort } from "../../utils";
+import { translate, translateCohort, START_DATE_SESSION_PHASE1 } from "../../utils";
 import ConvocationDetails from "./components/ConvocationDetails";
 import { supportURL } from "../../config";
 import Case from "../../assets/case";
 import Question from "../../assets/question";
 import Bouclier from "../../assets/bouclier";
 import right from "../../assets/right.svg";
-import ModalConfirm from "../../components/modals/ModalConfirm";
-import ModalConfirmWithMessage from "../../components/modals/ModalConfirm";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import Chevron from "../../components/Chevron";
 import { Link } from "react-router-dom";
 
 export default function Affected() {
@@ -32,6 +28,7 @@ export default function Affected() {
   };
 
   useEffect(() => {
+    if (!young.sessionPhase1Id) return;
     (async () => {
       const { data, code, ok } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
       if (!ok) return toastr.error("error", translate(code));
@@ -62,7 +59,7 @@ export default function Affected() {
                 Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région (sauf exception) pour
                 créer ainsi des liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
               </p>
-              <Button to="/changeSejour">Changer de séjour</Button>
+              {START_DATE_SESSION_PHASE1[young.cohort]?.getTime() > Date.now() ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
               <Separator style={{ width: "150px" }} />
               <p>
                 <strong style={{ color: "black" }}>Votre lieu d&apos;affectation</strong>
@@ -238,12 +235,15 @@ const ContentHorizontal = styled(Content)`
   }
 `;
 
-const ChangeButton = styled.button`
-  margin: 1rem auto;
-  color: #fff;
-  background-color: #5145cd;
-  padding: 9px 20px;
-  border: 0;
+const Button = styled(Link)`
+  width: fit-content;
+  cursor: pointer;
+  color: #374151;
+  text-align: center;
+  margin: 1rem 0;
+  background-color: #fff;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d2d6dc;
   outline: 0;
   border-radius: 6px;
   font-weight: 500;
@@ -254,32 +254,12 @@ const ChangeButton = styled.button`
   display: block;
   outline: 0;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 2;
   :hover {
     opacity: 0.9;
   }
-  svg {
-    margin-left: 0.5rem;
-    margin-bottom: 0.2rem;
-  }
-`;
-
-const Button = styled(Link)`
-  color: #fff;
-  background-color: #5145cd;
-  padding: 9px 20px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 20px;
-  margin-right: 10px;
-  margin-top: 40px;
-  display: block;
-  text-align: center;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  :hover {
-    opacity: 0.9;
-    color: #fff;
+  a {
+    color: #374151;
   }
 `;
