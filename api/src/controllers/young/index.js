@@ -39,6 +39,7 @@ const { validateYoung, validateId, validateFirstName } = require("../../utils/va
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
 const { canDeleteYoung } = require("snu-lib/roles");
+const { canUpdateYoungStatus } = require("snu-lib");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
@@ -418,6 +419,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     //! needs further checking
     // if (req.user.department !== young.department) {

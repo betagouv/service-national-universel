@@ -157,7 +157,7 @@ const Hit = ({ hit }) => {
       {bus && mounted ? (
         <td>
           <MultiLine>
-            {bus.placesLeft === 0 ? <Badge text="Complet" /> : <h2>{bus.placesLeft} places disponibles</h2>}
+            {bus.placesLeft === 0 ? <Badge text="Complet" /> : <span className="font-bold text-black">{bus.placesLeft} places disponibles</span>}
             <p>sur {bus.capacity} places proposées</p>
           </MultiLine>
         </td>

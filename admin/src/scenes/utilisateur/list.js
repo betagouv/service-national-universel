@@ -202,7 +202,7 @@ const Hit = ({ hit, onClick, user, selected, structure }) => {
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
         <MultiLine>
-          <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
+          <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
           <p>{hit.email}</p>
         </MultiLine>
       </td>

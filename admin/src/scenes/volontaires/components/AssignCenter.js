@@ -125,7 +125,7 @@ const HitCenter = ({ hit, onSend }) => {
     <tr>
       <td>
         <MultiLine>
-          <h2>{hit.name}</h2>
+          <span className="font-bold text-black">{hit.name}</span>
           <p>{`${hit.city || ""} • ${hit.department || ""}`}</p>
         </MultiLine>
       </td>

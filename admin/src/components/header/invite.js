@@ -24,7 +24,6 @@ import ModalButton from "../../components/buttons/ModalButton";
 import api from "../../services/api";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 
-
 export default function InviteHeader({ setOpen, open, label = "Inviter un référent" }) {
   const { user } = useSelector((state) => state.Auth);
 
@@ -51,7 +50,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
   };
 
   return (
-    <Invitation style={{ marginBottom: 10, textAlign: "right" }}>
+    <Invitation>
       <Modal isOpen={open} toggle={() => setOpen(false)} size="lg">
         <Invitation>
           <ModalHeader style={{ border: "none" }} toggle={() => setOpen(false)}>
@@ -137,14 +136,20 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       <Col md={6}>
                         <FormGroup>
                           <div>Région</div>
-                          <ChooseRegion validate={(v) => !v && requiredMessage} name ="region" value={values.region} onChange={handleChange} />
+                          <ChooseRegion validate={(v) => !v && requiredMessage} name="region" value={values.region} onChange={handleChange} />
                           <ErrorMessage errors={errors} touched={touched} name="region" />
                         </FormGroup>
                       </Col>
                       <Col md={6}>
                         <FormGroup>
                           <div>Fonction</div>
-                          <ChooseSubRole validate={(v) => !v && requiredMessage} name="subRole" value={values.subRole} onChange={handleChange} options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
+                          <ChooseSubRole
+                            validate={(v) => !v && requiredMessage}
+                            name="subRole"
+                            value={values.subRole}
+                            onChange={handleChange}
+                            options={getSubRoleOptions(REFERENT_REGION_SUBROLE)}
+                          />
                           <ErrorMessage errors={errors} touched={touched} name="subRole" />
                         </FormGroup>
                       </Col>
@@ -162,7 +167,13 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       <Col md={6}>
                         <FormGroup>
                           <div>Fonction</div>
-                          <ChooseSubRole validate={(v) => !v && requiredMessage} name="subRole" value={values.subRole} onChange={handleChange} options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
+                          <ChooseSubRole
+                            validate={(v) => !v && requiredMessage}
+                            name="subRole"
+                            value={values.subRole}
+                            onChange={handleChange}
+                            options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)}
+                          />
                           <ErrorMessage errors={errors} touched={touched} name="subRole" />
                         </FormGroup>
                       </Col>
@@ -180,7 +191,13 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       <Col md={6}>
                         <FormGroup>
                           <div>Fonction</div>
-                          <ChooseSubRole validate={(v) => !v && requiredMessage} name="subRole" value={values.subRole} onChange={handleChange} options={getSubRoleOptions(VISITOR_SUBROLES)} />
+                          <ChooseSubRole
+                            validate={(v) => !v && requiredMessage}
+                            name="subRole"
+                            value={values.subRole}
+                            onChange={handleChange}
+                            options={getSubRoleOptions(VISITOR_SUBROLES)}
+                          />
                           <ErrorMessage errors={errors} touched={touched} name="subRole" />
                         </FormGroup>
                       </Col>
@@ -342,7 +359,6 @@ const ChooseSessionPhase1 = ({ onChange, value, validate }) => {
         }}
       />
     </>
-
   );
 };
 
