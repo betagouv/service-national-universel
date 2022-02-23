@@ -43,6 +43,18 @@ const Hit = ({ hit, model }) => {
     var d = new Date(str);
     return d.toISOString() === str;
   }
+
+  const splitElementArray = (v) => {
+    // si on modifie la valeur d'un element d'un champs array
+    // on doit le parser car il est affiché sous la forme : field/index
+    const elementOfArry = v.match(/(\w*)\/(\d)/);
+    if (elementOfArry?.length) {
+      console.log("✍️ ~ elementOfArry", elementOfArry);
+      return `${translateModelFields(model, elementOfArry[1])} (nº${Number(elementOfArry[2]) + 1})`;
+    }
+    return v;
+  };
+
   return (
     <div className="bg-white shadow-md rounded-lg">
       <div className="flex p-3 border-b justify-between items-center cursor-pointer" onClick={() => setViewDetails((e) => !e)}>
@@ -62,10 +74,10 @@ const Hit = ({ hit, model }) => {
             const originalValue = translate(JSON.stringify(e.originalValue)?.replace(/"/g, ""));
             const value = translate(JSON.stringify(e.value)?.replace(/"/g, ""));
             return (
-              <div className="flex p-3 justify-between" key={`${hit.date}-${i}`}>
-                <div className="flex-1 ">{`${translateModelFields(model, e.path.substring(1))}`}&nbsp;:</div>
+              <div className="flex p-3 justify-between border-b border-[#f3f3f3]" key={`${hit.date}-${i}`}>
+                <div className="flex-1 ">{`${splitElementArray(translateModelFields(model, e.path.substring(1)))}`}&nbsp;:</div>
                 <div className="flex-1 text-center">
-                  {(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || <span className="text-coolGray-500 italic">Vide</span>}
+                  {(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || <span className="text-coolGray-400 italic">Vide</span>}
                 </div>
                 <div className="text-center">
                   <HiArrowRight />
