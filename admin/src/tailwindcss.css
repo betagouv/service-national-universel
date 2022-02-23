@@ -662,6 +662,10 @@ Ensure the default browser behavior of the `hidden` attribute.
   width: 2.25rem;
 }
 
+.flex-1{
+  flex: 1 1 0%;
+}
+
 .flex-shrink{
   flex-shrink: 1;
 }

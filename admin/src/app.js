@@ -142,7 +142,7 @@ const Home = () => {
       <Header />
       <div className="flex">
         <Drawer />
-        <ContentContainer>
+        <div className="flex-1">
           <Switch>
             <Route path="/auth" component={Auth} />
             <RestrictedRoute path="/structure" component={Structure} />
@@ -163,7 +163,7 @@ const Home = () => {
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
             <RestrictedRoute path="/" component={renderDashboard} />
           </Switch>
-        </ContentContainer>
+        </div>
       </div>
       <ModalCGU
         isOpen={modal?.isOpen}
@@ -193,14 +193,3 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
   }
   return <Route {...rest} render={(props) => <Component {...props} />} />;
 };
-
-const ContentContainer = styled.div`
-  width: 85%;
-  max-width: calc(100%);
-  @media (max-width: 1000px) {
-    width: 100%;
-    padding: 0;
-    margin-left: auto;
-    max-width: 100%;
-  }
-`;
