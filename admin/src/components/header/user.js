@@ -32,13 +32,13 @@ export default function HeaderUser() {
         </div>
         <Menu open={open}>
           <Close onClick={() => setOpen(false)}>&times;</Close>
-          <UserInfo>
+          <div className="my-2 text-xs px-3 text-coolGray-600">
             <p>
               {user.firstName} {user.lastName}
             </p>
-            <p>{user.email}</p>
-          </UserInfo>
-          <hr />
+            <p className="italic">{user.email}</p>
+          </div>
+          <hr className="m-0" />
           <Item>
             <NavLink to="/profil">Profil</NavLink>
           </Item>
@@ -52,7 +52,7 @@ export default function HeaderUser() {
               <NavLink to={`/structure/${user.structureId}`}>Inviter un utilisateur</NavLink>
             </Item>
           ) : null}
-          <hr />
+          <hr className="m-0" />
           <Item onClick={logout}>
             <NavLink style={{ color: colors.red }} to="/logout">
               Se déconnecter
@@ -72,18 +72,11 @@ const InviteReferent = ({ role }) => {
         plausibleEvent("Profil CTA - Inviter nouvel utilisateur");
         setOpen(true);
       }}>
-      <div style={{ padding: "10px 25px 8px" }}>Inviter un nouvel utilisateur</div>
+      <div>Inviter un nouvel utilisateur</div>
       <Invite role={role} label="Inviter un nouvel utilisateur" open={open} setOpen={() => setOpen(false)} />
     </div>
   );
 };
-
-const UserInfo = styled.div`
-  padding: 0 25px;
-  font-weight: 400;
-  font-size: 12px;
-  color: #606266;
-`;
 
 const Dropdown = styled.div`
   position: relative;
@@ -116,7 +109,6 @@ const MenuToggle = styled.div`
 `;
 
 const Menu = styled.div`
-  padding: 10px 0 8px;
   min-width: 230px;
   border-radius: 2px;
   background-color: #fff;
@@ -161,29 +153,21 @@ const Menu = styled.div`
 `;
 
 const Item = styled.div`
-  font-size: 14px;
-  color: #606266;
+  font-size: 15px;
+  border-left: solid transparent 4px;
+  border-radius: 0;
+  text-align: left;
+  color: #374151;
   cursor: pointer;
-  :hover {
-    background-color: #eaf3fa;
-    color: #3182ce;
+  padding: 10px;
+  &:hover {
+    background-color: #d3bfc731;
+    color: #333;
   }
   a {
     color: inherit;
     text-decoration: none;
     display: block;
-    padding: 10px 25px 8px;
-    font-weight: 400;
-    font-size: 14px;
-    color: #606266;
-    &.active {
-      background-color: #fafafc;
-      color: #3182ce;
-    }
-    :hover {
-      background-color: #eaf3fa;
-      color: #3182ce;
-    }
   }
 `;
 

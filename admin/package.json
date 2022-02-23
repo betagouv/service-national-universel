@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline",
+    "tailwind": "npx tailwindcss -i ./src/index.css -o ./src/tailwindcss.css --watch",
     "mobile": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline --host 0.0.0.0",
     "start": "node server/index.js",
     "install": "node src/build-only-on-clevercloud.js",
@@ -68,6 +69,7 @@
     "react-autosuggest": "10.1.0",
     "react-beautiful-dnd": "13.1.0",
     "react-dom": "16.14.0",
+    "react-icons": "^4.3.1",
     "react-loading": "2.0.3",
     "react-multi-select-component": "3.0.7",
     "react-redux": "7.2.6",
