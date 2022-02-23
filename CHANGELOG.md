@@ -1,3 +1,19 @@
+# [1.48.0](https://github.com/betagouv/service-national-universel/compare/v1.47.0...v1.48.0) (2022-02-23)
+
+
+### Bug Fixes
+
+* **api:** test young document ([00ea38b](https://github.com/betagouv/service-national-universel/commit/00ea38bc5cb10b5ad16c396ba9772373780be649))
+* download attestation phase1 ([26a8029](https://github.com/betagouv/service-national-universel/commit/26a8029d4358eed171cd5166d93d95b7360e8b18))
+* **admin:** add referent phase 2 contact in structure panel ([a864ce0](https://github.com/betagouv/service-national-universel/commit/a864ce0bf96dbb92c93d525b1bf359ea43460696))
+* **admin:** beautify historic view ([#1277](https://github.com/betagouv/service-national-universel/issues/1277)) ([6119d9e](https://github.com/betagouv/service-national-universel/commit/6119d9ea6890a6cddfd2409c8cdce9e095d9273c))
+* **api:** download attestation ([99f7510](https://github.com/betagouv/service-national-universel/commit/99f75103433caff285563c376f41997df75faa8f))
+
+
+### Features
+
+* **admin:** tailwind drawer + header ([#1274](https://github.com/betagouv/service-national-universel/issues/1274)) ([b3f19d6](https://github.com/betagouv/service-national-universel/commit/b3f19d66098b54da2bf6c34df379783941ca428b))
+
 # [1.47.0](https://github.com/betagouv/service-national-universel/compare/v1.46.0...v1.47.0) (2022-02-22)
 
 
