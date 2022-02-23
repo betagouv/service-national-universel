@@ -25,7 +25,7 @@
     "react-modal": "3.14.4",
     "react-paginate": "8.1.0",
     "react-toastify": "8.1.0",
-    "slate": "0.72.0",
+    "slate": "0.73.0",
     "slate-history": "0.66.0",
     "slate-hyperscript": "0.67.0",
     "slate-paste-linkify": "0.7.0",
