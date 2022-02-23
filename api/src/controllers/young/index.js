@@ -464,6 +464,27 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
   }
 });
 
+router.put("/:id/change-cohort/:newCohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = validateYoung(req.body, req.user);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
+
+    young.set(value);
+    await young.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 //todo : add operation unauthorized:
 // taking a user and a target, check if the user can send the template to the target
 router.post("/:id/email/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {

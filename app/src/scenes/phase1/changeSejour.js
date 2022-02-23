@@ -8,9 +8,9 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { translate, translateCohort } from "../../utils";
+import { HERO_IMAGES_LIST } from "../../utils";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import { HeroContainer, Hero } from "../../components/Content";
 
 export default function changeSejour() {
   const young = useSelector((state) => state.Auth.young);
@@ -21,6 +21,7 @@ export default function changeSejour() {
   const [sejours, setSejours] = useState(null);
   const [isEligible, setIsElegible] = useState(false);
   const [sejourGoal, setSejourGoal] = useState(null);
+  const [messageTextArea, setMessageTextArea] = useState("");
 
   const motifs = [
     "Non disponibilité pour motif familial ou personnel",
@@ -29,8 +30,6 @@ export default function changeSejour() {
     "Impossibilité de se rendre au point de rassemblement",
     "Autre",
   ];
-
-  const options = ["Juillet 2022", "Juin 2022", "Février 2022"];
 
   useEffect(() => {
     (async function getInfo() {
@@ -60,6 +59,7 @@ export default function changeSejour() {
   }, []);
 
   const onConfirmer = () => {
+    console.log("raison : " + messageTextArea);
     if (newSejour && motif) {
       var isGoalTrue = sejourGoal.filter((obj) => {
         if (obj.goal === true && obj.goal === newSejour) return obj.sejour === newSejour;
@@ -78,8 +78,9 @@ export default function changeSejour() {
 
   const handleChangeSejour = async () => {
     try {
-      await api.put("/young", { cohortChangeReason: motif });
-      await api.put("/young", { cohort: newSejour });
+      await api.put("/young/" + young._id + "/change-cohort/" + newSejour, { cohortChangeReason: motif });
+      await api.put("/young/" + young._id + "/change-cohort/" + newSejour, { cohortDetailedChangeReason: messageTextArea });
+      await api.put("/young/" + young._id + "/change-cohort/" + newSejour, { cohort: newSejour });
       toastr.success("Cohorte modifiée avec succès");
       setmodalConfirmControlOk(false);
     } catch (e) {
@@ -108,67 +109,74 @@ export default function changeSejour() {
                   <strong>Changer mes dates de séjour de cohésion </strong>
                 </h1>
                 <p>
-                  <b>Une contrainte personnelle, familiale, scolaire ou professionnelle ?</b>
+                  <b >Une contrainte personnelle, familiale, scolaire ou professionnelle ?</b>
                   <br />
                   Vous pouvez modifier les dates de votre séjour initialement prévu {translateCohort(young.cohort)}.
                 </p>
+                <p style={{ marginTop: 10, marginBottom: 9, fontSize: 14, fontWeight: 500 }}>Dates de séjour</p>
                 <ActionBox color="#ffffff" width="375px">
-                  <UncontrolledDropdown setActiveFromChild>
-                    <DropdownToggle tag="button">
-                      Séjour {newSejour}
-                      <Chevron color="#9a9a9a" />
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      {sejours
-                        .filter((e) => e !== young.cohort)
-                        .map((status) => {
-                          return (
-                            <DropdownItem key={status} className="dropdown-item" onClick={() => setNewSejour(status)}>
-                              Séjour {status}
-                            </DropdownItem>
-                          );
-                        })}
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
+                  <SectionHelp>
+                    <UncontrolledDropdown setActiveFromChild>
+                      <DropdownToggle tag="button">
+                        Séjour {newSejour}
+                        <Chevron color="#9a9a9a" />
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        {sejours
+                          .filter((e) => e !== young.cohort)
+                          .map((status) => {
+                            return (
+                              <DropdownItem key={status} className="dropdown-item" onClick={() => setNewSejour(status)}>
+                                Séjour {status}
+                              </DropdownItem>
+                            );
+                          })}
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
+                    <a href="https:support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
+                      Pourquoi je ne vois pas tous les séjours ?
+                    </a>
+                  </SectionHelp>
                 </ActionBox>
-                <p style={{ margin: 0, marginTop: "16px" }}>
-                  Pourquoi je ne vois pas tous les séjours ?{" "}
-                  <a href="https:support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
-                    En savoir plus sur les séjours où je suis éligible.
-                  </a>
-                </p>
-                <p style={{ margin: 0 }}>Précisez le motif de changement de séjour :</p>
+                <p style={{ marginTop: 30, marginBottom: 0, fontSize: 14, fontWeight: 500 }}>Précisez la raison de votre changement de séjour</p>
                 <ActionBox color="#ffffff" width="375px">
-                  <UncontrolledDropdown setActiveFromChild>
-                    <DropdownToggle tag="button">
-                      {motif || <p></p>}
-                      <Chevron color="#9a9a9a" />
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      {motifs
-                        .filter((e) => e !== motif)
-                        .map((status) => {
-                          return (
-                            <DropdownItem key={status} className="dropdown-item" onClick={() => setMotif(status)}>
-                              {status}
-                            </DropdownItem>
-                          );
-                        })}
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
+                  <Section>
+                    <UncontrolledDropdown setActiveFromChild>
+                      <DropdownToggle tag="button">
+                        {motif || <p></p>}
+                        <Chevron color="#9a9a9a" />
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        {motifs
+                          .filter((e) => e !== motif)
+                          .map((status) => {
+                            return (
+                              <DropdownItem key={status} className="dropdown-item" onClick={() => setMotif(status)}>
+                                {status}
+                              </DropdownItem>
+                            );
+                          })}
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
+                  </Section>
+                </ActionBox>
+                <p style={{ marginTop: 30, marginBottom: 0, fontSize: 14, fontWeight: 500 }}>Précisez en quelques mots la raison de votre changement de séjour (facultatif)</p>
+                <ActionBox>
+                  <Section>
+                    <textarea placeholder={"En quelques mots..."} rows="15" value={messageTextArea} onChange={(e) => setMessageTextArea(e.target.value)} />
+                  </Section>
                 </ActionBox>
                 <div
                   style={{
                     display: "grid",
                     marginBlock: "20px",
-                    gridTemplateColumns: "1fr 375px",
-                    gridGap: "20px",
+                    gridTemplateColumns: "1fr 1fr",
                     alignItems: "center",
-                    justifyItems: "center",
                     minWidth: "75%",
+                    justifyItems: "between",
                   }}>
                   <p>
-                    <ContinueButton style={{ marginLeft: 10 }} onClick={() => onConfirmer()}>
+                    <ContinueButton style={{ marginLeft: "60px" }} onClick={() => onConfirmer()}>
                       Enregistrer
                     </ContinueButton>
                     <ModalConfirm
@@ -206,9 +214,7 @@ export default function changeSejour() {
                       showHeaderIcon={true}></ModalConfirm>
                   </p>
                   <p>
-                    <ContinueButton>
-                      <Button to="/phase1">Annuler</Button>
-                    </ContinueButton>
+                    <ButtonLink to="/phase1">Annuler</ButtonLink>
                   </p>
                 </div>
               </section>
@@ -228,6 +234,17 @@ export default function changeSejour() {
   );
 }
 
+const SectionHelp = styled.section`
+  display: flex;
+  a {
+    color: rgb(107 114 128) !important;
+    margin-left: 1rem;
+    font-size: 12px;
+    text-decoration-line: underline;
+    align-self: center;
+    }
+`;
+
 const Section = styled.section`
   display: flex;
   h1 span {
@@ -236,6 +253,22 @@ const Section = styled.section`
   }
   p span {
     color: #888888;
+  }
+  a {
+    margin-left: 1rem;
+    font-size: 12px;
+    align-self: center;
+    }
+  b  {
+    color:  rgb(51 65 85);
+  }
+  textarea{
+    width: 90%;
+    height: 160px;
+    border: 1px solid #cecece;
+    border-radius: 6px;
+    padding: 8px;
+    color: rgb(51 65 85);
   }
 `;
 
@@ -246,27 +279,9 @@ const Wrapper = styled.div`
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 `;
 
-const Heading = styled.div`
-  margin-bottom: 30px;
-  span {
-    color: #42389d;
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 5px;
-  }
-  h1 {
-    color: #161e2e;
-    margin-bottom: 0;
-    font-size: 3rem;
-    @media (max-width: 767px) {
-      font-size: 1.8rem;
-    }
-    font-weight: 800;
-  }
-`;
 
 const ActionBox = styled.div`
-  margin-left: 10px;
+
   .dropdown-menu {
     width: ${({ width }) => width};
     a,
@@ -351,10 +366,119 @@ const ContinueButton = styled.button`
   }
 `;
 
-const Button = styled(Link)`
-  color: #fff;
-  :hover {
-    opacity: 0.9;
-    color: #fff;
+const ButtonLink = styled(Link)`
+@media (max-width: 767px) {
+  margin: 1rem 0;
+}
+width:146px;
+color: #000 !important;
+background-color: #ff;
+padding: 10px 40px;
+border: 1px solid #cecece;
+outline: 0;
+border-radius: 6px;
+font-weight: 600;
+font-size: 14px !important;
+display: block;
+outline: 0;
+box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+align-self: flex-end;
+:hover {
+  opacity: 0.9;
+}
+`;
+
+const HeroStyle = styled.div`
+  border-radius: 0.5rem;
+  @media (max-width: 768px) {
+    border-radius: 0;
+  }
+  margin: 0 auto;
+  max-width: 80rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  background-color: #fff;
+
+  .content {
+    width: 65%;
+    padding: 60px 30px 60px 50px;
+    @media (max-width: 768px) {
+      width: 100%;
+      padding: 30px 15px 30px 15px;
+      text-align: center;
+    }
+    position: relative;
+    background-color: #fff;
+    > * {
+      position: relative;
+    }
+  }
+  h1 {
+    font-size: 3rem;
+    @media (max-width: 768px) {
+      font-size: 1.8rem;
+    }
+    color: #161e2e;
+    margin-bottom: 20px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  h2 {
+    font-size: 1.5rem;
+    @media (max-width: 768px) {
+      font-size: 1rem;
+    }
+    color: #161e2e;
+    margin-bottom: 20px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  p {
+    color: #6b7280;
+    font-size: 1.25rem;
+    @media (max-width: 768px) {
+      font-size: 1rem;
+    }
+    font-weight: 400;
+    a {
+      font-size: 1rem;
+      color: #5949d0;
+      :hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  .thumb {
+    min-height: 400px;
+    @media (max-width: 768px) {
+      min-height: 0;
+    }
+    ${({ thumbImage = HERO_IMAGES_LIST[1] }) => `background: url(${require(`../../assets/${thumbImage}`)}) no-repeat center;`}
+    background-size: cover;
+    flex: 1;
+    -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
+    clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
+  }
+
+  .diagorente {
+    min-height: 400px;
+    background: url(${require("../../assets/image-diagorente.png")}) no-repeat center;
+    background-size: cover;
+    flex: 1;
+    -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
+    clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
   }
 `;
+
+const HeroContainer = styled.div`
+  flex: 1;
+  padding: 1rem;
+  @media (max-width: 768px) {
+    padding: 1rem 0;
+  }
+`;
+
+const Hero = ({ children, ...props }) => <HeroStyle {...props}>{children}</HeroStyle>;
