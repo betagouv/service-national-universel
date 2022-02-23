@@ -9,7 +9,7 @@ import api from "../../services/api";
 import { translate, departmentList, department2region } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { SelectTag, step1, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/workflow";
+import { SelectTag, step1Public, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/workflow";
 
 export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) {
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
@@ -85,7 +85,7 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
             />
             <SelectTag
               name="step1"
-              options={Object.values(step1)}
+              options={Object.values(step1Public)}
               title={"Sujet"}
               selectPlaceholder={"Choisir le sujet"}
               validate={(v) => !v && requiredMessage}

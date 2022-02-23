@@ -44,6 +44,18 @@ export const step1 = {
     tags: ["TAG_question", "AGENT_Startup_Support", "AGENT_Référent_Département", "AGENT_Référent_Région"],
   },
 };
+export const step1Public = {
+  TECHNICAL: {
+    id: "TECHNICAL",
+    label: "J'ai un problème technique",
+    tags: ["TAG_problème_technique", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
+  },
+  QUESTION: {
+    id: "QUESTION",
+    label: "J'ai une question",
+    tags: ["TAG_question", "AGENT_Startup_Support"],
+  },
+};
 
 export const typesReferent = {
   TECHNICAL: {
