@@ -163,7 +163,7 @@ function validatePassword(password) {
 }
 
 const updatePlacesCenter = async (center) => {
-  console.log(`update place center ${center?._id} ${center?.name}`);
+  // console.log(`update place center ${center?._id} ${center?.name}`);
   try {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
     const placesTaken = youngs.filter((young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED").length;
@@ -174,7 +174,7 @@ const updatePlacesCenter = async (center) => {
       await center.save();
       await center.index();
     } else {
-      console.log(`Center ${center.id}: total ${center.placesTotal} left not changed ${center.placesLeft}`);
+      // console.log(`Center ${center.id}: total ${center.placesTotal} left not changed ${center.placesLeft}`);
     }
   } catch (e) {
     console.log(e);
@@ -186,7 +186,7 @@ const updatePlacesCenter = async (center) => {
 // duplicate of updatePlacesCenter
 // we'll remove the updatePlacesCenter function once the migration is done
 const updatePlacesSessionPhase1 = async (sessionPhase1) => {
-  console.log(`update place sessionPhase1 ${sessionPhase1?._id}`);
+  // console.log(`update place sessionPhase1 ${sessionPhase1?._id}`);
   try {
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
     const placesTaken = youngs.filter((young) => ["AFFECTED", "WAITING_AFFECTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED").length;
@@ -197,7 +197,7 @@ const updatePlacesSessionPhase1 = async (sessionPhase1) => {
       await sessionPhase1.save();
       await sessionPhase1.index();
     } else {
-      console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left not changed ${sessionPhase1.placesLeft}`);
+      // console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left not changed ${sessionPhase1.placesLeft}`);
     }
   } catch (e) {
     console.log(e);
@@ -251,12 +251,12 @@ const deleteCenterDependencies = async (center) => {
 };
 
 const updatePlacesBus = async (bus) => {
-  console.log(`update bus ${bus.id} - ${bus.idExcel}`);
+  // console.log(`update bus ${bus.id} - ${bus.idExcel}`);
   try {
     const meetingPoints = await MeetingPointModel.find({ busId: bus.id, cohort: bus.cohort });
     if (!meetingPoints?.length) return console.log("meetingPoints not found");
     const idsMeetingPoints = meetingPoints.map((e) => e._id);
-    console.log(`idsMeetingPoints for bus ${bus.id}`, idsMeetingPoints);
+    // console.log(`idsMeetingPoints for bus ${bus.id}`, idsMeetingPoints);
     const youngs = await YoungModel.find({
       status: "VALIDATED",
       statusPhase1: { $in: ["AFFECTED", "WAITING_AFFECTATION", "DONE"] },
@@ -272,7 +272,7 @@ const updatePlacesBus = async (bus) => {
       await bus.save();
       await bus.index();
     } else {
-      console.log(`Bus ${bus.id}: total ${bus.capacity}, left not changed ${placesLeft}`);
+      // console.log(`Bus ${bus.id}: total ${bus.capacity}, left not changed ${placesLeft}`);
     }
   } catch (e) {
     console.log(e);
