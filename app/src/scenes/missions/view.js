@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Container, Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
 
 import api from "../../services/api";
 import { translate, formatStringDateTimezoneUTC } from "../../utils";
@@ -17,6 +18,8 @@ import plausibleEvent from "../../services/plausible";
 export default function View(props) {
   const [mission, setMission] = useState();
   const [modal, setModal] = useState(null);
+  const [disabledApplication, setDisabledApplication] = useState(false);
+  const young = useSelector((state) => state.Auth.young);
 
   const getMission = async () => {
     const id = props.match && props.match.params && props.match.params.id;
@@ -27,6 +30,26 @@ export default function View(props) {
   useEffect(() => {
     getMission();
   }, []);
+
+  useEffect(() => {
+    function getDiffYear(a, b) {
+      const from = new Date(a);
+      from.setHours(0, 0, 0, 0);
+      const to = new Date(b);
+      to.setHours(0, 0, 0, 0);
+      const diffTime = Math.abs(to - from);
+      const res = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365.25));
+      if (!res || isNaN(res)) return "?";
+      return res;
+    }
+
+    // si c'est une préparation militaire
+    // on vérifie que le vonlontaire aura plus de 16 ans au début de la mission
+    if (mission?.isMilitaryPreparation === "true") {
+      const ageAtStart = getDiffYear(mission.startAt, young.birthdateAt);
+      setDisabledApplication(ageAtStart < 16);
+    }
+  }, [mission]);
 
   const getTags = () => {
     const tags = [];
@@ -63,7 +86,7 @@ export default function View(props) {
           </Tags>
         </div>
         <div>
-          <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} setModal={setModal} />
+          <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} setModal={setModal} disabledApplication={disabledApplication} />
         </div>
       </Heading>
       <Box>
@@ -108,21 +131,25 @@ export default function View(props) {
         </Row>
       </Box>
       <Footer>
-        <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} setModal={setModal} />
+        <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} setModal={setModal} disabledApplication={disabledApplication} />
       </Footer>
     </Container>
   );
 }
 
-const ApplyButton = ({ applied, placesLeft, setModal }) => {
-  return applied ? (
-    <>
-      <Link to="/candidature">
-        <Button>Voir&nbsp;la&nbsp;candidature</Button>
-      </Link>
-      <p className="button-subtitle">Vous avez déjà candidaté à cette mission</p>
-    </>
-  ) : (
+const ApplyButton = ({ applied, placesLeft, setModal, disabledApplication }) => {
+  if (applied)
+    return (
+      <>
+        <Link to="/candidature">
+          <Button>Voir&nbsp;la&nbsp;candidature</Button>
+        </Link>
+        <p className="button-subtitle">Vous avez déjà candidaté à cette mission</p>
+      </>
+    );
+
+  if (disabledApplication) return <p className="button-subtitle">Vous ne pouvez pas candidater à cette mission</p>;
+  return (
     <>
       <Button
         onClick={() => {
