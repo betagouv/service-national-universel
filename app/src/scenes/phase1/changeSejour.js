@@ -7,8 +7,7 @@ import { Link } from "react-router-dom";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, translateCohort } from "../../utils";
-import { HERO_IMAGES_LIST } from "../../utils";
+import { translate, translateCohort, HERO_IMAGES_LIST } from "../../utils";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 
@@ -109,7 +108,7 @@ export default function changeSejour() {
                   <strong>Changer mes dates de séjour de cohésion </strong>
                 </h1>
                 <p>
-                  <b >Une contrainte personnelle, familiale, scolaire ou professionnelle ?</b>
+                  <b>Une contrainte personnelle, familiale, scolaire ou professionnelle ?</b>
                   <br />
                   Vous pouvez modifier les dates de votre séjour initialement prévu {translateCohort(young.cohort)}.
                 </p>
@@ -242,7 +241,7 @@ const SectionHelp = styled.section`
     font-size: 12px;
     text-decoration-line: underline;
     align-self: center;
-    }
+  }
 `;
 
 const Section = styled.section`
@@ -258,11 +257,11 @@ const Section = styled.section`
     margin-left: 1rem;
     font-size: 12px;
     align-self: center;
-    }
-  b  {
-    color:  rgb(51 65 85);
   }
-  textarea{
+  b {
+    color: rgb(51 65 85);
+  }
+  textarea {
     width: 90%;
     height: 160px;
     border: 1px solid #cecece;
@@ -279,9 +278,7 @@ const Wrapper = styled.div`
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 `;
 
-
 const ActionBox = styled.div`
-
   .dropdown-menu {
     width: ${({ width }) => width};
     a,
@@ -367,25 +364,25 @@ const ContinueButton = styled.button`
 `;
 
 const ButtonLink = styled(Link)`
-@media (max-width: 767px) {
-  margin: 1rem 0;
-}
-width:146px;
-color: #000 !important;
-background-color: #ff;
-padding: 10px 40px;
-border: 1px solid #cecece;
-outline: 0;
-border-radius: 6px;
-font-weight: 600;
-font-size: 14px !important;
-display: block;
-outline: 0;
-box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-align-self: flex-end;
-:hover {
-  opacity: 0.9;
-}
+  @media (max-width: 767px) {
+    margin: 1rem 0;
+  }
+  width: 146px;
+  color: #000 !important;
+  background-color: #ff;
+  padding: 10px 40px;
+  border: 1px solid #cecece;
+  outline: 0;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px !important;
+  display: block;
+  outline: 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  align-self: flex-end;
+  :hover {
+    opacity: 0.9;
+  }
 `;
 
 const HeroStyle = styled.div`
