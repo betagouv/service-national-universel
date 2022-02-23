@@ -14,8 +14,8 @@ export default function HeaderIndex({ onClickBurger }) {
 
   function getName() {
     if (user.role === ROLES.ADMIN) return "Espace modérateur";
-    if (user.role === ROLES.REFERENT_DEPARTMENT) return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
-    if (user.role === ROLES.REFERENT_REGION) return "ESPACE RÉFÉRENT REGIONAL";
+    if (user.role === ROLES.REFERENT_DEPARTMENT) return `Espace référent départemental • ${user.department}`;
+    if (user.role === ROLES.REFERENT_REGION) return `Espace référent régional • ${user.region}`;
     if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
     if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
     return "";
