@@ -85,9 +85,7 @@ export default function View(props) {
             {mission?.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" color="#03224C" /> : null}
           </Tags>
         </div>
-        <div>
-          <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} setModal={setModal} disabledApplication={disabledApplication} />
-        </div>
+        <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} setModal={setModal} disabledApplication={disabledApplication} />
       </Heading>
       <Box>
         <Row>
@@ -140,26 +138,44 @@ export default function View(props) {
 const ApplyButton = ({ applied, placesLeft, setModal, disabledApplication }) => {
   if (applied)
     return (
-      <>
+      <div className="flex flex-col items-center">
         <Link to="/candidature">
-          <Button>Voir&nbsp;la&nbsp;candidature</Button>
+          <div className="px-5 py-2 bg-[#31c48d] text-white rounded-full shadow-lg hover:cursor-not-allowed text-center">Voir&nbsp;la&nbsp;candidature</div>
         </Link>
         <p className="button-subtitle">Vous avez déjà candidaté à cette mission</p>
-      </>
+      </div>
     );
 
-  if (disabledApplication) return <p className="button-subtitle">Vous ne pouvez pas candidater à cette mission</p>;
+  if (disabledApplication)
+    return (
+      <div className="flex flex-col items-center">
+        <div className="px-5 py-2 bg-coolGray-300 text-coolGray-500 rounded-full shadow-md hover:cursor-not-allowed text-center">Candidater</div>
+        <p className="button-subtitle">
+          Vous ne pouvez pas candidater à cette Préparation Militaire car vous n&apos;aurez pas 16 ans révolus au 1er jour de la mission.
+          <br />
+          Pour en savoir plus{" "}
+          <a
+            className="underline hover:underline hover:text-snu-purple-300"
+            href="https://support.snu.gouv.fr/base-de-connaissance/je-televerse-mes-justificatifs-pour-ma-preparation-militaire"
+            target="_blank"
+            rel="noreferrer">
+            cliquez ici
+          </a>
+        </p>
+      </div>
+    );
   return (
-    <>
-      <Button
+    <div className="flex flex-col items-center">
+      <div
+        className="px-5 py-2 bg-[#31c48d] text-white rounded-full shadow-lg hover:cursor-not-allowed text-center"
         onClick={() => {
           setModal("APPLY");
           plausibleEvent("Phase2/CTA missions - Candidater");
         }}>
         Candidater
-      </Button>
+      </div>
       <p className="button-subtitle">{`${placesLeft} volontaire${placesLeft > 1 ? "s" : ""} recherché${placesLeft > 1 ? "s" : ""}`}</p>
-    </>
+    </div>
   );
 };
 
@@ -250,25 +266,6 @@ const Box = styled.div`
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   margin-bottom: 33px;
   border-radius: 8px;
-`;
-
-const Button = styled.div`
-  cursor: pointer;
-  background-color: #31c48d;
-  border-radius: 30px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  color: #fff;
-  font-size: 1rem;
-  padding: 0.8rem 3rem;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-    padding: 0.5rem 1rem;
-  }
-  width: fit-content;
-  :hover {
-    color: #fff;
-    background-color: #0e9f6e;
-  }
 `;
 
 const Heading = styled(Container)`
