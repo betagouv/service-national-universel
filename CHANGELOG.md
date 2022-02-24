@@ -1,3 +1,19 @@
+# [1.49.0](https://github.com/betagouv/service-national-universel/compare/v1.48.0...v1.49.0) (2022-02-24)
+
+
+### Bug Fixes
+
+* **app:** button apply mission ([d9e94ee](https://github.com/betagouv/service-national-universel/commit/d9e94ee4270a891c4f09dfff5eec6d654e870046))
+* date in attestation ([cbc8ff6](https://github.com/betagouv/service-national-universel/commit/cbc8ff674dd600d8edf4c1360e66c0b1d8c8b1b0))
+* quick win PM ([#1284](https://github.com/betagouv/service-national-universel/issues/1284)) ([6ac954d](https://github.com/betagouv/service-national-universel/commit/6ac954d8a36acc702642181cebd07e1d3af7c803))
+* qwick win PM 2 ([#1285](https://github.com/betagouv/service-national-universel/issues/1285)) ([c2ad059](https://github.com/betagouv/service-national-universel/commit/c2ad05924fd992103c4c8e44705cce586ea70154))
+* wording ([bb3b4e8](https://github.com/betagouv/service-national-universel/commit/bb3b4e8edf5ae0dc1a381048eb564fe3823f4d01))
+
+
+### Features
+
+* **app+admin:** remove referents tags in public form ([#1283](https://github.com/betagouv/service-national-universel/issues/1283)) ([1cc1bb4](https://github.com/betagouv/service-national-universel/commit/1cc1bb43a728cc6d9c7d820a4a5f08186150676c))
+
 # [1.48.0](https://github.com/betagouv/service-national-universel/compare/v1.47.0...v1.48.0) (2022-02-23)
 
 
