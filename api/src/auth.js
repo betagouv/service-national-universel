@@ -22,8 +22,7 @@ class Auth {
 
     try {
       const user = await this.model.findOne({ email });
-      if (!user) return res.status(401).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
-      if (user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
 
       const match = config.ENVIRONMENT === "development" || (await user.comparePassword(password));
       if (!match) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
@@ -108,13 +107,13 @@ class Auth {
 
   async forgotPassword(req, res, cta) {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).unknown().validate(req.body);
-    if (error) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
+    if (error) return res.status(404).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
 
     const { email } = value;
 
     try {
       const user = await this.model.findOne({ email });
-      if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
+      if (!user) return res.status(404).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
 
       const token = await crypto.randomBytes(20).toString("hex");
       user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_MAX_AGE });
