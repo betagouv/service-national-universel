@@ -4,8 +4,6 @@ import { Modal } from "reactstrap";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 import CloseSvg from "../../assets/Close";
-import styled from "styled-components";
-
 
 export default function ModalConfirmWithMessage({
   isOpen,
@@ -38,7 +36,7 @@ export default function ModalConfirmWithMessage({
       <ModalContainer>
         <CloseSvg className="close-icon" height={10} onClick={onChange} />
         <Header>{topTitle}</Header>
-        <Content >
+        <Content>
           <h1>{title}</h1>
           <p>{message}</p>
           {renderInput()}

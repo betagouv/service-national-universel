@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
+import { Col, Row, DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 
 import { translate, YOUNG_STATUS, ROLES, colors, translateCohort } from "../../../utils";
 import SelectStatus from "../../../components/selectStatus";
-import Badge from "../../../components/Badge";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
@@ -126,7 +124,7 @@ const BadgeCohort = ({ young, onChange }) => {
     "Autre",
   ];
 
-  const defaultInput = `[Zone de texte : Renseignez la raison du changement de cohorte]`;
+  const defaultInput = "Renseignez la raison du changement de cohorte";
 
   const handleChangeCohort = async (messageTextArea) => {
     try {
@@ -205,11 +203,20 @@ const BadgeCohort = ({ young, onChange }) => {
       <ModalConfirmWithMessage
         isOpen={modalConfirmWithMessage}
         title="Veuillez éditer le message ci-dessous pour préciser le motif de changement de cohorte avant de l’envoyer"
-        message={<p>Bonjour {young.firstName} {young.lastName},<br/> Votre changement de séjour pour le Service National Universel a été pris en compte.<br/> Vous êtes maintenant positionné(e) sur le séjour se déroulant {translateCohort(newCohort)}.</p>}
+        message={
+          <p>
+            Bonjour {young.firstName} {young.lastName},<br /> Votre changement de séjour pour le Service National Universel a été pris en compte.
+            <br /> Vous êtes maintenant positionné(e) sur le séjour se déroulant {translateCohort(newCohort)}.
+          </p>
+        }
         defaultInput={defaultInput}
         onChange={() => setModalConfirmWithMessage(false)}
         onConfirm={handleChangeCohort}
-        endMessage={<p>Cordialement <br/> Les équipes du Service National Universel</p>}
+        endMessage={
+          <p>
+            Cordialement <br /> Les équipes du Service National Universel
+          </p>
+        }
       />
     </>
   );
