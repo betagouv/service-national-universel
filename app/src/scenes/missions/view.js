@@ -140,7 +140,7 @@ const ApplyButton = ({ applied, placesLeft, setModal, disabledApplication }) => 
     return (
       <div className="flex flex-col items-center">
         <Link to="/candidature">
-          <div className="px-5 py-2 bg-[#31c48d] text-white rounded-full shadow-lg hover:cursor-not-allowed text-center">Voir&nbsp;la&nbsp;candidature</div>
+          <div className="px-5 py-2 bg-[#31c48d] text-white rounded-full shadow-md hover:cursor-pointer hover:scale-105 text-center">Voir&nbsp;la&nbsp;candidature</div>
         </Link>
         <p className="button-subtitle">Vous avez déjà candidaté à cette mission</p>
       </div>
@@ -167,7 +167,7 @@ const ApplyButton = ({ applied, placesLeft, setModal, disabledApplication }) => 
   return (
     <div className="flex flex-col items-center">
       <div
-        className="px-5 py-2 bg-[#31c48d] text-white rounded-full shadow-lg hover:cursor-not-allowed text-center"
+        className="px-5 py-2 bg-[#31c48d] text-white rounded-full shadow-md hover:cursor-pointer hover:scale-105 text-center"
         onClick={() => {
           setModal("APPLY");
           plausibleEvent("Phase2/CTA missions - Candidater");
