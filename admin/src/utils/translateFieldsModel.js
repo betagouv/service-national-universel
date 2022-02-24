@@ -334,6 +334,8 @@ const translateFieldYoung = (f) => {
       return "Code postal de naissance";
     case "birthCity":
       return "Ville de naissance";
+    case "birthCountry":
+      return "Pays de naissance";
     case "employed":
       return "Employé";
     case "schoolCountry":
