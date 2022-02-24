@@ -9,7 +9,7 @@ import api from "../../services/api";
 import { translate, departmentList, department2region } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
-import { SelectTag, step1, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/worflow";
+import { SelectTag, step1Public, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/worflow";
 
 export default function FormComponent({ setOpen, setSuccessMessage }) {
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
@@ -86,7 +86,7 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
             />
             <SelectTag
               name="step1"
-              options={Object.values(step1)}
+              options={Object.values(step1Public)}
               title={"Ma demande"}
               selectPlaceholder={"Choisir la catégorie"}
               handleChange={handleChange}
