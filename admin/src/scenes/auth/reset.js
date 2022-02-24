@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { Formik } from "formik";
 import queryString from "query-string";
-import { FormGroup, Row, Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { Redirect } from "react-router-dom";
-import styled from "styled-components";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -15,13 +13,13 @@ export default function ResetPassword({ location }) {
   const [redirect, setRedirect] = useState(false);
 
   return (
-    <Wrapper noGutters>
-      <Col sm={6}>
-        <AuthWrapper>
-          <div style={{ marginBottom: 60 }}>
-            <img src={require("../../assets/logo-snu.png")} width={100} />
+    <div className="flex flex-1 overflow-x-hidden">
+      <div className="flex flex-1 flex-col p-8">
+        <div className="mx-auto max-w-lg">
+          <div className="mb-10">
+            <img src={require("../../assets/logo-snu.png")} className="h-10 py-1 px-4 md:h-20" />
           </div>
-          <Title>Créer un nouveau mot de passe</Title>
+          <h1 className="auth-title">Créer un nouveau mot de passe</h1>
           <Formik
             initialValues={{ password: "" }}
             validateOnChange={false}
@@ -40,96 +38,31 @@ export default function ResetPassword({ location }) {
             }}>
             {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
               return (
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                   {redirect && <Redirect to="/" />}
-                  <StyledFormGroup>
-                    <label>Mot de passe</label>
+                  <div>
+                    <label className="input-label">Mot de passe</label>
                     <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} />
-                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
-                    <p>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
-                  </StyledFormGroup>
-                  <div className="button">
-                    <Submit loading={isSubmitting} type="submit" color="primary" disabled={isSubmitting}>
-                      Créer
-                    </Submit>
+                    <p className="input-error">{errors.password}</p>
+                    <p className="mt-2 text-sm font-medium text-brand-grey">
+                      👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole
+                    </p>
                   </div>
+                  <LoadingButton className="auth-button-primary" loading={isSubmitting} type="submit" disabled={isSubmitting}>
+                    Créer
+                  </LoadingButton>
                 </form>
               );
             }}
           </Formik>
-        </AuthWrapper>
-      </Col>
-      <Col sm={6} style={{ background: "rgb(245, 249, 252)" }}>
-        <Thumb>
-          <h1>Plateforme du Service National Universel</h1>
-          <img src={require("../../assets/auth.png")} />
-        </Thumb>
-      </Col>
-    </Wrapper>
+        </div>
+      </div>
+      <div className="flex-1 bg-blue-50">
+        <div className="flex h-full flex-col items-center justify-center">
+          <h1 className="auth-title text-blue-600">Plateforme du Service National Universel</h1>
+          <img className="max-w-[280px]" src={require("../../assets/auth.png")} />
+        </div>
+      </div>
+    </div>
   );
 }
-
-const Wrapper = styled(Row)`
-  height: 100vh;
-  overflow: hidden;
-  flex: 1;
-`;
-
-const AuthWrapper = styled.div`
-  padding: 20px;
-  max-width: 380px;
-  width: 100%;
-  margin: 0 auto;
-  overflow-y: auto;
-`;
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 15px;
-`;
-
-const StyledFormGroup = styled(FormGroup)`
-  margin-bottom: 25px;
-  label {
-    color: rgb(106, 111, 133);
-    font-size: 10px;
-    text-transform: uppercase;
-    font-weight: 700;
-  }
-`;
-
-const Submit = styled(LoadingButton)`
-  background-color: #3182ce;
-  outline: 0;
-  border: 0;
-  color: #fff;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  :hover {
-    background-color: #5a9bd8;
-  }
-  :disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const Thumb = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  height: 100%;
-  h1 {
-    color: rgb(49, 130, 206);
-    margin-bottom: 60px;
-    font-size: 24px;
-  }
-  img {
-    max-width: 280px;
-  }
-`;

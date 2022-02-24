@@ -10,7 +10,7 @@ import InvitationExpired from "./invitationexpired";
 
 export default function AuthIndex() {
   return (
-    <div style={{ backgroundColor: "fff", flex: 1, display: "flex" }}>
+    <div className="flex flex-1 bg-white">
       <Switch>
         <Route path="/auth/reset" component={Reset} />
         <Route path="/auth/forgot" component={Forgot} />

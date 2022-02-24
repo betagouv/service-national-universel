@@ -1,24 +1,18 @@
 import React from "react";
-import { FormGroup, Row, Col } from "reactstrap";
 import { Formik, Field } from "formik";
 import validator from "validator";
 import { Link, Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import styled from "styled-components";
 
 import { setUser } from "../../redux/auth/actions";
 import PasswordEye from "../../components/PasswordEye";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
-import LoginBox from "./components/loginBox";
-import Title from "./components/title";
-import Subtitle from "./components/subtitle";
-import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import MultiSelect from "../../components/Multiselect";
 
-import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, colors, getRegionByZip, getDepartmentByZip } from "../../utils";
+import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, getRegionByZip, getDepartmentByZip } from "../../utils";
 import { adminURL } from "../../config";
 
 export default function Signup() {
@@ -37,7 +31,7 @@ export default function Signup() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+    <div className="flex flex-1 flex-col bg-gray-50">
       <Header />
       <Formik
         validateOnChange={false}
@@ -74,172 +68,207 @@ export default function Signup() {
         }}>
         {({ values, errors, touched, isSubmitting, handleChange, handleSubmit }) => {
           return (
-            <AuthWrapper>
-              <Title>Inscrivez votre structure d&apos;accueil</Title>
-              <Subtitle style={{ color: colors.grey }}>A destination des structures souhaitant accueillir des volontaires</Subtitle>
-              <div>
-                <hr />
-                <Register>
-                  Vous avez déjà un compte ? <Link to="/auth">Connectez-vous</Link>
-                </Register>
-              </div>
-              <LoginBoxes>
-                <LoginBox>
-                  <form onSubmit={handleSubmit}>
-                    <Subtitle style={{ color: "#6A7986", fontSize: "0.85rem" }}>INFORMATIONS SUR LE RESPONSABLE DE STRUCTURE</Subtitle>
-                    <StyledFormGroup>
-                      <label>
-                        <span>*</span>ADRESSE EMAIL
-                      </label>
-                      <InputField
-                        validate={(v) => (!v && "Ce champ est requis") || (!validator.isEmail(v) && "Veuillez renseigner votre email")}
-                        name="user.email"
-                        type="email"
-                        value={values.user.email}
+            <div className="flex flex-col items-center p-8">
+              <h1 className="auth-title mb-2">Inscrivez votre structure d&apos;accueil</h1>
+              <h2 className="auth-subtitle mb-4">A destination des structures souhaitant accueillir des volontaires</h2>
+              <p className="mb-8 text-center text-sm font-medium text-brand-grey">
+                Vous avez déjà un compte ?{" "}
+                <Link to="/auth" className="font-medium text-snu-purple-200 transition-colors hover:text-snu-purple-600">
+                  Connectez-vous
+                </Link>
+              </p>
+              <div className="mx-auto mb-6 flex max-w-screen-lg gap-8">
+                {/* left form */}
+                <form onSubmit={handleSubmit} className="grid flex-1 grid-cols-2 gap-y-4 gap-x-2">
+                  <h2 className="auth-subtitle col-span-2 mb-0 text-center">INFORMATIONS SUR LE RESPONSABLE DE STRUCTURE</h2>
+                  <div className="col-span-2">
+                    <label className="input-label">
+                      <span className="mr-1">*</span>ADRESSE EMAIL
+                    </label>
+                    <Field
+                      className="input-field"
+                      validate={(v) => (!v && "Ce champ est requis") || (!validator.isEmail(v) && "Veuillez renseigner votre email")}
+                      name="user.email"
+                      type="email"
+                      value={values.user.email}
+                      onChange={handleChange}
+                      placeholder="Email"
+                      haserror={errors.user?.email}
+                    />
+                    <p className="input-error">{errors.user?.email}</p>
+                  </div>
+                  <div>
+                    <label htmlFor="firstName" className="input-label">
+                      <span className="mr-1">*</span>Prénom
+                    </label>
+                    <Field
+                      className="input-field"
+                      validate={(v) => !v && "Ce champ est requis"}
+                      name="user.firstName"
+                      id="firstName"
+                      value={values.user.firstName}
+                      onChange={handleChange}
+                      placeholder="Prénom"
+                      haserror={errors.user?.firstName}
+                    />
+                    <p className="input-error">{errors.user?.firstName}</p>
+                  </div>
+                  <div>
+                    <label htmlFor="lastName" className="input-label">
+                      <span className="mr-1">*</span>Nom
+                    </label>
+                    <Field
+                      className="input-field"
+                      validate={(v) => !v && "Ce champ est requis"}
+                      name="user.lastName"
+                      id="lastName"
+                      value={values.user.lastName}
+                      onChange={handleChange}
+                      placeholder="Nom"
+                      haserror={errors.user?.lastName}
+                    />
+                    <p className="input-error">{errors.user?.lastName}</p>
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="input-label">
+                      Téléphone
+                    </label>
+                    <Field className="input-field" name="user.phone" type="tel" id="phone" value={values.user.phone} onChange={handleChange} placeholder="02 00 00 00 00" />
+                  </div>
+                  <div>
+                    <label htmlFor="mobile" className="input-label">
+                      Téléphone portable
+                    </label>
+                    <Field className="input-field" name="user.mobile" type="tel" id="mobile" value={values.user.mobile} onChange={handleChange} placeholder="06 00 00 00 00" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="input-label">
+                      <span className="mr-1">*</span>Mot de passe
+                    </label>
+                    <p className="mb-2 text-xs text-brand-grey">👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
+                    <PasswordEye autoComplete="new-password" value={values.user.password} onChange={handleChange} name="user.password" />
+                    <p className="input-error">{errors.user?.password}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="input-label">
+                      <span className="mr-1">*</span>Confirmation mot de passe
+                    </label>
+                    <PasswordEye
+                      validate={() => values.user.password !== values.user.repassword && "Les mots de passe ne correspondent pas."}
+                      autoComplete="new-password"
+                      value={values.user.repassword}
+                      onChange={handleChange}
+                      name="user.repassword"
+                      placeholder="Confirmez votre mot de passe"
+                    />
+                    <p className="input-error">{errors.user?.repassword}</p>
+                  </div>
+                </form>
+
+                {/* right form */}
+                <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
+                  <h2 className="auth-subtitle mb-0 text-center">INFORMATIONS SUR LA STRUCTURE</h2>
+                  <div>
+                    <label className="input-label">
+                      <span className="mr-1">*</span>NOM DE LA STRUCTURE
+                    </label>
+                    <Field
+                      className="input-field"
+                      validate={(v) => !v && "Ce champ est requis"}
+                      value={values.structure.name}
+                      onChange={handleChange}
+                      name="structure.name"
+                      placeholder="Nom de votre structure"
+                    />
+                    <p className="input-error" errors={errors} touched={touched} name="structure.name" />
+                  </div>
+                  <div>
+                    <label className="input-label">DESCRIPTION DE LA STRUCTURE</label>
+                    <Field
+                      className="input-field"
+                      as="textarea"
+                      value={values.structure.description}
+                      onChange={handleChange}
+                      name="structure.description"
+                      placeholder="Description..."
+                    />
+                  </div>
+                  <div>
+                    <label className="input-label">
+                      <span className="mr-1">*</span>STATUT JURIDIQUE
+                    </label>
+                    <Field
+                      className="input-field"
+                      validate={(v) => !v && "Ce champ est requis"}
+                      component="select"
+                      name="structure.legalStatus"
+                      value={values.structure.legalStatus}
+                      onChange={handleChange}>
+                      <option value={null} disabled selected>
+                        Statut juridique
+                      </option>
+                      <option value="PUBLIC">{translate("PUBLIC")}</option>
+                      <option value="PRIVATE">{translate("PRIVATE")}</option>
+                      <option value="ASSOCIATION">{translate("ASSOCIATION")}</option>
+                      <option value="OTHER">{translate("OTHER")}</option>
+                    </Field>
+                    <p className="input-error" errors={errors} touched={touched} name="structure.legalStatus" />
+                  </div>
+                  {values.structure.legalStatus === "ASSOCIATION" && (
+                    <div>
+                      <label className="input-label">DISPOSEZ-VOUS D&apos;UN AGRÉMENT ?</label>
+                      <MultiSelect
+                        value={values.structure.associationTypes}
                         onChange={handleChange}
-                        placeholder="Email"
-                        haserror={errors.user?.email}
+                        name="structure.associationTypes"
+                        options={associationTypes}
+                        placeholder="Sélectionnez un ou plusieurs agréments"
                       />
-                      <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.user?.email}</p>
-                    </StyledFormGroup>
-                    <Row noGutters>
-                      <Col>
-                        <StyledFormGroup>
-                          <label htmlFor="firstName">
-                            <span>*</span>Prénom
-                          </label>
-                          <InputField
-                            validate={(v) => !v && "Ce champ est requis"}
-                            name="user.firstName"
-                            id="firstName"
-                            value={values.user.firstName}
-                            onChange={handleChange}
-                            placeholder="Prénom"
-                            haserror={errors.user?.firstName}
-                          />
-                          <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.user?.firstName}</p>
-                        </StyledFormGroup>
-                      </Col>
-                      <div style={{ width: 10 }} />
-                      <Col>
-                        <StyledFormGroup>
-                          <label htmlFor="lastName">
-                            <span>*</span>Nom
-                          </label>
-                          <InputField
-                            validate={(v) => !v && "Ce champ est requis"}
-                            name="user.lastName"
-                            id="lastName"
-                            value={values.user.lastName}
-                            onChange={handleChange}
-                            placeholder="Nom"
-                            haserror={errors.user?.lastName}
-                          />
-                          <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.user?.lastName}</p>
-                        </StyledFormGroup>
-                      </Col>
-                    </Row>
-                    <Row noGutters>
-                      <Col>
-                        <StyledFormGroup>
-                          <label htmlFor="phone">Téléphone</label>
-                          <InputField name="user.phone" type="tel" id="phone" value={values.user.phone} onChange={handleChange} placeholder="02 00 00 00 00" />
-                        </StyledFormGroup>
-                      </Col>
-                      <div style={{ width: 10 }} />
-                      <Col>
-                        <StyledFormGroup>
-                          <label htmlFor="mobile">Téléphone portable</label>
-                          <InputField name="user.mobile" type="tel" id="mobile" value={values.user.mobile} onChange={handleChange} placeholder="06 00 00 00 00" />
-                        </StyledFormGroup>
-                      </Col>
-                    </Row>
-                    <StyledFormGroup>
-                      <label>
-                        <span>*</span>Mot de passe
+                    </div>
+                  )}
+                  {values.structure.legalStatus === "PRIVATE" && (
+                    <div>
+                      <label className="input-label">
+                        <span className="mr-1">*</span>TYPE DE STRUCTURE PRIVÉE
                       </label>
-                      <p style={{ fontSize: 12, color: colors.grey }}>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
-                      <PasswordEye autoComplete="new-password" value={values.user.password} onChange={handleChange} name="user.password" />
-                      <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.user?.password}</p>
-                    </StyledFormGroup>
-                    <StyledFormGroup>
-                      <label>
-                        <span>*</span>Confirmation mot de passe
-                      </label>
-                      <PasswordEye
-                        validate={() => values.user.password !== values.user.repassword && "Les mots de passe ne correspondent pas."}
-                        autoComplete="new-password"
-                        value={values.user.repassword}
-                        onChange={handleChange}
-                        name="user.repassword"
-                        placeholder="Confirmez votre mot de passe"
-                      />
-                      <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.user?.repassword}</p>
-                    </StyledFormGroup>
-                  </form>
-                </LoginBox>
-                <LoginBox>
-                  <form onSubmit={handleSubmit}>
-                    <Subtitle style={{ color: "#6A7986", fontSize: "0.85rem" }}>INFORMATIONS SUR LA STRUCTURE</Subtitle>
-                    <StyledFormGroup>
-                      <label>
-                        <span>*</span>NOM DE LA STRUCTURE
-                      </label>
-                      <InputField
-                        validate={(v) => !v && requiredMessage}
-                        value={values.structure.name}
-                        onChange={handleChange}
-                        name="structure.name"
-                        placeholder="Nom de votre structure"
-                      />
-                      <ErrorMessage errors={errors} touched={touched} name="structure.name" />
-                    </StyledFormGroup>
-                    <StyledFormGroup>
-                      <label>DESCRIPTION DE LA STRUCTURE</label>
-                      <InputField as="textarea" value={values.structure.description} onChange={handleChange} name="structure.description" placeholder="Description..." />
-                    </StyledFormGroup>
-                    <StyledFormGroup>
-                      <label>
-                        <span>*</span>STATUT JURIDIQUE
-                      </label>
-                      <Field validate={(v) => !v && requiredMessage} component="select" name="structure.legalStatus" value={values.structure.legalStatus} onChange={handleChange}>
-                        <option value={null} disabled selected>
-                          Statut juridique
+                      <Field
+                        className="input-field"
+                        validate={(v) => !v && "Ce champ est requis"}
+                        component="select"
+                        name="structure.structurePriveeType"
+                        value={values.structure.structurePriveeType}
+                        onChange={handleChange}>
+                        <option key="" value="" selected disabled>
+                          Type de structure privée
                         </option>
-                        <option value="PUBLIC">{translate("PUBLIC")}</option>
-                        <option value="PRIVATE">{translate("PRIVATE")}</option>
-                        <option value="ASSOCIATION">{translate("ASSOCIATION")}</option>
-                        <option value="OTHER">{translate("OTHER")}</option>
+                        {privateTypes.map((e) => {
+                          return (
+                            <option key={e} value={e}>
+                              {translate(e)}
+                            </option>
+                          );
+                        })}
                       </Field>
-                      <ErrorMessage errors={errors} touched={touched} name="structure.legalStatus" />
-                    </StyledFormGroup>
-                    {values.structure.legalStatus === "ASSOCIATION" && (
-                      <StyledFormGroup>
-                        <label>DISPOSEZ-VOUS D&apos;UN AGRÉMENT ?</label>
-                        <MultiSelect
-                          value={values.structure.associationTypes}
-                          onChange={handleChange}
-                          name="structure.associationTypes"
-                          options={associationTypes}
-                          placeholder="Sélectionnez un ou plusieurs agréments"
-                        />
-                      </StyledFormGroup>
-                    )}
-                    {values.structure.legalStatus === "PRIVATE" && (
-                      <StyledFormGroup>
-                        <label>
-                          <span>*</span>TYPE DE STRUCTURE PRIVÉE
+                      <p className="input-error" errors={errors} touched={touched} name="structure.structurePriveeType" />
+                    </div>
+                  )}
+                  {values.structure.legalStatus === "PUBLIC" && (
+                    <div>
+                      <div>
+                        <label className="input-label">
+                          <span className="text-red-500, mr-1">*</span>TYPE DE STRUCTURE PUBLIQUE
                         </label>
                         <Field
-                          validate={(v) => !v && requiredMessage}
+                          className="input-field"
+                          validate={(v) => !v && "Ce champ est requis"}
                           component="select"
-                          name="structure.structurePriveeType"
-                          value={values.structure.structurePriveeType}
+                          name="structure.structurePubliqueType"
+                          value={values.structure.structurePubliqueType}
                           onChange={handleChange}>
                           <option key="" value="" selected disabled>
-                            Type de structure privée
+                            Type de structure publique
                           </option>
-                          {privateTypes.map((e) => {
+                          {publicTypes.map((e) => {
                             return (
                               <option key={e} value={e}>
                                 {translate(e)}
@@ -247,25 +276,24 @@ export default function Signup() {
                             );
                           })}
                         </Field>
-                        <ErrorMessage errors={errors} touched={touched} name="structure.structurePriveeType" />
-                      </StyledFormGroup>
-                    )}
-                    {values.structure.legalStatus === "PUBLIC" && (
-                      <div>
-                        <StyledFormGroup>
-                          <label>
-                            <span>*</span>TYPE DE STRUCTURE PUBLIQUE
+                        <p className="input-error" errors={errors} touched={touched} name="structure.structurePubliqueType" />
+                      </div>
+                      {["Service de l'Etat", "Etablissement public"].includes(values.structure.structurePubliqueType) && (
+                        <div>
+                          <label className="input-label">
+                            <span className="text-red-500 mr-1">*</span>TYPE DE SERVICE DE L&apos;ETAT
                           </label>
                           <Field
-                            validate={(v) => !v && requiredMessage}
+                            className="input-field"
+                            validate={(v) => !v && "Ce champ est requis"}
                             component="select"
-                            name="structure.structurePubliqueType"
-                            value={values.structure.structurePubliqueType}
+                            name="structure.structurePubliqueEtatType"
+                            value={values.structure.structurePubliqueEtatType}
                             onChange={handleChange}>
                             <option key="" value="" selected disabled>
-                              Type de structure publique
+                              Type de service de l&apos;état
                             </option>
-                            {publicTypes.map((e) => {
+                            {publicEtatTypes.map((e) => {
                               return (
                                 <option key={e} value={e}>
                                   {translate(e)}
@@ -273,197 +301,57 @@ export default function Signup() {
                               );
                             })}
                           </Field>
-                          <ErrorMessage errors={errors} touched={touched} name="structure.structurePubliqueType" />
-                        </StyledFormGroup>
-                        {["Service de l'Etat", "Etablissement public"].includes(values.structure.structurePubliqueType) && (
-                          <StyledFormGroup>
-                            <label>
-                              <span>*</span>TYPE DE SERVICE DE L&apos;ETAT
-                            </label>
-                            <Field
-                              validate={(v) => !v && requiredMessage}
-                              component="select"
-                              name="structure.structurePubliqueEtatType"
-                              value={values.structure.structurePubliqueEtatType}
-                              onChange={handleChange}>
-                              <option key="" value="" selected disabled>
-                                Type de service de l&apos;état
-                              </option>
-                              {publicEtatTypes.map((e) => {
-                                return (
-                                  <option key={e} value={e}>
-                                    {translate(e)}
-                                  </option>
-                                );
-                              })}
-                            </Field>
-                            <ErrorMessage errors={errors} touched={touched} name="structure.structurePubliqueEtatType" />
-                          </StyledFormGroup>
-                        )}
-                      </div>
-                    )}
-                    <StyledFormGroup>
-                      <label>
-                        <span>*</span>Code postal de la structure
-                      </label>
-                      <InputField validate={(v) => !v && requiredMessage} value={values.structure.zip} onChange={handleChange} name="structure.zip" placeholder="44000" />
-                      <ErrorMessage errors={errors} touched={touched} name="structure.zip" />
-                    </StyledFormGroup>
-                  </form>
-                </LoginBox>
-              </LoginBoxes>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", marginBottom: "1rem" }}>
-                  <CheckBox
+                          <p className="input-error" errors={errors} touched={touched} name="structure.structurePubliqueEtatType" />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div>
+                    <label className="input-label">
+                      <span className="text-red-500 mr-1">*</span>Code postal de la structure
+                    </label>
+                    <Field
+                      className="input-field"
+                      validate={(v) => !v && "Ce champ est requis"}
+                      value={values.structure.zip}
+                      onChange={handleChange}
+                      name="structure.zip"
+                      placeholder="44000"
+                    />
+                    <p className="input-error" errors={errors} touched={touched} name="structure.zip" />
+                  </div>
+                </form>
+              </div>
+
+              <div className="mb-6">
+                <div className="flex items-center gap-2">
+                  <Field
+                    className="rounded border-brand-grey text-brand-purple focus:ring-offset-0"
                     id="checkboxCGU"
-                    validate={(v) => !v && requiredMessage}
+                    validate={(v) => !v && "Ce champ est requis"}
                     type="checkbox"
                     value="true"
                     onChange={(e) => handleChange({ target: { name: "user.acceptCGU", value: e.target.checked ? "true" : "false" } })}
                     name="user.acceptCGU"
                     checked={values.user.acceptCGU === "true"}
-                    style={{ display: "flex" }}
                   />
-                  <label htmlFor="checkboxCGU" style={{ flex: 1, margin: 0 }}>
-                    <p style={{ marginBottom: "0" }}>
-                      J&apos;ai lu et j&apos;accepte les{" "}
-                      <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank" style={{ textDecoration: "underline", color: colors.darkPurple }} rel="noreferrer">
-                        conditions générales d&apos;utilisation{" "}
-                      </a>
-                      de la plateforme du Service national universel
-                    </p>
+                  <label htmlFor="checkboxCGU" className="flex-1 text-brand-grey mb-0">
+                    J&apos;ai lu et j&apos;accepte les{" "}
+                    <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank" className="text-brand-darkPurple underline" rel="noreferrer">
+                      conditions générales d&apos;utilisation{" "}
+                    </a>
+                    de la plateforme du Service national universel
                   </label>
                 </div>
-                <ErrorMessage errors={errors} touched={touched} name="user.acceptCGU" />
+                <p className="input-error" errors={errors} touched={touched} name="user.acceptCGU" />
               </div>
-              <Submit loading={isSubmitting} type="submit" color="primary" onClick={handleSubmit}>
+              <LoadingButton className="auth-button-primary" loading={isSubmitting} type="submit" onClick={handleSubmit}>
                 S&apos;inscrire
-              </Submit>
-            </AuthWrapper>
+              </LoadingButton>
+            </div>
           );
         }}
       </Formik>
     </div>
   );
 }
-
-const Register = styled.h3`
-  position: relative;
-  font-size: 1rem;
-  text-align: center;
-  color: ${colors.grey};
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  font-weight: 400;
-  margin-bottom: 20px;
-  a {
-    color: ${colors.purple};
-    font-weight: 500;
-  }
-`;
-
-const StyledFormGroup = styled(FormGroup)`
-  margin-bottom: 25px;
-  label {
-    color: rgb(106, 111, 133);
-    font-size: 10px;
-    text-transform: uppercase;
-    font-weight: 700;
-    > span {
-      color: red;
-      font-size: 10px;
-      margin-right: 5px;
-    }
-  }
-  select,
-  textarea,
-  input {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    color: #606266;
-    border: 0;
-    outline: 0;
-    padding: 11px 20px;
-    border-radius: 6px;
-    margin-right: 15px;
-    border: 1px solid #dcdfe6;
-    ::placeholder {
-      color: #d6d6e1;
-    }
-    :focus {
-      border: 1px solid #aaa;
-    }
-  }
-`;
-
-const InputField = styled(Field)`
-  display: block;
-  width: 100%;
-  margin-bottom: 0.375rem;
-  background-color: #fff;
-  color: #606266;
-  outline: 0;
-  padding: 9px 20px;
-  border-radius: 4px;
-  border: 1px solid;
-  border-color: ${({ haserror }) => (haserror ? "red" : "#dcdfe6")};
-  ::placeholder {
-    color: #d6d6e1;
-  }
-  :focus {
-    border: 1px solid #aaa;
-  }
-`;
-
-const CheckBox = styled(Field)`
-  display: flex;
-  margin-right: 1rem;
-  background-color: #fff;
-  color: #606266;
-  outline: 0;
-  padding: 9px 20px;
-  border-radius: 4px;
-  border: 1px solid;
-  border-color: ${({ haserror }) => (haserror ? "red" : "#dcdfe6")};
-  ::placeholder {
-    color: #d6d6e1;
-  }
-  :focus {
-    border: 1px solid #aaa;
-  }
-`;
-
-const Submit = styled(LoadingButton)`
-  display: block;
-  font-size: 1rem;
-  font-weight: 700;
-  border-radius: 0;
-  padding: 0.5rem 3rem;
-  border: 0;
-  background-color: ${colors.purple};
-  margin-bottom: 1rem;
-  border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-  cursor: pointer;
-  :hover {
-    background-color: #42389d;
-  }
-  :focus {
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-  }
-  :disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const LoginBoxes = styled.div`
-  display: flex;
-`;
-const AuthWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
