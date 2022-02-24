@@ -326,6 +326,8 @@ const translateFieldYoung = (f) => {
       return "Fichier Formulaire de consentement au traitement des données personnelles";
     case "phase2ApplicationStatus":
       return "Liste de statuts de candidatures (phase 2)";
+    case "statusMilitaryPreparationFiles":
+      return "Statut des fichiers de préparation militaire";
     case "statusPhase2Contract":
       return "Liste de statuts des contrats (phase 2)";
     case "cniFiles":
