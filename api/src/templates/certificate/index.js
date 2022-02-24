@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl } = require("../../utils");
-const { COHESION_STAY_LIMIT_DATE } = require("snu-lib");
+const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 
@@ -25,7 +25,7 @@ function getBgUrl2019() {
 }
 
 const phase1 = async (young) => {
-  const d = new Date();
+  const now = new Date();
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
   const template = young.cohort === "2019" ? getBgUrl2019() : getBgUrl();
 
@@ -35,6 +35,10 @@ const phase1 = async (young) => {
   if (!cohesionCenter) return;
 
   const COHESION_CENTER_LOCATION = getLocationCohesionCenter(cohesionCenter);
+
+  // on prend la date de fin de séjour si on édite l'attestation après la date de fin de séjour
+  const date = COHESION_STAY_END[young.cohort].getTime() < now.getTime() ? COHESION_STAY_END[young.cohort] : now;
+
   return html
     .replace(/{{FIRST_NAME}}/g, young.firstName)
     .replace(/{{LAST_NAME}}/g, young.lastName)
@@ -44,7 +48,7 @@ const phase1 = async (young) => {
     .replace(/{{COHESION_CENTER_LOCATION}}/g, COHESION_CENTER_LOCATION)
     .replace(/{{BASE_URL}}/g, getBaseUrl())
     .replace(/{{GENERAL_BG}}/g, template)
-    .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
+    .replace(/{{DATE}}/g, date.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
 };
 
 const phase2 = (young) => {
