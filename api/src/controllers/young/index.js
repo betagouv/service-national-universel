@@ -464,18 +464,28 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
   }
 });
 
-router.put("/:id/change-cohort/:newCohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/change-cohort/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const young = await YoungObject.findById(req.user._id);
+    if (req.body.isFull === true) {
+      young.set({ cohort: value.cohort, cohortChangeReason: value.cohortChangeReason, cohortDetailedChangeReason: value.cohortDetailedChangeReason, statusPhase1: "WAITING_LIST" });
+    } else {
+      young.set({ cohort: value.cohort, cohortChangeReason: value.cohortChangeReason, cohortDetailedChangeReason: value.cohortDetailedChangeReason });
+
+    }
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
 
-    young.set(value);
     await young.save({ fromUser: req.user });
+
+    // if they had a cohesion center, we check if we need to update the places taken / left
+    if (young.sessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+    }
 
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
