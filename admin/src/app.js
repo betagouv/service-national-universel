@@ -44,7 +44,6 @@ import { SENTRY_URL, environment, adminURL } from "./config";
 import { ROLES, ROLES_LIST } from "./utils";
 
 import "./index.css";
-import "./tailwindcss.css";
 import ModalCGU from "./components/modals/ModalCGU";
 
 if (environment === "production") {

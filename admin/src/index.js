@@ -13,7 +13,7 @@ ReactDOM.render(
     <App />
     <ReduxToastr timeOut={1500} transitionIn="fadeIn" transitionOut="fadeOut" />
   </Provider>,
-  document.getElementById("root")
+  document.getElementById("root"),
 );
 
 //dasdsadsadsa
