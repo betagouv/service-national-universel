@@ -14,6 +14,7 @@ const { getQPV, getDensity } = require("../../geo");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const SessionPhase1 = require("../../models/sessionPhase1");
+const InscriptionGoalModel = require("../../models/inscriptionGoal");
 const ApplicationModel = require("../../models/application");
 const MissionModel = require("../../models/mission");
 const AuthObject = require("../../auth");
@@ -470,18 +471,41 @@ router.put("/:id/change-cohort/", passport.authenticate("young", { session: fals
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const young = await YoungObject.findById(req.user._id);
-    if (req.body.isFull === true) {
-      young.set({ cohort: value.cohort, cohortChangeReason: value.cohortChangeReason, cohortDetailedChangeReason: value.cohortDetailedChangeReason, statusPhase1: "WAITING_LIST" });
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const oldSessionPhase1Id = young.sessionPhase1Id;
+    young.set({ sessionPhase1Id: "" });
+
+    var goal = await InscriptionGoalModel.findOne({ department: young.department, cohort: value.cohort });
+    if (goal && goal.max) {
+      const nbYoung = await YoungObject.find({
+        department: young.department,
+        cohort: value.cohort,
+        status: { $nin: ["REFUSED", "IN_PROGRESS", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
+      }).count();
+      if (nbYoung === 0) {
+        goal = false;
+      } else {
+        const buffer = 1.25;
+        const ratio = Math.floor(goal.max * buffer) / nbYoung;
+        if (ratio >= 1) goal = true;
+        else goal = false;
+      }
+    } else {
+      goal = false;
+    }
+
+    if (goal === true) {
+      young.set({ cohort: value.cohort, cohortChangeReason: value.cohortChangeReason, cohortDetailedChangeReason: value.cohortDetailedChangeReason, status: "WAITING_LIST" });
     } else {
       young.set({ cohort: value.cohort, cohortChangeReason: value.cohortChangeReason, cohortDetailedChangeReason: value.cohortDetailedChangeReason });
     }
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     await young.save({ fromUser: req.user });
 
+
     // if they had a cohesion center, we check if we need to update the places taken / left
-    if (young.sessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+    if (oldSessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
     }
 

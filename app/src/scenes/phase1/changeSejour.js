@@ -61,12 +61,10 @@ export default function changeSejour() {
 
   const onConfirmer = () => {
     if (newSejour && motif) {
-      var isGoalTrue = sejourGoal.filter((obj) => {
-        if (obj.goal === true && obj.goal === newSejour) return obj.sejour === newSejour;
-      });
+      var isGoalTrue = sejourGoal.find(obj => (obj.goal === true && obj.id === newSejour));
       //si le volontaire est en statut de phase 1 “affectée” et que les objectifs de recrutement sont atteint pour le nouveau séjour choisi
 
-      if (isGoalTrue.length === 0) {
+      if (isGoalTrue === undefined) {
         setmodalConfirmControlOk(true);
       } else {
         setmodalConfirmGoalReached(true);
@@ -88,7 +86,7 @@ export default function changeSejour() {
 
   const handleWaitingList = async () => {
     try {
-      await api.put("/young/" + young._id + "/change-cohort/", { cohortChangeReason: motif, cohortDetailedChangeReason: messageTextArea, cohort: newSejour, isFull: true });
+      await api.put("/young/" + young._id + "/change-cohort/", { cohortChangeReason: motif, cohortDetailedChangeReason: messageTextArea, cohort: newSejour });
       toastr.success("Vous avez été ajouté en liste d'attente");
       setmodalConfirmGoalReached(false);
     } catch (e) {
@@ -190,7 +188,7 @@ export default function changeSejour() {
                         message={
                           <>
                             Êtes-vous sûr ? <br /> <br />
-                            Vous vous apprêtez à changer de séjour pour le {newSejour}. Cette action est irréversible, souhaitez-vous confirmer cette action ? <br />
+                            Vous vous apprêtez à changer de séjour pour {newSejour}. Cette action est irréversible, souhaitez-vous confirmer cette action ? <br />
                           </>
                         }
                         onCancel={() => setmodalConfirmControlOk(false)}
