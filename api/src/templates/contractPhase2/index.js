@@ -102,34 +102,52 @@ const addSignature = (str, context, field) => {
     <div style="display: grid; grid-auto-columns: 1fr; grid-auto-flow: column;">
       <div style="text-align: center;">
         <div>Représentant de l'état</div>
+        <div>
+        ${context.projectManagerLastName}
+        ${context.projectManagerFirstName}
+        </div>
         ${badgeSignature(context.projectManagerStatus)}
       </div>
       <div style="text-align: center;">
         <div>Représentant structure</div>
+        <div>
+        ${context.structureManagerLastName}
+        ${context.structureManagerFirstName}
+        </div>  
         ${badgeSignature(context.structureManagerStatus)}
       </div>
-      ${
-        context.isYoungAdult == "true"
-          ? `
+      ${context.isYoungAdult == "true"
+      ? `
           <div style="text-align: center;">
             <div>Volontaire</div>
+            <div>
+            ${context.youngContractLastName}
+            ${context.youngContractFirstName}
+            </div>
             ${badgeSignature(context.youngContractStatus)}
           </div>
       `
-          : `<div style="text-align: center;">
+      : `<div style="text-align: center;">
               <div>Représentant légal 1</div>
+              <div>
+              ${context.parent1LastName}
+              ${context.parent1FirstName}
+              </div>
               ${badgeSignature(context.parent1Status)}
             </div>
-      ${
-        context.parent2Email
-          ? `<div style="text-align: center;">
+      ${context.parent2Email
+        ? `<div style="text-align: center;">
               <div>Représentant légal 2</div>
+              <div>
+              ${context.parent2LastName}
+              ${context.parent2FirstName}
+              </div>
               ${badgeSignature(context.parent2Status)}
             </div>`
-          : ``
+        : ``
       }
       `
-      }
+    }
     </div>
   `;
   return str.replace(regex, content);
