@@ -358,7 +358,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
   }
 });
 
-router.put("/young/change_cohort/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/young/:id/change_cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -378,7 +378,6 @@ router.put("/young/change_cohort/:id", passport.authenticate("referent", { sessi
 
     young.set(newYoung);
     await young.save({ fromUser: req.user });
-
 
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {
