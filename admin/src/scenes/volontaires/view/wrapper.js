@@ -128,7 +128,7 @@ const BadgeCohort = ({ young, onChange }) => {
 
   const handleChangeCohort = async (messageTextArea) => {
     try {
-      await api.put(`/referent/young/${young._id}`, { cohort: newCohort });
+      await api.put(`/referent/young/change_cohort/${young._id}`, { cohort: newCohort });
       //! TODO : Ajouter le template
       // await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);}
       await onChange();

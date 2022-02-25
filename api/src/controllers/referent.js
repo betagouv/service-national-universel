@@ -358,6 +358,42 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
   }
 });
 
+router.put("/young/change_cohort/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = validateYoung(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const { id } = req.params;
+    const young = await YoungModel.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    // eslint-disable-next-line no-unused-vars
+    let { __v, ...newYoung } = value;
+
+    const oldSessionPhase1Id = young.sessionPhase1Id;
+    if (young.cohort !== req.body.cohort && (young.sessionPhase1Id || young.meetingPointId)) {
+      newYoung.sessionPhase1Id = "";
+      newYoung.meetingPointId = "";
+    }
+
+    young.set(newYoung);
+    await young.save({ fromUser: req.user });
+
+
+    // if they had a cohesion center, we check if we need to update the places taken / left
+    if (oldSessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+    }
+    res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
+
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.post("/:tutorId/email/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
