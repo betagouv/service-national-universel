@@ -1,3 +1,15 @@
+# [1.50.0](https://github.com/betagouv/service-national-universel/compare/v1.49.0...v1.50.0) (2022-02-25)
+
+
+### Bug Fixes
+
+* **api:** update only contract that linked to active application ([#1292](https://github.com/betagouv/service-national-universel/issues/1292)) ([b6fc590](https://github.com/betagouv/service-national-universel/commit/b6fc5907d280940cdc2932f689eab9b2e5932b76))
+
+
+### Features
+
+* contrat - Ajouter date et nom en dessous de valider ([#1291](https://github.com/betagouv/service-national-universel/issues/1291)) ([5aa77d0](https://github.com/betagouv/service-national-universel/commit/5aa77d04f814ddc2a53cb50f6dd918810db6dde7))
+
 # [1.49.0](https://github.com/betagouv/service-national-universel/compare/v1.48.0...v1.49.0) (2022-02-24)
 
 
