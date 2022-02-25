@@ -474,10 +474,8 @@ router.put("/:id/change-cohort/", passport.authenticate("young", { session: fals
       young.set({ cohort: value.cohort, cohortChangeReason: value.cohortChangeReason, cohortDetailedChangeReason: value.cohortDetailedChangeReason, statusPhase1: "WAITING_LIST" });
     } else {
       young.set({ cohort: value.cohort, cohortChangeReason: value.cohortChangeReason, cohortDetailedChangeReason: value.cohortDetailedChangeReason });
-
     }
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
 
     await young.save({ fromUser: req.user });
 

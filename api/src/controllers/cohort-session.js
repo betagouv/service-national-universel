@@ -8,7 +8,6 @@ const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
 const { getDepartmentNumber } = require("snu-lib/region-and-departments");
-const { validateId } = require("../utils/validator");
 
 router.get("/availability/2022", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const young = req.user;

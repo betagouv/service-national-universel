@@ -24,7 +24,6 @@ export default function changeSejour() {
   const [messageTextArea, setMessageTextArea] = useState("");
   const [loading, setLoading] = useState(true);
 
-
   const motifs = [
     "Non disponibilité pour motif familial ou personnel",
     "Non disponibilité pour motif scolaire ou professionnel",
@@ -89,18 +88,16 @@ export default function changeSejour() {
 
   const handleWaitingList = async () => {
     try {
-      await api.put("/young/" + young._id + "/change-cohort/", { cohort: newSejour });
       await api.put("/young/" + young._id + "/change-cohort/", { cohortChangeReason: motif, cohortDetailedChangeReason: messageTextArea, cohort: newSejour, isFull: true });
-
       toastr.success("Vous avez été ajouté en liste d'attente");
       setmodalConfirmGoalReached(false);
     } catch (e) {
       return toastr.error("Oups, une erreur est survenue lors de votre changement de cohorte :", translate(e.code));
     }
   };
-  if (loading) { return <Loader /> }
-  else {
-
+  if (loading) {
+    return <Loader />;
+  } else {
     return (
       <>
         <HeroContainer>
@@ -136,7 +133,11 @@ export default function changeSejour() {
                             })}
                         </DropdownMenu>
                       </UncontrolledDropdown>
-                      <a href="https:support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }} target="_blank" rel="noreferrer">
+                      <a
+                        href="https:support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1"
+                        style={{ color: "#5145cc" }}
+                        target="_blank"
+                        rel="noreferrer">
                         Pourquoi je ne vois pas tous les séjours ?
                       </a>
                     </SectionHelp>
@@ -204,8 +205,8 @@ export default function changeSejour() {
                         title="Changement de séjour"
                         message={
                           <>
-                            Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour . Vous allez être positionné(e) sur liste complémentaire et vous serez
-                            averti(e) si des places se libérent. <br /> <br />
+                            Malheureusement il n&apos;y a plus de place disponible actuellement pour ce séjour . Vous allez être positionné(e) sur liste complémentaire et vous
+                            serez averti(e) si des places se libérent. <br /> <br />
                             Souhaitez-vous maintenir votre choix de séjour ?
                           </>
                         }
