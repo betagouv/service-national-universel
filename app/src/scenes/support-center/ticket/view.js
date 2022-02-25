@@ -36,8 +36,22 @@ export default function TicketView(props) {
       setTicket(null);
     }
   };
+
+  const getTicketZammood = async () => {
+    try {
+      const id = props.match?.params?.id;
+      if (!id) return console.log("no corresponding ticket zammood");
+      const data = await api.get(`/zammood/ticket/${id}`);
+      if (!data.ok) console.log("no corresponding ticket in Zammood");
+      return data;
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   useEffect(() => {
     getTicket();
+    getTicketZammood();
     const ping = setInterval(getTicket, 5000);
     return () => {
       clearInterval(ping);
