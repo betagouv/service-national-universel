@@ -856,7 +856,7 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
 function ContractStatusBadge({ title, lastName, firstName, ...rest }) {
   return (
     <div style={{ textAlign: "center" }}>
-      <div>{title}</div>
+      <div className="italic text-coolGray-500">{title}</div>
       <div>
         {lastName} {firstName}
       </div>

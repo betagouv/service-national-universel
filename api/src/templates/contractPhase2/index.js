@@ -116,8 +116,9 @@ const addSignature = (str, context, field) => {
         </div>  
         ${badgeSignature(context.structureManagerStatus)}
       </div>
-      ${context.isYoungAdult == "true"
-      ? `
+      ${
+        context.isYoungAdult == "true"
+          ? `
           <div style="text-align: center;">
             <div>Volontaire</div>
             <div>
@@ -127,7 +128,7 @@ const addSignature = (str, context, field) => {
             ${badgeSignature(context.youngContractStatus)}
           </div>
       `
-      : `<div style="text-align: center;">
+          : `<div style="text-align: center;">
               <div>Représentant légal 1</div>
               <div>
               ${context.parent1LastName}
@@ -135,8 +136,9 @@ const addSignature = (str, context, field) => {
               </div>
               ${badgeSignature(context.parent1Status)}
             </div>
-      ${context.parent2Email
-        ? `<div style="text-align: center;">
+      ${
+        context.parent2Email
+          ? `<div style="text-align: center;">
               <div>Représentant légal 2</div>
               <div>
               ${context.parent2LastName}
@@ -144,10 +146,10 @@ const addSignature = (str, context, field) => {
               </div>
               ${badgeSignature(context.parent2Status)}
             </div>`
-        : ``
+          : ``
       }
       `
-    }
+      }
     </div>
   `;
   return str.replace(regex, content);
