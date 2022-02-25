@@ -14,7 +14,7 @@ const { validateUpdateApplication, validateNewApplication } = require("../utils/
 const { ADMIN_URL, APP_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
 const { serializeApplication } = require("../utils/serializer");
-const { updateYoungPhase2Hours, updateStatusPhase2 } = require("../utils");
+const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract } = require("../utils");
 
 const updatePlacesMission = async (app, fromUser) => {
   try {
@@ -85,6 +85,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     await updateYoungPhase2Hours(young);
     await updateStatusPhase2(young);
     await updatePlacesMission(data, req.user);
+    await updateYoungStatusPhase2Contract(young, req.user);
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
@@ -113,6 +114,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
 
     await updateYoungPhase2Hours(young);
     await updateStatusPhase2(young);
+    await updateYoungStatusPhase2Contract(young, req.user);
     await updatePlacesMission(application, req.user);
 
     res.status(200).send({ ok: true, data: serializeApplication(application) });

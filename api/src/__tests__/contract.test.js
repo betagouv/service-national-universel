@@ -44,7 +44,7 @@ describe("Structure", () => {
     describe("when it works", () => {
       async function createContract(options, initialYoung) {
         const young = initialYoung || (await createYoungHelper(getNewYoungFixture()));
-        const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
+        const application = await createApplication({ ...getNewApplicationFixture(), status:"VALIDATED", youngId: young._id });
         const contractFixture = getNewContractFixture();
         contractFixture.youngId = young._id;
         contractFixture.applicationId = application._id;

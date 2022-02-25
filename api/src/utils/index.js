@@ -7,6 +7,7 @@ const CohesionCenterModel = require("../models/cohesionCenter");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
+const ContractObject = require("../models/contract");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
@@ -452,6 +453,39 @@ const updateStatusPhase2 = async (young) => {
   await young.save();
 };
 
+const checkStatusContract = (contract) => {
+  if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
+  // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
+  const tokenKeys = ["parent1Token", "parent2Token", "projectManagerToken", "structureManagerToken", "youngContractToken"];
+  const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
+  const validateKeys = ["parent1Status", "parent2Status", "projectManagerStatus", "structureManagerStatus", "youngContractStatus"];
+  const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
+  if (validatedCount >= tokenCount) {
+    return "VALIDATED";
+  } else {
+    return "SENT";
+  }
+};
+
+const updateYoungStatusPhase2Contract = async (young, fromUser) => {
+  const contracts = await ContractObject.find({ youngId: young._id });
+
+  // on récupère toutes les candidatures du volontaire
+  const applications = await ApplicationModel.find({ _id: { $in: contracts?.map((c) => c.applicationId) } });
+
+  // on filtre sur les candidatures pour lesquelles le contrat est "actif"
+  const applicationsThatContractIsActive = applications.filter((application) => ["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"].includes(application.status));
+
+  //on filtre les contrats liés à ces candidatures filtrée précédement
+  const activeContracts = contracts.filter((contract) => applicationsThatContractIsActive.map((application) => application._id.toString()).includes(contract.applicationId));
+
+  young.set({
+    statusPhase2Contract: activeContracts.map((contract) => checkStatusContract(contract)),
+  });
+
+  await young.save({ fromUser });
+};
+
 function isYoung(user) {
   return user instanceof YoungModel;
 }
@@ -566,4 +600,6 @@ module.exports = {
   updateStatusPhase2,
   getSignedUrlForApiAssociation,
   updateApplicationsWithYoungOrMission,
+  updateYoungStatusPhase2Contract,
+  checkStatusContract,
 };
