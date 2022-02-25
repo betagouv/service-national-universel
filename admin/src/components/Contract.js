@@ -110,13 +110,13 @@ export default function Contract({ young, admin }) {
     try {
       values.sendMessage
         ? setLoadings({
-          saveButton: false,
-          submitButton: true,
-        })
+            saveButton: false,
+            submitButton: true,
+          })
         : setLoadings({
-          saveButton: true,
-          submitButton: false,
-        });
+            saveButton: true,
+            submitButton: false,
+          });
       const { ok, code } = await api.post(`/contract`, {
         ...values,
         missionDuration: values.missionDuration?.toString(),
@@ -260,17 +260,40 @@ export default function Contract({ young, admin }) {
               token={contract?.structureManagerToken}
               lastName={contract?.structureManagerLastName}
               firstName={contract?.structureManagerFirstName}
-
             />
             {!isYoungAdult ? (
               <>
-                <ContractStatusBadge title="Représentant légal 1" target="parent1" contract={contract} status={contract?.parent1Status} token={contract?.parent1Token} lastName={contract?.parent1LastName} firstName={contract?.parent1FirstName} />
+                <ContractStatusBadge
+                  title="Représentant légal 1"
+                  target="parent1"
+                  contract={contract}
+                  status={contract?.parent1Status}
+                  token={contract?.parent1Token}
+                  lastName={contract?.parent1LastName}
+                  firstName={contract?.parent1FirstName}
+                />
                 {young.parent2Email && (
-                  <ContractStatusBadge title="Représentant légal 2" target="parent2" contract={contract} status={contract?.parent2Status} token={contract?.parent2Token} lastName={contract?.parent2LastName} firstName={contract?.parent2FirstName} />
+                  <ContractStatusBadge
+                    title="Représentant légal 2"
+                    target="parent2"
+                    contract={contract}
+                    status={contract?.parent2Status}
+                    token={contract?.parent2Token}
+                    lastName={contract?.parent2LastName}
+                    firstName={contract?.parent2FirstName}
+                  />
                 )}
               </>
             ) : (
-              <ContractStatusBadge title="Volontaire" target="young" contract={contract} status={contract?.youngContractStatus} token={contract?.youngContractToken} lastName={contract?.youngLastName} firstName={contract?.youngFirstName} />
+              <ContractStatusBadge
+                title="Volontaire"
+                target="young"
+                contract={contract}
+                status={contract?.youngContractStatus}
+                token={contract?.youngContractToken}
+                lastName={contract?.youngLastName}
+                firstName={contract?.youngFirstName}
+              />
             )}
           </div>
         </Bloc>
@@ -834,7 +857,9 @@ function ContractStatusBadge({ title, lastName, firstName, ...rest }) {
   return (
     <div style={{ textAlign: "center" }}>
       <div>{title}</div>
-      <div>{lastName} {firstName}</div>
+      <div>
+        {lastName} {firstName}
+      </div>
       <ContractStatusbadgeItem {...rest} />
     </div>
   );
