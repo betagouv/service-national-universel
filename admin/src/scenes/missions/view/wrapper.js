@@ -14,7 +14,6 @@ import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import Badge from "../../../components/Badge";
 import Title from "../../../components/views/Title";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
-import ActionDropdown from "../../../components/buttons/ActionDropdown";
 
 export default function Wrapper({ mission, tab, children }) {
   const history = useHistory();
@@ -81,34 +80,40 @@ export default function Wrapper({ mission, tab, children }) {
             ) : null}
           </TabList>
         </div>
-        <div style={{ display: "flex" }}>
-          <BoxPlaces>
-            <table>
-              <tbody>
-                <tr>
-                  <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{mission.placesLeft}</td>
-                  <td>
-                    <b>Places restantes</b>
-                    <br />
-                    <span style={{ color: "#999" }}>
-                      {mission.placesTotal - mission.placesLeft} / {mission.placesTotal}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </BoxPlaces>
-          <div style={{ marginLeft: "20px" }}>
-            <ActionDropdown
-              style={{ marginBottom: "10px" }}
-              width="100%"
-              onDelete={onClickDelete}
-              onDuplicate={onClickDuplicate}
-              onEdit={() => history.push(`/mission/${mission._id}/edit`)}
-            />
-            <SelectStatusMission hit={mission} />
-          </div>
-        </div>
+        <Row style={{ minWidth: "30%" }}>
+          <Col md={4}>
+            <BoxPlaces>
+              <table>
+                <tbody>
+                  <tr>
+                    <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{mission.placesLeft}</td>
+                    <td>
+                      <b>Places restantes</b>
+                      <br />
+                      <span style={{ color: "#999" }}>
+                        {mission.placesTotal - mission.placesLeft} / {mission.placesTotal}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </BoxPlaces>
+          </Col>
+          <Col md={8}>
+            <Row>
+              <Col md={12} style={{ display: "flex", justifyContent: "flex-end", minHeight: "35px" }}>
+                <SelectStatusMission hit={mission} />
+              </Col>
+            </Row>
+            <Row style={{ marginTop: "0.5rem" }}>
+              <Link to={`/mission/${mission._id}/edit`}>
+                <PanelActionButton title="Modifier" icon="pencil" />
+              </Link>
+              <PanelActionButton onClick={onClickDuplicate} title="Dupliquer" icon="duplicate" />
+              <PanelActionButton onClick={onClickDelete} title="Supprimer" icon="bin" />
+            </Row>
+          </Col>
+        </Row>
       </Header>
       {children}
       <ModalConfirm
