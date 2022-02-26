@@ -8,6 +8,10 @@ import Duplicate from "../../assets/Duplicate.js";
 import Pencil from "../../assets/Pencil.js";
 import Burger from "../../assets/Burger.js";
 
+//todo
+// revoir le style (largeur, hover)
+// dynamiser les actions (liste d'actions) `actions.map(action => <DropdownItem onClick={action.onClick}>{action.title}</DropdownItem>)`
+
 export default function ActionDropdown({ width, onDuplicate, onDelete, onEdit, ...props }) {
   return (
     <ActionBox width={width} {...props}>
