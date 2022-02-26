@@ -138,6 +138,7 @@ const Header = styled.div`
 `;
 
 const Box = styled.div`
+  width: ${(props) => props.width || 100}%;
   height: 100%;
   background-color: #fff;
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
