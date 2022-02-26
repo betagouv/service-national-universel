@@ -1,3 +1,10 @@
+## [1.50.1](https://github.com/betagouv/service-national-universel/compare/v1.50.0...v1.50.1) (2022-02-26)
+
+
+### Bug Fixes
+
+* create an action dropdown ([#1236](https://github.com/betagouv/service-national-universel/issues/1236)) ([a580fe1](https://github.com/betagouv/service-national-universel/commit/a580fe14ebe50e99e7f2d3f9c83a0588e9286453))
+
 # [1.50.0](https://github.com/betagouv/service-national-universel/compare/v1.49.0...v1.50.0) (2022-02-25)
 
 
