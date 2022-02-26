@@ -26,7 +26,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="flex flex-1">
+      <div className=" flex flex-1 flex-col lg:flex-row">
         <nav className="px-3 flex flex-1 border-b">
           <TabItem title="Inscriptions" to="/dashboard/inscriptions" />
           <TabItem title="Volontaires" to="/dashboard/volontaires" />
@@ -34,16 +34,16 @@ export default function Dashboard() {
           <TabItem title="Missions" to="/dashboard/missions" />
           <TabItem title="Centres" to="/dashboard/centres" />
         </nav>
-      </div>
-      <div className="flex flex-1 justify-end m-2">
-        {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll filter={filter} /> : null}
-        <VioletButton
-          onClick={() => {
-            plausibleEvent("Dashboard/CTA - Exporter statistiques");
-            print();
-          }}>
-          <p>Exporter les statistiques</p>
-        </VioletButton>
+        <div className="flex m-1 justify-end">
+          {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll filter={filter} /> : null}
+          <VioletButton
+            onClick={() => {
+              plausibleEvent("Dashboard/CTA - Exporter statistiques");
+              print();
+            }}>
+            <p>Exporter les statistiques</p>
+          </VioletButton>
+        </div>
       </div>
       <Wrapper className="p-6">
         {currentTab === "inscriptions" && <Inscription onChangeFilter={setFilter} />}
@@ -60,7 +60,7 @@ const TabItem = ({ to, title }) => (
   <NavLink
     to={to}
     activeClassName="text-snu-purple-800 font-bold border-b-[3px] border-snu-purple-800"
-    className="px-4 py-2 cursor-pointer text-coolGray-500  hover:text-snu-purple-800 hover:border-b-[3px] hover:border-snu-purple-800">
+    className="px-3 py-2 cursor-pointer text-coolGray-500  hover:text-snu-purple-800 hover:border-b-[3px] hover:border-snu-purple-800">
     {title}
   </NavLink>
 );
