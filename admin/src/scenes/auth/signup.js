@@ -71,9 +71,9 @@ export default function Signup() {
             <div className="flex flex-col items-center p-8">
               <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl mb-2">Inscrivez votre structure d&apos;accueil</h1>
               <h2 className="mb-8 text-base font-normal text-brand-grey mb-4">A destination des structures souhaitant accueillir des volontaires</h2>
-              <p className="mb-8 text-center text-sm font-medium text-brand-grey">
+              <p className="mb-8 text-center text-sm text-brand-grey">
                 Vous avez déjà un compte ?{" "}
-                <Link to="/auth" className="font-medium text-snu-purple-200 transition-colors hover:text-snu-purple-600">
+                <Link to="/auth" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
                   Connectez-vous
                 </Link>
               </p>
@@ -86,8 +86,8 @@ export default function Signup() {
                       <span className="mr-1 text-red-500">*</span>ADRESSE EMAIL
                     </label>
                     <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                      validate={(v) => (!v && "Ce champ est requis") || (!validator.isEmail(v) && "Veuillez renseigner votre email")}
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      validate={(v) => (!v && "Ce champ est obligatoire") || (!validator.isEmail(v) && "Veuillez renseigner votre email")}
                       name="user.email"
                       type="email"
                       value={values.user.email}
@@ -102,8 +102,8 @@ export default function Signup() {
                       <span className="mr-1 text-red-500">*</span>Prénom
                     </label>
                     <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                      validate={(v) => !v && "Ce champ est requis"}
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      validate={(v) => !v && "Ce champ est obligatoire"}
                       name="user.firstName"
                       id="firstName"
                       value={values.user.firstName}
@@ -118,8 +118,8 @@ export default function Signup() {
                       <span className="mr-1 text-red-500">*</span>Nom
                     </label>
                     <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                      validate={(v) => !v && "Ce champ est requis"}
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      validate={(v) => !v && "Ce champ est obligatoire"}
                       name="user.lastName"
                       id="lastName"
                       value={values.user.lastName}
@@ -134,7 +134,7 @@ export default function Signup() {
                       Téléphone
                     </label>
                     <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
                       name="user.phone"
                       type="tel"
                       id="phone"
@@ -148,7 +148,7 @@ export default function Signup() {
                       Téléphone portable
                     </label>
                     <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
                       name="user.mobile"
                       type="tel"
                       id="mobile"
@@ -189,19 +189,19 @@ export default function Signup() {
                       <span className="mr-1 text-red-500">*</span>NOM DE LA STRUCTURE
                     </label>
                     <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                      validate={(v) => !v && "Ce champ est requis"}
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      validate={(v) => !v && "Ce champ est obligatoire"}
                       value={values.structure.name}
                       onChange={handleChange}
                       name="structure.name"
                       placeholder="Nom de votre structure"
                     />
-                    <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.name" />
+                    <p className="text-xs text-red-500">{errors.structure?.name}</p>
                   </div>
                   <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">DESCRIPTION DE LA STRUCTURE</label>
                     <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
                       as="textarea"
                       value={values.structure.description}
                       onChange={handleChange}
@@ -214,8 +214,8 @@ export default function Signup() {
                       <span className="mr-1 text-red-500">*</span>STATUT JURIDIQUE
                     </label>
                     <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                      validate={(v) => !v && "Ce champ est requis"}
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      validate={(v) => !v && "Ce champ est obligatoire"}
                       component="select"
                       name="structure.legalStatus"
                       value={values.structure.legalStatus}
@@ -228,7 +228,7 @@ export default function Signup() {
                       <option value="ASSOCIATION">{translate("ASSOCIATION")}</option>
                       <option value="OTHER">{translate("OTHER")}</option>
                     </Field>
-                    <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.legalStatus" />
+                    <p className="text-xs text-red-500">{errors.structure?.legalStatus}</p>
                   </div>
                   {values.structure.legalStatus === "ASSOCIATION" && (
                     <div>
@@ -248,8 +248,8 @@ export default function Signup() {
                         <span className="mr-1 text-red-500">*</span>TYPE DE STRUCTURE PRIVÉE
                       </label>
                       <Field
-                        className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                        validate={(v) => !v && "Ce champ est requis"}
+                        className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                        validate={(v) => !v && "Ce champ est obligatoire"}
                         component="select"
                         name="structure.structurePriveeType"
                         value={values.structure.structurePriveeType}
@@ -265,7 +265,7 @@ export default function Signup() {
                           );
                         })}
                       </Field>
-                      <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.structurePriveeType" />
+                      <p className="text-xs text-red-500">{errors.structure?.structurePriveeType}</p>
                     </div>
                   )}
                   {values.structure.legalStatus === "PUBLIC" && (
@@ -275,8 +275,8 @@ export default function Signup() {
                           <span className="text-red-500 mr-1">*</span>TYPE DE STRUCTURE PUBLIQUE
                         </label>
                         <Field
-                          className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                          validate={(v) => !v && "Ce champ est requis"}
+                          className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                          validate={(v) => !v && "Ce champ est obligatoire"}
                           component="select"
                           name="structure.structurePubliqueType"
                           value={values.structure.structurePubliqueType}
@@ -292,7 +292,7 @@ export default function Signup() {
                             );
                           })}
                         </Field>
-                        <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.structurePubliqueType" />
+                        <p className="text-xs text-red-500">{errors.structure?.structurePubliqueType}</p>
                       </div>
                       {["Service de l'Etat", "Etablissement public"].includes(values.structure.structurePubliqueType) && (
                         <div>
@@ -300,8 +300,8 @@ export default function Signup() {
                             <span className="text-red-500 mr-1">*</span>TYPE DE SERVICE DE L&apos;ETAT
                           </label>
                           <Field
-                            className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                            validate={(v) => !v && "Ce champ est requis"}
+                            className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                            validate={(v) => !v && "Ce champ est obligatoire"}
                             component="select"
                             name="structure.structurePubliqueEtatType"
                             value={values.structure.structurePubliqueEtatType}
@@ -317,7 +317,7 @@ export default function Signup() {
                               );
                             })}
                           </Field>
-                          <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.structurePubliqueEtatType" />
+                          <p className="text-xs text-red-500">{errors.structure?.structurePubliqueEtatType}</p>
                         </div>
                       )}
                     </div>
@@ -327,14 +327,14 @@ export default function Signup() {
                       <span className="text-red-500 mr-1">*</span>Code postal de la structure
                     </label>
                     <Field
-                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                      validate={(v) => !v && "Ce champ est requis"}
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      validate={(v) => !v && "Ce champ est obligatoire"}
                       value={values.structure.zip}
                       onChange={handleChange}
                       name="structure.zip"
                       placeholder="44000"
                     />
-                    <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.zip" />
+                    <p className="text-xs text-red-500">{errors.structure?.zip}</p>
                   </div>
                 </form>
               </div>
@@ -344,7 +344,7 @@ export default function Signup() {
                   <Field
                     className="rounded border-brand-grey text-brand-purple focus:ring-offset-0"
                     id="checkboxCGU"
-                    validate={(v) => !v && "Ce champ est requis"}
+                    validate={(v) => !v && "Ce champ est obligatoire"}
                     type="checkbox"
                     value="true"
                     onChange={(e) => handleChange({ target: { name: "user.acceptCGU", value: e.target.checked ? "true" : "false" } })}
@@ -353,16 +353,20 @@ export default function Signup() {
                   />
                   <label htmlFor="checkboxCGU" className="flex-1 text-brand-grey mb-0">
                     J&apos;ai lu et j&apos;accepte les{" "}
-                    <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank" className="text-brand-darkPurple underline" rel="noreferrer">
-                      conditions générales d&apos;utilisation{" "}
-                    </a>
+                    <a
+                      href={`${adminURL}/conditions-generales-utilisation`}
+                      target="_blank"
+                      className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline"
+                      rel="noreferrer">
+                      conditions générales d&apos;utilisation
+                    </a>{" "}
                     de la plateforme du Service national universel
                   </label>
                 </div>
                 <p className="text-xs text-red-500" errors={errors} touched={touched} name="user.acceptCGU" />
               </div>
               <LoadingButton
-                className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple"
+                className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
                 loading={isSubmitting}
                 type="submit"
                 onClick={handleSubmit}>
