@@ -85,14 +85,6 @@ h4 {
     @apply focus:outline-none focus:ring-0 !important;
   }
 
-  .input-error {
-    @apply text-xs text-red-500;
-  }
-
-  .input-error-block {
-    @apply block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500;
-  }
-
   .auth-title {
     @apply mb-4 text-xl font-bold text-brand-black md:text-3xl;
   }

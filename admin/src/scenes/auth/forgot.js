@@ -63,7 +63,7 @@ export default function Forgot() {
                             hasError={errors.email}
                           />
                         </div>
-                        <p className="input-error">{errors.email}</p>
+                        <p className="text-xs text-red-500">{errors.email}</p>
                       </div>
                       <LoadingButton className="auth-button-primary" type="submit" color="success" loading={isSubmitting}>
                         Obtenir le lien de réinitialisation par email

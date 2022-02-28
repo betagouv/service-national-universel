@@ -55,8 +55,14 @@ export default function Signin() {
               {({ values, isSubmitting, handleChange, handleSubmit }) => {
                 return (
                   <form onSubmit={handleSubmit} className="mb-6 flex flex-col gap-4">
-                    {!userIsValid && <div className="input-error-block">E-mail et/ou mot de passe incorrect(s)</div>}
-                    {tooManyRequests && <div className="input-error-block">Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure. </div>}
+                    {!userIsValid && (
+                      <div className="block w-full rounded bg-red-50 py-2.5 px-4 text-sm text-red-500 border border-red-400">E-mail et/ou mot de passe incorrect(s)</div>
+                    )}
+                    {tooManyRequests && (
+                      <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">
+                        Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure.
+                      </div>
+                    )}
 
                     <div>
                       <label htmlFor="email" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">

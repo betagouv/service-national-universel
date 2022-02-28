@@ -49,7 +49,7 @@ export default function InvitationExpired() {
                       placeholder="Email"
                       haserror={errors.email}
                     />
-                    <p className="input-error">{errors.email}</p>
+                    <p className="text-xs text-red-500">{errors.email}</p>
                   </div>
                   <LoadingButton className="auth-button-primary" loading={isSubmitting} type="submit" color="primary">
                     Cliquez ici pour recevoir une nouvelle invitation valide

@@ -101,7 +101,7 @@ export default function SignupInvite() {
                       placeholder="Email"
                       haserror={errors.email}
                     />
-                    <p className="input-error">{errors.email}</p>
+                    <p className="text-xs text-red-500">{errors.email}</p>
                   </div>
                   <div>
                     <label htmlFor="firstName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
@@ -121,7 +121,7 @@ export default function SignupInvite() {
                       placeholder="Prénom"
                       haserror={errors.firstName}
                     />
-                    <p className="input-error">{errors.firstName}</p>
+                    <p className="text-xs text-red-500">{errors.firstName}</p>
                   </div>
                   <div>
                     <label htmlFor="lastName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
@@ -141,7 +141,7 @@ export default function SignupInvite() {
                       placeholder="Nom"
                       haserror={errors.lastName}
                     />
-                    <p className="input-error">{errors.lastName}</p>
+                    <p className="text-xs text-red-500">{errors.lastName}</p>
                   </div>
                   <div className="col-span-2">
                     <label htmlFor="password" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
@@ -164,7 +164,7 @@ export default function SignupInvite() {
                       id="repassword"
                       placeholder="Confirmez votre mot de passe"
                     />
-                    <p className="input-error">{errors.repassword}</p>
+                    <p className="text-xs text-red-500">{errors.repassword}</p>
                   </div>
                   <div className="col-span-2">
                     <div className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export default function SignupInvite() {
                         de la plateforme du Service national universel
                       </label>
                     </div>
-                    <p className="input-error">{errors.acceptCGU}</p>
+                    <p className="text-xs text-red-500">{errors.acceptCGU}</p>
                   </div>
                   <LoadingButton className="auth-button-primary col-span-2" loading={isSubmitting} type="submit" color="primary">
                     Activer mon compte

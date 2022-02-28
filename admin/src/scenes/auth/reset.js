@@ -43,7 +43,7 @@ export default function ResetPassword({ location }) {
                   <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">Mot de passe</label>
                     <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} />
-                    <p className="input-error">{errors.password}</p>
+                    <p className="text-xs text-red-500">{errors.password}</p>
                     <p className="mt-2 text-sm font-medium text-brand-grey">
                       👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole
                     </p>

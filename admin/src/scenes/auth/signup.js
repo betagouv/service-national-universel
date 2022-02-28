@@ -95,7 +95,7 @@ export default function Signup() {
                       placeholder="Email"
                       haserror={errors.user?.email}
                     />
-                    <p className="input-error">{errors.user?.email}</p>
+                    <p className="text-xs text-red-500">{errors.user?.email}</p>
                   </div>
                   <div>
                     <label htmlFor="firstName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
@@ -111,7 +111,7 @@ export default function Signup() {
                       placeholder="Prénom"
                       haserror={errors.user?.firstName}
                     />
-                    <p className="input-error">{errors.user?.firstName}</p>
+                    <p className="text-xs text-red-500">{errors.user?.firstName}</p>
                   </div>
                   <div>
                     <label htmlFor="lastName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
@@ -127,7 +127,7 @@ export default function Signup() {
                       placeholder="Nom"
                       haserror={errors.user?.lastName}
                     />
-                    <p className="input-error">{errors.user?.lastName}</p>
+                    <p className="text-xs text-red-500">{errors.user?.lastName}</p>
                   </div>
                   <div>
                     <label htmlFor="phone" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
@@ -147,7 +147,7 @@ export default function Signup() {
                     </label>
                     <p className="mb-2 text-xs text-brand-grey">👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
                     <PasswordEye autoComplete="new-password" value={values.user.password} onChange={handleChange} name="user.password" />
-                    <p className="input-error">{errors.user?.password}</p>
+                    <p className="text-xs text-red-500">{errors.user?.password}</p>
                   </div>
                   <div className="col-span-2">
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
@@ -161,7 +161,7 @@ export default function Signup() {
                       name="user.repassword"
                       placeholder="Confirmez votre mot de passe"
                     />
-                    <p className="input-error">{errors.user?.repassword}</p>
+                    <p className="text-xs text-red-500">{errors.user?.repassword}</p>
                   </div>
                 </form>
 
@@ -180,7 +180,7 @@ export default function Signup() {
                       name="structure.name"
                       placeholder="Nom de votre structure"
                     />
-                    <p className="input-error" errors={errors} touched={touched} name="structure.name" />
+                    <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.name" />
                   </div>
                   <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">DESCRIPTION DE LA STRUCTURE</label>
@@ -212,7 +212,7 @@ export default function Signup() {
                       <option value="ASSOCIATION">{translate("ASSOCIATION")}</option>
                       <option value="OTHER">{translate("OTHER")}</option>
                     </Field>
-                    <p className="input-error" errors={errors} touched={touched} name="structure.legalStatus" />
+                    <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.legalStatus" />
                   </div>
                   {values.structure.legalStatus === "ASSOCIATION" && (
                     <div>
@@ -249,7 +249,7 @@ export default function Signup() {
                           );
                         })}
                       </Field>
-                      <p className="input-error" errors={errors} touched={touched} name="structure.structurePriveeType" />
+                      <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.structurePriveeType" />
                     </div>
                   )}
                   {values.structure.legalStatus === "PUBLIC" && (
@@ -276,7 +276,7 @@ export default function Signup() {
                             );
                           })}
                         </Field>
-                        <p className="input-error" errors={errors} touched={touched} name="structure.structurePubliqueType" />
+                        <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.structurePubliqueType" />
                       </div>
                       {["Service de l'Etat", "Etablissement public"].includes(values.structure.structurePubliqueType) && (
                         <div>
@@ -301,7 +301,7 @@ export default function Signup() {
                               );
                             })}
                           </Field>
-                          <p className="input-error" errors={errors} touched={touched} name="structure.structurePubliqueEtatType" />
+                          <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.structurePubliqueEtatType" />
                         </div>
                       )}
                     </div>
@@ -318,7 +318,7 @@ export default function Signup() {
                       name="structure.zip"
                       placeholder="44000"
                     />
-                    <p className="input-error" errors={errors} touched={touched} name="structure.zip" />
+                    <p className="text-xs text-red-500" errors={errors} touched={touched} name="structure.zip" />
                   </div>
                 </form>
               </div>
@@ -343,7 +343,7 @@ export default function Signup() {
                     de la plateforme du Service national universel
                   </label>
                 </div>
-                <p className="input-error" errors={errors} touched={touched} name="user.acceptCGU" />
+                <p className="text-xs text-red-500" errors={errors} touched={touched} name="user.acceptCGU" />
               </div>
               <LoadingButton className="auth-button-primary" loading={isSubmitting} type="submit" onClick={handleSubmit}>
                 S&apos;inscrire
