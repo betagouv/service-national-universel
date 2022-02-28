@@ -111,10 +111,8 @@ export default function Wrapper({ children, young, tab, onChange }) {
 const BadgeCohort = ({ young, onChange }) => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalConfirmWithMessage, setModalConfirmWithMessage] = useState(false);
-  const [disableConfirm, setDisableConfirm] = useState(false);
   const [newCohort, setNewCohort] = useState(young.cohort);
   const [motif, setMotif] = useState("");
-  console.log(motif, !motif);
 
   const motifs = [
     "Non disponibilité pour motif familial ou personnel",
@@ -123,8 +121,6 @@ const BadgeCohort = ({ young, onChange }) => {
     "Impossibilité de se rendre au point de rassemblement",
     "Autre",
   ];
-
-  const defaultInput = "Renseignez la raison du changement de cohorte";
 
   const handleChangeCohort = async (messageTextArea) => {
     try {
@@ -165,7 +161,8 @@ const BadgeCohort = ({ young, onChange }) => {
           setModalConfirmWithMessage(true);
         }}
         disableConfirm={!motif}
-        showHeaderIcon={true}>
+        showHeaderIcon={true}
+        showHeaderText={false}>
         <>
           <div style={{ display: "grid", marginBlock: "20px", gridTemplateColumns: "1fr 375px", gridGap: "20px", alignItems: "center", justifyItems: "left", minWidth: "75%" }}>
             <p style={{ margin: 0 }}>Précisez le motif de changement de séjour :</p>
@@ -194,7 +191,11 @@ const BadgeCohort = ({ young, onChange }) => {
           </div>
           <p style={{ margin: 0, marginTop: "16px" }}>
             Veuillez vous assurer de son éligibilité , pour en savoir plus consulter{" "}
-            <a href=" https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
+            <a
+              target="_blank"
+              rel="noreferrer"
+              href=" https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1"
+              style={{ color: "#5145cc" }}>
               l’article de la base de connaissance
             </a>
           </p>
@@ -209,7 +210,6 @@ const BadgeCohort = ({ young, onChange }) => {
             <br /> Vous êtes maintenant positionné(e) sur le séjour se déroulant {translateCohort(newCohort)}.
           </p>
         }
-        defaultInput={defaultInput}
         onChange={() => setModalConfirmWithMessage(false)}
         onConfirm={handleChangeCohort}
         endMessage={

@@ -40,7 +40,7 @@ const {
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } = require("snu-lib/constants");
 const { department2region } = require("snu-lib/region-and-departments");
 const {
   ROLES_LIST,
@@ -379,7 +379,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       young.set({ meetingPointId: undefined });
     }
 
-    young.set({ cohort });
+    young.set({ statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, cohort });
     await young.save({ fromUser: req.user });
 
     // if they had a session, we check if we need to update the places taken / left
@@ -396,6 +396,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         if (bus) await updatePlacesBus(bus);
       }
     }
+
+    //! TODO : Ajouter le template
 
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
