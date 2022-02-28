@@ -25,14 +25,14 @@ export default function HeaderUser() {
 
   return (
     <div>
-      <div className="group py-5 pl-3">
+      <div className="group py-2 pl-3">
         <div>
           <Avatar onClick={() => setOpen(!open)} name={`${user.firstName} ${user.lastName}`} menuOpened={open} />
         </div>
         <div
           className={`${
             open ? "block" : "hidden"
-          } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute top-[calc(100%+5px)] right-0 border-3 border-red-600 shadow overflow-hidden`}>
+          } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute top-[calc(100%)] right-0 border-3 border-red-600 shadow overflow-hidden`}>
           <div className="my-2 text-xs px-3 text-coolGray-600">
             <p>
               {user.firstName} {user.lastName}
