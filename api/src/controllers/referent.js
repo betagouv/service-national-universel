@@ -12,6 +12,8 @@ const YoungModel = require("../models/young");
 const MissionModel = require("../models/mission");
 const ApplicationModel = require("../models/application");
 const SessionPhase1 = require("../models/sessionPhase1");
+const MeetingPointModel = require("../models/meetingPoint");
+const BusModel = require("../models/bus");
 const StructureModel = require("../models/structure");
 const AuthObject = require("../auth");
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -27,6 +29,7 @@ const {
   uploadFile,
   validatePassword,
   updatePlacesSessionPhase1,
+  updatePlacesBus,
   signinLimiter,
   //  assignNextYoungFromWaitingList,
   ERRORS,
@@ -358,7 +361,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
   }
 });
 
-router.put("/young/:id/change_cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/young/:id/change-cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -367,27 +370,35 @@ router.put("/young/:id/change_cohort", passport.authenticate("referent", { sessi
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    // eslint-disable-next-line no-unused-vars
-    let { __v, ...newYoung } = value;
+    const { cohort } = value;
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
-    if (young.cohort !== req.body.cohort && (young.sessionPhase1Id || young.meetingPointId)) {
-      newYoung.sessionPhase1Id = "";
-      newYoung.meetingPointId = "";
+    const oldMeetingPointId = young.meetingPointId;
+    if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
+      young.set({ sessionPhase1Id: undefined });
+      young.set({ meetingPointId: undefined });
     }
 
-    young.set(newYoung);
+    young.set({ cohort });
     await young.save({ fromUser: req.user });
 
-    // if they had a cohesion center, we check if we need to update the places taken / left
+    // if they had a session, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
     }
+
+    // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
+    if (oldMeetingPointId) {
+      const meetingPoint = await MeetingPointModel.findById(oldMeetingPointId);
+      if (meetingPoint) {
+        const bus = await BusModel.findById(meetingPoint.busId);
+        if (bus) await updatePlacesBus(bus);
+      }
+    }
+
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
-
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
