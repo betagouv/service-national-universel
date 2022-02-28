@@ -1,3 +1,11 @@
+## [1.50.2](https://github.com/betagouv/service-national-universel/compare/v1.50.1...v1.50.2) (2022-02-28)
+
+
+### Bug Fixes
+
+* cross svg ([ac97b44](https://github.com/betagouv/service-national-universel/commit/ac97b4451cd8933c83eb094f76491c142ea60e30))
+* **admin,app:** phase 2 dates ([ca5c6c7](https://github.com/betagouv/service-national-universel/commit/ca5c6c7194119ad0d90c0a9282f6a75b1ca1dd40))
+
 ## [1.50.1](https://github.com/betagouv/service-national-universel/compare/v1.50.0...v1.50.1) (2022-02-26)
 
 
