@@ -188,7 +188,11 @@ export default function SignupInvite() {
                     </div>
                     <p className="text-xs text-red-500">{errors.acceptCGU}</p>
                   </div>
-                  <LoadingButton className="auth-button-primary col-span-2" loading={isSubmitting} type="submit" color="primary">
+                  <LoadingButton
+                    className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple col-span-2"
+                    loading={isSubmitting}
+                    type="submit"
+                    color="primary">
                     Activer mon compte
                   </LoadingButton>
                   <div className="col-span-2 border-t border-gray-200 pt-6 text-sm text-brand-grey">

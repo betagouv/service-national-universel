@@ -88,7 +88,10 @@ export default function Signin() {
                     <Link to="/auth/forgot" className="text-sm font-medium text-brand-purple transition-colors hover:text-brand-darkPurple">
                       Mot de passe perdu ?
                     </Link>
-                    <LoadingButton className="auth-button-primary" loading={isSubmitting} type="submit">
+                    <LoadingButton
+                      className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple"
+                      loading={isSubmitting}
+                      type="submit">
                       Se connecter
                     </LoadingButton>
                   </form>

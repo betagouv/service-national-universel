@@ -85,10 +85,6 @@ h4 {
     @apply focus:outline-none focus:ring-0 !important;
   }
 
-  .auth-button-primary {
-    @apply block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple;
-  }
-
   .stats-card {
     @apply flex items-center justify-between gap-4 overflow-hidden rounded-lg bg-white px-4 py-5 shadow transition-shadow hover:shadow-md sm:p-6;
   }

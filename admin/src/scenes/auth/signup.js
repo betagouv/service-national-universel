@@ -361,7 +361,11 @@ export default function Signup() {
                 </div>
                 <p className="text-xs text-red-500" errors={errors} touched={touched} name="user.acceptCGU" />
               </div>
-              <LoadingButton className="auth-button-primary" loading={isSubmitting} type="submit" onClick={handleSubmit}>
+              <LoadingButton
+                className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple"
+                loading={isSubmitting}
+                type="submit"
+                onClick={handleSubmit}>
                 S&apos;inscrire
               </LoadingButton>
             </div>

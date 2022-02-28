@@ -65,7 +65,11 @@ export default function Forgot() {
                         </div>
                         <p className="text-xs text-red-500">{errors.email}</p>
                       </div>
-                      <LoadingButton className="auth-button-primary" type="submit" color="success" loading={isSubmitting}>
+                      <LoadingButton
+                        className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple"
+                        type="submit"
+                        color="success"
+                        loading={isSubmitting}>
                         Obtenir le lien de réinitialisation par email
                       </LoadingButton>
                     </>
