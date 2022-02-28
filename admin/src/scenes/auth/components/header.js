@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function HeaderComponent() {
   return (
-    <div className="sticky left-0 top-0 z-20 flex w-full items-center justify-between bg-white shadow-lg">
+    <div className="sticky left-0 top-0 z-20 flex w-full items-center justify-between bg-white shadow">
       <div className="flex flex-1 items-center">
         <a href="https://www.snu.gouv.fr/">
           <img className="hidden h-20 py-1 px-4 align-top md:block" src={require("../../../assets/fr.png")} />
