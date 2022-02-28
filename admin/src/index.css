@@ -85,11 +85,6 @@ h4 {
     @apply focus:outline-none focus:ring-0 !important;
   }
 
-
-  .input-field {
-    @apply block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey;
-  }
-
   .input-error {
     @apply text-xs text-red-500;
   }

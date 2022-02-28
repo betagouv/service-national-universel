@@ -89,7 +89,10 @@ export default function SignupInvite() {
                   <div className="col-span-2">
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">ADRESSE EMAIL</label>
                     <Field
-                      className={classNames(errors.email ? "border-red-500" : "", "input-field")}
+                      className={classNames(
+                        errors.email ? "border-red-500" : "",
+                        "block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey",
+                      )}
                       validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
                       name="email"
                       type="email"
@@ -105,7 +108,10 @@ export default function SignupInvite() {
                       Prénom
                     </label>
                     <Field
-                      className={classNames(errors.firstName ? "border-red-500" : "", "input-field")}
+                      className={classNames(
+                        errors.firstName ? "border-red-500" : "",
+                        "block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey",
+                      )}
                       validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
                       name="firstName"
                       type="name"
@@ -122,7 +128,10 @@ export default function SignupInvite() {
                       Nom
                     </label>
                     <Field
-                      className={classNames(errors.lastName ? "border-red-500" : "", "input-field")}
+                      className={classNames(
+                        errors.lastName ? "border-red-500" : "",
+                        "block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey",
+                      )}
                       validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
                       name="lastName"
                       type="lastName"
