@@ -90,8 +90,20 @@ export default function List() {
       {showAlertLimitDate ? (
         <AlertBox
           onClose={() => setShowAlertLimitDate(false)}
-          title={`Vous pourrez faire une mission jusqu’au ${getLimitDateForPhase2(young.cohort)}.`}
-          message="Des missions supplémentaires seront proposées tout au long de l’année. Vous serez informé par e-mail dès qu’une mission répondant à vos préférences sera publiée."
+          title="Vous devez réaliser vos 84 heures de mission dans l’année qui suit votre séjour de cohésion."
+          message={
+            <div>
+              Pour plus d&apos;information,{" "}
+              <a
+                className="underline hover:underline"
+                href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
+                target="_blank"
+                rel="noreferrer">
+                cliquez-ici
+              </a>
+              .
+            </div>
+          }
         />
       ) : null}
       {ENABLE_PM && showAlert100km ? (
