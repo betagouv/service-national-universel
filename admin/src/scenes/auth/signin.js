@@ -30,7 +30,7 @@ export default function Signin() {
         <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8">
           <div>
             <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Espace Administrateur</h1>
-            <h2 className="auth-subtitle">A destination des référents et des structures d’accueil</h2>
+            <h2 className="mb-8 text-base font-normal text-brand-grey">A destination des référents et des structures d’accueil</h2>
             <Formik
               initialValues={{ email: "", password: "" }}
               onSubmit={async ({ email, password }, actions) => {

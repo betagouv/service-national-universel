@@ -36,17 +36,17 @@ export default function Forgot() {
                   {mail ? (
                     <>
                       <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl mb-0">Email envoyé à : {mail}</h1>
-                      <h2 className="auth-subtitle mb-0">
+                      <h2 className="mb-8 text-base font-normal text-brand-grey mb-0">
                         Si vous possedez un compte chez nous, un email contenant les instructions pour réinitialiser votre mot de passe vient de vous être envoyé.
                       </h2>
-                      <h2 className="auth-subtitle mb-4">
+                      <h2 className="mb-8 text-base font-normal text-brand-grey mb-4">
                         Si vous ne vous souvenez plus de votre email de connexion, écrivez-nous à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>.
                       </h2>
                     </>
                   ) : (
                     <>
                       <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl mb-0">Réinitialisation du mot de passe</h1>
-                      <h2 className="auth-subtitle mb-4">
+                      <h2 className="mb-8 text-base font-normal text-brand-grey mb-4">
                         Pour réinitialiser votre mot de passe, entrez l&apos;adresse mail que vous avez utilisée pour vous connecter à la plateforme
                       </h2>
                       <div>

@@ -70,7 +70,7 @@ export default function Signup() {
           return (
             <div className="flex flex-col items-center p-8">
               <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl mb-2">Inscrivez votre structure d&apos;accueil</h1>
-              <h2 className="auth-subtitle mb-4">A destination des structures souhaitant accueillir des volontaires</h2>
+              <h2 className="mb-8 text-base font-normal text-brand-grey mb-4">A destination des structures souhaitant accueillir des volontaires</h2>
               <p className="mb-8 text-center text-sm font-medium text-brand-grey">
                 Vous avez déjà un compte ?{" "}
                 <Link to="/auth" className="font-medium text-snu-purple-200 transition-colors hover:text-snu-purple-600">
@@ -80,7 +80,7 @@ export default function Signup() {
               <div className="mx-auto mb-6 flex max-w-screen-lg gap-8">
                 {/* left form */}
                 <form onSubmit={handleSubmit} className="grid flex-1 grid-cols-2 gap-y-4 gap-x-2">
-                  <h2 className="auth-subtitle col-span-2 mb-0 text-center">INFORMATIONS SUR LE RESPONSABLE DE STRUCTURE</h2>
+                  <h2 className="mb-8 text-base font-normal text-brand-grey col-span-2 mb-0 text-center">INFORMATIONS SUR LE RESPONSABLE DE STRUCTURE</h2>
                   <div className="col-span-2">
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="mr-1 text-red-500">*</span>ADRESSE EMAIL
@@ -183,7 +183,7 @@ export default function Signup() {
 
                 {/* right form */}
                 <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
-                  <h2 className="auth-subtitle mb-0 text-center">INFORMATIONS SUR LA STRUCTURE</h2>
+                  <h2 className="mb-8 text-base font-normal text-brand-grey mb-0 text-center">INFORMATIONS SUR LA STRUCTURE</h2>
                   <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="mr-1 text-red-500">*</span>NOM DE LA STRUCTURE

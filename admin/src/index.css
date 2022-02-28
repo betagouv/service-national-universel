@@ -85,14 +85,6 @@ h4 {
     @apply focus:outline-none focus:ring-0 !important;
   }
 
-  .auth-title {
-    @apply mb-4 text-xl font-bold text-brand-black md:text-3xl;
-  }
-
-  .auth-subtitle {
-    @apply mb-8 text-base font-normal text-brand-grey;
-  }
-
   .auth-button-primary {
     @apply block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple;
   }
