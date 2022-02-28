@@ -10,7 +10,6 @@ import { translate, departmentList, department2region } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
 import { SelectTag, step1Public, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/worflow";
-import { newSupportURL } from "../../config";
 
 export default function FormComponent({ setOpen, setSuccessMessage }) {
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
@@ -19,18 +18,18 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
     <Form>
       <img src={close} onClick={() => setOpen(false)} />
       <Formik
-        initialValues={{ step1: null, step2: null, message: "", subject: "", email: "", lastName: "", firstName: "", department: "" }}
+        initialValues={{ step1: null, step2: null, message: "", subject: "", email: "", name: "", department: "" }}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
             setLoading(true);
-            const { message, subject, email, step1, step2, department, firstName, lastName } = values;
+            const { message, subject, name, email, step1, step2, department } = values;
             const regionTags = [`DEPARTEMENT_${department}`, `REGION_${department2region[department]}`];
             const { ok, code } = await api.post("/zammad-support-center/public/ticket", {
               title: `${step1?.label} - ${step2?.label} - ${subject}`,
               subject,
-              name: `${firstName} ${lastName}`,
+              name,
               email,
               message,
               // eslint-disable-next-line no-unsafe-optional-chaining
@@ -41,14 +40,6 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
             if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
             toastr.success("Ticket créé");
             setSuccessMessage("Votre demande a bien été envoyée ! Nous vous répondrons par mail.");
-            const response = await api.post("/zammood/ticket/form", {
-              message,
-              email,
-              subject,
-              firstName,
-              lastName,
-            });
-            if (!response.ok) console.log("ERROR", response);
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue", translate(e.code));
@@ -57,23 +48,11 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
             <Item
-              name="firstName"
-              title="Prénom"
-              placeholder="Renseignez votre prénom"
+              name="name"
+              title="Nom et prénom"
+              placeholder="Renseignez vos nom et prénom"
               type="input"
-              value={values.firstName}
-              handleChange={handleChange}
-              validate={(v) => !v && requiredMessage}
-              errors={errors}
-              touched={touched}
-              rows="2"
-            />
-            <Item
-              name="lastName"
-              title="Nom"
-              placeholder="Renseignez votre nom"
-              type="input"
-              value={values.lastName}
+              value={values.name}
               handleChange={handleChange}
               validate={(v) => !v && requiredMessage}
               errors={errors}

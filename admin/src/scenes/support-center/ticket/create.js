@@ -67,12 +67,20 @@ export default function Create() {
               let title = type?.label;
               if (user.role === "visitor") title = messageTitle;
               if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
-              const { ok, code } = await api.post("/zammad-support-center/ticket", {
-                title,
-                message,
-                tags: [...new Set([...computedTags])], // dirty hack to remove duplicates
-              });
-              if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
+              let response;
+              if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
+                response = await api.post("/zammood/ticket", {
+                  message,
+                  subject,
+                });
+              } else {
+                response = await api.post("/zammad-support-center/ticket", {
+                  title,
+                  message,
+                  tags: [...new Set([...computedTags])], // dirty hack to remove duplicates
+                });
+              }
+              if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
               toastr.success("Demande envoyée");
               history.push("/besoin-d-aide");
             } catch (e) {

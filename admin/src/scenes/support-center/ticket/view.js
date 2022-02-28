@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById, translateState } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById, translateState, ROLES } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -22,6 +22,8 @@ export default function View(props) {
   const [ticket, setTicket] = useState();
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState();
+  const [zammoodTicket, setZammoodTicket] = useState();
+  const [zammoodMessages, setZammoodMessages] = useState();
   const user = useSelector((state) => state.Auth.user);
 
   const getTicket = async () => {
@@ -35,7 +37,20 @@ export default function View(props) {
       setTicket(null);
     }
   };
+  const getTicketZammood = async () => {
+    try {
+      const id = props.match?.params?.id;
+      if (!id) return console.log("no corresponding ticket zammood");
+      const data = await api.get(`/zammood/ticket/${id}`);
+      if (!data.ok) console.log("no corresponding ticket in Zammood");
+      setZammoodTicket(data.ticket);
+      setZammoodMessages(data.messages);
+    } catch (e) {
+      console.log(e);
+    }
+  };
   useEffect(() => {
+    if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) getTicketZammood();
     getTicket();
     const ping = setInterval(getTicket, 5000);
     return () => {
@@ -47,8 +62,13 @@ export default function View(props) {
     setSending(true);
     if (!message) return setSending(false);
     const id = props.match?.params?.id;
+    if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
+      const { ok, code } = await api.post(`/zammood/ticket/${id}`, { message });
+      if (!ok) console.log("ERROR", code);
+    }
     await api.put(`/zammad-support-center/ticket/${id}`, { message, ticket });
     setMessage("");
+    if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) getTicketZammood();
     getTicket();
     setSending(false);
   };
@@ -85,23 +105,55 @@ export default function View(props) {
         <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
       </BackButtonContainer>
       <div style={{ padding: 0, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-        <Heading>
-          <div>
-            <h1>
-              Demande #{ticket?.number} - {ticket?.title}
-            </h1>
-            <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
-          </div>
-          {displayState(ticketStateNameById(ticket?.state_id))}
-        </Heading>
-        <Messages>
-          {ticket?.articles
-            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            ?.filter((article) => !article.internal)
-            ?.map((article, i) => (
-              <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-            ))}
-        </Messages>
+        {zammoodMessages && zammoodTicket ? (
+          <>
+            <Heading>
+              <div>
+                <h1>
+                  Demande #{zammoodTicket?.number} - {zammoodTicket?.subject}
+                </h1>
+                <Details title="Crée le" content={zammoodTicket?.createdAt && formatStringLongDate(zammoodTicket?.createdAt)} />
+              </div>
+              <StateContainer>
+                <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+                {zammoodTicket?.status}
+              </StateContainer>
+            </Heading>
+            <Messages>
+              {zammoodMessages
+                ?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                ?.map((message) => (
+                  <Message
+                    key={message._id}
+                    fromMe={user.lastName === message.authorLastName && user.firstName === message.authorFirstName}
+                    from={`${message.authorFirstName} ${message.authorLastName}`}
+                    date={formatStringLongDate(message.createdAt)}
+                    content={message.text}
+                  />
+                ))}
+            </Messages>
+          </>
+        ) : (
+          <>
+            <Heading>
+              <div>
+                <h1>
+                  Demande #{ticket?.number} - {ticket?.title}
+                </h1>
+                <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+              </div>
+              {displayState(ticketStateNameById(ticket?.state_id))}
+            </Heading>
+            <Messages>
+              {ticket?.articles
+                ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                ?.filter((article) => !article.internal)
+                ?.map((article, i) => (
+                  <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+                ))}
+            </Messages>
+          </>
+        )}
         <InputContainer>
           <textarea
             row={2}
