@@ -21,7 +21,7 @@ export default function PasswordEye({
     <ContainerPassword>
       <InputField
         placeholder={placeholder}
-        className="form-control"
+        className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:!text-brand-black/25 focus:border-brand-grey"
         validate={(v) => validate(v) || (showError && getPasswordErrorMessage(v))}
         type={passwordText ? "text" : "password"}
         autoComplete={autoComplete}

@@ -54,7 +54,7 @@ export default function Signin() {
               }}>
               {({ values, isSubmitting, handleChange, handleSubmit }) => {
                 return (
-                  <form onSubmit={handleSubmit} className="mb-6 flex flex-col gap-4">
+                  <form onSubmit={handleSubmit} className="mb-6 flex flex-col gap-4 items-start">
                     {!userIsValid && (
                       <div className="block w-full rounded bg-red-50 py-2.5 px-4 text-sm text-red-500 border border-red-400">E-mail et/ou mot de passe incorrect(s)</div>
                     )}
@@ -64,7 +64,7 @@ export default function Signin() {
                       </div>
                     )}
 
-                    <div>
+                    <div className="self-stretch">
                       <label htmlFor="email" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                         E-mail
                       </label>
@@ -79,17 +79,17 @@ export default function Signin() {
                         onChange={handleChange}
                       />
                     </div>
-                    <div>
+                    <div className="self-stretch">
                       <label htmlFor="password" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                         Mot de passe
                       </label>
                       <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
                     </div>
-                    <Link to="/auth/forgot" className="text-sm font-medium text-brand-purple transition-colors hover:text-brand-darkPurple">
+                    <Link to="/auth/forgot" className="text-sm text-brand-purple transition-colors hover:text-brand-darkPurple hover:underline">
                       Mot de passe perdu ?
                     </Link>
                     <LoadingButton
-                      className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple"
+                      className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
                       loading={isSubmitting}
                       type="submit">
                       Se connecter
@@ -100,15 +100,15 @@ export default function Signin() {
             </Formik>
           </div>
           <div className="flex flex-col gap-3 border-t border-gray-200 pt-4">
-            <p className="text-center text-sm font-medium text-brand-grey ">
+            <p className="text-center text-sm text-brand-grey ">
               Vous êtes une structure ?{" "}
-              <Link to="/auth/signup" className="font-medium text-snu-purple-200 transition-colors hover:text-snu-purple-600">
+              <Link to="/auth/signup" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
                 Publiez vos missions
               </Link>
             </p>
-            <p className="text-center text-sm font-medium text-brand-grey ">
+            <p className="text-center text-sm text-brand-grey ">
               Vous avez besoin d&apos;aide ?{" "}
-              <Link to="/public-besoin-d-aide" className="font-medium text-snu-purple-200 transition-colors hover:text-snu-purple-600" target="_blank">
+              <Link to="/public-besoin-d-aide" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline" target="_blank">
                 Cliquez ici
               </Link>
             </p>
