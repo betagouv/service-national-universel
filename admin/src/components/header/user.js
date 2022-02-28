@@ -40,12 +40,12 @@ export default function HeaderUser() {
             <p className="italic">{user.email}</p>
           </div>
           <hr className="m-0 border-t-coolGray-100" />
-          <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2">
-            <HiUser className="group-hover:scale-110" />
-            <NavLink className="text-coolGray-800 hover:text-coolGray-800" to="/profil">
+          <NavLink to="/profil">
+            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
+              <HiUser className="group-hover:scale-110" />
               Profil
-            </NavLink>
-          </div>
+            </div>
+          </NavLink>
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
             <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2">
               <HiUserAdd className="group-hover:scale-110" />
@@ -53,20 +53,20 @@ export default function HeaderUser() {
             </div>
           ) : null}
           {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && user.structureId ? (
-            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2">
-              <HiUserAdd className="group-hover:scale-110" />
-              <NavLink className="text-coolGray-800 hover:text-coolGray-800" to={`/structure/${user.structureId}`}>
+            <NavLink to={`/structure/${user.structureId}`}>
+              <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
+                <HiUserAdd className="group-hover:scale-110" />
                 Inviter&nbsp;un&nbsp;utilisateur
-              </NavLink>
-            </div>
+              </div>
+            </NavLink>
           ) : null}
           <hr className="m-0 border-t-coolGray-100" />
-          <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2">
-            <HiLogout className="text-red-700 group-hover:scale-110" />
-            <NavLink className="text-red-700 hover:text-red-700" to="/logout">
+          <NavLink to="/logout" onClick={logout}>
+            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-red-700 hover:text-red-700">
+              <HiLogout className="text-red-700 group-hover:scale-110" />
               Se déconnecter
-            </NavLink>
-          </div>
+            </div>
+          </NavLink>
         </div>
       </div>
     </div>

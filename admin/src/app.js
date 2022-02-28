@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-d
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
-import styled from "styled-components";
 
 import { setUser } from "./redux/auth/actions";
 import Auth from "./scenes/auth";
@@ -137,7 +136,7 @@ const Home = () => {
   }, [user]);
 
   return (
-    <div className="min-h-screen">
+    <div>
       <Header />
       <div className="flex">
         <Drawer />
