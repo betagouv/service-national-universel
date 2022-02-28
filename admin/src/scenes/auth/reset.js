@@ -41,7 +41,7 @@ export default function ResetPassword({ location }) {
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                   {redirect && <Redirect to="/" />}
                   <div>
-                    <label className="input-label">Mot de passe</label>
+                    <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">Mot de passe</label>
                     <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} />
                     <p className="input-error">{errors.password}</p>
                     <p className="mt-2 text-sm font-medium text-brand-grey">

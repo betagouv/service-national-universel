@@ -35,7 +35,7 @@ export default function InvitationExpired() {
               return (
                 <form onSubmit={handleSubmit} className="mb-6 flex flex-col gap-4">
                   <div>
-                    <label className="input-label">Adresse Email</label>
+                    <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">Adresse Email</label>
                     <Field
                       className={classNames(errors.email ? "border-red-500" : "", "input-field")}
                       validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}

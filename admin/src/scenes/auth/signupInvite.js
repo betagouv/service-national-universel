@@ -87,7 +87,7 @@ export default function SignupInvite() {
               return (
                 <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-y-4 gap-x-2">
                   <div className="col-span-2">
-                    <label className="input-label">ADRESSE EMAIL</label>
+                    <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">ADRESSE EMAIL</label>
                     <Field
                       className={classNames(errors.email ? "border-red-500" : "", "input-field")}
                       validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
@@ -101,7 +101,7 @@ export default function SignupInvite() {
                     <p className="input-error">{errors.email}</p>
                   </div>
                   <div>
-                    <label htmlFor="firstName" className="input-label">
+                    <label htmlFor="firstName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       Prénom
                     </label>
                     <Field
@@ -118,7 +118,7 @@ export default function SignupInvite() {
                     <p className="input-error">{errors.firstName}</p>
                   </div>
                   <div>
-                    <label htmlFor="lastName" className="input-label">
+                    <label htmlFor="lastName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       Nom
                     </label>
                     <Field
@@ -135,7 +135,7 @@ export default function SignupInvite() {
                     <p className="input-error">{errors.lastName}</p>
                   </div>
                   <div className="col-span-2">
-                    <label htmlFor="password" className="input-label">
+                    <label htmlFor="password" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="mr-1">*</span>Mot de passe
                     </label>
                     <p className="mb-2 text-xs text-brand-grey">👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
@@ -143,7 +143,7 @@ export default function SignupInvite() {
                     <p className="text-xs text-red-500">{errors.password}</p>
                   </div>
                   <div className="col-span-2">
-                    <label htmlFor="repassword" className="input-label">
+                    <label htmlFor="repassword" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="mr-1">*</span>Confirmation mot de passe
                     </label>
                     <PasswordEye

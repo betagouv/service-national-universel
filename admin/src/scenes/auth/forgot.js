@@ -51,7 +51,7 @@ export default function Forgot() {
                       </h2>
                       <div>
                         <div>
-                          <label className="input-label">ADRESSE EMAIL</label>
+                          <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">ADRESSE EMAIL</label>
                           <Field
                             className="input-field"
                             validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}

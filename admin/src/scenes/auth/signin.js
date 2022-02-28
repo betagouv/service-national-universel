@@ -59,7 +59,7 @@ export default function Signin() {
                     {tooManyRequests && <div className="input-error-block">Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure. </div>}
 
                     <div>
-                      <label htmlFor="email" className="input-label">
+                      <label htmlFor="email" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                         E-mail
                       </label>
                       <Field
@@ -74,7 +74,7 @@ export default function Signin() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="password" className="input-label">
+                      <label htmlFor="password" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                         Mot de passe
                       </label>
                       <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />

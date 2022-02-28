@@ -82,8 +82,8 @@ export default function Signup() {
                 <form onSubmit={handleSubmit} className="grid flex-1 grid-cols-2 gap-y-4 gap-x-2">
                   <h2 className="auth-subtitle col-span-2 mb-0 text-center">INFORMATIONS SUR LE RESPONSABLE DE STRUCTURE</h2>
                   <div className="col-span-2">
-                    <label className="input-label">
-                      <span className="mr-1">*</span>ADRESSE EMAIL
+                    <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      <span className="mr-1 text-red-500">*</span>ADRESSE EMAIL
                     </label>
                     <Field
                       className="input-field"
@@ -98,8 +98,8 @@ export default function Signup() {
                     <p className="input-error">{errors.user?.email}</p>
                   </div>
                   <div>
-                    <label htmlFor="firstName" className="input-label">
-                      <span className="mr-1">*</span>Prénom
+                    <label htmlFor="firstName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      <span className="mr-1 text-red-500">*</span>Prénom
                     </label>
                     <Field
                       className="input-field"
@@ -114,8 +114,8 @@ export default function Signup() {
                     <p className="input-error">{errors.user?.firstName}</p>
                   </div>
                   <div>
-                    <label htmlFor="lastName" className="input-label">
-                      <span className="mr-1">*</span>Nom
+                    <label htmlFor="lastName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      <span className="mr-1 text-red-500">*</span>Nom
                     </label>
                     <Field
                       className="input-field"
@@ -130,28 +130,28 @@ export default function Signup() {
                     <p className="input-error">{errors.user?.lastName}</p>
                   </div>
                   <div>
-                    <label htmlFor="phone" className="input-label">
+                    <label htmlFor="phone" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       Téléphone
                     </label>
                     <Field className="input-field" name="user.phone" type="tel" id="phone" value={values.user.phone} onChange={handleChange} placeholder="02 00 00 00 00" />
                   </div>
                   <div>
-                    <label htmlFor="mobile" className="input-label">
+                    <label htmlFor="mobile" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       Téléphone portable
                     </label>
                     <Field className="input-field" name="user.mobile" type="tel" id="mobile" value={values.user.mobile} onChange={handleChange} placeholder="06 00 00 00 00" />
                   </div>
                   <div className="col-span-2">
-                    <label className="input-label">
-                      <span className="mr-1">*</span>Mot de passe
+                    <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      <span className="mr-1 text-red-500">*</span>Mot de passe
                     </label>
                     <p className="mb-2 text-xs text-brand-grey">👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
                     <PasswordEye autoComplete="new-password" value={values.user.password} onChange={handleChange} name="user.password" />
                     <p className="input-error">{errors.user?.password}</p>
                   </div>
                   <div className="col-span-2">
-                    <label className="input-label">
-                      <span className="mr-1">*</span>Confirmation mot de passe
+                    <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      <span className="mr-1 text-red-500">*</span>Confirmation mot de passe
                     </label>
                     <PasswordEye
                       validate={() => values.user.password !== values.user.repassword && "Les mots de passe ne correspondent pas."}
@@ -169,8 +169,8 @@ export default function Signup() {
                 <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
                   <h2 className="auth-subtitle mb-0 text-center">INFORMATIONS SUR LA STRUCTURE</h2>
                   <div>
-                    <label className="input-label">
-                      <span className="mr-1">*</span>NOM DE LA STRUCTURE
+                    <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      <span className="mr-1 text-red-500">*</span>NOM DE LA STRUCTURE
                     </label>
                     <Field
                       className="input-field"
@@ -183,7 +183,7 @@ export default function Signup() {
                     <p className="input-error" errors={errors} touched={touched} name="structure.name" />
                   </div>
                   <div>
-                    <label className="input-label">DESCRIPTION DE LA STRUCTURE</label>
+                    <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">DESCRIPTION DE LA STRUCTURE</label>
                     <Field
                       className="input-field"
                       as="textarea"
@@ -194,8 +194,8 @@ export default function Signup() {
                     />
                   </div>
                   <div>
-                    <label className="input-label">
-                      <span className="mr-1">*</span>STATUT JURIDIQUE
+                    <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      <span className="mr-1 text-red-500">*</span>STATUT JURIDIQUE
                     </label>
                     <Field
                       className="input-field"
@@ -216,7 +216,7 @@ export default function Signup() {
                   </div>
                   {values.structure.legalStatus === "ASSOCIATION" && (
                     <div>
-                      <label className="input-label">DISPOSEZ-VOUS D&apos;UN AGRÉMENT ?</label>
+                      <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">DISPOSEZ-VOUS D&apos;UN AGRÉMENT ?</label>
                       <MultiSelect
                         value={values.structure.associationTypes}
                         onChange={handleChange}
@@ -228,8 +228,8 @@ export default function Signup() {
                   )}
                   {values.structure.legalStatus === "PRIVATE" && (
                     <div>
-                      <label className="input-label">
-                        <span className="mr-1">*</span>TYPE DE STRUCTURE PRIVÉE
+                      <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                        <span className="mr-1 text-red-500">*</span>TYPE DE STRUCTURE PRIVÉE
                       </label>
                       <Field
                         className="input-field"
@@ -255,8 +255,8 @@ export default function Signup() {
                   {values.structure.legalStatus === "PUBLIC" && (
                     <div>
                       <div>
-                        <label className="input-label">
-                          <span className="text-red-500, mr-1">*</span>TYPE DE STRUCTURE PUBLIQUE
+                        <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                          <span className="text-red-500 mr-1">*</span>TYPE DE STRUCTURE PUBLIQUE
                         </label>
                         <Field
                           className="input-field"
@@ -280,7 +280,7 @@ export default function Signup() {
                       </div>
                       {["Service de l'Etat", "Etablissement public"].includes(values.structure.structurePubliqueType) && (
                         <div>
-                          <label className="input-label">
+                          <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                             <span className="text-red-500 mr-1">*</span>TYPE DE SERVICE DE L&apos;ETAT
                           </label>
                           <Field
@@ -307,7 +307,7 @@ export default function Signup() {
                     </div>
                   )}
                   <div>
-                    <label className="input-label">
+                    <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       <span className="text-red-500 mr-1">*</span>Code postal de la structure
                     </label>
                     <Field
