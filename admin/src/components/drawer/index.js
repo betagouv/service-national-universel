@@ -226,7 +226,7 @@ const Drawer = (props) => {
   }
 
   return (
-    <div className="min-h-full bg-snu-purple-900 text-white">
+    <div className="min-h-screen bg-snu-purple-900 text-white">
       {!isOpen ? (
         <>
           <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">

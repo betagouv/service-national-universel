@@ -6,8 +6,9 @@ import { useDispatch, useSelector } from "react-redux";
 import Invite from "./invite";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import { ROLES, colors } from "../../utils";
+import { ROLES } from "../../utils";
 import plausibleEvent from "../../services/pausible";
+import { HiLogout, HiUser, HiUserAdd } from "react-icons/hi";
 
 import Avatar from "../Avatar";
 
@@ -22,8 +23,9 @@ export default function HeaderUser() {
     await api.post(`/referent/logout`);
     dispatch(setUser(null));
   }
+
   return (
-    <div className="User">
+    <div>
       <Dropdown>
         <div>
           <MenuToggle>
@@ -31,33 +33,40 @@ export default function HeaderUser() {
           </MenuToggle>
         </div>
         <Menu open={open}>
-          <Close onClick={() => setOpen(false)}>&times;</Close>
           <div className="my-2 text-xs px-3 text-coolGray-600">
             <p>
               {user.firstName} {user.lastName}
             </p>
             <p className="italic">{user.email}</p>
           </div>
-          <hr className="m-0" />
-          <Item>
-            <NavLink to="/profil">Profil</NavLink>
-          </Item>
+          <hr className="m-0 border-t-coolGray-100" />
+          <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2">
+            <HiUser className="group-hover:scale-110" />
+            <NavLink className="text-coolGray-800 hover:text-coolGray-800" to="/profil">
+              Profil
+            </NavLink>
+          </div>
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
-            <Item>
+            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2">
+              <HiUserAdd className="group-hover:scale-110" />
               <InviteReferent role={user.role} />
-            </Item>
+            </div>
           ) : null}
           {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && user.structureId ? (
-            <Item>
-              <NavLink to={`/structure/${user.structureId}`}>Inviter un utilisateur</NavLink>
-            </Item>
+            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2">
+              <HiUserAdd className="group-hover:scale-110" />
+              <NavLink className="text-coolGray-800 hover:text-coolGray-800" to={`/structure/${user.structureId}`}>
+                Inviter&nbsp;un&nbsp;utilisateur
+              </NavLink>
+            </div>
           ) : null}
-          <hr className="m-0" />
-          <Item onClick={logout}>
-            <NavLink style={{ color: colors.red }} to="/logout">
+          <hr className="m-0 border-t-coolGray-100" />
+          <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2">
+            <HiLogout className="text-red-700 group-hover:scale-110" />
+            <NavLink className="text-red-700 hover:text-red-700" to="/logout">
               Se déconnecter
             </NavLink>
-          </Item>
+          </div>
         </Menu>
       </Dropdown>
     </div>
@@ -72,7 +81,7 @@ const InviteReferent = ({ role }) => {
         plausibleEvent("Profil CTA - Inviter nouvel utilisateur");
         setOpen(true);
       }}>
-      <div>Inviter un nouvel utilisateur</div>
+      <div>Inviter&nbsp;un&nbsp;nouvel&nbsp;utilisateur</div>
       <Invite role={role} label="Inviter un nouvel utilisateur" open={open} setOpen={() => setOpen(false)} />
     </div>
   );
@@ -83,10 +92,6 @@ const Dropdown = styled.div`
   :hover > div {
     opacity: 1;
     visibility: visible;
-  }
-  hr {
-    margin: 5px 0;
-    border-top: 1px solid #ebeef5;
   }
 `;
 
@@ -117,26 +122,12 @@ const Menu = styled.div`
   -webkit-transition: all 0.3s;
   transition: all 0.3s;
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 5px);
   right: 0;
   border-radius: 4px;
   z-index: 100;
   border: 1px solid rgb(235, 238, 245);
   box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
-
-  ::after {
-    content: "";
-    display: block;
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-bottom: 10px solid #fff;
-    position: absolute;
-    bottom: 100%;
-    right: 10%;
-    z-index: -1;
-  }
 
   @media (max-width: 767px) {
     position: fixed;
@@ -149,37 +140,5 @@ const Menu = styled.div`
     width: 100vw;
     background-color: #fff;
     z-index: 11;
-  }
-`;
-
-const Item = styled.div`
-  font-size: 15px;
-  border-left: solid transparent 4px;
-  border-radius: 0;
-  text-align: left;
-  color: #374151;
-  cursor: pointer;
-  padding: 10px;
-  &:hover {
-    background-color: #d3bfc731;
-    color: #333;
-  }
-  a {
-    color: inherit;
-    text-decoration: none;
-    display: block;
-  }
-`;
-
-const Close = styled.div`
-  font-size: 32px;
-  color: #666;
-  padding: 0 15px 20px;
-  display: none;
-  width: 45px;
-  padding: 0 15px;
-  margin-left: auto;
-  @media (max-width: 767px) {
-    display: block;
   }
 `;

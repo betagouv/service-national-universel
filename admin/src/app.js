@@ -137,7 +137,7 @@ const Home = () => {
   }, [user]);
 
   return (
-    <div className="min-screen">
+    <div className="min-h-screen">
       <Header />
       <div className="flex">
         <Drawer />
