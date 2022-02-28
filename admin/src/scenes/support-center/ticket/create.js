@@ -71,7 +71,7 @@ export default function Create() {
               if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
                 response = await api.post("/zammood/ticket", {
                   message,
-                  subject,
+                  subject: subject.label,
                 });
               } else {
                 response = await api.post("/zammad-support-center/ticket", {

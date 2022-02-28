@@ -17,7 +17,7 @@ import { supportURL } from "../../config";
 
 const Dashboard = () => {
   const [userTickets, setUserTickets] = useState(null);
-  const [zammoodTickets, setZammoodTickets] = useState();
+  const [zammoodTickets, setZammoodTickets] = useState(null);
   const [articles, setArticles] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
@@ -40,9 +40,8 @@ const Dashboard = () => {
         let response;
         if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
           response = await api.get("/zammood/tickets");
-          console.log("ZAMMOOD", response.data);
           if (!response.ok) return setZammoodTickets([]);
-          setZammoodTickets(response.data);
+          setZammoodTickets(response.data.data);
         } else {
           response = await api.get("/zammad-support-center/ticket?withArticles=true");
           if (!response.ok) return setUserTickets([]);
@@ -144,7 +143,7 @@ const Dashboard = () => {
             {zammoodTickets
               ?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
               ?.map((ticket) => (
-                <NavLink to={`/besoin-d-aide/ticket/${ticket.id}`} key={ticket.id} className="ticket">
+                <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="ticket">
                   <p>{ticket.number}</p>
                   <p>{ticket.subject}</p>
                   <p>{ticket.contactLastName}</p>

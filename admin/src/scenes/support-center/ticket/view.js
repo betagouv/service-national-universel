@@ -40,11 +40,13 @@ export default function View(props) {
   const getTicketZammood = async () => {
     try {
       const id = props.match?.params?.id;
-      if (!id) return console.log("no corresponding ticket zammood");
-      const data = await api.get(`/zammood/ticket/${id}`);
-      if (!data.ok) console.log("no corresponding ticket in Zammood");
-      setZammoodTicket(data.ticket);
-      setZammoodMessages(data.messages);
+      const {
+        data: { data: res },
+        ok,
+      } = await api.get(`/zammood/ticket/${id}`);
+      if (!ok) console.log("no corresponding ticket in Zammood");
+      setZammoodTicket(res.ticket);
+      setZammoodMessages(res.messages);
     } catch (e) {
       console.log(e);
     }
