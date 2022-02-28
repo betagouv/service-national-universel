@@ -29,7 +29,7 @@ export default function Signin() {
         <div className="hidden min-h-[400px] flex-[1] bg-[url('./assets/computer.jpeg')] bg-cover bg-center bg-no-repeat md:block" />
         <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8">
           <div>
-            <h1 className="auth-title">Espace Administrateur</h1>
+            <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Espace Administrateur</h1>
             <h2 className="auth-subtitle">A destination des référents et des structures d’accueil</h2>
             <Formik
               initialValues={{ email: "", password: "" }}

@@ -19,7 +19,7 @@ export default function ResetPassword({ location }) {
           <div className="mb-10">
             <img src={require("../../assets/logo-snu.png")} className="h-10 py-1 px-4 md:h-20" />
           </div>
-          <h1 className="auth-title">Créer un nouveau mot de passe</h1>
+          <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Créer un nouveau mot de passe</h1>
           <Formik
             initialValues={{ password: "" }}
             validateOnChange={false}
@@ -59,7 +59,7 @@ export default function ResetPassword({ location }) {
       </div>
       <div className="flex-1 bg-blue-50">
         <div className="flex h-full flex-col items-center justify-center">
-          <h1 className="auth-title text-blue-600">Plateforme du Service National Universel</h1>
+          <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl text-blue-600">Plateforme du Service National Universel</h1>
           <img className="max-w-[280px]" src={require("../../assets/auth.png")} />
         </div>
       </div>

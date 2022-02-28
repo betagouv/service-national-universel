@@ -61,7 +61,7 @@ export default function SignupInvite() {
         <div className="hidden min-h-[400px] flex-1 bg-[url('./assets/rang.jpg')] bg-cover bg-center bg-no-repeat md:block" />
 
         <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8">
-          <h1 className="auth-title">{title}</h1>
+          <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">{title}</h1>
           <Formik
             initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", repassword: "", acceptCGU: "" }}
             onSubmit={async (values, actions) => {

@@ -18,7 +18,7 @@ export default function InvitationExpired() {
       <div className="flex flex-1 justify-center">
         <div className="hidden min-h-[400px] flex-1 bg-[url('./assets/rang.jpg')] bg-cover bg-center bg-no-repeat md:block" />
         <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8">
-          <h1 className="auth-title">Votre lien d&apos;invitation a expiré</h1>
+          <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Votre lien d&apos;invitation a expiré</h1>
           <Formik
             initialValues={{ email: urlParams.get("email") || "" }}
             onSubmit={async (values, actions) => {

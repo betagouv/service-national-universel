@@ -69,7 +69,7 @@ export default function Signup() {
         {({ values, errors, touched, isSubmitting, handleChange, handleSubmit }) => {
           return (
             <div className="flex flex-col items-center p-8">
-              <h1 className="auth-title mb-2">Inscrivez votre structure d&apos;accueil</h1>
+              <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl mb-2">Inscrivez votre structure d&apos;accueil</h1>
               <h2 className="auth-subtitle mb-4">A destination des structures souhaitant accueillir des volontaires</h2>
               <p className="mb-8 text-center text-sm font-medium text-brand-grey">
                 Vous avez déjà un compte ?{" "}
@@ -133,13 +133,29 @@ export default function Signup() {
                     <label htmlFor="phone" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       Téléphone
                     </label>
-                    <Field className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey" name="user.phone" type="tel" id="phone" value={values.user.phone} onChange={handleChange} placeholder="02 00 00 00 00" />
+                    <Field
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      name="user.phone"
+                      type="tel"
+                      id="phone"
+                      value={values.user.phone}
+                      onChange={handleChange}
+                      placeholder="02 00 00 00 00"
+                    />
                   </div>
                   <div>
                     <label htmlFor="mobile" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                       Téléphone portable
                     </label>
-                    <Field className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey" name="user.mobile" type="tel" id="mobile" value={values.user.mobile} onChange={handleChange} placeholder="06 00 00 00 00" />
+                    <Field
+                      className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                      name="user.mobile"
+                      type="tel"
+                      id="mobile"
+                      value={values.user.mobile}
+                      onChange={handleChange}
+                      placeholder="06 00 00 00 00"
+                    />
                   </div>
                   <div className="col-span-2">
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
