@@ -180,7 +180,11 @@ export default function SignupInvite() {
                       />
                       <label htmlFor="checkboxCGU" className="flex-1 text-brand-grey mb-0">
                         J&apos;ai lu et j&apos;accepte les{" "}
-                        <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank" className="text-brand-darkPurple underline" rel="noreferrer">
+                        <a
+                          href={`${adminURL}/conditions-generales-utilisation`}
+                          target="_blank"
+                          className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline"
+                          rel="noreferrer">
                           conditions générales d&apos;utilisation{" "}
                         </a>
                         de la plateforme du Service national universel
@@ -189,15 +193,14 @@ export default function SignupInvite() {
                     <p className="text-xs text-red-500">{errors.acceptCGU}</p>
                   </div>
                   <LoadingButton
-                    className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple col-span-2"
+                    className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
                     loading={isSubmitting}
-                    type="submit"
-                    color="primary">
+                    type="submit">
                     Activer mon compte
                   </LoadingButton>
                   <div className="col-span-2 border-t border-gray-200 pt-6 text-sm text-brand-grey">
                     Vous avez déjà un compte ?{" "}
-                    <Link to="/auth/signin" className="ml-[5px] font-semibold text-[#262a3e]">
+                    <Link to="/auth/signin" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
                       Connectez-vous
                     </Link>
                   </div>
