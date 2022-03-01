@@ -1,7 +1,6 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
 import CircularProgress, { CircularLine, CircularLineIndex } from "../components/CircularProgress";
-import { Subtitle } from "../../../components/dashboard";
 import { translate, MISSION_DOMAINS } from "../../../utils";
 import { Box, BoxTitleCircular as BoxTitle } from "../../../components/box";
 
