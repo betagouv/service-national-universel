@@ -295,7 +295,7 @@ router.post("/signup_invite", async (req, res) => {
 router.put("/young/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { id } = req.params;
     const young = await YoungModel.findById(id);
@@ -364,14 +364,16 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
 router.put("/young/:id/change-cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = validateYoung(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const validatedMessage = Joi.string().required().validate(req.body.message);
+    const validatedBody = validateYoung(req.body);
+
+    if (validatedBody?.error || validatedMessage?.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { id } = req.params;
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    const { cohort, message } = value;
+    const { cohort, cohortChangeReason } = validatedBody.value;
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldMeetingPointId = young.meetingPointId;
@@ -381,7 +383,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       young.set({ meetingPointId: undefined });
     }
 
-    young.set({ statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, cohort });
+    young.set({ statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, cohort, cohortChangeReason });
     await young.save({ fromUser: req.user });
 
     // if they had a session, we check if we need to update the places taken / left
@@ -404,7 +406,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_CHANGE_COHORT, {
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
         params: {
-          message,
+          motif: cohortChangeReason,
+          message: validatedMessage.value,
           oldCohort,
           cohort,
           youngFirstName: young?.firstName,
@@ -416,7 +419,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     await sendTemplate(SENDINBLUE_TEMPLATES.young.CHANGE_COHORT, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
-        message,
+        motif: cohortChangeReason,
+        message: validatedMessage.value,
         cohortPeriod: translateCohort(cohort),
       },
     });

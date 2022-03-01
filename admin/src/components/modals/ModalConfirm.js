@@ -42,16 +42,14 @@ export default function ModalConfirm({
           {children}
         </Content>
         <Footer>
-          <ModalButton disabled={sending} onClick={onCancel || onChange}>
-            {cancelText}
-          </ModalButton>
           <ModalButton loading={sending} disabled={sending || disableConfirm} onClick={submit} primary>
             {confirmText}
+          </ModalButton>
+          <ModalButton disabled={sending} onClick={onCancel || onChange}>
+            {cancelText}
           </ModalButton>
         </Footer>
       </ModalContainer>
     </Modal>
   );
 }
-
-

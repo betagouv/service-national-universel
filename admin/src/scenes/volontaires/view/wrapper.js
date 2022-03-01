@@ -124,7 +124,7 @@ const BadgeCohort = ({ young, onChange }) => {
 
   const handleChangeCohort = async (message) => {
     try {
-      await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort, message });
+      await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort, message, cohortChangeReason: motif });
       await onChange();
       toastr.success("Cohorte modifiée avec succès");
       setModalConfirmWithMessage(false);
@@ -221,7 +221,7 @@ const BadgeCohort = ({ young, onChange }) => {
 };
 
 const CohortDropDown = ({ cohort, onClick, color, width }) => {
-  const options = ["Juillet 2022", "Juin 2022", "Février 2022"];
+  const options = ["Juillet 2022", "Juin 2022"];
 
   return (
     <ActionBox color={color} width={width}>
