@@ -1,4 +1,6 @@
 const { Media } = require("reactstrap");
+const colors = require("tailwindcss/colors");
+
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
@@ -34,6 +36,15 @@ module.exports = {
         0: "0px",
       },
       colors: {
+        "snu-purple-900": "#32257F",
+        "snu-purple-800": "#3830a9",
+        "snu-purple-600": "#43389b",
+        "snu-purple-300": "#5145cc",
+        "snu-purple-200": "#4F46E5",
+        "snu-purple-100": "#C7D2FE",
+        warmGray: colors.stone,
+        trueGray: colors.neutral,
+        coolGray: colors.gray,
         brand: {
           black: "#111111",
           darkBlue: "#00008b",
