@@ -1,3 +1,10 @@
+## [1.50.3](https://github.com/betagouv/service-national-universel/compare/v1.50.2...v1.50.3) (2022-03-01)
+
+
+### Bug Fixes
+
+* copy icon ([b24e516](https://github.com/betagouv/service-national-universel/commit/b24e516d59da5d8d887dc5f86646cc966d219024))
+
 ## [1.50.2](https://github.com/betagouv/service-national-universel/compare/v1.50.1...v1.50.2) (2022-02-28)
 
 
