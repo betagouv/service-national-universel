@@ -460,7 +460,7 @@ export default function Index() {
         </Box>
       </div>
       <div style={{ marginTop: "1rem", marginBottom: "2rem", textAlign: "center" }}>
-        <div>J&apos;atteste avoir lu et approuver les éléments renseignés ci-dessus.</div>
+        <div>J&apos;atteste avoir lu et approuvé les éléments renseignés ci-dessus.</div>
         <VioletButton
           onClick={async () => {
             try {
