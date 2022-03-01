@@ -1,14 +1,14 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
-import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage, Subtitle } from "../../../components/dashboard";
+import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage } from "../../../components/dashboard";
 import { translate, MISSION_STATUS, MISSION_STATUS_COLORS } from "../../../utils";
 
 export default function Status({ data, filter, getLink }) {
   const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
   return (
     <React.Fragment>
-      <Subtitle>Statut des missions proposées par les structures</Subtitle>
+      <h3 className="mt-4 mb-2 text-xl">Statut des missions proposées par les structures</h3>
       <Row>
         {Object.values(MISSION_STATUS).map((l, k) => {
           return (

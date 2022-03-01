@@ -30,7 +30,7 @@ export default function Index() {
     <>
       <Row style={{}}>
         <Col md={6}>
-          <Title>Volontaires</Title>
+          <h2 className="m-0 font-bold text-2xl">Volontaires</h2>
         </Col>
         <Col md={6}>
           {filter && (
@@ -60,14 +60,6 @@ export default function Index() {
     </>
   );
 }
-
-// Title line with filters
-const Title = styled.h2`
-  color: #242526;
-  font-weight: bold;
-  font-size: 28px;
-  margin-bottom: 10px;
-`;
 
 const FiltersList = styled.div`
   display: flex;

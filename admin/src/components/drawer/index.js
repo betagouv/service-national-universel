@@ -214,17 +214,6 @@ const Drawer = (props) => {
 
   if (!user) return <div />;
 
-  function getName() {
-    if (user.role === ROLES.ADMIN) return "Espace modérateur";
-    if (user.role === ROLES.REFERENT_DEPARTMENT) return "Espace référent départemental";
-    if (user.role === ROLES.REFERENT_REGION) return "Espace référent Régional";
-    if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
-    if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
-    if (user.role === ROLES.HEAD_CENTER) return "Espace chef de centre";
-    if (user.role === ROLES.VISITOR) return "Espace visiteur";
-    return "";
-  }
-
   return (
     <div className="min-h-screen bg-snu-purple-900 text-white">
       {!isOpen ? (

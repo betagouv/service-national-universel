@@ -33,7 +33,7 @@ export default function Index() {
     <>
       <Row>
         <Col style={{ display: "flex" }}>
-          <Title>Missions</Title>
+          <h2 className="m-0 font-bold text-2xl">Missions</h2>
           {filter && (
             <>
               <FiltersList>
@@ -49,13 +49,6 @@ export default function Index() {
   );
 }
 
-// Title line with filters
-const Title = styled.h2`
-  color: #242526;
-  font-weight: bold;
-  font-size: 28px;
-  margin-bottom: 10px;
-`;
 const FiltersList = styled.div`
   gap: 1rem;
   flex: 1;

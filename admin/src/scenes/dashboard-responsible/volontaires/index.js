@@ -11,7 +11,7 @@ export default function Index({ referentManagerPhase2 }) {
     <>
       <Row style={{}}>
         <Col md={6}>
-          <Title>Volontaires</Title>
+          <h2 className="m-0 font-bold text-2xl">Volontaires</h2>
         </Col>
         {referentManagerPhase2 ? (
           <Col md={6}>
