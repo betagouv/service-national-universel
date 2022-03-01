@@ -58,7 +58,7 @@ export default function Index({ onChangeFilter = () => {} }) {
     <>
       <Row>
         <Col style={{ display: "flex" }}>
-          <h2 className="m-0 text-2xl">Inscriptions</h2>
+          <h2 className="m-0 font-bold text-2xl">Inscriptions</h2>
           {filter ? (
             <FiltersList>
               {user.role === ROLES.ADMIN ? (

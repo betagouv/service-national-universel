@@ -33,7 +33,7 @@ export default function Index() {
     <>
       <Row>
         <Col style={{ display: "flex" }}>
-          <Title>Missions</Title>
+          <h2 className="m-0 font-bold text-2xl">Missions</h2>
           {filter && (
             <>
               <FiltersList>

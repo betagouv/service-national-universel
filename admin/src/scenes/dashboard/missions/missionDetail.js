@@ -11,7 +11,7 @@ export default function MissionDetail({ youngsDomains, missionsDomains }) {
 
   return (
     <React.Fragment>
-      <Subtitle>Dans le détail des missions</Subtitle>
+      <h3 className="mt-4 mb-2 text-xl">Dans le détail des missions</h3>
       <Box>
         <Row>
           <Col md={6} xl={6} key="1">
