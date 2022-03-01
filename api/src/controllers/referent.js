@@ -42,6 +42,7 @@ const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require(".
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } = require("snu-lib/constants");
 const { department2region } = require("snu-lib/region-and-departments");
+const { translateCohort } = require("snu-lib/translation");
 const {
   ROLES_LIST,
   canInviteUser,
@@ -370,10 +371,11 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    const { cohort } = value;
+    const { cohort, message } = value;
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldMeetingPointId = young.meetingPointId;
+    const oldCohort = young.cohort;
     if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
       young.set({ sessionPhase1Id: undefined });
       young.set({ meetingPointId: undefined });
@@ -397,7 +399,27 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       }
     }
 
-    //! TODO : Ajouter le template
+    const referents = await ReferentModel.find({ department: young.department });
+    for (let referent of referents) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_CHANGE_COHORT, {
+        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+        params: {
+          message,
+          oldCohort,
+          cohort,
+          youngFirstName: young?.firstName,
+          youngLastName: young?.lastName,
+        },
+      });
+    }
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.young.CHANGE_COHORT, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: {
+        message,
+        cohortPeriod: translateCohort(cohort),
+      },
+    });
 
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
