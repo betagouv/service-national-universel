@@ -1,21 +1,14 @@
 import React, { useState } from "react";
-import { FormGroup } from "reactstrap";
 import { Formik, Field } from "formik";
 import { Link, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import styled from "styled-components";
 import queryString from "query-string";
 
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import LoginBox from "./components/loginBox";
 import Header from "./components/header";
-import AuthWrapper from "./components/authWrapper";
-import Title from "./components/title";
-import Subtitle from "./components/subtitle";
-import { colors } from "../../utils";
 import PasswordEye from "../../components/PasswordEye";
 
 export default function Signin() {
@@ -30,14 +23,14 @@ export default function Signin() {
   if (unauthorized === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+    <div className="flex flex-1 flex-col min-h-screen">
       <Header />
-      <AuthWrapper>
-        <Thumb />
-        <LoginBox style={{ justifyContent: "center" }}>
+      <div className="flex flex-1 justify-center">
+        <div className="hidden min-h-[400px] flex-[1] bg-[url('./assets/computer.jpeg')] bg-cover bg-center bg-no-repeat md:block" />
+        <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8">
           <div>
-            <Title>Espace Administrateur</Title>
-            <Subtitle>A destination des référents et des structures d’accueil</Subtitle>
+            <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Espace Administrateur</h1>
+            <h2 className="mb-8 text-base font-normal text-brand-grey">A destination des référents et des structures d’accueil</h2>
             <Formik
               initialValues={{ email: "", password: "" }}
               onSubmit={async ({ email, password }, actions) => {
@@ -61,165 +54,67 @@ export default function Signin() {
               }}>
               {({ values, isSubmitting, handleChange, handleSubmit }) => {
                 return (
-                  <form onSubmit={handleSubmit}>
+                  <form onSubmit={handleSubmit} className="mb-6 flex flex-col gap-4 items-start">
                     {!userIsValid && (
-                      <StyledFormGroup>
-                        <ErrorLogin>E-mail et/ou mot de passe incorrect(s)</ErrorLogin>
-                      </StyledFormGroup>
+                      <div className="block w-full rounded bg-red-50 py-2.5 px-4 text-sm text-red-500 border border-red-400">E-mail et/ou mot de passe incorrect(s)</div>
                     )}
                     {tooManyRequests && (
-                      <StyledFormGroup>
-                        <ErrorLogin>Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure. </ErrorLogin>
-                      </StyledFormGroup>
+                      <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">
+                        Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure.
+                      </div>
                     )}
 
-                    <StyledFormGroup>
-                      <div>
-                        <label htmlFor="email">E-mail</label>
-                        <InputField
-                          autoComplete="username"
-                          className="form-control"
-                          name="email"
-                          type="email"
-                          id="email"
-                          placeholder="Adresse e-mail"
-                          value={values.email}
-                          onChange={handleChange}
-                        />
-                      </div>
-                    </StyledFormGroup>
-                    <StyledFormGroup>
-                      <label htmlFor="password">Mot de passe</label>
+                    <div className="self-stretch">
+                      <label htmlFor="email" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                        E-mail
+                      </label>
+                      <Field
+                        autoComplete="username"
+                        className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                        name="email"
+                        type="email"
+                        id="email"
+                        placeholder="Adresse e-mail"
+                        value={values.email}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="self-stretch">
+                      <label htmlFor="password" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                        Mot de passe
+                      </label>
                       <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
-                    </StyledFormGroup>
-                    <Forgot>
-                      <Link to="/auth/forgot">Mot de passe perdu ?</Link>
-                    </Forgot>
-                    <Submit loading={isSubmitting} type="submit">
+                    </div>
+                    <Link to="/auth/forgot" className="text-sm text-brand-purple transition-colors hover:text-brand-darkPurple hover:underline">
+                      Mot de passe perdu ?
+                    </Link>
+                    <LoadingButton
+                      className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
+                      loading={isSubmitting}
+                      type="submit">
                       Se connecter
-                    </Submit>
+                    </LoadingButton>
                   </form>
                 );
               }}
             </Formik>
           </div>
-          <div>
-            <hr />
-            <Register>
-              Vous êtes une structure ? <Link to="/auth/signup">Publiez vos missions</Link>
-            </Register>
-            <Register>
+          <div className="flex flex-col gap-3 border-t border-gray-200 pt-4">
+            <p className="text-center text-sm text-brand-grey ">
+              Vous êtes une structure ?{" "}
+              <Link to="/auth/signup" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
+                Publiez vos missions
+              </Link>
+            </p>
+            <p className="text-center text-sm text-brand-grey ">
               Vous avez besoin d&apos;aide ?{" "}
-              <Link to="/public-besoin-d-aide" target="_blank">
+              <Link to="/public-besoin-d-aide" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline" target="_blank">
                 Cliquez ici
               </Link>
-            </Register>
+            </p>
           </div>
-        </LoginBox>
-      </AuthWrapper>
+        </div>
+      </div>
     </div>
   );
 }
-
-const Thumb = styled.div`
-  min-height: 400px;
-  background: url(${require("../../assets/computer.jpeg")}) no-repeat center;
-  background-size: cover;
-  flex: 1;
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const Register = styled.h3`
-  position: relative;
-  font-size: 1rem;
-  text-align: center;
-  color: ${colors.grey};
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  font-weight: 400;
-  margin-bottom: 20px;
-  a {
-    color: #32267f;
-    font-weight: 500;
-  }
-`;
-
-const StyledFormGroup = styled(FormGroup)`
-  margin-bottom: 25px;
-  label {
-    color: rgb(106, 111, 133);
-    font-size: 10px;
-    text-transform: uppercase;
-    font-weight: 700;
-  }
-`;
-const InputField = styled(Field)`
-  background-color: #fff;
-  outline: 0;
-  display: block;
-  width: 100%;
-  padding: 12px 20px;
-  border: 1px solid #e2e8f0;
-  border-radius: 5px;
-  color: #798fb0;
-  -webkit-transition: border 0.2s ease;
-  transition: border 0.2s ease;
-  line-height: 1.2;
-  ::placeholder {
-    color: #d6d6e1;
-  }
-  &:focus {
-    outline: none;
-    border: 1px solid rgba(66, 153, 225, 0.5);
-    & + label {
-      color: #434190;
-    }
-    ::placeholder {
-      color: #ccd5e0;
-    }
-  }
-`;
-const Forgot = styled.div`
-  margin-bottom: 20px;
-  a {
-    color: ${colors.purple};
-    font-size: 14px;
-  }
-`;
-
-const Submit = styled(LoadingButton)`
-  display: block;
-  font-size: 1rem;
-  font-weight: 700;
-  border-radius: 0;
-  padding: 0.5rem 3rem;
-  border: 0;
-  background-color: ${colors.purple};
-  margin-top: 30px;
-  margin-bottom: 30px;
-  border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-  cursor: pointer;
-  :hover {
-    background-color: #42389d;
-  }
-  :focus {
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-  }
-`;
-
-const ErrorLogin = styled.div`
-  background-color: #fff5f5;
-  display: block;
-  width: 100%;
-  padding: 15px;
-  margin-top: 3px;
-  margin-bottom: 0;
-  border: 1px solid #fc8180;
-  color: #c73738;
-  line-height: 1.2;
-  border-radius: 5px;
-`;

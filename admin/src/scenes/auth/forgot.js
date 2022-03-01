@@ -1,176 +1,95 @@
 import React, { useState } from "react";
-import { FormGroup } from "reactstrap";
 import { Formik, Field } from "formik";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
-import styled from "styled-components";
 
 import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 import { Link } from "react-router-dom";
-import { translate, colors } from "../../utils";
+import { translate } from "../../utils";
 import Header from "./components/header";
-import LoginBox from "./components/loginBox";
-import AuthWrapper from "./components/authWrapper";
-import Title from "./components/title";
-import Subtitle from "./components/subtitle";
 
 export default function Forgot() {
   const [mail, setMail] = useState("");
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+    <div className="flex flex-1 flex-col min-h-screen">
       <Header />
-      <AuthWrapper>
-        <Thumb />
-        <div>
-          <LoginBox>
-            <div>
-              <Formik
-                initialValues={{ email: "" }}
-                onSubmit={async ({ email }, actions) => {
-                  try {
-                    await api.post("/referent/forgot_password", { email });
-                    setMail(email);
-                  } catch (e) {
-                    toastr.error("Erreur !", translate(e.code));
-                  }
-                  actions.setSubmitting(false);
-                }}>
-                {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
-                  return (
-                    <form onSubmit={handleSubmit}>
-                      {mail ? (
-                        <>
-                          <Title>Email envoyé à : {mail}</Title>
-                          <Subtitle>
-                            Si vous possedez un compte chez nous, un email contenant les instructions pour réinitialiser votre mot de passe vient de vous être envoyé.
-                          </Subtitle>
-                          <Subtitle>
-                            Si vous ne vous souvenez plus de votre email de connexion, écrivez-nous à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>.
-                          </Subtitle>
-                        </>
-                      ) : (
-                        <>
-                          <Title>Réinitialisation du mot de passe</Title>
-                          <Subtitle>Pour réinitialiser votre mot de passe, entrez l&apos;adresse mail que vous avez utilisée pour vous connecter à la plateforme</Subtitle>
-                          <StyledFormGroup>
-                            <div>
-                              <label>ADRESSE EMAIL</label>
-                              <InputField
-                                validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
-                                name="email"
-                                type="email"
-                                value={values.email}
-                                placeholder="Email"
-                                onChange={handleChange}
-                                hasError={errors.email}
-                              />
-                            </div>
-                            <p style={{ fontSize: 12, color: colors.red }}>{errors.email}</p>
-                          </StyledFormGroup>
-                          <Submit type="submit" color="success" loading={isSubmitting}>
-                            Obtenir le lien de réinitialisation par email
-                          </Submit>
-                        </>
-                      )}
-                    </form>
-                  );
-                }}
-              </Formik>
-            </div>
-            <div>
-              <hr />
-              <Register>
-                Vous avez déjà un compte ? <Link to="/auth">Connectez vous</Link>
-              </Register>
-            </div>
-          </LoginBox>
+      <div className="flex flex-1 justify-center">
+        <div className="hidden min-h-[400px] flex-[1] bg-[url('./assets/computer.jpeg')] bg-cover bg-center bg-no-repeat md:block" />
+        <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8">
+          <Formik
+            initialValues={{ email: "" }}
+            onSubmit={async ({ email }, actions) => {
+              try {
+                await api.post("/referent/forgot_password", { email });
+                setMail(email);
+              } catch (e) {
+                toastr.error("Erreur !", translate(e.code));
+              }
+              actions.setSubmitting(false);
+            }}>
+            {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
+              return (
+                <form onSubmit={handleSubmit} className="mb-6 flex flex-col gap-4 items-start">
+                  {mail ? (
+                    <>
+                      <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl mb-0">Email envoyé à : {mail}</h1>
+                      <h2 className="mb-8 text-base font-normal text-brand-grey mb-0">
+                        Si vous possedez un compte chez nous, un email contenant les instructions pour réinitialiser votre mot de passe vient de vous être envoyé.
+                      </h2>
+                      <h2 className="mb-8 text-base font-normal text-brand-grey mb-4">
+                        Si vous ne vous souvenez plus de votre email de connexion, écrivez-nous à{" "}
+                        <a href="mailto:contact@snu.gouv.fr" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
+                          contact@snu.gouv.fr
+                        </a>
+                        .
+                      </h2>
+                    </>
+                  ) : (
+                    <>
+                      <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl mb-0">Réinitialisation du mot de passe</h1>
+                      <h2 className="mb-8 text-base font-normal text-brand-grey mb-4">
+                        Pour réinitialiser votre mot de passe, entrez l&apos;adresse mail que vous avez utilisée pour vous connecter à la plateforme
+                      </h2>
+                      <div className="self-stretch">
+                        <div>
+                          <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">ADRESSE EMAIL</label>
+                          <Field
+                            className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                            validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
+                            name="email"
+                            type="email"
+                            value={values.email}
+                            placeholder="Email"
+                            onChange={handleChange}
+                            hasError={errors.email}
+                          />
+                        </div>
+                        <p className="text-xs text-red-500">{errors.email}</p>
+                      </div>
+                      <LoadingButton
+                        className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
+                        type="submit"
+                        loading={isSubmitting}>
+                        Obtenir le lien de réinitialisation par email
+                      </LoadingButton>
+                    </>
+                  )}
+                </form>
+              );
+            }}
+          </Formik>
+          <div className="border-t border-gray-200 pt-4">
+            <p className="text-center text-sm text-brand-grey">
+              Vous avez déjà un compte ?{" "}
+              <Link to="/auth" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
+                Connectez vous
+              </Link>
+            </p>
+          </div>
         </div>
-      </AuthWrapper>
+      </div>
     </div>
   );
 }
-
-const Thumb = styled.div`
-  min-height: 400px;
-  background: url(${require("../../assets/computer.jpeg")}) no-repeat center;
-  background-size: cover;
-  flex: 1;
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const Register = styled.h3`
-  position: relative;
-  font-size: 1rem;
-  text-align: center;
-  color: ${colors.grey};
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  font-weight: 400;
-  margin-bottom: 20px;
-  a {
-    color: ${colors.darkPurple};
-    font-weight: 500;
-  }
-`;
-
-const StyledFormGroup = styled(FormGroup)`
-  margin-bottom: 25px;
-  label {
-    color: ${colors.grey};
-    font-size: 10px;
-    text-transform: uppercase;
-    font-weight: 700;
-  }
-`;
-const InputField = styled(Field)`
-  background-color: #fff;
-  outline: 0;
-  display: block;
-  width: 100%;
-  padding: 12px 20px;
-  border: 1px solid #e2e8f0;
-  border-radius: 5px;
-  color: #798fb0;
-  -webkit-transition: border 0.2s ease;
-  transition: border 0.2s ease;
-  line-height: 1.2;
-  ::placeholder {
-    color: #798fb0;
-  }
-  &:focus {
-    outline: none;
-    border: 1px solid rgba(66, 153, 225, 0.5);
-    & + label {
-      color: #434190;
-    }
-    ::placeholder {
-      color: #ccd5e0;
-    }
-  }
-`;
-
-const Submit = styled(LoadingButton)`
-  display: block;
-  font-size: 1rem;
-  font-weight: 700;
-  border-radius: 0;
-  padding: 0.5rem 3rem;
-  border: 0;
-  background-color: ${colors.purple};
-  margin-top: 30px;
-  margin-bottom: 30px;
-  border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-  cursor: pointer;
-  :hover {
-    background-color: ${colors.darkPurple};
-  }
-  :focus {
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-  }
-`;
