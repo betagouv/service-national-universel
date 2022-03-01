@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import api from "../../services/api";
 import { apiURL } from "../../config";
@@ -11,6 +12,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT"];
 
 export default function MeetingPoint() {
+  useDocumentTitle("Points de rassemblement");
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
