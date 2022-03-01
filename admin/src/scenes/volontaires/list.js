@@ -88,7 +88,7 @@ export default function VolontaireList() {
     })();
   }, []);
   const getDefaultQuery = () => ({
-    query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } } } },
+    query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST", "DELETED"] } } } },
     sort: [{ "lastName.keyword": "asc" }],
     track_total_hits: true,
   });
@@ -663,34 +663,59 @@ export default function VolontaireList() {
 const Hit = ({ hit, onClick, selected }) => {
   const getBackgroundColor = () => {
     if (selected) return colors.lightBlueGrey;
-    if (hit.status === "WITHDRAWN") return colors.extraLightGrey;
+    if (hit.status === "WITHDRAWN" || hit.status === "DELETED") return colors.extraLightGrey;
   };
-  return (
-    <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
-      <td>
-        <MultiLine>
-          <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
-          <p>
-            {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
-          </p>
-        </MultiLine>
-      </td>
-      <td>
-        <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
-        {hit.status === "WITHDRAWN" && <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} />}
 
-        <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} />
-        <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} />
-        <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} />
-      </td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <Action hit={hit} />
-      </td>
-    </tr>
-  );
+  if (hit.status === "DELETED") {
+    return (
+      <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
+        <td>
+          <MultiLine>
+            <span className="font-bold text-black">Compte supprimé</span>
+            <p>{hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null}</p>
+          </MultiLine>
+        </td>
+        <td>
+          <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
+          <Badge minify text="Supprimé" color={YOUNG_STATUS_COLORS.DELETED} tooltipText={translate(hit.status)} />
+
+          <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} style={{ opacity: "0.5" }} />
+          <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} style={{ opacity: "0.5" }} />
+          <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} style={{ opacity: "0.5" }} />
+        </td>
+        <td onClick={(e) => e.stopPropagation()}>
+          <Action hit={hit} />
+        </td>
+      </tr>
+    );
+  } else {
+    return (
+      <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
+        <td>
+          <MultiLine>
+            <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
+            <p>
+              {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
+            </p>
+          </MultiLine>
+        </td>
+        <td>
+          <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
+          {hit.status === "WITHDRAWN" && <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} />}
+
+          <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} />
+          <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} />
+          <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} />
+        </td>
+        <td onClick={(e) => e.stopPropagation()}>
+          <Action hit={hit} />
+        </td>
+      </tr>
+    );
+  }
 };
 
-const BadgePhase = ({ text, value, redirect }) => {
+const BadgePhase = ({ text, value, redirect, style }) => {
   const history = useHistory();
 
   return (
@@ -701,6 +726,7 @@ const BadgePhase = ({ text, value, redirect }) => {
       tooltipText={translate(value)}
       minTooltipText={`${text}: ${translate(value)}`}
       color={YOUNG_STATUS_COLORS[value]}
+      style={style}
     />
   );
 };
@@ -722,7 +748,7 @@ const Action = ({ hit }) => {
           <Link to={`/volontaire/${hit._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
             <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
           </Link>
-          {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
+          {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status != "DELETED" ? (
             <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
               <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
             </DropdownItem>

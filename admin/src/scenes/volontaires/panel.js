@@ -54,7 +54,7 @@ export default function VolontairePanel({ onChange, value }) {
       <div className="info">
         <div style={{ display: "flex" }}>
           <div className="close" onClick={onChange} />
-          <div className="title">{`${young.firstName} ${young.lastName}`}</div>
+          <div className="title">{young.firstName ? `${young.firstName} ${young.lastName}` : "Compte supprimé"}</div>
         </div>
         <div>{t(young.gender)}</div>
         {young.birthdateAt && (
@@ -74,9 +74,11 @@ export default function VolontairePanel({ onChange, value }) {
           <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
-          <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-            <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-          </a>
+          {young.status !== "DELETED" ? (
+            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+              <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+            </a>
+          ) : null}
           {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
         </div>
         <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
@@ -155,17 +157,19 @@ export default function VolontairePanel({ onChange, value }) {
         <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
         <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment) || "Non"} />
       </Info>
-      <Info title="Représentant légal n°1" id={young._id}>
-        <Details title="Statut" value={t(young.parent1Status)} />
-        <Details title="Prénom" value={young.parent1FirstName} />
-        <Details title="Nom" value={young.parent1LastName} />
-        <Details title="E-mail" value={young.parent1Email} />
-        <Details title="Tel" value={young.parent1Phone} />
-        <Details title="Adresse" value={young.parent1Address} />
-        <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
-        <Details title="Dép" value={young.parent1Department} />
-        <Details title="Région" value={young.parent1Region} />
-      </Info>
+      {young.parent1Status && (
+        <Info title="Représentant légal n°1" id={young._id}>
+          <Details title="Statut" value={t(young.parent1Status)} />
+          <Details title="Prénom" value={young.parent1FirstName} />
+          <Details title="Nom" value={young.parent1LastName} />
+          <Details title="E-mail" value={young.parent1Email} />
+          <Details title="Tel" value={young.parent1Phone} />
+          <Details title="Adresse" value={young.parent1Address} />
+          <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
+          <Details title="Dép" value={young.parent1Department} />
+          <Details title="Région" value={young.parent1Region} />
+        </Info>
+      )}
       {young.parent2Status && (
         <Info title="Représentant légal n°2" id={young._id}>
           <Details title="Statut" value={t(young.parent2Status)} />

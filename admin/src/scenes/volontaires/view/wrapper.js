@@ -50,7 +50,7 @@ export default function Wrapper({ children, young, tab }) {
       <Header>
         <div style={{ flex: 1 }}>
           <Title>
-            {young.firstName} {young.lastName} <Badge text={`Cohorte ${young.cohort}`} />
+            {young.status !== "DELETED" ? `${young.firstName} ${young.lastName}` : "Compte supprimé"} <Badge text={`Cohorte ${young.cohort}`} />
           </Title>
           <TabList>
             <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>

@@ -613,8 +613,42 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     if (!canDeleteYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    await young.remove();
-    console.log(`Young ${id} has been deleted`);
+    const fieldToKeep = [
+      "_id",
+      "__v",
+      "birthdateAt",
+      "cohort",
+      "gender",
+      "situation",
+      "grade",
+      "qpv",
+      "populationDensity",
+      "handicap",
+      "ppsBeneficiary",
+      "paiBeneficiary",
+      "highSkilledActivity",
+      "statusPhase1",
+      "statusPhase2",
+      "phase2ApplicationStatus",
+      "statusPhase3"
+    ];
+
+    for (const key in young._doc) {
+      if (!fieldToKeep.find((val) => val === key)) {
+        young.set({ [key]: undefined });
+      }
+    }
+    
+    young.set({ location: { lat: undefined, lon: undefined } });
+    young.set({ schoolLocation: { lat: undefined, lon: undefined } });
+    young.set({ parent1Location: { lat: undefined, lon: undefined } });
+    young.set({ parent2Location: { lat: undefined, lon: undefined } });
+    young.set({ medicosocialStructureLocation: { lat: undefined, lon: undefined } });
+    young.set({ email: `${young._doc["_id"]}@delete.com` });
+    young.set({ status: "DELETED" });
+    
+    await young.save();
+    console.log(`Young ${id} has been soft deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
