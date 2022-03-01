@@ -23,7 +23,7 @@ export default function Phase2({ young, onChange }) {
               <p style={{ flex: 1 }}>
                 Le volontaire doit réaliser sa phase 2 dans l&apos;année suivant son séjour de cohésion.
                 <br />
-                Pour plus d&apos;information,{" "}
+                Pour plus d&apos;informations,{" "}
                 <a
                   className="underline hover:underline"
                   href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"

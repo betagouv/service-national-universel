@@ -93,7 +93,7 @@ export default function List() {
           title="Vous devez réaliser vos 84 heures de mission dans l’année qui suit votre séjour de cohésion."
           message={
             <div>
-              Pour plus d&apos;information,{" "}
+              Pour plus d&apos;informations,{" "}
               <a
                 className="underline hover:underline"
                 href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
