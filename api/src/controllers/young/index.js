@@ -32,6 +32,7 @@ const {
   updatePlacesBus,
   updatePlacesSessionPhase1,
   ROLES,
+  YOUNG_STATUS,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -630,7 +631,11 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       "statusPhase1",
       "statusPhase2",
       "phase2ApplicationStatus",
-      "statusPhase3"
+      "statusPhase3",
+      "department",
+      "region",
+      "zip",
+      "city",
     ];
 
     for (const key in young._doc) {
@@ -638,16 +643,16 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
         young.set({ [key]: undefined });
       }
     }
-    
+
     young.set({ location: { lat: undefined, lon: undefined } });
     young.set({ schoolLocation: { lat: undefined, lon: undefined } });
     young.set({ parent1Location: { lat: undefined, lon: undefined } });
     young.set({ parent2Location: { lat: undefined, lon: undefined } });
     young.set({ medicosocialStructureLocation: { lat: undefined, lon: undefined } });
     young.set({ email: `${young._doc["_id"]}@delete.com` });
-    young.set({ status: "DELETED" });
-    
-    await young.save();
+    young.set({ status: YOUNG_STATUS.DELETED });
+
+    await young.save({ fromUser: req.user });
     console.log(`Young ${id} has been soft deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {

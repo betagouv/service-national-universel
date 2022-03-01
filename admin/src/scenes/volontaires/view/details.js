@@ -18,7 +18,7 @@ import ExpandComponent from "../../../components/ExpandComponent";
 
 export default function VolontaireViewDetails({ young }) {
   const user = useSelector((state) => state.Auth.user);
-  const [isDeleted, setIsDeleted] = useState(young.status !== "DELETED");
+  const [isDeleted, setIsDeleted] = useState(young.status === "DELETED");
 
   function isFromFranceConnect() {
     return young.parent1FromFranceConnect === "true" && (!young.parent2Status || young.parent2FromFranceConnect === "true");
@@ -59,7 +59,7 @@ export default function VolontaireViewDetails({ young }) {
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Bloc title="Informations générales">
-                {isDeleted ? <Details title="E-mail" value={young.email} copy /> : null}
+                {!isDeleted ? <Details title="E-mail" value={young.email} copy /> : null}
                 <Details title="Date de naissance" value={`${formatStringDate(young.birthdateAt)} • ${getAge(young.birthdateAt)} ans`} />
                 <Details title="Lieu de naissance" value={young.birthCity} />
                 <Details title="Pays de naissance" value={young.birthCountry} />
@@ -116,7 +116,7 @@ export default function VolontaireViewDetails({ young }) {
                   />
                 ))}
               </Bloc>
-              {isDeleted ? (
+              {!isDeleted ? (
                 <>
                   <Bloc title="Droit à l'image">
                     <Details title="Autorisation" value={t(young.imageRight)} />
@@ -239,7 +239,7 @@ export default function VolontaireViewDetails({ young }) {
                   )}
                 </Bloc>
               ) : null}
-              {isDeleted ? (
+              {!isDeleted ? (
                 <Bloc title="Consentements">
                   <Details title={`Consentements validés par ${young.firstName} ${young.lastName}`} value={t(young.consentment || "false")} style={{ border: "none" }} />
                   <ExpandComponent>

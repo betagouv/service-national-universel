@@ -679,9 +679,9 @@ const Hit = ({ hit, onClick, selected }) => {
           <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
           <Badge minify text="Supprimé" color={YOUNG_STATUS_COLORS.DELETED} tooltipText={translate(hit.status)} />
 
-          <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} style={{ opacity: "0.5" }} />
-          <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} style={{ opacity: "0.5" }} />
-          <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} style={{ opacity: "0.5" }} />
+          <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} style={"opacity-50"} />
+          <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} style={"opacity-50"} />
+          <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} style={"opacity-50"} />
         </td>
         <td onClick={(e) => e.stopPropagation()}>
           <Action hit={hit} />
@@ -726,7 +726,7 @@ const BadgePhase = ({ text, value, redirect, style }) => {
       tooltipText={translate(value)}
       minTooltipText={`${text}: ${translate(value)}`}
       color={YOUNG_STATUS_COLORS[value]}
-      style={style}
+      className={style}
     />
   );
 };
