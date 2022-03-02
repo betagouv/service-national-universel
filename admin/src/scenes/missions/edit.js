@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInputV2";
@@ -29,6 +30,7 @@ import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default function Edit(props) {
+  const setDocumentTitle = useDocumentTitle("Missions");
   const [defaultValue, setDefaultValue] = useState(null);
   const [structure, setStructure] = useState();
   const [structures, setStructures] = useState();
@@ -50,6 +52,7 @@ export default function Edit(props) {
     const { data } = await api.get(`/mission/${id}`);
     if (data && data.startAt) data.startAt = dateForDatePicker(data.startAt);
     if (data && data.endAt) data.endAt = dateForDatePicker(data.endAt);
+    setDocumentTitle(`${data.name}`);
     setDefaultValue(data);
   }
   async function initReferents() {

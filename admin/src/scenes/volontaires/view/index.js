@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Switch, Route } from "react-router-dom";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 import api from "../../../services/api";
 import Details from "./details";
@@ -11,12 +12,14 @@ import History from "./history";
 
 export default function Index({ ...props }) {
   const [young, setYoung] = useState();
+  const setDocumentTitle = useDocumentTitle("Volontaires");
 
   const getYoung = async () => {
     const id = props.match && props.match.params && props.match.params.id;
     if (!id) return <div />;
     const { data } = await api.get(`/referent/young/${id}`);
     setYoung(data);
+    setDocumentTitle(`${data.firstName} ${data.lastName}`);
   };
 
   useEffect(() => {
