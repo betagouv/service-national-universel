@@ -6,6 +6,7 @@ import "dayjs/locale/fr";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import VioletButton from "../../components/buttons/VioletButton";
 import ExportComponent from "../../components/ExportXlsx";
@@ -35,6 +36,7 @@ import Badge from "../../components/Badge";
 import plausibleEvent from "../../services/pausible";
 
 export default function Inscription() {
+  useDocumentTitle("Inscriptions");
   const [young, setYoung] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } }, track_total_hits: true });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
