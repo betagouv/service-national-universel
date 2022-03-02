@@ -116,11 +116,20 @@ export default function View(props) {
   };
 
   return (
-    <Container>
+    <Container style={{ marginBottom: "1rem" }}>
       <BackButtonContainer>
         <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
       </BackButtonContainer>
-      <div style={{ padding: 0, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+      <div
+        style={{
+          padding: 0,
+          display: "flex",
+          flexDirection: "column",
+          height: "calc(95vh - 170px)",
+          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+          overflow: "hidden",
+          borderRadius: "10px",
+        }}>
         {ticket && messages ? (
           <>
             <Heading>
@@ -130,14 +139,11 @@ export default function View(props) {
                 </h1>
                 <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
               </div>
-              <StateContainer>
-                <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-                {ticket?.status}
-              </StateContainer>
+              {displayState(ticketStateNameById(ticket?.state_id))}
             </Heading>
             <Messages>
               {messages?.map((message) => (
-                <Message key={message?._id || message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} />
+                <Message key={message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} />
               ))}
             </Messages>
           </>

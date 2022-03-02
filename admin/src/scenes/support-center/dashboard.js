@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { ticketStateNameById, colors, translateState, ROLES } from "../../utils";
+import { ticketStateNameById, colors, translateState } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
