@@ -16,7 +16,7 @@ import ExpandComponent from "../../../components/ExpandComponent";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
 
-export default function VolontaireViewDetails({ young }) {
+export default function VolontaireViewDetails({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
 
   function isFromFranceConnect() {
@@ -25,7 +25,7 @@ export default function VolontaireViewDetails({ young }) {
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <YoungView young={young} tab="details">
+      <YoungView young={young} tab="details" onChange={onChange}>
         {young.status === YOUNG_STATUS.REFUSED && young.inscriptionRefusedMessage ? (
           <Box>
             <Bloc title="Motif de refus" id={young._id}>

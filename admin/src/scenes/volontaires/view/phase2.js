@@ -15,7 +15,7 @@ import { Box, BoxTitle } from "../../../components/box";
 export default function Phase2({ young, onChange }) {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase2 young={young} tab="phase2">
+      <WrapperPhase2 young={young} tab="phase2" onChange={onChange}>
         <Box>
           <Row>
             <Col md={4} sm={4} style={{ padding: "3rem", borderRight: "2px solid #f4f5f7" }}>
