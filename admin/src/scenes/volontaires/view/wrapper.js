@@ -221,14 +221,16 @@ const BadgeCohort = ({ young, onChange }) => {
 };
 
 const CohortDropDown = ({ cohort, onClick, color, width }) => {
+  const user = useSelector((state) => state.Auth.user);
   const options = ["Juillet 2022", "Juin 2022"];
+  const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 
   return (
     <ActionBox color={color} width={width}>
       <UncontrolledDropdown setActiveFromChild>
-        <DropdownToggle tag="button">
+        <DropdownToggle tag="button" disabled={disabled}>
           Cohorte {cohort}
-          <Chevron color="#9a9a9a" />
+          {!disabled ? <Chevron color="#9a9a9a" /> : null}
         </DropdownToggle>
         <DropdownMenu>
           {options

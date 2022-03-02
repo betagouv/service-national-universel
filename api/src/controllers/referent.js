@@ -377,7 +377,6 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldMeetingPointId = young.meetingPointId;
-    const oldCohort = young.cohort;
     if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
       young.set({ sessionPhase1Id: undefined });
       young.set({ meetingPointId: undefined });
@@ -399,21 +398,6 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         const bus = await BusModel.findById(meetingPoint.busId);
         if (bus) await updatePlacesBus(bus);
       }
-    }
-
-    const referents = await ReferentModel.find({ department: young.department });
-    for (let referent of referents) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_CHANGE_COHORT, {
-        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-        params: {
-          motif: cohortChangeReason,
-          message: validatedMessage.value,
-          oldCohort,
-          cohort,
-          youngFirstName: young?.firstName,
-          youngLastName: young?.lastName,
-        },
-      });
     }
 
     await sendTemplate(SENDINBLUE_TEMPLATES.young.CHANGE_COHORT, {
