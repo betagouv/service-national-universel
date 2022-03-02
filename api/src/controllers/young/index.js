@@ -604,7 +604,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 });
 
 // Delete one user (only admin can delete user)
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/soft-delete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -654,7 +654,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     await young.save({ fromUser: req.user });
     console.log(`Young ${id} has been soft deleted`);
-    res.status(200).send({ ok: true });
+    res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });

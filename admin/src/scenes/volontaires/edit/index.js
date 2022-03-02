@@ -37,6 +37,7 @@ import MilitaryPreparation from "./military-preparation";
 import JDC from "./JDC";
 import CohesionCenter from "./cohesion-center";
 import MeetingPoint from "./meeting-point";
+import { YOUNG_STATUS } from "../../../utils";
 
 export default function VolontaireEdit(props) {
   const [young, setYoung] = useState();
@@ -145,7 +146,7 @@ export default function VolontaireEdit(props) {
               <Alert>Vous ne pouvez pas enregistrer ce volontaires car tous les champs ne sont pas correctement renseignés.</Alert>
             ) : null}
             <TitleWrapper>
-              <DeleteButton young={young} />
+              {young.status !== YOUNG_STATUS.DELETED ? <DeleteButton young={young} /> : <div />}
               <div style={{ display: "flex" }}>
                 <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
                   <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />

@@ -49,15 +49,66 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Young", () => {
-  describe("DELETE /young/:id", () => {
-    it("should delete the young", async () => {
+  describe("PUT /young/:id/soft-delete", () => {
+    it.only("should soft-delete the young", async () => {
       const youngFixture = getNewYoungFixture();
       const young = await createYoungHelper(youngFixture);
-      const youngsBefore = await getYoungsHelper();
-      const res = await request(getAppHelper()).delete(`/young/${young._id}`);
+      const res = await request(getAppHelper()).put(`/young/${young._id}/soft-delete`);
       expect(res.statusCode).toEqual(200);
-      const youngsAfter = await getYoungsHelper();
-      expect(youngsAfter.length).toEqual(youngsBefore.length - 1);
+      const updatedYoung = res.body.data;
+
+      const fieldToKeep = [
+        "_id",
+        "__v",
+        "email",
+        "status",
+        "birthdateAt",
+        "cohort",
+        "gender",
+        "situation",
+        "grade",
+        "qpv",
+        "populationDensity",
+        "handicap",
+        "ppsBeneficiary",
+        "paiBeneficiary",
+        "highSkilledActivity",
+        "statusPhase1",
+        "statusPhase2",
+        "phase2ApplicationStatus",
+        "statusPhase3",
+        "department",
+        "region",
+        "zip",
+        "city",
+      ];
+
+      //Check that the fields deleted are deleted
+      for (const key in updatedYoung) {
+        if (!fieldToKeep.find((val) => val === key)) {
+          expect(updatedYoung[key]).toEqual(undefined);
+        }
+      }
+
+      //Check that the saved fields are equals to the old one
+      for (const key in updatedYoung) {
+        console.log("key -> ", key);
+        if (fieldToKeep.find((val) => val === key)) {
+          if (key === "status") {
+            expect(updatedYoung[key]).toEqual("DELETED");
+          } else if (key === "email") {
+            expect(updatedYoung[key]).toEqual(`${young._doc["_id"]}@delete.com`);
+          } else if (key === "_id") {
+            expect(updatedYoung[key]).toEqual(young[key].toString());
+          } else if (key === "phase2ApplicationStatus") {
+            expect(updatedYoung[key]).toEqual(Array.from(young[key]));
+          } else if (key === "birthdateAt") {
+            expect(Date(updatedYoung[key])).toEqual(Date(young[key]));
+          } else {
+            expect(updatedYoung[key]).toEqual(young[key]);
+          }
+        }
+      }
     });
 
     it("should return 404 with wrong id", async () => {
@@ -98,7 +149,7 @@ describe("Young", () => {
           expect.objectContaining({
             ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/firstName", value: "MY NEW NAME" })]),
           }),
-        ])
+        ]),
       );
     });
     it("should be only accessible by referents", async () => {
@@ -159,14 +210,14 @@ describe("Young", () => {
           Promise.resolve({
             access_token: "foo",
             id_token: "bar",
-          })
+          }),
         )
         .mockReturnValue(Promise.resolve({}));
       fetch.mockReturnValue(
         Promise.resolve({
           status: 200,
           json: jsonResponse,
-        })
+        }),
       );
       const res = await request(getAppHelper()).post("/young/france-connect/user-info").send({
         code: "foo",
@@ -221,7 +272,12 @@ describe("Young", () => {
     });
 
     it("should cascade status to WITHDRAWN if not validated", async () => {
-      const young = await createYoungHelper({...getNewYoungFixture(), statusPhase1: "WAITING_AFFECTATION", statusPhase2:'WAITING_REALISATION', statusPhase3: 'WAITING_REALISATION'});
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        statusPhase1: "WAITING_AFFECTATION",
+        statusPhase2: "WAITING_REALISATION",
+        statusPhase3: "WAITING_REALISATION",
+      });
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
@@ -235,7 +291,7 @@ describe("Young", () => {
       passport.user = previous;
     });
     it("should not cascade status to WITHDRAWN if validated", async () => {
-      const young = await createYoungHelper({...getNewYoungFixture(), statusPhase1: "DONE", statusPhase2:'VALIDATED', statusPhase3: 'VALIDATED'});
+      const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase1: "DONE", statusPhase2: "VALIDATED", statusPhase3: "VALIDATED" });
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
@@ -258,12 +314,15 @@ describe("Young", () => {
     it("should remove places when sending to cohesion center", async () => {
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
       const placesLeft = sessionPhase1.placesLeft;
-      const { updatedYoung, response } = await selfUpdateYoung({
-        sessionPhase1Id: sessionPhase1._id,
-      }, {
-        status: "VALIDATED",
-        statusPhase1: "DONE"
-      });
+      const { updatedYoung, response } = await selfUpdateYoung(
+        {
+          sessionPhase1Id: sessionPhase1._id,
+        },
+        {
+          status: "VALIDATED",
+          statusPhase1: "DONE",
+        },
+      );
       expect(response.statusCode).toEqual(200);
       const updatedSessionPhase1 = await getSessionPhase1ById(updatedYoung.sessionPhase1Id);
       expect(updatedSessionPhase1.placesLeft).toEqual(placesLeft - 1);
