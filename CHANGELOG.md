@@ -1,3 +1,18 @@
+# [1.51.0](https://github.com/betagouv/service-national-universel/compare/v1.50.3...v1.51.0) (2022-03-02)
+
+
+### Bug Fixes
+
+* filter youngs ([8687e01](https://github.com/betagouv/service-national-universel/commit/8687e0161de1be5a814e318ebdbed696d8eabe52))
+* filters inscriptions ([d76b021](https://github.com/betagouv/service-national-universel/commit/d76b021940f2ae2799b69f871c6412195dffba1a))
+* **admin:** dynamic title document ([8348a93](https://github.com/betagouv/service-national-universel/commit/8348a93cc8c25cd9dc06fdda7c3c8c9fe7502205))
+
+
+### Features
+
+* **admin:** referent region can invite visitor ([#1299](https://github.com/betagouv/service-national-universel/issues/1299)) ([b4c039c](https://github.com/betagouv/service-national-universel/commit/b4c039cdd9da16d6fc4a2f4c244134f135146b8c))
+* **admin,api:** Changement de cohorte/séjour ([#1246](https://github.com/betagouv/service-national-universel/issues/1246)) ([3560c50](https://github.com/betagouv/service-national-universel/commit/3560c50574f192778664f10237108db882a76c0b))
+
 ## [1.50.3](https://github.com/betagouv/service-national-universel/compare/v1.50.2...v1.50.3) (2022-03-01)
 
 
