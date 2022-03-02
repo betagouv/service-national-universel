@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 
 import styled from "styled-components";
 import Chevron from "../../components/Chevron";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { translate, translateCohort, HERO_IMAGES_LIST } from "../../utils";
 import Loader from "../../components/Loader";
+import { setYoung } from "../../redux/auth/actions";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 
@@ -24,6 +25,7 @@ export default function changeSejour() {
   const [messageTextArea, setMessageTextArea] = useState("");
   const [loading, setLoading] = useState(true);
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const motifs = [
     "Non disponibilité pour motif familial ou personnel",
@@ -84,6 +86,7 @@ export default function changeSejour() {
       });
       if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
       toastr.success("Cohorte modifiée avec succés. Votre nouvelle cohorte se tiendra en " + newSejour);
+      dispatch(setYoung(data));
       setmodalConfirmControlOk(false);
       history.push("/phase1");
     } catch (e) {
