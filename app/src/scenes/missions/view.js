@@ -266,7 +266,7 @@ const Box = styled.div`
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   margin-bottom: 33px;
   border-radius: 8px;
-wwwww`;
+`;
 
 const Heading = styled(Container)`
   margin-bottom: 3rem;

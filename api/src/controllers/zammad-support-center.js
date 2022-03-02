@@ -61,7 +61,6 @@ router.get("/ticket", passport.authenticate(["referent", "young"], { session: fa
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
-    console.log("ID ?", customer_id);
     if (!customer_id) return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
     let response = await zammad.api(`/tickets/search?query=${email}`);
     if (!response || !response.assets || !response.assets.Ticket) return res.status(200).send({ ok: true, data: [] });
@@ -72,10 +71,8 @@ router.get("/ticket", passport.authenticate(["referent", "young"], { session: fa
         const articles = await zammad.api("/ticket_articles/by_ticket/" + item.id, { method: "GET", headers: { "X-On-Behalf-Of": email } });
         data.push({ ...item, articles });
       }
-      console.log("😆", data);
       return res.status(200).send({ ok: true, data });
     }
-    console.log("😅", response);
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
@@ -102,7 +99,6 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
 // Update one ticket (add a response).
 router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   const { message, ticket, state } = req.body;
-  console.log("BEGIN", ticket);
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
@@ -141,7 +137,6 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
           state,
         }),
       });
-      console.log("RESPONSE", response);
       if (!response.id) return res.status(400).send({ ok: false });
       return res.status(200).send({ ok: true, data: response });
     }

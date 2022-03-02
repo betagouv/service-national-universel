@@ -23,12 +23,11 @@ export default function View(props) {
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState();
   const [messages, setMessages] = useState([]);
-  //const [zammoodTicket, setZammoodTicket] = useState();
-  //const [zammoodMessages, setZammoodMessages] = useState();
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     load();
+    // À voir, ca fait sauter le visuel ?
     //const ping = setInterval(load, 5000);
     return () => {
       //clearInterval(ping);

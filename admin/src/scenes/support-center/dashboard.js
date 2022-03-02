@@ -17,7 +17,6 @@ import { supportURL } from "../../config";
 
 const Dashboard = () => {
   const [userTickets, setUserTickets] = useState(null);
-  //const [zammoodTickets, setZammoodTickets] = useState(null);
   const [articles, setArticles] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
@@ -37,11 +36,7 @@ const Dashboard = () => {
     }
     const fetchTickets = async () => {
       try {
-        // response = await api.get("/zammood/tickets");
-        // if (!response.ok) return setZammoodTickets([]);
-        // setZammoodTickets(response.data.data);
         const response = await api.get("/zammad-support-center/ticket?withArticles=true");
-        console.log("RESPONSE", response);
         if (!response.ok) return setUserTickets([]);
         setUserTickets(response.data);
       } catch (error) {
