@@ -653,6 +653,12 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
     young.set({ status: YOUNG_STATUS.DELETED });
 
     await young.save({ fromUser: req.user });
+    const result = await patches.deletePatches(req, YoungObject);
+
+    if (!result.ok) {
+      return res.status(result.codeError).send({ ok: result.ok, code: result.code });
+    }
+
     console.log(`Young ${id} has been soft deleted`);
     res.status(200).send({ ok: true, data: young });
   } catch (error) {

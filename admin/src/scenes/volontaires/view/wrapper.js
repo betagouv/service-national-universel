@@ -50,7 +50,7 @@ export default function Wrapper({ children, young, tab }) {
       <Header>
         <div style={{ flex: 1 }}>
           <Title>
-            {young.status !== "DELETED" ? `${young.firstName} ${young.lastName}` : "Compte supprimé"} <Badge text={`Cohorte ${young.cohort}`} />
+            {young.status !== YOUNG_STATUS.DELETED ? `${young.firstName} ${young.lastName}` : "Compte supprimé"} <Badge text={`Cohorte ${young.cohort}`} />
           </Title>
           <TabList>
             <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
@@ -86,7 +86,7 @@ export default function Wrapper({ children, young, tab }) {
               <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
                 <PanelActionButton icon="pencil" title="Modifier" />
               </Link>
-              <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+              {young.status !== YOUNG_STATUS.DELETED ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
               {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
             </Row>
           </Col>

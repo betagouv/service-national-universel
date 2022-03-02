@@ -22,4 +22,66 @@ const get = async (req, res, model) => {
   }
 };
 
-module.exports = { get };
+const deletePatches = async (req, model) => {
+  try {
+    const { error, value } = Joi.object({ id: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return { ok: false, code: ERRORS.INVALID_PARAMS, codeError: 400 };
+    if (!canViewPatchesHistory(req.user)) return { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, codeError: 403 };
+
+    const elem = await model.findById(value.id);
+    if (!elem) return { ok: false, code: ERRORS.NOT_FOUND, codeError: 404 };
+
+    const fieldToKeep = [
+      "status",
+      "birthdateAt",
+      "cohort",
+      "gender",
+      "situation",
+      "grade",
+      "qpv",
+      "populationDensity",
+      "handicap",
+      "ppsBeneficiary",
+      "paiBeneficiary",
+      "highSkilledActivity",
+      "statusPhase1",
+      "statusPhase2",
+      "phase2ApplicationStatus",
+      "statusPhase3",
+      "department",
+      "region",
+      "zip",
+      "city",
+    ];
+
+    const data = await elem.patches.find({ ref: elem.id });
+    for (const patch of data) {
+      let updatedOps = patch.ops.filter((op) => {
+        if (fieldToKeep.find((val) => val === op.path.split("/")[1])) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      const patchToUpdate = await elem.patches.findOne({ _id: patch._id });
+      console.log(patchToUpdate);
+      if (updatedOps.length === 0) {
+        patchToUpdate.remove();
+      } else {
+        patchToUpdate.set({ ops: updatedOps });
+        patchToUpdate.set({ user: undefined });
+        patchToUpdate.save();
+      }
+    }
+
+    return { ok: true };
+  } catch (error) {
+    capture(error);
+    return { ok: false, code: ERRORS.SERVER_ERROR, codeError: 500 };
+  }
+};
+
+module.exports = { get, deletePatches };
