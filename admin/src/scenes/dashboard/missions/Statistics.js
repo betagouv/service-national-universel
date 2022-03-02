@@ -36,7 +36,7 @@ export default function Places({ filter }) {
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
-          domains: { terms: { field: "domains.keyword" } },
+          mainDomain: { terms: { field: "mainDomain.keyword" } },
           period: { terms: { field: "period.keyword" } },
           format: { terms: { field: "format.keyword" } },
           placesTotal: { sum: { field: "placesTotal" } },
@@ -69,7 +69,7 @@ export default function Places({ filter }) {
       const { responses: youngResponse } = await api.esQuery("young", body2);
 
       if (missionResponse.length) {
-        setMissionsDomains(missionResponse[0].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMissionsDomains(missionResponse[0].aggregations.mainDomain.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionsStatus(missionResponse[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionsPeriod(missionResponse[0].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionsFormat(missionResponse[0].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
