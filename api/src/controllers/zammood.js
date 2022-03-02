@@ -22,8 +22,8 @@ router.get("/tickets", passport.authenticate("referent", { session: false, failW
 router.get("/ticket/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await zammood.api("/v0/message?ticketId=" + req.params.id, { method: "GET", credentials: "include" });
+    console.log("DATA", data);
     if (!data.ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    //console.log("GET ZAMMOOD 🍕", data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -34,7 +34,7 @@ router.get("/ticket/:id", passport.authenticate("referent", { session: false, fa
 // Create a new ticket while authenticated
 router.post("/ticket", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { subject, message } = req.body;
+    const { subject, message, clientId } = req.body;
     const response = await zammood.api("/v0/message", {
       method: "POST",
       credentials: "include",
@@ -45,6 +45,7 @@ router.post("/ticket", passport.authenticate("referent", { session: false, failW
         firstName: req.user.firstName,
         lastName: req.user.lastName,
         source: "PLATFORM",
+        clientId,
       }),
     });
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
@@ -86,11 +87,11 @@ router.post("/ticket/:id", passport.authenticate("referent", { session: false, f
       method: "POST",
       credentials: "include",
       body: JSON.stringify({
-        ticketId: req.params.id,
         lastName: req.user.lastName,
         firstName: req.user.firstName,
         email: req.user.email,
         message: req.body.message,
+        clientId: req.params.id,
       }),
     });
     if (!response.ok) return res.status(400).send({ ok: false, code: response });

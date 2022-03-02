@@ -17,7 +17,7 @@ import { supportURL } from "../../config";
 
 const Dashboard = () => {
   const [userTickets, setUserTickets] = useState(null);
-  const [zammoodTickets, setZammoodTickets] = useState(null);
+  //const [zammoodTickets, setZammoodTickets] = useState(null);
   const [articles, setArticles] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
@@ -37,16 +37,13 @@ const Dashboard = () => {
     }
     const fetchTickets = async () => {
       try {
-        let response;
-        if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
-          response = await api.get("/zammood/tickets");
-          if (!response.ok) return setZammoodTickets([]);
-          setZammoodTickets(response.data.data);
-        } else {
-          response = await api.get("/zammad-support-center/ticket?withArticles=true");
-          if (!response.ok) return setUserTickets([]);
-          setUserTickets(response.data);
-        }
+        // response = await api.get("/zammood/tickets");
+        // if (!response.ok) return setZammoodTickets([]);
+        // setZammoodTickets(response.data.data);
+        const response = await api.get("/zammad-support-center/ticket?withArticles=true");
+        console.log("RESPONSE", response);
+        if (!response.ok) return setUserTickets([]);
+        setUserTickets(response.data);
       } catch (error) {
         setUserTickets([]);
       }
@@ -136,23 +133,8 @@ const Dashboard = () => {
           <p>Etat</p>
           <p className="ticket-date">Dernière mise à jour</p>
         </section>
-        {!userTickets && !zammoodTickets ? <Loader /> : null}
-        {userTickets?.length === 0 && zammoodTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
-        {zammoodTickets?.length > 0 ? (
-          <>
-            {zammoodTickets
-              ?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-              ?.map((ticket) => (
-                <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="ticket">
-                  <p>{ticket.number}</p>
-                  <p>{ticket.subject}</p>
-                  <p>{ticket.contactLastName}</p>
-                  <p>{ticket.status}</p>
-                  <div className="ticket-date">{dayjs(new Date(ticket.updatedAt)).fromNow()}</div>
-                </NavLink>
-              ))}
-          </>
-        ) : null}
+        {!userTickets ? <Loader /> : null}
+        {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
         {userTickets
           ?.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
           ?.map((ticket) => (

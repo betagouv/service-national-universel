@@ -69,9 +69,16 @@ export default function Create() {
               if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
               let response;
               if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
+                const { data, ok, code } = await api.post("/zammad-support-center/ticket", {
+                  title,
+                  message,
+                  tags: [...new Set([...computedTags])], // dirty hack to remove duplicates
+                });
+                if (!ok) return console.log("error", code);
                 response = await api.post("/zammood/ticket", {
                   message,
                   subject: subject.label,
+                  clientId: data.id,
                 });
               } else {
                 response = await api.post("/zammad-support-center/ticket", {
