@@ -38,8 +38,9 @@ const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 const { validateYoung, validateId, validateFirstName } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
-const { canDeleteYoung } = require("snu-lib/roles");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { canDeleteYoung, ROLES } = require("snu-lib/roles");
+const { translateCohort } = require("snu-lib/translation");
+const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS } = require("snu-lib/constants");
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
@@ -465,21 +466,36 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
   }
 });
 
-router.put("/:id/change-cohort/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/change-cohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = validateYoung(req.body, req.user);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const { error, value } = validateYoung(req.body);
 
-    const young = await YoungObject.findById(req.user._id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { id } = req.params;
+    const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    // young can only update their own mission phase3.
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
+
     const oldSessionPhase1Id = young.sessionPhase1Id;
-    young.set({ sessionPhase1Id: "" });
+    const oldMeetingPointId = young.meetingPointId;
+    const oldCohort = young.cohort;
+    if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
+      young.set({ sessionPhase1Id: undefined });
+      young.set({ meetingPointId: undefined });
+    }
 
-    var goal = await InscriptionGoalModel.findOne({ department: young.department, cohort: value.cohort });
+    let goal = await InscriptionGoalModel.findOne({ department: young.department, cohort });
     if (goal && goal.max) {
       const nbYoung = await YoungObject.find({
         department: young.department,
-        cohort: value.cohort,
+        cohort,
         status: { $nin: ["REFUSED", "IN_PROGRESS", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
       }).count();
       if (nbYoung === 0) {
@@ -495,25 +511,59 @@ router.put("/:id/change-cohort/", passport.authenticate("young", { session: fals
     }
 
     if (goal === true) {
-      young.set({ cohort: value.cohort, cohortChangeReason: value.cohortChangeReason, cohortDetailedChangeReason: value.cohortDetailedChangeReason, status: "WAITING_LIST" });
+      young.set({
+        cohort,
+        cohortChangeReason,
+        cohortDetailedChangeReason,
+        status: YOUNG_STATUS.WAITING_LIST,
+        statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+      });
     } else {
-      young.set({ cohort: value.cohort, cohortChangeReason: value.cohortChangeReason, cohortDetailedChangeReason: value.cohortDetailedChangeReason });
+      young.set({ cohort, cohortChangeReason, cohortDetailedChangeReason, statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION });
     }
 
     await young.save({ fromUser: req.user });
 
-
-    // if they had a cohesion center, we check if we need to update the places taken / left
+    // if they had a session, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
     }
 
-    return res.status(200).send({ ok: true, data: young });
+    // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
+    if (oldMeetingPointId) {
+      const meetingPoint = await MeetingPointModel.findById(oldMeetingPointId);
+      if (meetingPoint) {
+        const bus = await BusModel.findById(meetingPoint.busId);
+        if (bus) await updatePlacesBus(bus);
+      }
+    }
+
+    const referents = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
+    for (let referent of referents) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_CHANGE_COHORT, {
+        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+        params: {
+          motif: cohortChangeReason,
+          oldCohort,
+          cohort,
+          youngFirstName: young?.firstName,
+          youngLastName: young?.lastName,
+        },
+      });
+    }
+    await sendTemplate(SENDINBLUE_TEMPLATES.young.CHANGE_COHORT, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: {
+        motif: cohortChangeReason,
+        cohortPeriod: translateCohort(cohort),
+      },
+    });
+
+    res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 

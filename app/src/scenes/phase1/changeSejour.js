@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Chevron from "../../components/Chevron";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
@@ -23,6 +23,7 @@ export default function changeSejour() {
   const [sejourGoal, setSejourGoal] = useState(null);
   const [messageTextArea, setMessageTextArea] = useState("");
   const [loading, setLoading] = useState(true);
+  const history = useHistory();
 
   const motifs = [
     "Non disponibilité pour motif familial ou personnel",
@@ -76,9 +77,15 @@ export default function changeSejour() {
 
   const handleChangeSejour = async () => {
     try {
-      await api.put("/young/" + young._id + "/change-cohort/", { cohortChangeReason: motif, cohortDetailedChangeReason: messageTextArea, cohort: newSejour });
+      const { ok, data, code } = await api.put("/young/" + young._id + "/change-cohort/", {
+        cohortChangeReason: motif,
+        cohortDetailedChangeReason: messageTextArea,
+        cohort: newSejour,
+      });
+      if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
       toastr.success("Cohorte modifiée avec succés. Votre nouvelle cohorte se tiendra en " + newSejour);
       setmodalConfirmControlOk(false);
+      history.push("/phase1");
     } catch (e) {
       return toastr.error("Oups, une erreur est survenue lors de votre changement de cohorte :", translate(e.code));
     }
