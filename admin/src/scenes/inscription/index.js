@@ -29,11 +29,30 @@ import {
 } from "../../utils";
 import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL", "COHORT", "PPS", "PAI", "QPV", "HANDICAP", "ZRR", "GRADE", "ACADEMY", "COUNTRY"];
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Badge from "../../components/Badge";
 import plausibleEvent from "../../services/pausible";
+
+const FILTERS = [
+  "SEARCH",
+  "STATUS",
+  "REGION",
+  "DEPARTMENT",
+  "SCHOOL",
+  "COHORT",
+  "PPS",
+  "PAI",
+  "QPV",
+  "HANDICAP",
+  "ZRR",
+  "GRADE",
+  "ACADEMY",
+  "COUNTRY",
+  "SPECIFIC_AMENAGEMENT",
+  "SAME_DEPARTMENT",
+  "PMR",
+];
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
@@ -215,16 +234,17 @@ export default function Inscription() {
                   URLParams={true}
                   showSearch={false}
                 />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <MultiDropdownList
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Région", "Région")} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Département", "Département")} />
+                {/* <MultiDropdownList
                   style={{ display: "none" }}
                   defaultQuery={getDefaultQuery}
                   componentId="SCHOOL"
                   dataField="schoolName.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
                   URLParams={true}
-                />
+                  renderLabel={(items) => getFilterLabel(items, "Classe", "Classe")}
+                /> */}
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -238,6 +258,7 @@ export default function Inscription() {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Classe", "Classe")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -252,6 +273,7 @@ export default function Inscription() {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -308,6 +330,48 @@ export default function Inscription() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Aménagement spécifique"
+                  componentId="SPECIFIC_AMENAGEMENT"
+                  dataField="specificAmenagment.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SPECIFIC_AMENAGEMENT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Aménagement spécifique", "Aménagement spécifique")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="PMR"
+                  componentId="PMR"
+                  dataField="reducedMobilityAccess.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PMR") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Aménagement PMR", "Aménagement PMR")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Affectation dans son département"
+                  componentId="SAME_DEPARTMENT"
+                  dataField="handicapInSameDepartment.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SAME_DEPARTMENT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département", "Affectation dans son département")}
                 />
               </FilterRow>
             </Filter>
