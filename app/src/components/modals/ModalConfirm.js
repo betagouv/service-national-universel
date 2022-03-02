@@ -10,7 +10,7 @@ export default function ModalConfirm({ isOpen, topTitle = "alerte", title, messa
 
   const submit = async () => {
     setSending(true);
-    onConfirm();
+    await onConfirm();
     setSending(false);
   };
 

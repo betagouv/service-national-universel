@@ -199,8 +199,8 @@ export default function changeSejour() {
                           </>
                         }
                         onCancel={() => setmodalConfirmControlOk(false)}
-                        onConfirm={() => {
-                          handleChangeSejour();
+                        onConfirm={async () => {
+                          await handleChangeSejour();
                         }}
                         disableConfirm={!motif}
                         showHeaderIcon={true}></ModalConfirm>
