@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 import {
   YOUNG_SITUATIONS,
@@ -29,7 +28,6 @@ import { toastr } from "react-redux-toastr";
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
-  const user = useSelector((state) => state.Auth.user);
 
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const onClickDelete = () => {
