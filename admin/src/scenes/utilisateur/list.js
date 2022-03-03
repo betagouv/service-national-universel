@@ -163,6 +163,17 @@ export default function List() {
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
+                sortOptions={[
+                  { label: "Nom (A > Z)", dataField: "lastName.keyword", sortBy: "asc" },
+                  { label: "Nom (Z > A)", dataField: "lastName.keyword", sortBy: "desc" },
+                  { label: "Prénom (A > Z)", dataField: "firstName.keyword", sortBy: "asc" },
+                  { label: "Prénom (Z > A)", dataField: "firstName.keyword", sortBy: "desc" },
+                  { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
+                  { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
+                  { label: "Dernière connexion (récent > ancien)", dataField: "lastLoginAt", sortBy: "desc" },
+                  { label: "Dernière connexion (ancien > récent)", dataField: "lastLoginAt", sortBy: "asc" },
+                ]}
+                defaultSortOption="Nom (A > Z)"
                 render={({ data }) => (
                   <Table>
                     <thead>
