@@ -4,6 +4,7 @@ import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactive
 import { toastr } from "react-redux-toastr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
+import { HiLogin, HiUserAdd } from "react-icons/hi";
 
 import { setUser } from "../../redux/auth/actions";
 import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT, ROLES, canUpdateReferent, canDeleteReferent } from "../../utils";
@@ -166,8 +167,7 @@ export default function List() {
                       <tr>
                         <th width="30%">Email</th>
                         <th>Rôle</th>
-                        <th>Crée le</th>
-                        <th>Dernière connexion le</th>
+                        <th>Dates</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
@@ -214,8 +214,20 @@ const Hit = ({ hit, onClick, user, selected, structure }) => {
           </div>
         )}
       </td>
-      <td>{formatStringLongDate(hit.createdAt)}</td>
-      <td>{formatStringLongDate(hit.lastLoginAt)}</td>
+      <td>
+        <div className="flex flex-col items-start">
+          <div className="flex items-center gap-1">
+            <HiUserAdd className="text-coolGray-600" />
+            {formatStringLongDate(hit.createdAt)}
+          </div>
+          {hit.lastLoginAt ? (
+            <div className="flex items-center gap-1">
+              <HiLogin className="text-coolGray-600" />
+              {formatStringLongDate(hit.lastLoginAt)}
+            </div>
+          ) : null}
+        </div>
+      </td>
       {displayActionButton ? (
         <td onClick={(e) => e.stopPropagation()}>
           <Action hit={hit} structure={structure} />
