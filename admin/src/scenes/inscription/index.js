@@ -33,6 +33,7 @@ import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiL
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Badge from "../../components/Badge";
 import plausibleEvent from "../../services/pausible";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 
 const FILTERS = [
   "SEARCH",
@@ -373,6 +374,7 @@ export default function Inscription() {
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Affectation dans son département", "Affectation dans son département")}
                 />
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>

@@ -16,6 +16,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from 
 import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION"];
 
@@ -221,6 +222,7 @@ export default function List() {
                     sortBy="asc"
                   />
                 ) : null}
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>

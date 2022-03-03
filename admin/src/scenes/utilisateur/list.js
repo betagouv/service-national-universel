@@ -20,6 +20,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import plausibleEvent from "../../services/pausible";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
@@ -154,6 +155,7 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fonction")}
                 />
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>
