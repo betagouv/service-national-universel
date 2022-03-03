@@ -206,7 +206,14 @@ const Hit = ({ hit, onClick, user, selected, structure }) => {
           <p>{hit.email}</p>
         </MultiLine>
       </td>
-      <td>{hit.role && <Badge text={translate(hit.role)} />}</td>
+      <td>
+        {hit.role && (
+          <div className="flex flex-col items-start">
+            <Badge text={translate(hit.role)} className="!bg-[#DAE3FD] !text-[#302B94] !border-[#302B94]" />
+            {hit.subRole ? <Badge text={translate(hit.subRole)} /> : null}
+          </div>
+        )}
+      </td>
       <td>{formatStringLongDate(hit.createdAt)}</td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
       {displayActionButton ? (
