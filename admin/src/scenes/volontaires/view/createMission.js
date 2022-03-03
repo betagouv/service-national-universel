@@ -95,6 +95,8 @@ export default function CreateMission({ young, onSend }) {
         region: "",
         structureLegalStatus: "PUBLIC",
         applicationStatus: "DONE",
+        mainDomain: "",
+        domains: [],
         period: [],
         subPeriod: [],
       }}
@@ -244,13 +246,31 @@ export default function CreateMission({ young, onSend }) {
                     </ToggleBloc>
                   </FormGroup>
                   <FormGroup>
-                    <label>DOMAINES D&apos;ACTION</label>
+                    <label>
+                      <span>*</span>DOMAINE D&apos;ACTION PRINCIPAL
+                    </label>
+                    <Field component="select" value={values.mainDomain} onChange={handleChange} name="mainDomain" validate={(v) => !v && requiredMessage}>
+                      <option value="" label="Sélectionnez un domaine principal">
+                        Sélectionnez un domaine principal
+                      </option>
+                      {Object.keys(MISSION_DOMAINS).map((el) => (
+                        <option key={el} value={el}>
+                          {translate(el)}
+                        </option>
+                      ))}
+                    </Field>
+                    <ErrorMessage errors={errors} touched={touched} name="mainDomain" />
+                  </FormGroup>
+                  <FormGroup>
+                    <label>DOMAINE(S) D&apos;ACTION SECONDAIRE(S)</label>
                     <MultiSelect
                       value={values.domains || []}
+                      valueToExclude={values.mainDomain}
                       onChange={handleChange}
                       name="domains"
-                      options={Object.keys(MISSION_DOMAINS).concat(values.domains || [])}
-                      placeholder="Sélectionnez un ou plusieurs domains"
+                      // eslint-disable-next-line no-prototype-builtins
+                      options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
+                      placeholder="Sélectionnez un ou plusieurs domaines"
                     />
                   </FormGroup>
                   <FormGroup>
