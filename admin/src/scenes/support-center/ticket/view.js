@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById, translateState } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById, translateState, ROLES } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -22,34 +22,69 @@ export default function View(props) {
   const [ticket, setTicket] = useState();
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState();
+  const [messages, setMessages] = useState([]);
   const user = useSelector((state) => state.Auth.user);
 
-  const getTicket = async () => {
+  useEffect(() => {
+    load();
+    // À voir, ca fait sauter le visuel ?
+    //const ping = setInterval(load, 5000);
+    return () => {
+      //clearInterval(ping);
+    };
+  }, []);
+
+  const load = async () => {
     try {
       const id = props.match?.params?.id;
       if (!id) return setTicket(null);
-      const { data, ok } = await api.get(`/zammad-support-center/ticket/${id}`);
-      if (data.error || !ok) return setTicket(null);
-      return setTicket(data);
+
+      const response = await api.get(`/zammad-support-center/ticket/${id}`);
+      if (response.error || !response.ok) return setTicket(null);
+      setTicket(response.data);
+      const arr = response.data?.articles
+        ?.filter((article) => !article.internal)
+        ?.map((article) => ({
+          id: article.id,
+          fromMe: user.email === article.created_by,
+          from: article.from,
+          date: formatStringLongDate(article.created_at),
+          content: article.body,
+          createdAt: article.created_at,
+        }));
+      setMessages(arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      const { data, ok } = await api.get(`/zammood/ticket/${id}?`);
+      if (!ok) return;
+      const zammoodMessages = data?.map((message) => {
+        if (!message.clientId) {
+          return {
+            id: message._id,
+            fromMe: user.lastName === message.authorLastName && user.firstName === message.authorFirstName,
+            from: `${message.authorFirstName} ${message.authorLastName}`,
+            date: formatStringLongDate(message.createdAt),
+            content: message.text,
+            createdAt: message.createdAt,
+          };
+        }
+      });
+      setMessages([...arr, ...zammoodMessages].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
+      console.log("error", e);
       setTicket(null);
     }
   };
-  useEffect(() => {
-    getTicket();
-    const ping = setInterval(getTicket, 5000);
-    return () => {
-      clearInterval(ping);
-    };
-  }, []);
 
   const send = async () => {
     setSending(true);
     if (!message) return setSending(false);
     const id = props.match?.params?.id;
     await api.put(`/zammad-support-center/ticket/${id}`, { message, ticket });
+    if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
+      const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message });
+      if (!ok) console.log("ERROR", code);
+    }
     setMessage("");
-    getTicket();
+    load();
     setSending(false);
   };
 
@@ -80,28 +115,38 @@ export default function View(props) {
   };
 
   return (
-    <Container>
+    <Container style={{ marginBottom: "1rem" }}>
       <BackButtonContainer>
         <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
       </BackButtonContainer>
-      <div style={{ padding: 0, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-        <Heading>
-          <div>
-            <h1>
-              Demande #{ticket?.number} - {ticket?.title}
-            </h1>
-            <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
-          </div>
-          {displayState(ticketStateNameById(ticket?.state_id))}
-        </Heading>
-        <Messages>
-          {ticket?.articles
-            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            ?.filter((article) => !article.internal)
-            ?.map((article, i) => (
-              <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-            ))}
-        </Messages>
+      <div
+        style={{
+          padding: 0,
+          display: "flex",
+          flexDirection: "column",
+          height: "calc(95vh - 170px)",
+          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+          overflow: "hidden",
+          borderRadius: "10px",
+        }}>
+        {ticket && messages ? (
+          <>
+            <Heading>
+              <div>
+                <h1>
+                  Demande #{ticket?.number} - {ticket?.title}
+                </h1>
+                <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+              </div>
+              {displayState(ticketStateNameById(ticket?.state_id))}
+            </Heading>
+            <Messages>
+              {messages?.map((message) => (
+                <Message key={message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} />
+              ))}
+            </Messages>
+          </>
+        ) : null}
         <InputContainer>
           <textarea
             row={2}
