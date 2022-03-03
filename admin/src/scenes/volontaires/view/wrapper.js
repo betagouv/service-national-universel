@@ -80,16 +80,20 @@ export default function Wrapper({ children, young, tab, onChange }) {
                 <SelectStatus hit={young} options={[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN]} />
               </Col>
             </Row>
-            <Row style={{ marginTop: "0.5rem" }}>
-              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-                <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-              </a>
-              <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
-                <PanelActionButton icon="pencil" title="Modifier" />
-              </Link>
-              <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
-              {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
-            </Row>
+            {young.status !== "DELETED" ? (
+              <>
+                <Row style={{ marginTop: "0.5rem" }}>
+                  <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+                    <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+                  </a>
+                  <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
+                    <PanelActionButton icon="pencil" title="Modifier" />
+                  </Link>
+                  <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+                  {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
+                </Row>
+              </>
+            ) : null}
           </Col>
         </Row>
       </Header>
