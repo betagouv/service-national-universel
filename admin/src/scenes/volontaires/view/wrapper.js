@@ -15,7 +15,6 @@ import Title from "../../../components/views/Title";
 import { appURL } from "../../../config";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
-import ActionButtonArchive from "../../../components/buttons/ActionButtonArchive";
 import plausibleEvent from "../../../services/pausible";
 import Chevron from "../../../components/Chevron";
 
@@ -90,7 +89,6 @@ export default function Wrapper({ children, young, tab, onChange }) {
                     <PanelActionButton icon="pencil" title="Modifier" />
                   </Link>
                   <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
-                  {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
                 </Row>
               </>
             ) : null}

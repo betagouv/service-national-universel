@@ -33,6 +33,7 @@ import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
 import plausibleEvent from "../../services/pausible";
+import DeletedVolontairePanel from "./deletedPanel";
 
 const FILTERS = [
   "SEARCH",
@@ -741,12 +742,21 @@ export default function VolontaireList() {
               />
             </ResultTable>
           </div>
-          <Panel
-            value={volontaire}
-            onChange={() => {
-              setVolontaire(null);
-            }}
-          />
+          {volontaire !== null && volontaire.status === YOUNG_STATUS.DELETED ? (
+            <DeletedVolontairePanel
+              value={volontaire}
+              onChange={() => {
+                setVolontaire(null);
+              }}
+            />
+          ) : (
+            <Panel
+              value={volontaire}
+              onChange={() => {
+                setVolontaire(null);
+              }}
+            />
+          )}
         </div>
       </ReactiveBase>
     </div>
@@ -756,10 +766,10 @@ export default function VolontaireList() {
 const Hit = ({ hit, onClick, selected }) => {
   const getBackgroundColor = () => {
     if (selected) return colors.lightBlueGrey;
-    if (hit.status === "WITHDRAWN" || hit.status === "DELETED") return colors.extraLightGrey;
+    if (hit.status === "WITHDRAWN" || hit.status === YOUNG_STATUS.DELETED) return colors.extraLightGrey;
   };
 
-  if (hit.status === "DELETED") {
+  if (hit.status === YOUNG_STATUS.DELETED) {
     return (
       <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
         <td>
@@ -841,7 +851,7 @@ const Action = ({ hit }) => {
           <Link to={`/volontaire/${hit._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
             <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
           </Link>
-          {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status != "DELETED" ? (
+          {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status !== YOUNG_STATUS.DELETED ? (
             <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
               <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
             </DropdownItem>
