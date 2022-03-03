@@ -10,7 +10,6 @@ router.get("/tickets", passport.authenticate("referent", { session: false, failW
   try {
     const data = await zammood.api(`/ticket?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!data.ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    //console.log("GET ZAMMOOD 🍕", data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -21,8 +20,8 @@ router.get("/tickets", passport.authenticate("referent", { session: false, failW
 // Get one tickets with its messages.
 router.get("/ticket/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const data = await zammood.api("/v0/message?ticketId=" + req.params.id, { method: "GET", credentials: "include" });
-    console.log("DATA", data);
+    //TODO quand on killera Zammad : remplacer `clientId` par `ticketId`
+    const data = await zammood.api("/v0/message?clientId=" + req.params.id, { method: "GET", credentials: "include" });
     if (!data.ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -56,7 +55,7 @@ router.post("/ticket", passport.authenticate("referent", { session: false, failW
   }
 });
 
-// Create a new ticket for public users
+// Create a new ticket for public users => not used for now
 router.post("/ticket/form", async (req, res) => {
   try {
     const { subject, message, email, firstName, lastName, zammadId } = req.body;
