@@ -1,3 +1,21 @@
+# [1.52.0](https://github.com/betagouv/service-national-universel/compare/v1.51.0...v1.52.0) (2022-03-03)
+
+
+### Bug Fixes
+
+* **admin:** filtre onglet utilisateur/mission/structure ([#1315](https://github.com/betagouv/service-national-universel/issues/1315)) ([f029ad5](https://github.com/betagouv/service-national-universel/commit/f029ad5ba0b0e5696fb532b25a019a765f69bb7e))
+* filter inscription ([c8f3a93](https://github.com/betagouv/service-national-universel/commit/c8f3a930601483bcdead8856c517fc0acc8fcb95))
+* list user ([677b912](https://github.com/betagouv/service-national-universel/commit/677b91286ea6a382c8a4858d56eb17fdbc6796c8))
+* qw list user ([d707e95](https://github.com/betagouv/service-national-universel/commit/d707e95a8fc8cd7aecfa67672a8ed195eb4ae3e6))
+* wording waiting-affectation ([db74878](https://github.com/betagouv/service-national-universel/commit/db74878ac5e5aed70c1428659732cefc952e0110))
+
+
+### Features
+
+* **admin:** filter and analytics with mainDomain ([#1303](https://github.com/betagouv/service-national-universel/issues/1303)) ([3894df6](https://github.com/betagouv/service-national-universel/commit/3894df61b2bd416a2720229063bb18ecb040ee0b))
+* **admin:** pouvoir réinitialiser les filtres ([#1314](https://github.com/betagouv/service-national-universel/issues/1314)) ([fbb02ef](https://github.com/betagouv/service-national-universel/commit/fbb02efddb81511ec7c36a58068ab3de5a3eb8c2))
+* **api+admin:** connecting to zammood ([#1293](https://github.com/betagouv/service-national-universel/issues/1293)) ([b84164c](https://github.com/betagouv/service-national-universel/commit/b84164ccd970eaec9fce6a21f336ccee58950626))
+
 # [1.51.0](https://github.com/betagouv/service-national-universel/compare/v1.50.3...v1.51.0) (2022-03-02)
 
 
