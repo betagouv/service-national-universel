@@ -1,3 +1,33 @@
+# [1.51.0](https://github.com/betagouv/service-national-universel/compare/v1.50.3...v1.51.0) (2022-03-02)
+
+
+### Bug Fixes
+
+* filter youngs ([8687e01](https://github.com/betagouv/service-national-universel/commit/8687e0161de1be5a814e318ebdbed696d8eabe52))
+* filters inscriptions ([d76b021](https://github.com/betagouv/service-national-universel/commit/d76b021940f2ae2799b69f871c6412195dffba1a))
+* **admin:** dynamic title document ([8348a93](https://github.com/betagouv/service-national-universel/commit/8348a93cc8c25cd9dc06fdda7c3c8c9fe7502205))
+
+
+### Features
+
+* **admin:** referent region can invite visitor ([#1299](https://github.com/betagouv/service-national-universel/issues/1299)) ([b4c039c](https://github.com/betagouv/service-national-universel/commit/b4c039cdd9da16d6fc4a2f4c244134f135146b8c))
+* **admin,api:** Changement de cohorte/séjour ([#1246](https://github.com/betagouv/service-national-universel/issues/1246)) ([3560c50](https://github.com/betagouv/service-national-universel/commit/3560c50574f192778664f10237108db882a76c0b))
+
+## [1.50.3](https://github.com/betagouv/service-national-universel/compare/v1.50.2...v1.50.3) (2022-03-01)
+
+
+### Bug Fixes
+
+* copy icon ([b24e516](https://github.com/betagouv/service-national-universel/commit/b24e516d59da5d8d887dc5f86646cc966d219024))
+
+## [1.50.2](https://github.com/betagouv/service-national-universel/compare/v1.50.1...v1.50.2) (2022-02-28)
+
+
+### Bug Fixes
+
+* cross svg ([ac97b44](https://github.com/betagouv/service-national-universel/commit/ac97b4451cd8933c83eb094f76491c142ea60e30))
+* **admin,app:** phase 2 dates ([ca5c6c7](https://github.com/betagouv/service-national-universel/commit/ca5c6c7194119ad0d90c0a9282f6a75b1ca1dd40))
+
 ## [1.50.1](https://github.com/betagouv/service-national-universel/compare/v1.50.0...v1.50.1) (2022-02-26)
 
 

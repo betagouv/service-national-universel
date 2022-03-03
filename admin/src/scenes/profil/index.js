@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Formik, Field } from "formik";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
@@ -18,6 +19,8 @@ import PasswordEye from "../../components/PasswordEye";
 import { VISITOR_SUBROLES } from "snu-lib/roles";
 
 export default function Profil() {
+  useDocumentTitle("Mon profil");
+
   const user = useSelector((state) => state.Auth.user);
   const [service, setService] = useState();
   const dispatch = useDispatch();

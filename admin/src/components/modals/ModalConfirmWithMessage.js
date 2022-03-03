@@ -15,13 +15,14 @@ export default function ModalConfirmWithMessage({
   onConfirm,
   placeholder = "Votre message...",
   type = "textarea",
+  endMessage,
 }) {
   const [messageTextArea, setMessageTextArea] = useState(defaultInput);
   const [sending, setSending] = useState(false);
 
   const submit = async () => {
     setSending(true);
-    onConfirm(messageTextArea);
+    await onConfirm(messageTextArea);
     setSending(false);
     setMessageTextArea("");
   };
@@ -33,12 +34,13 @@ export default function ModalConfirmWithMessage({
   return (
     <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
-        <CloseSvg className="close-icon" height={10} onClick={onChange} />
+        <CloseSvg className="close-icon" height={10} width={10} onClick={onChange} />
         <Header>{topTitle}</Header>
         <Content>
           <h1>{title}</h1>
           <p>{message}</p>
           {renderInput()}
+          <p>{endMessage}</p>
         </Content>
         <Footer>
           <ModalButton loading={sending} disabled={sending || !messageTextArea} onClick={submit} primary>

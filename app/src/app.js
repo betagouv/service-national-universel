@@ -41,7 +41,6 @@ import { SENTRY_URL, environment, appURL } from "./config";
 import ModalCGU from "./components/modals/ModalCGU";
 
 import "./index.css";
-import "./tailwindcss.css";
 import { YOUNG_STATUS, ENABLE_PM } from "./utils";
 import Zammad from "./components/Zammad";
 import GoogleTags from "./components/GoogleTags";

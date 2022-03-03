@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "styled-components";
-import { copyToClipboard, colors } from "../utils";
-import TickDone from "../assets/TickDone";
-import Copy from "../assets/Copy";
+import { copyToClipboard } from "../utils";
+import { BiCopy } from "react-icons/bi";
+import { HiCheckCircle } from "react-icons/hi";
 
 export const Info = ({ children, title }) => {
   return (
@@ -31,12 +31,12 @@ export const Details = ({ title, value, copy }) => {
         <div className="detail-text">{value}</div>
         {copy ? (
           <div
-            className="icon"
+            className="flex items-center justify-center mx-1 cursor-pointer hover:scale-105 text-snu-purple-400"
             onClick={() => {
               copyToClipboard(value);
               setCopied(true);
             }}>
-            {copied ? <TickDone color={colors.green} width={17} height={17} /> : <Copy color={colors.darkPurple} width={17} height={17} />}
+            {copied ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-snu-purple-300" />}
           </div>
         ) : null}
       </div>

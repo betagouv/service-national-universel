@@ -146,7 +146,6 @@ export const Filter = styled.div`
     padding: 15px 20px;
     border-radius: 6px;
     margin-right: 15px;
-    margin-bottom: 15px;
     ::placeholder {
       color: #767676;
     }
@@ -162,7 +161,6 @@ export const Filter = styled.div`
       font-size: 14px;
       color: #242526;
       min-width: 150px;
-      margin-right: 15px;
       cursor: pointer;
       div {
         width: 100%;
@@ -209,12 +207,10 @@ export const Table = styled.table`
 
 export const FilterRow = styled.div`
   ${({ visible }) => (!visible ? "display: none;" : "display: flex;")}
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
-  .dropdown-filter {
-    margin-right: 15px;
-    margin-bottom: 15px;
-  }
+  margin-bottom: 10px;
+  gap: 10px;
   button {
     background-color: #fff;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
@@ -224,7 +220,7 @@ export const FilterRow = styled.div`
     font-size: 14px;
     color: #242526;
     min-width: 150px;
-    margin-right: 15px;
+    margin-right: 10px;
     cursor: pointer;
     div {
       width: 100%;

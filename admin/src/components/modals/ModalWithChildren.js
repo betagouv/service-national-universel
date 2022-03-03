@@ -16,11 +16,8 @@ export default function ModalConfirm({
   onChange,
   onCancel,
   onConfirm,
-  size = "md",
-  disableConfirm = false,
   confirmText = "Confirmer",
   cancelText = "Annuler",
-  children = <></>,
 }) {
   const [sending, setSending] = useState(false);
 
@@ -31,18 +28,17 @@ export default function ModalConfirm({
   };
 
   return (
-    <Modal size={size} centered isOpen={isOpen} toggle={onCancel || onChange}>
+    <Modal centered isOpen={isOpen} toggle={onCancel || onChange}>
       <ModalContainer>
-        <CloseSvg className="close-icon" height={10} width={10} onClick={onCancel || onChange} />
+        <CloseSvg className="close-icon" height={10} onClick={onCancel || onChange} />
         {showHeaderText ? <Header>{headerText}</Header> : null}
         {showHeaderIcon ? <RoundWarning style={{ marginBottom: "1.5rem" }} /> : null}
         <Content>
           <h1>{title}</h1>
           <p>{message}</p>
-          {children}
         </Content>
         <Footer>
-          <ModalButton loading={sending} disabled={sending || disableConfirm} onClick={submit} primary>
+          <ModalButton loading={sending} disabled={disabled} onClick={submit} primary>
             {confirmText}
           </ModalButton>
           <ModalButton disabled={sending} onClick={onCancel || onChange}>
