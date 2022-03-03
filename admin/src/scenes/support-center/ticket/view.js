@@ -55,7 +55,7 @@ export default function View(props) {
       setMessages(arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
       const { data, ok } = await api.get(`/zammood/ticket/${id}?`);
       if (!ok) return;
-      const zammoodMessages = data?.data?.messages.map((message) => {
+      const zammoodMessages = data?.map((message) => {
         if (!message.clientId) {
           return {
             id: message._id,

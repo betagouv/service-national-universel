@@ -21,9 +21,11 @@ router.get("/tickets", passport.authenticate("referent", { session: false, failW
 router.get("/ticket/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     //TODO quand on killera Zammad : remplacer `clientId` par `ticketId`
-    const data = await zammood.api("/v0/message?clientId=" + req.params.id, { method: "GET", credentials: "include" });
-    if (!data.ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data });
+    const ticket = await zammood.api(`/v0/ticket/${req.params.id}`, { method: "GET", credentials: "include" });
+    if (!ticket.ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const messages = await zammood.api(`/v0/message?ticketId=${ticket.data._id}`, { method: "GET", credentials: "include" });
+    if (!messages.ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data: messages.data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
