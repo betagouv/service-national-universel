@@ -1,6 +1,10 @@
 const fetch = require("node-fetch");
-//const { ZAMMOOD_URL } = require("./config");
-const ZAMMOOD_URL = "http://localhost:8084";
+const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
+let SUPPORT_URL = "http://localhost:8084";
+
+if (environment === "staging" || environment === "production") {
+  SUPPORT_URL = "https://app-e08e5b05-2416-486c-ad68-2d511fadbe50.cleverapps.io/";
+}
 
 const getCustomerIdByEmail = async (email) => {
   const res = await api(`/users/search?query=email:${email}&limit=1`, { method: "GET" });
@@ -9,9 +13,9 @@ const getCustomerIdByEmail = async (email) => {
 };
 
 const api = async (path, options = {}) => {
-  const res = await fetch(`${ZAMMOOD_URL}${path}`, {
+  const res = await fetch(`${SUPPORT_URL}${path}`, {
     ...options,
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    headers: { "Content-Type": "application/json", apikey: process.env.SUPPORT_APIKEY, ...(options.headers || {}) },
   });
 
   const contentType = res.headers.raw()["content-type"];

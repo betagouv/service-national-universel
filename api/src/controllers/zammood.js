@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const slack = require("../slack");
 
 const { capture } = require("../sentry");
 const zammood = require("../zammood");
@@ -82,7 +83,7 @@ router.post("/ticket/form", async (req, res) => {
   }
 });
 
-router.post("/ticket/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/ticket/:id/message", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const response = await zammood.api("/v0/message", {
       method: "POST",
@@ -95,7 +96,7 @@ router.post("/ticket/:id", passport.authenticate("referent", { session: false, f
         clientId: req.params.id,
       }),
     });
-    if (!response.ok) return res.status(400).send({ ok: false, code: response });
+    if (!response.ok) slack.error({ title: "Create message Zammod", text: JSON.stringify(e) });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);

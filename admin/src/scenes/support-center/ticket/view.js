@@ -80,7 +80,7 @@ export default function View(props) {
     const id = props.match?.params?.id;
     await api.put(`/zammad-support-center/ticket/${id}`, { message, ticket });
     if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
-      const { ok, code } = await api.post(`/zammood/ticket/${id}`, { message });
+      const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message });
       if (!ok) console.log("ERROR", code);
     }
     setMessage("");
