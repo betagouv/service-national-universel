@@ -8,6 +8,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from 
 import Chevron from "../../components/Chevron";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT"];
 
@@ -102,6 +103,7 @@ export default function MeetingPoint() {
                   searchPlaceholder="Rechercher..."
                   size={1000}
                 />
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>

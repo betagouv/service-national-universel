@@ -15,6 +15,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine, SubTd 
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION"];
 
@@ -148,6 +149,7 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
                 />
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>
