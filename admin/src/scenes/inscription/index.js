@@ -234,7 +234,6 @@ export default function Inscription() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
-                  defaultValue={[YOUNG_STATUS.VALIDATED]}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
