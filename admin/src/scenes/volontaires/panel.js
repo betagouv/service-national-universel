@@ -109,7 +109,7 @@ export default function VolontairePanel({ onChange, value }) {
         <Details title="Contact phase 2" value={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
       </Info>
       <Info title="Coordonnées" id={young._id}>
-        <Details title="E-mail" value={young.email} copy />
+        {young.status !== "DELETED" ? <Details title="E-mail" value={young.email} copy /> : null}
         <Details title="Tel" value={young.phone} />
         <Details title="Adresse" value={young.address} />
         <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
