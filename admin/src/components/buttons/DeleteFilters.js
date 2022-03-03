@@ -11,10 +11,11 @@ export default function DeleteFilters() {
             setValue(component, null);
           });
         };
+        if (!Object.values(selectedValues).some((filter) => filter.value?.length)) return null;
         return (
-          <button className="!bg-snu-purple-300 hover:shadow-lg text-white" onClick={clearFilter}>
+          <div className="underline text-xs text-coolGray-600 cursor-pointer hover:scale-105" onClick={clearFilter}>
             Supprimer la sélection
-          </button>
+          </div>
         );
       }}
     />
