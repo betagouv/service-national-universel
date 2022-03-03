@@ -18,7 +18,7 @@ import ExpandComponent from "../../../components/ExpandComponent";
 
 export default function VolontaireViewDetails({ young }) {
   const user = useSelector((state) => state.Auth.user);
-  const [isDeleted, setIsDeleted] = useState(young.status === "DELETED");
+  const [isDeleted] = useState(young.status === "DELETED");
 
   function isFromFranceConnect() {
     return young.parent1FromFranceConnect === "true" && (!young.parent2Status || young.parent2FromFranceConnect === "true");
