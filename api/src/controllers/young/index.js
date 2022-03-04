@@ -61,7 +61,7 @@ router.post("/signup", async (req, res) => {
       lastName: Joi.string().uppercase().trim().required(),
       password: Joi.string().required(),
       verifyPassword: Joi.ref("password"),
-      birthdateAt: Joi.date().options({ convert: false }),
+      birthdateAt: Joi.string().trim().required(),
       birthCountry: Joi.string().trim().required(),
       birthCity: Joi.string().trim().required(),
       birthCityZip: Joi.string().trim().required(),
