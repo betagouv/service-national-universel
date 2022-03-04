@@ -6,7 +6,7 @@ if (environment === "staging") {
   SUPPORT_URL = "https://app-e08e5b05-2416-486c-ad68-2d511fadbe50.cleverapps.io";
 }
 if (environment === "production") {
-  SUPPORT_URL = "https://support-snu-app.cleverapps.io";
+  SUPPORT_URL = "https://app-e08e5b05-2416-486c-ad68-2d511fadbe50.cleverapps.io";
 }
 
 const getCustomerIdByEmail = async (email) => {
