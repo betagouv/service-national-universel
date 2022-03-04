@@ -1,3 +1,21 @@
+# [1.53.0](https://github.com/betagouv/service-national-universel/compare/v1.52.0...v1.53.0) (2022-03-04)
+
+
+### Bug Fixes
+
+* error message ([ee506f3](https://github.com/betagouv/service-national-universel/commit/ee506f30f49f393a3dc607efe61f72f798637782))
+* view deleted in inscription tab ([57efdd0](https://github.com/betagouv/service-national-universel/commit/57efdd04e07c840f19157460e81fef77cf47f849))
+* **admin:** realigner création de nouvelle mission depuis onglet phase2 jeune ([#1316](https://github.com/betagouv/service-national-universel/issues/1316)) ([336002f](https://github.com/betagouv/service-national-universel/commit/336002f1d8432f6cc8e8fe030bb60f3957847c8a))
+* **api/crons:** application pending ([#1280](https://github.com/betagouv/service-national-universel/issues/1280)) ([241be50](https://github.com/betagouv/service-national-universel/commit/241be50acc4f86b0568c02d6565300c6139a53bd))
+* open only for fev 2022 ([507b76b](https://github.com/betagouv/service-national-universel/commit/507b76b036040a524ee53465bf4215382ef25b53))
+* open to every cohort ([f3d4225](https://github.com/betagouv/service-national-universel/commit/f3d422542fad6929447f77e1e58c17e045a754df))
+
+
+### Features
+
+* **api,admin:** soft delete + anonymisation ([#1296](https://github.com/betagouv/service-national-universel/issues/1296)) ([1b87836](https://github.com/betagouv/service-national-universel/commit/1b8783607067013b6873ad8d508b4375325c8b13))
+* **app:** volontaire - changement de séjour ([#1268](https://github.com/betagouv/service-national-universel/issues/1268)) ([5f3a6ad](https://github.com/betagouv/service-national-universel/commit/5f3a6ade522988aa6489068cf4c109ffc15b4a8e))
+
 # [1.52.0](https://github.com/betagouv/service-national-universel/compare/v1.51.0...v1.52.0) (2022-03-03)
 
 
