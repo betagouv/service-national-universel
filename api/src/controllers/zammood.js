@@ -49,6 +49,7 @@ router.post("/ticket", passport.authenticate("referent", { session: false, failW
         clientId,
       }),
     });
+    console.log("RESPONSE ZAMMOOD API 😅", response);
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
