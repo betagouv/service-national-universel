@@ -127,17 +127,30 @@ export default function Status({ filter }) {
         </LinkCard>
       </Col>
       {user.role === ROLES.ADMIN && (
-        <Col md={6} xl={2}>
-          <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"NOT_ELIGIBLE"%5D'] })} color={YOUNG_STATUS_COLORS.NOT_ELIGIBLE}>
-            <CardTitle>Non éligible</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{status.NOT_ELIGIBLE || 0}</CardValue>
-              <CardPercentage>
-                <CardArrow />
-              </CardPercentage>
-            </CardValueWrapper>
-          </LinkCard>
-        </Col>
+        <>
+          <Col md={6} xl={2}>
+            <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"NOT_ELIGIBLE"%5D'] })} color={YOUNG_STATUS_COLORS.NOT_ELIGIBLE}>
+              <CardTitle>Non éligibles</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{status.NOT_ELIGIBLE || 0}</CardValue>
+                <CardPercentage>
+                  <CardArrow />
+                </CardPercentage>
+              </CardValueWrapper>
+            </LinkCard>
+          </Col>
+          <Col md={6} xl={2}>
+            <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"DELETED"%5D'] })} color={YOUNG_STATUS_COLORS.DELETED}>
+              <CardTitle>Supprimées</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{status.DELETED || 0}</CardValue>
+                <CardPercentage>
+                  <CardArrow />
+                </CardPercentage>
+              </CardValueWrapper>
+            </LinkCard>
+          </Col>
+        </>
       )}
     </Row>
   );

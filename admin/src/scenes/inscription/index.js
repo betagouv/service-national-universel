@@ -423,26 +423,50 @@ const Hit = ({ hit, index, onClick, selected }) => {
 
   let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WAITING_LIST];
   if (user.role === ROLES.ADMIN) STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
+  const getBackgroundColor = () => {
+    if (selected) return colors.lightBlueGrey;
+    if (hit.status === "WITHDRAWN" || hit.status === YOUNG_STATUS.DELETED) return colors.extraLightGrey;
+  };
+  if (hit.status === YOUNG_STATUS.DELETED) {
+    return (
+      <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
+        <td>{index + 1}</td>
 
-  return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick} key={hit._id}>
-      <td>{index + 1}</td>
-      <td>
-        <MultiLine>
-          <span className="font-bold text-black">
-            {hit.firstName} {hit.lastName} <Badge text={hit.cohort} />
-          </span>
-          <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
-        </MultiLine>
-      </td>
-      <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-        <SelectStatus hit={hit} options={STATUS} />
-      </td>
-      <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-        <Action hit={hit} />
-      </td>
-    </tr>
-  );
+        <td>
+          <MultiLine>
+            <span className="font-bold text-black">Compte supprimé</span>
+            <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
+          </MultiLine>
+        </td>
+        <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+          <SelectStatus hit={hit} options={STATUS} />
+        </td>
+        <td onClick={(e) => e.stopPropagation()}>
+          <Action hit={hit} />
+        </td>
+      </tr>
+    );
+  } else {
+    return (
+      <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick} key={hit._id}>
+        <td>{index + 1}</td>
+        <td>
+          <MultiLine>
+            <span className="font-bold text-black">
+              {hit.firstName} {hit.lastName} <Badge text={hit.cohort} />
+            </span>
+            <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
+          </MultiLine>
+        </td>
+        <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+          <SelectStatus hit={hit} options={STATUS} />
+        </td>
+        <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+          <Action hit={hit} />
+        </td>
+      </tr>
+    );
+  }
 };
 
 const Action = ({ hit }) => {
@@ -459,14 +483,18 @@ const Action = ({ hit }) => {
               Consulter le profil
             </Link>
           </DropdownItem>
-          <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Inscriptions/CTA - Modifier profil jeune")}>
-            <Link to={`/volontaire/${hit._id}/edit`}>Modifier le profil</Link>
-          </DropdownItem>
-          <DropdownItem className="dropdown-item">
-            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
-              Prendre sa place
-            </a>
-          </DropdownItem>
+          {hit.status !== YOUNG_STATUS.DELETED ? (
+            <>
+              <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Inscriptions/CTA - Modifier profil jeune")}>
+                <Link to={`/volontaire/${hit._id}/edit`}>Modifier le profil</Link>
+              </DropdownItem>
+              <DropdownItem className="dropdown-item">
+                <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
+                  Prendre sa place
+                </a>
+              </DropdownItem>
+            </>
+          ) : null}
         </DropdownMenu>
       </UncontrolledDropdown>
     </ActionBox>
