@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { HeroContainer, Hero } from "../../components/Content";
-import { translateCohort, START_DATE_SESSION_PHASE1 } from "../../utils";
+import { translateCohort } from "../../utils";
 import { supportURL } from "../../config";
 import NextStep from "./nextStep";
 import { Link } from "react-router-dom";
@@ -21,7 +21,7 @@ export default function WaitingAffectation({ young }) {
               Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
               nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
             </p>
-            {START_DATE_SESSION_PHASE1[young.cohort]?.getTime() > Date.now() ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
+            {["Février 2022"].includes(young.cohort) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
             <Divider />
             <p>
               <strong style={{ color: "#000" }}>Vous êtes en attente d&apos;affectation à un centre</strong>

@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { HeroContainer, Hero, Content, Separator, AlertBoxInformation } from "../../components/Content";
 import NextStep from "./nextStep";
 import api from "../../services/api";
-import { translate, translateCohort, START_DATE_SESSION_PHASE1 } from "../../utils";
+import { translate, translateCohort } from "../../utils";
 import ConvocationDetails from "./components/ConvocationDetails";
 import { supportURL } from "../../config";
 import Case from "../../assets/case";
@@ -59,7 +59,7 @@ export default function Affected() {
                 Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région (sauf exception) pour
                 créer ainsi des liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
               </p>
-              {START_DATE_SESSION_PHASE1[young.cohort]?.getTime() > Date.now() ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
+              {["Février 2022"].includes(young.cohort) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
               <Separator style={{ width: "150px" }} />
               <p>
                 <strong style={{ color: "black" }}>Votre lieu d&apos;affectation</strong>
