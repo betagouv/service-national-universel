@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Col } from "reactstrap";
 import { Field, Formik } from "formik";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
@@ -25,13 +25,13 @@ export default function StepProfil() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
-  const young = useSelector((state) => state.Auth.young) || {
+  const young = {
     frenchNationality: "false",
     firstName: "",
     lastName: "",
     birthdateAt: "",
     email: "",
-    newEmail: "",
+    verifyEmail: "",
     password: "",
     verifyPassword: "",
     birthCountry: "",
@@ -55,15 +55,12 @@ export default function StepProfil() {
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            const { firstName, lastName, email, password, birthdateAt } = values;
-            const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password, birthdateAt });
+            delete values.birthCountrySelector;
+            const { user, token, code, ok } = await api.post(`/young/signup`, { ...values });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
-            const newValues = { ...values, ...user };
-            const { ok: okPut, code: codePut, data } = await api.put("/young", newValues);
-            if (!okPut || !data?._id) return toastr.error("Une erreur s'est produite :", codePut);
-            dispatch(setYoung(data));
-            await api.post(`/young/${data._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`);
+            dispatch(setYoung(user));
+            await api.post(`/young/${user._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`);
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);
@@ -94,8 +91,8 @@ export default function StepProfil() {
             if (values.email) validateField("email");
           }, [values.email]);
           useEffect(() => {
-            if (values.newEmail) validateField("newEmail");
-          }, [values.newEmail]);
+            if (values.verifyEmail) validateField("verifyEmail");
+          }, [values.verifyEmail]);
           useEffect(() => {
             if (values.password) validateField("password");
           }, [values.password]);
@@ -336,11 +333,11 @@ export default function StepProfil() {
                     className="form-control"
                     validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
                     type="email"
-                    name="newEmail"
-                    value={values.newEmail}
+                    name="verifyEmail"
+                    value={values.verifyEmail}
                     onChange={handleChange}
                   />
-                  <ErrorMessage errors={errors} touched={touched} name="newEmail" />
+                  <ErrorMessage errors={errors} touched={touched} name="verifyEmail" />
                 </Col>
               </FormRow>
               <FormRow align="center">
