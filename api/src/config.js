@@ -10,7 +10,6 @@ let KNOWLEDGEBASE_URL = process.env.KNOWLEDGEBASE_URL || "http://localhost:8083"
 let ZAMMAD_IP = process.env.ZAMMAD_IP || "";
 let ZAMMAD_PLATEFORME_USER = process.env.ZAMMAD_PLATEFORME_USER || "";
 let ZAMMAD_PLATEFORME_USER_ID = process.env.ZAMMAD_PLATEFORME_USER_ID || "";
-let ZAMMOOD_URL = process.env.ZAMMOOD_URL || "http://localhost:8084";
 
 const ES_ENDPOINT = process.env.ES_ENDPOINT || "";
 
@@ -70,7 +69,6 @@ module.exports = {
   API_ASSOCIATION_CELLAR_KEYSECRET,
   SLACK_BOT_TOKEN,
   SLACK_BOT_CHANNEL,
-  ZAMMOOD_URL,
 };
 
 function getEnvironment() {

@@ -1,9 +1,12 @@
 const fetch = require("node-fetch");
-const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
+const environment = getEnvironment();
 let SUPPORT_URL = "http://localhost:8084";
 
-if (environment === "staging" || environment === "production") {
-  SUPPORT_URL = "https://app-e08e5b05-2416-486c-ad68-2d511fadbe50.cleverapps.io/";
+if (environment === "staging") {
+  SUPPORT_URL = "https://app-e08e5b05-2416-486c-ad68-2d511fadbe50.cleverapps.io";
+}
+if (environment === "production") {
+  SUPPORT_URL = "https://support-snu-app.cleverapps.io";
 }
 
 const getCustomerIdByEmail = async (email) => {
@@ -99,5 +102,12 @@ const api = async (path, options = {}) => {
 //     console.log("Can't delete in zammad", obj.email);
 //   }
 // }
+
+function getEnvironment() {
+  if (process.env.STAGING === "true") return "staging";
+  else if (process.env.PRODUCTION === "true") return "production";
+  else if (process.env.TESTING === "true" || process.env.NODE_ENV === "test") return "testing";
+  return "development";
+}
 
 module.exports = { api, getCustomerIdByEmail };
