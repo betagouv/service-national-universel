@@ -25,8 +25,8 @@ export default function WaitingAffectation({ young }) {
               <strong style={{ color: "#000" }}>Vous êtes en attente d&apos;affectation à un centre</strong>
               <br />
               <span style={{ fontSize: "1rem" }}>
-                Votre affectation vous sera communiquée dans les prochains jours par mail. Pensez à vérifier vos spams et courriers indésirables pour vous assurer que vous recevez
-                bien les communications de la plateforme. Vous pouvez d&apos;ores et déjà préparer votre venue en consultant les{" "}
+                Votre affectation vous sera communiquée dans les semaines qui précèdent le départ par mail. Pensez à vérifier vos spams et courriers indésirables pour vous assurer
+                que vous recevez bien les communications de la plateforme. Vous pouvez d&apos;ores et déjà préparer votre venue en consultant les{" "}
                 <a href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
                   articles à propos de la Phase 1
                 </a>
