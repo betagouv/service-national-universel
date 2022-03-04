@@ -20,7 +20,6 @@ const api = async (path, options = {}) => {
     ...options,
     headers: { "Content-Type": "application/json", apikey: process.env.SUPPORT_APIKEY, ...(options.headers || {}) },
   });
-  console.log("ZAMMOOD API 🙂", res);
   const contentType = res.headers.raw()["content-type"];
   if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
   return await res.text();
