@@ -268,8 +268,7 @@ export default function CreateMission({ young, onSend }) {
                       valueToExclude={values.mainDomain}
                       onChange={handleChange}
                       name="domains"
-                      // eslint-disable-next-line no-prototype-builtins
-                      options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
+                      options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !Object.keys(MISSION_DOMAINS).includes(e)))}
                       placeholder="Sélectionnez un ou plusieurs domaines"
                     />
                   </FormGroup>
