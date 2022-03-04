@@ -26,7 +26,7 @@ const {
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
 const { ROLES } = require("snu-lib/roles");
-const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib/constants");
 
 // Set the number of requests allowed to 15 in a 1 hour window
 const signinLimiter = rateLimit({
@@ -620,4 +620,5 @@ module.exports = {
   updateApplicationsWithYoungOrMission,
   updateYoungStatusPhase2Contract,
   checkStatusContract,
+  YOUNG_STATUS,
 };

@@ -3,7 +3,7 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason, colors, CONSENTMENT_TEXTS } from "../../../utils";
+import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason, CONSENTMENT_TEXTS } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -187,17 +187,19 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   <Details title="JDC réalisée" value={t(young.jdc)} />
                 </Bloc>
               )}
-              <Bloc title="Représentant légal n°1">
-                <Details title="Statut" value={t(young.parent1Status)} />
-                <Details title="Prénom" value={young.parent1FirstName} />
-                <Details title="Nom" value={young.parent1LastName} />
-                <Details title="E-mail" value={young.parent1Email} />
-                <Details title="Tel" value={young.parent1Phone} />
-                <Details title="Adresse" value={young.parent1Address} />
-                <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
-                <Details title="Dép" value={young.parent1Department} />
-                <Details title="Région" value={young.parent1Region} />
-              </Bloc>
+              {young.parent1Status ? (
+                <Bloc title="Représentant légal n°1">
+                  <Details title="Statut" value={t(young.parent1Status)} />
+                  <Details title="Prénom" value={young.parent1FirstName} />
+                  <Details title="Nom" value={young.parent1LastName} />
+                  <Details title="E-mail" value={young.parent1Email} />
+                  <Details title="Tel" value={young.parent1Phone} />
+                  <Details title="Adresse" value={young.parent1Address} />
+                  <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
+                  <Details title="Dép" value={young.parent1Department} />
+                  <Details title="Région" value={young.parent1Region} />
+                </Bloc>
+              ) : null}
               {young.parent2Status ? (
                 <Bloc title="Représentant légal n°2">
                   <Details title="Statut" value={t(young.parent2Status)} />

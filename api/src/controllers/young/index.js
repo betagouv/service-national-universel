@@ -692,7 +692,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 });
 
 // Delete one user (only admin can delete user)
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/soft-delete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -702,9 +702,47 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     if (!canDeleteYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    await young.remove();
-    console.log(`Young ${id} has been deleted`);
-    res.status(200).send({ ok: true });
+    const fieldToKeep = [
+      "_id",
+      "__v",
+      "birthdateAt",
+      "cohort",
+      "gender",
+      "situation",
+      "grade",
+      "qpv",
+      "populationDensity",
+      "handicap",
+      "ppsBeneficiary",
+      "paiBeneficiary",
+      "highSkilledActivity",
+      "statusPhase1",
+      "statusPhase2",
+      "phase2ApplicationStatus",
+      "statusPhase3",
+      "department",
+      "region",
+      "zip",
+      "city",
+    ];
+
+    for (const key in young._doc) {
+      if (!fieldToKeep.find((val) => val === key)) {
+        young.set({ [key]: undefined });
+      }
+    }
+
+    young.set({ location: { lat: undefined, lon: undefined } });
+    young.set({ schoolLocation: { lat: undefined, lon: undefined } });
+    young.set({ parent1Location: { lat: undefined, lon: undefined } });
+    young.set({ parent2Location: { lat: undefined, lon: undefined } });
+    young.set({ medicosocialStructureLocation: { lat: undefined, lon: undefined } });
+    young.set({ email: `${young._doc["_id"]}@delete.com` });
+    young.set({ status: YOUNG_STATUS.DELETED });
+
+    await young.save({ fromUser: req.user });
+    console.log(`Young ${id} has been soft deleted`);
+    res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });

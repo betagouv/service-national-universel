@@ -15,7 +15,6 @@ import Title from "../../../components/views/Title";
 import { appURL } from "../../../config";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
-import ActionButtonArchive from "../../../components/buttons/ActionButtonArchive";
 import plausibleEvent from "../../../services/pausible";
 import Chevron from "../../../components/Chevron";
 
@@ -34,7 +33,7 @@ export default function Wrapper({ children, young, tab, onChange }) {
 
   const onConfirmDelete = async () => {
     try {
-      const { ok, code } = await api.remove(`/young/${young._id}`);
+      const { ok, code } = await api.put(`/young/${young._id}/soft-delete`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce volontaire a été supprimé.");
@@ -51,7 +50,7 @@ export default function Wrapper({ children, young, tab, onChange }) {
       <Header>
         <div style={{ flex: 1 }}>
           <Title>
-            {young.firstName} {young.lastName} <BadgeCohort young={young} onChange={onChange} />
+            {young.status !== "DELETED" ? `${young.firstName} ${young.lastName}` : "Compte supprimé"} <BadgeCohort young={young} onChange={onChange} />
           </Title>
           <TabList>
             <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
@@ -80,16 +79,19 @@ export default function Wrapper({ children, young, tab, onChange }) {
                 <SelectStatus hit={young} options={[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN]} />
               </Col>
             </Row>
-            <Row style={{ marginTop: "0.5rem" }}>
-              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-                <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-              </a>
-              <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
-                <PanelActionButton icon="pencil" title="Modifier" />
-              </Link>
-              <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
-              {user.role === ROLES.ADMIN ? <ActionButtonArchive young={young} /> : null}
-            </Row>
+            {young.status !== "DELETED" ? (
+              <>
+                <Row style={{ marginTop: "0.5rem" }}>
+                  <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
+                    <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+                  </a>
+                  <Link to={`/volontaire/${young._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
+                    <PanelActionButton icon="pencil" title="Modifier" />
+                  </Link>
+                  <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+                </Row>
+              </>
+            ) : null}
           </Col>
         </Row>
       </Header>

@@ -4,11 +4,13 @@ import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 import api from "../../../services/api";
 import Details from "./details";
+import DeletedDetail from "./deletedDetail";
 import Phase1 from "./phase1";
 import Phase2 from "./phase2";
 import Phase3 from "./phase3";
 import Phase2Contract from "./phase2Contract";
 import History from "./history";
+import { YOUNG_STATUS } from "../../../utils";
 
 export default function Index({ ...props }) {
   const [young, setYoung] = useState();
@@ -20,6 +22,19 @@ export default function Index({ ...props }) {
     const { data } = await api.get(`/referent/young/${id}`);
     setYoung(data);
     setDocumentTitle(`${data.firstName} ${data.lastName}`);
+    if (data.status === YOUNG_STATUS.DELETED) {
+      setDocumentTitle(`Compte supprimé`);
+    } else {
+      setDocumentTitle(`${data.firstName} ${data.lastName}`);
+    }
+  };
+
+  const getDetail = () => {
+    if (young.status === YOUNG_STATUS.DELETED) {
+      return <DeletedDetail young={young} onChange={getYoung} />;
+    } else {
+      return <Details young={young} onChange={getYoung} />;
+    }
   };
 
   useEffect(() => {
@@ -27,6 +42,7 @@ export default function Index({ ...props }) {
   }, [props.match.params.id]);
 
   if (!young) return <div />;
+
   return (
     <Switch>
       <Route path="/volontaire/:id/phase1" component={() => <Phase1 young={young} getYoung={getYoung} onChange={getYoung} />} />
@@ -34,7 +50,7 @@ export default function Index({ ...props }) {
       <Route path="/volontaire/:id/phase2" component={() => <Phase2 young={young} onChange={getYoung} />} />
       <Route path="/volontaire/:id/phase3" component={() => <Phase3 young={young} onChange={getYoung} />} />
       <Route path="/volontaire/:id/historique" component={() => <History young={young} onChange={getYoung} />} />
-      <Route path="/volontaire/:id" component={() => <Details young={young} onChange={getYoung} />} />
+      <Route path="/volontaire/:id" component={getDetail} />
     </Switch>
   );
 }
