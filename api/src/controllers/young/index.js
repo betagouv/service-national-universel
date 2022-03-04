@@ -32,7 +32,6 @@ const {
   // updateApplicationsWithYoungOrMission,
   updatePlacesBus,
   updatePlacesSessionPhase1,
-  ROLES,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -41,7 +40,7 @@ const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
 const { canDeleteYoung } = require("snu-lib/roles");
 const { translateCohort } = require("snu-lib/translation");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS } = require("snu-lib/constants");
+const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus } = require("snu-lib");
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
