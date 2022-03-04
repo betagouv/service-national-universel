@@ -30,7 +30,7 @@ export default function ApplyDoneModal({ value, onChange }) {
   return (
     <Modal isOpen={true} toggle={onChange} style={{}}>
       <ModalContainer>
-        <img src={require("../../../assets/close.svg")} height={10} onClick={onChange} />
+        <img src={require("../../../assets/close.svg")} height={10} width={10} onClick={onChange} />
         <h1>Félications, votre candidature a bien été enregistrée.</h1>
         <h3>{renderText()}</h3>
         {/* todo: gerer classement candidature */}

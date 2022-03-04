@@ -15,6 +15,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine, SubTd 
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION"];
 
@@ -148,6 +149,7 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
                 />
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>
@@ -197,10 +199,10 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
         <MultiLine>
-          <h2>
+          <span className="font-bold text-black">
             {hit?.name}
             {/* <span style={{ fontSize: ".7rem", color: "#9C9C9C" }}> #{hit?._id}</span> */}
-          </h2>
+          </span>
 
           <p>{`${hit?.city || ""} • ${hit?.department || ""}`}</p>
         </MultiLine>
@@ -216,7 +218,7 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
         {sessionsPhase1.map((sessionPhase1) => (
           <SubTd key={sessionPhase1._id}>
             <MultiLine>
-              <h2>{sessionPhase1._source.placesLeft} places disponibles</h2>
+              <span className="font-bold text-black">{sessionPhase1._source.placesLeft} places disponibles</span>
               <p>sur {sessionPhase1._source.placesTotal} places proposées</p>
             </MultiLine>
           </SubTd>

@@ -5,10 +5,13 @@ import api from "../../../services/api";
 import Details from "./details";
 import Youngs from "./youngs";
 import Historic from "./history";
+import ProposeMission from "./propose-mission";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 export default function Index({ ...props }) {
+  const setDocumentTitle = useDocumentTitle("Missions");
   const [mission, setMission] = useState();
   const [tutor, setTutor] = useState();
   const [structure, setStructure] = useState();
@@ -25,6 +28,7 @@ export default function Index({ ...props }) {
         toastr.error("Oups, une erreur est survenue lors de la récupération de la mission", translate(missionResponse.code));
         return history.push("/mission");
       }
+      setDocumentTitle(`${missionResponse.data?.name}`);
       setMission(missionResponse.data);
 
       const structureResponse = await api.get(`/structure/${missionResponse.data.structureId}`);
@@ -35,11 +39,9 @@ export default function Index({ ...props }) {
       setStructure(structureResponse.data);
 
       if (missionResponse.data.tutorId) {
-        console.log(missionResponse.data.tutorId);
         const tutorResponse = await api.get(`/referent/${missionResponse.data.tutorId}`);
         if (!tutorResponse.ok) {
-          toastr.error("Oups, une erreur est survenue lors de la récupération du tuteur", translate(tutorResponse.code));
-          return history.push("/mission");
+          setTutor(null);
         }
         setTutor(tutorResponse.data);
       }
@@ -58,6 +60,7 @@ export default function Index({ ...props }) {
     <Switch>
       <Route path="/mission/:id/youngs" component={() => <Youngs mission={mission} applications={applications} />} />
       <Route path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
+      <Route path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} />} />
       <Route path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />
     </Switch>
   );

@@ -68,7 +68,7 @@ export default function ComboBoxYoungs({ center, onAffect, onClick }) {
                 showIcon={false}
                 placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                 componentId="SEARCH"
-                dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
                 react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
@@ -122,7 +122,7 @@ const HitYoung = ({ hit, handleAffect, handleWaitingList, onClick }) => {
     <tr>
       <td>
         <MultiLine onClick={onClick}>
-          <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
+          <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
           <p>
             {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
           </p>

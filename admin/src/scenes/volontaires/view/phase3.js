@@ -8,7 +8,7 @@ import SelectStatus from "../../../components/selectStatus";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
 
-export default function Phase3({ young }) {
+export default function Phase3({ young, onChange }) {
   const getText = () => {
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.WAITING_VALIDATION) return "Le tuteur n'a pas encore validé la mission";
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) return "Le tuteur a validé la mission";
@@ -16,7 +16,7 @@ export default function Phase3({ young }) {
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase3 young={young} tab="phase3">
+      <WrapperPhase3 young={young} tab="phase3" onChange={onChange}>
         <Box>
           <Bloc title="Réalisation d'une nouvelle mission d'intérêt général">
             <div style={{ display: "flex" }}>

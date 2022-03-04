@@ -121,7 +121,7 @@ export default function StatusIndex({ filter }) {
       <Wrapper>
         {currentSubtab === "général" && (
           <>
-            <SubTitle>En quelques chiffres</SubTitle>
+            <h3 className="mt-4 mb-2 text-xl">En quelques chiffres</h3>
             <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} filter={filter} getLink={getLink} />
           </>
         )}

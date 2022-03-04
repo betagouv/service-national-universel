@@ -1,5 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap");
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
   padding: 0;
   margin: 0;
@@ -56,4 +60,64 @@ a:hover {
 
 .modal-backdrop.show  {
   opacity: 0.88;
+}
+
+h2 {
+  margin-top: 2rem;
+  font-size: 2.5rem;
+}
+
+h3 {
+  font-size: 2rem;
+}
+h4 {
+  font-size: 1.25rem;
+}
+
+@layer components {
+  body {
+    @apply font-ubuntu;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply focus:outline-none focus:ring-0 !important;
+  }
+
+  .stats-card {
+    @apply flex items-center justify-between gap-4 overflow-hidden rounded-lg bg-white px-4 py-5 shadow transition-shadow hover:shadow-md sm:p-6;
+  }
+
+  .stats-card-grid {
+    @apply mt-5 grid grid-cols-4 gap-5;
+  }
+
+  .stats-card-disabled {
+    @apply transform-none hover:shadow;
+  }
+
+  .stats-card-wrapper {
+    @apply flex h-full flex-1 flex-col justify-between;
+  }
+
+  .stats-card-title {
+    @apply truncate text-sm font-medium text-gray-500;
+  }
+
+  .stats-card-value {
+    @apply mt-1 flex w-full items-center justify-between gap-2 text-3xl font-semibold;
+  }
+
+  .stats-card-value span {
+    @apply text-lg font-medium;
+  }
+
+  .stats-card-arrow {
+    @apply flex-none text-xl text-brand-grey;
+  }
+
+  .footer a {
+    @apply text-brand-grey transition-colors hover:text-snu-purple-300;
+  }
 }

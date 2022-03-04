@@ -6,6 +6,8 @@ import "dayjs/locale/fr";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { HiAdjustments } from "react-icons/hi";
 
 import VioletButton from "../../components/buttons/VioletButton";
 import ExportComponent from "../../components/ExportXlsx";
@@ -28,13 +30,34 @@ import {
 } from "../../utils";
 import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL", "COHORT", "PPS", "PAI", "QPV", "HANDICAP", "ZRR", "GRADE", "ACADEMY", "COUNTRY"];
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Badge from "../../components/Badge";
 import plausibleEvent from "../../services/pausible";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
+
+const FILTERS = [
+  "SEARCH",
+  "STATUS",
+  "REGION",
+  "DEPARTMENT",
+  "SCHOOL",
+  "COHORT",
+  "PPS",
+  "PAI",
+  "QPV",
+  "HANDICAP",
+  "ZRR",
+  "GRADE",
+  "ACADEMY",
+  "COUNTRY",
+  "SPECIFIC_AMENAGEMENT",
+  "SAME_DEPARTMENT",
+  "PMR",
+];
 
 export default function Inscription() {
+  useDocumentTitle("Inscriptions");
   const [young, setYoung] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } }, track_total_hits: true });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -172,7 +195,7 @@ export default function Inscription() {
                   showIcon={false}
                   placeholder="Rechercher une inscription..."
                   componentId="SEARCH"
-                  dataField={["email.keyword", "firstName", "lastName", "phone"]}
+                  dataField={["email.keyword", "firstName.folded", "lastName.folded", "phone"]}
                   react={{ and: FILTERS }}
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
@@ -180,63 +203,10 @@ export default function Inscription() {
                   URLParams={true}
                   autosuggest={false}
                 />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS"
-                  dataField="status.keyword"
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut")}
-                />
-                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+                <HiAdjustments onClick={handleShowFilter} className="text-xl text-coolGray-700 cursor-pointer hover:scale-105" />
               </FilterRow>
-
               <FilterRow visible={filterVisible}>
-                <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Pays"
-                  componentId="COUNTRY"
-                  dataField="country.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "COUNTRY") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <MultiDropdownList
-                  style={{ display: "none" }}
-                  defaultQuery={getDefaultQuery}
-                  componentId="SCHOOL"
-                  dataField="schoolName.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
-                  URLParams={true}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Classe"
-                  componentId="GRADE"
-                  dataField="grade.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "GRADE") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                />
+                <div className="uppercase text-xs text-snu-purple-800">Général</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -250,6 +220,57 @@ export default function Inscription() {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="STATUS"
+                  dataField="status.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Pays"
+                  componentId="COUNTRY"
+                  dataField="country.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COUNTRY") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Pays", "Pays")}
+                />
+                <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Académie", "Académie")} />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Région", "Région")} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Département", "Département")} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Classe"
+                  componentId="GRADE"
+                  dataField="grade.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "GRADE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Classe", "Classe")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -307,6 +328,49 @@ export default function Inscription() {
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Aménagement spécifique"
+                  componentId="SPECIFIC_AMENAGEMENT"
+                  dataField="specificAmenagment.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SPECIFIC_AMENAGEMENT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Aménagement spécifique", "Aménagement spécifique")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="PMR"
+                  componentId="PMR"
+                  dataField="reducedMobilityAccess.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PMR") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Aménagement PMR", "Aménagement PMR")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Affectation dans son département"
+                  componentId="SAME_DEPARTMENT"
+                  dataField="handicapInSameDepartment.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SAME_DEPARTMENT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département", "Affectation dans son département")}
+                />
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>
@@ -365,9 +429,9 @@ const Hit = ({ hit, index, onClick, selected }) => {
       <td>{index + 1}</td>
       <td>
         <MultiLine>
-          <h2>
+          <span className="font-bold text-black">
             {hit.firstName} {hit.lastName} <Badge text={hit.cohort} />
-          </h2>
+          </span>
           <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
         </MultiLine>
       </td>

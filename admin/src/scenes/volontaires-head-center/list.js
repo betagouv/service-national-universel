@@ -197,7 +197,7 @@ export default function List() {
                   showIcon={false}
                   placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                   componentId="SEARCH"
-                  dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                  dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
                   react={{ and: FILTERS }}
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
@@ -266,6 +266,8 @@ export default function List() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -280,6 +282,8 @@ export default function List() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}

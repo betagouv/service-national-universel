@@ -97,7 +97,7 @@ export default function StepDocuments() {
               <>
                 <FormRow>
                   <Col md={4}>
-                    <Label>Consentement du ou des représentant légaux</Label>
+                    <Label>Consentement du ou des représentants légaux</Label>
                     <AlerteInfo>
                       Merci de télécharger le consentement du ou des representants légaux, le compléter, le dater, le signer, le photographier ou le scanner et le déposer ici.
                     </AlerteInfo>

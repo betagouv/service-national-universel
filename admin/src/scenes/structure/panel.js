@@ -17,6 +17,7 @@ export default function PanelView({ onChange, value }) {
   const [referents, setReferents] = useState([]);
   const [parentStructure, setParentStructure] = useState(null);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
 
   const history = useHistory();
   useEffect(() => {
@@ -55,6 +56,16 @@ export default function PanelView({ onChange, value }) {
         setReferents(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
       }
     })();
+  }, [value]);
+
+  useEffect(() => {
+    if (!value) return;
+    (async () => {
+      const { ok, data } = await api.get(`/referent/manager_phase2/${value.department}`);
+      if (ok) return setReferentManagerPhase2(data);
+      setReferentManagerPhase2(null);
+    })();
+    return () => setReferentManagerPhase2();
   }, [value]);
 
   const onClickDelete = (structure) => {
@@ -116,6 +127,7 @@ export default function PanelView({ onChange, value }) {
         <Details title="Adresse" value={value.address} />
         <Details title="Siret" value={value.siret} />
         <Details title="Vitrine" value={<SocialIcons value={value} />} />
+        <Details title="Contact phase 2" value={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
       </Info>
       <Info title={`Missions (${missions.count})`}>
         <p style={{ color: "#999" }}>Cette structure a {missions.placesLeft} places restantes.</p>

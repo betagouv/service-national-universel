@@ -1,7 +1,6 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
 import CircularProgress, { CircularLine, CircularLineIndex } from "../components/CircularProgress";
-import { Subtitle } from "../../../components/dashboard";
 import { translate, MISSION_DOMAINS } from "../../../utils";
 import { Box, BoxTitleCircular as BoxTitle } from "../../../components/box";
 
@@ -11,7 +10,7 @@ export default function MissionDetail({ youngsDomains, missionsDomains }) {
 
   return (
     <React.Fragment>
-      <Subtitle>Dans le détail des missions</Subtitle>
+      <h3 className="mt-4 mb-2 text-xl">Dans le détail des missions</h3>
       <Box>
         <Row>
           <Col md={6} xl={6} key="1">

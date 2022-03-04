@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, Link } from "react-router-dom";
-import styled from "styled-components";
+import { NavLink } from "react-router-dom";
 import { useSelector, connect } from "react-redux";
-import { environment } from "../../config";
 import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
@@ -11,18 +9,19 @@ import QuestionMark from "../../assets/QuestionMark";
 import api from "../../services/api";
 import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
+import { RiMenuFill, RiMenuFoldLine } from "react-icons/ri";
 
 const DrawerTab = ({ title, to, onClick, beta }) => (
-  <li onClick={onClick}>
-    <NavLink to={to}>
+  <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block">
+    <NavLink to={to} className="block py-3 pl-3 text-base hover:!text-white" activeClassName="block bg-snu-purple-300 py-3 pl-3 font-bold">
       {title}
       {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
     </NavLink>
-  </li>
+  </div>
 );
 
 const BlankSeparator = () => (
-  <li
+  <div
     style={{
       height: "1.5rem",
     }}
@@ -31,16 +30,16 @@ const BlankSeparator = () => (
 
 const HelpButton = ({ onClick, to }) => (
   <div
-    className="help-button-container"
+    className="justify-center flex mb-4 p-8 "
     onClick={() => {
       plausibleEvent("Menu/CTA - Besoin Aide");
       onClick();
     }}>
-    <NavLink className="help-button" to={to}>
-      <QuestionMark className="icon" />
-      <div className="help-button-text">
-        <div className="help-button-text-primary">Besoin d&apos;aide ?</div>
-        <div className="help-button-text-secondary">Tutoriels, contacts</div>
+    <NavLink className=" items-center border rounded flex p-2 hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg" activeClassName="flex bg-snu-purple-300 p-2" to={to}>
+      <QuestionMark class="h-6 w-6 flex mr-2 " />
+      <div>
+        <div className=" font-normal text-sm text-center  ">Besoin d&apos;aide ?</div>
+        <div className="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
       </div>
     </NavLink>
   </div>
@@ -48,14 +47,14 @@ const HelpButton = ({ onClick, to }) => (
 
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
-    <li onClick={onClick}>
-      <NavLink to={to}>
-        <div style={{ display: "flex", alignContent: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
+    <div onClick={onClick} className="hover:bg-snu-purple-800 hover:shadow-lg block">
+      <NavLink to={to} className=" py-3 pl-3 text-base block hover:!text-white" activeClassName=" bg-snu-purple-300 py-3 pl-3 font-bold">
+        <div>
           <div>{title}</div>
-          <div style={{ display: "flex" }}>{children}</div>
+          <div className="flex content-center">{children}</div>
         </div>
       </NavLink>
-    </li>
+    </div>
   );
 };
 
@@ -65,7 +64,6 @@ function responsible({ user, onClick }) {
       <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -78,7 +76,6 @@ function supervisor({ onClick }) {
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -102,22 +99,21 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           <div />
         ) : (
           <>
-            <IconContainer style={{ background: "#F1545B" }}>
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
               <MailCloseIcon />
-              <div style={{ marginLeft: "4px" }}>{newTickets}</div>
-            </IconContainer>
-            <IconContainer style={{ background: "#FEB951" }}>
+              <div>{newTickets}</div>
+            </div>
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
               <MailOpenIcon />
-              <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
-            </IconContainer>
-            <IconContainer style={{ background: "#6BC762" }}>
-              <SuccessIcon color="#FFF" />
-              <div style={{ marginLeft: "4px" }}>{closedTickets}</div>
-            </IconContainer>
+              <div>{openedTickets}</div>
+            </div>
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+              <SuccessIcon />
+              <div>{closedTickets}</div>
+            </div>
           </>
         )}
       </DrawerTabWithIcons>
-      <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -139,22 +135,21 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           <div />
         ) : (
           <>
-            <IconContainer style={{ background: "#F1545B" }}>
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
               <MailCloseIcon />
-              <div style={{ marginLeft: "4px" }}>{newTickets}</div>
-            </IconContainer>
-            <IconContainer style={{ background: "#FEB951" }}>
+              <div>{newTickets}</div>
+            </div>
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
               <MailOpenIcon />
-              <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
-            </IconContainer>
-            <IconContainer style={{ background: "#6BC762" }}>
-              <SuccessIcon color="#FFF" />
-              <div style={{ marginLeft: "4px" }}>{closedTickets}</div>
-            </IconContainer>
+              <div>{openedTickets}</div>
+            </div>
+            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+              <SuccessIcon />
+              <div>{closedTickets}</div>
+            </div>
           </>
         )}
       </DrawerTabWithIcons>
-      <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -183,13 +178,13 @@ function visitor({ onClick }) {
 }
 
 const Drawer = (props) => {
+  const [isOpen, setIsOpen] = useState(false);
   const user = useSelector((state) => state.Auth.user);
   const newTickets = useSelector((state) => state.Tickets.new);
   const openedTickets = useSelector((state) => state.Tickets.open);
   const closedTickets = useSelector((state) => state.Tickets.closed);
   const tickets = useSelector((state) => state.Tickets.tickets);
   const [open, setOpen] = useState();
-  const [environmentBannerVisible, setEnvironmentBannerVisible] = useState(true);
   useEffect(() => {
     setOpen(props.open);
   }, [props.open]);
@@ -219,45 +214,46 @@ const Drawer = (props) => {
 
   if (!user) return <div />;
 
-  function getName() {
-    if (user.role === ROLES.ADMIN) return "Espace modérateur";
-    if (user.role === ROLES.REFERENT_DEPARTMENT) return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
-    if (user.role === ROLES.REFERENT_REGION) return "ESPACE RÉFÉRENT REGIONAL";
-    if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
-    if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
-    if (user.role === ROLES.HEAD_CENTER) return "espace chef de centre";
-    if (user.role === ROLES.VISITOR) return "Espace visiteur";
-    return "";
-  }
-
-  function getTextEnvironmentBanner() {
-    if (environment === "staging") return "Espace de Test";
-    if (environment === "development") return "Développement";
-    return "";
-  }
-
   return (
-    <Sidebar open={open} id="drawer">
-      <Logo>
-        <HeaderSideBar to="/">
-          <img src={require("../../assets/logo-snu.png")} height={38} />
-          {getName()}
-          <Burger onClick={handleClick} src={require("../../assets/burger.svg")} />
-        </HeaderSideBar>
-      </Logo>
-      {environment !== "production" && environmentBannerVisible ? (
-        <EnvironmentBanner onClick={() => setEnvironmentBannerVisible(false)}>{getTextEnvironmentBanner()}</EnvironmentBanner>
-      ) : null}
-      <ul>
-        <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-        {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
-        {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
-        {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-        {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-        {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
-      </ul>
-    </Sidebar>
+    <div className="min-h-screen bg-snu-purple-900 text-white">
+      {!isOpen ? (
+        <>
+          <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
+            <div className="w-12 pl-2 h-14 flex items-center justify-between lg:hidden sticky top-0 left-0">
+              <RiMenuFill className="w-7 h-7 cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
+            </div>
+            <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative transition duration-200 ease-in-out">
+              <ul className="divide-y divide-slate-700">
+                <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+                {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+                {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+                {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+                {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+                {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+                {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
+              </ul>
+            </div>
+          </nav>
+        </>
+      ) : (
+        <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-base font-normal min-h-full">
+          <div>
+            <div className="w-12 pl-2 h-14 flex items-center justify-between lg:hidden shadow-sm sticky top-0 left-0">
+              <RiMenuFoldLine className="w-7 h-7 cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
+            </div>
+            <ul className="divide-y divide-slate-700">
+              <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+              {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+              {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+              {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+              {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
+            </ul>
+          </div>
+        </nav>
+      )}
+    </div>
   );
 };
 
@@ -278,180 +274,3 @@ const mapDispatchToProps = (dispatch) => ({
 let container = connect(null, mapDispatchToProps)(Drawer);
 
 export default container;
-
-const HeaderSideBar = styled(Link)`
-  display: flex;
-  @media (max-width: 1550px) {
-    flex-direction: column;
-  }
-`;
-
-const IconContainer = styled.div`
-  display: flex;
-  align-content: center;
-  justify-content: center;
-  border-radius: 0.5rem;
-  margin-right: 10px;
-  padding-right: 8px;
-  padding-left: 8px;
-  width: 60px;
-`;
-
-const EnvironmentBanner = styled.div`
-  background: ${colors.red};
-  color: white;
-  font-style: italic;
-  font-weight: 500;
-  text-align: center;
-  padding: 5px;
-  cursor: pointer;
-
-  :hover {
-    opacity: 0.5;
-  }
-`;
-const Burger = styled.img`
-  display: none;
-  @media (max-width: 1000px) {
-    margin-left: auto;
-    margin-right: 0 !important;
-    display: block;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    object-fit: contain;
-    cursor: pointer;
-  }
-`;
-
-const Logo = styled.h1`
-  background: ${colors.darkPurple};
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 0;
-  padding: 15px 20px 15px;
-
-  a {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    color: #161e2e;
-    font-size: 13px;
-    font-weight: 500;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    text-decoration: none;
-  }
-
-  img {
-    margin-right: 1rem;
-    vertical-align: top;
-  }
-`;
-
-const Sidebar = styled.div`
-  ::-webkit-scrollbar {
-    display: none;
-  }
-
-  @media (max-width: 1000px) {
-    transform: translateX(${({ open }) => (open ? 0 : "-105%")});
-    opacity: 1;
-    visibility: visible;
-    height: 100vh;
-    width: 60vw;
-    z-index: 11;
-    position: fixed;
-  }
-  background-color: ${colors.darkPurple};
-  width: 15%;
-  position: sticky;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 20;
-  height: 100vh;
-  min-width: 250px;
-  overflow-y: auto;
-  transition: 0.2s;
-
-  ul {
-    list-style: none;
-
-    a {
-      text-decoration: none;
-      padding: 15px 20px;
-      display: block;
-      color: #fff;
-      font-weight: 400;
-      font-size: 16px;
-      border-bottom: 1px solid ${colors.transPurple};
-      transition: 0.2s;
-
-      i {
-        font-size: 0.7rem;
-      }
-    }
-
-    a:hover {
-      background: ${colors.transPurple};
-      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    a.active {
-      font-weight: 700;
-      background: ${colors.purple};
-      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
-    }
-    .help-button-container {
-      justify-content: center;
-      display: flex;
-      margin-bottom: 1rem;
-      .help-button {
-        border: 1px solid #7786cf;
-        border-radius: 0.3rem;
-        padding: 0.5rem;
-        align-items: center;
-        display: flex;
-        .icon {
-          height: 1.5rem;
-          width: 1.5rem;
-          color: #7786cf;
-          margin-right: 0.5rem;
-        }
-        .help-button-text {
-          color: white;
-          text-align: center;
-          .help-button-text-primary {
-            font-weight: 400;
-            font-size: 0.9rem;
-          }
-          .help-button-text-secondary {
-            font-weight: 300;
-            font-size: 0.6rem;
-          }
-        }
-        :hover {
-          background: #7786cf;
-          cursor: pointer;
-          .icon {
-            color: #fff;
-          }
-        }
-      }
-    }
-  }
-
-  .has-child ul {
-    display: none;
-
-    a {
-      padding-left: 40px;
-    }
-  }
-
-  .has-child.open ul {
-    display: block;
-  }
-`;

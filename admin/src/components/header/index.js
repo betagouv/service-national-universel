@@ -1,70 +1,50 @@
 import React from "react";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { ROLES } from "../../utils";
+import { Link } from "react-router-dom";
 
+import { ROLES } from "../../utils";
+import { environment } from "../../config";
 import User from "./user";
 
 export default function HeaderIndex({ onClickBurger }) {
   const { user } = useSelector((state) => state.Auth);
+  const [environmentBannerVisible, setEnvironmentBannerVisible] = React.useState(true);
+
   if (!user) return <div />;
 
   function getName() {
     if (user.role === ROLES.ADMIN) return "Espace modérateur";
-    if (user.role === ROLES.REFERENT_DEPARTMENT) return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
-    if (user.role === ROLES.REFERENT_REGION) return "ESPACE RÉFÉRENT REGIONAL";
+    if (user.role === ROLES.REFERENT_DEPARTMENT) return `Espace référent départemental • ${user.department}`;
+    if (user.role === ROLES.REFERENT_REGION) return `Espace référent régional • ${user.region}`;
     if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
     if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
     return "";
   }
 
+  function getTextEnvironmentBanner() {
+    if (environment === "staging") return "Espace de Test";
+    if (environment === "development") return "Développement";
+    return "";
+  }
+
   return (
-    <Header>
-      <Burger onClick={onClickBurger} src={require("../../assets/burger.svg")} />
-      <Title>{getName()}</Title>
-      <div style={{ display: "flex", alignItems: "center" }}>
+    <div className="w-full pr-4 bg-white h-14 flex items-center justify-between shadow-sm sticky top-0 left-0 z-20 p-1">
+      <h1 className="flex items-center gap-2">
+        <Link to="/" className="flex items-center group hover:text-black gap-2 mx-3">
+          <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 group-hover:scale-105" />
+          <span className="text-base font-bold justify-center group-hover:underline">{getName()}</span>
+        </Link>
+        {environment !== "production" && environmentBannerVisible ? (
+          <span
+            onClick={() => setEnvironmentBannerVisible(false)}
+            className="p-2 bg-snu-purple-900 text-white text-xs font-italic items-center text-center rounded-full cursor-pointer hover:opacity-50">
+            {getTextEnvironmentBanner()}
+          </span>
+        ) : null}
+      </h1>
+      <div className="flex items-center">
         <User />
       </div>
-    </Header>
+    </div>
   );
 }
-
-const Header = styled.div`
-  background-color: #fff;
-  padding-right: 20px;
-  width: 100%;
-  height: 68px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  @media (max-width: 1000px) {
-    justify-content: space-between;
-  }
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  left: 0;
-  top: 0;
-  z-index: 20;
-  padding: 1rem;
-`;
-
-const Burger = styled.img`
-  display: none;
-  @media (max-width: 1000px) {
-    display: block;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    object-fit: contain;
-    cursor: pointer;
-  }
-`;
-
-const Title = styled.div`
-  font-size: 1rem;
-  font-weight: 700;
-  @media (min-width: 1000px) {
-    display: none;
-  }
-`;

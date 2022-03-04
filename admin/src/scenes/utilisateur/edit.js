@@ -8,6 +8,7 @@ import "dayjs/locale/fr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 import ReactSelect from "react-select";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -37,6 +38,7 @@ import { requiredMessage } from "../../components/errorMessage";
 import plausibleEvent from "../../services/pausible";
 
 export default function Edit(props) {
+  const setDocumentTitle = useDocumentTitle("Utilisateurs");
   const [user, setUser] = useState();
   const [service, setService] = useState();
   const [centers, setCenters] = useState();
@@ -56,6 +58,7 @@ export default function Edit(props) {
         if (!id) return setUser(null);
         const { ok, data } = await api.get(`/referent/${id}`);
         if (!ok) return setUser(null);
+        setDocumentTitle(`${data.firstName} ${data.lastName}`);
         setUser(data);
         const { data: d } = await api.get(`/department-service/${data.department}`);
         setService(d);
@@ -137,6 +140,7 @@ export default function Edit(props) {
     try {
       const { ok, code } = await api.remove(`/referent/${user._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && code === "LINKED_OBJECT") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");
       return history.push(`/user`);
@@ -284,8 +288,8 @@ export default function Edit(props) {
                             title="Région"
                             options={regionList.map((r) => ({ value: r, label: r }))}
                           />
-                        </>                      
-                        ) : null}
+                        </>
+                      ) : null}
 
                       {values.role === ROLES.REFERENT_DEPARTMENT ? (
                         <Select

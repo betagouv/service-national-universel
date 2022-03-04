@@ -32,6 +32,7 @@ const {
   // updateApplicationsWithYoungOrMission,
   updatePlacesBus,
   updatePlacesSessionPhase1,
+  ROLES,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -41,6 +42,7 @@ const { serializeYoung, serializeApplication } = require("../../utils/serializer
 const { canDeleteYoung, ROLES } = require("snu-lib/roles");
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS } = require("snu-lib/constants");
+const { canUpdateYoungStatus } = require("snu-lib");
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
@@ -190,20 +192,6 @@ router.post("/file/:key", passport.authenticate("young", { session: false, failW
   } catch (error) {
     capture(error);
     if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/", async (req, res) => {
-  try {
-    const { error, value } = validateYoung(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-
-    const young = await YoungObject.create({ ...value, fromUser: req.user });
-    return res.status(200).send({ young: serializeYoung(young, young), ok: true });
-  } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.YOUNG_ALREADY_REGISTERED });
-    capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
@@ -419,7 +407,22 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    //! needs further checking
+    // if (req.user.department !== young.department) {
+    //   const referents = await ReferentModel.find({ department: req.user.department, role: ROLES.REFERENT_DEPARTMENT });
+    //   for (let referent of referents) {
+    //     await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
+    //       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+    //       params: {
+    //         youngFirstName: young.firstName,
+    //         youngLastName: young.lastName,
+    //         cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
+    //       },
+    //     });
+    //   }
+    // }
     young.set(value);
     await young.save({ fromUser: req.user });
 

@@ -7,6 +7,7 @@ const CohesionCenterModel = require("../models/cohesionCenter");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
+const ContractObject = require("../models/contract");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
@@ -163,7 +164,7 @@ function validatePassword(password) {
 }
 
 const updatePlacesCenter = async (center) => {
-  console.log(`update place center ${center?._id} ${center?.name}`);
+  // console.log(`update place center ${center?._id} ${center?.name}`);
   try {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
     const placesTaken = youngs.filter((young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED").length;
@@ -174,7 +175,7 @@ const updatePlacesCenter = async (center) => {
       await center.save();
       await center.index();
     } else {
-      console.log(`Center ${center.id}: total ${center.placesTotal} left not changed ${center.placesLeft}`);
+      // console.log(`Center ${center.id}: total ${center.placesTotal} left not changed ${center.placesLeft}`);
     }
   } catch (e) {
     console.log(e);
@@ -186,7 +187,7 @@ const updatePlacesCenter = async (center) => {
 // duplicate of updatePlacesCenter
 // we'll remove the updatePlacesCenter function once the migration is done
 const updatePlacesSessionPhase1 = async (sessionPhase1) => {
-  console.log(`update place sessionPhase1 ${sessionPhase1?._id}`);
+  // console.log(`update place sessionPhase1 ${sessionPhase1?._id}`);
   try {
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
     const placesTaken = youngs.filter((young) => ["AFFECTED", "WAITING_AFFECTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED").length;
@@ -197,7 +198,7 @@ const updatePlacesSessionPhase1 = async (sessionPhase1) => {
       await sessionPhase1.save();
       await sessionPhase1.index();
     } else {
-      console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left not changed ${sessionPhase1.placesLeft}`);
+      // console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left not changed ${sessionPhase1.placesLeft}`);
     }
   } catch (e) {
     console.log(e);
@@ -251,12 +252,12 @@ const deleteCenterDependencies = async (center) => {
 };
 
 const updatePlacesBus = async (bus) => {
-  console.log(`update bus ${bus.id} - ${bus.idExcel}`);
+  // console.log(`update bus ${bus.id} - ${bus.idExcel}`);
   try {
     const meetingPoints = await MeetingPointModel.find({ busId: bus.id, cohort: bus.cohort });
     if (!meetingPoints?.length) return console.log("meetingPoints not found");
     const idsMeetingPoints = meetingPoints.map((e) => e._id);
-    console.log(`idsMeetingPoints for bus ${bus.id}`, idsMeetingPoints);
+    // console.log(`idsMeetingPoints for bus ${bus.id}`, idsMeetingPoints);
     const youngs = await YoungModel.find({
       status: "VALIDATED",
       statusPhase1: { $in: ["AFFECTED", "WAITING_AFFECTATION", "DONE"] },
@@ -272,7 +273,7 @@ const updatePlacesBus = async (bus) => {
       await bus.save();
       await bus.index();
     } else {
-      console.log(`Bus ${bus.id}: total ${bus.capacity}, left not changed ${placesLeft}`);
+      // console.log(`Bus ${bus.id}: total ${bus.capacity}, left not changed ${placesLeft}`);
     }
   } catch (e) {
     console.log(e);
@@ -470,6 +471,39 @@ const updateStatusPhase2 = async (young) => {
   await young.save();
 };
 
+const checkStatusContract = (contract) => {
+  if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
+  // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
+  const tokenKeys = ["parent1Token", "parent2Token", "projectManagerToken", "structureManagerToken", "youngContractToken"];
+  const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
+  const validateKeys = ["parent1Status", "parent2Status", "projectManagerStatus", "structureManagerStatus", "youngContractStatus"];
+  const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
+  if (validatedCount >= tokenCount) {
+    return "VALIDATED";
+  } else {
+    return "SENT";
+  }
+};
+
+const updateYoungStatusPhase2Contract = async (young, fromUser) => {
+  const contracts = await ContractObject.find({ youngId: young._id });
+
+  // on récupère toutes les candidatures du volontaire
+  const applications = await ApplicationModel.find({ _id: { $in: contracts?.map((c) => c.applicationId) } });
+
+  // on filtre sur les candidatures pour lesquelles le contrat est "actif"
+  const applicationsThatContractIsActive = applications.filter((application) => ["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"].includes(application.status));
+
+  //on filtre les contrats liés à ces candidatures filtrée précédement
+  const activeContracts = contracts.filter((contract) => applicationsThatContractIsActive.map((application) => application._id.toString()).includes(contract.applicationId));
+
+  young.set({
+    statusPhase2Contract: activeContracts.map((contract) => checkStatusContract(contract)),
+  });
+
+  await young.save({ fromUser });
+};
+
 function isYoung(user) {
   return user instanceof YoungModel;
 }
@@ -584,4 +618,6 @@ module.exports = {
   updateStatusPhase2,
   getSignedUrlForApiAssociation,
   updateApplicationsWithYoungOrMission,
+  updateYoungStatusPhase2Contract,
+  checkStatusContract,
 };

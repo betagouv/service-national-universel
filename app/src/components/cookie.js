@@ -21,7 +21,7 @@ export default function Cookie() {
       <Modal size="lg" isOpen={open} scrollable={true} toggle={() => setOpen(false)}>
         <ModalContainer>
           <div style={{ display: "flex", width: "100%", justifyContent: "end", cursor: "pointer" }}>
-            <CloseSvg className="close-icon" height={15} onClick={() => setOpen(false)} />
+            <CloseSvg className="close-icon" height={15} width={15} onClick={() => setOpen(false)} />
           </div>
           <Title style={{ textAlign: "center", color: "#1D4094", marginBottom: "30px", fontWeight: "600" }}>Gestion de vos cookies</Title>
           <TextBigModal style={{ fontWeight: "500" }}>

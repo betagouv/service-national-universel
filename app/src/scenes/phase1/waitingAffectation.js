@@ -27,8 +27,8 @@ export default function WaitingAffectation({ young }) {
               <strong style={{ color: "#000" }}>Vous êtes en attente d&apos;affectation à un centre</strong>
               <br />
               <span style={{ fontSize: "1rem" }}>
-                Votre affectation vous sera communiquée dans les prochains jours par mail. Pensez à vérifier vos spams et courriers indésirables pour vous assurer que vous recevez
-                bien les communications de la plateforme. Vous pouvez d&apos;ores et déjà préparer votre venue en consultant les{" "}
+                Votre affectation vous sera communiquée dans les semaines qui précèdent le départ par mail. Pensez à vérifier vos spams et courriers indésirables pour vous assurer
+                que vous recevez bien les communications de la plateforme. Vous pouvez d&apos;ores et déjà préparer votre venue en consultant les{" "}
                 <a href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
                   articles à propos de la Phase 1
                 </a>
@@ -40,7 +40,7 @@ export default function WaitingAffectation({ young }) {
           <div className="thumb" />
         </Hero>
       </HeroContainer>
-      <UnderTitle>Documents à renseigner</UnderTitle>
+      <h2 className="text-stone-500 m-auto text-center">Documents à renseigner</h2>
       <NextStep />
     </>
   );
@@ -49,39 +49,4 @@ export default function WaitingAffectation({ young }) {
 const Divider = styled.hr`
   width: 100px;
   margin: 2rem 0;
-`;
-
-const UnderTitle = styled.h2`
-  color: #6b7280;
-  margin: 0.5rem auto;
-  text-align: center;
-`;
-
-const Button = styled(Link)`
-  width: fit-content;
-  cursor: pointer;
-  color: #374151;
-  text-align: center;
-  margin: 1rem 0;
-  background-color: #fff;
-  padding: 0.5rem 1rem;
-  border: 1px solid #d2d6dc;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 1rem;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  display: block;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  position: relative;
-  z-index: 2;
-  :hover {
-    opacity: 0.9;
-  }
-  a {
-    color: #374151;
-  }
 `;

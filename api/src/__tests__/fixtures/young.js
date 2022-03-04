@@ -2,7 +2,7 @@ const faker = require("faker");
 
 faker.locale = "fr";
 
-function getNewYoungFixture() {
+function getNewYoungFixture(fields = {}) {
   return {
     firstName: faker.name.firstName(),
     lastName: faker.name.lastName(),
@@ -178,6 +178,7 @@ function getNewYoungFixture() {
     sportInterest: faker.lorem.sentences(),
     environmentInterest: faker.lorem.sentences(),
     citizenshipInterest: faker.lorem.sentences(),
+    ...fields,
   };
 }
 

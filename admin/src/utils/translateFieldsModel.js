@@ -52,6 +52,8 @@ const translateFieldYoung = (f) => {
       return "Prénom";
     case "lastName":
       return "Nom";
+    case "email":
+      return "Email";
     case "frenchNationality":
       return "Nationalité française";
     case "phone":
@@ -114,14 +116,22 @@ const translateFieldYoung = (f) => {
       return "Téléphone tuteur phase 3";
     case "phase3TutorNote":
       return "Note tuteur phase 3";
+    case "addressVerified":
+      return "Adresse vérifiée";
     case "address":
       return "Adresse";
+    case "complementAddress":
+      return "Complément d'adresse";
     case "zip":
       return "Code postal";
     case "city":
       return "Ville";
     case "cityCode":
       return "Code ville";
+    case "country":
+      return "Pays";
+    case "foreignCountry":
+      return "Pays étranger";
     case "populationDensity":
       return "Densité de population";
     case "department":
@@ -164,6 +174,8 @@ const translateFieldYoung = (f) => {
       return "Email du représentant légal 1";
     case "parent1Phone":
       return "Téléphone du représentant légal 1";
+    case "parent1OwnAddress":
+      return "Rreprésentant légal 1 a une adresse différente";
     case "parent1Address":
       return "Adresse du représentant légal 1";
     case "parent1ComplementAddress":
@@ -190,6 +202,8 @@ const translateFieldYoung = (f) => {
       return "Email du représentant légal 2";
     case "parent2Phone":
       return "Téléphone du représentant légal 2";
+    case "parent2OwnAddress":
+      return "Rreprésentant légal 2 a une adresse différente";
     case "parent2Address":
       return "Adresse du représentant légal 2";
     case "parent2ComplementAddress":
@@ -289,9 +303,85 @@ const translateFieldYoung = (f) => {
     case "desiredLocation":
       return "Souhait lieu MIG";
     case "createdAt":
-      return "créé(e) le";
+      return "Créé(e) le";
     case "updatedAt":
-      return "mis(e) à jour le";
+      return "Mis(e) à jour le";
+    case "statusPhase2UpdatedAt":
+      return "Statut phase 2 mis(e) à jour le";
+    case "phase2NumberHoursEstimated":
+      return "Nombre d'heures estimées (phase 2)";
+    case "phase2NumberHoursDone":
+      return "Nombre d'heures effectuées (phase 2)";
+    case "militaryPreparationFilesCertificate":
+      return "Certificat d’absence de contre-indication à la pratique sportive";
+    case "militaryPreparationFilesAuthorization":
+      return "Consentement à la participation à une préparation militaire";
+    case "militaryPreparationFilesCensus":
+      return "Attestation de recensement";
+    case "militaryPreparationFilesIdentity":
+      return "Pièce d’identité en cours de validité (CNI, passeport)";
+    case "rulesFiles":
+      return "Fichiers règlement intérieur";
+    case "dataProcessingConsentmentFiles":
+      return "Fichier Formulaire de consentement au traitement des données personnelles";
+    case "phase2ApplicationStatus":
+      return "Liste de statuts de candidatures (phase 2)";
+    case "statusMilitaryPreparationFiles":
+      return "Statut des fichiers de préparation militaire";
+    case "statusPhase2Contract":
+      return "Liste de statuts des contrats (phase 2)";
+    case "cniFiles":
+      return "Fichiers CNI";
+    case "birthCityZip":
+      return "Code postal de naissance";
+    case "birthCity":
+      return "Ville de naissance";
+    case "birthCountry":
+      return "Pays de naissance";
+    case "employed":
+      return "Employé";
+    case "schoolCountry":
+      return "Pays établissement";
+    case "foreignZip":
+      return "Code postal étranger";
+    case "foreignCity":
+      return "Ville étranger";
+    case "foreignAddress":
+      return "Adresse étranger";
+    case "hostRelationship":
+      return "Lien de l'hébergeur avec le volontaire";
+    case "hostLastName":
+      return "Nom de l'hébergeur";
+    case "hostFirstName":
+      return "Prénom de l'hébergeur";
+    case "hostAddress":
+      return "Adresse de l'hébergeur";
+    case "hostRegion":
+      return "Région de l'hébergeur";
+    case "hostDepartment":
+      return "Département de l'hébergeur";
+    case "hostZip":
+      return "Code Postal de l'hébergeur";
+    case "hostCity":
+      return "Ville de l'hébergeur";
+    case "aknowledgmentTerminaleSessionAvailability":
+      return "Le volontaire a pris connaissance des règles de disponibilité liées au rattrapage du bac";
+    case "informationAccuracy":
+      return "Le volontaire certifie l'exactitude des renseignements fournis";
+    case "rulesParent1":
+      return "Le representant légal 1 a accepté le règlement intérieur";
+    case "rulesParent2":
+      return "Le representant légal 2 a accepté le règlement intérieur";
+    case "rulesYoung":
+      return "Le volontaire a accepté le règlement intérieur";
+    case "acceptCGU":
+      return "Le volontaire a accepté les CGU";
+    case "meetingPointId":
+      return "Identifiant du point de rassemblement (phase 1)";
+    case "deplacementPhase1Autonomous":
+      return "Le volontaire se rend par ses propres moyens (phase 1)";
+    case "qpv":
+      return "QPV";
     default:
       return f;
   }

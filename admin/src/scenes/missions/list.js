@@ -16,6 +16,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from 
 import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION"];
 
@@ -90,7 +91,7 @@ export default function List() {
                       Description: data.description,
                       "Id de la structure": data.structureId,
                       "Nom de la structure": data.structureName,
-                      "Id du tuteur": data.tutorId,
+                      "Id du tuteur": data.tutorId || "La mission n'a pas de tuteur",
                       "Nom du tuteur": data.tutor?.lastName,
                       "Prénom du tuteur": data.tutor?.firstName,
                       "Email du tuteur": data.tutor?.email,
@@ -126,7 +127,7 @@ export default function List() {
                   showIcon={false}
                   placeholder="Rechercher par mots clés, ville, code postal..."
                   componentId="SEARCH"
-                  dataField={["name", "structureName", "city", "zip"]}
+                  dataField={["name.folded", "structureName.folded", "city.folded", "zip"]}
                   react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                   // fuzziness={1}
                   style={{ flex: 1, marginRight: "1rem" }}
@@ -159,7 +160,7 @@ export default function List() {
                   className="dropdown-filter"
                   placeholder="Domaine"
                   componentId="DOMAIN"
-                  dataField="domains.keyword"
+                  dataField="mainDomain.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
@@ -167,7 +168,9 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Domaine")}
+                  renderLabel={(items) => getFilterLabel(items, "Domaine d’action principal", "Domaine d’action principal")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -221,6 +224,7 @@ export default function List() {
                     sortBy="asc"
                   />
                 ) : null}
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>
@@ -287,7 +291,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={() => onClick(value)}>
       <td>
         <MultiLine>
-          <h2>{value.name}</h2>
+          <span className="font-bold text-black">{value.name}</span>
           <p>
             {value.structureName} {`• ${value.city} (${value.department})`}
           </p>

@@ -5,10 +5,11 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS, colors } from "../../../utils";
+import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
-import TickDone from "../../../assets/TickDone";
-import Copy from "../../../assets/Copy";
+import { BiCopy } from "react-icons/bi";
+import { HiCheckCircle } from "react-icons/hi";
 
 const rowStyle = { marginRight: 0, marginLeft: 0 };
 
@@ -61,7 +62,14 @@ export default function DetailsView({ mission, structure, tutor }) {
                     <Details title="Tel. fixe" value={tutor.phone} copy />
                     <Details title="Tel. mobile" value={mission.mobile} copy />
                   </Bloc>
-                ) : null}
+                ) : (
+                  <Bloc title="Le tuteur">
+                    <p>Cette mission n&apos;a pas de tuteur</p>
+                    <Link to={`/mission/${mission._id}/edit`}>
+                      <PanelActionButton title="Assigner un tuteur" icon="pencil" />
+                    </Link>
+                  </Bloc>
+                )}
               </Row>
               <Row style={{ borderBottom: "2px solid #f4f5f7", ...rowStyle }}>
                 {structure ? (
@@ -140,12 +148,12 @@ const Details = ({ title, value, copy }) => {
         {value}
         {copy ? (
           <div
-            className="icon"
+            className="flex items-center justify-center mx-1 cursor-pointer hover:scale-105 text-snu-purple-400"
             onClick={() => {
               copyToClipboard(value);
               setCopied(true);
             }}>
-            {copied ? <TickDone color={colors.green} width={17} height={17} /> : <Copy color={colors.darkPurple} width={17} height={17} />}
+            {copied ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-snu-purple-300" />}
           </div>
         ) : null}
       </div>

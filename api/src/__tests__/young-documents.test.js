@@ -35,7 +35,9 @@ describe("Young", () => {
       expect(res.status).toEqual(404);
     });
     it("should return the certificate", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
+      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
+      const sessionPhase1 = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohesionCenterId: cohesionCenter._id });
+      const young = await createYoungHelper({ ...getNewYoungFixture(), sessionPhase1Id: sessionPhase1._id });
       const certificates = ["1", "2", "3", "snu"];
       for (const certificate of certificates) {
         const res = await request(getAppHelper()).post("/young/" + young._id + "/documents/certificate/" + certificate);
@@ -80,7 +82,7 @@ describe("Young", () => {
     });
     it("should return the convocation", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const sessionPhase1 = await createSessionPhase1({...getNewSessionPhase1Fixture(), cohesionCenterId: cohesionCenter._id});
+      const sessionPhase1 = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohesionCenterId: cohesionCenter._id });
       const bus = await createBusHelper(getNewBusFixture());
       const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), busId: bus._id });
       const departmentService = await createDepartmentServiceHelper({

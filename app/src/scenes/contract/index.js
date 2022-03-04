@@ -38,7 +38,7 @@ export default function Index() {
           <ContractContainer>
             <div style={{ display: "flex", marginBottom: "3rem" }}>
               <div style={{ marginRight: "2rem" }}>
-                <img src={require("../../assets/logo-snu.png")} height={96} />
+                <img src={require("../../assets/logo-snu.png")} height={96} width={96} />
               </div>
               <div style={{ marginRight: "2rem", textAlign: "center", marginTop: "-1rem" }}>
                 <h2>Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU)</h2>
@@ -460,7 +460,7 @@ export default function Index() {
         </Box>
       </div>
       <div style={{ marginTop: "1rem", marginBottom: "2rem", textAlign: "center" }}>
-        <div>J&apos;atteste avoir lu et approuver les éléments renseignés ci-dessus.</div>
+        <div>J&apos;atteste avoir lu et approuvé les éléments renseignés ci-dessus.</div>
         <VioletButton
           onClick={async () => {
             try {

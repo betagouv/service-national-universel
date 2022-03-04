@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-d
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
-import styled from "styled-components";
 
 import { setUser } from "./redux/auth/actions";
 import Auth from "./scenes/auth";
@@ -137,35 +136,33 @@ const Home = () => {
   }, [user]);
 
   return (
-    <div style={{ display: "flex" }}>
-      <Drawer open={menuVisible} onOpen={setMenuVisible} />
-      <ContentContainer>
-        <Header
-          onClickBurger={() => {
-            setMenuVisible(!menuVisible);
-          }}
-        />
-        <Switch>
-          <Route path="/auth" component={Auth} />
-          <RestrictedRoute path="/structure" component={Structure} />
-          <RestrictedRoute path="/settings" component={Settings} />
-          <RestrictedRoute path="/profil" component={Profil} />
-          <RestrictedRoute path="/volontaire" component={renderVolontaire} />
-          <RestrictedRoute path="/mission" component={Missions} />
-          <RestrictedRoute path="/inscription" component={Inscription} />
-          <RestrictedRoute path="/user" component={Utilisateur} />
-          <RestrictedRoute path="/contenu" component={Content} />
-          <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
-          <RestrictedRoute path="/centre" component={Center} />
-          <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
-          <RestrictedRoute path="/association" component={Association} />
-          <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
-          <RestrictedRoute path="/boite-de-reception" component={Inbox} />
-          <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
-          <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
-          <RestrictedRoute path="/" component={renderDashboard} />
-        </Switch>
-      </ContentContainer>
+    <div>
+      <Header />
+      <div className="flex">
+        <Drawer />
+        <div className="flex-1">
+          <Switch>
+            <Route path="/auth" component={Auth} />
+            <RestrictedRoute path="/structure" component={Structure} />
+            <RestrictedRoute path="/settings" component={Settings} />
+            <RestrictedRoute path="/profil" component={Profil} />
+            <RestrictedRoute path="/volontaire" component={renderVolontaire} />
+            <RestrictedRoute path="/mission" component={Missions} />
+            <RestrictedRoute path="/inscription" component={Inscription} />
+            <RestrictedRoute path="/user" component={Utilisateur} />
+            <RestrictedRoute path="/contenu" component={Content} />
+            <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
+            <RestrictedRoute path="/centre" component={Center} />
+            <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
+            <RestrictedRoute path="/association" component={Association} />
+            <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
+            <RestrictedRoute path="/boite-de-reception" component={Inbox} />
+            <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
+            <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
+            <RestrictedRoute path="/" component={renderDashboard} />
+          </Switch>
+        </div>
+      </div>
       <ModalCGU
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -194,15 +191,3 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
   }
   return <Route {...rest} render={(props) => <Component {...props} />} />;
 };
-
-const ContentContainer = styled.div`
-  margin-left: auto;
-  width: 85%;
-  max-width: calc(100% - 250px);
-  @media (max-width: 1000px) {
-    width: 100%;
-    padding: 0;
-    margin-left: auto;
-    max-width: 100%;
-  }
-`;
