@@ -476,7 +476,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    // young can only update their own mission phase3.
+    // young can only update their own cohort.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
