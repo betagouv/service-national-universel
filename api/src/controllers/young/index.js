@@ -194,20 +194,6 @@ router.post("/file/:key", passport.authenticate("young", { session: false, failW
   }
 });
 
-router.post("/", async (req, res) => {
-  try {
-    const { error, value } = validateYoung(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-
-    const young = await YoungObject.create({ ...value, fromUser: req.user });
-    return res.status(200).send({ young: serializeYoung(young, young), ok: true });
-  } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.YOUNG_ALREADY_REGISTERED });
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/invite", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body);
