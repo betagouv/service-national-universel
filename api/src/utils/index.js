@@ -382,6 +382,24 @@ const assignNextYoungFromWaitingList = async (young) => {
   }
 };
 
+// pourrait être utile un jour
+
+// const assignYoungToWaitingList = async (young, newCohort) => {
+//   if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED || young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ) {
+//   young.set({ status: "VALIDATED", statusPhase1: "WAITING_AFFECTATION", cohort:"" });
+//   await young.save();
+
+//   //add young to waiting list
+//   //todo sélectionner le centre avec la date newCohort
+//   const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+//   console.log(`add young ${young._id} to waiting list`)
+//   sessionPhase1.waitingList.push(young._id);
+//   await sessionPhase1.save();
+
+//   }
+
+// }
+
 const getYoungFromWaitingList = async (young) => {
   try {
     if (!young || !young.cohesionCenterId) return null;
