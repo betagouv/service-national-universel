@@ -168,7 +168,7 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Domaine d’action principal")}
+                  renderLabel={(items) => getFilterLabel(items, "Domaine d’action principal", "Domaine d’action principal")}
                   showMissing
                   missingLabel="Non renseigné"
                 />
