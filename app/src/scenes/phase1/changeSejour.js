@@ -126,7 +126,7 @@ export default function changeSejour() {
                     <SectionHelp>
                       <UncontrolledDropdown setActiveFromChild>
                         <DropdownToggle tag="button">
-                          Séjour {newSejour}
+                          {newSejour ? `Séjour ${newSejour}` : "Choisir un séjour"}
                           <Chevron color="#9a9a9a" />
                         </DropdownToggle>
                         <DropdownMenu>
@@ -155,7 +155,7 @@ export default function changeSejour() {
                     <Section>
                       <UncontrolledDropdown setActiveFromChild>
                         <DropdownToggle tag="button">
-                          {motif || <p></p>}
+                          {motif || "Précisez la raison de votre changement de séjour"}
                           <Chevron color="#9a9a9a" />
                         </DropdownToggle>
                         <DropdownMenu>
