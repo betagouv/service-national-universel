@@ -23,22 +23,24 @@ exports.handler = async () => {
       if (!patches.length) return;
       const tutor = await Referent.findById(application.tutorId);
       if (!tutor) return;
-      patches.map((patch) => {
-        if (differenceInDays(now, patch.date) >= 7) {
-          // send a mail to the tutor
-          sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER, {
-            emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
-            params: {
-              cta: `${ADMIN_URL}/dashboard`,
-              youngFirstName: application.youngFirstName,
-              youngLastName: application.youngLastName,
-              missionName: application.missionName,
-            },
-          });
-        }
-      });
+      if (differenceInDays(now, patches[0].date) >= 7) {
+        // send a mail to the tutor
+        slack.success({
+          title: "1 week notice pending application",
+          text: `applicationId: ${application._id} - change status date: ${patches[0].date}, status: WAITING_VALIDATION`,
+        });
+        // sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER, {
+        //   emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
+        //   params: {
+        //     cta: `${ADMIN_URL}/dashboard`,
+        //     youngFirstName: application.youngFirstName,
+        //     youngLastName: application.youngLastName,
+        //     missionName: application.missionName,
+        //   },
+        // });
+      }
     });
-    slack.success({ title: "1 week notice pending application", text: `${countNotice} pending application has been noticed !` });
+    slack.success({ title: "1 week notice pending application 📆", text: `${countNotice} pending application has been noticed !` });
   } catch (e) {
     capture(e);
     slack.error({ title: "applicationPending", text: JSON.stringify(e) });
