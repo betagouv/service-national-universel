@@ -42,7 +42,6 @@ export default function DeletedVolontairePanel({ onChange, value }) {
         <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
       </div>
       <Info title="Coordonnées" id={young._id}>
-        <Details title="E-mail" value={young.email} copy />
         <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
         <Details title="Dép" value={young.department} />
         <Details title="Région" value={young.region} />

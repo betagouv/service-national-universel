@@ -852,9 +852,11 @@ const Action = ({ hit }) => {
           <Link to={`/volontaire/${hit._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
             <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
           </Link>
-          <Link to={`/volontaire/${hit._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
-            <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
-          </Link>
+          {hit.status !== YOUNG_STATUS.DELETED ? (
+            <Link to={`/volontaire/${hit._id}/edit`} onClick={() => plausibleEvent("Volontaires/CTA - Modifier profil volontaire")}>
+              <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
+            </Link>
+          ) : null}
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status !== YOUNG_STATUS.DELETED ? (
             <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
               <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
