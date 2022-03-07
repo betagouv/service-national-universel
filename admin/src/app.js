@@ -98,7 +98,7 @@ const Home = () => {
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
-  const [menuVisible, setMenuVisible] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(false);
 
   const renderDashboard = () => {
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsible />;
@@ -137,9 +137,9 @@ const Home = () => {
 
   return (
     <div>
-      <Header />
+      <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} />
       <div className="flex">
-        <Drawer />
+        <Drawer open={drawerVisible} />
         <div className="flex-1">
           <Switch>
             <Route path="/auth" component={Auth} />
