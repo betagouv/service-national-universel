@@ -159,8 +159,8 @@ export default function Index() {
                   name="militaryPreparationFilesIdentity"
                   handleChange={handleChange}
                 />
-                <ErrorMessage errors={errors} touched={touched} name="militaryPreparationFilesIdentity" />
                 <UploadCard
+                  optional
                   errors={errors}
                   title="Attestation de recensement"
                   subTitle="Déposez ici la copie de votre attestation de recensement."
@@ -179,7 +179,6 @@ export default function Index() {
                   handleChange={handleChange}
                   template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Modele_d_autorisation_parentale.pdf"
                 />
-                <ErrorMessage errors={errors} touched={touched} name="militaryPreparationFilesAuthorization" />
                 <UploadCard
                   errors={errors}
                   title="Certificat médical de non contre indication à la pratique sportive"
@@ -190,7 +189,6 @@ export default function Index() {
                   handleChange={handleChange}
                   template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/certificat_medical.pdf"
                 />
-                <ErrorMessage errors={errors} touched={touched} name="militaryPreparationFilesCertificate" />
               </CardsContainer>
               <SubmitComponent young={young} loading={isSubmitting} onClick={handleSubmit} errors={errors} />
             </>

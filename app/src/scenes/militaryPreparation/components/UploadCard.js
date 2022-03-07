@@ -18,6 +18,7 @@ export default function UploadCard({
   subsubTitle,
   errorMessage = "Ce document est requis",
   template,
+  optional,
 }) {
   return (
     <Card>
@@ -34,7 +35,7 @@ export default function UploadCard({
           </LoadingButton>
         ) : null}
         <DndFileInput
-          optional
+          optional={optional}
           errorMessage={errorMessage}
           value={values[name]}
           name={name}
