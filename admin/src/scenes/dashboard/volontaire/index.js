@@ -12,23 +12,17 @@ import { YOUNG_STATUS, ROLES, translate } from "../../../utils";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
-  const [filter, setFilter] = useState();
+  const [filter, setFilter] = useState({ status: [YOUNG_STATUS.VALIDATED], cohort: ["2021"], region: [], department: [] });
 
   function updateFilter(n) {
-    setFilter({
-      ...(filter || { status: [YOUNG_STATUS.VALIDATED], region: [], department: [], cohort: filter?.cohort || ["2021"] }),
-      ...n,
-    });
+    setFilter((f) => ({ ...f, ...n }));
   }
 
   useEffect(() => {
-    const cohort = ["2021"];
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: [user.department], cohort });
+      updateFilter({ department: [user.department] });
     } else if (user.role === ROLES.REFERENT_REGION) {
-      updateFilter({ region: [user.region], cohort });
-    } else {
-      updateFilter({ cohort });
+      updateFilter({ region: [user.region] });
     }
   }, []);
 
