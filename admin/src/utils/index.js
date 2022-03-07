@@ -144,4 +144,8 @@ export const getLink = ({ base = "/", filter, filtersUrl = [] }) => {
   return res;
 };
 
+export function classNames(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
+
 export const ENABLE_PM = true;

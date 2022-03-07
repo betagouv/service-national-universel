@@ -16,6 +16,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from 
 import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION"];
 
@@ -159,7 +160,7 @@ export default function List() {
                   className="dropdown-filter"
                   placeholder="Domaine"
                   componentId="DOMAIN"
-                  dataField="domains.keyword"
+                  dataField="mainDomain.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
@@ -167,7 +168,9 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Domaine")}
+                  renderLabel={(items) => getFilterLabel(items, "Domaine d’action principal", "Domaine d’action principal")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -221,6 +224,7 @@ export default function List() {
                     sortBy="asc"
                   />
                 ) : null}
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -12,6 +13,8 @@ import { region2department, departmentList, department2region } from "../../util
 
 import YearPicker from "../dashboard/components/YearPicker";
 export default function Goal() {
+  useDocumentTitle("Objectifs");
+
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const [loading, setLoading] = useState(false);
   const [blocsOpened, setBlocsOpened] = useState([]);

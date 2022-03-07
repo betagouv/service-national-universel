@@ -32,7 +32,7 @@ export default function Index() {
     <>
       <Row>
         <Col style={{ display: "flex" }}>
-          <Title>Structures</Title>
+          <h2 className="m-0 font-bold text-2xl">Structures</h2>
           {filter && (
             <FiltersList>
               <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
@@ -46,13 +46,6 @@ export default function Index() {
   );
 }
 
-// Title line with filters
-const Title = styled.h2`
-  color: #242526;
-  font-weight: bold;
-  font-size: 28px;
-  margin-bottom: 10px;
-`;
 const FiltersList = styled.div`
   gap: 1rem;
   flex: 1;

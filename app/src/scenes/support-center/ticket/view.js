@@ -36,6 +36,7 @@ export default function TicketView(props) {
       setTicket(null);
     }
   };
+
   useEffect(() => {
     getTicket();
     const ping = setInterval(getTicket, 5000);

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 
 import Invite from "./invite";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import { ROLES, colors } from "../../utils";
+import { ROLES } from "../../utils";
 import plausibleEvent from "../../services/pausible";
+import { HiLogout, HiUser, HiUserAdd } from "react-icons/hi";
 
 import Avatar from "../Avatar";
 
@@ -22,44 +22,53 @@ export default function HeaderUser() {
     await api.post(`/referent/logout`);
     dispatch(setUser(null));
   }
+
   return (
-    <div className="User">
-      <Dropdown>
+    <div>
+      <div className="group py-2 pl-3">
         <div>
-          <MenuToggle>
-            <Avatar onClick={() => setOpen(!open)} name={`${user.firstName} ${user.lastName}`} menuOpened={open} />
-          </MenuToggle>
+          <Avatar onClick={() => setOpen(!open)} name={`${user.firstName} ${user.lastName}`} menuOpened={open} />
         </div>
-        <Menu open={open}>
-          <Close onClick={() => setOpen(false)}>&times;</Close>
+        <div
+          className={`${
+            open ? "block" : "hidden"
+          } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute top-[calc(100%)] right-0 border-3 border-red-600 shadow overflow-hidden`}>
           <div className="my-2 text-xs px-3 text-coolGray-600">
             <p>
               {user.firstName} {user.lastName}
             </p>
             <p className="italic">{user.email}</p>
           </div>
-          <hr className="m-0" />
-          <Item>
-            <NavLink to="/profil">Profil</NavLink>
-          </Item>
+          <hr className="m-0 border-t-coolGray-100" />
+          <NavLink to="/profil">
+            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
+              <HiUser className="group-hover:scale-110" />
+              Profil
+            </div>
+          </NavLink>
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
-            <Item>
+            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2">
+              <HiUserAdd className="group-hover:scale-110" />
               <InviteReferent role={user.role} />
-            </Item>
+            </div>
           ) : null}
           {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && user.structureId ? (
-            <Item>
-              <NavLink to={`/structure/${user.structureId}`}>Inviter un utilisateur</NavLink>
-            </Item>
-          ) : null}
-          <hr className="m-0" />
-          <Item onClick={logout}>
-            <NavLink style={{ color: colors.red }} to="/logout">
-              Se déconnecter
+            <NavLink to={`/structure/${user.structureId}`}>
+              <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
+                <HiUserAdd className="group-hover:scale-110" />
+                Inviter&nbsp;un&nbsp;utilisateur
+              </div>
             </NavLink>
-          </Item>
-        </Menu>
-      </Dropdown>
+          ) : null}
+          <hr className="m-0 border-t-coolGray-100" />
+          <NavLink to="/logout" onClick={logout}>
+            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-red-700 hover:text-red-700">
+              <HiLogout className="text-red-700 group-hover:scale-110" />
+              Se déconnecter
+            </div>
+          </NavLink>
+        </div>
+      </div>
     </div>
   );
 }
@@ -72,114 +81,8 @@ const InviteReferent = ({ role }) => {
         plausibleEvent("Profil CTA - Inviter nouvel utilisateur");
         setOpen(true);
       }}>
-      <div>Inviter un nouvel utilisateur</div>
+      <div>Inviter&nbsp;un&nbsp;nouvel&nbsp;utilisateur</div>
       <Invite role={role} label="Inviter un nouvel utilisateur" open={open} setOpen={() => setOpen(false)} />
     </div>
   );
 };
-
-const Dropdown = styled.div`
-  position: relative;
-  :hover > div {
-    opacity: 1;
-    visibility: visible;
-  }
-  hr {
-    margin: 5px 0;
-    border-top: 1px solid #ebeef5;
-  }
-`;
-
-const MenuToggle = styled.div`
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  h2 {
-    color: #000;
-    font-size: 14px;
-    font-weight: 400;
-    margin-bottom: 5px;
-  }
-  p {
-    text-transform: uppercase;
-    color: #606266;
-    font-size: 12px;
-    margin: 0;
-  }
-`;
-
-const Menu = styled.div`
-  min-width: 230px;
-  border-radius: 2px;
-  background-color: #fff;
-  opacity: ${({ open }) => (open ? 1 : 0)};
-  visibility: ${({ open }) => (open ? "visible" : "hidden")};
-  -webkit-transition: all 0.3s;
-  transition: all 0.3s;
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  border-radius: 4px;
-  z-index: 100;
-  border: 1px solid rgb(235, 238, 245);
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
-
-  ::after {
-    content: "";
-    display: block;
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-bottom: 10px solid #fff;
-    position: absolute;
-    bottom: 100%;
-    right: 10%;
-    z-index: -1;
-  }
-
-  @media (max-width: 767px) {
-    position: fixed;
-    top: 0;
-    left: 0;
-    transform: translateX(${({ open }) => (open ? 0 : "105%")});
-    opacity: 1;
-    visibility: visible;
-    height: 100vh;
-    width: 100vw;
-    background-color: #fff;
-    z-index: 11;
-  }
-`;
-
-const Item = styled.div`
-  font-size: 15px;
-  border-left: solid transparent 4px;
-  border-radius: 0;
-  text-align: left;
-  color: #374151;
-  cursor: pointer;
-  padding: 10px;
-  &:hover {
-    background-color: #d3bfc731;
-    color: #333;
-  }
-  a {
-    color: inherit;
-    text-decoration: none;
-    display: block;
-  }
-`;
-
-const Close = styled.div`
-  font-size: 32px;
-  color: #666;
-  padding: 0 15px 20px;
-  display: none;
-  width: 45px;
-  padding: 0 15px;
-  margin-left: auto;
-  @media (max-width: 767px) {
-    display: block;
-  }
-`;

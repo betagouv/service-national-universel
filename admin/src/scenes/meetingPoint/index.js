@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import api from "../../services/api";
 import { apiURL } from "../../config";
@@ -7,10 +8,12 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from 
 import Chevron from "../../components/Chevron";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT"];
 
 export default function MeetingPoint() {
+  useDocumentTitle("Points de rassemblement");
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
@@ -100,6 +103,7 @@ export default function MeetingPoint() {
                   searchPlaceholder="Rechercher..."
                   size={1000}
                 />
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>

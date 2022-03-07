@@ -6,6 +6,8 @@ import "dayjs/locale/fr";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { HiAdjustments } from "react-icons/hi";
 
 import VioletButton from "../../components/buttons/VioletButton";
 import ExportComponent from "../../components/ExportXlsx";
@@ -28,13 +30,34 @@ import {
 } from "../../utils";
 import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL", "COHORT", "PPS", "PAI", "QPV", "HANDICAP", "ZRR", "GRADE", "ACADEMY", "COUNTRY"];
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Badge from "../../components/Badge";
 import plausibleEvent from "../../services/pausible";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
+
+const FILTERS = [
+  "SEARCH",
+  "STATUS",
+  "REGION",
+  "DEPARTMENT",
+  "SCHOOL",
+  "COHORT",
+  "PPS",
+  "PAI",
+  "QPV",
+  "HANDICAP",
+  "ZRR",
+  "GRADE",
+  "ACADEMY",
+  "COUNTRY",
+  "SPECIFIC_AMENAGEMENT",
+  "SAME_DEPARTMENT",
+  "PMR",
+];
 
 export default function Inscription() {
+  useDocumentTitle("Inscriptions");
   const [young, setYoung] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } }, track_total_hits: true });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -180,63 +203,10 @@ export default function Inscription() {
                   URLParams={true}
                   autosuggest={false}
                 />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS"
-                  dataField="status.keyword"
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut")}
-                />
-                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+                <HiAdjustments onClick={handleShowFilter} className="text-xl text-coolGray-700 cursor-pointer hover:scale-105" />
               </FilterRow>
-
               <FilterRow visible={filterVisible}>
-                <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Pays"
-                  componentId="COUNTRY"
-                  dataField="country.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "COUNTRY") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <MultiDropdownList
-                  style={{ display: "none" }}
-                  defaultQuery={getDefaultQuery}
-                  componentId="SCHOOL"
-                  dataField="schoolName.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
-                  URLParams={true}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Classe"
-                  componentId="GRADE"
-                  dataField="grade.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "GRADE") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                />
+                <div className="uppercase text-xs text-snu-purple-800">Général</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -250,6 +220,57 @@ export default function Inscription() {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="STATUS"
+                  dataField="status.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Pays"
+                  componentId="COUNTRY"
+                  dataField="country.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COUNTRY") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Pays", "Pays")}
+                />
+                <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Académie", "Académie")} />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Région", "Région")} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} renderLabel={(items) => getFilterLabel(items, "Département", "Département")} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Classe"
+                  componentId="GRADE"
+                  dataField="grade.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "GRADE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Classe", "Classe")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -307,6 +328,49 @@ export default function Inscription() {
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Aménagement spécifique"
+                  componentId="SPECIFIC_AMENAGEMENT"
+                  dataField="specificAmenagment.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SPECIFIC_AMENAGEMENT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Aménagement spécifique", "Aménagement spécifique")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="PMR"
+                  componentId="PMR"
+                  dataField="reducedMobilityAccess.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PMR") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Aménagement PMR", "Aménagement PMR")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Affectation dans son département"
+                  componentId="SAME_DEPARTMENT"
+                  dataField="handicapInSameDepartment.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SAME_DEPARTMENT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département", "Affectation dans son département")}
+                />
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>
@@ -359,26 +423,50 @@ const Hit = ({ hit, index, onClick, selected }) => {
 
   let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WAITING_LIST];
   if (user.role === ROLES.ADMIN) STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
+  const getBackgroundColor = () => {
+    if (selected) return colors.lightBlueGrey;
+    if (hit.status === "WITHDRAWN" || hit.status === YOUNG_STATUS.DELETED) return colors.extraLightGrey;
+  };
+  if (hit.status === YOUNG_STATUS.DELETED) {
+    return (
+      <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
+        <td>{index + 1}</td>
 
-  return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick} key={hit._id}>
-      <td>{index + 1}</td>
-      <td>
-        <MultiLine>
-          <span className="font-bold text-black">
-            {hit.firstName} {hit.lastName} <Badge text={hit.cohort} />
-          </span>
-          <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
-        </MultiLine>
-      </td>
-      <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-        <SelectStatus hit={hit} options={STATUS} />
-      </td>
-      <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-        <Action hit={hit} />
-      </td>
-    </tr>
-  );
+        <td>
+          <MultiLine>
+            <span className="font-bold text-black">Compte supprimé</span>
+            <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
+          </MultiLine>
+        </td>
+        <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+          <SelectStatus hit={hit} options={STATUS} />
+        </td>
+        <td onClick={(e) => e.stopPropagation()}>
+          <Action hit={hit} />
+        </td>
+      </tr>
+    );
+  } else {
+    return (
+      <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick} key={hit._id}>
+        <td>{index + 1}</td>
+        <td>
+          <MultiLine>
+            <span className="font-bold text-black">
+              {hit.firstName} {hit.lastName} <Badge text={hit.cohort} />
+            </span>
+            <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
+          </MultiLine>
+        </td>
+        <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+          <SelectStatus hit={hit} options={STATUS} />
+        </td>
+        <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+          <Action hit={hit} />
+        </td>
+      </tr>
+    );
+  }
 };
 
 const Action = ({ hit }) => {
@@ -395,14 +483,18 @@ const Action = ({ hit }) => {
               Consulter le profil
             </Link>
           </DropdownItem>
-          <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Inscriptions/CTA - Modifier profil jeune")}>
-            <Link to={`/volontaire/${hit._id}/edit`}>Modifier le profil</Link>
-          </DropdownItem>
-          <DropdownItem className="dropdown-item">
-            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
-              Prendre sa place
-            </a>
-          </DropdownItem>
+          {hit.status !== YOUNG_STATUS.DELETED ? (
+            <>
+              <DropdownItem className="dropdown-item" onClick={() => plausibleEvent("Inscriptions/CTA - Modifier profil jeune")}>
+                <Link to={`/volontaire/${hit._id}/edit`}>Modifier le profil</Link>
+              </DropdownItem>
+              <DropdownItem className="dropdown-item">
+                <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
+                  Prendre sa place
+                </a>
+              </DropdownItem>
+            </>
+          ) : null}
         </DropdownMenu>
       </UncontrolledDropdown>
     </ActionBox>

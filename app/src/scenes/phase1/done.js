@@ -20,7 +20,7 @@ export default function Done() {
             <strong>{young.firstName}, vous avez validé votre Phase 1 !</strong>
           </h1>
           <p>Bravo pour votre engagement !</p>
-          {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
+          {young.statusPhase1 === "DONE" ? (
             <>
               <Separator />
               <p>

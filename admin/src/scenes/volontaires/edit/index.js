@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 import plausibleEvent from "../../../services/pausible";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import { translate, ROLES } from "../../../utils";
@@ -42,13 +43,15 @@ import { YOUNG_STATUS } from "../../../utils";
 export default function VolontaireEdit(props) {
   const [young, setYoung] = useState();
   const user = useSelector((state) => state.Auth.user);
+  const setDocumentTitle = useDocumentTitle("Volontaires");
 
   useEffect(() => {
     (async () => {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return setYoung(null);
       const { data } = await api.get(`/referent/young/${id}`);
-      return setYoung(data);
+      setDocumentTitle(`${data.firstName} ${data.lastName}`);
+      setYoung(data);
     })();
   }, []);
 

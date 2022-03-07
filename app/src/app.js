@@ -35,13 +35,13 @@ import Bug from "./scenes/bug";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import Desistement from "./scenes/desistement";
+import changeSejour from "./scenes/phase1/changeSejour";
 
 import api from "./services/api";
 import { SENTRY_URL, environment, appURL } from "./config";
 import ModalCGU from "./components/modals/ModalCGU";
 
 import "./index.css";
-import "./tailwindcss.css";
 import { YOUNG_STATUS, ENABLE_PM } from "./utils";
 import Zammad from "./components/Zammad";
 import GoogleTags from "./components/GoogleTags";
@@ -163,6 +163,7 @@ const Espace = () => {
             <Route path="/candidature" component={Applications} />
             <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
+            <Route path="/changer-de-sejour" component={changeSejour} />
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>

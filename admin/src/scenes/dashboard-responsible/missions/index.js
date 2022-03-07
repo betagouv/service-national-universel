@@ -38,7 +38,7 @@ export default function Missions({ referentManagerPhase2 }) {
   return (
     <Row>
       <Col md={6}>
-        <Title>Missions</Title>
+        <h2 className="m-0 font-bold text-2xl">Missions</h2>
       </Col>
       {referentManagerPhase2 ? (
         <Col md={6}>

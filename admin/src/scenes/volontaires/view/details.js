@@ -3,7 +3,7 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason, colors, CONSENTMENT_TEXTS } from "../../../utils";
+import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason, CONSENTMENT_TEXTS } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -11,12 +11,12 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import { Box, BoxTitle } from "../../../components/box";
 import Emails from "../../../components/views/Emails";
 import InfoIcon from "../../../assets/InfoIcon";
-import TickDone from "../../../assets/TickDone";
-import Copy from "../../../assets/Copy";
 import PatchHistoric from "../../../components/views/PatchHistoric";
 import ExpandComponent from "../../../components/ExpandComponent";
+import { BiCopy } from "react-icons/bi";
+import { HiCheckCircle } from "react-icons/hi";
 
-export default function VolontaireViewDetails({ young }) {
+export default function VolontaireViewDetails({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
   const [isDeleted, setIsDeleted] = useState(young.status === "DELETED");
 
@@ -26,7 +26,7 @@ export default function VolontaireViewDetails({ young }) {
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <YoungView young={young} tab="details">
+      <YoungView young={young} tab="details" onChange={onChange}>
         {young.status === YOUNG_STATUS.REFUSED && young.inscriptionRefusedMessage ? (
           <Box>
             <Bloc title="Motif de refus" id={young._id}>
@@ -302,12 +302,12 @@ const Details = ({ title, value, copy, style }) => {
         <div className="detail-text">{value}</div>
         {copy ? (
           <div
-            className="icon"
+            className="flex items-center justify-center mx-1 cursor-pointer hover:scale-105 text-snu-purple-400"
             onClick={() => {
               copyToClipboard(value);
               setCopied(true);
             }}>
-            {copied ? <TickDone color={colors.green} width={17} height={17} /> : <Copy color={colors.darkPurple} width={17} height={17} />}
+            {copied ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-snu-purple-300" />}
           </div>
         ) : null}
       </section>

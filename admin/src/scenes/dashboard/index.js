@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useHistory, NavLink } from "react-router-dom";
 
 import Inscription from "./inscription";
 import Volontaire from "./volontaire";
@@ -26,25 +26,15 @@ export default function Dashboard() {
 
   return (
     <>
-      <TabNavigation>
-        <TabNavigationList>
-          <TabItem onClick={() => history.push(`/dashboard/inscriptions`)} isActive={currentTab === "inscriptions"}>
-            Inscriptions
-          </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/volontaires`)} isActive={currentTab === "volontaires"}>
-            Volontaires
-          </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/structures`)} isActive={currentTab === "structures"}>
-            Structures
-          </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/missions`)} isActive={currentTab === "missions"}>
-            Missions
-          </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/centres`)} isActive={currentTab === "centres"}>
-            Centres
-          </TabItem>
-        </TabNavigationList>
-        <div style={{ display: "flex", marginTop: "1rem" }}>
+      <div className=" flex flex-1 flex-col lg:flex-row">
+        <nav className="px-3 flex flex-1 border-b">
+          <TabItem title="Inscriptions" to="/dashboard/inscriptions" />
+          <TabItem title="Volontaires" to="/dashboard/volontaires" />
+          <TabItem title="Structures" to="/dashboard/structures" />
+          <TabItem title="Missions" to="/dashboard/missions" />
+          <TabItem title="Centres" to="/dashboard/centres" />
+        </nav>
+        <div className="flex m-1 justify-end">
           {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll filter={filter} /> : null}
           <VioletButton
             onClick={() => {
@@ -54,8 +44,8 @@ export default function Dashboard() {
             <p>Exporter les statistiques</p>
           </VioletButton>
         </div>
-      </TabNavigation>
-      <Wrapper>
+      </div>
+      <Wrapper className="p-6">
         {currentTab === "inscriptions" && <Inscription onChangeFilter={setFilter} />}
         {currentTab === "volontaires" && <Volontaire />}
         {currentTab === "structures" && <Structure />}
@@ -66,8 +56,16 @@ export default function Dashboard() {
   );
 }
 
+const TabItem = ({ to, title }) => (
+  <NavLink
+    to={to}
+    activeClassName="text-snu-purple-800 font-bold border-b-[3px] border-snu-purple-800"
+    className="px-3 py-2 cursor-pointer text-coolGray-500  hover:text-snu-purple-800 hover:border-b-[3px] hover:border-snu-purple-800">
+    {title}
+  </NavLink>
+);
+
 const Wrapper = styled.div`
-  padding: 1.5rem;
   @media print {
     background-color: #fff;
     position: absolute;
@@ -78,57 +76,4 @@ const Wrapper = styled.div`
     padding: 2rem;
     z-index: 999;
   }
-`;
-const TabNavigation = styled.nav`
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-`;
-const TabNavigationList = styled.ul`
-  padding-left: 30px;
-  display: flex;
-  list-style-type: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.09);
-`;
-const TabItem = styled.li`
-  padding: 16px;
-  position: relative;
-  font-size: 16px;
-  color: #979797;
-  cursor: pointer;
-  :hover {
-    color: #aaa;
-    &:after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background-color: #aaa;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-    }
-  }
-
-  ${(props) =>
-    props.isActive &&
-    `
-    color: #5245CC;
-    font-weight: bold;
-
-    &:after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background-color: #5245CC;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-    }
-  `}
 `;
