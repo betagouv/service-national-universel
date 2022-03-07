@@ -61,7 +61,7 @@ export default function SocialIcons({ value }) {
     ) : null,
   ].filter((b) => b);
   if (a.length === 0) return "--";
-  return <SocialWrapper>{a}</SocialWrapper>;
+  return <SocialWrapper className="flex">{a}</SocialWrapper>;
 }
 
 const SocialWrapper = styled.div`
