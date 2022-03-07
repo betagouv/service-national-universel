@@ -1,11 +1,9 @@
 import React from "react";
-import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import Header from "./header";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
-import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
 import plausibleEvent from "../../../services/plausible";
 import gtagEvent from "../../../services/gtag";
@@ -13,49 +11,65 @@ import gtagEvent from "../../../services/gtag";
 export default function Home({ location }) {
   const history = useHistory();
   const [cookies] = useCookies(["accept-cookie"]);
-
   return (
     <div>
       <Header location={location} />
-      <Wrapper>
-        <TitleContainer>
-          <TopTitle className="mobileOnly">inscription 2022</TopTitle>
-          <Title>Participez au SNU</Title>
-          <PlayButton onClick={() => plausibleEvent("LP - Video")} href="https://www.youtube.com/watch?v=rE-8fe9xPDo" target="_blank">
+      <div className="bg-hero-pattern w-full h-[405px] text-center bg-right	bg-no-repeat  bg-cover md:h-[500px]">
+        <div className="flex pt-1 flex-col	items-center z-10">
+          {/* incription Head */}
+          <div className="uppercase text-sm	font-normal	text-white md:hidden">inscription 2022</div>
+          <div className="mb-8 pt-3 text-white font-semibold text-[2rem] md:text-[3rem]">Participez au SNU</div>
+          {/* PlayButton */}
+          <a
+            className="flex items-center justify-center bg-white mb-4 w-12 h-12 rounded-full md:h-20 md:w-20"
+            onClick={() => plausibleEvent("LP - Video")}
+            href="https://www.youtube.com/watch?v=rE-8fe9xPDo"
+            target="_blank"
+            rel="noreferrer">
             <svg width="20" height="26" viewBox="0 0 20 26" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M19.1346 11.0998L3.79966 0.640236C2.49183 -0.253291 0.722412 0.719077 0.722412 2.32217V23.2149C0.722412 24.8443 2.49183 25.7904 3.79966 24.8969L19.1346 14.4373C20.2886 13.6752 20.2886 11.8882 19.1346 11.0998Z"
                 fill="#D33C4A"
               />
             </svg>
-          </PlayButton>
-        </TitleContainer>
-        <CardsContainer>
-          <CardTitle>Une aventure en trois phases</CardTitle>
-          <div className="desktop">
-            <CardPhase
-              onClick={() => plausibleEvent("LP - Phase 1")}
-              upText="phase 1"
-              title="Le séjour de cohésion"
-              downText="3 sessions possibles en février, juin et juillet 2022"
-              to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
-            />
-            <CardPhase
-              onClick={() => plausibleEvent("LP - Phase 2")}
-              upText="phase 2"
-              title="La mission d'intérêt général"
-              downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
-              to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
-            />
-            <CardPhase
-              onClick={() => plausibleEvent("LP - Phase 3")}
-              upText="phase 3 - facultative"
-              title="L'engagement"
-              downText="Mission facultative de 3 mois minimum"
-              to="https://www.snu.gouv.fr/l-engagement-28"
-            />
+          </a>
+        </div>
+        {/* Cards container */}
+        <div className="flex-1 z-10">
+          <p className="text-white mb-4 font-medium text-2xl md:text-base">Une aventure en trois phases</p>
+          {/* Desktop View Cards*/}
+          <div className=" justify-around hidden md:flex">
+            <div className="w-[20rem] lg:w-[25rem] ">
+              <CardPhase
+                onClick={() => plausibleEvent("LP - Phase 1")}
+                upText="phase 1"
+                title="Le séjour de cohésion"
+                downText="3 sessions possibles en février, juin et juillet 2022"
+                to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
+              />
+            </div>
+            <div className="w-[20rem] lg:w-[25rem]">
+              <CardPhase
+                onClick={() => plausibleEvent("LP - Phase 2")}
+                upText="phase 2"
+                title="La mission d'intérêt général"
+                downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
+                to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
+              />
+            </div>
+            <div className="w-[20rem] lg:w-[25rem]  ">
+              <CardPhase
+                onClick={() => plausibleEvent("LP - Phase 3")}
+                upText="phase 3 - facultative"
+                title="L'engagement"
+                downText="Mission facultative de 3 mois minimum"
+                to="https://www.snu.gouv.fr/l-engagement-28"
+              />
+            </div>
           </div>
-          <Carousel className="mobile" showThumbs={false} showStatus={false} showArrows={true}>
+
+          {/* Mobile View Carusel*/}
+          <Carousel className="flex md:hidden p-3" showThumbs={false} showStatus={false} showArrows={true}>
             <CardPhase
               onClick={() => plausibleEvent("LP - Phase 1")}
               upText="phase 1"
@@ -78,247 +92,52 @@ export default function Home({ location }) {
               to="https://www.snu.gouv.fr/l-engagement-28"
             />
           </Carousel>
-          <StartButtonContainer className="desktop desktopButton">
-            <StartButton
+          {/* Start Button Desktop View */}
+          <div className="z-50  hidden md:block">
+            <button
+              className="uppercase p-3 pr-4 mt-[3px] lg:mt-[2rem] text-white bg-[#61c091] font-medium	text-base	cursor-pointer tracking-wider	rounded-full	hover:shadow-2xl"
               onClick={() => {
                 history.push("/inscription/profil");
                 plausibleEvent("LP CTA - Inscription");
                 gtagEvent(cookies, "DC-2971054/snuiz0/bouton1+unique");
               }}>
               Commencer&nbsp;l&apos;inscription
-            </StartButton>
-          </StartButtonContainer>
-        </CardsContainer>
-        <MobileView />
-        <DesktopView />
-      </Wrapper>
-      <StartButtonContainer className="mobile">
-        <StartButton
-          onClick={() => {
-            history.push("/inscription/profil");
-            plausibleEvent("LP CTA - Inscription");
-            gtagEvent(cookies, "DC-2971054/snuiz0/bouton1+unique");
-          }}>
-          Commencer&nbsp;l&apos;inscription
-        </StartButton>
-      </StartButtonContainer>
+            </button>
+          </div>
+        </div>
+      </div>
+      {/* Its Mobile and Desktop View Component */}
+      <DesktopView />
+      {/* Start Button Mobile View */}
+      <div className="flex justify-center	">
+        <div className="z-10 fixed bottom-12 md:hidden">
+          <button
+            className="uppercase p-3 pr-4 text-white bg-[#61c091]	font-medium	text-base	cursor-pointer tracking-wider	rounded-full 	hover:shadow-2xl"
+            onClick={() => {
+              history.push("/inscription/profil");
+              plausibleEvent("LP CTA - Inscription");
+              gtagEvent(cookies, "DC-2971054/snuiz0/bouton1+unique");
+            }}>
+            Commencer&nbsp;l&apos;inscription
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
-const CardTitle = styled.div`
-  color: #fff;
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
-  font-weight: 500;
-  @media (max-width: 767px) {
-    font-size: 1rem;
-  }
-`;
-
-const PlayButton = styled.a`
-  background-color: #fff;
-  height: 90px;
-  width: 90px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-  svg {
-    height: 100%;
-  }
-  @media (max-width: 767px) {
-    height: 50px;
-    width: 50px;
-  }
-`;
-
-const TitleContainer = styled.div`
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 10;
-`;
-
-const CardsContainer = styled.div`
-  flex: 1;
-  z-index: 2;
-  .mobile {
-    display: none;
-  }
-  .desktop {
-    display: flex;
-    align-items: center;
-    > * {
-      margin: 0 1rem;
-    }
-  }
-  @media (max-width: 767px) {
-    .desktop {
-      display: none;
-    }
-    .mobile {
-      display: flex;
-      > * {
-        margin: 0 1rem;
-      }
-    }
-  }
-`;
-
 const CardPhase = ({ upText, title, downText, to }) => {
   return (
-    <Card href={to} target="_blank">
+    <a
+      className="flex w-full flex-col justify-between items-start border-b-8 border-red-700 rounded-2xl  min-h-[10rem]	 bg-white pt-4	pr-4 pb-8	 pl-4	hover:text-black"
+      href={to}
+      target="_blank"
+      rel="noreferrer">
       <div>
-        <CardUpText>{upText}</CardUpText>
-        <CardText>{title}</CardText>
+        <p className="text-left text-[#ef4036]	uppercase text-[0.8rem]	">{upText}</p>
+        <p className="text-lg text-left font-bold md:text-2xl ">{title}</p>
       </div>
-      <CardDownText>{downText}</CardDownText>
-    </Card>
+      <p className="text-left text-base	md:text-sm text-[#6e757c] ">{downText}</p>
+    </a>
   );
 };
-
-const Card = styled.a`
-  padding: 1rem 1rem 2rem 1rem;
-  display: flex;
-  width: 100%;
-  min-height: 170px;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  background-color: #fff;
-  border-radius: 1rem;
-  border-bottom: 7px solid #ef4036;
-`;
-const CardUpText = styled.div`
-  text-align: left;
-  color: #ef4036;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-`;
-
-const CardText = styled.div`
-  color: #000;
-  font-size: 1.5rem;
-  text-align: left;
-  font-weight: 700;
-  @media (max-width: 767px) {
-    font-size: 1.2rem;
-  }
-`;
-
-const CardDownText = styled.div`
-  text-align: left;
-  font-size: 1rem;
-  @media (max-width: 767px) {
-    font-size: 0.85rem;
-  }
-  color: #6e757c;
-`;
-
-const StartButtonContainer = styled.div`
-  z-index: 100;
-  &.mobile {
-    display: none;
-  }
-  justify-content: center;
-  margin-top: 1rem;
-  @media (max-width: 767px) {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translate(-50%, 0);
-    &.mobile {
-      display: inline-block;
-    }
-  }
-`;
-
-const StartButton = styled.div`
-  padding: 1rem 1.5rem;
-  text-transform: uppercase;
-  color: #fff;
-  background-color: #61c091;
-  font-weight: 500;
-  font-size: 1rem;
-  cursor: pointer;
-  letter-spacing: 0.03em;
-  border-radius: 30px;
-  :hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    color: #fff;
-  }
-  &.mobile {
-    border: 3px #51b081 solid;
-  }
-`;
-
-const Wrapper = styled.div`
-  width: 100%;
-  text-align: center;
-  align-items: center;
-
-  ::before {
-    content: "";
-    display: block;
-    height: 630px;
-    width: 100%;
-    background: url(${require("../../../assets/phase3.jpg")}) center no-repeat;
-    background-size: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-  }
-  ::after {
-    content: "";
-    display: block;
-    height: 630px;
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: rgb(66, 56, 157);
-    background: linear-gradient(0deg, rgba(66, 56, 157, 1) 0%, rgba(66, 56, 157, 0.8575805322128851) 24%, rgba(66, 56, 157, 0.5606617647058824) 79%, rgba(0, 212, 255, 0) 100%);
-    z-index: 1;
-  }
-  > * {
-    position: relative;
-  }
-  .mobileOnly {
-    display: none;
-  }
-  @media (max-width: 767px) {
-    .mobileOnly {
-      display: block;
-    }
-    padding: 0;
-    ::before,
-    ::after {
-      height: 490px;
-    }
-  }
-`;
-const Title = styled.div`
-  margin-bottom: 20px;
-  color: #fff;
-  font-size: 46px;
-  font-weight: 600;
-  @media (max-width: 1024px) {
-    font-size: 38px;
-  }
-  @media (max-width: 767px) {
-    font-size: 32px;
-  }
-  @media (max-width: 575px) {
-    font-size: 22px;
-  }
-`;
-const TopTitle = styled.div`
-  text-transform: uppercase;
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 400;
-`;
