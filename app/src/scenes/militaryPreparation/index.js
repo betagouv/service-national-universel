@@ -14,6 +14,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import AlertBox from "../../components/AlertBox";
 import Loader from "../../components/Loader";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import ErrorMessage from "../../components/ErrorMessage";
 import plausibleEvent from "../../services/plausible";
 
 export default function Index() {
@@ -41,7 +42,7 @@ export default function Index() {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
     if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-    const d = data.filter((a) => a.mission.isMilitaryPreparation === "true");
+    const d = data?.filter((a) => a?.mission?.isMilitaryPreparation === "true");
     console.log(d);
     return setApplicationsToMilitaryPreparation(d);
   };
@@ -58,7 +59,7 @@ export default function Index() {
         actions.setSubmitting(false);
       },
       title: "Demande de validation de dossier",
-      message: "Je confirme avoir téléverser tous les documents demandés, et transmets mon dossier pour validation.",
+      message: "Je confirme avoir téléversé tous les documents demandés, et transmets mon dossier pour validation.",
     });
   };
 
@@ -137,7 +138,7 @@ export default function Index() {
       </HeroContainer>
       {applicationsToMilitaryPreparation.length ? (
         <Formik initialValues={young} validateOnChange={false} validateOnBlur={false} onSubmit={onClickSubmit}>
-          {({ values, handleChange, handleSubmit, errors, isSubmitting }) => (
+          {({ values, handleChange, handleSubmit, errors, touched, isSubmitting }) => (
             <>
               <AlertBox
                 message="Les informations collectées dans le cadre d’une candidature de votre part pour effectuer une préparation militaire sont destinées à vérifier l’éligibilité de
@@ -153,10 +154,12 @@ export default function Index() {
                   errors={errors}
                   title="Pièce d'identité"
                   subTitle="Déposez ici la copie d’une pièce d’identité en cours de validité (CNI, passeport)."
+                  errorMessage="Vous devez téléverser votre pièce d'identité."
                   values={values}
                   name="militaryPreparationFilesIdentity"
                   handleChange={handleChange}
                 />
+                <ErrorMessage errors={errors} touched={touched} name="militaryPreparationFilesIdentity" />
                 <UploadCard
                   errors={errors}
                   title="Attestation de recensement"
@@ -170,20 +173,24 @@ export default function Index() {
                   errors={errors}
                   title="Autorisation parentale pour effectuer une préparation militaire"
                   subTitle="Téléchargez puis téléversez le formulaire rempli par votre représentant légal consentant à votre participation à une préparation militaire."
+                  errorMessage="Vous devez téléverser l'autorisation parentale."
                   values={values}
                   name="militaryPreparationFilesAuthorization"
                   handleChange={handleChange}
                   template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Modele_d_autorisation_parentale.pdf"
                 />
+                <ErrorMessage errors={errors} touched={touched} name="militaryPreparationFilesAuthorization" />
                 <UploadCard
                   errors={errors}
                   title="Certificat médical de non contre indication à la pratique sportive"
                   subTitle="Téléchargez puis téléversez le formulaire rempli par votre médecin traitant certifiant l’absence de contre-indication à la pratique sportive."
+                  errorMessage="Vous devez téléverser le certificat médical."
                   values={values}
                   name="militaryPreparationFilesCertificate"
                   handleChange={handleChange}
                   template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/certificat_medical.pdf"
                 />
+                <ErrorMessage errors={errors} touched={touched} name="militaryPreparationFilesCertificate" />
               </CardsContainer>
               <SubmitComponent young={young} loading={isSubmitting} onClick={handleSubmit} errors={errors} />
             </>
