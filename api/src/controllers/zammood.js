@@ -36,6 +36,7 @@ router.get("/ticket/:id", passport.authenticate("referent", { session: false, fa
 router.post("/ticket", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { subject, message, clientId } = req.body;
+    const attributes = [{ name: "id", value: req.user._id }, { name: "date de creation", value: req.user.createdAt }, { name: "derniere connexion", value: req.user.lastLoginAt }, { name: "role", value: req.user.role }];
     const response = await zammood.api("/v0/message", {
       method: "POST",
       credentials: "include",
@@ -47,6 +48,7 @@ router.post("/ticket", passport.authenticate("referent", { session: false, failW
         lastName: req.user.lastName,
         source: "PLATFORM",
         clientId,
+        attributes,
       }),
     });
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
