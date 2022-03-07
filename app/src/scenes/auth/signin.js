@@ -8,28 +8,17 @@ import { setYoung } from "../../redux/auth/actions";
 import LoginBox from "./components/LoginBox";
 import api from "../../services/api";
 import Header from "./components/header";
-import InputField from "./components/InputField";
-import StyledFormGroup from "./components/StyledFormGroup";
-import Forgot from "./components/Forgot";
-import Submit from "./components/Submit";
-import Register from "./components/Register";
-import ErrorLogin from "./components/ErrorLogin";
 import ModalInProgress from "../../components/modals/ModalInProgress";
 import { toastr } from "react-redux-toastr";
 import PasswordEye from "../../components/PasswordEye";
 
 /*
-
 About Redirect after signin
-
 we use this signin screen in the `app`, but also outside the app in `knowledge-base` which is not in the same origin
-
 -> signin and redirect within the app would be an url like http://localhost:8081/auth?redirect=/my-page
 |-> redirection is made with `if (young) return <Redirect to={"/" + (redirect || "")} />;`
-
 -> signin and redirect outside the app would be an url like http://localhost:8081/auth?redirect=http(s)://localhost:8083/
 |-> redirection is made with `if (redirect.startsWith('http')) return window.location.href = redirect;`
-
 */
 
 export default function Signin() {
@@ -45,7 +34,7 @@ export default function Signin() {
   if (disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div className="flex flex-col min-h-screen">
       {modal === "inProgress" && (
         <ModalInProgress
           onChange={() => setModal(false)}
@@ -55,10 +44,11 @@ export default function Signin() {
         />
       )}
       <Header />
+      {/* Login Box */}
       <LoginBox>
-        <h3 className="relative text-center md:text-base text-xs font-bold mb-3 px-2.5 bg-white text-coolGray-900 left-0">
-          <span>Mon espace volontaire</span>
-        </h3>
+        <div className="relative text-center text-[0.8rem] md:text-[1rem] font-bold	mb-[1.25rem] after:content-[''] after:block after:h-[1px] after:w-full after:bg-[#d2d6dc] after:absolute after:left-0 after:top-1/2 after:z-[-1] after:translate-y-[-50%]">
+          <span className="bg-[#fff] text-[#161E2E] p-2">Mon espace volontaire</span>
+        </div>
         <Formik
           initialValues={{ email: "", password: "" }}
           onSubmit={async ({ email, password }, actions) => {
@@ -82,19 +72,24 @@ export default function Signin() {
             return (
               <form onSubmit={handleSubmit}>
                 {!userIsValid && (
-                  <StyledFormGroup>
-                    <ErrorLogin>E-mail et/ou mot de passe incorrect(s)</ErrorLogin>
-                  </StyledFormGroup>
+                  <div className="mb-[20px]">
+                    <div className="w-full block p-[15px] mt-[3px] text-[#c73738] bg-[#fff5f5] rounded-[5px] leading-tight border-[1px] border-[#fc8180]">
+                      E-mail et/ou mot de passe incorrect(s)
+                    </div>
+                  </div>
                 )}
                 {tooManyRequests && (
-                  <StyledFormGroup>
-                    <ErrorLogin>Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure. </ErrorLogin>
-                  </StyledFormGroup>
+                  <div className="mb-[20px]">
+                    <div className="w-full block p-[15px] mt-[3px] text-[#c73738] bg-[#fff5f5] rounded-[5px] leading-tight border-[1px] border-[#fc8180]">
+                      Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure.{" "}
+                    </div>
+                  </div>
                 )}
 
-                <StyledFormGroup>
-                  <div>
-                    <InputField
+                <section className="mb-[20px]">
+                  <div className="flex flex-col-reverse	">
+                    <input
+                      className="w-full block outline-0	 p-[12px]  bg-[transparent] text-[#798fb0] leading-5  rounded-[5px] border-[1px] border-[#e2e8f0] focus:border-[#4299E1] focus:outline-0 "
                       // validate={(v) => !validator.isEmail(v) && "Invalid email address"}
                       name="email"
                       type="email"
@@ -103,32 +98,51 @@ export default function Signin() {
                       value={values.email}
                       onChange={handleChange}
                     />
-                    <label htmlFor="email">E-mail</label>
+                    <label className="text-[#37415b] text-sm	mb-[5px] focus:text-[#434190]" htmlFor="email">
+                      E-mail
+                    </label>
                   </div>
-                  <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.email}</p>
-                </StyledFormGroup>
-                <StyledFormGroup>
-                  <div>
+                  <p className="text-xs mt-1 text-[#FD3131]">{errors.email}</p>
+                </section>
+                <section className="mb-[20px]">
+                  <div className="flex flex-col-reverse	">
                     <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
-                    <label htmlFor="password">Mot de passe</label>
+                    <label className="text-[#37415b] text-sm	mb-[5px] focus:text-[#434190]" htmlFor="password">
+                      Mot de passe
+                    </label>
                   </div>
-                  <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.password}</p>
-                </StyledFormGroup>
-                <Forgot>
-                  <Link to="/auth/forgot">Mot de passe perdu ?</Link>
-                </Forgot>
-                <Submit loading={isSubmitting} type="submit">
+                  <p className="text-xs mt-1 text-[#FD3131]">{errors.password}</p>
+                </section>
+                {/* Forget Password */}
+                <div className="mb-[20px]">
+                  <Link className="text-[#5145cd] text-[14px]" to="/auth/forgot">
+                    Mot de passe perdu ?
+                  </Link>
+                </div>
+                {/* Forget Password */}
+                {/* Submit Button */}
+                <button
+                  className="w-full block text-[18px] font-bold p-[12px] bg-[#5145cd] mt-[30px] mb-[30px] cursor-pointer shadow-xl	 rounded-[10px] hover:bg-[#42389d]"
+                  loading={isSubmitting}
+                  type="submit">
                   Connexion
-                </Submit>
+                </button>
+                {/* Submit Button */}
               </form>
             );
           }}
         </Formik>
         <>
-          <h3 className="relative text-center md:text-base text-xs font-bold pt-3 px-2.5 bg-white text-coolGray-900 left-0 border-t">
-            <span>Vous n&apos;êtes pas encore inscrit ?</span>
-          </h3>
-          <Register to="/inscription/profil">Commencer l&apos;inscription</Register>
+          <div className="relative text-center text-[0.8rem] md:text-[1rem] font-bold	mb-[1.25rem] after:content-[''] after:block after:h-[1px] after:w-full after:bg-[#d2d6dc] after:absolute after:left-0 after:top-1/2 after:z-[-1] after:translate-y-[-50%]">
+            <span className="bg-[#fff] text-[#161E2E] p-2">Vous n&apos;êtes pas encore inscrit ?</span>
+          </div>
+          {/* Register Button */}
+          <Link
+            className="w-full block text-[#000] text-center text-[18px] font-bold p-[12px] bg-[#fff] mt-[20px] rounded-[10px] border-[1px] border-[#e5e7eb] hover:text-[#000] hover:bg-[#f4f5f7]"
+            to="/inscription/profil">
+            Commencer l&apos;inscription
+          </Link>
+          {/* Register Button */}
         </>
       </LoginBox>
     </div>
