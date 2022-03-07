@@ -54,7 +54,7 @@ export default function DetailsView({ structure }) {
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Bloc title="La structure" titleRight={<SocialIcons value={structure} />}>
                 <Details title="Présentation" value={structure.description} />
-                <Details title="Status" value={translate(structure.legalStatus)} />
+                <Details title="Statut" value={translate(structure.legalStatus)} />
                 <Details title="Adresse" value={structure.address} />
                 <Details title="Ville" value={structure.city} />
                 <Details title="Code Postal" value={structure.zip} />
