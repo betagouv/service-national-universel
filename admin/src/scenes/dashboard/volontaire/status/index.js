@@ -38,7 +38,7 @@ export default function StatusIndex({ filter }) {
   useEffect(() => {
     (async () => {
       const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "status.keyword": ["VALIDATED"] } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },

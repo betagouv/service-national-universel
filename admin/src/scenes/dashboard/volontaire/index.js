@@ -15,9 +15,8 @@ export default function Index() {
   const [filter, setFilter] = useState();
 
   function updateFilter(n) {
-    console.log("✍️ ~ n", n);
     setFilter({
-      ...(filter || { status: YOUNG_STATUS.VALIDATED, region: [], department: [], cohort: filter?.cohort || ["2021"] }),
+      ...(filter || { status: [YOUNG_STATUS.VALIDATED], region: [], department: [], cohort: filter?.cohort || ["2021"] }),
       ...n,
     });
   }
@@ -34,8 +33,9 @@ export default function Index() {
   }, []);
 
   const getOptionsStatus = () => {
-    let STATUS = Object.keys(YOUNG_STATUS).map((s) => ({ label: translate(YOUNG_STATUS[s]), value: s }));
-    if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => !["IN_PROGRESS", "NOT_ELIGIBLE"].includes(e.value));
+    let STATUS = Object.keys(YOUNG_STATUS)
+      .filter((e) => [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.DELETED].includes(e))
+      .map((s) => ({ label: translate(YOUNG_STATUS[s]), value: s }));
     return STATUS;
   };
 

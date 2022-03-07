@@ -68,22 +68,6 @@ export default function Status({ status, statusPhase1, statusPhase2, statusPhase
           </Card>
         </Col>
       </Row>
-      <Row>
-        <Col md={6} xl={4}>
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"WITHDRAWN"%5D'] })}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.WITHDRAWN}>
-              <CardTitle>Désistés</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{status.WITHDRAWN || 0}</CardValue>
-                <CardPercentage>
-                  {total ? `${(((status.WITHDRAWN || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                  <CardArrow />
-                </CardPercentage>
-              </CardValueWrapper>
-            </Card>
-          </Link>
-        </Col>
-      </Row>
     </React.Fragment>
   );
 }
