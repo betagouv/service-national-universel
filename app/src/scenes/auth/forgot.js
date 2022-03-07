@@ -77,7 +77,7 @@ export default function Forgot() {
                       <p className="text-xs mt-1 text-[#FD3131]">{errors.email}</p>
                     </section>
                     <button
-                      className="w-full block text-[18px] font-bold p-[12px] bg-[#5145cd] mt-[30px] mb-[30px] cursor-pointer shadow-xl	 rounded-[10px] hover:bg-[#42389d]"
+                      className="w-full block text-[18px] text-white text-lg font-bold p-[12px] bg-[#5145cd] mt-[30px] mb-[30px] cursor-pointer shadow-xl	 rounded-[10px] hover:bg-[#42389d]"
                       type="submit"
                       color="success"
                       loading={isSubmitting}>

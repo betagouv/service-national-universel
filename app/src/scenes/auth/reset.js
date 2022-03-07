@@ -50,7 +50,12 @@ export default function Reset() {
                   <p>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
                 </section>
                 <div className="button">
-                  <button loading={isSubmitting} type="submit" color="primary" disabled={isSubmitting}>
+                  <button
+                    loading={isSubmitting}
+                    type="submit"
+                    color="primary"
+                    disabled={isSubmitting}
+                    className="w-full block text-[18px] text-lg text-white font-bold p-[12px] bg-[#5145cd] mt-[30px] mb-[30px] cursor-pointer shadow-xl rounded-[10px] hover:bg-[#42389d]">
                     Confirmer
                   </button>
                 </div>
