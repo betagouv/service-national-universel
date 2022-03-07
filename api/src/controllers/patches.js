@@ -67,7 +67,6 @@ const deletePatches = async (req, model) => {
       });
 
       const patchToUpdate = await elem.patches.findOne({ _id: patch._id });
-      console.log(patchToUpdate);
       if (updatedOps.length === 0) {
         patchToUpdate.remove();
       } else {

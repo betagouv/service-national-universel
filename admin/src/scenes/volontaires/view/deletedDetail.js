@@ -1,18 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge } from "../../../utils";
+import { translate as t, isInRuralArea, copyToClipboard, formatStringDate, getAge } from "../../../utils";
 import YoungView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
 
 export default function DeletedVolontaireViewDetails({ young, onChange }) {
-  const user = useSelector((state) => state.Auth.user);
-  const [isDeleted] = useState(young.status === "DELETED");
-
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <YoungView young={young} tab="details" onChange={onChange}>

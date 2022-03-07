@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -18,7 +18,6 @@ import { HiCheckCircle } from "react-icons/hi";
 
 export default function VolontaireViewDetails({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
-  const [isDeleted, setIsDeleted] = useState(young.status === "DELETED");
 
   function isFromFranceConnect() {
     return young.parent1FromFranceConnect === "true" && (!young.parent2Status || young.parent2FromFranceConnect === "true");
@@ -59,7 +58,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Bloc title="Informations générales">
-                {!isDeleted ? <Details title="E-mail" value={young.email} copy /> : null}
+                <Details title="E-mail" value={young.email} copy />
                 <Details title="Date de naissance" value={`${formatStringDate(young.birthdateAt)} • ${getAge(young.birthdateAt)} ans`} />
                 <Details title="Lieu de naissance" value={young.birthCity} />
                 <Details title="Pays de naissance" value={young.birthCountry} />
@@ -116,60 +115,60 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   />
                 ))}
               </Bloc>
-              {!isDeleted ? (
-                <>
-                  <Bloc title="Droit à l'image">
-                    <Details title="Autorisation" value={t(young.imageRight)} />
-                    {(young.imageRightFiles || []).map((e, i) => (
+
+              <>
+                <Bloc title="Droit à l'image">
+                  <Details title="Autorisation" value={t(young.imageRight)} />
+                  {(young.imageRightFiles || []).map((e, i) => (
+                    <DownloadButton
+                      key={i}
+                      source={() => api.get(`/referent/youngFile/${young._id}/imageRightFiles/${e}`)}
+                      title={`Télécharger le formulaire (${i + 1}/${young.imageRightFiles.length})`}
+                    />
+                  ))}
+                </Bloc>
+                <Bloc title="Règlement intérieur">
+                  <Details title="Validation" value={t(young.rulesYoung)} />
+                  {(young.rulesFiles || []).map((e, i) => (
+                    <DownloadButton
+                      key={i}
+                      source={() => api.get(`/referent/youngFile/${young._id}/rulesFiles/${e}`)}
+                      title={`Télécharger le formulaire (${i + 1}/${young.rulesFiles.length})`}
+                    />
+                  ))}
+                </Bloc>
+                {getAge(young?.birthdateAt) < 15 ? (
+                  <Bloc title="Traitement des données personnelles">
+                    {(young.dataProcessingConsentmentFiles || []).map((e, i) => (
                       <DownloadButton
                         key={i}
-                        source={() => api.get(`/referent/youngFile/${young._id}/imageRightFiles/${e}`)}
-                        title={`Télécharger le formulaire (${i + 1}/${young.imageRightFiles.length})`}
+                        source={() => api.get(`/referent/youngFile/${young._id}/dataProcessingConsentmentFiles/${e}`)}
+                        title={`Télécharger le document (${i + 1}/${young.dataProcessingConsentmentFiles.length})`}
                       />
                     ))}
+                    {isFromFranceConnect(young) && (
+                      <div style={{ marginTop: "1rem" }}>
+                        <img src={require("../../../assets/fc_logo_v2.png")} height={60} />
+                        <br />
+                        <b>Consentement parental validé via FranceConnect.</b>
+                        <br />
+                        Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
+                      </div>
+                    )}
                   </Bloc>
-                  <Bloc title="Règlement intérieur">
-                    <Details title="Validation" value={t(young.rulesYoung)} />
-                    {(young.rulesFiles || []).map((e, i) => (
-                      <DownloadButton
-                        key={i}
-                        source={() => api.get(`/referent/youngFile/${young._id}/rulesFiles/${e}`)}
-                        title={`Télécharger le formulaire (${i + 1}/${young.rulesFiles.length})`}
-                      />
-                    ))}
-                  </Bloc>
-                  {getAge(young?.birthdateAt) < 15 ? (
-                    <Bloc title="Traitement des données personnelles">
-                      {(young.dataProcessingConsentmentFiles || []).map((e, i) => (
-                        <DownloadButton
-                          key={i}
-                          source={() => api.get(`/referent/youngFile/${young._id}/dataProcessingConsentmentFiles/${e}`)}
-                          title={`Télécharger le document (${i + 1}/${young.dataProcessingConsentmentFiles.length})`}
-                        />
-                      ))}
-                      {isFromFranceConnect(young) && (
-                        <div style={{ marginTop: "1rem" }}>
-                          <img src={require("../../../assets/fc_logo_v2.png")} height={60} />
-                          <br />
-                          <b>Consentement parental validé via FranceConnect.</b>
-                          <br />
-                          Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
-                        </div>
-                      )}
-                    </Bloc>
-                  ) : null}
-                  <Bloc title="Autotest PCR">
-                    <Details title="Autorisation" value={t(young.autoTestPCR)} />
-                    {(young.autoTestPCRFiles || []).map((e, i) => (
-                      <DownloadButton
-                        key={i}
-                        source={() => api.get(`/referent/youngFile/${young._id}/autoTestPCRFiles/${e}`)}
-                        title={`Télécharger le formulaire (${i + 1}/${young.autoTestPCRFiles.length})`}
-                      />
-                    ))}
-                  </Bloc>
-                </>
-              ) : null}
+                ) : null}
+                <Bloc title="Autotest PCR">
+                  <Details title="Autorisation" value={t(young.autoTestPCR)} />
+                  {(young.autoTestPCRFiles || []).map((e, i) => (
+                    <DownloadButton
+                      key={i}
+                      source={() => api.get(`/referent/youngFile/${young._id}/autoTestPCRFiles/${e}`)}
+                      title={`Télécharger le formulaire (${i + 1}/${young.autoTestPCRFiles.length})`}
+                    />
+                  ))}
+                </Bloc>
+              </>
+
               {young.motivations && (
                 <Bloc title="Motivations">
                   <div className="quote">{`« ${young.motivations} »`}</div>
@@ -239,26 +238,25 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   )}
                 </Bloc>
               ) : null}
-              {!isDeleted ? (
-                <Bloc title="Consentements">
-                  <Details title={`Consentements validés par ${young.firstName} ${young.lastName}`} value={t(young.consentment || "false")} style={{ border: "none" }} />
-                  <ExpandComponent>
-                    <ul>
-                      {CONSENTMENT_TEXTS?.young?.map((line) => (
-                        <li key={line}>{line}</li>
-                      ))}
-                    </ul>
-                  </ExpandComponent>
-                  <Details title="Consentements validés par ses représentants légaux" value={t(young.parentConsentment || "false")} style={{ border: "none" }} />
-                  <ExpandComponent>
-                    <ul>
-                      {CONSENTMENT_TEXTS?.parents?.map((line) => (
-                        <li key={line}>{line}</li>
-                      ))}
-                    </ul>
-                  </ExpandComponent>
-                </Bloc>
-              ) : null}
+
+              <Bloc title="Consentements">
+                <Details title={`Consentements validés par ${young.firstName} ${young.lastName}`} value={t(young.consentment || "false")} style={{ border: "none" }} />
+                <ExpandComponent>
+                  <ul>
+                    {CONSENTMENT_TEXTS?.young?.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </ExpandComponent>
+                <Details title="Consentements validés par ses représentants légaux" value={t(young.parentConsentment || "false")} style={{ border: "none" }} />
+                <ExpandComponent>
+                  <ul>
+                    {CONSENTMENT_TEXTS?.parents?.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </ExpandComponent>
+              </Bloc>
             </Col>
           </Row>
         </Box>

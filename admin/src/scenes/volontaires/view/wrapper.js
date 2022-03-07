@@ -5,6 +5,7 @@ import { Col, Row, DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropd
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
+import Badge from "../../../components/Badge";
 
 import { translate, YOUNG_STATUS, ROLES, colors, translateCohort } from "../../../utils";
 import SelectStatus from "../../../components/selectStatus";
@@ -50,7 +51,17 @@ export default function Wrapper({ children, young, tab, onChange }) {
       <Header>
         <div style={{ flex: 1 }}>
           <Title>
-            {young.status !== YOUNG_STATUS.DELETED ? `${young.firstName} ${young.lastName}` : "Compte supprimé"} <Badge text={`Cohorte ${young.cohort}`} />
+            {young.status !== YOUNG_STATUS.DELETED ? (
+              <>
+                {young.firstName} {young.lastName}
+                <BadgeCohort young={young} onChange={onChange} />
+              </>
+            ) : (
+              <>
+                "Compte supprimé"
+                <Badge text={`Cohorte ${young.cohort}`} />
+              </>
+            )}
           </Title>
           <TabList>
             <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
