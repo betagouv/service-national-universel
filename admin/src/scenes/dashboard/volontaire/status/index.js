@@ -38,7 +38,7 @@ export default function StatusIndex({ filter }) {
   useEffect(() => {
     (async () => {
       const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "status.keyword": ["VALIDATED"] } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },
@@ -53,6 +53,7 @@ export default function StatusIndex({ filter }) {
       if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
       if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
       if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (filter.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
 
       const { responses } = await api.esQuery("young", body);
 
