@@ -56,7 +56,7 @@ describe("Young", () => {
       });
       expect(response.statusCode).toBe(400);
     });
-    it.only("should return 409 if user don't have right to update", async () => {
+    it("should return 409 if user don't have right to update", async () => {
       const me = await createYoungHelper(getNewYoungFixture());
       const they = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
