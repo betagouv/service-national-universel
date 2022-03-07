@@ -65,9 +65,9 @@ router.post("/signup", async (req, res) => {
       birthCountry: Joi.string().trim().required(),
       birthCity: Joi.string().trim().required(),
       birthCityZip: Joi.string().trim().allow(null, ""),
-      RGPD: Joi.string().trim().required().valid("true", "false"),
-      CGU: Joi.string().trim().required().valid("true", "false"),
-      frenchNationality: Joi.string().trim().required().valid("true", "false"),
+      RGPD: Joi.string().trim().required().valid("true"),
+      CGU: Joi.string().trim().required().valid("true"),
+      frenchNationality: Joi.string().trim().required().valid("true"),
     })
       .unknown()
       .validate(req.body);
@@ -85,8 +85,14 @@ router.post("/signup", async (req, res) => {
     const countDocuments = await YoungObject.countDocuments({ lastName, firstName, birthdateAt });
     if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-    delete value.newEmail;
+    value.acceptCGU = "true";
+    value.rulesYoung = "true";
+
+    delete value.verifyEmail;
     delete value.verifyPassword;
+    delete value.RGPD;
+    delete value.CGU;
+
     const user = await YoungObject.create({ ...value });
     const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
