@@ -1,3 +1,12 @@
+## [1.53.1](https://github.com/betagouv/service-national-universel/compare/v1.53.0...v1.53.1) (2022-03-07)
+
+
+### Bug Fixes
+
+* **admin:** add status tab volontaire ([#1317](https://github.com/betagouv/service-national-universel/issues/1317)) ([69cdaa5](https://github.com/betagouv/service-national-universel/commit/69cdaa544066695f188f380a804dd87b8995fbb0))
+* open history to referent ([cdcb37d](https://github.com/betagouv/service-national-universel/commit/cdcb37da4b3844777a4857f5a9e599532225ffed))
+* **app:** accès aux certificats depuis phase1 ([6b73426](https://github.com/betagouv/service-national-universel/commit/6b73426840cd4bb1f0c9311250cbb7c434e1b4fc))
+
 # [1.53.0](https://github.com/betagouv/service-national-universel/compare/v1.52.0...v1.53.0) (2022-03-04)
 
 
