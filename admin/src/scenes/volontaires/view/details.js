@@ -234,7 +234,6 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   )}
                 </Bloc>
               ) : null}
-
               <Bloc title="Consentements">
                 <Details title={`Consentements validés par ${young.firstName} ${young.lastName}`} value={t(young.consentment || "false")} style={{ border: "none" }} />
                 <ExpandComponent>
