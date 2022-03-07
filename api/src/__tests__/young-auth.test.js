@@ -56,50 +56,97 @@ describe("Young", () => {
     });
   });
   describe("POST /young/signup", () => {
-    it("should return 400 when no email, no password, wrong email, no firstname or no lastname", async () => {
+    it("should return 400 when all the fields are note defined or not well informed", async () => {
+      const fixture = getNewYoungFixture();
       let res = await request(getAppHelper()).post("/young/signup");
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/young/signup").send({ email: "foo@bar.fr" });
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo", password: "bar" });
+      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo@bar.fr", verifyEmail: "foo@bar.fr" });
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper()).post("/young/signup").send({ password: "foo" });
+      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo", verifyEmail: "foo@bar.fr", password: "bar" });
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo@bar.fr", password: "bar" });
+      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo", verifyEmail: "foo@bar.fr", password: "bar", verifyPassword: "bar" });
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo@bar.fr", password: "bar", firstName: "foo" });
+      res = await request(getAppHelper()).post("/young/signup").send({
+        email: "foo",
+        verifyEmail: "foo@bar.fr",
+        password: "bar",
+        verifyPassword: "bar",
+        birthdateAt: fixture.birthdateAt,
+        birthCountry: fixture.birthCountry,
+        birthCity: fixture.birthCity,
+        birthCityZip: fixture.birthCityZip,
+      });
+      expect(res.status).toBe(400);
+
+      res = await request(getAppHelper()).post("/young/signup").send({
+        email: "foo",
+        verifyEmail: "foo@bar.fr",
+        password: "bar",
+        verifyPassword: "bar",
+        birthdateAt: fixture.birthdateAt,
+        birthCountry: fixture.birthCountry,
+        birthCity: fixture.birthCity,
+        birthCityZip: fixture.birthCityZip,
+        frenchNationality: "false",
+        RGPD: "false",
+        CGU: "false",
+      });
       expect(res.status).toBe(400);
     });
 
     it("should return 400 when password does not match requirments", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email.toLowerCase();
-      res = await request(getAppHelper())
-        .post("/young/signup")
-        .send({ email, password: "bar", firstName: "foo", lastName: "bar", birthdateAt: fixture.birthdateAt });
+      res = await request(getAppHelper()).post("/young/signup").send({ email, password: "bar", firstName: "foo", lastName: "bar", birthdateAt: fixture.birthdateAt });
       expect(res.status).toBe(400);
     });
 
     it("should return 200", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email.toLowerCase();
-      res = await request(getAppHelper())
-        .post("/young/signup")
-        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", birthdateAt: fixture.birthdateAt });
+      res = await request(getAppHelper()).post("/young/signup").send({
+        email: fixture.email,
+        verifyEmail: fixture.email,
+        firstName: "foo",
+        lastName: "bar",
+        password: VALID_PASSWORD,
+        verifyPassword: VALID_PASSWORD,
+        birthdateAt: fixture.birthdateAt,
+        birthCountry: fixture.birthCountry,
+        birthCity: fixture.birthCity,
+        birthCityZip: fixture.birthCityZip,
+        frenchNationality: fixture.frenchNationality,
+        RGPD: fixture.acceptCGU,
+        CGU: fixture.rulesYoung,
+      });
       expect(res.status).toBe(200);
       expect(res.body.token).toBeTruthy();
     });
 
     it("should transform firstName and lastName", async () => {
       const fixture = getNewYoungFixture();
-      res = await request(getAppHelper())
-        .post("/young/signup")
-        .send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", birthdateAt: fixture.birthdateAt });
+      res = await request(getAppHelper()).post("/young/signup").send({
+        email: fixture.email,
+        verifyEmail: fixture.email,
+        firstName: "foo",
+        lastName: "bar",
+        password: VALID_PASSWORD,
+        verifyPassword: VALID_PASSWORD,
+        birthdateAt: fixture.birthdateAt,
+        birthCountry: fixture.birthCountry,
+        birthCity: fixture.birthCity,
+        birthCityZip: fixture.birthCityZip,
+        frenchNationality: fixture.frenchNationality,
+        RGPD: fixture.acceptCGU,
+        CGU: fixture.rulesYoung,
+      });
       expect(res.body.user.firstName).toBe("Foo");
       expect(res.body.user.lastName).toBe("BAR");
       expect(res.body.user.email).toBe(fixture.email.toLowerCase());
@@ -109,9 +156,21 @@ describe("Young", () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email.toLowerCase();
       await createYoungHelper({ ...fixture, email });
-      res = await request(getAppHelper())
-        .post("/young/signup")
-        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", birthdateAt: fixture.birthdateAt });
+      res = await request(getAppHelper()).post("/young/signup").send({
+        email: fixture.email,
+        verifyEmail: fixture.email,
+        firstName: "foo",
+        lastName: "bar",
+        password: VALID_PASSWORD,
+        verifyPassword: VALID_PASSWORD,
+        birthdateAt: fixture.birthdateAt,
+        birthCountry: fixture.birthCountry,
+        birthCity: fixture.birthCity,
+        birthCityZip: fixture.birthCityZip,
+        frenchNationality: fixture.frenchNationality,
+        RGPD: fixture.acceptCGU,
+        CGU: fixture.rulesYoung,
+      });
       expect(res.status).toBe(409);
     });
   });
@@ -163,9 +222,7 @@ describe("Young", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
-      res = await request(getAppHelper())
-        .post("/young/reset_password")
-        .send({ password: VALID_PASSWORD, verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+      res = await request(getAppHelper()).post("/young/reset_password").send({ password: VALID_PASSWORD, verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(401);
       passport.user = previous;
     });
@@ -175,9 +232,7 @@ describe("Young", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
-      res = await request(getAppHelper())
-        .post("/young/reset_password")
-        .send({ password: "bar", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+      res = await request(getAppHelper()).post("/young/reset_password").send({ password: "bar", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(401);
       passport.user = previous;
     });
@@ -199,9 +254,7 @@ describe("Young", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
-      res = await request(getAppHelper())
-        .post("/young/reset_password")
-        .send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+      res = await request(getAppHelper()).post("/young/reset_password").send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(200);
       passport.user = previous;
     });
