@@ -66,7 +66,7 @@ const AlertBox = () => {
   return (
     <Link to={`/structure/${user.structureId}/edit`}>
       <Alert>
-        <img src={require("../../assets/information.svg")} height={15} />
+        <img src={require("../../assets/information.svg")} height={15} width={15} />
         <div className="text">
           <strong>Vous n&apos;avez pas terminé l&apos;inscription de votre structure !</strong>
           <p>Cliquez ici pour renseigner toutes ses informations.</p>
