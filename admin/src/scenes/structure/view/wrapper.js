@@ -53,11 +53,9 @@ export default function Wrapper({ children, structure, tab }) {
                 <Tab isActive={tab === "missions"} onClick={() => history.push(`/structure/${structure._id}/missions`)}>
                   Missions
                 </Tab>
-                {user.role === ROLES.ADMIN ? (
-                  <Tab isActive={tab === "historique"} onClick={() => history.push(`/structure/${structure._id}/historique`)}>
-                    Historique <i style={{ color: colors.purple, fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
-                  </Tab>
-                ) : null}
+                <Tab isActive={tab === "historique"} onClick={() => history.push(`/structure/${structure._id}/historique`)}>
+                  Historique
+                </Tab>
               </>
             )}
           </TabList>
