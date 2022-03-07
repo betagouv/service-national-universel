@@ -8,6 +8,8 @@ const { canUpdateYoungStatus } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { validateFirstName } = require("../../utils/validator");
 
+const { ERRORS, ROLES } = require("../../utils");
+
 router.put("/onlineProfil", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     //TODO : Check adress + date
