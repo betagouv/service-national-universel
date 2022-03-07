@@ -64,7 +64,7 @@ router.post("/signup", async (req, res) => {
       birthdateAt: Joi.string().trim().required(),
       birthCountry: Joi.string().trim().required(),
       birthCity: Joi.string().trim().required(),
-      birthCityZip: Joi.string().trim().required(),
+      birthCityZip: Joi.string().trim().allow(null, ""),
       RGPD: Joi.string().trim().required().valid("true", "false"),
       CGU: Joi.string().trim().required().valid("true", "false"),
       frenchNationality: Joi.string().trim().required().valid("true", "false"),
@@ -737,5 +737,6 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.use("/:id/documents", require("./documents"));
 router.use("/:id/meeting-point", require("./meeting-point"));
+router.use("/inscription", require("./inscription"));
 
 module.exports = router;
