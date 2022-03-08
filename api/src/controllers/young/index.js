@@ -53,7 +53,7 @@ router.post("/reset_password", passport.authenticate("young", { session: false, 
 
 router.post("/signup", async (req, res) => {
   try {
-    //TODO : Check adress + date
+    // TODO: Check adress + date
     const { error, value } = Joi.object({
       email: Joi.string().lowercase().trim().email().required(),
       firstName: validateFirstName().trim().required(),
