@@ -62,7 +62,7 @@ export default function Forgot() {
                           validate={(v) => !validator.isEmail(v) && "format incorrect"}
                           className={`${classnames({
                             "has-error": errors.email,
-                          })}w-full block outline-0 p-[12px] bg-[transparent] text-[#798fb0] leading-5  rounded-[5px] border-[1px] border-[#e2e8f0] focus:border-[#4299E1] focus:outline-0 `}
+                          })}w-full block outline-0 p-[12px] bg-[transparent] placeholder:text-[#798fb0] leading-5  rounded-[5px] border-[1px] border-[#dcdfe6] focus:border-[#4299E1] focus:outline-0 `}
                           name="email"
                           type="email"
                           id="email"
