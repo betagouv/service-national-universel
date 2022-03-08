@@ -6,6 +6,8 @@ const slack = require("../slack");
 const { capture } = require("../sentry");
 const zammood = require("../zammood");
 const { ERRORS } = require("../utils");
+const { ADMIN_URL } = require("../config.js");
+
 
 router.get("/tickets", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -36,6 +38,9 @@ router.get("/ticket/:id", passport.authenticate("referent", { session: false, fa
 router.post("/ticket", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { subject, message, clientId } = req.body;
+    const structureLink = `${ADMIN_URL}/structure/${req.user.structureId}`;
+    const missionsLink = `${ADMIN_URL}/structure/${req.user.structureId}/missions`;
+    const userAttributes = [{ name: "date de création", value: req.user.createdAt }, { name: "dernière connexion", value: req.user.lastLoginAt }, { name: "role", value: req.user.role }, { name: "lien vers la fiche structure", value: structureLink }, { name: "lien général vers la page des missions proposées par la structure", value: missionsLink }];
     const response = await zammood.api("/v0/message", {
       method: "POST",
       credentials: "include",
@@ -47,6 +52,7 @@ router.post("/ticket", passport.authenticate("referent", { session: false, failW
         lastName: req.user.lastName,
         source: "PLATFORM",
         clientId,
+        attributes: userAttributes,
       }),
     });
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
