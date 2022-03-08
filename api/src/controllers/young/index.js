@@ -83,8 +83,6 @@ router.post("/signup", async (req, res) => {
     value.acceptCGU = "true";
     value.rulesYoung = "true";
 
-    delete value.verifyEmail;
-    delete value.verifyPassword;
     delete value.RGPD;
     delete value.CGU;
 
