@@ -60,6 +60,8 @@ export default function StepProfilOnline() {
         onSubmit={async (values) => {
           setLoading(true);
           try {
+            delete values.birthCountrySelector;
+            delete values.verifyEmail;
             const { ok: okPut, code: codePut, data: user } = await api.put("/young/inscription/onlineProfil", values);
             if (!okPut || !user?._id) return toastr.error("Une erreur s'est produite :", translate(codePut));
             dispatch(setYoung(user));
@@ -152,11 +154,11 @@ export default function StepProfilOnline() {
                     className="form-control"
                     validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
                     type="email"
-                    name="newEmail"
-                    value={values.newEmail}
+                    name="verifyEmail"
+                    value={values.verifyEmail}
                     onChange={handleChange}
                   />
-                  <ErrorMessage errors={errors} touched={touched} name="newEmail" />
+                  <ErrorMessage errors={errors} touched={touched} name="verifyEmail" />
                 </Col>
               </FormRow>
               <FormRow align="center">

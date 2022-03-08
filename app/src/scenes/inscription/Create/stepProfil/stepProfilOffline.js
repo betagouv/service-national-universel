@@ -56,6 +56,8 @@ export default function StepProfil() {
           setLoading(true);
           try {
             delete values.birthCountrySelector;
+            delete values.verifyPassword;
+            delete values.verifyEmail;
             const { user, token, code, ok } = await api.post(`/young/signup`, { ...values });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);

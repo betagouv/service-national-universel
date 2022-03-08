@@ -56,11 +56,9 @@ router.post("/signup", async (req, res) => {
     //TODO : Check adress + date
     const { error, value } = Joi.object({
       email: Joi.string().lowercase().trim().email().required(),
-      verifyEmail: Joi.ref("email"),
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       password: Joi.string().required(),
-      verifyPassword: Joi.ref("password"),
       birthdateAt: Joi.string().trim().required(),
       birthCountry: Joi.string().trim().required(),
       birthCity: Joi.string().trim().required(),
@@ -68,14 +66,11 @@ router.post("/signup", async (req, res) => {
       RGPD: Joi.string().trim().required().valid("true"),
       CGU: Joi.string().trim().required().valid("true"),
       frenchNationality: Joi.string().trim().required().valid("true"),
-    })
-      .unknown()
-      .validate(req.body);
+    }).validate(req.body);
 
     if (error) {
-      if (error.details[0].path.find((e) => e === "email" || e === "verifyEmail")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
-      if (error.details[0].path.find((e) => e === "password" || e === "verifyPassword"))
-        return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+      if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
+      if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
       return res.status(400).send({ ok: false, code: error.toString() });
     }
 
