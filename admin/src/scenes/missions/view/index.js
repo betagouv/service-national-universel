@@ -46,19 +46,23 @@ export default function Index({ ...props }) {
         setTutor(tutorResponse.data);
       }
 
-      const applicationResponse = await api.get(`/mission/${missionResponse.data._id}/application`);
-      if (!applicationResponse.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération des volontaires", translate(applicationResponse.code));
-        return history.push("/mission");
-      }
-      setApplications(applicationResponse.data);
+      fetchApplication();
     })();
   }, [props.match.params.id]);
+
+  async function fetchApplication() {
+    const applicationResponse = await api.get(`/mission/${mission._id}/application`);
+    if (!applicationResponse.ok) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération des volontaires", translate(applicationResponse.code));
+      return history.push("/mission");
+    }
+    setApplications(applicationResponse.data);
+  }
 
   if (!mission) return <div />;
   return (
     <Switch>
-      <Route path="/mission/:id/youngs" component={() => <Youngs mission={mission} applications={applications} setApplications={setApplications} />} />
+      <Route path="/mission/:id/youngs" component={() => <Youngs mission={mission} applications={applications} updateApplications={fetchApplication} />} />
       <Route path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
       <Route path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} />} />
       <Route path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />

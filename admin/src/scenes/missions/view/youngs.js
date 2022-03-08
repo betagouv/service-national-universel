@@ -33,14 +33,13 @@ import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWith
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
-export default function Youngs({ mission, applications, setApplications }) {
+export default function Youngs({ mission, applications, updateApplications }) {
   const [missionTemp, setMissionTemp] = useState(mission);
   const [young, setYoung] = useState();
 
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
     if (ok) setYoung(data);
-    console.log("update", data);
   };
 
   const getDefaultQuery = () => ({
@@ -56,10 +55,9 @@ export default function Youngs({ mission, applications, setApplications }) {
 
   const updateMission = async () => {
     const { data, ok } = await api.get(`/mission/${mission._id}`);
-    console.log(mission);
     if (ok) {
       setMissionTemp(data);
-      //setApplications();
+      updateApplications();
     }
   };
 
@@ -202,7 +200,6 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalDurationOpen, setModalDurationOpen] = useState(false);
   const user = useSelector((state) => state.Auth.user);
-  console.log(hit);
   const history = useHistory();
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
@@ -255,7 +252,6 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
                   toastr.success("Mis à jour!");
                 }
               } catch (e) {
-                console.log("here");
                 toastr.error("Une erreur s'est produite :", translate(e?.code));
               }
               setModalDurationOpen(false);
