@@ -58,7 +58,7 @@ export default function Index({ ...props }) {
   if (!mission) return <div />;
   return (
     <Switch>
-      <Route path="/mission/:id/youngs" component={() => <Youngs mission={mission} applications={applications} />} />
+      <Route path="/mission/:id/youngs" component={() => <Youngs mission={mission} applications={applications} setApplications={setApplications} />} />
       <Route path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
       <Route path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} />} />
       <Route path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />
