@@ -1,3 +1,17 @@
+# [1.54.0](https://github.com/betagouv/service-national-universel/compare/v1.53.1...v1.54.0) (2022-03-08)
+
+
+### Bug Fixes
+
+* **admin:** header - drawer position ([#1329](https://github.com/betagouv/service-national-universel/issues/1329)) ([7880ce8](https://github.com/betagouv/service-national-universel/commit/7880ce8c3ed5de19cbe2ab8b8fda9cf795862792))
+* **app:** Update header.js signin ([8878caa](https://github.com/betagouv/service-national-universel/commit/8878caaf4d2878c738134f99b37afc81778af731))
+
+
+### Features
+
+* **app:** tailwind - migrate auth ([#1321](https://github.com/betagouv/service-national-universel/issues/1321)) ([558661c](https://github.com/betagouv/service-national-universel/commit/558661c4b41f9ef0e544b6d2cb8e1a1808025a56))
+* **app:** tailwind - migrate landing page ([#1322](https://github.com/betagouv/service-national-universel/issues/1322)) ([980445d](https://github.com/betagouv/service-national-universel/commit/980445d24006e4c8294717b89fb35e9c6b6d9009))
+
 ## [1.53.1](https://github.com/betagouv/service-national-universel/compare/v1.53.0...v1.53.1) (2022-03-07)
 
 
