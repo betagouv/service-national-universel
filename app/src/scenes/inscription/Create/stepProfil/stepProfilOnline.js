@@ -60,9 +60,12 @@ export default function StepProfilOnline() {
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            delete values.birthCountrySelector;
-            delete values.verifyEmail;
-            const { ok: okPut, code: codePut, data: user } = await api.put("/young/inscription/onlineProfil", values);
+            const { email, firstName, lastName, birthdateAt, birthCountry, birthCity, birthCityZip } = values;
+            const {
+              ok: okPut,
+              code: codePut,
+              data: user,
+            } = await api.put("/young/inscription/onlineProfil", { email, firstName, lastName, birthdateAt, birthCountry, birthCity, birthCityZip });
             if (!okPut || !user?._id) return toastr.error("Une erreur s'est produite :", translate(codePut));
             dispatch(setYoung(user));
             history.push("/inscription/coordonnees");
@@ -87,6 +90,8 @@ export default function StepProfilOnline() {
               }
             })();
           }, [values.birthCityZip]);
+
+          console.log(values);
 
           return (
             <>

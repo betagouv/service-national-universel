@@ -33,7 +33,8 @@ router.put("/onlineProfil", passport.authenticate("young", { session: false, fai
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    young.set(value);
+    const { email, firstName, lastName, birthdateAt, birthCountry, birthCity, birthCityZip } = value;
+    young.set({ email, firstName, lastName, birthdateAt, birthCountry, birthCity, birthCityZip });
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: young });

@@ -55,10 +55,20 @@ export default function StepProfil() {
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            delete values.birthCountrySelector;
-            delete values.verifyPassword;
-            delete values.verifyEmail;
-            const { user, token, code, ok } = await api.post(`/young/signup`, { ...values });
+            const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, RGPD, CGU } = values;
+            const { user, token, code, ok } = await api.post(`/young/signup`, {
+              email,
+              firstName,
+              lastName,
+              password,
+              birthdateAt,
+              birthCountry,
+              birthCity,
+              birthCityZip,
+              frenchNationality,
+              RGPD,
+              CGU,
+            });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
             dispatch(setYoung(user));
