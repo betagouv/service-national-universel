@@ -493,26 +493,28 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       young.set({ meetingPointId: undefined });
     }
 
-    let goal = await InscriptionGoalModel.findOne({ department: young.department, cohort });
-    if (goal && goal.max) {
+    let inscriptionGoal = await InscriptionGoalModel.findOne({ department: young.department, cohort });
+    let goalIsReached = false;
+
+    if (inscriptionGoal && inscriptionGoal.max) {
       const nbYoung = await YoungObject.find({
         department: young.department,
         cohort,
         status: { $nin: ["REFUSED", "IN_PROGRESS", "NOT_ELIGIBLE", "WITHDRAWN", "DELETED"] },
       }).count();
       if (nbYoung === 0) {
-        goal = false;
+        goalIsReached = false;
       } else {
         const buffer = 1.25;
-        const ratio = Math.floor(goal.max * buffer) / nbYoung;
-        if (ratio >= 1) goal = true;
-        else goal = false;
+        const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * buffer);
+        if (fillingRatio >= 1) goalIsReached = true;
+        else goalIsReached = false;
       }
     } else {
-      goal = false;
+      goalIsReached = false;
     }
 
-    if (goal === true) {
+    if (goalIsReached === true) {
       young.set({
         cohort,
         cohortChangeReason,
