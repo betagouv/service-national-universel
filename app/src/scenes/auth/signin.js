@@ -89,7 +89,7 @@ export default function Signin() {
                 <section className="mb-[20px]">
                   <div className="flex flex-col-reverse	">
                     <input
-                      className="w-full block outline-0	 p-[12px]  bg-[transparent] text-[#798fb0] leading-5  rounded-[5px] border-[1px] border-[#e2e8f0] focus:border-[#4299E1] focus:outline-0 "
+                      className="w-full block outline-0	 p-[12px]  bg-[transparent] placeholder:text-[#798fb0] leading-5  rounded-[5px] border-[1px] border-[#dcdfe6] focus:border-[#4299E1] focus:outline-0 "
                       // validate={(v) => !validator.isEmail(v) && "Invalid email address"}
                       name="email"
                       type="email"
