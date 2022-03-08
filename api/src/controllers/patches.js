@@ -22,11 +22,12 @@ const get = async (req, res, model) => {
   }
 };
 
-const deletePatches = async (req, model) => {
+const deletePatches = async ({ req, model }) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
+    console.log(error);
     if (error) return { ok: false, code: ERRORS.INVALID_PARAMS, codeError: 400 };
     if (!canViewPatchesHistory(req.user)) return { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, codeError: 403 };
 
@@ -66,7 +67,7 @@ const deletePatches = async (req, model) => {
         }
       });
 
-      const patchToUpdate = await elem.patches.findOne({ _id: patch._id });
+      const patchToUpdate = patch;
       if (updatedOps.length === 0) {
         patchToUpdate.remove();
       } else {

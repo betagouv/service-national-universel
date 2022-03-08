@@ -58,7 +58,7 @@ export default function Wrapper({ children, young, tab, onChange }) {
               </>
             ) : (
               <>
-                "Compte supprimé"
+                Compte supprimé
                 <Badge text={`Cohorte ${young.cohort}`} />
               </>
             )}
