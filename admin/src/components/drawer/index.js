@@ -216,7 +216,7 @@ const Drawer = (props) => {
   if (!user) return <div />;
 
   return (
-    <div className="min-h-screen bg-snu-purple-900 text-white fixed z-10 overflow-y-scroll bottom-0 top-[56px] pb-4">
+    <div className="min-h-screen w-[220px] bg-snu-purple-900 text-white fixed z-10 overflow-y-scroll bottom-0 top-[56px] pb-4">
       {!isOpen ? (
         <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
           <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">

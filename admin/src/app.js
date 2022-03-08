@@ -140,7 +140,7 @@ const Home = () => {
       <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} />
       <div className="flex">
         <Drawer open={drawerVisible} />
-        <div className={drawerVisible ? `flex-1 ml-[214px]` : `flex-1 lg:ml-[214px]`}>
+        <div className={drawerVisible ? `flex-1 ml-[220px]` : `flex-1 lg:ml-[220px]`}>
           <Switch>
             <Route path="/auth" component={Auth} />
             <RestrictedRoute path="/structure" component={Structure} />
