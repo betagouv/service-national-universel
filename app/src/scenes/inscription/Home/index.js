@@ -14,7 +14,7 @@ export default function Home({ location }) {
   return (
     <div>
       <Header location={location} />
-      <div className="bg-hero-pattern w-full h-[405px] text-center bg-right	bg-no-repeat  bg-cover md:h-[500px]">
+      <div className="bg-hero-pattern w-full h-[405px] text-center bg-right	bg-no-repeat bg-cover md:h-[500px]">
         <div className="flex pt-1 flex-col	items-center z-10">
           {/* incription Head */}
           <div className="uppercase text-sm	font-normal	text-white md:hidden">inscription 2022</div>

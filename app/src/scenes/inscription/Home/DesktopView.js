@@ -1,5 +1,4 @@
 import React from "react";
-import styled from "styled-components";
 import { appURL, supportURL } from "../../../config";
 import { Link } from "react-router-dom";
 import StopIcon from "../components/stopIcon";
@@ -12,25 +11,25 @@ import plausibleEvent from "../../../services/plausible";
 export default function DesktopView() {
   return (
     <div>
-      <div className="ml-14 mr-14 mt-4">
-        <div className="flex justify-around flex-wrap  border-b pb-4 border-[#c0c9d1]">
+      <div className="px-14 mt-4">
+        <div className="flex justify-around flex-wrap  border-b pb-4 border-[#DFDFDF]">
           {informations.map((val) => {
             return (
-              <div className="w-96 text-center mt-2 p-2 pt-5">
-                <span className="bg-[#fff] p-3 rounded-md shadow-2xl">{val.icon}</span>
-                <h5 className="mt-4 text-[#111827]">{val.title}</h5>
+              <div key={val.title} className="w-96 text-center mt-2 p-2 pt-5">
+                <span className="bg-[#fff] p-3 rounded-md shadow-2xl text-[26px]">{val.icon}</span>
+                <h5 className="mt-4 mb-2 text-[#111827]">{val.title}</h5>
                 <p className="text-[#6b7280] break-words">{val.text}</p>
               </div>
             );
           })}
         </div>
         {/* Question Secction */}
-        <div className="flex justify-evenly flex-wrap ">
+        <div className="flex justify-evenly flex-wrap py-4">
           <div className="w-full p-3 md:w-2/4">
             <p className="text-[#6b7280]">
               Et cette année, les lycéens de 2de générale, technologique et professionnelle, dont l&apos;inscription est validée, sont de plein droit autorisés à participer au
               séjour de cohésion y compris sur le temps scolaire (février ou juin). Le séjour de cohésion, c&apos;est vivre une{" "}
-              <b className="text-black">expérience inédite et faire des rencontres inoubliables</b>.
+              <b className="text-[#6b7280]">expérience inédite et faire des rencontres inoubliables</b>.
             </p>
           </div>
           <div className="w-full p-3 md:w-2/4">
@@ -44,8 +43,8 @@ export default function DesktopView() {
         </div>
       </div>
       {/* Title Container */}
-      <div className="bg-white shadow-2xl	pb-4">
-        <div className=" pt-4 mb-4 border-b pb-4 border-[#c0c9d1]">
+      <div className="bg-white shadow	pb-4">
+        <div className=" pt-4 mb-4 border-b pb-4 border-[#DFDFDF]">
           <div className="flex justify-around flex-wrap">
             <div className="mt-1 mb-2 uppercase pt-2 pr-2 text-[#32257f] text-[0.9rem]	font-bold	tracking-widest	">Conditions d&apos;inscription</div>
             <EligibilityModal />
@@ -53,9 +52,9 @@ export default function DesktopView() {
         </div>
 
         {/* First Section */}
-        <div className="border-b pb-4 border-[#c0c9d1]">
+        <div className="border-b pb-4 border-[#DFDFDF]">
           <div className="w-[93%] m-auto flex justify-start md:justify-around flex-wrap p-2 text-[#32267f] ">
-            <div className="flex mt-1 border-b pb-2 border-[#c0c9d1] md:border-none">
+            <div className="flex mt-1 pb-2">
               <svg className="mt-1" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="20" height="20" rx="10" fill="#32267F" fillOpacity=".06" />
                 <path
@@ -198,7 +197,7 @@ export default function DesktopView() {
             </div>
           </div>
           {/* Line  */}
-          <div className="w-[1px] bg-[#c0c9d1]"></div>
+          <div className="w-[1px] bg-[#DFDFDF]"></div>
 
           <div className="flex  w-6/12 p-[2rem]	ml-3">
             <svg className="mt-2" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
