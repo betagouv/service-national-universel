@@ -105,16 +105,16 @@ export default function StatusIndex({ filter }) {
     <>
       <TabNavigation>
         <TabNavigationList>
-          <TabItem onClick={() => history.push(`/dashboard/volontaires/général`)} isActive={currentSubtab === "général"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/général`, { params: { filter } })} isActive={currentSubtab === "général"}>
             Général
           </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase1`)} isActive={currentSubtab === "phase1"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase1`, { params: { filter } })} isActive={currentSubtab === "phase1"}>
             Phase 1
           </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase2`)} isActive={currentSubtab === "phase2"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase2`, { params: { filter } })} isActive={currentSubtab === "phase2"}>
             Phase 2
           </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase3`)} isActive={currentSubtab === "phase3"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase3`, { params: { filter } })} isActive={currentSubtab === "phase3"}>
             Phase 3
           </TabItem>
         </TabNavigationList>
