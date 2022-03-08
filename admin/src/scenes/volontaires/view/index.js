@@ -21,11 +21,11 @@ export default function Index({ ...props }) {
     if (!id) return <div />;
     const { data } = await api.get(`/referent/young/${id}`);
     setYoung(data);
-    setDocumentTitle(`${data.firstName} ${data.lastName}`);
-    if (data.status === YOUNG_STATUS.DELETED) {
+    setDocumentTitle(`${data?.firstName} ${data?.lastName}`);
+    if (data?.status === YOUNG_STATUS.DELETED) {
       setDocumentTitle(`Compte supprimé`);
     } else {
-      setDocumentTitle(`${data.firstName} ${data.lastName}`);
+      setDocumentTitle(`${data?.firstName} ${data?.lastName}`);
     }
   };
 

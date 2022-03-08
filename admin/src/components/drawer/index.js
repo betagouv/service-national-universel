@@ -30,7 +30,7 @@ const BlankSeparator = () => (
 
 const HelpButton = ({ onClick, to }) => (
   <div
-    className="justify-center flex mb-4 p-8 "
+    className="justify-center flex mb-4 p-8"
     onClick={() => {
       plausibleEvent("Menu/CTA - Besoin Aide");
       onClick();
@@ -187,6 +187,7 @@ const Drawer = (props) => {
   const [open, setOpen] = useState();
   useEffect(() => {
     setOpen(props.open);
+    setIsOpen(props.open);
   }, [props.open]);
 
   useEffect(() => {
@@ -215,32 +216,24 @@ const Drawer = (props) => {
   if (!user) return <div />;
 
   return (
-    <div className="min-h-screen bg-snu-purple-900 text-white">
+    <div className="min-h-screen max-w-[220px] bg-snu-purple-900 text-white fixed z-10 overflow-y-auto bottom-0 top-[56px] pb-4">
       {!isOpen ? (
-        <>
-          <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
-            <div className="w-12 pl-2 h-14 flex items-center justify-between lg:hidden sticky top-0 left-0">
-              <RiMenuFill className="w-7 h-7 cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
-            </div>
-            <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative transition duration-200 ease-in-out">
-              <ul className="divide-y divide-slate-700">
-                <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-                {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
-                {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
-                {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-                {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-                {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-                {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
-              </ul>
-            </div>
-          </nav>
-        </>
+        <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
+          <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
+            <ul className="divide-y divide-slate-700">
+              <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+              {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+              {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+              {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+              {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
+            </ul>
+          </div>
+        </nav>
       ) : (
         <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-base font-normal min-h-full">
           <div>
-            <div className="w-12 pl-2 h-14 flex items-center justify-between lg:hidden shadow-sm sticky top-0 left-0">
-              <RiMenuFoldLine className="w-7 h-7 cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
-            </div>
             <ul className="divide-y divide-slate-700">
               <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
