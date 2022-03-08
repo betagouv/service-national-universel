@@ -30,7 +30,7 @@ const BlankSeparator = () => (
 
 const HelpButton = ({ onClick, to }) => (
   <div
-    className="justify-center flex mb-4 p-8 "
+    className="justify-center flex mb-4 p-8"
     onClick={() => {
       plausibleEvent("Menu/CTA - Besoin Aide");
       onClick();
@@ -216,10 +216,10 @@ const Drawer = (props) => {
   if (!user) return <div />;
 
   return (
-    <div className="min-h-screen bg-snu-purple-900 text-white">
+    <div className="min-h-screen bg-snu-purple-900 text-white fixed z-10 overflow-y-scroll bottom-0 top-[56px] pb-4">
       {!isOpen ? (
         <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
-          <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative ">
+          <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
             <ul className="divide-y divide-slate-700">
               <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
