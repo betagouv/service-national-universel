@@ -64,20 +64,18 @@ describe("Young", () => {
       res = await request(getAppHelper()).post("/young/signup").send({ email: "foo@bar.fr" });
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo@bar.fr", verifyEmail: "foo@bar.fr" });
+      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo@bar.fr" });
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo", verifyEmail: "foo@bar.fr", password: "bar" });
+      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo", password: "bar" });
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo", verifyEmail: "foo@bar.fr", password: "bar", verifyPassword: "bar" });
+      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo", password: "bar" });
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/young/signup").send({
         email: "foo",
-        verifyEmail: "foo@bar.fr",
         password: "bar",
-        verifyPassword: "bar",
         birthdateAt: fixture.birthdateAt,
         birthCountry: fixture.birthCountry,
         birthCity: fixture.birthCity,
@@ -87,9 +85,7 @@ describe("Young", () => {
 
       res = await request(getAppHelper()).post("/young/signup").send({
         email: "foo",
-        verifyEmail: "foo@bar.fr",
         password: "bar",
-        verifyPassword: "bar",
         birthdateAt: fixture.birthdateAt,
         birthCountry: fixture.birthCountry,
         birthCity: fixture.birthCity,
@@ -113,11 +109,9 @@ describe("Young", () => {
       const email = fixture.email.toLowerCase();
       res = await request(getAppHelper()).post("/young/signup").send({
         email: fixture.email,
-        verifyEmail: fixture.email,
         firstName: "foo",
         lastName: "bar",
         password: VALID_PASSWORD,
-        verifyPassword: VALID_PASSWORD,
         birthdateAt: fixture.birthdateAt,
         birthCountry: fixture.birthCountry,
         birthCity: fixture.birthCity,
@@ -134,11 +128,9 @@ describe("Young", () => {
       const fixture = getNewYoungFixture();
       res = await request(getAppHelper()).post("/young/signup").send({
         email: fixture.email,
-        verifyEmail: fixture.email,
         firstName: "foo",
         lastName: "bar",
         password: VALID_PASSWORD,
-        verifyPassword: VALID_PASSWORD,
         birthdateAt: fixture.birthdateAt,
         birthCountry: fixture.birthCountry,
         birthCity: fixture.birthCity,
@@ -158,11 +150,9 @@ describe("Young", () => {
       await createYoungHelper({ ...fixture, email });
       res = await request(getAppHelper()).post("/young/signup").send({
         email: fixture.email,
-        verifyEmail: fixture.email,
         firstName: "foo",
         lastName: "bar",
         password: VALID_PASSWORD,
-        verifyPassword: VALID_PASSWORD,
         birthdateAt: fixture.birthdateAt,
         birthCountry: fixture.birthCountry,
         birthCity: fixture.birthCity,

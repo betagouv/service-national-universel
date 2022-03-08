@@ -27,7 +27,6 @@ describe("Young", () => {
       const email = fixture.email.toLowerCase();
       const { updatedYoung, response } = await selfUpdateYoung({
         email: email,
-        verifyEmail: email,
         firstName: "foo",
         lastName: "bar",
         birthdateAt: fixture.birthdateAt,
@@ -64,7 +63,6 @@ describe("Young", () => {
       passport.user = they;
       const res = await request(getAppHelper()).put(`/young/inscription/onlineProfil`).send({
         email: me.email,
-        verifyEmail: me.email,
         firstName: "foo",
         lastName: "bar",
         birthdateAt: me.birthdateAt,
@@ -80,7 +78,6 @@ describe("Young", () => {
       const email = fixture.email.toLowerCase();
       const response = await request(getAppHelper()).put("/young/inscription/onlineProfil").send({
         email: email,
-        verifyEmail: email,
         firstName: "foo",
         lastName: "bar",
         birthdateAt: fixture.birthdateAt,
