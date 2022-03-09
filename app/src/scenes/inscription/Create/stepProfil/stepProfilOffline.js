@@ -37,8 +37,8 @@ export default function StepProfil() {
     birthCountry: "",
     birthCity: "",
     birthCityZip: "",
-    RGPD: "false",
-    CGU: "false",
+    rulesYoung: "false",
+    acceptCGU: "false",
   };
   const history = useHistory();
 
@@ -55,7 +55,7 @@ export default function StepProfil() {
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, RGPD, CGU } = values;
+            const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, rulesYoung, acceptCGU } = values;
             const { user, token, code, ok } = await api.post(`/young/signup`, {
               email,
               firstName,
@@ -66,8 +66,8 @@ export default function StepProfil() {
               birthCity,
               birthCityZip,
               frenchNationality,
-              RGPD,
-              CGU,
+              rulesYoung,
+              acceptCGU,
             });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
@@ -402,9 +402,9 @@ export default function StepProfil() {
                     <Field
                       validate={(v) => (!v || v === "false") && "Vous devez accepter les CGU pour continuer."}
                       value="true"
-                      checked={values.CGU === "true"}
+                      checked={values.acceptCGU === "true"}
                       type="checkbox"
-                      name="CGU"
+                      name="acceptCGU"
                       onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                     />
                     <p style={{ marginBottom: "0" }}>
@@ -415,14 +415,14 @@ export default function StepProfil() {
                       de la plateforme du Service national universel
                     </p>
                   </RadioLabel>
-                  <ErrorMessage errors={errors} touched={touched} name="CGU" />
+                  <ErrorMessage errors={errors} touched={touched} name="acceptCGU" />
                   <RadioLabel style={{ marginTop: "0.5rem" }}>
                     <Field
                       validate={(v) => (!v || v === "false") && "Vous devez accepter les modalités de traitement pour continuer."}
                       value="true"
-                      checked={values.RGPD === "true"}
+                      checked={values.rulesYoung === "true"}
                       type="checkbox"
-                      name="RGPD"
+                      name="rulesYoung"
                       onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                     />
                     <p style={{ marginBottom: "0" }}>
@@ -432,7 +432,7 @@ export default function StepProfil() {
                       </a>
                     </p>
                   </RadioLabel>
-                  <ErrorMessage errors={errors} touched={touched} name="RGPD" />
+                  <ErrorMessage errors={errors} touched={touched} name="rulesYoung" />
                 </div>
               </FormRow>
               <FormFooter loading={loading} secondButton="back" values={values} handleSubmit={handleSubmit} errors={errors} />

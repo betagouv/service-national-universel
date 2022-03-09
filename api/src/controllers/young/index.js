@@ -63,8 +63,8 @@ router.post("/signup", async (req, res) => {
       birthCountry: Joi.string().trim().required(),
       birthCity: Joi.string().trim().required(),
       birthCityZip: Joi.string().trim().allow(null, ""),
-      RGPD: Joi.string().trim().required().valid("true"),
-      CGU: Joi.string().trim().required().valid("true"),
+      rulesYoung: Joi.string().trim().required().valid("true"),
+      acceptCGU: Joi.string().trim().required().valid("true"),
       frenchNationality: Joi.string().trim().required().valid("true"),
     }).validate(req.body);
 
@@ -73,9 +73,6 @@ router.post("/signup", async (req, res) => {
       if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
       return res.status(400).send({ ok: false, code: error.toString() });
     }
-
-    value.acceptCGU = "true";
-    value.rulesYoung = "true";
 
     const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung } = value;
     if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
