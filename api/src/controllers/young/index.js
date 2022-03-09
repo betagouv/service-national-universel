@@ -52,29 +52,34 @@ router.post("/reset_password", passport.authenticate("young", { session: false, 
 
 router.post("/signup", async (req, res) => {
   try {
+    // TODO: Check adress + date
     const { error, value } = Joi.object({
       email: Joi.string().lowercase().trim().email().required(),
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       password: Joi.string().required(),
       birthdateAt: Joi.string().trim().required(),
-    })
-      .unknown()
-      .validate(req.body);
+      birthCountry: Joi.string().trim().required(),
+      birthCity: Joi.string().trim().required(),
+      birthCityZip: Joi.string().trim().allow(null, ""),
+      rulesYoung: Joi.string().trim().required().valid("true"),
+      acceptCGU: Joi.string().trim().required().valid("true"),
+      frenchNationality: Joi.string().trim().required().valid("true"),
+    }).validate(req.body);
 
     if (error) {
-      if (error.details.find((e) => e.path === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
-      if (error.details.find((e) => e.path === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+      if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
+      if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
       return res.status(400).send({ ok: false, code: error.toString() });
     }
 
-    const { password, email, lastName, firstName, birthdateAt } = value;
+    const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung } = value;
     if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
     const countDocuments = await YoungObject.countDocuments({ lastName, firstName, birthdateAt });
     if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-    const user = await YoungObject.create({ password, email, firstName, lastName, birthdateAt });
+    const user = await YoungObject.create({ email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung });
     const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
 
@@ -764,5 +769,6 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.use("/:id/documents", require("./documents"));
 router.use("/:id/meeting-point", require("./meeting-point"));
+router.use("/inscription", require("./inscription"));
 
 module.exports = router;

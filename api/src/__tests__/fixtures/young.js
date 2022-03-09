@@ -8,6 +8,8 @@ function getNewYoungFixture(fields = {}) {
     lastName: faker.name.lastName(),
     frenchNationality: "true",
     birthCountry: faker.address.country(),
+    birthCity: faker.address.city(),
+    birthCityZip: faker.address.zipCode(),
     email: faker.internet.email().toLowerCase(),
     phone: faker.phone.phoneNumber(),
     gender: faker.name.gender(),

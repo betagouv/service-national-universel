@@ -21,19 +21,31 @@ export default function StepProfilOnline() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
-  const young = useSelector((state) => state.Auth.young) || {
-    firstName: "",
-    lastName: "",
-    birthdateAt: "",
-    birthCountry: "",
-    birthCity: "",
-    birthCityZip: "",
-  };
+  const [data, setData] = useState();
+  const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
   useEffect(() => {
-    if (young.birthCityZip && young.birthCountrySelector === undefined) dispatch(setYoung({ ...young, birthCountrySelector: "true" }));
-  }, []);
+    if (young !== undefined) {
+      setData({
+        firstName: young.firstName,
+        lastName: young.lastName,
+        birthdateAt: young.birthdateAt,
+        birthCountry: young.birthCountry,
+        birthCity: young.birthCity,
+        birthCityZip: young.birthCityZip,
+        email: young.email,
+      });
+
+      if (young.birthCityZip && young.birthCountrySelector === undefined) {
+        setData((data) => ({ ...data, birthCountrySelector: "true" }));
+      } else {
+        setData((data) => ({ ...data, birthCountrySelector: "false" }));
+      }
+    }
+  }, [young]);
+
+  if (!data) return null;
 
   return (
     <Wrapper>
@@ -42,19 +54,22 @@ export default function StepProfilOnline() {
         <p>Renseignez ci-dessous les coordonnées du volontaire</p>
       </Heading>
       <Formik
-        initialValues={young}
+        initialValues={data}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            const newValues = { ...values };
-            const { ok: okPut, code: codePut, data } = await api.put("/young", newValues);
-            if (!okPut || !data?._id) return toastr.error("Une erreur s'est produite :", translate(codePut));
-            dispatch(setYoung(data));
+            const { email, firstName, lastName, birthdateAt, birthCountry, birthCity, birthCityZip } = values;
+            const {
+              ok: okPut,
+              code: codePut,
+              data: user,
+            } = await api.put("/young/inscription/profile", { email, firstName, lastName, birthdateAt, birthCountry, birthCity, birthCityZip });
+            if (!okPut || !user?._id) return toastr.error("Une erreur s'est produite :", translate(codePut));
+            dispatch(setYoung(user));
             history.push("/inscription/coordonnees");
           } catch (e) {
-            console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code) || e.message);
             Sentry.captureException(e);
           } finally {
@@ -142,11 +157,11 @@ export default function StepProfilOnline() {
                     className="form-control"
                     validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
                     type="email"
-                    name="newEmail"
-                    value={values.newEmail}
+                    name="verifyEmail"
+                    value={values.verifyEmail}
                     onChange={handleChange}
                   />
-                  <ErrorMessage errors={errors} touched={touched} name="newEmail" />
+                  <ErrorMessage errors={errors} touched={touched} name="verifyEmail" />
                 </Col>
               </FormRow>
               <FormRow align="center">
@@ -194,6 +209,8 @@ export default function StepProfilOnline() {
                           const value = e.target.value;
                           handleChange({ target: { value, name: "birthCountrySelector" } });
                           handleChange({ target: { value: "France", name: "birthCountry" } });
+                          handleChange({ target: { value: "", name: "birthCity" } });
+                          handleChange({ target: { value: "", name: "birthCityZip" } });
                         }}
                       />
                       Je suis né(e) en France
@@ -210,6 +227,8 @@ export default function StepProfilOnline() {
                           const value = e.target.value;
                           handleChange({ target: { value, name: "birthCountrySelector" } });
                           handleChange({ target: { value: "", name: "birthCountry" } });
+                          handleChange({ target: { value: "", name: "birthCity" } });
+                          handleChange({ target: { value: "", name: "birthCityZip" } });
                         }}
                       />
                       Je suis né(e) à l&apos;étranger
