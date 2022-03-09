@@ -58,18 +58,16 @@ router.get("/actions", async (req, res) => {
 
     // si l'utilisateur existe, on récupère les missions + candidatures qui lui sont liées
     if (user) {
-      const data = { structure: {}, actions: { waitingValitation: undefined, contractToBeSigned: undefined, contractToBeFilled: undefined } };
+      const data = { structure: {}, actions: { waitingValitation: 0, contractToBeSigned: 0, contractToBeFilled: 0 } };
       const structure = await StructureModel.findById(user.structureId);
       data.structure = { name: structure.name };
 
       const missions = await MissionModel.find({ tutorId: user._id.toString() });
 
-      let applicationsWaitingValidation = 0;
       for (let mission of missions) {
         const applications = await ApplicationModel.find({ missionId: mission._id, status: { $in: [APPLICATION_STATUS.WAITING_VALIDATION] } });
-        applicationsWaitingValidation += applications.length;
+        data.actions.waitingValitation += applications.length;
       }
-      data.actions.waitingValitation = applicationsWaitingValidation;
 
       let contractToBeSigned = 0;
       // todo
@@ -78,6 +76,8 @@ router.get("/actions", async (req, res) => {
       let contractToBeFilled = 0;
       // todo
       data.actions.contractToBeFilled = contractToBeFilled;
+
+      // data.raw = { missions, structure };
 
       return res.status(200).send({ ok: true, data });
     }
