@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
+const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const ReferentModel = require("../models/referent");
@@ -14,7 +15,10 @@ const { ERRORS } = require("../utils");
 
 router.get("/signin", async (req, res) => {
   try {
-    let { email, token } = req.query;
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token: Joi.string().required() }).validate(req.query);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+
+    const { token, email } = value;
 
     if (!email || !token || token.toString() !== config.JVA_SIGNIN_TOKEN.toString()) {
       return res.status(401).send({ ok: false, code: "TOKEN_OR_EMAIL_INVALID" });
@@ -43,7 +47,10 @@ router.get("/signin", async (req, res) => {
 
 router.get("/actions", async (req, res) => {
   try {
-    let { email, token } = req.query;
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token: Joi.string().required() }).validate(req.query);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+
+    const { token, email } = value;
 
     // améliorer token ?
     if (!email || !token || token.toString() !== config.JVA_SIGNIN_TOKEN.toString()) {
