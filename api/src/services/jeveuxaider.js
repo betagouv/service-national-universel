@@ -16,18 +16,18 @@ const { ERRORS } = require("../utils");
 router.get("/signin", async (req, res) => {
   try {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token: Joi.string().required() }).validate(req.query);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
 
     const { token, email } = value;
 
     if (!email || !token || token.toString() !== config.JVA_TOKEN.toString()) {
-      return res.status(401).send({ ok: false, code: "TOKEN_OR_EMAIL_INVALID" });
+      return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
     }
 
     const user = await ReferentModel.findOne({ email, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
 
     // si l'utilisateur n'existe pas, on bloque
-    if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+    if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
 
     // si l'utilisateur existe, on le connecte, et on le redirige vers la plateforme admin SNU
     if (user) {
@@ -48,18 +48,18 @@ router.get("/signin", async (req, res) => {
 router.get("/actions", async (req, res) => {
   try {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), token: Joi.string().required() }).validate(req.query);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
 
     const { token, email } = value;
 
     if (!email || !token || token.toString() !== config.JVA_TOKEN.toString()) {
-      return res.status(401).send({ ok: false, code: "TOKEN_OR_EMAIL_INVALID" });
+      return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
     }
 
     const user = await ReferentModel.findOne({ email, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
 
     // si l'utilisateur n'existe pas, on bloque
-    if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+    if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
 
     // si l'utilisateur existe, on récupère les missions + candidatures qui lui sont liées
     if (user) {
