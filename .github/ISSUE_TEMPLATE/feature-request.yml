@@ -16,6 +16,14 @@ body:
       description: Une description claire et concise de la fonctionnalité souhaitée ou de la solution alternative.
     validations:
       required: true
+  - type: input
+    id: link
+    attributes:
+      label: ticket
+      description: "ticket lié, pour plus d'informations !"
+      placeholder: "https://www.notion..."
+    validations:
+    required: false
   - type: textarea
     id: comment
     attributes:
