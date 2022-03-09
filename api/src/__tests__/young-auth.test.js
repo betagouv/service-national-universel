@@ -91,8 +91,8 @@ describe("Young", () => {
         birthCity: fixture.birthCity,
         birthCityZip: fixture.birthCityZip,
         frenchNationality: "false",
-        RGPD: "false",
-        CGU: "false",
+        rulesYoung: "false",
+        acceptCGU: "false",
       });
       expect(res.status).toBe(400);
     });
@@ -117,8 +117,8 @@ describe("Young", () => {
         birthCity: fixture.birthCity,
         birthCityZip: fixture.birthCityZip,
         frenchNationality: fixture.frenchNationality,
-        RGPD: fixture.acceptCGU,
-        CGU: fixture.rulesYoung,
+        rulesYoung: fixture.acceptCGU,
+        acceptCGU: fixture.rulesYoung,
       });
       expect(res.status).toBe(200);
       expect(res.body.token).toBeTruthy();
@@ -136,8 +136,8 @@ describe("Young", () => {
         birthCity: fixture.birthCity,
         birthCityZip: fixture.birthCityZip,
         frenchNationality: fixture.frenchNationality,
-        RGPD: fixture.acceptCGU,
-        CGU: fixture.rulesYoung,
+        rulesYoung: fixture.acceptCGU,
+        acceptCGU: fixture.rulesYoung,
       });
       expect(res.body.user.firstName).toBe("Foo");
       expect(res.body.user.lastName).toBe("BAR");
@@ -158,8 +158,8 @@ describe("Young", () => {
         birthCity: fixture.birthCity,
         birthCityZip: fixture.birthCityZip,
         frenchNationality: fixture.frenchNationality,
-        RGPD: fixture.acceptCGU,
-        CGU: fixture.rulesYoung,
+        rulesYoung: fixture.acceptCGU,
+        acceptCGU: fixture.rulesYoung,
       });
       expect(res.status).toBe(409);
     });

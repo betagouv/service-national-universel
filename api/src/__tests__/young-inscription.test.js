@@ -9,14 +9,14 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Young", () => {
-  describe("PUT /young/inscription/onlineProfil", () => {
+  describe("PUT /young/inscription/profile", () => {
     async function selfUpdateYoung(body = {}, fields = {}) {
       const young = await createYoungHelper(getNewYoungFixture(fields));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
 
-      const response = await request(getAppHelper()).put("/young/inscription/onlineProfil").send(body);
+      const response = await request(getAppHelper()).put("/young/inscription/profile").send(body);
       updatedYoung = response.body.data;
       passport.user = previous;
 
@@ -61,7 +61,7 @@ describe("Young", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = they;
-      const res = await request(getAppHelper()).put(`/young/inscription/onlineProfil`).send({
+      const res = await request(getAppHelper()).put(`/young/inscription/profile`).send({
         email: me.email,
         firstName: "foo",
         lastName: "bar",
@@ -76,7 +76,7 @@ describe("Young", () => {
     it("should return 404 if user don't exist", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email.toLowerCase();
-      const response = await request(getAppHelper()).put("/young/inscription/onlineProfil").send({
+      const response = await request(getAppHelper()).put("/young/inscription/profile").send({
         email: email,
         firstName: "foo",
         lastName: "bar",
