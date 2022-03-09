@@ -44,8 +44,8 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
 
   try {
     for (let session of sessions) {
-      const goal = await InscriptionGoalModel.findOne({ department: young.department, cohort: session.id });
-      if (!goal || !goal.max) {
+      const inscriptionGoal = await InscriptionGoalModel.findOne({ department: young.department, cohort: session.id });
+      if (!inscriptionGoal || !inscriptionGoal.max) {
         session.goalReached = false;
         continue;
       }
@@ -60,8 +60,8 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
         continue;
       }
 
-      const ratio = Math.floor(goal.max * session.buffer) / nbYoung;
-      if (ratio >= 1) session.goalReached = true;
+      const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
+      if (fillingRatio >= 1) session.goalReached = true;
       else session.goalReached = false;
     }
 
@@ -137,8 +137,8 @@ router.post("/eligibility/2022", async (req, res) => {
 
   try {
     for (let session of sessions) {
-      const goal = await InscriptionGoalModel.findOne({ department: department, cohort: session.id });
-      if (!goal || !goal.max) {
+      const inscriptionGoal = await InscriptionGoalModel.findOne({ department: department, cohort: session.id });
+      if (!inscriptionGoal || !inscriptionGoal.max) {
         session.goalReached = false;
         continue;
       }
@@ -153,8 +153,8 @@ router.post("/eligibility/2022", async (req, res) => {
         continue;
       }
 
-      const ratio = Math.floor(goal.max * session.buffer) / nbYoung;
-      if (ratio >= 1) session.goalReached = true;
+      const fillingRatio = nbYoung / Math.floor(inscriptionGoal.max * session.buffer);
+      if (fillingRatio >= 1) session.goalReached = true;
       else session.goalReached = false;
     }
 
