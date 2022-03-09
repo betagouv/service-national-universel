@@ -20,7 +20,7 @@ router.get("/signin", async (req, res) => {
 
     const { token, email } = value;
 
-    if (!email || !token || token.toString() !== config.JVA_SIGNIN_TOKEN.toString()) {
+    if (!email || !token || token.toString() !== config.JVA_TOKEN.toString()) {
       return res.status(401).send({ ok: false, code: "TOKEN_OR_EMAIL_INVALID" });
     }
 
@@ -52,7 +52,7 @@ router.get("/actions", async (req, res) => {
 
     const { token, email } = value;
 
-    if (!email || !token || token.toString() !== config.JVA_SIGNIN_TOKEN.toString()) {
+    if (!email || !token || token.toString() !== config.JVA_TOKEN.toString()) {
       return res.status(401).send({ ok: false, code: "TOKEN_OR_EMAIL_INVALID" });
     }
 
