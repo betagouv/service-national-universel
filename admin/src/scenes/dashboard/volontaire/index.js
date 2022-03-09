@@ -9,16 +9,24 @@ import FilterDepartment from "../components/FilterDepartment";
 import SubTab from "./status";
 
 import { YOUNG_STATUS, ROLES, translate } from "../../../utils";
+import { useLocation } from "react-router-dom";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
-  const [filter, setFilter] = useState({ status: [YOUNG_STATUS.VALIDATED], cohort: ["2021"], region: [], department: [] });
+  const { state } = useLocation();
+
+  const [filter, setFilter] = useState();
 
   function updateFilter(n) {
     setFilter((f) => ({ ...f, ...n }));
   }
 
   useEffect(() => {
+    if (state !== undefined && state?.params) {
+      setFilter(state.params.filter);
+    } else {
+      setFilter({ status: [YOUNG_STATUS.VALIDATED], cohort: ["2021"], region: [], department: [] });
+    }
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
       updateFilter({ department: [user.department] });
     } else if (user.role === ROLES.REFERENT_REGION) {
