@@ -52,7 +52,6 @@ router.get("/actions", async (req, res) => {
 
     const { token, email } = value;
 
-    // améliorer token ?
     if (!email || !token || token.toString() !== config.JVA_SIGNIN_TOKEN.toString()) {
       return res.status(401).send({ ok: false, code: "TOKEN_OR_EMAIL_INVALID" });
     }
@@ -75,13 +74,11 @@ router.get("/actions", async (req, res) => {
         data.actions.waitingValitation += applications.length;
       }
 
-      let contractToBeSigned = 0;
       // todo
-      data.actions.contractToBeSigned = contractToBeSigned;
+      data.actions.contractToBeSigned = 0;
 
-      let contractToBeFilled = 0;
       // todo
-      data.actions.contractToBeFilled = contractToBeFilled;
+      data.actions.contractToBeFilled = 0;
 
       // data.raw = { missions, structure };
 
