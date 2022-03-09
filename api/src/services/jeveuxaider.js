@@ -45,8 +45,6 @@ router.get("/signin", async (req, res) => {
 router.get("/actions", async (req, res) => {
   try {
     let { email, token } = req.query;
-    const x = req.header("authorization");
-    console.log("✍️ ~ x", x);
 
     // améliorer token ?
     if (!email || !token || token.toString() !== config.JVA_SIGNIN_TOKEN.toString()) {
@@ -60,17 +58,28 @@ router.get("/actions", async (req, res) => {
 
     // si l'utilisateur existe, on récupère les missions + candidatures qui lui sont liées
     if (user) {
+      const data = { structure: {}, actions: { waitingValitation: undefined, contractToBeSigned: undefined, contractToBeFilled: undefined } };
       const structure = await StructureModel.findById(user.structureId);
-      const missions = await MissionModel.find({ tutorId: user._id.toString() });
-      for (let mission of missions) {
-        // const applications = await ApplicationModel.find({ missionId: mission._id, status: { $in: [APPLICATION_STATUS.WAITING_VALIDATION] } });
-        const applications = await ApplicationModel.find({ missionId: mission._id });
-        mission.applications = applications.map((m) => ({
-          status: m.status,
-        }));
-      }
+      data.structure = { name: structure.name };
 
-      return res.status(200).send({ ok: true, data: { structure: { name: structure.name }, missions: missions.map((m) => ({ name: m.name, applications: m.applications })) } });
+      const missions = await MissionModel.find({ tutorId: user._id.toString() });
+
+      let applicationsWaitingValidation = 0;
+      for (let mission of missions) {
+        const applications = await ApplicationModel.find({ missionId: mission._id, status: { $in: [APPLICATION_STATUS.WAITING_VALIDATION] } });
+        applicationsWaitingValidation += applications.length;
+      }
+      data.actions.waitingValitation = applicationsWaitingValidation;
+
+      let contractToBeSigned = 0;
+      // todo
+      data.actions.contractToBeSigned = contractToBeSigned;
+
+      let contractToBeFilled = 0;
+      // todo
+      data.actions.contractToBeFilled = contractToBeFilled;
+
+      return res.status(200).send({ ok: true, data });
     }
   } catch (error) {
     capture(error);
