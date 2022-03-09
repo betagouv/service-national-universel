@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { ENABLE_PM } from "../../../utils";
 
-export default function ApplyDoneModal({ value, onChange, young }) {
+export default function ApplyDoneModal({ value, onChange }) {
   if (!value) return <div />;
 
   const renderText = () => {
@@ -14,6 +14,12 @@ export default function ApplyDoneModal({ value, onChange, young }) {
   };
 
   const renderRedirect = () => {
+    if (ENABLE_PM && value.isMilitaryPreparation === "true")
+      return (
+        <Link to="/ma-preparation-militaire">
+          <Button>Je renseigne mes documents</Button>
+        </Link>
+      );
     return (
       <Link to="/ma-preparation-militaire">
         <Button>Ma préparation militaire</Button>
