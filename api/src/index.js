@@ -78,6 +78,12 @@ app.use("/support-center/user", require("./controllers/supportUser"));
 app.use("/support-center/ticket", require("./controllers/supportTicket"));
 app.use("/support-center/knowledge-base", require("./controllers/knowledgeBase"));
 app.use("/signin", require("./controllers/signin"));
+
+//services
+if (ENVIRONMENT !== "production") {
+  app.use("/jeveuxaider", require("./services/jeveuxaider"));
+}
+
 app.use(handleError);
 
 app.get("/", async (req, res) => {
