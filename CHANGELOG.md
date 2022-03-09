@@ -1,3 +1,16 @@
+# [1.55.0](https://github.com/betagouv/service-national-universel/compare/v1.54.0...v1.55.0) (2022-03-09)
+
+
+### Bug Fixes
+
+* **admin:** filtres dashboard volontaires ([7cd2cfe](https://github.com/betagouv/service-national-universel/commit/7cd2cfe0259d19af14efeea20136c5a11b7c202d))
+* **api:** ratio goal inscription ([2a4f40a](https://github.com/betagouv/service-national-universel/commit/2a4f40afaa0afb10113033099a6a7e31e36b71e5))
+
+
+### Features
+
+* jva endpoint v1 ([#1341](https://github.com/betagouv/service-national-universel/issues/1341)) ([a642f23](https://github.com/betagouv/service-national-universel/commit/a642f232d4f567b694bb7749d55931f886fab3a3))
+
 # [1.54.0](https://github.com/betagouv/service-national-universel/compare/v1.53.1...v1.54.0) (2022-03-08)
 
 
