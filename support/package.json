@@ -34,7 +34,7 @@
     "snu-lib": "file:../lib",
     "sortablejs": "1.14.0",
     "swr": "1.2.1",
-    "urijs": "1.19.7"
+    "urijs": "1.19.10"
   },
   "devDependencies": {
     "autoprefixer": "10.4.2",
