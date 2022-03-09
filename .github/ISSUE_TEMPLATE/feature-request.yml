@@ -20,10 +20,10 @@ body:
     id: link
     attributes:
       label: ticket
-      description: "ticket lié, pour plus d'informations !"
-      placeholder: "https://www.notion..."
+      description: ticket lié, pour plus d\'informations !
+      placeholder: https://www.notion...
     validations:
-    required: false
+      required: false
   - type: textarea
     id: comment
     attributes:
