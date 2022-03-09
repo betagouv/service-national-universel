@@ -14,7 +14,6 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import AlertBox from "../../components/AlertBox";
 import Loader from "../../components/Loader";
 import ModalConfirm from "../../components/modals/ModalConfirm";
-import ErrorMessage from "../../components/ErrorMessage";
 import plausibleEvent from "../../services/plausible";
 
 export default function Index() {
@@ -138,7 +137,7 @@ export default function Index() {
       </HeroContainer>
       {applicationsToMilitaryPreparation.length ? (
         <Formik initialValues={young} validateOnChange={false} validateOnBlur={false} onSubmit={onClickSubmit}>
-          {({ values, handleChange, handleSubmit, errors, touched, isSubmitting }) => (
+          {({ values, handleChange, handleSubmit, errors, isSubmitting }) => (
             <>
               <AlertBox
                 message="Les informations collectées dans le cadre d’une candidature de votre part pour effectuer une préparation militaire sont destinées à vérifier l’éligibilité de

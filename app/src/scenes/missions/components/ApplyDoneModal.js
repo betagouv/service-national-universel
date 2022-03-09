@@ -14,15 +14,9 @@ export default function ApplyDoneModal({ value, onChange, young }) {
   };
 
   const renderRedirect = () => {
-    if (ENABLE_PM && value.isMilitaryPreparation === "true" && !young.statusMilitaryPreparationFiles)
-      return (
-        <Link to="/ma-preparation-militaire">
-          <Button>Je renseigne mes documents</Button>
-        </Link>
-      );
     return (
-      <Link to="/candidature">
-        <Button>Classer mes missions</Button>
+      <Link to="/ma-preparation-militaire">
+        <Button>Ma préparation militaire</Button>
       </Link>
     );
   };
