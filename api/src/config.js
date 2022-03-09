@@ -37,6 +37,8 @@ const API_ASSOCIATION_CELLAR_KEYSECRET = process.env.API_ASSOCIATION_CELLAR_KEYS
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || "";
 const SLACK_BOT_CHANNEL = process.env.SLACK_BOT_CHANNEL || "";
 
+const JVA_SIGNIN_TOKEN = process.env.JVA_SIGNIN_TOKEN || "";
+
 module.exports = {
   PORT,
   MONGO_URL,
@@ -69,6 +71,7 @@ module.exports = {
   API_ASSOCIATION_CELLAR_KEYSECRET,
   SLACK_BOT_TOKEN,
   SLACK_BOT_CHANNEL,
+  JVA_SIGNIN_TOKEN,
 };
 
 function getEnvironment() {
