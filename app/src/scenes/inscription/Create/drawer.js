@@ -87,7 +87,9 @@ export default function InscriptionDrawer({ step }) {
           onClick={() => {
             plausibleEvent("Funnel Inscription/CTA - Se désister", { step: step });
           }}>
-          <Link to="/inscription/desistement">Se désister du SNU</Link>
+          <Link to="/inscription/desistement">
+            {[YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) ? "Abandonner mon inscription" : "Se désister du SNU"}
+          </Link>
         </DrawerButton>
       ) : null}
     </Sidebar>
