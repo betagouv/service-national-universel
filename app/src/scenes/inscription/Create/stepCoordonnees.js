@@ -174,7 +174,6 @@ export default function StepCoordonnees() {
           useEffect(() => {
             if (values.phone) validateField("phone");
           }, [values.phone]);
-          console.log(values);
           return (
             <>
               <FormRow>

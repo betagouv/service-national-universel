@@ -8,7 +8,7 @@ const { canUpdateYoungStatus } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { validateFirstName } = require("../../utils/validator");
 
-const { ERRORS, YOUNG_SITUATIONS, inscriptionCheck } = require("../../utils");
+const { ERRORS, YOUNG_SITUATIONS, STEPS, inscriptionCheck } = require("../../utils");
 
 router.put("/profile", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -158,6 +158,9 @@ router.put("/coordonnee", passport.authenticate("young", { session: false, failW
       value.schoolDepartment = "";
       value.grade = "";
     }
+
+    delete value.livesInFrance;
+    value.inscriptionStep = STEPS.AVAILABILITY;
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
