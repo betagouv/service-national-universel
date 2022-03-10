@@ -4,7 +4,6 @@ import { toastr } from "react-redux-toastr";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { Spinner } from "reactstrap";
-import { YOUNG_STATUS } from "snu-lib";
 
 import api from "../../../services/api";
 import { HERO_IMAGES_LIST, translate } from "../../../utils";
@@ -41,13 +40,13 @@ export default function StepAvailability() {
 
   useEffect(() => {
     (async () => {
-      if (availability?.length === 0 && young.cohort === "2022") await api.put("/young", { status: YOUNG_STATUS.NOT_ELIGIBLE });
+      if (availability?.length === 0 && young.cohort === "2022") await api.put("/young/inscription/availability/notEligible");
     })();
   }, [availability]);
 
   const submit = async (cohort) => {
     try {
-      const { ok, code, data } = await api.put("/young", { cohort, inscriptionStep: STEPS.PARTICULIERES });
+      const { ok, code, data } = await api.put("/young/inscription/availability", { cohort: cohort });
       if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(data));
       history.push("/inscription/particulieres");
@@ -59,7 +58,7 @@ export default function StepAvailability() {
 
   const resetCohort = async () => {
     try {
-      const { ok, code, data } = await api.put("/young", { cohort: "2022" });
+      const { ok, code, data } = await api.put("/young/inscription/availability/reset");
       if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(data));
     } catch (e) {
