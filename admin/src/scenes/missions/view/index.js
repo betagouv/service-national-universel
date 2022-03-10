@@ -45,10 +45,12 @@ export default function Index({ ...props }) {
         }
         setTutor(tutorResponse.data);
       }
-
-      fetchApplication();
     })();
   }, [props.match.params.id]);
+
+  useEffect(() => {
+    if (mission) fetchApplication();
+  }, [mission]);
 
   async function fetchApplication() {
     const applicationResponse = await api.get(`/mission/${mission._id}/application`);
