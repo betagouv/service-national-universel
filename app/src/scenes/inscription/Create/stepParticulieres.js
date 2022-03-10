@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
@@ -18,11 +18,27 @@ export default function StepSpecific() {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [loading, setLoading] = useState(false);
+  const [data, setData] = useState();
 
-  if (!young) {
-    history.push("/inscription/profil");
-    return <div />;
-  }
+  useEffect(() => {
+    if (young !== undefined) {
+      setData({
+        handicap: young.handicap,
+        ppsBeneficiary: young.ppsBeneficiary,
+        paiBeneficiary: young.paiBeneficiary,
+        specificAmenagment: young.specificAmenagment,
+        reducedMobilityAccess: young.reducedMobilityAccess,
+        handicapInSameDepartment: young.handicapInSameDepartment,
+        allergies: young.allergies,
+        highSkilledActivity: young.highSkilledActivity,
+        highSkilledActivityInSameDepartment: young.highSkilledActivityInSameDepartment,
+      });
+    } else {
+      history.push("/inscription/profil");
+    }
+  }, [young]);
+
+  if (!data) return null;
 
   return (
     <Wrapper>
@@ -37,14 +53,23 @@ export default function StepSpecific() {
         </p>
       </Heading>
       <Formik
-        initialValues={young}
+        initialValues={data}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            values.inscriptionStep = STEPS.REPRESENTANTS;
-            const { ok, code, data } = await api.put("/young", values);
+            values.moreInformation = values.handicap === "true" || values.ppsBeneficiary === "true" || values.paiBeneficiary === "true" ? "true" : "false";
+            if (values.moreInformation === "false") {
+              delete values.specificAmenagment;
+              delete values.reducedMobilityAccess;
+              delete values.handicapInSameDepartment;
+            }
+            if (values.highSkilledActivity === "false") {
+              delete values.highSkilledActivityInSameDepartment;
+            }
+            console.log(values.moreInformation);
+            const { ok, code, data } = await api.put("/young/inscription/particulieres", values);
             if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(data));
             history.push("/inscription/representants");

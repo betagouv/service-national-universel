@@ -8,7 +8,7 @@ const { canUpdateYoungStatus } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { validateFirstName } = require("../../utils/validator");
 
-const { ERRORS, ROLES } = require("../../utils");
+const { ERRORS, YOUNG_SITUATIONS, STEPS, inscriptionCheck, YOUNG_STATUS } = require("../../utils");
 
 router.put("/profile", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -41,6 +41,74 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
   } catch (error) {
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.put("/particulieres", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    //TODO : Check adress + date
+    const { error, value } = Joi.object({
+      handicap: Joi.string().trim().required().valid("true", "false"),
+      ppsBeneficiary: Joi.string().trim().required().valid("true", "false"),
+      paiBeneficiary: Joi.string().trim().required().valid("true", "false"),
+      allergies: Joi.string().trim().required().valid("true", "false"),
+      highSkilledActivity: Joi.string().trim().required().valid("true", "false"),
+      moreInformation: Joi.string().trim().required().valid("true", "false"),
+
+      specificAmenagment: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: Joi.string().trim().required().valid("true", "false"),
+        otherwise: Joi.isError(new Error()),
+      }),
+      reducedMobilityAccess: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: Joi.string().trim().required().valid("true", "false"),
+        otherwise: Joi.isError(new Error()),
+      }),
+      handicapInSameDepartment: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: Joi.string().trim().required().valid("true", "false"),
+        otherwise: Joi.isError(new Error()),
+      }),
+
+      highSkilledActivityInSameDepartment: Joi.alternatives().conditional("highSkilledActivity", {
+        is: "true",
+        then: Joi.string().trim().required().valid("true", "false"),
+        otherwise: Joi.isError(new Error()),
+      }),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (value.moreInformation === "false") {
+      value.specificAmenagment = "false";
+      value.reducedMobilityAccess = "false";
+      value.handicapInSameDepartment = "false";
+    }
+
+    if (value.highSkilledActivity === "false") {
+      value.highSkilledActivityInSameDepartment = "false";
+    }
+
+    value.inscriptionStep = STEPS.REPRESENTANTS;
+    delete value.moreInformation;
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set(value);
+    await young.save({ fromUser: req.user });
+
+    inscriptionCheck(value, young, req);
+
+    return res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
