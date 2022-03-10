@@ -413,20 +413,20 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    //! needs further checking
-    // if (req.user.department !== young.department) {
-    //   const referents = await ReferentModel.find({ department: req.user.department, role: ROLES.REFERENT_DEPARTMENT });
-    //   for (let referent of referents) {
-    //     await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
-    //       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    //       params: {
-    //         youngFirstName: young.firstName,
-    //         youngLastName: young.lastName,
-    //         cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-    //       },
-    //     });
-    //   }
-    // }
+    if (value?.department && value?.department !== young?.department) {
+      const referents = await ReferentModel.find({ department: value.department, role: ROLES.REFERENT_DEPARTMENT });
+      for (let referent of referents) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: {
+            youngFirstName: young.firstName,
+            youngLastName: young.lastName,
+            cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
+          },
+        });
+      }
+    }
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
