@@ -88,7 +88,7 @@ describe("Young", () => {
       expect(response.statusCode).toBe(404);
     });
   });
-  describe.only("PUT /young/inscription/particulieres", () => {
+  describe("PUT /young/inscription/particulieres", () => {
     async function selfUpdateYoung(body = {}, fields = {}) {
       const young = await createYoungHelper(getNewYoungFixture(fields));
       const passport = require("passport");
