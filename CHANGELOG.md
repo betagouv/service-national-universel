@@ -1,3 +1,17 @@
+# [1.56.0](https://github.com/betagouv/service-national-universel/compare/v1.55.0...v1.56.0) (2022-03-10)
+
+
+### Bug Fixes
+
+* **api:** template changement de département ([#1281](https://github.com/betagouv/service-national-universel/issues/1281)) ([d4be6b2](https://github.com/betagouv/service-national-universel/commit/d4be6b2bbe5a7b1a20530dd9d52d168f8a95d6f8))
+* **api,admin:** soft delete - clean patches ([#1304](https://github.com/betagouv/service-national-universel/issues/1304)) ([3091f3f](https://github.com/betagouv/service-national-universel/commit/3091f3f485dccec2fca296dc4f0ad09eed8ad65c))
+* **app:** required files PM ([#1330](https://github.com/betagouv/service-national-universel/issues/1330)) ([2181e5d](https://github.com/betagouv/service-national-universel/commit/2181e5de3f3fd1bda194a4bf94c41893a0f22809))
+
+
+### Features
+
+* **api:** visibilité sur les visiteurs par réf. régional ([7a6bcb6](https://github.com/betagouv/service-national-universel/commit/7a6bcb60d690356bd44033abb61c296f86c2e3ac))
+
 # [1.55.0](https://github.com/betagouv/service-national-universel/compare/v1.54.0...v1.55.0) (2022-03-09)
 
 
