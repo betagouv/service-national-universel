@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Col } from "reactstrap";
 import { Field, Formik } from "formik";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
@@ -25,20 +25,20 @@ export default function StepProfil() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
-  const young = useSelector((state) => state.Auth.young) || {
+  const young = {
     frenchNationality: "false",
     firstName: "",
     lastName: "",
     birthdateAt: "",
     email: "",
-    newEmail: "",
+    verifyEmail: "",
     password: "",
     verifyPassword: "",
     birthCountry: "",
     birthCity: "",
     birthCityZip: "",
-    RGPD: "false",
-    CGU: "false",
+    rulesYoung: "false",
+    acceptCGU: "false",
   };
   const history = useHistory();
 
@@ -55,15 +55,24 @@ export default function StepProfil() {
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            const { firstName, lastName, email, password, birthdateAt } = values;
-            const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password, birthdateAt });
+            const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, rulesYoung, acceptCGU } = values;
+            const { user, token, code, ok } = await api.post(`/young/signup`, {
+              email,
+              firstName,
+              lastName,
+              password,
+              birthdateAt,
+              birthCountry,
+              birthCity,
+              birthCityZip,
+              frenchNationality,
+              rulesYoung,
+              acceptCGU,
+            });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
-            const newValues = { ...values, ...user };
-            const { ok: okPut, code: codePut, data } = await api.put("/young", newValues);
-            if (!okPut || !data?._id) return toastr.error("Une erreur s'est produite :", codePut);
-            dispatch(setYoung(data));
-            await api.post(`/young/${data._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`);
+            dispatch(setYoung(user));
+            await api.post(`/young/${user._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`);
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);
@@ -94,8 +103,8 @@ export default function StepProfil() {
             if (values.email) validateField("email");
           }, [values.email]);
           useEffect(() => {
-            if (values.newEmail) validateField("newEmail");
-          }, [values.newEmail]);
+            if (values.verifyEmail) validateField("verifyEmail");
+          }, [values.verifyEmail]);
           useEffect(() => {
             if (values.password) validateField("password");
           }, [values.password]);
@@ -336,11 +345,11 @@ export default function StepProfil() {
                     className="form-control"
                     validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
                     type="email"
-                    name="newEmail"
-                    value={values.newEmail}
+                    name="verifyEmail"
+                    value={values.verifyEmail}
                     onChange={handleChange}
                   />
-                  <ErrorMessage errors={errors} touched={touched} name="newEmail" />
+                  <ErrorMessage errors={errors} touched={touched} name="verifyEmail" />
                 </Col>
               </FormRow>
               <FormRow align="center">
@@ -393,9 +402,9 @@ export default function StepProfil() {
                     <Field
                       validate={(v) => (!v || v === "false") && "Vous devez accepter les CGU pour continuer."}
                       value="true"
-                      checked={values.CGU === "true"}
+                      checked={values.acceptCGU === "true"}
                       type="checkbox"
-                      name="CGU"
+                      name="acceptCGU"
                       onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                     />
                     <p style={{ marginBottom: "0" }}>
@@ -406,14 +415,14 @@ export default function StepProfil() {
                       de la plateforme du Service national universel
                     </p>
                   </RadioLabel>
-                  <ErrorMessage errors={errors} touched={touched} name="CGU" />
+                  <ErrorMessage errors={errors} touched={touched} name="acceptCGU" />
                   <RadioLabel style={{ marginTop: "0.5rem" }}>
                     <Field
                       validate={(v) => (!v || v === "false") && "Vous devez accepter les modalités de traitement pour continuer."}
                       value="true"
-                      checked={values.RGPD === "true"}
+                      checked={values.rulesYoung === "true"}
                       type="checkbox"
-                      name="RGPD"
+                      name="rulesYoung"
                       onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                     />
                     <p style={{ marginBottom: "0" }}>
@@ -423,7 +432,7 @@ export default function StepProfil() {
                       </a>
                     </p>
                   </RadioLabel>
-                  <ErrorMessage errors={errors} touched={touched} name="RGPD" />
+                  <ErrorMessage errors={errors} touched={touched} name="rulesYoung" />
                 </div>
               </FormRow>
               <FormFooter loading={loading} secondButton="back" values={values} handleSubmit={handleSubmit} errors={errors} />

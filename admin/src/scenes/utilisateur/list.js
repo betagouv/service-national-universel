@@ -4,6 +4,7 @@ import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactive
 import { toastr } from "react-redux-toastr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
+import { HiLogin, HiUserAdd } from "react-icons/hi";
 
 import { setUser } from "../../redux/auth/actions";
 import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT, ROLES, canUpdateReferent, canDeleteReferent } from "../../utils";
@@ -20,6 +21,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import plausibleEvent from "../../services/pausible";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
@@ -154,20 +156,31 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fonction")}
                 />
+                <DeleteFilters />
               </FilterRow>
             </Filter>
             <ResultTable>
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
+                sortOptions={[
+                  { label: "Nom (A > Z)", dataField: "lastName.keyword", sortBy: "asc" },
+                  { label: "Nom (Z > A)", dataField: "lastName.keyword", sortBy: "desc" },
+                  { label: "Prénom (A > Z)", dataField: "firstName.keyword", sortBy: "asc" },
+                  { label: "Prénom (Z > A)", dataField: "firstName.keyword", sortBy: "desc" },
+                  { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
+                  { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
+                  { label: "Dernière connexion (récent > ancien)", dataField: "lastLoginAt", sortBy: "desc" },
+                  { label: "Dernière connexion (ancien > récent)", dataField: "lastLoginAt", sortBy: "asc" },
+                ]}
+                defaultSortOption="Nom (A > Z)"
                 render={({ data }) => (
                   <Table>
                     <thead>
                       <tr>
                         <th width="30%">Email</th>
                         <th>Rôle</th>
-                        <th>Crée le</th>
-                        <th>Dernière connexion le</th>
+                        <th>Dates</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
@@ -202,13 +215,32 @@ const Hit = ({ hit, onClick, user, selected, structure }) => {
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
         <MultiLine>
-          <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
+          <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
           <p>{hit.email}</p>
         </MultiLine>
       </td>
-      <td>{hit.role && <Badge text={translate(hit.role)} />}</td>
-      <td>{formatStringLongDate(hit.createdAt)}</td>
-      <td>{formatStringLongDate(hit.lastLoginAt)}</td>
+      <td>
+        {hit.role && (
+          <div className="flex flex-col items-start">
+            <Badge text={translate(hit.role)} className="!bg-[#DAE3FD] !text-[#302B94] !border-[#302B94]" />
+            {hit.subRole ? <Badge text={translate(hit.subRole)} /> : null}
+          </div>
+        )}
+      </td>
+      <td>
+        <div className="flex flex-col items-start">
+          <div className="flex items-center gap-1">
+            <HiUserAdd className="text-coolGray-600" />
+            {formatStringLongDate(hit.createdAt)}
+          </div>
+          {hit.lastLoginAt ? (
+            <div className="flex items-center gap-1">
+              <HiLogin className="text-coolGray-600" />
+              {formatStringLongDate(hit.lastLoginAt)}
+            </div>
+          ) : null}
+        </div>
+      </td>
       {displayActionButton ? (
         <td onClick={(e) => e.stopPropagation()}>
           <Action hit={hit} structure={structure} />

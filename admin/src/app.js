@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-d
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
-import styled from "styled-components";
 
 import { setUser } from "./redux/auth/actions";
 import Auth from "./scenes/auth";
@@ -44,7 +43,6 @@ import { SENTRY_URL, environment, adminURL } from "./config";
 import { ROLES, ROLES_LIST } from "./utils";
 
 import "./index.css";
-import "./tailwindcss.css";
 import ModalCGU from "./components/modals/ModalCGU";
 
 if (environment === "production") {
@@ -100,7 +98,7 @@ const Home = () => {
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
-  const [menuVisible, setMenuVisible] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(false);
 
   const renderDashboard = () => {
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsible />;
@@ -138,31 +136,33 @@ const Home = () => {
   }, [user]);
 
   return (
-    <div style={{ display: "flex" }}>
-      <Drawer/>
-      <ContentContainer>
-        <Header/>
-        <Switch>
-          <Route path="/auth" component={Auth} />
-          <RestrictedRoute path="/structure" component={Structure} />
-          <RestrictedRoute path="/settings" component={Settings} />
-          <RestrictedRoute path="/profil" component={Profil} />
-          <RestrictedRoute path="/volontaire" component={renderVolontaire} />
-          <RestrictedRoute path="/mission" component={Missions} />
-          <RestrictedRoute path="/inscription" component={Inscription} />
-          <RestrictedRoute path="/user" component={Utilisateur} />
-          <RestrictedRoute path="/contenu" component={Content} />
-          <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
-          <RestrictedRoute path="/centre" component={Center} />
-          <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
-          <RestrictedRoute path="/association" component={Association} />
-          <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
-          <RestrictedRoute path="/boite-de-reception" component={Inbox} />
-          <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
-          <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
-          <RestrictedRoute path="/" component={renderDashboard} />
-        </Switch>
-      </ContentContainer>
+    <div>
+      <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} />
+      <div className="flex">
+        <Drawer open={drawerVisible} onOpen={setDrawerVisible} />
+        <div className={drawerVisible ? `flex-1 ml-[220px]` : `flex-1 lg:ml-[220px]`}>
+          <Switch>
+            <Route path="/auth" component={Auth} />
+            <RestrictedRoute path="/structure" component={Structure} />
+            <RestrictedRoute path="/settings" component={Settings} />
+            <RestrictedRoute path="/profil" component={Profil} />
+            <RestrictedRoute path="/volontaire" component={renderVolontaire} />
+            <RestrictedRoute path="/mission" component={Missions} />
+            <RestrictedRoute path="/inscription" component={Inscription} />
+            <RestrictedRoute path="/user" component={Utilisateur} />
+            <RestrictedRoute path="/contenu" component={Content} />
+            <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
+            <RestrictedRoute path="/centre" component={Center} />
+            <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
+            <RestrictedRoute path="/association" component={Association} />
+            <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
+            <RestrictedRoute path="/boite-de-reception" component={Inbox} />
+            <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
+            <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
+            <RestrictedRoute path="/" component={renderDashboard} />
+          </Switch>
+        </div>
+      </div>
       <ModalCGU
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -191,14 +191,3 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
   }
   return <Route {...rest} render={(props) => <Component {...props} />} />;
 };
-
-const ContentContainer = styled.div`
-  width: 85%;
-  max-width: calc(100%);
-  @media (max-width: 1000px) {
-    width: 100%;
-    padding: 0;
-    margin-left: auto;
-    max-width: 100%;
-  }
-`;

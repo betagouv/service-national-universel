@@ -8,8 +8,10 @@ import Historic from "./history";
 import ProposeMission from "./propose-mission";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 export default function Index({ ...props }) {
+  const setDocumentTitle = useDocumentTitle("Missions");
   const [mission, setMission] = useState();
   const [tutor, setTutor] = useState();
   const [structure, setStructure] = useState();
@@ -26,6 +28,7 @@ export default function Index({ ...props }) {
         toastr.error("Oups, une erreur est survenue lors de la récupération de la mission", translate(missionResponse.code));
         return history.push("/mission");
       }
+      setDocumentTitle(`${missionResponse.data?.name}`);
       setMission(missionResponse.data);
 
       const structureResponse = await api.get(`/structure/${missionResponse.data.structureId}`);

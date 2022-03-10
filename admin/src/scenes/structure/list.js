@@ -231,6 +231,12 @@ export default function List() {
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
+                sortOptions={[
+                  { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
+                  { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
+                  { label: "Nom de la structure (A > Z)", dataField: "name.keyword", sortBy: "asc" },
+                  { label: "Nom de la structure (Z > A)", dataField: "name.keyword", sortBy: "desc" },
+                ]}
                 onData={({ rawData }) => {
                   if (rawData?.hits?.hits) setStructureIds(rawData.hits.hits.map((e) => e._id));
                 }}
@@ -277,7 +283,7 @@ const Hit = ({ hit, onClick, selected, missions }) => {
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
         <MultiLine>
-          <h2>{hit.name}</h2>
+          <span className="font-bold text-black">{hit.name}</span>
           <p>
             {translate(hit.legalStatus)} • Créée le {formatLongDate(hit.createdAt)}
           </p>

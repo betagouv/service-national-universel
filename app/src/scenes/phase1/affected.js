@@ -13,6 +13,7 @@ import Case from "../../assets/case";
 import Question from "../../assets/question";
 import Bouclier from "../../assets/bouclier";
 import right from "../../assets/right.svg";
+import { Link } from "react-router-dom";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -27,6 +28,7 @@ export default function Affected() {
   };
 
   useEffect(() => {
+    if (!young.sessionPhase1Id) return;
     (async () => {
       const { data, code, ok } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
       if (!ok) return toastr.error("error", translate(code));
@@ -57,6 +59,7 @@ export default function Affected() {
                 Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région (sauf exception) pour
                 créer ainsi des liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
               </p>
+              <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button>
               <Separator style={{ width: "150px" }} />
               <p>
                 <strong style={{ color: "black" }}>Votre lieu d&apos;affectation</strong>
@@ -84,25 +87,21 @@ export default function Affected() {
           </Protocole>
         </Hero>
       </HeroContainer>
-      <GoodToKnow>
-        <section className="good-article">
-          <Case />
-          <div className="good-article-text">
-            <p>Dans ma valise, il y a...</p>
-            <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`} target="_blank" rel="noreferrer">
-              Comment bien <span>préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
-            </a>
-          </div>
-        </section>
-        <section className="good-article">
-          <Question />
-          <div className="good-article-text">
-            <p>Vous avez des questions sur le séjour ?</p>
-            <a href={`${supportURL}/base-de-connaissance/phase-1-le-sejour-de-cohesion`} target="_blank" rel="noreferrer">
-              Consulter notre <span>base&nbsp;de&nbsp;connaissance&nbsp;›</span>
-            </a>
-          </div>
-        </section>
+      <GoodToKnow className=" smmd:flex smmd:flex-row flex flex-col items-center justify-center">
+        <Case class="h-12 w-12 border p-2 rounded-xl" />
+        <div className="ml-3 smmd:mr-20">
+          <p className="!font-bold !text-black">Dans ma valise, il y a...</p>
+          <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`} target="_blank" rel="noreferrer">
+            Comment bien <span className="!text-snu-purple-200">préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
+          </a>
+        </div>
+        <Question class="h-12 w-12 border p-2 rounded-xl" />
+        <div className="ml-3">
+          <p className="!font-bold !text-black">Vous avez des questions sur le séjour ?</p>
+          <a href={`${supportURL}/base-de-connaissance/phase-1-le-sejour-de-cohesion`} target="_blank" rel="noreferrer">
+            Consulter notre <span className="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
+          </a>
+        </div>
       </GoodToKnow>
       <HeroContainer id="convocationPhase1">
         <Hero>
@@ -160,50 +159,9 @@ const Protocole = styled.a`
   }
 `;
 
-const GoodToKnow = styled.article`
-  max-width: 1280px;
-  margin: 2rem auto;
-  padding: 0 2rem;
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  .good-article {
-    margin: 2rem;
-    display: flex;
-    align-items: center;
-    &-text {
-      margin-left: 1rem;
-    }
-    svg {
-      min-width: 48px;
-    }
-  }
-  a {
-    color: #6c6c6c;
-  }
-  span {
-    color: #5245cc;
-    text-decoration: underline;
-  }
-  img {
-    width: 1.5rem;
-    margin-bottom: 1rem;
-  }
-  p {
-    margin: 0;
-    color: black;
-    font-weight: bold;
-  }
-  @media (min-width: 1335px) {
-    justify-content: center;
-  }
-  @media (max-width: 360px) {
-    .good-article {
-      flex-direction: column;
-    }
-    svg {
-      margin-bottom: 0.5rem;
-    }
+const GoodToKnow = styled.div`
+  svg {
+    min-width: 48px;
   }
 `;
 
@@ -220,5 +178,34 @@ const ContentHorizontal = styled(Content)`
     margin-top: 0.5rem;
     font-weight: 400;
     cursor: pointer;
+  }
+`;
+
+const Button = styled(Link)`
+  width: fit-content;
+  cursor: pointer;
+  color: #374151;
+  text-align: center;
+  margin: 1rem 0;
+  background-color: #fff;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d2d6dc;
+  outline: 0;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 1rem;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+  display: block;
+  outline: 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 2;
+  :hover {
+    opacity: 0.9;
+  }
+  a {
+    color: #374151;
   }
 `;

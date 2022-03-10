@@ -45,6 +45,19 @@ export const step1 = {
   },
 };
 
+export const step1Public = {
+  TECHNICAL: {
+    id: "TECHNICAL",
+    label: "J'ai un problème technique",
+    tags: ["TAG_problème_technique", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
+  },
+  QUESTION: {
+    id: "QUESTION",
+    label: "J'ai une question",
+    tags: ["TAG_question", "AGENT_Startup_Support"],
+  },
+};
+
 export const step2Technical = {
   DOWNLOAD: {
     parentId: "TECHNICAL",

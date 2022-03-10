@@ -5,6 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { Formik, Field } from "formik";
 import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import Avatar from "../../components/Avatar";
 import MultiSelect from "../../components/Multiselect";
@@ -18,6 +19,7 @@ import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default function Edit(props) {
+  const setDocumentTitle = useDocumentTitle("Structures");
   const [defaultValue, setDefaultValue] = useState();
   const [networks, setNetworks] = useState([]);
   const [referents, setReferents] = useState([]);
@@ -32,6 +34,7 @@ export default function Edit(props) {
       const { data } = await api.get(`/structure/${id}`);
       const { data: networkData } = await api.get(`/structure/networks`);
       setNetworks(networkData);
+      setDocumentTitle(`${data.name}`);
       setDefaultValue(data);
     })();
   }, []);

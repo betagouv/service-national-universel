@@ -351,6 +351,9 @@ const ContactButtons = styled.div`
 `;
 const ContactButton = styled.button`
   background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 50%;
   width: 40px;
   height: 40px;

@@ -37,9 +37,12 @@ const Wrapper = ({ children }) => {
     <div className="flex min-h-screen w-full flex-col">
       <header className="flex-none bg-white print:hidden ">
         <div className="mr-auto ml-auto flex max-w-screen-95 flex-wrap items-center gap-4 py-4 px-8 lg:gap-8">
-          <div className="w-auto flex-none lg:w-1/6">
+          <div className="flex w-auto lg:w-1/6">
             <Link href="/">
-              <img className="h-9 w-9 cursor-pointer" src="/assets/logo-snu.png" alt="" />
+              <img className="mr-4 h-14 w-14 cursor-pointer" src="/assets/logo-fr.png" alt="" />
+            </Link>
+            <Link href="/">
+              <img className="h-14 w-14 cursor-pointer" src="/assets/logo-snu.png" alt="" />
             </Link>
           </div>
           <div className="order-3 w-full md:order-2 md:w-1/2 md:flex-1">

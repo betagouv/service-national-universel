@@ -8,6 +8,7 @@ import "dayjs/locale/fr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 import ReactSelect from "react-select";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -37,6 +38,7 @@ import { requiredMessage } from "../../components/errorMessage";
 import plausibleEvent from "../../services/pausible";
 
 export default function Edit(props) {
+  const setDocumentTitle = useDocumentTitle("Utilisateurs");
   const [user, setUser] = useState();
   const [service, setService] = useState();
   const [centers, setCenters] = useState();
@@ -56,6 +58,7 @@ export default function Edit(props) {
         if (!id) return setUser(null);
         const { ok, data } = await api.get(`/referent/${id}`);
         if (!ok) return setUser(null);
+        setDocumentTitle(`${data.firstName} ${data.lastName}`);
         setUser(data);
         const { data: d } = await api.get(`/department-service/${data.department}`);
         setService(d);
@@ -286,7 +289,7 @@ export default function Edit(props) {
                             options={regionList.map((r) => ({ value: r, label: r }))}
                           />
                         </>
-                        ) : null}
+                      ) : null}
 
                       {values.role === ROLES.REFERENT_DEPARTMENT ? (
                         <Select

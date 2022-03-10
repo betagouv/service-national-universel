@@ -3,15 +3,10 @@ import { Formik } from "formik";
 import { Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-
 import { setYoung } from "../../redux/auth/actions";
-
 import api from "../../services/api";
 import Header from "./components/header";
-import StyledFormGroup from "./components/StyledFormGroup";
-import Submit from "./components/Submit";
 import LoginBox from "./components/LoginBox";
-import InputField from "./components/InputField";
 import { translate } from "../../utils";
 
 export default function SignupInvite() {
@@ -44,12 +39,13 @@ export default function SignupInvite() {
   if (!newuser) return <div>Chargement...</div>;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div className="flex flex-col min-h-screen">
       <Header />
       <LoginBox>
-        <h3 className="relative text-center md:text-base text-xs font-bold mb-3 px-2.5 bg-white text-coolGray-900 left-0">
-          <span>Activer votre espace volontaire</span>
-        </h3>
+        <div className="relative text-center text-[0.8rem] md:text-[1rem] font-bold	mb-[1.25rem] after:content-[''] after:block after:h-[1px] after:w-full after:bg-[#d2d6dc] after:absolute after:left-0 after:top-1/2 after:z-[-1] after:translate-y-[-50%]">
+          <span className="bg-[#fff] text-[#161E2E] p-2">Activer votre espace volontaire</span>
+        </div>
+
         <Formik
           initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "" }}
           onSubmit={async (values, actions) => {
@@ -76,9 +72,10 @@ export default function SignupInvite() {
           {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
             return (
               <form onSubmit={handleSubmit}>
-                <StyledFormGroup>
-                  <div>
-                    <InputField
+                <section className="mb-[20px]">
+                  <div className="flex flex-col-reverse	">
+                    <input
+                      className="w-full block outline-0	 p-[12px]  bg-[transparent] placeholder:text-[#798fb0] leading-5  rounded-[5px] border-[1px] border-[#dcdfe6] focus:border-[#4299E1] focus:outline-0 "
                       // validate={(v) => !validator.isEmail(v) && "Invalid email address"}
                       name="email"
                       type="email"
@@ -89,11 +86,12 @@ export default function SignupInvite() {
                     />
                     <label htmlFor="email">E-mail</label>
                   </div>
-                  <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.email}</p>
-                </StyledFormGroup>
-                <StyledFormGroup>
-                  <div>
-                    <InputField
+                  <p className="text-xs mt-1 text-[#FD3131]">{errors.email}</p>
+                </section>
+                <section className="mb-[20px]">
+                  <div className="flex flex-col-reverse	">
+                    <input
+                      className="w-full block outline-0	 p-[12px]  bg-[transparent] text-[#798fb0] leading-5  rounded-[5px] border-[1px] border-[#e2e8f0] focus:border-[#4299E1] focus:outline-0 "
                       // validate={(v) => validator.isEmpty(v) && "This field is Required"}
                       name="password"
                       type="password"
@@ -102,13 +100,19 @@ export default function SignupInvite() {
                       value={values.password}
                       onChange={handleChange}
                     />
-                    <label htmlFor="password">Mot de passe</label>
+                    <label className="text-[#37415b] text-sm	mb-[5px] focus:text-[#434190]" htmlFor="password">
+                      Mot de passe
+                    </label>
                   </div>
-                  <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.password}</p>
-                </StyledFormGroup>
-                <Submit loading={isSubmitting} type="submit">
+                  <p className="text-xs mt-1 text-[#FD3131]">{errors.password}</p>
+                </section>
+                {/* Button Submit */}
+                <button
+                  className="w-full block text-[18px] text-lg text-white font-bold p-[12px] bg-[#5145cd] mt-[30px] mb-[30px] cursor-pointer shadow-xl	 rounded-[10px] hover:bg-[#42389d]"
+                  loading={isSubmitting}
+                  type="submit">
                   Connexion
-                </Submit>
+                </button>
               </form>
             );
           }}

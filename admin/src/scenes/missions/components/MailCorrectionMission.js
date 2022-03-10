@@ -36,7 +36,7 @@ Merci d'effectuer ces modifications depuis votre espace.`);
   return (
     <Modal isOpen={true} toggle={onChange}>
       <ModalContainer>
-        <img src={require("../../../assets/close.svg")} height={10} onClick={onChange} />
+        <img src={require("../../../assets/close.svg")} height={10} width={10} onClick={onChange} />
         <h1>Veuillez éditer le message ci-dessous pour préciser les corrections à apporter avant de l&apos;envoyer</h1>
         <h3>votre message</h3>
         <textarea rows="15" value={message} onChange={(e) => setMessage(e.target.value)} />

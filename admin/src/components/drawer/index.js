@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useSelector, connect } from "react-redux";
-import { environment } from "../../config";
 import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
@@ -10,6 +9,7 @@ import QuestionMark from "../../assets/QuestionMark";
 import api from "../../services/api";
 import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
+import { RiMenuFill, RiMenuFoldLine } from "react-icons/ri";
 
 const DrawerTab = ({ title, to, onClick, beta }) => (
   <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block">
@@ -30,7 +30,7 @@ const BlankSeparator = () => (
 
 const HelpButton = ({ onClick, to }) => (
   <div
-    className="justify-center flex mb-4 p-8 "
+    className="justify-center flex mb-4 p-8"
     onClick={() => {
       plausibleEvent("Menu/CTA - Besoin Aide");
       onClick();
@@ -179,16 +179,15 @@ function visitor({ onClick }) {
 
 const Drawer = (props) => {
   const [isOpen, setIsOpen] = useState(false);
-
   const user = useSelector((state) => state.Auth.user);
   const newTickets = useSelector((state) => state.Tickets.new);
   const openedTickets = useSelector((state) => state.Tickets.open);
   const closedTickets = useSelector((state) => state.Tickets.closed);
   const tickets = useSelector((state) => state.Tickets.tickets);
   const [open, setOpen] = useState();
-  const [environmentBannerVisible, setEnvironmentBannerVisible] = useState(true);
   useEffect(() => {
     setOpen(props.open);
+    setIsOpen(props.open);
   }, [props.open]);
 
   useEffect(() => {
@@ -216,70 +215,25 @@ const Drawer = (props) => {
 
   if (!user) return <div />;
 
-  function getName() {
-    if (user.role === ROLES.ADMIN) return "Espace modérateur";
-    if (user.role === ROLES.REFERENT_DEPARTMENT) return "Espace référent départemental";
-    if (user.role === ROLES.REFERENT_REGION) return "Espace référent Régional";
-    if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
-    if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
-    if (user.role === ROLES.HEAD_CENTER) return "Espace chef de centre";
-    if (user.role === ROLES.VISITOR) return "Espace visiteur";
-    return "";
-  }
-
-  function getTextEnvironmentBanner() {
-    if (environment === "staging") return "Espace de Test";
-    if (environment === "development") return "Développement";
-    return "";
-  }
-
   return (
-    <>
+    <div className="min-h-screen max-w-[220px] bg-snu-purple-900 text-white fixed z-10 overflow-y-auto bottom-0 top-[56px] pb-4">
       {!isOpen ? (
-        <>
-          <div className="w-12 pl-2 bg-white h-14 flex items-center justify-between lg:hidden shadow-sm sticky top-0 left-0 z-20">
-            <img id="burger" className=" block w-8 h-8  cursor-contain lg:hidden" onClick={() => setIsOpen(!isOpen)} src={require("../../assets/burger.svg")} />
+        <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
+          <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
+            <ul className="divide-y divide-slate-700">
+              <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+              {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+              {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+              {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+              {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
+            </ul>
           </div>
-          <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-base font-normal  ">
-            <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative transition duration-200 ease-in-out">
-              <h1>
-                <Link to="/" class="flex items-center py-2 hover:!text-white">
-                  <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 mx-3 " />
-                  <span className="text-sm text-center mr-3">{getName()}</span>
-                </Link>
-              </h1>
-              {environment !== "production" && environmentBannerVisible ? (
-                <div onClick={() => setEnvironmentBannerVisible(false)} className="py-2 bg-orange-600 text-xs font-italic items-center text-center">
-                  {getTextEnvironmentBanner()}
-                </div>
-              ) : null}
-              <ul className="divide-y divide-slate-700">
-                <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-                {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
-                {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
-                {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-                {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-                {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-                {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
-              </ul>
-            </div>
-          </nav>
-        </>
+        </nav>
       ) : (
-        <nav open={open} id="drawer" className=" bg-snu-purple-900 text-white text-base font-normal  ">
+        <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-base font-normal min-h-full">
           <div>
-            <h1>
-              <Link to="/" class="flex items-center py-2 hover:!text-white">
-                <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 mx-3 " />
-                <span className="uppercase font-medium text-sm text-center mr-3 "> {getName()} </span>
-                <img id="burger" className="block w-6 h-6 mr-2 cursor-contain lg:hidden " onClick={() => setIsOpen(!isOpen)} src={require("../../assets/close.svg")} />
-              </Link>
-            </h1>
-            {environment !== "production" && environmentBannerVisible ? (
-              <div onClick={() => setEnvironmentBannerVisible(false)} className="py-1 bg-orange-600 font-italic items-center text-center">
-                {getTextEnvironmentBanner()}
-              </div>
-            ) : null}
             <ul className="divide-y divide-slate-700">
               <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
@@ -292,7 +246,7 @@ const Drawer = (props) => {
           </div>
         </nav>
       )}
-    </>
+    </div>
   );
 };
 

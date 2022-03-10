@@ -58,7 +58,7 @@ export default function Index({ onChangeFilter = () => {} }) {
     <>
       <Row>
         <Col style={{ display: "flex" }}>
-          <Title>Inscriptions</Title>
+          <h2 className="m-0 font-bold text-2xl">Inscriptions</h2>
           {filter ? (
             <FiltersList>
               {user.role === ROLES.ADMIN ? (
@@ -94,17 +94,17 @@ export default function Index({ onChangeFilter = () => {} }) {
         <>
           <Row>
             <Col md={12}>
-              <SubTitle>Pilotage</SubTitle>
+              <h3 className="mt-4 mb-2 text-xl">Pilotage</h3>
             </Col>
           </Row>
           <Goals filter={filter} />
           <Row>
             <Col md={12}>
-              <SubTitle>Statut des inscriptions</SubTitle>
+              <h3 className="mt-4 mb-2 text-xl">Statut des inscriptions</h3>
             </Col>
           </Row>
           <Status filter={filter} />
-          <SubTitle>Dans le détails</SubTitle>
+          <h3 className="mt-4 mb-2 text-xl">Dans le détails</h3>
           <Row>
             <Col md={12} lg={6}>
               <BirthDate filter={filter} />
@@ -143,20 +143,6 @@ export default function Index({ onChangeFilter = () => {} }) {
   );
 }
 
-// Title line with filters
-const Title = styled.h2`
-  color: #242526;
-  font-weight: bold;
-  font-size: 28px;
-  margin-bottom: 10px;
-`;
-const SubTitle = styled.h3`
-  color: #242526;
-  font-size: 24px;
-  margin-bottom: 1rem;
-  margin-top: 1.5rem;
-  font-weight: normal;
-`;
 const FiltersList = styled.div`
   gap: 1rem;
   flex: 1;

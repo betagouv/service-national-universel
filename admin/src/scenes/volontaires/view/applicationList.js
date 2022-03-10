@@ -142,15 +142,17 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
   return (
     <tr>
       <td>
-        <Mission to={`/mission/${hit.missionId}`}>
+        <Link to={`/mission/${hit.missionId}`}>
           <div>
-            <h3>{hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}</h3>
-            <h2>{mission.name}</h2>
-            <p>
+            <div className="text-snu-purple-300 font-medium uppercase text-xs mb-2">
+              {hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}
+            </div>
+            <div className="text-coolGray-900">{mission.name}</div>
+            <div className="text-coolGray-500 text-xs">
               {mission.structureName} {`• ${mission.city} (${mission.department})`}
-            </p>
+            </div>
           </div>
-        </Mission>
+        </Link>
       </td>
       <td>
         <div>
@@ -369,26 +371,6 @@ const Table = styled.table`
     :hover {
       background-color: #e6ebfa;
     }
-  }
-`;
-
-const Mission = styled(Link)`
-  h3 {
-    color: #5245cc;
-    font-size: 12px;
-    text-transform: uppercase;
-    font-weight: 500;
-  }
-  h2 {
-    color: #333;
-    font-size: 14px;
-    font-weight: 400;
-    margin-bottom: 5px;
-  }
-  p {
-    color: #606266;
-    font-size: 12px;
-    margin: 0;
   }
 `;
 

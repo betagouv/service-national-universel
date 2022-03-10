@@ -15,8 +15,8 @@ const { sendTemplate } = require("../../sendinblue");
 const { canSendFileByMail } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
-function getHtmlTemplate(type, template, young, contract) {
-  if (type === "certificate" && template === "1") return certificate.phase1(young);
+async function getHtmlTemplate(type, template, young, contract) {
+  if (type === "certificate" && template === "1") return await certificate.phase1(young);
   if (type === "certificate" && template === "2") return certificate.phase2(young);
   if (type === "certificate" && template === "3") return certificate.phase3(young);
   if (type === "certificate" && template === "snu") return certificate.snu(young);

@@ -22,7 +22,7 @@ export default function DeleteButton({ young }) {
 
   const onConfirm = async () => {
     try {
-      const { ok, code } = await api.remove(`/young/${young._id}`);
+      const { ok, code } = await api.put(`/young/${young._id}/soft-delete`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");

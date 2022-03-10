@@ -16,31 +16,8 @@ const contractTemplate = require("../templates/contractPhase2");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
-const { updateYoungPhase2Hours, updateStatusPhase2 } = require("../utils");
+const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
 const Joi = require("joi");
-
-function checkStatusContract(contract) {
-  if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
-  // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
-  const tokenKeys = ["parent1Token", "parent2Token", "projectManagerToken", "structureManagerToken", "youngContractToken"];
-  const tokenCount = tokenKeys.reduce((acc, current) => (contract[current] ? acc + 1 : acc), 0);
-  const validateKeys = ["parent1Status", "parent2Status", "projectManagerStatus", "structureManagerStatus", "youngContractStatus"];
-  const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
-  if (validatedCount >= tokenCount) {
-    return "VALIDATED";
-  } else {
-    return "SENT";
-  }
-}
-
-async function updateYoungStatusPhase2Contract(young, fromUser) {
-  const contracts = await ContractObject.find({ youngId: young._id });
-  young.set({
-    statusPhase2Contract: contracts.map((contract) => checkStatusContract(contract)),
-  });
-
-  await young.save({ fromUser });
-}
 
 async function createContract(data, fromUser) {
   const { sendMessage } = data;

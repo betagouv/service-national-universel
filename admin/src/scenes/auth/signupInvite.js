@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { FormGroup, Row, Col } from "reactstrap";
 import { Formik, Field } from "formik";
 import validator from "validator";
 import { Link, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import styled from "styled-components";
 
 import { setUser } from "../../redux/auth/actions";
 
@@ -15,10 +13,8 @@ import PasswordEye from "../../components/PasswordEye";
 import Header from "./components/header";
 import { adminURL } from "../../config";
 
-import { translate, ROLES, colors } from "../../utils";
+import { translate, ROLES, classNames } from "../../utils";
 import Loader from "../../components/Loader";
-import LoginBox from "./components/loginBox";
-import AuthWrapper from "./components/authWrapper";
 import { requiredMessage } from "../../components/errorMessage";
 
 export default function SignupInvite() {
@@ -59,12 +55,13 @@ export default function SignupInvite() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+    <div className="flex flex-1 flex-col">
       <Header />
-      <AuthWrapper>
-        <Thumb />
-        <LoginBox>
-          <Title>{title}</Title>
+      <div className="flex flex-1 justify-center">
+        <div className="hidden min-h-[400px] flex-1 bg-[url('./assets/rang.jpg')] bg-cover bg-center bg-no-repeat md:block" />
+
+        <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8">
+          <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">{title}</h1>
           <Formik
             initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", repassword: "", acceptCGU: "" }}
             onSubmit={async (values, actions) => {
@@ -88,10 +85,14 @@ export default function SignupInvite() {
             }}>
             {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
               return (
-                <form onSubmit={handleSubmit}>
-                  <StyledFormGroup>
-                    <label>ADRESSE EMAIL</label>
-                    <InputField
+                <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-y-4 gap-x-2">
+                  <div className="col-span-2">
+                    <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">ADRESSE EMAIL</label>
+                    <Field
+                      className={classNames(
+                        errors.email ? "border-red-500" : "",
+                        "block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey",
+                      )}
                       validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
                       name="email"
                       type="email"
@@ -100,54 +101,59 @@ export default function SignupInvite() {
                       placeholder="Email"
                       haserror={errors.email}
                     />
-                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
-                  </StyledFormGroup>
-                  <Row noGutters>
-                    <Col>
-                      <StyledFormGroup>
-                        <label htmlFor="firstName">Prénom</label>
-                        <InputField
-                          validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                          name="firstName"
-                          type="name"
-                          id="firstName"
-                          value={values.firstName}
-                          onChange={handleChange}
-                          placeholder="Prénom"
-                          haserror={errors.firstName}
-                        />
-                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.firstName}</p>
-                      </StyledFormGroup>
-                    </Col>
-                    <div style={{ width: 10 }} />
-                    <Col>
-                      <StyledFormGroup>
-                        <label htmlFor="lastName">Nom</label>
-                        <InputField
-                          validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                          name="lastName"
-                          type="lastName"
-                          id="lastName"
-                          value={values.lastName}
-                          onChange={handleChange}
-                          placeholder="Nom"
-                          haserror={errors.lastName}
-                        />
-                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.lastName}</p>
-                      </StyledFormGroup>
-                    </Col>
-                  </Row>
-                  <StyledFormGroup>
-                    <label htmlFor="password">
-                      <span>*</span>Mot de passe
+                    <p className="text-xs text-red-500">{errors.email}</p>
+                  </div>
+                  <div>
+                    <label htmlFor="firstName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      Prénom
                     </label>
-                    <p style={{ fontSize: 12, color: colors.grey }}>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
+                    <Field
+                      className={classNames(
+                        errors.firstName ? "border-red-500" : "",
+                        "block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey",
+                      )}
+                      validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
+                      name="firstName"
+                      type="name"
+                      id="firstName"
+                      value={values.firstName}
+                      onChange={handleChange}
+                      placeholder="Prénom"
+                      haserror={errors.firstName}
+                    />
+                    <p className="text-xs text-red-500">{errors.firstName}</p>
+                  </div>
+                  <div>
+                    <label htmlFor="lastName" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      Nom
+                    </label>
+                    <Field
+                      className={classNames(
+                        errors.lastName ? "border-red-500" : "",
+                        "block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm font-medium text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey",
+                      )}
+                      validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
+                      name="lastName"
+                      type="lastName"
+                      id="lastName"
+                      value={values.lastName}
+                      onChange={handleChange}
+                      placeholder="Nom"
+                      haserror={errors.lastName}
+                    />
+                    <p className="text-xs text-red-500">{errors.lastName}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <label htmlFor="password" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      <span className="mr-1">*</span>Mot de passe
+                    </label>
+                    <p className="mb-2 text-xs text-brand-grey">👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
                     <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} name="password" id="password" />
-                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
-                  </StyledFormGroup>
-                  <StyledFormGroup>
-                    <label htmlFor="repassword">
-                      <span>*</span>Confirmation mot de passe
+                    <p className="text-xs text-red-500">{errors.password}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <label htmlFor="repassword" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                      <span className="mr-1">*</span>Confirmation mot de passe
                     </label>
                     <PasswordEye
                       validate={() => values.password !== values.repassword && "Les mots de passe ne correspondent pas."}
@@ -158,11 +164,11 @@ export default function SignupInvite() {
                       id="repassword"
                       placeholder="Confirmez votre mot de passe"
                     />
-                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.repassword}</p>
-                  </StyledFormGroup>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", marginBottom: "1rem" }}>
-                      <CheckBox
+                    <p className="text-xs text-red-500">{errors.repassword}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <div className="flex items-center gap-2">
+                      <Field
                         id="checkboxCGU"
                         validate={(v) => (!v || v === "false") && requiredMessage}
                         type="checkbox"
@@ -170,136 +176,40 @@ export default function SignupInvite() {
                         onChange={(e) => handleChange({ target: { name: "acceptCGU", value: e.target.checked ? "true" : "false" } })}
                         name="acceptCGU"
                         checked={values.acceptCGU === "true"}
-                        style={{ display: "flex" }}
+                        className="rounded border-brand-grey text-brand-purple focus:ring-offset-0"
                       />
-                      <label htmlFor="checkboxCGU" style={{ flex: 1, margin: 0 }}>
-                        <p style={{ marginBottom: "0" }}>
-                          J&apos;ai lu et j&apos;accepte les{" "}
-                          <a
-                            href={`${adminURL}/conditions-generales-utilisation`}
-                            target="_blank"
-                            style={{ textDecoration: "underline", color: colors.darkPurple }}
-                            rel="noreferrer">
-                            conditions générales d&apos;utilisation{" "}
-                          </a>
-                          de la plateforme du Service national universel
-                        </p>
+                      <label htmlFor="checkboxCGU" className="flex-1 text-brand-grey mb-0">
+                        J&apos;ai lu et j&apos;accepte les{" "}
+                        <a
+                          href={`${adminURL}/conditions-generales-utilisation`}
+                          target="_blank"
+                          className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline"
+                          rel="noreferrer">
+                          conditions générales d&apos;utilisation{" "}
+                        </a>
+                        de la plateforme du Service national universel
                       </label>
                     </div>
-                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.acceptCGU}</p>
+                    <p className="text-xs text-red-500">{errors.acceptCGU}</p>
                   </div>
-                  <Submit loading={isSubmitting} type="submit" color="primary">
+                  <LoadingButton
+                    className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
+                    loading={isSubmitting}
+                    type="submit">
                     Activer mon compte
-                  </Submit>
-                  <Account>
-                    Vous avez déjà un compte ? <Link to="/auth/signin">Connectez-vous</Link>
-                  </Account>
+                  </LoadingButton>
+                  <div className="col-span-2 border-t border-gray-200 pt-6 text-sm text-brand-grey">
+                    Vous avez déjà un compte ?{" "}
+                    <Link to="/auth/signin" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
+                      Connectez-vous
+                    </Link>
+                  </div>
                 </form>
               );
             }}
           </Formik>
-        </LoginBox>
-      </AuthWrapper>
+        </div>
+      </div>
     </div>
   );
 }
-
-const Thumb = styled.div`
-  min-height: 400px;
-  background: url(${require("../../assets/rang.jpg")}) no-repeat center;
-  background-size: cover;
-  flex: 1;
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 15px;
-`;
-
-const StyledFormGroup = styled(FormGroup)`
-  margin-bottom: 25px;
-  label {
-    color: rgb(106, 111, 133);
-    font-size: 10px;
-    text-transform: uppercase;
-    font-weight: 700;
-  }
-`;
-
-const InputField = styled(Field)`
-  display: block;
-  width: 100%;
-  margin-bottom: 0.375rem;
-  background-color: #fff;
-  color: #606266;
-  outline: 0;
-  padding: 9px 20px;
-  border-radius: 4px;
-  border: 1px solid;
-  border-color: ${({ haserror }) => (haserror ? "red" : "#dcdfe6")};
-  ::placeholder {
-    color: #d6d6e1;
-  }
-  :focus {
-    border: 1px solid #aaa;
-  }
-`;
-
-const Submit = styled(LoadingButton)`
-  display: block;
-  font-size: 1rem;
-  font-weight: 700;
-  border-radius: 0;
-  padding: 0.5rem 3rem;
-  border: 0;
-  background-color: ${colors.purple};
-  margin-top: 30px;
-  margin-bottom: 30px;
-  border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-  cursor: pointer;
-  :hover {
-    background-color: #42389d;
-  }
-  :focus {
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-  }
-  :disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-const Account = styled.div`
-  border-top: 1px solid #cbd5e0;
-  padding-top: 25px;
-  margin-top: 100px;
-  font-size: 14px;
-  color: #6a6f88;
-  a {
-    color: #262a3e;
-    font-weight: 600;
-    margin-left: 5px;
-  }
-`;
-const CheckBox = styled(Field)`
-  display: flex;
-  margin-right: 1rem;
-  background-color: #fff;
-  color: #606266;
-  outline: 0;
-  padding: 9px 20px;
-  border-radius: 4px;
-  border: 1px solid;
-  border-color: ${({ haserror }) => (haserror ? "red" : "#dcdfe6")};
-  ::placeholder {
-    color: #d6d6e1;
-  }
-  :focus {
-    border: 1px solid #aaa;
-  }
-`;

@@ -70,7 +70,6 @@ const HeroStyle = styled.div`
     background-color: #fff;
     > * {
       position: relative;
-      z-index: 2;
     }
   }
   h1 {

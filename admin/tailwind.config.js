@@ -1,8 +1,9 @@
 const { Media } = require("reactstrap");
 const colors = require("tailwindcss/colors");
+
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
-  content: ['./src/**/*.{js,ts,jsx,tsx}'],
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
   darkMode: Media, // or 'media' or 'class'
   theme: {
     minWidth: {
@@ -44,9 +45,55 @@ module.exports = {
         warmGray: colors.stone,
         trueGray: colors.neutral,
         coolGray: colors.gray,
+        brand: {
+          black: "#111111",
+          darkBlue: "#00008b",
+          darkGreen: "#1C7713",
+          darkPurple: "#382F79",
+          extraLightGrey: "#fafafa",
+          green: "#6CC763",
+          grey: "#6e757c",
+          lightBlueGrey: "#e6ebfa",
+          lightGold: "#d9bb71",
+          lightGrey: "#d7d7d7",
+          lightOrange: "#ffa987",
+          orange: "#FE7B52",
+          pink: "#F8A9AD",
+          purple: "#5145cd",
+          red: "#BE3B12",
+          transPurple: "#5145cd66",
+          yellow: "#FEB951",
+        },
+        status: {
+          "in-progress": "#382f79",
+          "not-done": "#be3b12",
+          "not-eligible": "#fe7b52",
+          "waiting-acceptation": "#feb951",
+          "waiting-affectation": "#feb951",
+          "waiting-correction": "#feb951",
+          "waiting-list": "#FFA987",
+          "waiting-realisation": "#fe7b52",
+          "waiting-validation": "#fe7b52",
+          affected: "#382f79",
+          cancel: "#fe7b52",
+          deleted: "#111111",
+          done: "#6cc763",
+          exempted: "#fe7b52",
+          refused: "#f8a9ad",
+          validated: "#6cc763",
+          withdrawn: "#D7D7D7",
+        },
+        "snu-purple": {
+          900: "#32257F",
+          800: "#3830a9",
+          600: "#43389b",
+          300: "#5145cc",
+          200: "#4F46E5",
+          100: "#C7D2FE",
+        },
       },
-      font: {
-        sans: ["Ubuntu", "ui-sans-serif", "system-ui"],
+      fontFamily: {
+        ubuntu: ["Ubuntu", "ui-sans-serif", "system-ui"],
       },
       width: {
         "screen-1/4": "25vw",

@@ -122,7 +122,7 @@ const HitYoung = ({ hit, handleAffect, handleWaitingList, onClick }) => {
     <tr>
       <td>
         <MultiLine onClick={onClick}>
-          <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
+          <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
           <p>
             {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
           </p>

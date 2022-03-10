@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 import plausibleEvent from "../../../services/pausible";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import { translate, ROLES } from "../../../utils";
@@ -37,17 +38,20 @@ import MilitaryPreparation from "./military-preparation";
 import JDC from "./JDC";
 import CohesionCenter from "./cohesion-center";
 import MeetingPoint from "./meeting-point";
+import { YOUNG_STATUS } from "../../../utils";
 
 export default function VolontaireEdit(props) {
   const [young, setYoung] = useState();
   const user = useSelector((state) => state.Auth.user);
+  const setDocumentTitle = useDocumentTitle("Volontaires");
 
   useEffect(() => {
     (async () => {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return setYoung(null);
       const { data } = await api.get(`/referent/young/${id}`);
-      return setYoung(data);
+      setDocumentTitle(`${data.firstName} ${data.lastName}`);
+      setYoung(data);
     })();
   }, []);
 
@@ -145,7 +149,7 @@ export default function VolontaireEdit(props) {
               <Alert>Vous ne pouvez pas enregistrer ce volontaires car tous les champs ne sont pas correctement renseignés.</Alert>
             ) : null}
             <TitleWrapper>
-              <DeleteButton young={young} />
+              {young.status !== YOUNG_STATUS.DELETED ? <DeleteButton young={young} /> : <div />}
               <div style={{ display: "flex" }}>
                 <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
                   <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />

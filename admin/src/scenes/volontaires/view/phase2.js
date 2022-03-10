@@ -15,13 +15,23 @@ import { Box, BoxTitle } from "../../../components/box";
 export default function Phase2({ young, onChange }) {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase2 young={young} tab="phase2">
+      <WrapperPhase2 young={young} tab="phase2" onChange={onChange}>
         <Box>
           <Row>
             <Col md={4} sm={4} style={{ padding: "3rem", borderRight: "2px solid #f4f5f7" }}>
               <BoxTitle>Réalisation des 84 heures de mission d&apos;intérêt général</BoxTitle>
               <p style={{ flex: 1 }}>
-                Le volontaire doit achever sa phase 2 avant le <b>{getLimitDateForPhase2(young.cohort)}</b>
+                Le volontaire doit réaliser sa phase 2 dans l&apos;année suivant son séjour de cohésion.
+                <br />
+                Pour plus d&apos;informations,{" "}
+                <a
+                  className="underline hover:underline"
+                  href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
+                  target="_blank"
+                  rel="noreferrer">
+                  cliquez-ici
+                </a>
+                .
               </p>
             </Col>
             <Col md={4} sm={4} style={{ padding: 0, borderRight: "2px solid #f4f5f7" }}>

@@ -2,12 +2,14 @@ const faker = require("faker");
 
 faker.locale = "fr";
 
-function getNewYoungFixture() {
+function getNewYoungFixture(fields = {}) {
   return {
     firstName: faker.name.firstName(),
     lastName: faker.name.lastName(),
     frenchNationality: "true",
     birthCountry: faker.address.country(),
+    birthCity: faker.address.city(),
+    birthCityZip: faker.address.zipCode(),
     email: faker.internet.email().toLowerCase(),
     phone: faker.phone.phoneNumber(),
     gender: faker.name.gender(),
@@ -178,6 +180,7 @@ function getNewYoungFixture() {
     sportInterest: faker.lorem.sentences(),
     environmentInterest: faker.lorem.sentences(),
     citizenshipInterest: faker.lorem.sentences(),
+    ...fields,
   };
 }
 

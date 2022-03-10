@@ -121,7 +121,7 @@ export default function Phase1(props) {
       return (
         <>
           <p>{young.firstName} est en attente d&apos;affectation à un centre de cohésion</p>
-          {!FORCE_DISABLED_ASSIGN_COHESION_CENTER && user.role === ROLES.ADMIN ? <AssignCenter young={young} onAffect={props.getYoung} /> : null}
+          {!FORCE_DISABLED_ASSIGN_COHESION_CENTER && user.role === ROLES.ADMIN ? <AssignCenter young={young} onAffect={props.onChange} /> : null}
         </>
       );
     if (young.statusPhase1 === "WAITING_LIST")
@@ -164,7 +164,7 @@ export default function Phase1(props) {
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase1 young={young} tab="phase1">
+      <WrapperPhase1 young={young} tab="phase1" onChange={props.onChange}>
         <Box>
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>

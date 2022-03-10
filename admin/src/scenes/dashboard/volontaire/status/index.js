@@ -38,7 +38,7 @@ export default function StatusIndex({ filter }) {
   useEffect(() => {
     (async () => {
       const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "status.keyword": ["VALIDATED"] } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },
@@ -53,6 +53,7 @@ export default function StatusIndex({ filter }) {
       if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
       if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
       if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (filter.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
 
       const { responses } = await api.esQuery("young", body);
 
@@ -104,16 +105,16 @@ export default function StatusIndex({ filter }) {
     <>
       <TabNavigation>
         <TabNavigationList>
-          <TabItem onClick={() => history.push(`/dashboard/volontaires/général`)} isActive={currentSubtab === "général"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/général`, { params: { filter } })} isActive={currentSubtab === "général"}>
             Général
           </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase1`)} isActive={currentSubtab === "phase1"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase1`, { params: { filter } })} isActive={currentSubtab === "phase1"}>
             Phase 1
           </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase2`)} isActive={currentSubtab === "phase2"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase2`, { params: { filter } })} isActive={currentSubtab === "phase2"}>
             Phase 2
           </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase3`)} isActive={currentSubtab === "phase3"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires/phase3`, { params: { filter } })} isActive={currentSubtab === "phase3"}>
             Phase 3
           </TabItem>
         </TabNavigationList>
@@ -121,7 +122,7 @@ export default function StatusIndex({ filter }) {
       <Wrapper>
         {currentSubtab === "général" && (
           <>
-            <SubTitle>En quelques chiffres</SubTitle>
+            <h3 className="mt-4 mb-2 text-xl">En quelques chiffres</h3>
             <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} filter={filter} getLink={getLink} />
           </>
         )}

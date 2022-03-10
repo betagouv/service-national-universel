@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { translate, APPLICATION_STATUS_COLORS, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { translate, APPLICATION_STATUS, APPLICATION_STATUS_COLORS, SENDINBLUE_TEMPLATES } from "../../../utils";
 import Badge from "../../../components/Badge";
 import { Box, BoxTitle, Separator } from "../../../components/box";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -27,7 +27,7 @@ export default function Phase2militaryPrepartion({ young }) {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
     if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-    return setApplicationsToMilitaryPreparation(data.filter((a) => a.mission.isMilitaryPreparation === "true"));
+    return setApplicationsToMilitaryPreparation(data?.filter((a) => a?.mission?.isMilitaryPreparation === "true"));
   };
 
   if (!applicationsToMilitaryPreparation) return <Loader />;
@@ -42,7 +42,6 @@ export default function Phase2militaryPrepartion({ young }) {
     setModal({ isOpen: true, template: "confirm" });
   };
   const onValidate = async () => {
-    console.log("onValidate");
     try {
       // validate the files
       const responseYoung = await api.put(`/referent/young/${young._id}`, { statusMilitaryPreparationFiles: "VALIDATED" });
@@ -51,18 +50,22 @@ export default function Phase2militaryPrepartion({ young }) {
       // change status of applications
       for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
         const app = applicationsToMilitaryPreparation[i];
-        const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VALIDATION" });
-        if (!responseApplication.ok)
-          toastr.error(
-            translate(responseApplication.code),
-            `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
-          );
+        if (app.status === APPLICATION_STATUS.WAITING_VERIFICATION) {
+          const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VALIDATION" });
+          if (!responseApplication.ok)
+            toastr.error(
+              translate(responseApplication.code),
+              `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
+            );
+        }
       }
       setModal({ isOpen: false, template: null, data: null });
       await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED}`);
       for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
         const app = applicationsToMilitaryPreparation[i];
-        await api.post(`/referent/${app.tutorId}/email/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED}`, { app });
+        if (app.status === APPLICATION_STATUS.WAITING_VERIFICATION) {
+          await api.post(`/referent/${app.tutorId}/email/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED}`, { app });
+        }
       }
     } catch (e) {
       console.error(e);
@@ -77,23 +80,10 @@ export default function Phase2militaryPrepartion({ young }) {
     setModal({ isOpen: true, template: "correction" });
   };
   const onCorrection = async (message) => {
-    console.log("onCorrection");
-
     // update the young
     const responseYoung = await api.put(`/referent/young/${young._id}`, { statusMilitaryPreparationFiles: "WAITING_CORRECTION" });
     if (!responseYoung.ok) return toastr.error(translate(responseYoung.code), "Une erreur s'est produite lors de la validation des documents");
 
-    // change status of applications if its not already correct
-    for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
-      const app = applicationsToMilitaryPreparation[i];
-      if (app.status === "WAITING_VERIFICATION") continue;
-      const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VERIFICATION" });
-      if (!responseApplication.ok)
-        toastr.error(
-          translate(responseApplication.code),
-          `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
-        );
-    }
     await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION}`, { message });
     toastr.success("Email envoyé !");
     setModal({ isOpen: false, template: null, data: null });
@@ -116,13 +106,14 @@ export default function Phase2militaryPrepartion({ young }) {
     // change status of applications if its not already correct
     for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
       const app = applicationsToMilitaryPreparation[i];
-      if (app.status === "REFUSED") continue;
-      const responseApplication = await api.put("/application", { _id: app._id, status: "REFUSED" });
-      if (!responseApplication.ok)
-        toastr.error(
-          translate(responseApplication.code),
-          `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
-        );
+      if (app.status === APPLICATION_STATUS.WAITING_VERIFICATION) {
+        const responseApplication = await api.put("/application", { _id: app._id, status: "REFUSED" });
+        if (!responseApplication.ok)
+          toastr.error(
+            translate(responseApplication.code),
+            `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
+          );
+      }
     }
     await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REFUSED}`, { message });
     toastr.success("Email envoyé !");
