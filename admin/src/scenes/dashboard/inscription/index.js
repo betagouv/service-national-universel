@@ -104,7 +104,7 @@ export default function Index({ onChangeFilter = () => {} }) {
             </Col>
           </Row>
           <Status filter={filter} />
-          <h3 className="mt-4 mb-2 text-xl">Dans le détails</h3>
+          <h3 className="mt-4 mb-2 text-xl">Dans le détail</h3>
           <Row>
             <Col md={12} lg={6}>
               <BirthDate filter={filter} />

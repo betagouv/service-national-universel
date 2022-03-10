@@ -140,6 +140,17 @@ export default function Status({ filter }) {
             </LinkCard>
           </Col>
           <Col md={6} xl={2}>
+            <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"ABANDONED"%5D'] })} color={YOUNG_STATUS_COLORS.ABANDONED}>
+              <CardTitle>Abandonnées</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{status.ABANDONED || 0}</CardValue>
+                <CardPercentage>
+                  <CardArrow />
+                </CardPercentage>
+              </CardValueWrapper>
+            </LinkCard>
+          </Col>
+          <Col md={6} xl={2}>
             <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"DELETED"%5D'] })} color={YOUNG_STATUS_COLORS.DELETED}>
               <CardTitle>Supprimées</CardTitle>
               <CardValueWrapper>
