@@ -35,7 +35,13 @@ export default function ApplyModal({ value, onChange, onSend }) {
       tutorId: value.tutorId,
       tutorName: value.tutorName,
     };
-    if (ENABLE_PM && value.isMilitaryPreparation === "true") application.status = APPLICATION_STATUS.WAITING_VERIFICATION;
+    if (ENABLE_PM && value.isMilitaryPreparation === "true") {
+      if (young.statusMilitaryPreparationFiles === "VALIDATED") {
+        application.status = APPLICATION_STATUS.WAITING_VALIDATION;
+      } else {
+        application.status = APPLICATION_STATUS.WAITING_VERIFICATION;
+      }
+    }
     const { ok, data, code } = await api.post(`/application`, application);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
     const responseNotification = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
@@ -43,6 +49,11 @@ export default function ApplyModal({ value, onChange, onSend }) {
     if (ENABLE_PM && value.isMilitaryPreparation === "true") {
       const responseNotificationYoung = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER}`);
       if (!responseNotificationYoung?.ok) return toastr.error(translate(responseNotificationYoung?.code), "Une erreur s'est produite avec le service de notification.");
+      if (young.statusMilitaryPreparationFiles === "WAITING_VALIDATION") {
+        console.log("Notif de rappel référent");
+        const responseReminderReferent = await api.post(`/application/notify/docs-military-preparation/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED}`);
+        if (!responseReminderReferent?.ok) return toastr.error(translate(responseNotificationYoung?.code), "Une erreur s'est produite avec le service de notification.");
+      }
     }
 
     onSend();
