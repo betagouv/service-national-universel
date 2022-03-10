@@ -50,7 +50,6 @@ export default function ApplyModal({ value, onChange, onSend }) {
       const responseNotificationYoung = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER}`);
       if (!responseNotificationYoung?.ok) return toastr.error(translate(responseNotificationYoung?.code), "Une erreur s'est produite avec le service de notification.");
       if (young.statusMilitaryPreparationFiles === "WAITING_VALIDATION") {
-        console.log("Notif de rappel référent");
         const responseReminderReferent = await api.post(`/application/notify/docs-military-preparation/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED}`);
         if (!responseReminderReferent?.ok) return toastr.error(translate(responseNotificationYoung?.code), "Une erreur s'est produite avec le service de notification.");
       }
