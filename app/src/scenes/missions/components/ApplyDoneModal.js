@@ -21,8 +21,8 @@ export default function ApplyDoneModal({ value, onChange }) {
         </Link>
       );
     return (
-      <Link to="/ma-preparation-militaire">
-        <Button>Ma préparation militaire</Button>
+      <Link to="/candidature">
+        <Button>Classer mes missions</Button>
       </Link>
     );
   };
