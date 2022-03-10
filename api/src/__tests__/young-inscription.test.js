@@ -200,7 +200,7 @@ describe("Young", () => {
       let date = new Date();
       date.setFullYear(date.getFullYear() - 16);
 
-      const { response, updatedYoung } = await selfUpdateYoung(
+      const { response } = await selfUpdateYoung(
         {},
         {
           birthdateAt: date,
