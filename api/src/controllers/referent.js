@@ -311,7 +311,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (young.statusPhase3 !== "VALIDATED") newYoung.statusPhase3 = "WITHDRAWN";
     }
 
-    if (newYoung?.department !== young?.department) {
+    if (newYoung?.department && newYoung?.department !== young?.department) {
       const referents = await ReferentModel.find({ department: newYoung.department, role: ROLES.REFERENT_DEPARTMENT });
       for (let referent of referents) {
         await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
