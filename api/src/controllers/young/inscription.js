@@ -83,6 +83,15 @@ router.put("/particulieres", passport.authenticate("young", { session: false, fa
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    //Additionnal verification
+    if (value.moreInformation === "true" && value.handicap === "false" && value.ppsBeneficiary === "false" && value.paiBeneficiary === "false") {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (value.moreInformation === "false" && (value.handicap === "true" || value.ppsBeneficiary === "true" || value.paiBeneficiary === "true")) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
     if (value.moreInformation === "false") {
       value.specificAmenagment = "false";
       value.reducedMobilityAccess = "false";

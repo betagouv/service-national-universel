@@ -8,7 +8,6 @@ import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import FormLegend from "../../../components/form/FormLegend";
-import { STEPS } from "../utils";
 import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
 import FormRadioLabelTrueFalse from "../../../components/form/FormRadioLabelTrueFalse";
