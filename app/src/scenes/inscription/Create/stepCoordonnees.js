@@ -10,7 +10,7 @@ import { useHistory } from "react-router-dom";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
-import { STEPS, YOUNG_SITUATIONS } from "../utils";
+import { YOUNG_SITUATIONS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import AddressInputV2 from "../../../components/addressInputV2";
 import Etablissement from "../components/etablissmentInput";
@@ -22,6 +22,7 @@ export default function StepCoordonnees() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
+  const [data, setData] = useState();
 
   const [loading, setLoading] = useState(false);
 
@@ -31,12 +32,48 @@ export default function StepCoordonnees() {
   }
 
   useEffect(() => {
-    if (young.foreignCountry) {
-      young.livesInFrance = "false";
+    if (young !== undefined) {
+      setData({
+        gender: young.gender,
+        phone: young.phone,
+        country: young.country,
+        city: young.city,
+        zip: young.zip,
+        address: young.address,
+        location: young.location,
+        department: young.department,
+        region: young.region,
+        cityCode: young.cityCode,
+        academy: young.academy,
+        addressVerified: young.addressVerified,
+        hostLastName: young.hostLastName,
+        hostFirstName: young.hostFirstName,
+        hostRelationship: young.hostRelationship,
+        foreignCountry: young.foreignCountry,
+        foreignCity: young.foreignCountry,
+        foreignZip: young.foreignZip,
+        foreignAddress: young.foreignAddress,
+        schooled: young.schooled,
+        situation: young.situation,
+        employed: young.employed,
+        schoolName: young.schoolName,
+        grade: young.grade,
+        schoolId: young.schoolId,
+        schoolCountry: young.schoolCountry,
+        schoolCity: young.schoolCity,
+        schoolDepartment: young.schoolDepartment,
+      });
+      if (young.foreignCountry) {
+        setData((data) => ({ ...data, livesInFrance: "false" }));
+      } else {
+        setData((data) => ({ ...data, livesInFrance: "true" }));
+      }
     } else {
-      young.livesInFrance = "true";
+      history.push("/inscription/profil");
     }
-  }, []);
+  }, [young]);
+
+  if (!data) return null;
 
   const cleanSchoolInformation = (v) => {
     delete v.schoolType;
@@ -46,19 +83,15 @@ export default function StepCoordonnees() {
     delete v.schoolCity;
     delete v.schoolDepartment;
     delete v.schoolLocation;
-    v.schoolId;
-    v.schoolName = "";
-    v.grade = "";
+    delete v.schoolId;
+    delete v.schoolName;
+    delete v.schoolCountry;
+    delete v.grade;
   };
 
   const cleanAllAddressInformation = (callback) => {
     callback({ target: { name: "hostLastName", value: "" } });
     callback({ target: { name: "hostFirstName", value: "" } });
-    callback({ target: { name: "hostCity", value: "" } });
-    callback({ target: { name: "hostZip", value: "" } });
-    callback({ target: { name: "hostDepartment", value: "" } });
-    callback({ target: { name: "hostRegion", value: "" } });
-    callback({ target: { name: "hostAddress", value: "" } });
     callback({ target: { name: "hostRelationship", value: "" } });
     callback({ target: { name: "foreignAddress", value: "" } });
     callback({ target: { name: "foreignCity", value: "" } });
@@ -70,30 +103,38 @@ export default function StepCoordonnees() {
     callback({ target: { name: "address", value: "" } });
     callback({ target: { name: "location", value: {} } });
     callback({ target: { name: "cityCode", value: "" } });
-    callback({ target: { name: "populationDensity", value: "" } });
-    callback({ target: { name: "complementAddress", value: "" } });
+    callback({ target: { name: "addressVerified", value: "" } });
     // we do not reinit the country
   };
 
   const cleanSituation = (v) => {
     delete v.situation;
-    delete v.employed;
     delete v.schoolType;
     delete v.schoolAddress;
-    delete v.schoolComplementAdresse;
     delete v.schoolZip;
     delete v.schoolCity;
+    delete v.schoolCountry;
     delete v.schoolDepartment;
     delete v.schoolLocation;
     delete v.schoolId;
-    v.schoolName = "";
-    v.grade = "";
+    delete v.schoolName;
+    delete v.grade;
+    delete v.employed;
   };
 
   const onSubmit = async (values) => {
     setLoading(true);
     try {
-      const { ok, code, data } = await api.put("/young", { ...values, inscriptionStep: STEPS.AVAILABILITY });
+      if (values.livesInFrance === "true") {
+        delete values.foreignAddress;
+        delete values.foreignCity;
+        delete values.foreignCountry;
+        delete values.foreignZip;
+        delete values.hostFirstName;
+        delete values.hostLastName;
+        delete values.hostRelationship;
+      }
+      const { ok, code, data } = await api.put("/young/inscription/coordonnee", values);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(data));
       history.push("/inscription/availability");
@@ -112,7 +153,7 @@ export default function StepCoordonnees() {
         <p>Renseignez ci-dessous vos coordonnées personnelles</p>
       </Heading>
       <Formik
-        initialValues={young}
+        initialValues={data}
         validate={(values) => {
           const errors = {};
           const needsEtablissement = [
@@ -133,7 +174,7 @@ export default function StepCoordonnees() {
           useEffect(() => {
             if (values.phone) validateField("phone");
           }, [values.phone]);
-
+          console.log(values);
           return (
             <>
               <FormRow>
