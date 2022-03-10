@@ -67,15 +67,14 @@ const deletePatches = async ({ req, model }) => {
         }
       });
 
-      const patchToUpdate = patch;
       if (updatedOps.length === 0) {
-        patchToUpdate.remove();
+        patch.remove();
       } else {
-        patchToUpdate.set({ ops: updatedOps });
-        if (patchToUpdate.user !== undefined && patchToUpdate.user["role"] === undefined) {
-          patchToUpdate.set({ user: undefined });
+        patch.set({ ops: updatedOps });
+        if (patch.user !== undefined && patch.user["role"] === undefined) {
+          patch.set({ user: undefined });
         }
-        patchToUpdate.save();
+        await patch.save();
       }
     }
 
