@@ -271,7 +271,7 @@ describe("Young", () => {
       expect(updatedYoung.qpv).toEqual("false");
     });
 
-    it("should cascade status to WITHDRAWN if not validated", async () => {
+    it("should not cascade status to WITHDRAWN if not validated", async () => {
       const young = await createYoungHelper({
         ...getNewYoungFixture(),
         statusPhase1: "WAITING_AFFECTATION",
@@ -285,9 +285,9 @@ describe("Young", () => {
       const updatedYoung = response.body.data;
       expect(response.statusCode).toEqual(200);
       expect(updatedYoung.status).toEqual("WITHDRAWN");
-      expect(updatedYoung.statusPhase1).toEqual("WITHDRAWN");
-      expect(updatedYoung.statusPhase2).toEqual("WITHDRAWN");
-      expect(updatedYoung.statusPhase3).toEqual("WITHDRAWN");
+      expect(updatedYoung.statusPhase1).toEqual("WAITING_AFFECTATION");
+      expect(updatedYoung.statusPhase2).toEqual("WAITING_REALISATION");
+      expect(updatedYoung.statusPhase3).toEqual("WAITING_REALISATION");
       passport.user = previous;
     });
     it("should not cascade status to WITHDRAWN if validated", async () => {
