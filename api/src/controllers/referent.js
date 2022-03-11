@@ -311,7 +311,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (young.statusPhase3 !== "VALIDATED") newYoung.statusPhase3 = "WITHDRAWN";
     }
 
-    if (newYoung?.department && newYoung?.department !== young?.department) {
+    if (newYoung?.department && young?.department && newYoung?.department !== young?.department) {
       const referents = await ReferentModel.find({ department: newYoung.department, role: ROLES.REFERENT_DEPARTMENT });
       for (let referent of referents) {
         await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
@@ -358,20 +358,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (qpv === true) newYoung.qpv = "true";
       else if (qpv === false) newYoung.qpv = "false";
       else newYoung.qpv = "";
-    }
-
-    if (newYoung.department !== young.department) {
-      const referents = await ReferentModel.find({ department: newYoung.department, role: ROLES.REFERENT_DEPARTMENT });
-      for (let referent of referents) {
-        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
-          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-          params: {
-            youngFirstName: newYoung.firstName,
-            youngLastName: newYoung.lastName,
-            cta: `${config.ADMIN_URL}/volontaire/${newYoung._id}`,
-          },
-        });
-      }
     }
 
     // Check quartier prioritaires.
