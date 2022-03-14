@@ -25,7 +25,7 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
 
     if (error) {
       if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
-      return res.status(400).send({ ok: false, code: error.toString() });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     const young = await YoungObject.findById(req.user._id);
@@ -41,7 +41,7 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
   } catch (error) {
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
