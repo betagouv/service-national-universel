@@ -73,7 +73,7 @@ export default function View(props) {
           }}
         />
       )}
-      {modal === "DONE" && <ApplyDoneModal value={mission} onChange={() => setModal(null)} />}
+      {modal === "DONE" && <ApplyDoneModal young={young} value={mission} onChange={() => setModal(null)} />}
       <Heading>
         <div>
           <p className="title">mission</p>

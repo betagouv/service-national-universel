@@ -1,10 +1,9 @@
 import React from "react";
 import styled from "styled-components";
-import { Container } from "reactstrap";
 
-export default function AlertBox({ onClose, title, message }) {
+export default function AlertBox({ onClose, title, message, color = "#5949d0" }) {
   return (
-    <Alert>
+    <Alert color={color}>
       <img src={require("../assets/information.svg")} height={15} width={15} />
       <div className="text">
         <strong>{title}</strong>
@@ -15,15 +14,17 @@ export default function AlertBox({ onClose, title, message }) {
   );
 }
 
-const Alert = styled(Container)`
+const Alert = styled.span`
   border-radius: 8px;
   @media (max-width: 768px) {
     border-radius: 0;
   }
   display: flex;
   align-items: center;
-  background-color: #5949d0;
+  background-color: ${(props) => props.color};
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  margin-right: 1rem;
+  margin-left: 1rem;
   margin-bottom: 20px;
   padding: 10px 20px;
   .text {
