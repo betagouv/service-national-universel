@@ -31,7 +31,6 @@ const {
   updatePlacesSessionPhase1,
   updatePlacesBus,
   signinLimiter,
-  //  assignNextYoungFromWaitingList,
   ERRORS,
   isYoung,
   inSevenDays,
@@ -311,10 +310,18 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (young.statusPhase3 !== "VALIDATED") newYoung.statusPhase3 = "WITHDRAWN";
     }
 
-    // if withdrawn from phase1 -> run the script that find a replacement for this young
-    if (newYoung.statusPhase1 === "WITHDRAWN" && ["AFFECTED", "WAITING_ACCEPTATION"].includes(young.statusPhase1) && young.cohesionCenterId) {
-      // disable the 08 jun 21
-      // await assignNextYoungFromWaitingList(young);
+    if (newYoung?.department && young?.department && newYoung?.department !== young?.department) {
+      const referents = await ReferentModel.find({ department: newYoung.department, role: ROLES.REFERENT_DEPARTMENT });
+      for (let referent of referents) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: {
+            youngFirstName: young.firstName,
+            youngLastName: young.lastName,
+            cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
+          },
+        });
+      }
     }
 
     if (newYoung.cohesionStayPresence === "true" && young.cohesionStayPresence !== "true") {
@@ -344,20 +351,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (qpv === true) newYoung.qpv = "true";
       else if (qpv === false) newYoung.qpv = "false";
       else newYoung.qpv = "";
-    }
-
-    if (newYoung.department !== young.department) {
-      const referents = await ReferentModel.find({ department: newYoung.department, role: ROLES.REFERENT_DEPARTMENT });
-      for (let referent of referents) {
-        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
-          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-          params: {
-            youngFirstName: newYoung.firstName,
-            youngLastName: newYoung.lastName,
-            cta: `${config.ADMIN_URL}/volontaire/${newYoung._id}`,
-          },
-        });
-      }
     }
 
     // Check quartier prioritaires.

@@ -23,7 +23,7 @@ describe("Young", () => {
 
       return { young, updatedYoung, response };
     }
-    it("Should update Young with statut code 200", async () => {
+    it("Should update Young profil with statut code 200", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email.toLowerCase();
       const { updatedYoung, response } = await selfUpdateYoung({
@@ -89,7 +89,217 @@ describe("Young", () => {
       expect(response.statusCode).toBe(404);
     });
   });
+  describe("PUT /young/inscription/coordonnee", () => {
+    async function selfUpdateYoung(body = {}, fields = {}) {
+      const young = await createYoungHelper(getNewYoungFixture(fields));
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      let response = await request(getAppHelper()).put("/young/inscription/coordonnee").send(body);
+      updatedYoung = response.body.data;
+      passport.user = previous;
+
+      return response;
+    }
+    function getBasicFixture() {
+      const fixture = getNewYoungFixture();
+      return {
+        gender: "female",
+        phone: fixture.phone,
+        country: fixture.country,
+        city: fixture.city,
+        zip: fixture.zip,
+        address: "Une adresse qualitative",
+        location: fixture.location,
+        department: fixture.department,
+        region: fixture.region,
+        cityCode: fixture.cityCode,
+        academy: fixture.academy,
+        addressVerified: "true",
+      };
+    }
+    function getForeignFixture() {
+      const fixture = getNewYoungFixture();
+      return {
+        hostLastName: fixture.hostLastName,
+        hostFirstName: fixture.hostFirstName,
+        hostRelationship: fixture.hostRelationship,
+        foreignCountry: fixture.foreignCountry,
+        foreignCity: fixture.foreignCity,
+        foreignZip: fixture.foreignZip,
+        foreignAddress: fixture.foreignAddress,
+      };
+    }
+    function getSchoolFixture(schooled, country) {
+      const fixture = getNewYoungFixture();
+      if (schooled) {
+        if (country === "France") {
+          return {
+            schoolCountry: country,
+            schoolName: fixture.schoolName,
+            schoolCity: fixture.schoolCity,
+            schoolId: fixture.schoolId,
+            schoolDepartment: fixture.schoolDepartment,
+            grade: "3eme",
+          };
+        } else {
+          return {
+            schoolCountry: country,
+            schoolName: fixture.schoolName,
+            grade: "3eme",
+          };
+        }
+      }
+    }
+    it("Should update Young coordonnee with statut code 200", async () => {
+      const base = getBasicFixture();
+      const foreign = getForeignFixture();
+
+      const response = await selfUpdateYoung({
+        ...base,
+        livesInFrance: "true",
+        schooled: "true",
+        ...getSchoolFixture(true, "France"),
+        situation: YOUNG_SITUATIONS.GENERAL_SCHOOL,
+      });
+      expect(response.statusCode).toBe(200);
+
+      const response2 = await selfUpdateYoung({
+        ...base,
+        livesInFrance: "false",
+        ...foreign,
+        schooled: "true",
+        ...getSchoolFixture(true, "France"),
+        situation: YOUNG_SITUATIONS.GENERAL_SCHOOL,
+      });
+      expect(response2.statusCode).toBe(200);
+
+      const response3 = await selfUpdateYoung({
+        ...base,
+        livesInFrance: "true",
+        schooled: "true",
+        ...getSchoolFixture(true, "Maroc"),
+        situation: YOUNG_SITUATIONS.GENERAL_SCHOOL,
+      });
+      expect(response3.statusCode).toBe(200);
+
+      const response4 = await selfUpdateYoung({
+        ...base,
+        livesInFrance: "true",
+        schooled: "false",
+        employed: "true",
+        situation: YOUNG_SITUATIONS.EMPLOYEE,
+      });
+      expect(response4.statusCode).toBe(200);
+
+      const response5 = await selfUpdateYoung({
+        ...base,
+        livesInFrance: "true",
+        schooled: "false",
+        employed: "false",
+        situation: YOUNG_SITUATIONS.POLE_EMPLOI,
+      });
+      expect(response5.statusCode).toBe(200);
+    });
+    it("should return 400 when parameters invalid", async () => {
+      const base = getBasicFixture();
+      const foreign = getForeignFixture();
+
+      const response = await selfUpdateYoung({
+        ...base,
+        livesInFrance: "true",
+        ...foreign,
+        schooled: "true",
+        ...getSchoolFixture(true, "France"),
+        situation: YOUNG_SITUATIONS.GENERAL_SCHOOL,
+      });
+      expect(response.statusCode).toBe(400);
+
+      const response1 = await selfUpdateYoung({
+        ...base,
+        livesInFrance: "true",
+        schooled: "false",
+        ...getSchoolFixture(true, "France"),
+        situation: YOUNG_SITUATIONS.GENERAL_SCHOOL,
+      });
+      expect(response1.statusCode).toBe(400);
+
+      const response3 = await selfUpdateYoung({
+        ...base,
+        livesInFrance: "true",
+        schooled: "false",
+        employed: "false",
+        situation: YOUNG_SITUATIONS.EMPLOYEE,
+      });
+      expect(response3.statusCode).toBe(400);
+    });
+    it("should return 404 if user don't exist", async () => {
+      const base = getBasicFixture();
+      const foreign = getForeignFixture();
+
+      const response = await request(getAppHelper())
+        .put("/young/inscription/coordonnee")
+        .send({
+          ...base,
+          livesInFrance: "true",
+          schooled: "true",
+          ...getSchoolFixture(true, "France"),
+          situation: YOUNG_SITUATIONS.GENERAL_SCHOOL,
+        });
+      expect(response.statusCode).toBe(404);
+    });
+  });
   describe("PUT /young/inscription/availability", () => {
+    async function selfUpdateYoung(body = {}, fields = {}) {
+      const young = await createYoungHelper(getNewYoungFixture(fields));
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      const response = await request(getAppHelper()).put("/young/inscription/availability").send(body);
+      updatedYoung = response.body.data;
+      passport.user = previous;
+
+      return { young, updatedYoung, response };
+    }
+    it("Should update Young cochort with statut code 200", async () => {
+      let date = new Date();
+      date.setFullYear(date.getFullYear() - 16);
+
+      const { response, updatedYoung } = await selfUpdateYoung(
+        {
+          cohort: "Juillet 2022",
+        },
+        {
+          birthdateAt: date,
+        },
+      );
+      expect(response.statusCode).toBe(200);
+      expect(updatedYoung.cohort).toEqual("Juillet 2022");
+    });
+    it("should return 400 when parameters invalid", async () => {
+      let date = new Date();
+      date.setFullYear(date.getFullYear() - 16);
+
+      const { response } = await selfUpdateYoung(
+        {
+          cohort: "coucou",
+        },
+        {
+          birthdateAt: date,
+        },
+      );
+      expect(response.statusCode).toBe(400);
+    });
+    it("should return 404 if user don't exist", async () => {
+      const response = await request(getAppHelper()).put("/young/inscription/availability").send({
+        cohort: "coucou",
+      });
+      expect(response.statusCode).toBe(404);
+    });
+  });
+  describe("PUT /young/inscription/availability/reset", () => {
     async function selfUpdateYoung(body = {}, fields = {}) {
       const young = await createYoungHelper(getNewYoungFixture(fields));
       const passport = require("passport");

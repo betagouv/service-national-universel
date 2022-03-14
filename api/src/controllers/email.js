@@ -7,7 +7,6 @@ const Joi = require("joi");
 const Netmask = require("netmask").Netmask;
 
 const { ERRORS } = require("../utils");
-const { sendTemplate } = require("../sendinblue");
 const { capture } = require("../sentry");
 const EmailObject = require("../models/email");
 const { canViewEmailHistory } = require("snu-lib/roles");
@@ -99,7 +98,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
   } catch (error) {
     capture(error);
   }
-  return res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
+  return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
 });
 
 module.exports = router;

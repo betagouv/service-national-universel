@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Col, Row } from "reactstrap";
-import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { Formik, Field } from "formik";
 import { toastr } from "react-redux-toastr";
@@ -11,9 +9,7 @@ import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Loader from "../../components/Loader";
-import Badge from "../../components/Badge";
-import Error, { requiredMessage } from "../../components/errorMessage";
-import { Box, BoxContent } from "../../components/box";
+import { requiredMessage } from "../../components/errorMessage";
 import { translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, getPasswordErrorMessage } from "../../utils";
 import PasswordEye from "../../components/PasswordEye";
 import { VISITOR_SUBROLES } from "snu-lib/roles";
@@ -44,16 +40,14 @@ export default function Profil() {
   if (user === undefined || service === undefined) return <Loader />;
 
   return (
-    <Wrapper>
-      <TopTitle>Mon profil</TopTitle>
-      <TitleWrapper>
-        <Title>
-          <span style={{ marginRight: "1rem" }}>{`${user.firstName} ${user.lastName}`}</span>
-          <Badge text={translate(user.role)} />
-        </Title>
-      </TitleWrapper>
-      <Row>
-        <Col md={6}>
+    <div className="py-5 px-10">
+      {/* <p className="mb-4 text-lg font-medium uppercase text-brand-grey">Mon profil</p> */}
+      <div className="mb-10 flex items-center gap-4">
+        <h2 className="text-2xl font-bold text-brand-black m-0">{`${user.firstName} ${user.lastName}`}</h2>
+        <span className="rounded-full border !border-gray-400 bg-gray-100 px-3 py-1 text-sm text-gray-400">{translate(user.role)}</span>
+      </div>
+      <div className="flex gap-8">
+        <div className="flex-1">
           <Formik
             initialValues={user}
             onSubmit={async (values, actions) => {
@@ -71,13 +65,14 @@ export default function Profil() {
             }}>
             {({ values, errors, touched, isSubmitting, handleChange, handleSubmit }) => (
               <>
-                <Box>
-                  <BoxTitle>
-                    <h3>Informations générales</h3>
-                    <p>Données personnelles</p>
-                  </BoxTitle>
-                  <BoxContent direction="column">
+                <div className="rounded-md bg-white shadow-md">
+                  <div className="border-b border-gray-200 px-8 py-6">
+                    <h3 className="text-lg font-bold text-gray-800">Informations générales</h3>
+                    <p className="italic text-gray-400">Données personnelles</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 p-8">
                     <Item
+                      className="col-span-2"
                       required
                       title="E-mail"
                       values={values}
@@ -89,62 +84,46 @@ export default function Profil() {
                       validate={(v) => !v && requiredMessage}
                     />
                     {user.role === ROLES.REFERENT_DEPARTMENT ? (
-                      <Item title="Département" disabled values={values} name="department" handleChange={handleChange} type={"text"} />
+                      <Item className="col-span-2" title="Département" disabled values={values} name="department" handleChange={handleChange} type={"text"} />
                     ) : null}
                     {user.role === ROLES.REFERENT_REGION ? <Item title="Région" disabled values={values} name="region" handleChange={handleChange} type={"text"} /> : null}
-                    <Row>
-                      <Col md={6}>
-                        <Item
-                          required
-                          title="Prénom"
-                          values={values}
-                          name="firstName"
-                          handleChange={handleChange}
-                          errors={errors}
-                          touched={touched}
-                          type={"text"}
-                          validate={(v) => !v && requiredMessage}
-                        />
-                      </Col>
-                      <Col md={6}>
-                        <Item
-                          required
-                          title="Nom"
-                          values={values}
-                          name="lastName"
-                          handleChange={handleChange}
-                          errors={errors}
-                          touched={touched}
-                          type={"text"}
-                          validate={(v) => !v && requiredMessage}
-                        />
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={6}>
-                        <Item title="Téléphone mobile" values={values} name="mobile" handleChange={handleChange} type={"text"} />
-                      </Col>
-                      <Col md={6}>
-                        <Item title="Téléphone fixe" values={values} name="phone" handleChange={handleChange} type={"text"} />
-                      </Col>
-                    </Row>
+                    <Item
+                      required
+                      title="Prénom"
+                      values={values}
+                      name="firstName"
+                      handleChange={handleChange}
+                      errors={errors}
+                      touched={touched}
+                      type={"text"}
+                      validate={(v) => !v && requiredMessage}
+                    />
+                    <Item
+                      required
+                      title="Nom"
+                      values={values}
+                      name="lastName"
+                      handleChange={handleChange}
+                      errors={errors}
+                      touched={touched}
+                      type={"text"}
+                      validate={(v) => !v && requiredMessage}
+                    />
+                    <Item title="Téléphone mobile" values={values} name="mobile" handleChange={handleChange} type={"text"} />
+                    <Item title="Téléphone fixe" values={values} name="phone" handleChange={handleChange} type={"text"} />
                     {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR].includes(values.role) ? (
                       <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
                     ) : null}
-                    <Row>
-                      <Col md={6}>
-                        <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                          Enregistrer
-                        </SaveBtn>
-                      </Col>
-                    </Row>
-                  </BoxContent>
-                </Box>
+                    <LoadingButton className="w-full max-w-xs" loading={isSubmitting} onClick={handleSubmit}>
+                      Enregistrer
+                    </LoadingButton>
+                  </div>
+                </div>
               </>
             )}
           </Formik>
-        </Col>
-        <Col md={6}>
+        </div>
+        <div className="flex-1">
           <Formik
             initialValues={{ password: "", newPassword: "", verifyPassword: "" }}
             validateOnChange={false}
@@ -162,19 +141,18 @@ export default function Profil() {
               }
             }}>
             {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
-              <Box>
-                <BoxTitle>
-                  <h3>Mot de passe</h3>
-                  <p>Modifier votre mot de passe</p>
-                </BoxTitle>
-                <BoxContent direction="column">
+              <div className="rounded-md bg-white shadow-md">
+                <div className="border-b border-gray-200 px-8 py-6">
+                  <h3 className="text-lg font-bold text-gray-800">Mot de passe</h3>
+                  <p className="italic text-gray-400">Modifier votre mot de passe</p>
+                </div>
+                <div className="flex flex-col gap-4 p-8">
                   <Item required name="password" title="Actuel" errors={errors} touched={touched}>
                     <PasswordEye
                       type="password"
-                      validate={getPasswordErrorMessage}
+                      validate={(v) => (!v && requiredMessage) || getPasswordErrorMessage(v)}
                       placeholder=""
                       name="password"
-                      validate={(v) => !v && requiredMessage}
                       value={values.password}
                       onChange={handleChange}
                     />
@@ -193,19 +171,15 @@ export default function Profil() {
                       onChange={handleChange}
                     />
                   </Item>
-                  <Row>
-                    <Col md={6}>
-                      <SaveBtn onClick={handleSubmit} disabled={isSubmitting} style={{ margin: "2rem 0" }}>
-                        Valider mon nouveau mot de passe
-                      </SaveBtn>
-                    </Col>
-                  </Row>
-                </BoxContent>
-              </Box>
+                  <LoadingButton className="w-full max-w-xs" onClick={handleSubmit} disabled={isSubmitting}>
+                    Valider mon nouveau mot de passe
+                  </LoadingButton>
+                </div>
+              </div>
             )}
           </Formik>
-        </Col>
-      </Row>
+        </div>
+      </div>
       {user.role === ROLES.REFERENT_DEPARTMENT && (
         <>
           <Formik
@@ -223,37 +197,31 @@ export default function Profil() {
             }}>
             {({ values, handleChange, handleSubmit, isSubmitting }) => (
               <>
-                <TitleWrapper>
-                  <div>
-                    <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
+                <div className="my-10 flex items-center">
+                  <h2 className="text-2xl font-bold text-brand-black">Information du service départemental {values.department && `(${values.department})`}</h2>
+                </div>
+
+                <div className="rounded-md bg-white shadow-md">
+                  <div className="border-b border-gray-200 px-8 py-6">
+                    <h3 className="text-lg font-bold text-gray-800">Service Départemental</h3>
+                    <p className="italic text-gray-400">Données partagées par tous les référents de votre département</p>
                   </div>
-                </TitleWrapper>
-                <Row>
-                  <Col md={6} style={{ marginBottom: "20px" }}>
-                    <Box>
-                      <BoxTitle>
-                        <h3>Service Départemental</h3>
-                        <p>Données partagées par tous les référents de votre département</p>
-                      </BoxTitle>
-                      <BoxContent direction="column">
-                        <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
-                        <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
-                        <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
-                        <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
-                        <Item title="Ville" values={values} name="city" handleChange={handleChange} />
-                      </BoxContent>
-                      <div style={{ display: "flex", justifyContent: "flex-end", padding: "0 2rem" }}>
-                        <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                          Enregistrer
-                        </SaveBtn>
-                      </div>
-                    </Box>
-                  </Col>
-                </Row>
+                  <div className="flex flex-col gap-4 p-8">
+                    <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
+                    <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
+                    <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
+                    <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
+                    <Item title="Ville" values={values} name="city" handleChange={handleChange} />
+                    <LoadingButton className="w-full max-w-xs" loading={isSubmitting} onClick={handleSubmit}>
+                      Enregistrer
+                    </LoadingButton>
+                  </div>
+                </div>
               </>
             )}
           </Formik>
-          <Row>
+
+          <div className="mt-8 grid grid-cols-2 gap-8">
             {["Février 2022", "Juin 2022", "Juillet 2022", "2021"].map((cohort) => (
               <Formik
                 key={`contact-${cohort}`}
@@ -271,171 +239,70 @@ export default function Profil() {
                   }
                 }}>
                 {({ values, handleChange, handleSubmit, isSubmitting }) => (
-                  <Col md={6} style={{ marginBottom: "20px" }}>
-                    <Box>
-                      <BoxTitle>
-                        <h3>Contacts convocation ({cohort})</h3>
-                      </BoxTitle>
-                      <BoxContent direction="column">
-                        <Item title="Nom du Contact" values={values} name="contactName" handleChange={handleChange} />
-                        <Item title="Tel." values={values} name="contactPhone" handleChange={handleChange} />
-                        <Item title="Email" values={values} name="contactMail" handleChange={handleChange} />
-                      </BoxContent>
-                      <div style={{ display: "flex", justifyContent: "flex-end", padding: "0 2rem" }}>
-                        <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                          Enregistrer
-                        </SaveBtn>
-                      </div>
-                    </Box>
-                  </Col>
+                  <div className="rounded-md bg-white shadow-md">
+                    <div className="border-b border-gray-200 px-8 py-6">
+                      <h3 className="text-lg font-bold text-gray-800">Contacts convocation ({cohort})</h3>
+                    </div>
+                    <div className="flex flex-col gap-4 p-8">
+                      <Item title="Nom du Contact" values={values} name="contactName" handleChange={handleChange} />
+                      <Item title="Tel." values={values} name="contactPhone" handleChange={handleChange} />
+                      <Item title="Email" values={values} name="contactMail" handleChange={handleChange} />
+
+                      <LoadingButton className="w-full max-w-xs" loading={isSubmitting} onClick={handleSubmit}>
+                        Enregistrer
+                      </LoadingButton>
+                    </div>
+                  </div>
                 )}
               </Formik>
             ))}
-          </Row>
+          </div>
         </>
       )}
-    </Wrapper>
+    </div>
   );
 }
 
-const Select = ({ title, name, values, onChange, disabled, options }) => {
+const Select = ({ title, name, values, onChange, disabled, options, className }) => {
   return (
-    <Row>
-      <Col md={6}>
-        <FormGroup>
-          <label>{title}</label>
-          <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={onChange}>
-            <option key={-1} value="" label=""></option>
-            {options.map((o, i) => (
-              <option key={i} value={o.value} label={o.label}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </FormGroup>
-      </Col>
-    </Row>
+    <div className={className}>
+      <label className="mb-2 inline-block text-xs uppercase text-brand-grey">{title}</label>
+      <select
+        disabled={disabled}
+        className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+        name={name}
+        value={values[name]}
+        onChange={onChange}>
+        <option key={-1} value="" label=""></option>
+        {options.map((o, i) => (
+          <option key={i} value={o.value} label={o.label}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 };
 
-const Item = ({ title, values, name, handleChange, disabled, required, errors, touched, type, validate, children }) => {
+const Item = ({ title, values, name, handleChange, disabled, required, errors, touched, type, validate, children, className }) => {
   return (
-    <FormGroup>
-      <label>
-        {required && <span>*</span>}
+    <div className={className}>
+      <label className="mb-2 inline-block text-xs uppercase text-brand-grey">
+        {required && <span className="text-red-500 mr-1">*</span>}
         {title}
       </label>
-      {children || <Field disabled={disabled} className="form-control" value={translate(values[name])} name={name} onChange={handleChange} type={type} validate={validate} />}
-      {errors && touched && <Error errors={errors} touched={touched} name={name} />}
-    </FormGroup>
+      {children || (
+        <Field
+          disabled={disabled}
+          className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+          value={translate(values[name])}
+          name={name}
+          onChange={handleChange}
+          type={type}
+          validate={validate}
+        />
+      )}
+      {errors && touched && <p className="text-xs text-red-500" errors={errors} touched={touched} name={name} />}
+    </div>
   );
 };
-
-const Wrapper = styled.div`
-  padding: 20px 40px;
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 25px;
-  label {
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    color: #6a6f85;
-    display: block;
-    margin-bottom: 10px;
-    span {
-      color: red;
-      font-size: 10px;
-      margin-right: 5px;
-    }
-  }
-  input {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    color: #606266;
-    border: 0;
-    outline: 0;
-    padding: 11px 20px;
-    border-radius: 6px;
-    margin-right: 15px;
-    border: 1px solid #dcdfe6;
-    ::placeholder {
-      color: #d6d6e1;
-    }
-    :focus {
-      border: 1px solid #aaa;
-    }
-  }
-`;
-
-const TopTitle = styled.div`
-  color: rgb(113, 128, 150);
-  font-weight: 400;
-  text-transform: uppercase;
-  font-size: 18px;
-`;
-
-const SaveBtn = styled(LoadingButton)`
-  background-color: #5245cc;
-  border: none;
-  border-radius: 5px;
-  padding: 7px 30px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  cursor: pointer;
-  :hover {
-    background: #372f78;
-  }
-  &.outlined {
-    :hover {
-      background: #fff;
-    }
-    background-color: transparent;
-    border: solid 1px #5245cc;
-    color: #5245cc;
-    font-size: 13px;
-    padding: 4px 20px;
-  }
-`;
-
-const TitleWrapper = styled.div`
-  margin: 32px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 4rem;
-`;
-
-const Title = styled.h2`
-  color: #242526;
-  font-weight: bold;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-`;
-
-const BoxTitle = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  border-bottom: 1px solid #f2f1f1;
-  min-height: 5rem;
-  padding: 22px;
-  h3 {
-    color: #171725;
-    font-size: 16px;
-    font-weight: bold;
-  }
-  p {
-    color: #aaa;
-    font-size: 14px;
-    font-weight: 300;
-    display: flex;
-    align-items: center;
-    font-style: italic;
-    margin: 0;
-  }
-`;

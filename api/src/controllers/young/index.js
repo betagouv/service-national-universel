@@ -25,7 +25,6 @@ const {
   uploadFile,
   validatePassword,
   signinLimiter,
-  // assignNextYoungFromWaitingList,
   ERRORS,
   inSevenDays,
   isYoung,
@@ -413,20 +412,20 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    //! needs further checking
-    // if (req.user.department !== young.department) {
-    //   const referents = await ReferentModel.find({ department: req.user.department, role: ROLES.REFERENT_DEPARTMENT });
-    //   for (let referent of referents) {
-    //     await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
-    //       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    //       params: {
-    //         youngFirstName: young.firstName,
-    //         youngLastName: young.lastName,
-    //         cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-    //       },
-    //     });
-    //   }
-    // }
+    if (value?.department && young?.department && value?.department !== young?.department) {
+      const referents = await ReferentModel.find({ department: value.department, role: ROLES.REFERENT_DEPARTMENT });
+      for (let referent of referents) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: {
+            youngFirstName: young.firstName,
+            youngLastName: young.lastName,
+            cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
+          },
+        });
+      }
+    }
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
@@ -452,12 +451,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       if (young.statusPhase2 !== "VALIDATED") young.set({ statusPhase2: "WITHDRAWN" });
       if (young.statusPhase3 !== "VALIDATED") young.set({ statusPhase3: "WITHDRAWN" });
       await young.save({ fromUser: req.user });
-    }
-
-    // if withdrawn from phase1 -> run the script that find a replacement for this young
-    if (young.statusPhase1 === "WITHDRAWN" && ["AFFECTED", "WAITING_ACCEPTATION"].includes(req.user.statusPhase1) && req.user.cohesionCenterId) {
-      // disable the 08 jun 21
-      // await assignNextYoungFromWaitingList(young);
     }
 
     // if they had a cohesion center, we check if we need to update the places taken / left

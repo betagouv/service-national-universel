@@ -13,7 +13,6 @@ const {
   ERRORS,
   updatePlacesCenter,
   updatePlacesBus,
-  sendAutoAffectationMail,
   sendAutoCancelMeetingPoint,
   getSignedUrl,
   updateCenterDependencies,
@@ -113,8 +112,6 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     }
 
     await young.save({ fromUser: req.user });
-
-    // await sendAutoAffectationMail(young, center);
 
     //if young is in waitingList of the center
     if (center.waitingList.indexOf(young._id) !== -1) {
