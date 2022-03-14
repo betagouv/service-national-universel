@@ -224,40 +224,42 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
             Contrat d&apos;engagement &gt;
           </ContractLink>
         ) : null}
-        <div>
-          <div style={{ textAlign: "center" }}>
-            {!hit.missionDuration ? (
-              <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Indiquer un nombre d&apos;heure</ModifyDurationLink>
-            ) : (
-              <span>
-                Durée : {hit.missionDuration}h - <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Modifier</ModifyDurationLink>
-              </span>
-            )}
-          </div>
-          <ModalConfirmWithMessage
-            isOpen={modalDurationOpen}
-            title="Validation de réalisation de mission"
-            message={`Merci de valider le nombre d'heures effectuées par ${hit.youngFirstName} pour la mission ${hit.missionName}.`}
-            type="number"
-            onChange={() => setModalDurationOpen(false)}
-            defaultInput={hit.missionDuration}
-            placeholder="Nombre d'heures"
-            onConfirm={async (duration) => {
-              try {
-                const { ok, code } = await api.put("/application", { _id: hit._id, missionDuration: duration });
-                if (!ok) {
-                  toastr.error("Une erreur s'est produite :", translate(code));
-                } else {
-                  onChangeApplication();
-                  toastr.success("Mis à jour!");
+        {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
+          <div>
+            <div style={{ textAlign: "center" }}>
+              {!hit.missionDuration ? (
+                <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Indiquer un nombre d&apos;heure</ModifyDurationLink>
+              ) : (
+                <span>
+                  Durée : {hit.missionDuration}h - <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Modifier</ModifyDurationLink>
+                </span>
+              )}
+            </div>
+            <ModalConfirmWithMessage
+              isOpen={modalDurationOpen}
+              title="Validation de réalisation de mission"
+              message={`Merci de valider le nombre d'heures effectuées par ${hit.youngFirstName} pour la mission ${hit.missionName}.`}
+              type="number"
+              onChange={() => setModalDurationOpen(false)}
+              defaultInput={hit.missionDuration}
+              placeholder="Nombre d'heures"
+              onConfirm={async (duration) => {
+                try {
+                  const { ok, code } = await api.put("/application", { _id: hit._id, missionDuration: duration });
+                  if (!ok) {
+                    toastr.error("Une erreur s'est produite :", translate(code));
+                  } else {
+                    onChangeApplication();
+                    toastr.success("Mis à jour!");
+                  }
+                } catch (e) {
+                  toastr.error("Une erreur s'est produite :", translate(e?.code));
                 }
-              } catch (e) {
-                toastr.error("Une erreur s'est produite :", translate(e?.code));
-              }
-              setModalDurationOpen(false);
-            }}
-          />
-        </div>
+                setModalDurationOpen(false);
+              }}
+            />
+          </div>
+        )}
 
         {hit.status === "WAITING_VALIDATION" && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role) && (
           <React.Fragment>
