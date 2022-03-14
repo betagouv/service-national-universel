@@ -9,8 +9,8 @@ const CohesionCenterModel = require("../models/cohesionCenter");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
-const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl } = require("../utils");
-const { ROLES, canCreateOrUpdateSessionPhase1 } = require("snu-lib/roles");
+const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll } = require("../utils");
+const { canCreateOrUpdateSessionPhase1 } = require("snu-lib/roles");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
@@ -158,17 +158,17 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   for (const young of youngs) {
     data.push(
       subHtml
-        .replace(/{{FIRST_NAME}}/g, young.firstName)
-        .replace(/{{LAST_NAME}}/g, young.lastName)
-        .replace(/{{COHORT}}/g, session.cohort)
-        .replace(/{{COHESION_CENTER_NAME}}/g, cohesionCenter.name || "")
-        .replace(/{{COHESION_CENTER_LOCATION}}/g, getLocationCohesionCenter(cohesionCenter))
-        .replace(/{{GENERAL_BG}}/g, template)
-        .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })),
+        .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+        .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+        .replace(/{{COHORT}}/g, sanitizeAll(session.cohort))
+        .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
+        .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(getLocationCohesionCenter(cohesionCenter)))
+        .replace(/{{GENERAL_BG}}/g, sanitizeAll(template))
+        .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))),
     );
   }
 
-  const newhtml = html.replace(/{{BASE_URL}}/g, getBaseUrl()).replace(/{{BODY}}/g, data.join(""));
+  const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
 
   const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
 
