@@ -61,7 +61,7 @@ const Schema = new mongoose.Schema({
 
   status: {
     type: String,
-    default: "WAITING_VALIDATION",
+    default: "VALIDATED",
     enum: ["WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "DRAFT"],
     documentation: {
       description: "Statut de la structure",
