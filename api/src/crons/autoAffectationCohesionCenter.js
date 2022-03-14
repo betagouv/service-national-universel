@@ -7,6 +7,7 @@ const fs = require("fs");
 const { capture, captureMessage } = require("../sentry");
 const YoungModel = require("../models/young");
 const CohesionCenterObject = require("../models/cohesionCenter");
+// eslint-disable-next-line no-unused-vars
 const { assignNextYoungFromWaitingList, updatePlacesCenter } = require("../utils");
 
 const clean = async () => {
