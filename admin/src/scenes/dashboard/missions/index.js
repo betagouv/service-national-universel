@@ -9,10 +9,13 @@ import FilterRegion from "../components/FilterRegion";
 import Statistics from "./Statistics";
 
 import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
+import DatePicker from "../components/DatePicker";
 
 export default function Index() {
   const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
@@ -29,6 +32,41 @@ export default function Index() {
     }
   }, []);
 
+  useEffect(() => {
+    if (startDate !== "" && endDate === "") {
+      updateFilter({
+        startDate: {
+          gte: new Date(startDate).toISOString(),
+        },
+        endDate: {
+          gte: new Date(startDate).toISOString(),
+        },
+      });
+    } else if (startDate === "" && endDate !== "") {
+      updateFilter({
+        startDate: {
+          lte: endDate,
+        },
+        endDate: {
+          lte: endDate,
+        },
+      });
+    } else if (startDate !== "" && endDate !== "") {
+      updateFilter({
+        startDate: {
+          gte: startDate,
+          lte: endDate,
+        },
+        endDate: {
+          gte: startDate,
+          lte: endDate,
+        },
+      });
+    } else {
+      updateFilter({ startDate: {}, endDate: {} });
+    }
+  }, [startDate, endDate]);
+
   return (
     <>
       <Row>
@@ -39,6 +77,8 @@ export default function Index() {
               <FiltersList>
                 <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
                 <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
+                <DatePicker title="Date de début" onChange={(e) => setStartDate(e.target.value)} value={startDate} />
+                <DatePicker title="Date de fin" onChange={(e) => setEndDate(e.target.value)} value={endDate} />
               </FiltersList>
             </>
           )}
