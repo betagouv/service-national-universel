@@ -118,8 +118,8 @@ export default function StepCoordonnees() {
     delete v.schoolLocation;
     delete v.schoolId;
     delete v.schoolName;
-    delete v.grade;
     delete v.employed;
+    v.grade = "";
   };
 
   const onSubmit = async (values) => {

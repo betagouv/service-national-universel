@@ -565,21 +565,6 @@ const isObjectKeysIsEqual = (object, newObject, keys) => {
 };
 
 async function inscriptionCheck(value, young, req) {
-  //! needs further checking
-  // if (req.user.department !== young.department) {
-  //   const referents = await ReferentModel.find({ department: req.user.department, role: ROLES.REFERENT_DEPARTMENT });
-  //   for (let referent of referents) {
-  //     await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
-  //       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-  //       params: {
-  //         youngFirstName: young.firstName,
-  //         youngLastName: young.lastName,
-  //         cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-  //       },
-  //     });
-  //   }
-  // }
-
   // Check quartier prioritaires.
   if (value.zip && value.city && value.address) {
     const qpv = await getQPV(value.zip, value.city, value.address);
@@ -602,12 +587,6 @@ async function inscriptionCheck(value, young, req) {
     if (young.statusPhase2 !== "VALIDATED") young.set({ statusPhase2: "WITHDRAWN" });
     if (young.statusPhase3 !== "VALIDATED") young.set({ statusPhase3: "WITHDRAWN" });
     await young.save({ fromUser: req.user });
-  }
-
-  // if withdrawn from phase1 -> run the script that find a replacement for this young
-  if (young.statusPhase1 === "WITHDRAWN" && ["AFFECTED", "WAITING_ACCEPTATION"].includes(req.user.statusPhase1) && req.user.cohesionCenterId) {
-    // disable the 08 jun 21
-    // await assignNextYoungFromWaitingList(young);
   }
 
   // if they had a cohesion center, we check if we need to update the places taken / left
