@@ -7,8 +7,7 @@ const fs = require("fs");
 const { capture, captureMessage } = require("../sentry");
 const YoungModel = require("../models/young");
 const CohesionCenterObject = require("../models/cohesionCenter");
-// eslint-disable-next-line no-unused-vars
-const { assignNextYoungFromWaitingList, updatePlacesCenter } = require("../utils");
+const { updatePlacesCenter } = require("../utils");
 
 const clean = async () => {
   let countAutoWithdrawn = 0;
@@ -25,8 +24,6 @@ const clean = async () => {
       await sendNoResponseAffectationMail(young);
 
       // assign next one from the waiting list
-      // disable the 08 jun 21
-      // await assignNextYoungFromWaitingList(young);
     } else {
       console.log(`${young._id} ${young.firstName} ${young.lastName} is not quick enough. but its statusPhase1 is '${young.statusPhase1}'`);
     }

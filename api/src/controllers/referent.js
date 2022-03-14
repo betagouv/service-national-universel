@@ -31,7 +31,6 @@ const {
   updatePlacesSessionPhase1,
   updatePlacesBus,
   signinLimiter,
-  //  assignNextYoungFromWaitingList,
   ERRORS,
   isYoung,
   inSevenDays,
@@ -323,12 +322,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
           },
         });
       }
-    }
-
-    // if withdrawn from phase1 -> run the script that find a replacement for this young
-    if (newYoung.statusPhase1 === "WITHDRAWN" && ["AFFECTED", "WAITING_ACCEPTATION"].includes(young.statusPhase1) && young.cohesionCenterId) {
-      // disable the 08 jun 21
-      // await assignNextYoungFromWaitingList(young);
     }
 
     if (newYoung.cohesionStayPresence === "true" && young.cohesionStayPresence !== "true") {
