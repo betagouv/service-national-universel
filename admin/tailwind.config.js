@@ -32,9 +32,6 @@ module.exports = {
         base: "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.06)",
         block: "0px 10px 20px rgba(0, 0, 0, 0.1)",
       },
-      dropShadow: {
-        filter: "0px 2px 4px rgba(0, 0, 0, 0.05)",
-      },
       fontSize: {
         0: "0px",
       },

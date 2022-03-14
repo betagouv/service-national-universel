@@ -14,8 +14,8 @@ import DatePicker from "../components/DatePicker";
 export default function Index() {
   const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [fromDate, setFromDate] = useState();
+  const [toDate, setToDate] = useState();
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
@@ -31,41 +31,46 @@ export default function Index() {
       updateFilter({ status: Object.keys(YOUNG_STATUS), region: [] });
     }
   }, []);
+  console.log(filter);
 
   useEffect(() => {
-    if (startDate !== "" && endDate === "") {
+    //If just the from date is filled
+    if (fromDate && !toDate) {
       updateFilter({
         startDate: {
-          gte: new Date(startDate).toISOString(),
+          gte: fromDate,
         },
         endDate: {
-          gte: new Date(startDate).toISOString(),
+          gte: fromDate,
         },
       });
-    } else if (startDate === "" && endDate !== "") {
+      //If just the to date is filled
+    } else if (!fromDate && toDate) {
       updateFilter({
         startDate: {
-          lte: endDate,
+          lte: toDate,
         },
         endDate: {
-          lte: endDate,
+          lte: toDate,
         },
       });
-    } else if (startDate !== "" && endDate !== "") {
+      //If both date are filled
+    } else if (fromDate && toDate) {
       updateFilter({
         startDate: {
-          gte: startDate,
-          lte: endDate,
+          gte: fromDate,
+          lte: toDate,
         },
         endDate: {
-          gte: startDate,
-          lte: endDate,
+          gte: fromDate,
+          lte: toDate,
         },
       });
+      //If none of the dates is filled, reset filter
     } else {
       updateFilter({ startDate: {}, endDate: {} });
     }
-  }, [startDate, endDate]);
+  }, [fromDate, toDate]);
 
   return (
     <>
@@ -77,8 +82,8 @@ export default function Index() {
               <FiltersList>
                 <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
                 <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
-                <DatePicker title="Date de début" onChange={(e) => setStartDate(e.target.value)} value={startDate} />
-                <DatePicker title="Date de fin" onChange={(e) => setEndDate(e.target.value)} value={endDate} />
+                <DatePicker title="Date de début" onChange={(e) => setFromDate(e.target.value)} value={fromDate} />
+                <DatePicker title="Date de fin" onChange={(e) => setToDate(e.target.value)} value={toDate} />
               </FiltersList>
             </>
           )}
