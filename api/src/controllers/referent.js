@@ -27,6 +27,7 @@ const { sendTemplate } = require("../sendinblue");
 const {
   getFile,
   uploadFile,
+  deleteFile,
   validatePassword,
   updatePlacesSessionPhase1,
   updatePlacesBus,
@@ -364,6 +365,15 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (newYoung.cityCode) {
       const populationDensity = await getDensity(newYoung.cityCode);
       newYoung.populationDensity = populationDensity;
+    }
+
+    if (newYoung.statusMilitaryPreparationFiles === "REFUSED") {
+      const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
+      for (let key of militaryKeys) {
+        young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
+        newYoung[key] = [];
+      }
+      console.log("~ new Young 🙉", newYoung);
     }
 
     // await updateApplicationsWithYoungOrMission({ young, newYoung });
