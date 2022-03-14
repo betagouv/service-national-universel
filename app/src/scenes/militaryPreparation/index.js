@@ -85,10 +85,10 @@ export default function Index() {
 
   return (
     <>
-      {young.statusMilitaryPreparationFiles === "VALIDATED" ? <AlertBox color="#31c48d" title="Félicitations ! Votre dossier a été validé par nos équipes." /> : null}
+      {young.statusMilitaryPreparationFiles === "VALIDATED" ? <AlertBox color="#31c48d" title="Vos documents ont été approuvés par nos équipes." /> : null}
       {young.statusMilitaryPreparationFiles === "WAITING_VALIDATION" ? (
         <AlertBox
-          title="Votre dossier est en cours de vérification par nos équipes."
+          title="Vos documents sont en cours de vérification par nos équipes."
           message={`Vous serez notifié par email à l'adresse ${young.email} dès qu'il y aura du nouveau !`}
         />
       ) : null}
