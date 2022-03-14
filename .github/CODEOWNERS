@@ -1,0 +1,3 @@
+# Protect workflow files
+.github/workflows/*.yml @tangimds @rap2hpoutre @SpookyUmi @goffle
+.github/CODEOWNERS @tangimds @rap2hpoutre @SpookyUmi @goffle
