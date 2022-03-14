@@ -373,7 +373,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
         young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
         newYoung[key] = [];
       }
-      console.log("~ new Young 🙉", newYoung);
     }
 
     // await updateApplicationsWithYoungOrMission({ young, newYoung });

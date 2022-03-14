@@ -9,8 +9,7 @@ function getFileName(file) {
 }
 
 export default function DndFileInput({ optional, value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier" }) {
-  const [filesList, setFilesList] = useState(value.length ? value : []);
-  console.log("FILES", filesList);
+  const [filesList, setFilesList] = useState(value || []);
 
   useEffect(() => {
     const dropArea = document.getElementById(`file-drop-${name}`);
