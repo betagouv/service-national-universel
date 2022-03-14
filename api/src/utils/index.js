@@ -3,7 +3,6 @@ const https = require("https");
 const http = require("http");
 const passwordValidator = require("password-validator");
 const YoungModel = require("../models/young");
-const CohesionCenterModel = require("../models/cohesionCenter");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
@@ -12,8 +11,7 @@ const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
 const rateLimit = require("express-rate-limit");
-const sendinblue = require("../sendinblue");
-const { ADMIN_URL, APP_URL } = require("../config");
+const { APP_URL } = require("../config");
 const {
   CELLAR_ENDPOINT,
   CELLAR_KEYID,
@@ -25,7 +23,6 @@ const {
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
-const { ROLES } = require("snu-lib/roles");
 const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib/constants");
 
 // Set the number of requests allowed to 15 in a 1 hour window
@@ -135,7 +132,7 @@ function getSignedUrlForApiAssociation(path) {
 }
 
 function fileExist(url) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     getReq(url, (resp) => {
       if (resp.statusCode === 200) return resolve(true);
       return resolve(false);
@@ -301,26 +298,6 @@ const sendAutoCancelMeetingPoint = async (young) => {
   );
 };
 
-const sendAutoAffectationNotFoundMails = async (to, young, center) => {
-  // Send mail.
-  await sendEmail(
-    {
-      name: `${to.firstName} ${to.lastName}`,
-      email: to.email,
-    },
-    "Une place s'est libérée dans l'un de vos centres de séjour SNU",
-    fs
-      .readFileSync(path.resolve(__dirname, "./templates/autoAffectationNotFound.html"))
-      .toString()
-      .replace(/{{firstName}}/, to.firstName)
-      .replace(/{{lastName}}/, to.lastName)
-      .replace(/{{youngFirstName}}/, young.firstName)
-      .replace(/{{youngLastName}}/, young.lastName)
-      .replace(/{{centerName}}/, center.name)
-      .replace(/{{cta}}/, `${ADMIN_URL}/auth?redirect=centre/${center._id}/affectation`),
-  );
-};
-
 // pourrait être utile un jour
 
 // const assignYoungToWaitingList = async (young, newCohort) => {
@@ -338,25 +315,6 @@ const sendAutoAffectationNotFoundMails = async (to, young, center) => {
 //   }
 
 // }
-
-const getYoungFromWaitingList = async (young) => {
-  try {
-    if (!young || !young.cohesionCenterId) return null;
-    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
-    if (!center) return null;
-    let res = null;
-    for (let i = 0; i < center.waitingList?.length; i++) {
-      const tempYoung = await YoungModel.findById(center.waitingList[i]);
-      if (tempYoung.statusPhase1 === "WAITING_LIST" && tempYoung.department === young.department && tempYoung.gender === young.gender) {
-        res = tempYoung;
-        break;
-      }
-    }
-    return res;
-  } catch (e) {
-    console.log(e);
-  }
-};
 
 async function updateYoungPhase2Hours(young) {
   const applications = await ApplicationModel.find({
