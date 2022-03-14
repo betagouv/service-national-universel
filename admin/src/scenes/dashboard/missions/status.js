@@ -23,6 +23,7 @@ export default function Status({ data, filter, getLink }) {
       <h3 className="mt-4 mb-2 text-xl">Statut des missions proposées par les structures</h3>
       <Row>
         {Object.values(MISSION_STATUS).map((l, k) => {
+          if (!data[l]) return null;
           return (
             <Col md={6} xl={3} key={k}>
               <Link to={getLink({ base: `/mission`, filter, filtersUrl: [`STATUS=%5B"${l}"%5D`] })}>
