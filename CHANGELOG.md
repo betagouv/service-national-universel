@@ -1,3 +1,18 @@
+# [1.57.0](https://github.com/betagouv/service-national-universel/compare/v1.56.0...v1.57.0) (2022-03-14)
+
+
+### Bug Fixes
+
+* **admin:** tailwind - admin profile ([#1351](https://github.com/betagouv/service-national-universel/issues/1351)) ([72dacaf](https://github.com/betagouv/service-national-universel/commit/72dacafa9269d353e8cfa916d746eaf4091af0cf))
+* **api:** default status structure ([52b7276](https://github.com/betagouv/service-national-universel/commit/52b72769f8283a09361e1b52c8109fd36af64efe))
+* **api:** fix email eslint notices ([b164647](https://github.com/betagouv/service-national-universel/commit/b164647b32fb10de899f8052cd080911100f7a60))
+
+
+### Features
+
+* Tableau de bord mission encart ([#1350](https://github.com/betagouv/service-national-universel/issues/1350)) ([c8d945a](https://github.com/betagouv/service-national-universel/commit/c8d945a6762362972bd4f8a38bddd7f8456cd4d7))
+* **app:** pm documents status ([#1345](https://github.com/betagouv/service-national-universel/issues/1345)) ([05955e8](https://github.com/betagouv/service-national-universel/commit/05955e874bb6676046b22ecb38299438f1d34f0c))
+
 # [1.56.0](https://github.com/betagouv/service-national-universel/compare/v1.55.0...v1.56.0) (2022-03-10)
 
 
