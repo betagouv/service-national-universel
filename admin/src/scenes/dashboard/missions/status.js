@@ -16,7 +16,7 @@ export default function Status({ data, filter, getLink }) {
   if (Object.keys(data).length === 0) {
     return null;
   }
-  console.log(data);
+
   return (
     <React.Fragment>
       <h3 className="mt-4 mb-2 text-xl">Statut des missions proposées par les structures</h3>
