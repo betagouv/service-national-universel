@@ -24,6 +24,7 @@ const {
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
 const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib/constants");
+const { getQPV, getDensity } = require("../geo");
 
 // Set the number of requests allowed to 15 in a 1 hour window
 const signinLimiter = rateLimit({
@@ -460,6 +461,38 @@ const isObjectKeysIsEqual = (object, newObject, keys) => {
   return true;
 };
 
+async function inscriptionCheck(value, young, req) {
+  // Check quartier prioritaires.
+  if (value.zip && value.city && value.address) {
+    const qpv = await getQPV(value.zip, value.city, value.address);
+    if (qpv === true) young.set({ qpv: "true" });
+    else if (qpv === false) young.set({ qpv: "false" });
+    else young.set({ qpv: "" });
+    await young.save({ fromUser: req.user });
+  }
+
+  // Check quartier prioritaires.
+  if (value.cityCode) {
+    const populationDensity = await getDensity(value.cityCode);
+    young.set({ populationDensity });
+    await young.save({ fromUser: req.user });
+  }
+
+  // if withdrawn, cascade withdrawn on every status
+  if (young.status === "WITHDRAWN" && (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")) {
+    if (young.statusPhase1 !== "DONE") young.set({ statusPhase1: "WITHDRAWN" });
+    if (young.statusPhase2 !== "VALIDATED") young.set({ statusPhase2: "WITHDRAWN" });
+    if (young.statusPhase3 !== "VALIDATED") young.set({ statusPhase3: "WITHDRAWN" });
+    await young.save({ fromUser: req.user });
+  }
+
+  // if they had a cohesion center, we check if we need to update the places taken / left
+  if (young.sessionPhase1Id) {
+    const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+    if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+  }
+}
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -487,6 +520,33 @@ const ERRORS = {
   USER_NOT_EXISTS: "USER_NOT_EXISTS",
   NEW_PASSWORD_IDENTICAL_PASSWORD: "NEW_PASSWORD_IDENTICAL_PASSWORD",
   INVALID_IP: "INVALID_IP",
+};
+
+const YOUNG_SITUATIONS = {
+  GENERAL_SCHOOL: "GENERAL_SCHOOL",
+  PROFESSIONAL_SCHOOL: "PROFESSIONAL_SCHOOL",
+  AGRICULTURAL_SCHOOL: "AGRICULTURAL_SCHOOL",
+  SPECIALIZED_SCHOOL: "SPECIALIZED_SCHOOL",
+  APPRENTICESHIP: "APPRENTICESHIP",
+  EMPLOYEE: "EMPLOYEE",
+  INDEPENDANT: "INDEPENDANT",
+  SELF_EMPLOYED: "SELF_EMPLOYED",
+  ADAPTED_COMPANY: "ADAPTED_COMPANY",
+  POLE_EMPLOI: "POLE_EMPLOI",
+  MISSION_LOCALE: "MISSION_LOCALE",
+  CAP_EMPLOI: "CAP_EMPLOI",
+  NOTHING: "NOTHING", // @todo find a better key --'
+};
+
+const STEPS = {
+  PROFIL: "PROFIL",
+  COORDONNEES: "COORDONNEES",
+  AVAILABILITY: "AVAILABILITY",
+  PARTICULIERES: "PARTICULIERES",
+  REPRESENTANTS: "REPRESENTANTS",
+  CONSENTEMENTS: "CONSENTEMENTS",
+  DOCUMENTS: "DOCUMENTS",
+  DONE: "DONE",
 };
 
 module.exports = {
@@ -517,4 +577,7 @@ module.exports = {
   updateYoungStatusPhase2Contract,
   checkStatusContract,
   YOUNG_STATUS,
+  YOUNG_SITUATIONS,
+  STEPS,
+  inscriptionCheck,
 };
