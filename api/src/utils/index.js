@@ -281,32 +281,6 @@ const updatePlacesBus = async (bus) => {
   return bus;
 };
 
-const sendAutoAffectationMail = async (nextYoung, center) => {
-  // Send mail.
-  const cc = [];
-  if (nextYoung.parent1Email) cc.push({ email: nextYoung.parent1Email });
-  if (nextYoung.parent2Email) cc.push({ email: nextYoung.parent2Email });
-  await sendEmail(
-    {
-      name: `${nextYoung.firstName} ${nextYoung.lastName}`,
-      email: nextYoung.email,
-    },
-    "Une place dans le séjour de cohésion SNU 2021 s’est libérée !",
-    fs
-      .readFileSync(path.resolve(__dirname, "./templates/autoAffectation.html"))
-      .toString()
-      .replace(/{{firstName}}/, nextYoung.firstName)
-      .replace(/{{lastName}}/, nextYoung.lastName)
-      .replace(/{{centerName}}/, center.name)
-      .replace(/{{centerAddress}}/, center.address + " " + center.zip + " " + center.city)
-      .replace(/{{centerDepartement}}/, center.department)
-      .replace(/{{ctaAccept}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
-      .replace(/{{ctaDocuments}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
-      .replace(/{{ctaWithdraw}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1"),
-    { cc },
-  );
-};
-
 const sendAutoCancelMeetingPoint = async (young) => {
   const cc = [];
   if (young.parent1Email) cc.push({ email: young.parent1Email });
@@ -345,41 +319,6 @@ const sendAutoAffectationNotFoundMails = async (to, young, center) => {
       .replace(/{{centerName}}/, center.name)
       .replace(/{{cta}}/, `${ADMIN_URL}/auth?redirect=centre/${center._id}/affectation`),
   );
-};
-
-const assignNextYoungFromWaitingList = async (young) => {
-  const nextYoung = await getYoungFromWaitingList(young);
-  if (!nextYoung) {
-    //notify referents & admin
-    console.log(`no replacement found for young ${young._id} in center ${young.cohesionCenterId}`);
-
-    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
-    if (!center) return null;
-    let to = await ReferentModel.find({ role: ROLES.ADMIN, email: { $in: ["youssef.tahiri@education.gouv.fr", "nicolas.roy@recherche.gouv.fr"] } });
-    to = to.concat(await ReferentModel.find({ role: ROLES.REFERENT_REGION, region: center.region }));
-    for (let i = 0; i < to.length; i++) {
-      await sendAutoAffectationNotFoundMails(to[i], young, center);
-    }
-  } else {
-    // Notify young & modify statusPhase1
-    console.log("replacement found", nextYoung._id);
-
-    // Activate waiting accepation and 48h cron
-    nextYoung.set({ status: "VALIDATED", statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 48 });
-    await nextYoung.save();
-    await sendinblue.sync(nextYoung, "young");
-
-    const center = await CohesionCenterModel.findById(nextYoung.cohesionCenterId);
-    await sendAutoAffectationMail(nextYoung, center);
-
-    //remove the young from the waiting list
-    if (center?.waitingList?.indexOf(nextYoung._id) !== -1) {
-      console.log(`remove young ${nextYoung._id} from waiting_list of ${nextYoung.cohesionCenterId}`);
-      const i = center.waitingList.indexOf(nextYoung._id);
-      center.waitingList.splice(i, 1);
-      await center.save();
-    }
-  }
 };
 
 // pourrait être utile un jour
@@ -604,8 +543,6 @@ module.exports = {
   updatePlacesSessionPhase1,
   updateCenterDependencies,
   deleteCenterDependencies,
-  assignNextYoungFromWaitingList,
-  sendAutoAffectationMail,
   updatePlacesBus,
   sendAutoCancelMeetingPoint,
   listFiles,
