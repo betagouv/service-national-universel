@@ -99,7 +99,11 @@ router.put("/coordonnee", passport.authenticate("young", { session: false, failW
       }),
       schoolId: Joi.alternatives().conditional("schooled", {
         is: "true",
-        then: Joi.alternatives().conditional("schoolCountry", { is: "France", then: Joi.string().trim().required(), otherwise: Joi.string().default("").allow("", null) }),
+        then: Joi.alternatives().conditional("schoolCountry", {
+          is: "France",
+          then: Joi.string().trim().required().allow("", null),
+          otherwise: Joi.string().default("").allow("", null),
+        }),
         otherwise: Joi.isError(new Error()),
       }),
       schoolDepartment: Joi.alternatives().conditional("schooled", {
