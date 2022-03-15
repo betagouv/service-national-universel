@@ -5,6 +5,7 @@ import { translateCohort } from "../../utils";
 import { supportURL } from "../../config";
 import NextStep from "./nextStep";
 import { Link } from "react-router-dom";
+import { COHORT_CAN_CHANGE } from "snu-lib/constants";
 
 export default function WaitingAffectation({ young }) {
   return (
@@ -21,7 +22,7 @@ export default function WaitingAffectation({ young }) {
               Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
               nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
             </p>
-            <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button>
+            {COHORT_CAN_CHANGE.includes(young.cohort) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
             <Divider />
             <p>
               <strong style={{ color: "#000" }}>Vous êtes en attente d&apos;affectation à un centre</strong>
