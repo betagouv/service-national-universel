@@ -209,7 +209,7 @@ router.put("/availability", passport.authenticate("young", { session: false, fai
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -229,7 +229,7 @@ router.put("/availability/notEligible", passport.authenticate("young", { session
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -242,7 +242,7 @@ router.put("/availability/reset", passport.authenticate("young", { session: fals
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

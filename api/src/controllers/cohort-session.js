@@ -18,7 +18,7 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
     return res.send({ ok: true, data: sessions });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

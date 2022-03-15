@@ -24,7 +24,6 @@ async function getCohortSessionsAvailability(young) {
     },
   ].filter((el) => {
     if (el.excludedGrade.includes(young.grade)) return false;
-    else if (el.excludedZip.some((e) => new RegExp(`^${e}`).test(young.zip))) return false;
     else if (
       new Date(el.includedBirthdate.begin).getTime() <= new Date(young.birthdateAt).getTime() &&
       new Date(young.birthdateAt).getTime() <= new Date(el.includedBirthdate.end).getTime()
