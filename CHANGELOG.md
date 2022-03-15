@@ -1,3 +1,16 @@
+# [1.58.0](https://github.com/betagouv/service-national-universel/compare/v1.57.0...v1.58.0) (2022-03-15)
+
+
+### Bug Fixes
+
+* <div> cannot appear as a descendant of <p> ([#1362](https://github.com/betagouv/service-national-universel/issues/1362)) ([26a748e](https://github.com/betagouv/service-national-universel/commit/26a748ee3c22133870bd4656d6e10e08a1318b0c))
+* schooledId in inscription ([9e08bb9](https://github.com/betagouv/service-national-universel/commit/9e08bb94ff6f69fa4dcc4352a28f53c8edee8b54))
+
+
+### Features
+
+* ouvrir les en cours aux référents ([8c55bcf](https://github.com/betagouv/service-national-universel/commit/8c55bcfb357d83a8a3672f5a3f80d87581efcb26))
+
 # [1.57.0](https://github.com/betagouv/service-national-universel/compare/v1.56.0...v1.57.0) (2022-03-14)
 
 
