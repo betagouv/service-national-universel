@@ -40,7 +40,7 @@ const { serializeYoung, serializeApplication } = require("../../utils/serializer
 const { canDeleteYoung } = require("snu-lib/roles");
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
-const { canUpdateYoungStatus } = require("snu-lib");
+const { canUpdateYoungStatus, COHORT_CAN_CHANGE } = require("snu-lib");
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
@@ -475,6 +475,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const { id } = req.params;
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    if (!COHORT_CAN_CHANGE.includes(young.cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // young can only update their own cohort.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
