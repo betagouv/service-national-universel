@@ -13,7 +13,7 @@ export default function FormRadioLabelTrueFalse({ title, children, name, values,
     <FormRow>
       <Col md={4}>
         <FormLabel>
-          {title} <p style={{ fontSize: "0.7rem" }}>{children}</p>
+          {title} <div style={{ fontSize: "0.7rem" }}>{children}</div>
         </FormLabel>
       </Col>
       <Col md={8} style={{ display: "flex", alignItems: "center" }}>
