@@ -6,14 +6,14 @@ const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
-const { differenceInDays } = require("date-fns");
+const { differenceInDays, getMonth } = require("date-fns");
 
 exports.handler = async () => {
   try {
     let countTotal = 0;
     let countHit = 0;
-    let countEmailSent = {};
-    let countMissionSentCohort = {};
+    let countApplicationMonth = {};
+    const tutors = [];
     const now = Date.now();
     const cursor = await Application.find({
       status: "WAITING_VALIDATION",
@@ -24,11 +24,14 @@ exports.handler = async () => {
       if (!patches.length) return;
       patches = patches.filter((patch) => patch.ops.filter((op) => op.path === "/status" && op.value === "WAITING_VALIDATION").length > 0);
       if (!patches.length) return;
+      if (!application.tutorId) return;
       const tutor = await Referent.findById(application.tutorId);
       if (!tutor) return;
       if (differenceInDays(now, patches[0].date) >= 7) {
         // send a mail to the tutor
         countHit++;
+        countApplicationMonth[getMonth(new Date(patches[0].date)) + 1] = (countApplicationMonth[getMonth(new Date(patches[0].date)) + 1] || 0) + 1;
+        if (!tutors.includes(tutor._id)) tutors.push(tutor._id);
         //countEmailSent[missions?.length] = (countEmailSent[missions?.length] || 0) + 1;
         // slack.success({
         //   title: "1 week notice pending application",
@@ -49,9 +52,7 @@ exports.handler = async () => {
       title: "missionApplicationPending",
       text: `${countHit}/${countTotal} (${((countHit / countTotal) * 100).toFixed(
         2,
-      )}%) jeunes ciblé(e)s.\nmails envoyés: ${countHit}\nnombre de missions proposées / mail : ${JSON.stringify(
-        countEmailSent,
-      )}\ncohortes (si missions proposées) : ${JSON.stringify(countMissionSentCohort)}`,
+      )}%) candidatures ciblées.\nmails envoyés: ${countHit}\ncandidatures ciblées/mois : ${JSON.stringify(countApplicationMonth)}\ntuteurs notifiés : ${tutors.length}`,
     });
   } catch (e) {
     capture(e);
