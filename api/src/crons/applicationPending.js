@@ -31,7 +31,7 @@ exports.handler = async () => {
         // send a mail to the tutor
         countHit++;
         countApplicationMonth[getMonth(new Date(patches[0].date)) + 1] = (countApplicationMonth[getMonth(new Date(patches[0].date)) + 1] || 0) + 1;
-        if (!tutors.includes(tutor._id)) tutors.push(tutor._id);
+        if (!tutors.includes(tutor.email)) tutors.push(tutor.email);
         //countEmailSent[missions?.length] = (countEmailSent[missions?.length] || 0) + 1;
         // slack.success({
         //   title: "1 week notice pending application",
@@ -52,7 +52,9 @@ exports.handler = async () => {
       title: "missionApplicationPending",
       text: `${countHit}/${countTotal} (${((countHit / countTotal) * 100).toFixed(
         2,
-      )}%) candidatures ciblées.\nmails envoyés: ${countHit}\ncandidatures ciblées/mois : ${JSON.stringify(countApplicationMonth)}\ntuteurs notifiés : ${tutors.length}`,
+      )}%) candidatures ciblées.\nmails envoyés: ${countHit}\ncandidatures ciblées/mois : ${JSON.stringify(countApplicationMonth)}\ntuteurs notifiés : ${
+        tutors.length
+      }\nmoyenne mails/tuteur : ${countHit / tutors.length}`,
     });
   } catch (e) {
     capture(e);
