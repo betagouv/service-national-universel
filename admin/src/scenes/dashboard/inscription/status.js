@@ -42,7 +42,7 @@ export default function Status({ filter }) {
 
   return (
     <Row>
-      {user.role === ROLES.ADMIN && (
+      {(user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) && (
         <Col md={6} xl={2}>
           <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] })} color={YOUNG_STATUS_COLORS.IN_PROGRESS}>
             <CardTitle>En cours</CardTitle>
