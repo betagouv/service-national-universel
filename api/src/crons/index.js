@@ -34,7 +34,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   //   newMissionReminder.handler();
   // });
 
-  cron.schedule(everyMinutes(30), function () {
+  cron.schedule(everyMinutes(20), function () {
     applicationPending.handler();
   });
 

@@ -37,15 +37,17 @@ exports.handler = async () => {
         //   title: "1 week notice pending application",
         //   text: `applicationId: ${application._id} - change status date: ${patches[0].date}, status: WAITING_VALIDATION`,
         // });
-        // sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER, {
-        //   emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
-        //   params: {
-        //     cta: `${ADMIN_URL}/dashboard`,
-        //     youngFirstName: application.youngFirstName,
-        //     youngLastName: application.youngLastName,
-        //     missionName: application.missionName,
-        //   },
-        // });
+        if (tutor.email === tutors[0]) {
+          sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER, {
+            emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: "spookyumi.dev@gmail.com" }],
+            params: {
+              cta: `${ADMIN_URL}/dashboard`,
+              youngFirstName: application.youngFirstName,
+              youngLastName: application.youngLastName,
+              missionName: application.missionName,
+            },
+          });
+        }
       }
     });
     slack.info({
