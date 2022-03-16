@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function DatePicker({ title, value, onChange }) {
+export default function DatePickerDashboard({ title, value, onChange }) {
   return (
     <div className="flex flex-wrap p-[5px] bg-white rounded-[0.4rem] box-border shadow-sm">
       <div className="flex py-[2px] px-[8px]">

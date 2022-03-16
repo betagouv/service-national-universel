@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch, ReactiveComponent } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/ExportXlsx";
@@ -17,8 +17,9 @@ import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
+import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION", "DATE"];
 
 export default function List() {
   const [mission, setMission] = useState(null);
@@ -26,6 +27,7 @@ export default function List() {
   const [structureIds, setStructureIds] = useState();
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
+
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
     if (user.role === ROLES.SUPERVISOR) return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } }, track_total_hits: true };
@@ -210,6 +212,15 @@ export default function List() {
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
                 />
+                <ReactiveComponent
+                  componentId="DATE"
+                  URLParams={true}
+                  defaultValue={[]}
+                  render={(props) => {
+                    return <DatePickerWrapper setQuery={props.setQuery} value={props.value} />;
+                  }}
+                />
+
                 {user.role === ROLES.SUPERVISOR ? (
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
