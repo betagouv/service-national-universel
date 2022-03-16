@@ -34,7 +34,7 @@ export default function Index({ onChangeFilter = () => {} }) {
   }
 
   useEffect(() => {
-    const status = Object.keys(YOUNG_STATUS).filter((e) => !["IN_PROGRESS", "NOT_ELIGIBLE"].includes(e));
+    const status = Object.keys(YOUNG_STATUS).filter((e) => !["NOT_ELIGIBLE"].includes(e));
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
       updateFilter({ department: [user.department], status });
     } else if (user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR) {
@@ -50,7 +50,7 @@ export default function Index({ onChangeFilter = () => {} }) {
 
   const getOptionsStatus = () => {
     let STATUS = Object.keys(YOUNG_STATUS).map((s) => ({ label: translate(YOUNG_STATUS[s]), value: s }));
-    if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => !["IN_PROGRESS", "NOT_ELIGIBLE"].includes(e.value));
+    if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => !["NOT_ELIGIBLE"].includes(e.value));
     return STATUS;
   };
 
