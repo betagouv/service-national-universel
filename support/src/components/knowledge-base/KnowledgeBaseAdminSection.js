@@ -148,7 +148,7 @@ const KnowledgeBaseAdminSection = ({ section, isRoot }) => {
         isOpen={readOnly}
         onRequestClose={() => setReadOnly(false)}
         closeButton={
-          <button type="button" className="fixed top-0 h-16 w-full rounded-none" onClick={() => setReadOnly((r) => !r)}>
+          <button type="button" className="fixed top-0 z-10 h-16 w-full rounded-none" onClick={() => setReadOnly((r) => !r)}>
             Retour à l'édition
           </button>
         }
