@@ -1,3 +1,17 @@
+# [1.59.0](https://github.com/betagouv/service-national-universel/compare/v1.58.1...v1.59.0) (2022-03-17)
+
+
+### Bug Fixes
+
+* remove option visitor for referent_department ([e0459cc](https://github.com/betagouv/service-national-universel/commit/e0459ccffee6d46959fea9c467e4558c498f68cc))
+* **api:** up clamscan ([71e21b2](https://github.com/betagouv/service-national-universel/commit/71e21b2765ebac55cfa2bcaa35c91393d52b70f4))
+
+
+### Features
+
+* **admin:** proposer une mission - ouverture aux référents ([#1374](https://github.com/betagouv/service-national-universel/issues/1374)) ([6ce4852](https://github.com/betagouv/service-national-universel/commit/6ce485294964a1a18f4dabdd856e12901454575e))
+* **api:** test clamscan antivirus ([#1372](https://github.com/betagouv/service-national-universel/issues/1372)) ([b20e762](https://github.com/betagouv/service-national-universel/commit/b20e7627760520db7c3f82bc52c15fd0e693277b))
+
 ## [1.58.1](https://github.com/betagouv/service-national-universel/compare/v1.58.0...v1.58.1) (2022-03-16)
 
 
