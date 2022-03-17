@@ -63,7 +63,7 @@ router.get("/actions", async (req, res) => {
 
     // si l'utilisateur existe, on récupère les missions + candidatures qui lui sont liées
     if (user) {
-      const data = { structure: {}, actions: { waitingValitation: 0, contractToBeSigned: 0, contractToBeFilled: 0 } };
+      const data = { structure: {}, actions: { waitingValidation: 0, contractToBeSigned: 0, contractToBeFilled: 0 } };
       const structure = await StructureModel.findById(user.structureId);
       data.structure = { name: structure.name };
 
@@ -71,7 +71,7 @@ router.get("/actions", async (req, res) => {
 
       for (let mission of missions) {
         const applications = await ApplicationModel.find({ missionId: mission._id, status: { $in: [APPLICATION_STATUS.WAITING_VALIDATION] } });
-        data.actions.waitingValitation += applications.length;
+        data.actions.waitingValidation += applications.length;
       }
 
       // todo

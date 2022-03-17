@@ -91,6 +91,9 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
     }
     const filter = [{ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }];
 
+    // Open in progress inscription to referent
+    if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) filter[0].terms["status.keyword"].push("IN_PROGRESS");
+
     // A head center can only see youngs of their session.
     if (user.role === ROLES.HEAD_CENTER) {
       const sessionPhase1 = await SessionPhase1Object.find({ headCenterId: user._id });

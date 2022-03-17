@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const mime = require("mime-types");
 const FileType = require("file-type");
 const Joi = require("joi");
+const NodeClam = require("clamscan");
 
 const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
@@ -591,11 +592,13 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
           Joi.object({
             name: Joi.string().required(),
             data: Joi.binary().required(),
+            tempFilePath: Joi.string().allow("").optional(),
           }).unknown(),
           Joi.array().items(
             Joi.object({
               name: Joi.string().required(),
               data: Joi.binary().required(),
+              tempFilePath: Joi.string().allow("").optional(),
             }).unknown(),
           ),
         ),
@@ -611,7 +614,17 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
       if (Array.isArray(currentFile)) {
         currentFile = currentFile[currentFile.length - 1];
       }
-      const { name, data } = currentFile;
+      const { name, data, tempFilePath } = currentFile;
+
+      if (config.ENVIRONMENT === "staging") {
+        const clamscan = await new NodeClam().init({
+          removeInfected: true,
+        });
+        const { isInfected } = await clamscan.isInfected(tempFilePath);
+        if (isInfected) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: "File is infected" });
+        }
+      }
 
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
