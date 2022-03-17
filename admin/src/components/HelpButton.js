@@ -9,7 +9,7 @@ export default function HelpButton() {
   };
   return (
     <div className="fixed bottom-5 right-2 ">
-      <div className="font-bold text-xl w-10 h-10 shadow-sm rounded-full bg-white  cursor-pointer flex justify-center items-center text-snu-purple-300" onClick={handleOpen}>
+      <div className="font-bold text-xl w-10 h-10 shadow-sm rounded-full text-white  cursor-pointer flex justify-center items-center bg-snu-purple-300" onClick={handleOpen}>
         <div>?</div>
       </div>
       <div
