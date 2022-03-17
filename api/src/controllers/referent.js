@@ -620,7 +620,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
         const clamscan = await new NodeClam().init({
           removeInfected: true,
         });
-        const { isInfected } = await clamscan(tempFilePath);
+        const { isInfected } = await clamscan.isInfected(tempFilePath);
         if (isInfected) {
           return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: "File is infected" });
         }
