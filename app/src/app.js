@@ -47,7 +47,7 @@ import Zammad from "./components/Zammad";
 import GoogleTags from "./components/GoogleTags";
 import { toastr } from "react-redux-toastr";
 
-import { COHORT_CAN_CHANGE } from "snu-lib/constants";
+import { youngCanChangeSession } from "snu-lib";
 
 if (environment === "production") {
   Sentry.init({
@@ -60,7 +60,6 @@ if (environment === "production") {
 
 export default function App() {
   const [loading, setLoading] = useState(true);
-  const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   useEffect(() => {
     const params = queryString.parse(location.search);
@@ -85,8 +84,6 @@ export default function App() {
   }, []);
 
   if (loading) return <Loader />;
-
-  console.log(young);
 
   return (
     <Router>
@@ -168,7 +165,7 @@ const Espace = () => {
             <Route path="/candidature" component={Applications} />
             <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
-            {COHORT_CAN_CHANGE.includes(young.cohort) ? <Route path="/changer-de-sejour" component={changeSejour} /> : null}
+            {youngCanChangeSession({ cohort: young.cohort }) ? <Route path="/changer-de-sejour" component={changeSejour} /> : null}
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>

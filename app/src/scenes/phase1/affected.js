@@ -14,7 +14,7 @@ import Question from "../../assets/question";
 import Bouclier from "../../assets/bouclier";
 import right from "../../assets/right.svg";
 import { Link } from "react-router-dom";
-import { COHORT_CAN_CHANGE } from "snu-lib/constants";
+import { youngCanChangeSession } from "snu-lib";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -60,7 +60,7 @@ export default function Affected() {
                 Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région (sauf exception) pour
                 créer ainsi des liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
               </p>
-              {COHORT_CAN_CHANGE.includes(young.cohort) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
+              {youngCanChangeSession({ cohort: young.cohort }) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
               <Separator style={{ width: "150px" }} />
               <p>
                 <strong style={{ color: "black" }}>Votre lieu d&apos;affectation</strong>
