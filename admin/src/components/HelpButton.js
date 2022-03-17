@@ -3,9 +3,13 @@ import { supportURL } from "../config";
 
 export default function HelpButton() {
   const [open, setOpen] = React.useState(false);
+  const handleOpen = () => {
+    setOpen((e) => !e);
+    setTimeout(() => setOpen(false), 10000);
+  };
   return (
-    <div className="fixed bottom-2 right-2 ">
-      <div className="w-10 h-10 shadow-sm rounded-full bg-white boreder-red-400 cursor-pointer flex justify-center items-center text-blue-600" onClick={() => setOpen((e) => !e)}>
+    <div className="fixed bottom-5 right-2 ">
+      <div className="font-bold text-xl w-10 h-10 shadow-sm rounded-full bg-white  cursor-pointer flex justify-center items-center text-snu-purple-300" onClick={handleOpen}>
         <div>?</div>
       </div>
       <div
