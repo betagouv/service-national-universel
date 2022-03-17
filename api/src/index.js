@@ -48,7 +48,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 require("./crons");
 app.use(cookieParser());
-app.use(fileUpload({ limits: { fileSize: 10 * 1024 * 1024 } })); // 10 Mo
+if (ENVIRONMENT !== "staging") {
+  app.use(fileUpload({ limits: { fileSize: 10 * 1024 * 1024 } })); // 10 Mo
+} else {
+  app.use(fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }));
+}
+
 app.use(express.static(__dirname + "/../public"));
 
 app.use(passport.initialize());
