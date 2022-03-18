@@ -60,10 +60,14 @@ router.put("/coordonnee", passport.authenticate("young", { session: false, failW
           lat: Joi.number().required(),
           lon: Joi.number().required(),
         })
-        .required(),
+        .default({
+          lat: null,
+          lon: null,
+        })
+        .allow({}, null),
       department: Joi.string().trim().required(),
       region: Joi.string().trim().required(),
-      cityCode: Joi.string().trim().required(),
+      cityCode: Joi.string().trim().default("").allow("", null),
       academy: Joi.string().trim().required(),
       addressVerified: Joi.string().trim().required().valid("true"),
       schooled: Joi.string().trim().required().valid("true", "false"),
