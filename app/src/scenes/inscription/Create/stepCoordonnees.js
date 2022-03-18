@@ -165,6 +165,7 @@ export default function StepCoordonnees() {
           ].includes(values.situation);
           if (needsEtablissement && !values.schoolName) errors.schoolName = "Un établissement est obligatoire";
           if (needsEtablissement && values.schoolCountry === "France" && !values.schoolCity) errors.schoolCity = "Une ville est obligatoire";
+          if (needsEtablissement && values.schoolCountry === "France" && !values.schoolDepartment) errors.schoolCity = "Veuillez renseigner correctement le nom de la ville";
           return errors;
         }}
         validateOnChange={false}

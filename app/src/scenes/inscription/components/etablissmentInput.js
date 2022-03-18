@@ -52,7 +52,7 @@ export default function EtablissmentInput({ handleChange, values, keys, errors, 
       <Col md={12}>
         {values[keys.schoolCountry] === "France" && (
           <>
-            <Label>Ville de l&apos;établissement</Label>
+            <Label>Ville de l&apos;établissement *</Label>
             <SchoolCityTypeahead
               initialValue={values[keys.schoolCity] || ""}
               onChange={({ name, department }) => {
@@ -154,7 +154,7 @@ function SchoolCityTypeahead({ onChange, initialValue }) {
           </div>
         )}
         inputProps={{
-          placeholder: "Indiquez un nom de ville",
+          placeholder: "Recherchez un nom de ville",
           value,
           onChange: (event, { newValue }) => {
             setValue(newValue);
