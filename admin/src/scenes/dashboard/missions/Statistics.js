@@ -52,6 +52,13 @@ export default function Places({ filter }) {
       };
       if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
       if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (Object.keys(filter.startDate).length) {
+        body.query.bool.filter.push({ range: { startAt: filter.startDate } });
+      }
+      if (Object.keys(filter.endDate).length) {
+        body.query.bool.filter.push({ range: { endAt: filter.endDate } });
+      }
+
       const { responses: missionResponse } = await api.esQuery("mission", body);
 
       const body2 = {
