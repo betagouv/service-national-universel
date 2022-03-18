@@ -202,7 +202,8 @@ export default function Drawer(props) {
 
 const DeleteAccountButton = ({ young }) => {
   const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
-  const getLabel = () => (mandatoryPhasesDone ? "Supprimer mon compte" : "Se désister du SNU");
+  const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
+  const getLabel = () => (mandatoryPhasesDone ? "Supprimer mon compte" : inscriptionStatus ? "Abandonner mon inscription" : "Se désister du SNU");
 
   return <Link to="/desistement">{getLabel()}</Link>;
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -14,6 +14,9 @@ export default function Desistement() {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const [confirm, setConfirm] = useState({ state: false, onConfirm: () => {} });
+  const [status, setStatus] = useState(YOUNG_STATUS.WITHDRAWN);
+  const [stopSNU, setStopSNU] = useState("désistement");
+  const [title, setTitle] = useState("Vous souhaitez vous désister ?");
 
   // in /inscription/desistement, we do not check if the young is logged in
   // so we need to double check here
@@ -24,6 +27,14 @@ export default function Desistement() {
 
   const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
+      setStopSNU("abandon");
+      setStatus(YOUNG_STATUS.ABANDONED);
+      setTitle("Vous souhaitez abandonner votre inscription ?");
+    }
+  }, []);
 
   const onConfirm = async (status, values) => {
     young.historic.push({
@@ -69,10 +80,10 @@ export default function Desistement() {
         />
       ) : (
         <ComponentWithdrawn
-          title="Vous souhaitez vous désister ?"
+          title={title}
           message={
             <>
-              <p>Précisez la raison de votre désistement</p>
+              <p>Précisez la raison de votre {stopSNU}.</p>
               {/2022/.test(young.cohort) ? (
                 <p>
                   Si vous souhaitez changer vos dates de séjour, merci de <Link to="/besoin-d-aide/ticket">contacter le support</Link>
@@ -80,9 +91,9 @@ export default function Desistement() {
               ) : null}
             </>
           }
-          placeholder="Précisez en quelques mots la raison de votre désistement"
+          placeholder={`Précisez en quelques mots la raison de votre ${stopSNU}`}
           onConfirm={(values) => {
-            setConfirm({ state: true, onConfirm: () => onConfirm(YOUNG_STATUS.WITHDRAWN, values) });
+            setConfirm({ state: true, onConfirm: () => onConfirm(status, values) });
           }}
         />
       )}
