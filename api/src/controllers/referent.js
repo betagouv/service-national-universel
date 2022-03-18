@@ -386,24 +386,18 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
   }
 });
 
-router.put("/young/:id/refuse-military-preparation-files", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/young/:id/refuse-military-preparation-files", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = validateYoung(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
     const { id } = req.params;
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    // eslint-disable-next-line no-unused-vars
-    let { __v, ...newYoung } = value;
+    const newYoung = { statusMilitaryPreparationFiles: "REFUSED" };
 
-    if (newYoung.statusMilitaryPreparationFiles === "REFUSED") {
-      const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
-      for (let key of militaryKeys) {
-        young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
-        newYoung[key] = [];
-      }
+    const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
+    for (let key of militaryKeys) {
+      young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
+      newYoung[key] = [];
     }
 
     young.set(newYoung);
