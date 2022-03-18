@@ -29,12 +29,14 @@ import { DepartmentFilter } from "../../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
-export default function Youngs({ mission, applications }) {
+export default function Youngs({ mission, applications, updateApplications }) {
   const [missionTemp, setMissionTemp] = useState(mission);
   const [young, setYoung] = useState();
+
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
     if (ok) setYoung(data);
@@ -53,7 +55,10 @@ export default function Youngs({ mission, applications }) {
 
   const updateMission = async () => {
     const { data, ok } = await api.get(`/mission/${mission._id}`);
-    if (ok) setMissionTemp(data);
+    if (ok) {
+      setMissionTemp(data);
+      updateApplications();
+    }
   };
 
   if (!applications) return <Loader />;
@@ -193,8 +198,8 @@ export default function Youngs({ mission, applications }) {
 
 const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalDurationOpen, setModalDurationOpen] = useState(false);
   const user = useSelector((state) => state.Auth.user);
-
   const history = useHistory();
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
@@ -219,6 +224,43 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
             Contrat d&apos;engagement &gt;
           </ContractLink>
         ) : null}
+        {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
+          <div>
+            <div style={{ textAlign: "center" }}>
+              {!hit.missionDuration ? (
+                <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Indiquer un nombre d&apos;heure</ModifyDurationLink>
+              ) : (
+                <span>
+                  Durée : {hit.missionDuration}h - <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Modifier</ModifyDurationLink>
+                </span>
+              )}
+            </div>
+            <ModalConfirmWithMessage
+              isOpen={modalDurationOpen}
+              title="Validation de réalisation de mission"
+              message={`Merci de valider le nombre d'heures effectuées par ${hit.youngFirstName} pour la mission ${hit.missionName}.`}
+              type="number"
+              onChange={() => setModalDurationOpen(false)}
+              defaultInput={hit.missionDuration}
+              placeholder="Nombre d'heures"
+              onConfirm={async (duration) => {
+                try {
+                  const { ok, code } = await api.put("/application", { _id: hit._id, missionDuration: duration });
+                  if (!ok) {
+                    toastr.error("Une erreur s'est produite :", translate(code));
+                  } else {
+                    onChangeApplication();
+                    toastr.success("Mis à jour!");
+                  }
+                } catch (e) {
+                  toastr.error("Une erreur s'est produite :", translate(e?.code));
+                }
+                setModalDurationOpen(false);
+              }}
+            />
+          </div>
+        )}
+
         {hit.status === "WAITING_VALIDATION" && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role) && (
           <React.Fragment>
             <CopyLink
@@ -303,4 +345,11 @@ const CopyLink = styled.button`
     text-decoration: underline;
   }
   padding: 0;
+`;
+
+const ModifyDurationLink = styled.span`
+  color: #007bff;
+  :hover {
+    text-decoration: underline;
+  }
 `;

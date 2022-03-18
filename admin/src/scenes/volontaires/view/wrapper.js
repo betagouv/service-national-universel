@@ -5,6 +5,7 @@ import { Col, Row, DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropd
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
+import Badge from "../../../components/Badge";
 
 import { translate, YOUNG_STATUS, ROLES, colors, translateCohort } from "../../../utils";
 import SelectStatus from "../../../components/selectStatus";
@@ -50,7 +51,17 @@ export default function Wrapper({ children, young, tab, onChange }) {
       <Header>
         <div style={{ flex: 1 }}>
           <Title>
-            {young.status !== "DELETED" ? `${young.firstName} ${young.lastName}` : "Compte supprimé"} <BadgeCohort young={young} onChange={onChange} />
+            {young.status !== YOUNG_STATUS.DELETED ? (
+              <>
+                {young.firstName} {young.lastName}
+                <BadgeCohort young={young} onChange={onChange} />
+              </>
+            ) : (
+              <>
+                Compte supprimé
+                <Badge text={`Cohorte ${young.cohort}`} />
+              </>
+            )}
           </Title>
           <TabList>
             <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
@@ -77,7 +88,7 @@ export default function Wrapper({ children, young, tab, onChange }) {
                 <SelectStatus hit={young} options={[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN]} />
               </Col>
             </Row>
-            {young.status !== "DELETED" ? (
+            {young.status !== YOUNG_STATUS.DELETED ? (
               <>
                 <Row style={{ marginTop: "0.5rem" }}>
                   <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>

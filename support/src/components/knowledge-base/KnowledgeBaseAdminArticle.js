@@ -49,7 +49,7 @@ const KnowledgeBaseAdminArticle = ({ article }) => {
         isOpen={readOnly}
         onRequestClose={() => setReadOnly(false)}
         closeButton={
-          <button type="button" className={!readOnly ? "absolute right-2 top-2" : "fixed top-0 h-16 w-full rounded-none"} onClick={() => setReadOnly((r) => !r)}>
+          <button type="button" className={!readOnly ? "absolute right-2 top-2" : "fixed top-0 z-10 h-16 w-full rounded-none"} onClick={() => setReadOnly((r) => !r)}>
             {!readOnly ? "Prévisualiser" : "Retour à l'édition"}
           </button>
         }

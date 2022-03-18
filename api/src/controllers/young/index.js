@@ -25,7 +25,6 @@ const {
   uploadFile,
   validatePassword,
   signinLimiter,
-  // assignNextYoungFromWaitingList,
   ERRORS,
   inSevenDays,
   isYoung,
@@ -52,29 +51,34 @@ router.post("/reset_password", passport.authenticate("young", { session: false, 
 
 router.post("/signup", async (req, res) => {
   try {
+    // TODO: Check adress + date
     const { error, value } = Joi.object({
       email: Joi.string().lowercase().trim().email().required(),
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       password: Joi.string().required(),
       birthdateAt: Joi.string().trim().required(),
-    })
-      .unknown()
-      .validate(req.body);
+      birthCountry: Joi.string().trim().required(),
+      birthCity: Joi.string().trim().required(),
+      birthCityZip: Joi.string().trim().allow(null, ""),
+      rulesYoung: Joi.string().trim().required().valid("true"),
+      acceptCGU: Joi.string().trim().required().valid("true"),
+      frenchNationality: Joi.string().trim().required().valid("true"),
+    }).validate(req.body);
 
     if (error) {
-      if (error.details.find((e) => e.path === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
-      if (error.details.find((e) => e.path === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+      if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
+      if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
       return res.status(400).send({ ok: false, code: error.toString() });
     }
 
-    const { password, email, lastName, firstName, birthdateAt } = value;
+    const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung } = value;
     if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
     const countDocuments = await YoungObject.countDocuments({ lastName, firstName, birthdateAt });
     if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-    const user = await YoungObject.create({ password, email, firstName, lastName, birthdateAt });
+    const user = await YoungObject.create({ email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung });
     const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
 
@@ -408,20 +412,20 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    //! needs further checking
-    // if (req.user.department !== young.department) {
-    //   const referents = await ReferentModel.find({ department: req.user.department, role: ROLES.REFERENT_DEPARTMENT });
-    //   for (let referent of referents) {
-    //     await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
-    //       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    //       params: {
-    //         youngFirstName: young.firstName,
-    //         youngLastName: young.lastName,
-    //         cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-    //       },
-    //     });
-    //   }
-    // }
+    if (value?.department && young?.department && value?.department !== young?.department) {
+      const referents = await ReferentModel.find({ department: value.department, role: ROLES.REFERENT_DEPARTMENT });
+      for (let referent of referents) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: {
+            youngFirstName: young.firstName,
+            youngLastName: young.lastName,
+            cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
+          },
+        });
+      }
+    }
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
@@ -734,6 +738,12 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
     young.set({ status: YOUNG_STATUS.DELETED });
 
     await young.save({ fromUser: req.user });
+    const result = await patches.deletePatches({ req: req, model: YoungObject });
+
+    if (!result.ok) {
+      return res.status(result.codeError).send({ ok: result.ok, code: result.code });
+    }
+
     console.log(`Young ${id} has been soft deleted`);
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
@@ -756,5 +766,6 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.use("/:id/documents", require("./documents"));
 router.use("/:id/meeting-point", require("./meeting-point"));
+router.use("/inscription", require("./inscription"));
 
 module.exports = router;

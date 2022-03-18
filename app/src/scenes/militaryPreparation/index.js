@@ -41,7 +41,7 @@ export default function Index() {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
     if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-    const d = data.filter((a) => a.mission.isMilitaryPreparation === "true");
+    const d = data?.filter((a) => a?.mission?.isMilitaryPreparation === "true");
     console.log(d);
     return setApplicationsToMilitaryPreparation(d);
   };
@@ -58,7 +58,7 @@ export default function Index() {
         actions.setSubmitting(false);
       },
       title: "Demande de validation de dossier",
-      message: "Je confirme avoir téléverser tous les documents demandés, et transmets mon dossier pour validation.",
+      message: "Je confirme avoir téléversé tous les documents demandés, et transmets mon dossier pour validation.",
     });
   };
 
@@ -85,20 +85,22 @@ export default function Index() {
 
   return (
     <>
+      {young.statusMilitaryPreparationFiles === "VALIDATED" ? <AlertBox color="#31c48d" title="Vos documents ont été approuvés par nos équipes." /> : null}
       {young.statusMilitaryPreparationFiles === "WAITING_VALIDATION" ? (
         <AlertBox
-          title="Votre dossier est en cours de vérification par nos équipes."
+          title="Vos documents sont en cours de vérification par nos équipes."
           message={`Vous serez notifié par email à l'adresse ${young.email} dès qu'il y aura du nouveau !`}
         />
       ) : null}
       {young.statusMilitaryPreparationFiles === "WAITING_CORRECTION" ? (
         <AlertBox
+          color="#FBBF24"
           title="Votre dossier est incomplet et/ou invalide"
           message={`Vous avez reçu un email à l'adresse ${young.email} indiquant les pièces bloquantes. Merci de retéléverser des documents valides. N'oubliez pas de valider vos changements !`}
         />
       ) : null}
       {young.statusMilitaryPreparationFiles === "REFUSED" ? (
-        <AlertBox title="Votre dossier a été refusé." message={`Vous avez reçu un email à l'adresse ${young.email} indiquant les pièces bloquantes.`} />
+        <AlertBox color="#EF4036" title="Votre dossier a été refusé." message={`Vous avez reçu un email à l'adresse ${young.email} indiquant les pièces bloquantes.`} />
       ) : null}
       <HeroContainer>
         <Hero thumbImage="marine.jpg">
@@ -153,11 +155,13 @@ export default function Index() {
                   errors={errors}
                   title="Pièce d'identité"
                   subTitle="Déposez ici la copie d’une pièce d’identité en cours de validité (CNI, passeport)."
+                  errorMessage="Vous devez téléverser votre pièce d'identité."
                   values={values}
                   name="militaryPreparationFilesIdentity"
                   handleChange={handleChange}
                 />
                 <UploadCard
+                  optional
                   errors={errors}
                   title="Attestation de recensement"
                   subTitle="Déposez ici la copie de votre attestation de recensement."
@@ -170,6 +174,7 @@ export default function Index() {
                   errors={errors}
                   title="Autorisation parentale pour effectuer une préparation militaire"
                   subTitle="Téléchargez puis téléversez le formulaire rempli par votre représentant légal consentant à votre participation à une préparation militaire."
+                  errorMessage="Vous devez téléverser l'autorisation parentale."
                   values={values}
                   name="militaryPreparationFilesAuthorization"
                   handleChange={handleChange}
@@ -179,6 +184,7 @@ export default function Index() {
                   errors={errors}
                   title="Certificat médical de non contre indication à la pratique sportive"
                   subTitle="Téléchargez puis téléversez le formulaire rempli par votre médecin traitant certifiant l’absence de contre-indication à la pratique sportive."
+                  errorMessage="Vous devez téléverser le certificat médical."
                   values={values}
                   name="militaryPreparationFilesCertificate"
                   handleChange={handleChange}
