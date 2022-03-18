@@ -154,7 +154,7 @@ function SchoolCityTypeahead({ onChange, initialValue }) {
           </div>
         )}
         inputProps={{
-          placeholder: "Rechercher un nom de ville",
+          placeholder: "Recherchez un nom de ville",
           value,
           onChange: (event, { newValue }) => {
             setValue(newValue);
