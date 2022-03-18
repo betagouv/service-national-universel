@@ -29,7 +29,7 @@ export default function Desistement() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status)) {
+    if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
       setStopSNU("abandon");
       setStatus(YOUNG_STATUS.ABANDONED);
       setTitle("Vous souhaitez abandonner votre inscription ?");

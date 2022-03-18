@@ -28,7 +28,13 @@ export default function Index({ onChangeFilter = () => {} }) {
 
   function updateFilter(n) {
     setFilter({
-      ...(filter || { status: Object.keys(YOUNG_STATUS), academy: [], region: [], department: [], cohort: filter?.cohort || ["Février 2022", "Juin 2022", "Juillet 2022"] }),
+      ...(filter || {
+        status: Object.keys(YOUNG_STATUS),
+        academy: [],
+        region: [],
+        department: [],
+        cohort: filter?.cohort || ["Février 2022", "Juin 2022", "Juillet 2022", "2022"],
+      }),
       ...n,
     });
   }
