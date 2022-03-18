@@ -149,7 +149,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         else await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);
       }
       if (status === YOUNG_STATUS.WAITING_LIST) {
-        // await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
+        await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
       }
       setYoung(newYoung);
       toastr.success("Mis à jour!");
