@@ -1,3 +1,12 @@
+# [1.60.0](https://github.com/betagouv/service-national-universel/compare/v1.59.0...v1.60.0) (2022-03-18)
+
+
+### Features
+
+* Tableau de bord mission filtre date ([#1354](https://github.com/betagouv/service-national-universel/issues/1354)) ([8e47215](https://github.com/betagouv/service-national-universel/commit/8e47215083a3f065d7921121172ec3c0ef8a12ed))
+* **api+app:** delete files when refused ([#1358](https://github.com/betagouv/service-national-universel/issues/1358)) ([8fa09f7](https://github.com/betagouv/service-national-universel/commit/8fa09f79c9ec9e3b9b383ddf369b8eb9ae6ebf1f))
+* **app:** add abandoned status ([#1340](https://github.com/betagouv/service-national-universel/issues/1340)) ([3156b19](https://github.com/betagouv/service-national-universel/commit/3156b19801c7cd4c2e733bf241f5603bf5dbc9ea))
+
 # [1.59.0](https://github.com/betagouv/service-national-universel/compare/v1.58.1...v1.59.0) (2022-03-17)
 
 
