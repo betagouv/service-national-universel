@@ -367,14 +367,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung.populationDensity = populationDensity;
     }
 
-    if (newYoung.statusMilitaryPreparationFiles === "REFUSED") {
-      const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
-      for (let key of militaryKeys) {
-        young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
-        newYoung[key] = [];
-      }
-    }
-
     // await updateApplicationsWithYoungOrMission({ young, newYoung });
 
     young.set(newYoung);
@@ -389,6 +381,36 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
 
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.put("/young/:id/refuse-military-preparation-files", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = validateYoung(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { id } = req.params;
+    const young = await YoungModel.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    // eslint-disable-next-line no-unused-vars
+    let { __v, ...newYoung } = value;
+
+    if (newYoung.statusMilitaryPreparationFiles === "REFUSED") {
+      const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
+      for (let key of militaryKeys) {
+        young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
+        newYoung[key] = [];
+      }
+    }
+
+    young.set(newYoung);
+    await young.save({ fromUser: req.user });
+    res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
