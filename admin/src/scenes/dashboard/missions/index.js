@@ -31,7 +31,6 @@ export default function Index() {
       updateFilter({ status: Object.keys(YOUNG_STATUS), region: [] });
     }
   }, []);
-  console.log(filter);
 
   useEffect(() => {
     let range;
