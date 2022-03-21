@@ -2,6 +2,7 @@ const AWS = require("aws-sdk");
 const https = require("https");
 const http = require("http");
 const passwordValidator = require("password-validator");
+const sanitizeHtml = require("sanitize-html");
 const YoungModel = require("../models/young");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
@@ -36,6 +37,10 @@ const signinLimiter = rateLimit({
     code: "TOO_MANY_REQUESTS",
   },
 });
+
+function sanitizeAll(text) {
+  return sanitizeHtml(text || "", { allowedTags: [], allowedAttributes: {} });
+}
 
 function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
@@ -292,9 +297,9 @@ const sendAutoCancelMeetingPoint = async (young) => {
     fs
       .readFileSync(path.resolve(__dirname, "../templates/autoCancelMeetingPoint.html"))
       .toString()
-      .replace(/{{firstName}}/, young.firstName)
-      .replace(/{{lastName}}/, young.lastName)
-      .replace(/{{cta}}/g, `${APP_URL}/auth/login?redirect=phase1`),
+      .replace(/{{firstName}}/, sanitizeAll(young.firstName))
+      .replace(/{{lastName}}/, sanitizeAll(young.lastName))
+      .replace(/{{cta}}/g, sanitizeAll(`${APP_URL}/auth/login?redirect=phase1`)),
     { cc },
   );
 };
@@ -576,6 +581,7 @@ module.exports = {
   updateApplicationsWithYoungOrMission,
   updateYoungStatusPhase2Contract,
   checkStatusContract,
+  sanitizeAll,
   YOUNG_STATUS,
   YOUNG_SITUATIONS,
   STEPS,

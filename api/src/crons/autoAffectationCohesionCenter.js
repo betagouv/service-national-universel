@@ -7,7 +7,7 @@ const fs = require("fs");
 const { capture, captureMessage } = require("../sentry");
 const YoungModel = require("../models/young");
 const CohesionCenterObject = require("../models/cohesionCenter");
-const { updatePlacesCenter } = require("../utils");
+const { updatePlacesCenter, sanitizeAll } = require("../utils");
 
 const clean = async () => {
   let countAutoWithdrawn = 0;
@@ -47,8 +47,8 @@ const sendNoResponseAffectationMail = async (young) => {
     fs
       .readFileSync(path.resolve(__dirname, "../templates/noResponseAffectation.html"))
       .toString()
-      .replace(/{{firstName}}/, young.firstName)
-      .replace(/{{lastName}}/, young.lastName),
+      .replace(/{{firstName}}/, sanitizeAll(young.firstName))
+      .replace(/{{lastName}}/, sanitizeAll(young.lastName)),
   );
 };
 

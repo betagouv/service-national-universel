@@ -1,27 +1,22 @@
 const fs = require("fs");
 const path = require("path");
 const { formatDateFRTimezoneUTC } = require("snu-lib");
-const { getBaseUrl } = require("../../utils");
+const { getBaseUrl, sanitizeAll } = require("../../utils");
 
 const render = async (contract) => {
-  try {
-    let html = fs.readFileSync(path.resolve(__dirname, "./contract.html"), "utf8");
-    html = html.replace(/{{CONTRACT_ID}}/g, contract._id).replace(/{{BASE_URL}}/g, getBaseUrl());
-    html = addParents(html, contract, "isYoungAdult");
-    html = addSignature(html, contract, "status");
-    html = replaceDate(html, contract, "date");
-    html = replaceDate(html, contract, "youngBirthdate");
-    html = replaceDate(html, contract, "missionStartAt");
-    html = replaceDate(html, contract, "missionEndAt");
-    html = replaceField(html, contract._doc);
-    return html;
-  } catch (e) {
-    throw e;
-  }
+  let html = fs.readFileSync(path.resolve(__dirname, "./contract.html"), "utf8");
+  html = html.replace(/{{CONTRACT_ID}}/g, sanitizeAll(contract._id)).replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()));
+  html = addParents(html, contract, "isYoungAdult");
+  html = addSignature(html, contract, "status");
+  html = replaceDate(html, contract, "date");
+  html = replaceDate(html, contract, "youngBirthdate");
+  html = replaceDate(html, contract, "missionStartAt");
+  html = replaceDate(html, contract, "missionEndAt");
+  html = replaceField(html, contract._doc);
+  return html;
 };
 
 const addParents = (str, context, field) => {
-  const regex = new RegExp("{{" + field + "}}", "g");
   let content = "";
   if (context.isYoungAdult === "false") {
     content = `
@@ -29,19 +24,19 @@ const addParents = (str, context, field) => {
       <div>
         1) Le représentant légal du volontaire n°1 disposant de l’autorité parentale :
         <div class="field" name="parent1Name" placeholder="Prénom" context="{context}">
-          <p class="attributes">${context.parent1LastName} ${context.parent1FirstName}</p>
+          <p class="attributes">${sanitizeAll(context.parent1LastName)} ${sanitizeAll(context.parent1FirstName)}</p>
         </div>
         <div class="field" name="parent1Address" placeholder="Adresse" className="md" context="{context}">
           demeurant :
-          <p class="attributes">{{parent1Address}} ${context.parent1City} ${context.parent1Department}</p>
+          <p class="attributes">{{parent1Address}} ${sanitizeAll(context.parent1City)} ${sanitizeAll(context.parent1Department)}</p>
         </div>
         <div class="field" name="parent1Email" placeholder="Email" className="md" type="email" context="{context}">
           Email :
-          <p class="attributes">${context.parent1Email}</p>
+          <p class="attributes">${sanitizeAll(context.parent1Email)}</p>
         </div>
         <div class="field" name="parent1Phone" placeholder="0123456789" className="md" context="{context}">
           Téléphone :
-          <p class="attributes">${context.parent1Phone}</p>
+          <p class="attributes">${sanitizeAll(context.parent1Phone)}</p>
         </div>
       </div>
     `;
@@ -50,30 +45,29 @@ const addParents = (str, context, field) => {
       <div>
         1) Le représentant légal du volontaire n°2 disposant de l’autorité parentale :
         <div class="field" name="parent2Name" placeholder="Prénom" context="{context}">
-          <p class="attributes">${context.parent2LastName} ${context.parent2FirstName}</p>
+          <p class="attributes">${sanitizeAll(context.parent2LastName)} ${sanitizeAll(context.parent2FirstName)}</p>
         </div>
         <div class="field" name="parent2Address" placeholder="Adresse" className="md" context="{context}">
           demeurant :
-          <p class="attributes">${context.parent2Address} ${context.parent2City} ${context.parent2Department}</p>
+          <p class="attributes">${sanitizeAll(context.parent2Address)} ${sanitizeAll(context.parent2City)} ${sanitizeAll(context.parent2Department)}</p>
         </div>
         <div class="field" name="parent2Email" placeholder="Email" className="md" type="email" context="{context}">
           Email :
-          <p class="attributes">${context.parent2Email}</p>
+          <p class="attributes">${sanitizeAll(context.parent2Email)}</p>
         </div>
         <div class="field" name="parent2Phone" placeholder="0123456789" className="md" context="{context}">
           Téléphone :
-          <p class="attributes">${context.parent2Phone}</p>
+          <p class="attributes">${sanitizeAll(context.parent2Phone)}</p>
         </div>
       </div>
       `;
   }
-  return str.replace(regex, content);
+  return str.replaceAll("{{" + field + "}}", content);
 };
 
 const replaceField = (str, context) => {
   Object.keys(context).forEach((key) => {
-    const regex = new RegExp("{{" + key + "}}", "g");
-    str = str.replace(regex, context[key]);
+    str = str.replaceAll("{{" + key + "}}", sanitizeAll(context[key]));
   });
   return str;
 };
@@ -97,24 +91,23 @@ const badgeSignature = (status) => {
 };
 
 const addSignature = (str, context, field) => {
-  const regex = new RegExp("{{" + field + "}}", "g");
   let content = `
     <div style="display: grid; grid-auto-columns: 1fr; grid-auto-flow: column;">
       <div style="text-align: center;">
         <div>Représentant de l'état</div>
         <div>
-        ${context.projectManagerLastName}
-        ${context.projectManagerFirstName}
+        ${sanitizeAll(context.projectManagerLastName)}
+        ${sanitizeAll(context.projectManagerFirstName)}
         </div>
-        ${badgeSignature(context.projectManagerStatus)}
+        ${badgeSignature(sanitizeAll(context.projectManagerStatus))}
       </div>
       <div style="text-align: center;">
         <div>Représentant structure</div>
         <div>
-        ${context.structureManagerLastName}
-        ${context.structureManagerFirstName}
+        ${sanitizeAll(context.structureManagerLastName)}
+        ${sanitizeAll(context.structureManagerFirstName)}
         </div>  
-        ${badgeSignature(context.structureManagerStatus)}
+        ${badgeSignature(sanitizeAll(context.structureManagerStatus))}
       </div>
       ${
         context.isYoungAdult == "true"
@@ -122,29 +115,29 @@ const addSignature = (str, context, field) => {
           <div style="text-align: center;">
             <div>Volontaire</div>
             <div>
-            ${context.youngContractLastName}
-            ${context.youngContractFirstName}
+            ${sanitizeAll(context.youngContractLastName)}
+            ${sanitizeAll(context.youngContractFirstName)}
             </div>
-            ${badgeSignature(context.youngContractStatus)}
+            ${badgeSignature(sanitizeAll(context.youngContractStatus))}
           </div>
       `
           : `<div style="text-align: center;">
               <div>Représentant légal 1</div>
               <div>
-              ${context.parent1LastName}
-              ${context.parent1FirstName}
+              ${sanitizeAll(context.parent1LastName)}
+              ${sanitizeAll(context.parent1FirstName)}
               </div>
-              ${badgeSignature(context.parent1Status)}
+              ${badgeSignature(sanitizeAll(context.parent1Status))}
             </div>
       ${
         context.parent2Email
           ? `<div style="text-align: center;">
               <div>Représentant légal 2</div>
               <div>
-              ${context.parent2LastName}
-              ${context.parent2FirstName}
+              ${sanitizeAll(context.parent2LastName)}
+              ${sanitizeAll(context.parent2FirstName)}
               </div>
-              ${badgeSignature(context.parent2Status)}
+              ${badgeSignature(sanitizeAll(context.parent2Status))}
             </div>`
           : ``
       }
@@ -152,12 +145,11 @@ const addSignature = (str, context, field) => {
       }
     </div>
   `;
-  return str.replace(regex, content);
+  return str.replaceAll("{{" + field + "}}", content);
 };
 
 const replaceDate = (str, context, field) => {
-  const regex = new RegExp("{{" + field + "}}", "g");
-  return str.replace(regex, formatDateFRTimezoneUTC(context[field]));
+  return str.replaceAll("{{" + field + "}}", sanitizeAll(formatDateFRTimezoneUTC(context[field])));
 };
 
 module.exports = { render };
