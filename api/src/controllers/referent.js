@@ -641,7 +641,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
       }
       const { name, data, tempFilePath } = currentFile;
 
-      if (config.ENVIRONMENT === "staging") {
+      if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
         const clamscan = await new NodeClam().init({
           removeInfected: true,
         });
