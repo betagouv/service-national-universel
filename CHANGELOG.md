@@ -1,3 +1,12 @@
+# [1.61.0](https://github.com/betagouv/service-national-universel/compare/v1.60.0...v1.61.0) (2022-03-21)
+
+
+### Features
+
+* **api+app:** connect public form to new support ([#1373](https://github.com/betagouv/service-national-universel/issues/1373)) ([5ad9b5d](https://github.com/betagouv/service-national-universel/commit/5ad9b5d7b22b682a31c7f7610bb4841e1ccc672e))
+* clamav in prod ([#1378](https://github.com/betagouv/service-national-universel/issues/1378)) ([9aa52c5](https://github.com/betagouv/service-national-universel/commit/9aa52c514868aed20d7a2e6f74927c5023af3d23))
+* **mails:** activate 171 ([#1377](https://github.com/betagouv/service-national-universel/issues/1377)) ([6d443d2](https://github.com/betagouv/service-national-universel/commit/6d443d29b3f65b5d4a1015026c2e0ed9ff89a6f5))
+
 # [1.60.0](https://github.com/betagouv/service-national-universel/compare/v1.59.0...v1.60.0) (2022-03-18)
 
 
