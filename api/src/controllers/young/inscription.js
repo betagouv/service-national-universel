@@ -8,7 +8,8 @@ const { canUpdateYoungStatus } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { validateFirstName } = require("../../utils/validator");
 
-const { ERRORS, YOUNG_SITUATIONS, STEPS, inscriptionCheck } = require("../../utils");
+const { ERRORS, YOUNG_SITUATIONS, STEPS, inscriptionCheck, YOUNG_STATUS } = require("../../utils");
+const { getCohortSessionsAvailability } = require("../../utils/cohort");
 
 router.put("/profile", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -180,6 +181,72 @@ router.put("/coordonnee", passport.authenticate("young", { session: false, failW
 
     inscriptionCheck(value, young, req);
 
+    return res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/availability", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const sessions = await getCohortSessionsAvailability(young);
+
+    const sessionsId = sessions.map((session) => {
+      return session.id;
+    });
+
+    const { error, value } = Joi.object({
+      cohort: Joi.string()
+        .trim()
+        .required()
+        .valid(...sessionsId),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    young.set({ inscriptionStep: STEPS.PARTICULIERES, ...value });
+    await young.save({ fromUser: req.user });
+    await inscriptionCheck(value, young, req);
+
+    return res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/availability/notEligible", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const sessions = await getCohortSessionsAvailability(young);
+
+    if (sessions?.length === 0 && young.cohort === "2022") {
+      young.set({ status: YOUNG_STATUS.NOT_ELIGIBLE });
+    } else {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/availability/reset", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    young.set({ cohort: "2022" });
+    await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
