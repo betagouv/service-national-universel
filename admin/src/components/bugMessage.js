@@ -1,7 +1,7 @@
 import React from "react";
 import gear from "../assets/tools.png";
 
-export default function UnavailableFeature() {
+export default function BugMessage() {
   return (
     <div className=" bg-[#fff] p-8 border mx-4 mb-4 border-[#e2e2ea] rounded-[10px] items-center">
       <article className="">
