@@ -22,7 +22,7 @@ export default function WaitingAffectation({ young }) {
               Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
               nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
             </p>
-            {youngCanChangeSession({ cohort: young.cohort }) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
+            {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
             <Divider />
             <p>
               <strong style={{ color: "#000" }}>Vous êtes en attente d&apos;affectation à un centre</strong>
