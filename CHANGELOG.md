@@ -1,3 +1,10 @@
+## [1.61.1](https://github.com/betagouv/service-national-universel/compare/v1.61.0...v1.61.1) (2022-03-22)
+
+
+### Bug Fixes
+
+* **api:** upload file with av ([69a67fb](https://github.com/betagouv/service-national-universel/commit/69a67fbd4ac91730f03c6b29d08da2d866fe715a))
+
 # [1.61.0](https://github.com/betagouv/service-national-universel/compare/v1.60.0...v1.61.0) (2022-03-21)
 
 
