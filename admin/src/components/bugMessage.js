@@ -1,12 +1,12 @@
 import React from "react";
-import gear from "../assets/tools.png";
+import Warning from "../assets/RoundWarning";
 
 export default function BugMessage() {
   return (
-    <div className=" bg-[#fff] p-8 border mx-4 mb-4 border-[#e2e2ea] rounded-[10px] items-center">
-      <article className="">
-        <h2 className="flex text-xl font-bold mt-0">
-          <img src={gear} className="w-6 h-6 mr-2" />
+    <div className="flex bg-[#fff] p-8 border mx-4 mb-4 border-[#e2e2ea] rounded-[10px] items-center">
+      <article>
+        <h2 className="flex items-center text-xl font-bold mt-0">
+          <Warning className="mr-2" />
           BUG - Pièces téléversées impossible à télécharger
         </h2>
         <section className="">
