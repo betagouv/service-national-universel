@@ -7,20 +7,20 @@ export default function BugMessage() {
       <article>
         <h2 className="flex items-center text-xl font-bold mt-0">
           <Warning className="mr-2" />
-          BUG - Pièces téléversées impossible à télécharger
+          BUG - Pièces téléversées impossibles à télécharger
         </h2>
         <section className="">
           Pour tous les jeunes dont le statut d&apos;inscription actuel est : <strong>En cours</strong> • <strong>En attente de validation</strong> •{" "}
-          <strong>En attente de correction</strong> - ET qui ont téléversé des pièces-jointes entre le <strong>21 mars 14H50 et le 22 mars 10H30</strong>, il faut :
+          <strong>En attente de correction</strong> - ET qui ont téléversé des documents entre le <strong>21 mars 14H50 et le 22 mars 10H30</strong>, il faut :
           <ol className="list-decimal ml-3">
-            <li>Supprimer l&apos;ensemble des pièces-jointes</li>
+            <li>Supprimer l&apos;ensemble des documents</li>
             <li>
               Passer leur dossier : <strong>en attente de correction</strong>
             </li>
             <li>
               Leur demander de les re-téléverser (voir modèle ci-joint) :{" "}
               <em>
-                "Suite à un bug technique, l&apos;ensemble de vos pièces ont été endommagées, nous avons dû les supprimer. Pouvez-vous les téléverser à nouveau. Veuillez nous
+                "Suite à un bug technique, l&apos;ensemble de vos pièces ont été endommagées, nous avons dû les supprimer. Pouvez-vous les téléverser à nouveau ? Veuillez nous
                 excuser pour la gêne occasionnée."
               </em>
             </li>
