@@ -16,6 +16,7 @@ import Panel from "./panel";
 import Badge from "../../components/Badge";
 import {
   translate,
+  translatePhase1,
   getFilterLabel,
   YOUNG_STATUS_COLORS,
   isInRuralArea,
@@ -253,7 +254,7 @@ export default function VolontaireList() {
                         "Mis à jour le": formatLongDateFR(data.updatedAt),
                         "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
                         Statut: translate(data.status),
-                        "Statut Phase 1": translate(data.statusPhase1),
+                        "Statut Phase 1": translatePhase1(data.statusPhase1),
                         "Statut Phase 2": translate(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
                         "Dernier statut le": formatLongDateFR(data.lastStatusAt),
@@ -527,7 +528,7 @@ export default function VolontaireList() {
                   dataField="statusPhase1.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_1") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translatePhase1(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}

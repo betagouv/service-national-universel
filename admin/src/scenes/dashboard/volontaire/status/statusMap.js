@@ -2,7 +2,7 @@ import React from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 
-import { translate } from "../../../../utils";
+import { translate, translatePhase1 } from "../../../../utils";
 import { CardArrow, Card, CardTitle, CardSection, CardValueWrapper, CardValue, CardPercentage, Subtitle } from "../../../../components/dashboard";
 
 export default function StatusMap({ sectionTitle, title, obj, filterName, colors, data, getLink, filter }) {
