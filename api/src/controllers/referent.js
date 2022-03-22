@@ -7,6 +7,7 @@ const mime = require("mime-types");
 const FileType = require("file-type");
 const Joi = require("joi");
 const NodeClam = require("clamscan");
+const fs = require("fs");
 
 const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
@@ -639,7 +640,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
       if (Array.isArray(currentFile)) {
         currentFile = currentFile[currentFile.length - 1];
       }
-      const { name, data, tempFilePath } = currentFile;
+      const { name, tempFilePath } = currentFile;
 
       if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
         const clamscan = await new NodeClam().init({
@@ -651,9 +652,11 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
         }
       }
 
+      const data = fs.readFileSync(tempFilePath);
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
       await uploadFile(`app/young/${young._id}/${key}/${name}`, resultingFile);
+      fs.unlinkSync(tempFilePath);
     }
     young.set({ [key]: names });
     await young.save({ fromUser: req.user });

@@ -6,6 +6,8 @@ const crypto = require("crypto");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
+const NodeClam = require("clamscan");
+const fs = require("fs");
 
 const config = require("../../config");
 const { capture } = require("../../sentry");
@@ -176,17 +178,28 @@ router.post("/file/:key", passport.authenticate("young", { session: false, failW
       if (Array.isArray(currentFile)) {
         currentFile = currentFile[currentFile.length - 1];
       }
-      const { name, data, mimetype } = currentFile;
+      const { name, tempFilePath, mimetype } = currentFile;
       if (!["image/jpeg", "image/png", "application/pdf"].includes(mimetype)) return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
 
+      if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
+        const clamscan = await new NodeClam().init({
+          removeInfected: true,
+        });
+        const { isInfected } = await clamscan.isInfected(tempFilePath);
+        if (isInfected) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: "File is infected" });
+        }
+      }
+
+      const data = fs.readFileSync(tempFilePath);
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-
       if (militaryKeys.includes(key)) {
         await uploadFile(`app/young/${user._id}/military-preparation/${key}/${name}`, resultingFile);
       } else {
         await uploadFile(`app/young/${user._id}/${key}/${name}`, resultingFile);
       }
+      fs.unlinkSync(tempFilePath);
     }
     user.set({ [key]: names });
     await user.save({ fromUser: req.user });
