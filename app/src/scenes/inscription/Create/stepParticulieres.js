@@ -67,7 +67,6 @@ export default function StepSpecific() {
             if (values.highSkilledActivity === "false") {
               delete values.highSkilledActivityInSameDepartment;
             }
-            console.log(values.moreInformation);
             const { ok, code, data } = await api.put("/young/inscription/particulieres", values);
             if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(data));

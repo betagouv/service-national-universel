@@ -256,7 +256,6 @@ router.put("/availability/reset", passport.authenticate("young", { session: fals
 
 router.put("/particulieres", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    //TODO : Check adress + date
     const { error, value } = Joi.object({
       handicap: Joi.string().trim().required().valid("true", "false"),
       ppsBeneficiary: Joi.string().trim().required().valid("true", "false"),
@@ -327,7 +326,7 @@ router.put("/particulieres", passport.authenticate("young", { session: false, fa
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
