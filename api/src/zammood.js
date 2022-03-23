@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 const environment = getEnvironment();
-let SUPPORT_URL = "http://localhost:8084";
+let SUPPORT_URL = "http://localhost:3000";
 
 if (environment === "staging") {
   SUPPORT_URL = "https://app-e08e5b05-2416-486c-ad68-2d511fadbe50.cleverapps.io";

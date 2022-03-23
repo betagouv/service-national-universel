@@ -100,7 +100,7 @@ export default function Phase2militaryPrepartion({ young }) {
     console.log("onRefuse");
 
     // update the young
-    const responseYoung = await api.put(`/referent/young/${young._id}`, { statusMilitaryPreparationFiles: "REFUSED" });
+    const responseYoung = await api.post(`/referent/young/${young._id}/refuse-military-preparation-files`);
     if (!responseYoung.ok) return toastr.error(translate(responseYoung.code), "Une erreur s'est produite lors de la validation des documents");
 
     // change status of applications if its not already correct

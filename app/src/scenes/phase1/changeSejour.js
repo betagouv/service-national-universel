@@ -7,7 +7,7 @@ import { Link, useHistory } from "react-router-dom";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, translateCohort, HERO_IMAGES_LIST } from "../../utils";
+import { translate, translateCohort, HERO_IMAGES_LIST, SENDINBLUE_TEMPLATES } from "../../utils";
 import Loader from "../../components/Loader";
 import { setYoung } from "../../redux/auth/actions";
 
@@ -98,6 +98,7 @@ export default function changeSejour() {
     try {
       await api.put("/young/" + young._id + "/change-cohort/", { cohortChangeReason: motif, cohortDetailedChangeReason: messageTextArea, cohort: newSejour });
       toastr.success("Vous avez été ajouté en liste d'attente");
+      await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
       setmodalConfirmGoalReached(false);
     } catch (e) {
       return toastr.error("Oups, une erreur est survenue lors de votre changement de cohorte :", translate(e.code));

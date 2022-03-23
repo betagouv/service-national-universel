@@ -28,13 +28,19 @@ export default function Index({ onChangeFilter = () => {} }) {
 
   function updateFilter(n) {
     setFilter({
-      ...(filter || { status: Object.keys(YOUNG_STATUS), academy: [], region: [], department: [], cohort: filter?.cohort || ["Février 2022", "Juin 2022", "Juillet 2022"] }),
+      ...(filter || {
+        status: Object.keys(YOUNG_STATUS),
+        academy: [],
+        region: [],
+        department: [],
+        cohort: filter?.cohort || ["Février 2022", "Juin 2022", "Juillet 2022", "2022"],
+      }),
       ...n,
     });
   }
 
   useEffect(() => {
-    const status = Object.keys(YOUNG_STATUS).filter((e) => !["IN_PROGRESS", "NOT_ELIGIBLE"].includes(e));
+    const status = Object.keys(YOUNG_STATUS).filter((e) => !["NOT_ELIGIBLE"].includes(e));
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
       updateFilter({ department: [user.department], status });
     } else if (user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR) {
@@ -50,7 +56,7 @@ export default function Index({ onChangeFilter = () => {} }) {
 
   const getOptionsStatus = () => {
     let STATUS = Object.keys(YOUNG_STATUS).map((s) => ({ label: translate(YOUNG_STATUS[s]), value: s }));
-    if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => !["IN_PROGRESS", "NOT_ELIGIBLE"].includes(e.value));
+    if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => !["NOT_ELIGIBLE"].includes(e.value));
     return STATUS;
   };
 
@@ -104,7 +110,7 @@ export default function Index({ onChangeFilter = () => {} }) {
             </Col>
           </Row>
           <Status filter={filter} />
-          <h3 className="mt-4 mb-2 text-xl">Dans le détails</h3>
+          <h3 className="mt-4 mb-2 text-xl">Dans le détail</h3>
           <Row>
             <Col md={12} lg={6}>
               <BirthDate filter={filter} />

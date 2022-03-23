@@ -1,3 +1,92 @@
+## [1.61.1](https://github.com/betagouv/service-national-universel/compare/v1.61.0...v1.61.1) (2022-03-22)
+
+
+### Bug Fixes
+
+* **api:** upload file with av ([69a67fb](https://github.com/betagouv/service-national-universel/commit/69a67fbd4ac91730f03c6b29d08da2d866fe715a))
+
+# [1.61.0](https://github.com/betagouv/service-national-universel/compare/v1.60.0...v1.61.0) (2022-03-21)
+
+
+### Features
+
+* **api+app:** connect public form to new support ([#1373](https://github.com/betagouv/service-national-universel/issues/1373)) ([5ad9b5d](https://github.com/betagouv/service-national-universel/commit/5ad9b5d7b22b682a31c7f7610bb4841e1ccc672e))
+* clamav in prod ([#1378](https://github.com/betagouv/service-national-universel/issues/1378)) ([9aa52c5](https://github.com/betagouv/service-national-universel/commit/9aa52c514868aed20d7a2e6f74927c5023af3d23))
+* **mails:** activate 171 ([#1377](https://github.com/betagouv/service-national-universel/issues/1377)) ([6d443d2](https://github.com/betagouv/service-national-universel/commit/6d443d29b3f65b5d4a1015026c2e0ed9ff89a6f5))
+
+# [1.60.0](https://github.com/betagouv/service-national-universel/compare/v1.59.0...v1.60.0) (2022-03-18)
+
+
+### Features
+
+* Tableau de bord mission filtre date ([#1354](https://github.com/betagouv/service-national-universel/issues/1354)) ([8e47215](https://github.com/betagouv/service-national-universel/commit/8e47215083a3f065d7921121172ec3c0ef8a12ed))
+* **api+app:** delete files when refused ([#1358](https://github.com/betagouv/service-national-universel/issues/1358)) ([8fa09f7](https://github.com/betagouv/service-national-universel/commit/8fa09f79c9ec9e3b9b383ddf369b8eb9ae6ebf1f))
+* **app:** add abandoned status ([#1340](https://github.com/betagouv/service-national-universel/issues/1340)) ([3156b19](https://github.com/betagouv/service-national-universel/commit/3156b19801c7cd4c2e733bf241f5603bf5dbc9ea))
+
+# [1.59.0](https://github.com/betagouv/service-national-universel/compare/v1.58.1...v1.59.0) (2022-03-17)
+
+
+### Bug Fixes
+
+* remove option visitor for referent_department ([e0459cc](https://github.com/betagouv/service-national-universel/commit/e0459ccffee6d46959fea9c467e4558c498f68cc))
+* **api:** up clamscan ([71e21b2](https://github.com/betagouv/service-national-universel/commit/71e21b2765ebac55cfa2bcaa35c91393d52b70f4))
+
+
+### Features
+
+* **admin:** proposer une mission - ouverture aux référents ([#1374](https://github.com/betagouv/service-national-universel/issues/1374)) ([6ce4852](https://github.com/betagouv/service-national-universel/commit/6ce485294964a1a18f4dabdd856e12901454575e))
+* **api:** test clamscan antivirus ([#1372](https://github.com/betagouv/service-national-universel/issues/1372)) ([b20e762](https://github.com/betagouv/service-national-universel/commit/b20e7627760520db7c3f82bc52c15fd0e693277b))
+
+## [1.58.1](https://github.com/betagouv/service-national-universel/compare/v1.58.0...v1.58.1) (2022-03-16)
+
+
+### Bug Fixes
+
+* **admin:** en cours dashboard referent ([68139a4](https://github.com/betagouv/service-national-universel/commit/68139a4416a6cb70f8414f34c106cd895fbe6c06))
+* **api:** application pending template ([#1370](https://github.com/betagouv/service-national-universel/issues/1370)) ([bf21f50](https://github.com/betagouv/service-national-universel/commit/bf21f505909b350c2c69c7696aafa2c7d7c90f09))
+
+# [1.58.0](https://github.com/betagouv/service-national-universel/compare/v1.57.0...v1.58.0) (2022-03-15)
+
+
+### Bug Fixes
+
+* <div> cannot appear as a descendant of <p> ([#1362](https://github.com/betagouv/service-national-universel/issues/1362)) ([26a748e](https://github.com/betagouv/service-national-universel/commit/26a748ee3c22133870bd4656d6e10e08a1318b0c))
+* schooledId in inscription ([9e08bb9](https://github.com/betagouv/service-national-universel/commit/9e08bb94ff6f69fa4dcc4352a28f53c8edee8b54))
+
+
+### Features
+
+* ouvrir les en cours aux référents ([8c55bcf](https://github.com/betagouv/service-national-universel/commit/8c55bcfb357d83a8a3672f5a3f80d87581efcb26))
+
+# [1.57.0](https://github.com/betagouv/service-national-universel/compare/v1.56.0...v1.57.0) (2022-03-14)
+
+
+### Bug Fixes
+
+* **admin:** tailwind - admin profile ([#1351](https://github.com/betagouv/service-national-universel/issues/1351)) ([72dacaf](https://github.com/betagouv/service-national-universel/commit/72dacafa9269d353e8cfa916d746eaf4091af0cf))
+* **api:** default status structure ([52b7276](https://github.com/betagouv/service-national-universel/commit/52b72769f8283a09361e1b52c8109fd36af64efe))
+* **api:** fix email eslint notices ([b164647](https://github.com/betagouv/service-national-universel/commit/b164647b32fb10de899f8052cd080911100f7a60))
+
+
+### Features
+
+* Tableau de bord mission encart ([#1350](https://github.com/betagouv/service-national-universel/issues/1350)) ([c8d945a](https://github.com/betagouv/service-national-universel/commit/c8d945a6762362972bd4f8a38bddd7f8456cd4d7))
+* **app:** pm documents status ([#1345](https://github.com/betagouv/service-national-universel/issues/1345)) ([05955e8](https://github.com/betagouv/service-national-universel/commit/05955e874bb6676046b22ecb38299438f1d34f0c))
+
+# [1.56.0](https://github.com/betagouv/service-national-universel/compare/v1.55.0...v1.56.0) (2022-03-10)
+
+
+### Bug Fixes
+
+* **api:** template changement de département ([#1281](https://github.com/betagouv/service-national-universel/issues/1281)) ([d4be6b2](https://github.com/betagouv/service-national-universel/commit/d4be6b2bbe5a7b1a20530dd9d52d168f8a95d6f8))
+* **api,admin:** soft delete - clean patches ([#1304](https://github.com/betagouv/service-national-universel/issues/1304)) ([3091f3f](https://github.com/betagouv/service-national-universel/commit/3091f3f485dccec2fca296dc4f0ad09eed8ad65c))
+* **app:** required files PM ([#1330](https://github.com/betagouv/service-national-universel/issues/1330)) ([2181e5d](https://github.com/betagouv/service-national-universel/commit/2181e5de3f3fd1bda194a4bf94c41893a0f22809))
+
+
+### Features
+
+* **api:** visibilité sur les visiteurs par réf. régional ([7a6bcb6](https://github.com/betagouv/service-national-universel/commit/7a6bcb60d690356bd44033abb61c296f86c2e3ac))
+
 # [1.55.0](https://github.com/betagouv/service-national-universel/compare/v1.54.0...v1.55.0) (2022-03-09)
 
 

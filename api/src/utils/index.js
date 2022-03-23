@@ -2,8 +2,8 @@ const AWS = require("aws-sdk");
 const https = require("https");
 const http = require("http");
 const passwordValidator = require("password-validator");
+const sanitizeHtml = require("sanitize-html");
 const YoungModel = require("../models/young");
-const CohesionCenterModel = require("../models/cohesionCenter");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
@@ -12,8 +12,7 @@ const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
 const rateLimit = require("express-rate-limit");
-const sendinblue = require("../sendinblue");
-const { ADMIN_URL, APP_URL } = require("../config");
+const { APP_URL } = require("../config");
 const {
   CELLAR_ENDPOINT,
   CELLAR_KEYID,
@@ -25,7 +24,6 @@ const {
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
-const { ROLES } = require("snu-lib/roles");
 const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib/constants");
 const { getQPV, getDensity } = require("../geo");
 
@@ -39,6 +37,10 @@ const signinLimiter = rateLimit({
     code: "TOO_MANY_REQUESTS",
   },
 });
+
+function sanitizeAll(text) {
+  return sanitizeHtml(text || "", { allowedTags: [], allowedAttributes: {} });
+}
 
 function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
@@ -81,10 +83,10 @@ function uploadPublicPicture(path, file) {
   });
 }
 
-function deleteFile(name) {
+function deleteFile(path) {
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Key: name };
+    const params = { Bucket: BUCKET_NAME, Key: path };
     s3bucket.deleteObject(params, (err, data) => {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
@@ -136,7 +138,7 @@ function getSignedUrlForApiAssociation(path) {
 }
 
 function fileExist(url) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     getReq(url, (resp) => {
       if (resp.statusCode === 200) return resolve(true);
       return resolve(false);
@@ -282,32 +284,6 @@ const updatePlacesBus = async (bus) => {
   return bus;
 };
 
-const sendAutoAffectationMail = async (nextYoung, center) => {
-  // Send mail.
-  const cc = [];
-  if (nextYoung.parent1Email) cc.push({ email: nextYoung.parent1Email });
-  if (nextYoung.parent2Email) cc.push({ email: nextYoung.parent2Email });
-  await sendEmail(
-    {
-      name: `${nextYoung.firstName} ${nextYoung.lastName}`,
-      email: nextYoung.email,
-    },
-    "Une place dans le séjour de cohésion SNU 2021 s’est libérée !",
-    fs
-      .readFileSync(path.resolve(__dirname, "./templates/autoAffectation.html"))
-      .toString()
-      .replace(/{{firstName}}/, nextYoung.firstName)
-      .replace(/{{lastName}}/, nextYoung.lastName)
-      .replace(/{{centerName}}/, center.name)
-      .replace(/{{centerAddress}}/, center.address + " " + center.zip + " " + center.city)
-      .replace(/{{centerDepartement}}/, center.department)
-      .replace(/{{ctaAccept}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
-      .replace(/{{ctaDocuments}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
-      .replace(/{{ctaWithdraw}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1"),
-    { cc },
-  );
-};
-
 const sendAutoCancelMeetingPoint = async (young) => {
   const cc = [];
   if (young.parent1Email) cc.push({ email: young.parent1Email });
@@ -321,66 +297,11 @@ const sendAutoCancelMeetingPoint = async (young) => {
     fs
       .readFileSync(path.resolve(__dirname, "../templates/autoCancelMeetingPoint.html"))
       .toString()
-      .replace(/{{firstName}}/, young.firstName)
-      .replace(/{{lastName}}/, young.lastName)
-      .replace(/{{cta}}/g, `${APP_URL}/auth/login?redirect=phase1`),
+      .replace(/{{firstName}}/, sanitizeAll(young.firstName))
+      .replace(/{{lastName}}/, sanitizeAll(young.lastName))
+      .replace(/{{cta}}/g, sanitizeAll(`${APP_URL}/auth/login?redirect=phase1`)),
     { cc },
   );
-};
-
-const sendAutoAffectationNotFoundMails = async (to, young, center) => {
-  // Send mail.
-  await sendEmail(
-    {
-      name: `${to.firstName} ${to.lastName}`,
-      email: to.email,
-    },
-    "Une place s'est libérée dans l'un de vos centres de séjour SNU",
-    fs
-      .readFileSync(path.resolve(__dirname, "./templates/autoAffectationNotFound.html"))
-      .toString()
-      .replace(/{{firstName}}/, to.firstName)
-      .replace(/{{lastName}}/, to.lastName)
-      .replace(/{{youngFirstName}}/, young.firstName)
-      .replace(/{{youngLastName}}/, young.lastName)
-      .replace(/{{centerName}}/, center.name)
-      .replace(/{{cta}}/, `${ADMIN_URL}/auth?redirect=centre/${center._id}/affectation`),
-  );
-};
-
-const assignNextYoungFromWaitingList = async (young) => {
-  const nextYoung = await getYoungFromWaitingList(young);
-  if (!nextYoung) {
-    //notify referents & admin
-    console.log(`no replacement found for young ${young._id} in center ${young.cohesionCenterId}`);
-
-    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
-    if (!center) return null;
-    let to = await ReferentModel.find({ role: ROLES.ADMIN, email: { $in: ["youssef.tahiri@education.gouv.fr", "nicolas.roy@recherche.gouv.fr"] } });
-    to = to.concat(await ReferentModel.find({ role: ROLES.REFERENT_REGION, region: center.region }));
-    for (let i = 0; i < to.length; i++) {
-      await sendAutoAffectationNotFoundMails(to[i], young, center);
-    }
-  } else {
-    // Notify young & modify statusPhase1
-    console.log("replacement found", nextYoung._id);
-
-    // Activate waiting accepation and 48h cron
-    nextYoung.set({ status: "VALIDATED", statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 48 });
-    await nextYoung.save();
-    await sendinblue.sync(nextYoung, "young");
-
-    const center = await CohesionCenterModel.findById(nextYoung.cohesionCenterId);
-    await sendAutoAffectationMail(nextYoung, center);
-
-    //remove the young from the waiting list
-    if (center?.waitingList?.indexOf(nextYoung._id) !== -1) {
-      console.log(`remove young ${nextYoung._id} from waiting_list of ${nextYoung.cohesionCenterId}`);
-      const i = center.waitingList.indexOf(nextYoung._id);
-      center.waitingList.splice(i, 1);
-      await center.save();
-    }
-  }
 };
 
 // pourrait être utile un jour
@@ -400,25 +321,6 @@ const assignNextYoungFromWaitingList = async (young) => {
 //   }
 
 // }
-
-const getYoungFromWaitingList = async (young) => {
-  try {
-    if (!young || !young.cohesionCenterId) return null;
-    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
-    if (!center) return null;
-    let res = null;
-    for (let i = 0; i < center.waitingList?.length; i++) {
-      const tempYoung = await YoungModel.findById(center.waitingList[i]);
-      if (tempYoung.statusPhase1 === "WAITING_LIST" && tempYoung.department === young.department && tempYoung.gender === young.gender) {
-        res = tempYoung;
-        break;
-      }
-    }
-    return res;
-  } catch (e) {
-    console.log(e);
-  }
-};
 
 async function updateYoungPhase2Hours(young) {
   const applications = await ApplicationModel.find({
@@ -565,21 +467,6 @@ const isObjectKeysIsEqual = (object, newObject, keys) => {
 };
 
 async function inscriptionCheck(value, young, req) {
-  //! needs further checking
-  // if (req.user.department !== young.department) {
-  //   const referents = await ReferentModel.find({ department: req.user.department, role: ROLES.REFERENT_DEPARTMENT });
-  //   for (let referent of referents) {
-  //     await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
-  //       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-  //       params: {
-  //         youngFirstName: young.firstName,
-  //         youngLastName: young.lastName,
-  //         cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-  //       },
-  //     });
-  //   }
-  // }
-
   // Check quartier prioritaires.
   if (value.zip && value.city && value.address) {
     const qpv = await getQPV(value.zip, value.city, value.address);
@@ -602,12 +489,6 @@ async function inscriptionCheck(value, young, req) {
     if (young.statusPhase2 !== "VALIDATED") young.set({ statusPhase2: "WITHDRAWN" });
     if (young.statusPhase3 !== "VALIDATED") young.set({ statusPhase3: "WITHDRAWN" });
     await young.save({ fromUser: req.user });
-  }
-
-  // if withdrawn from phase1 -> run the script that find a replacement for this young
-  if (young.statusPhase1 === "WITHDRAWN" && ["AFFECTED", "WAITING_ACCEPTATION"].includes(req.user.statusPhase1) && req.user.cohesionCenterId) {
-    // disable the 08 jun 21
-    // await assignNextYoungFromWaitingList(young);
   }
 
   // if they had a cohesion center, we check if we need to update the places taken / left
@@ -685,8 +566,6 @@ module.exports = {
   updatePlacesSessionPhase1,
   updateCenterDependencies,
   deleteCenterDependencies,
-  assignNextYoungFromWaitingList,
-  sendAutoAffectationMail,
   updatePlacesBus,
   sendAutoCancelMeetingPoint,
   listFiles,
@@ -702,6 +581,7 @@ module.exports = {
   updateApplicationsWithYoungOrMission,
   updateYoungStatusPhase2Contract,
   checkStatusContract,
+  sanitizeAll,
   YOUNG_STATUS,
   YOUNG_SITUATIONS,
   STEPS,

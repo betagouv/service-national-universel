@@ -7,7 +7,7 @@ const fs = require("fs");
 const { capture, captureMessage } = require("../sentry");
 const YoungModel = require("../models/young");
 const CohesionCenterObject = require("../models/cohesionCenter");
-const { assignNextYoungFromWaitingList, updatePlacesCenter } = require("../utils");
+const { updatePlacesCenter, sanitizeAll } = require("../utils");
 
 const clean = async () => {
   let countAutoWithdrawn = 0;
@@ -24,8 +24,6 @@ const clean = async () => {
       await sendNoResponseAffectationMail(young);
 
       // assign next one from the waiting list
-      // disable the 08 jun 21
-      // await assignNextYoungFromWaitingList(young);
     } else {
       console.log(`${young._id} ${young.firstName} ${young.lastName} is not quick enough. but its statusPhase1 is '${young.statusPhase1}'`);
     }
@@ -49,8 +47,8 @@ const sendNoResponseAffectationMail = async (young) => {
     fs
       .readFileSync(path.resolve(__dirname, "../templates/noResponseAffectation.html"))
       .toString()
-      .replace(/{{firstName}}/, young.firstName)
-      .replace(/{{lastName}}/, young.lastName),
+      .replace(/{{firstName}}/, sanitizeAll(young.firstName))
+      .replace(/{{lastName}}/, sanitizeAll(young.lastName)),
   );
 };
 

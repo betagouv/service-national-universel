@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-catch */
 const fs = require("fs");
 const path = require("path");
-const { getSignedUrl, getBaseUrl } = require("../../utils");
+const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const SessionPhase1 = require("../../models/sessionPhase1");
 const MeetingPointModel = require("../../models/meetingPoint");
@@ -63,28 +63,28 @@ const render = async (young) => {
 
     const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
     return html
-      .replace(/{{REFERENT_NAME}}/g, contact?.contactName)
-      .replace(/{{REFERENT_PHONE}}/g, contact?.contactPhone)
-      .replace(/{{REFERENT_MAIL}}/g, contact?.contactMail)
-      .replace(/{{DATE}}/g, formatStringDate(Date.now()))
-      .replace(/{{FIRST_NAME}}/g, young.firstName)
-      .replace(/{{LAST_NAME}}/g, young.lastName)
-      .replace(/{{BIRTHDATE}}/g, formatStringDateTimezoneUTC(young.birthdateAt))
-      .replace(/{{ADDRESS}}/g, young.address)
-      .replace(/{{ZIP}}/g, young.zip)
-      .replace(/{{CITY}}/g, young.city)
-      .replace(/{{COHESION_STAY_DATE_STRING}}/g, COHESION_STAY_DATE_STRING[young.cohort])
-      .replace(/{{COHESION_CENTER_NAME}}/g, center.name)
-      .replace(/{{COHESION_CENTER_ADDRESS}}/g, center.address)
-      .replace(/{{COHESION_CENTER_ZIP}}/g, center.zip)
-      .replace(/{{COHESION_CENTER_CITY}}/g, center.city)
-      .replace(/{{MEETING_DATE}}/g, getDepartureMeetingDate(meetingPoint))
-      .replace(/{{MEETING_ADDRESS}}/g, getMeetingAddress(meetingPoint, center))
-      .replace(/{{MEETING_DATE_RETURN}}/g, getReturnMeetingDate(meetingPoint))
-      .replace(/{{MEETING_ADDRESS_RETURN}}/g, "au même lieu de rassemblement qu'à l'aller")
-      .replace(/{{TRANPORT}}/g, bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : "")
-      .replace(/{{BASE_URL}}/g, getBaseUrl())
-      .replace(/{{GENERAL_BG}}/g, getBg());
+      .replace(/{{REFERENT_NAME}}/g, sanitizeAll(contact?.contactName))
+      .replace(/{{REFERENT_PHONE}}/g, sanitizeAll(contact?.contactPhone))
+      .replace(/{{REFERENT_MAIL}}/g, sanitizeAll(contact?.contactMail))
+      .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
+      .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+      .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+      .replace(/{{BIRTHDATE}}/g, sanitizeAll(formatStringDateTimezoneUTC(young.birthdateAt)))
+      .replace(/{{ADDRESS}}/g, sanitizeAll(young.address))
+      .replace(/{{ZIP}}/g, sanitizeAll(young.zip))
+      .replace(/{{CITY}}/g, sanitizeAll(young.city))
+      .replace(/{{COHESION_STAY_DATE_STRING}}/g, sanitizeAll(COHESION_STAY_DATE_STRING[young.cohort]))
+      .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
+      .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
+      .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
+      .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
+      .replace(/{{MEETING_DATE}}/g, sanitizeAll(getDepartureMeetingDate(meetingPoint)))
+      .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(getMeetingAddress(meetingPoint, center)))
+      .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(getReturnMeetingDate(meetingPoint)))
+      .replace(/{{MEETING_ADDRESS_RETURN}}/g, sanitizeAll("au même lieu de rassemblement qu'à l'aller"))
+      .replace(/{{TRANPORT}}/g, sanitizeAll(bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : ""))
+      .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+      .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()));
   } catch (e) {
     throw e;
   }
@@ -102,22 +102,25 @@ const renderDOMTOM = async (young) => {
 
     const html = fs.readFileSync(path.resolve(__dirname, "./cohesionDOMTOM.html"), "utf8");
     return html
-      .replace(/{{REFERENT_NAME}}/g, service?.contactName)
-      .replace(/{{REFERENT_PHONE}}/g, service?.contactPhone)
-      .replace(/{{DATE}}/g, formatStringDate(Date.now()))
-      .replace(/{{FIRST_NAME}}/g, young.firstName)
-      .replace(/{{LAST_NAME}}/g, young.lastName)
-      .replace(/{{BIRTHDATE}}/g, formatStringDateTimezoneUTC(young.birthdateAt))
-      .replace(/{{ADDRESS}}/g, young.address)
-      .replace(/{{ZIP}}/g, young.zip)
-      .replace(/{{CITY}}/g, young.city)
-      .replace(/{{COHESION_CENTER_NAME}}/g, center.name)
-      .replace(/{{COHESION_CENTER_ADDRESS}}/g, center.address)
-      .replace(/{{COHESION_CENTER_ZIP}}/g, center.zip)
-      .replace(/{{COHESION_CENTER_CITY}}/g, center.city)
-      .replace(/{{MEETING_ADDRESS_DOMTOM}}/g, "Merci de vous présenter impérativement à la date, à l'heure et au lieu qui vous auront été indiqués par votre service régional.")
-      .replace(/{{BASE_URL}}/g, getBaseUrl())
-      .replace(/{{GENERAL_BG}}/g, getBg("domtom"));
+      .replace(/{{REFERENT_NAME}}/g, sanitizeAll(service?.contactName))
+      .replace(/{{REFERENT_PHONE}}/g, sanitizeAll(service?.contactPhone))
+      .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
+      .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+      .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+      .replace(/{{BIRTHDATE}}/g, sanitizeAll(formatStringDateTimezoneUTC(young.birthdateAt)))
+      .replace(/{{ADDRESS}}/g, sanitizeAll(young.address))
+      .replace(/{{ZIP}}/g, sanitizeAll(young.zip))
+      .replace(/{{CITY}}/g, sanitizeAll(young.city))
+      .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
+      .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
+      .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
+      .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
+      .replace(
+        /{{MEETING_ADDRESS_DOMTOM}}/g,
+        sanitizeAll("Merci de vous présenter impérativement à la date, à l'heure et au lieu qui vous auront été indiqués par votre service régional."),
+      )
+      .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+      .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg("domtom")));
   } catch (e) {
     throw e;
   }

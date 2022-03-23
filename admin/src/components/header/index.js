@@ -47,7 +47,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible }) {
         {environment !== "production" && environmentBannerVisible ? (
           <span
             onClick={() => setEnvironmentBannerVisible(false)}
-            className="p-2 bg-snu-purple-900 text-white text-xs font-italic items-center text-center rounded-full cursor-pointer hover:opacity-50">
+            className="p-2 px-3 bg-red-600 text-white text-xs font-italic items-center text-center rounded-full cursor-pointer hover:opacity-50">
             {getTextEnvironmentBanner()}
           </span>
         ) : null}

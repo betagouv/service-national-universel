@@ -135,6 +135,9 @@ export const copyToClipboard = (text) => {
 
 export const replaceSpaces = (v) => v?.replace(/\s+/g, "+");
 export const getLink = ({ base = "/", filter, filtersUrl = [] }) => {
+  if (filter?.fromDate?.length && !filter?.toDate?.length) filtersUrl.push(`DATE=%5B"FROMDATE"%2C"${filter.fromDate}"%5D`);
+  if (!filter?.fromDate?.length && filter?.toDate?.length) filtersUrl.push(`DATE=%5B"TODATE"%2C"${filter.toDate}"%5D`);
+  if (filter?.fromDate?.length && filter?.toDate?.length) filtersUrl.push(`DATE=%5B"FROMDATE"%2C"${filter.fromDate}"%2C"TODATE"%2C"${filter.toDate}"%5D`);
   if (filter?.region?.length) filtersUrl.push(`REGION=%5B${replaceSpaces(filter?.region?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
   if (filter?.cohort?.length) filtersUrl.push(`COHORT=%5B${replaceSpaces(filter?.cohort?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);
   if (filter?.department?.length) filtersUrl.push(`DEPARTMENT=%5B${replaceSpaces(filter?.department?.map((c) => `"${c}"`)?.join("%2C"))}%5D`);

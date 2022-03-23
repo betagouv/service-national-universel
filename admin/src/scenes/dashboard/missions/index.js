@@ -9,10 +9,13 @@ import FilterRegion from "../components/FilterRegion";
 import Statistics from "./Statistics";
 
 import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
+import DateFilter from "../components/DatePickerDashBoard";
 
 export default function Index() {
   const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
@@ -29,6 +32,47 @@ export default function Index() {
     }
   }, []);
 
+  useEffect(() => {
+    let range;
+    //If just the from date is filled
+    if (fromDate && !toDate) {
+      range = {
+        startDate: {
+          gte: fromDate,
+        },
+        endDate: {
+          gte: fromDate,
+        },
+      };
+      //If just the to date is filled
+    } else if (!fromDate && toDate) {
+      range = {
+        startDate: {
+          lte: toDate,
+        },
+        endDate: {
+          lte: toDate,
+        },
+      };
+      //If both date are filled
+    } else if (fromDate && toDate) {
+      range = {
+        startDate: {
+          gte: fromDate,
+          lte: toDate,
+        },
+        endDate: {
+          gte: fromDate,
+          lte: toDate,
+        },
+      };
+      //If none of the dates is filled, reset filter
+    } else {
+      range = { startDate: {}, endDate: {} };
+    }
+    updateFilter({ ...range, fromDate, toDate });
+  }, [fromDate, toDate]);
+
   return (
     <>
       <Row>
@@ -39,6 +83,8 @@ export default function Index() {
               <FiltersList>
                 <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
                 <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
+                <DateFilter title="Date de début" onChange={(e) => setFromDate(e.target.value)} value={fromDate} />
+                <DateFilter title="Date de fin" onChange={(e) => setToDate(e.target.value)} value={toDate} />
               </FiltersList>
             </>
           )}

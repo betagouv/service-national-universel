@@ -13,13 +13,13 @@ const {
   ERRORS,
   updatePlacesCenter,
   updatePlacesBus,
-  sendAutoAffectationMail,
   sendAutoCancelMeetingPoint,
   getSignedUrl,
   updateCenterDependencies,
   deleteCenterDependencies,
   isYoung,
   getBaseUrl,
+  sanitizeAll,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
 const { ROLES, canCreateOrUpdateCohesionCenter } = require("snu-lib/roles");
@@ -113,8 +113,6 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     }
 
     await young.save({ fromUser: req.user });
-
-    // await sendAutoAffectationMail(young, center);
 
     //if young is in waitingList of the center
     if (center.waitingList.indexOf(young._id) !== -1) {
@@ -405,17 +403,17 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   for (const young of youngs) {
     data.push(
       subHtml
-        .replace(/{{FIRST_NAME}}/g, young.firstName)
-        .replace(/{{LAST_NAME}}/g, young.lastName)
-        .replace(/{{COHORT}}/g, young.cohort)
-        .replace(/{{COHESION_CENTER_NAME}}/g, young.cohesionCenterName || "")
-        .replace(/{{COHESION_CENTER_LOCATION}}/g, COHESION_CENTER_LOCATION)
-        .replace(/{{GENERAL_BG}}/g, template)
-        .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })),
+        .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+        .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+        .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
+        .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(young.cohesionCenterName || ""))
+        .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(COHESION_CENTER_LOCATION))
+        .replace(/{{GENERAL_BG}}/g, sanitizeAll(template))
+        .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))),
     );
   }
 
-  const newhtml = html.replace(/{{BASE_URL}}/g, getBaseUrl()).replace(/{{BODY}}/g, data.join(""));
+  const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
 
   const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
 

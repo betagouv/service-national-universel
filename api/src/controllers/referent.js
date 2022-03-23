@@ -6,6 +6,8 @@ const jwt = require("jsonwebtoken");
 const mime = require("mime-types");
 const FileType = require("file-type");
 const Joi = require("joi");
+const NodeClam = require("clamscan");
+const fs = require("fs");
 
 const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
@@ -27,11 +29,11 @@ const { sendTemplate } = require("../sendinblue");
 const {
   getFile,
   uploadFile,
+  deleteFile,
   validatePassword,
   updatePlacesSessionPhase1,
   updatePlacesBus,
   signinLimiter,
-  //  assignNextYoungFromWaitingList,
   ERRORS,
   isYoung,
   inSevenDays,
@@ -311,10 +313,18 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (young.statusPhase3 !== "VALIDATED") newYoung.statusPhase3 = "WITHDRAWN";
     }
 
-    // if withdrawn from phase1 -> run the script that find a replacement for this young
-    if (newYoung.statusPhase1 === "WITHDRAWN" && ["AFFECTED", "WAITING_ACCEPTATION"].includes(young.statusPhase1) && young.cohesionCenterId) {
-      // disable the 08 jun 21
-      // await assignNextYoungFromWaitingList(young);
+    if (newYoung?.department && young?.department && newYoung?.department !== young?.department) {
+      const referents = await ReferentModel.find({ department: newYoung.department, role: ROLES.REFERENT_DEPARTMENT });
+      for (let referent of referents) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: {
+            youngFirstName: young.firstName,
+            youngLastName: young.lastName,
+            cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
+          },
+        });
+      }
     }
 
     if (newYoung.cohesionStayPresence === "true" && young.cohesionStayPresence !== "true") {
@@ -346,20 +356,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       else newYoung.qpv = "";
     }
 
-    if (newYoung.department !== young.department) {
-      const referents = await ReferentModel.find({ department: newYoung.department, role: ROLES.REFERENT_DEPARTMENT });
-      for (let referent of referents) {
-        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
-          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-          params: {
-            youngFirstName: newYoung.firstName,
-            youngLastName: newYoung.lastName,
-            cta: `${config.ADMIN_URL}/volontaire/${newYoung._id}`,
-          },
-        });
-      }
-    }
-
     // Check quartier prioritaires.
     if (newYoung.cityCode) {
       const populationDensity = await getDensity(newYoung.cityCode);
@@ -380,6 +376,30 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
 
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.post("/young/:id/refuse-military-preparation-files", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const young = await YoungModel.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    const newYoung = { statusMilitaryPreparationFiles: "REFUSED" };
+
+    const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
+    for (let key of militaryKeys) {
+      young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
+      newYoung[key] = [];
+    }
+
+    young.set(newYoung);
+    await young.save({ fromUser: req.user });
+    res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
@@ -598,11 +618,13 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
           Joi.object({
             name: Joi.string().required(),
             data: Joi.binary().required(),
+            tempFilePath: Joi.string().allow("").optional(),
           }).unknown(),
           Joi.array().items(
             Joi.object({
               name: Joi.string().required(),
               data: Joi.binary().required(),
+              tempFilePath: Joi.string().allow("").optional(),
             }).unknown(),
           ),
         ),
@@ -618,11 +640,23 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
       if (Array.isArray(currentFile)) {
         currentFile = currentFile[currentFile.length - 1];
       }
-      const { name, data } = currentFile;
+      const { name, tempFilePath } = currentFile;
 
+      if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
+        const clamscan = await new NodeClam().init({
+          removeInfected: true,
+        });
+        const { isInfected } = await clamscan.isInfected(tempFilePath);
+        if (isInfected) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: "File is infected" });
+        }
+      }
+
+      const data = fs.readFileSync(tempFilePath);
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
       await uploadFile(`app/young/${young._id}/${key}/${name}`, resultingFile);
+      fs.unlinkSync(tempFilePath);
     }
     young.set({ [key]: names });
     await young.save({ fromUser: req.user });

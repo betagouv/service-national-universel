@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { getSignedUrl, getBaseUrl } = require("../../utils");
+const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
 const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
@@ -40,15 +40,15 @@ const phase1 = async (young) => {
   const date = COHESION_STAY_END[young.cohort].getTime() < now.getTime() ? COHESION_STAY_END[young.cohort] : now;
 
   return html
-    .replace(/{{FIRST_NAME}}/g, young.firstName)
-    .replace(/{{LAST_NAME}}/g, young.lastName)
-    .replace(/{{COHORT}}/g, young.cohort)
-    .replace(/{{COHESION_DATE}}/g, COHESION_STAY_LIMIT_DATE[young.cohort].toLowerCase())
-    .replace(/{{COHESION_CENTER_NAME}}/g, cohesionCenter.name || "")
-    .replace(/{{COHESION_CENTER_LOCATION}}/g, COHESION_CENTER_LOCATION)
-    .replace(/{{BASE_URL}}/g, getBaseUrl())
-    .replace(/{{GENERAL_BG}}/g, template)
-    .replace(/{{DATE}}/g, date.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
+    .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+    .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+    .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
+    .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort].toLowerCase()))
+    .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
+    .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(COHESION_CENTER_LOCATION))
+    .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(template))
+    .replace(/{{DATE}}/g, sanitizeAll(date.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
 const phase2 = (young) => {
@@ -62,36 +62,36 @@ const phase2 = (young) => {
   }
   const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
   return html
-    .replace(/{{FIRST_NAME}}/g, young.firstName)
-    .replace(/{{LAST_NAME}}/g, young.lastName)
-    .replace(/{{COHORT}}/g, young.cohort)
-    .replace(/{{BASE_URL}}/g, getBaseUrl())
-    .replace(/{{GENERAL_BG}}/g, getBgUrl())
-    .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
+    .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+    .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+    .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
+    .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBgUrl()))
+    .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
 const phase3 = (young) => {
   const d = new Date();
   const html = fs.readFileSync(path.resolve(__dirname, "./phase3.html"), "utf8");
   return html
-    .replace(/{{FIRST_NAME}}/g, young.firstName)
-    .replace(/{{LAST_NAME}}/g, young.lastName)
-    .replace(/{{COHORT}}/g, young.cohort)
-    .replace(/{{BASE_URL}}/g, getBaseUrl())
-    .replace(/{{GENERAL_BG}}/g, getBgUrl())
-    .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
+    .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+    .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+    .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
+    .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBgUrl()))
+    .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
 const snu = (young) => {
   const d = new Date();
   const html = fs.readFileSync(path.resolve(__dirname, "./snu.html"), "utf8");
   return html
-    .replace(/{{FIRST_NAME}}/g, young.firstName)
-    .replace(/{{LAST_NAME}}/g, young.lastName)
-    .replace(/{{COHORT}}/g, young.cohort)
-    .replace(/{{BASE_URL}}/g, getBaseUrl())
-    .replace(/{{GENERAL_BG}}/g, getBgUrl())
-    .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
+    .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+    .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+    .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
+    .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBgUrl()))
+    .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
 module.exports = { phase1, phase2, phase3, snu };

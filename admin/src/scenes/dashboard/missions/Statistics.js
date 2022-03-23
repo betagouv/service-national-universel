@@ -35,7 +35,13 @@ export default function Places({ filter }) {
       const body = {
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
-          status: { terms: { field: "status.keyword" } },
+          status: {
+            terms: { field: "status.keyword" },
+            aggs: {
+              placesTotal: { sum: { field: "placesTotal" } },
+              placesLeft: { sum: { field: "placesLeft" } },
+            },
+          },
           mainDomain: { terms: { field: "mainDomain.keyword" } },
           period: { terms: { field: "period.keyword" } },
           format: { terms: { field: "format.keyword" } },
@@ -46,6 +52,13 @@ export default function Places({ filter }) {
       };
       if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
       if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (Object.keys(filter.startDate).length) {
+        body.query.bool.filter.push({ range: { startAt: filter.startDate } });
+      }
+      if (Object.keys(filter.endDate).length) {
+        body.query.bool.filter.push({ range: { endAt: filter.endDate } });
+      }
+
       const { responses: missionResponse } = await api.esQuery("mission", body);
 
       const body2 = {
@@ -70,7 +83,12 @@ export default function Places({ filter }) {
 
       if (missionResponse.length) {
         setMissionsDomains(missionResponse[0].aggregations.mainDomain.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-        setMissionsStatus(missionResponse[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMissionsStatus(
+          missionResponse[0].aggregations.status.buckets.reduce(
+            (acc, c) => ({ ...acc, [c.key]: { name: c.key, doc_count: c.doc_count, placesLeft: c.placesLeft.value, placesTotal: c.placesTotal.value } }),
+            {},
+          ),
+        );
         setMissionsPeriod(missionResponse[0].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionsFormat(missionResponse[0].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setMissionPlaceTotal(missionResponse[0].aggregations.placesTotal.value);

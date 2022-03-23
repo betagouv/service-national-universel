@@ -6,6 +6,8 @@ const crypto = require("crypto");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
+const NodeClam = require("clamscan");
+const fs = require("fs");
 
 const config = require("../../config");
 const { capture } = require("../../sentry");
@@ -25,7 +27,6 @@ const {
   uploadFile,
   validatePassword,
   signinLimiter,
-  // assignNextYoungFromWaitingList,
   ERRORS,
   inSevenDays,
   isYoung,
@@ -177,17 +178,28 @@ router.post("/file/:key", passport.authenticate("young", { session: false, failW
       if (Array.isArray(currentFile)) {
         currentFile = currentFile[currentFile.length - 1];
       }
-      const { name, data, mimetype } = currentFile;
+      const { name, tempFilePath, mimetype } = currentFile;
       if (!["image/jpeg", "image/png", "application/pdf"].includes(mimetype)) return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
 
+      if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
+        const clamscan = await new NodeClam().init({
+          removeInfected: true,
+        });
+        const { isInfected } = await clamscan.isInfected(tempFilePath);
+        if (isInfected) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: "File is infected" });
+        }
+      }
+
+      const data = fs.readFileSync(tempFilePath);
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-
       if (militaryKeys.includes(key)) {
         await uploadFile(`app/young/${user._id}/military-preparation/${key}/${name}`, resultingFile);
       } else {
         await uploadFile(`app/young/${user._id}/${key}/${name}`, resultingFile);
       }
+      fs.unlinkSync(tempFilePath);
     }
     user.set({ [key]: names });
     await user.save({ fromUser: req.user });
@@ -413,20 +425,20 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    //! needs further checking
-    // if (req.user.department !== young.department) {
-    //   const referents = await ReferentModel.find({ department: req.user.department, role: ROLES.REFERENT_DEPARTMENT });
-    //   for (let referent of referents) {
-    //     await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
-    //       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    //       params: {
-    //         youngFirstName: young.firstName,
-    //         youngLastName: young.lastName,
-    //         cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-    //       },
-    //     });
-    //   }
-    // }
+    if (value?.department && young?.department && value?.department !== young?.department) {
+      const referents = await ReferentModel.find({ department: value.department, role: ROLES.REFERENT_DEPARTMENT });
+      for (let referent of referents) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: {
+            youngFirstName: young.firstName,
+            youngLastName: young.lastName,
+            cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
+          },
+        });
+      }
+    }
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
@@ -443,14 +455,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (value.cityCode) {
       const populationDensity = await getDensity(value.cityCode);
       young.set({ populationDensity });
-      await young.save({ fromUser: req.user });
-    }
-
-    // if withdrawn, cascade withdrawn on every status
-    if (young.status === "WITHDRAWN" && (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")) {
-      if (young.statusPhase1 !== "DONE") young.set({ statusPhase1: "WITHDRAWN" });
-      if (young.statusPhase2 !== "VALIDATED") young.set({ statusPhase2: "WITHDRAWN" });
-      if (young.statusPhase3 !== "VALIDATED") young.set({ statusPhase3: "WITHDRAWN" });
       await young.save({ fromUser: req.user });
     }
 

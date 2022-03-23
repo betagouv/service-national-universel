@@ -85,20 +85,22 @@ export default function Index() {
 
   return (
     <>
+      {young.statusMilitaryPreparationFiles === "VALIDATED" ? <AlertBox color="#31c48d" title="Vos documents ont été approuvés par nos équipes." /> : null}
       {young.statusMilitaryPreparationFiles === "WAITING_VALIDATION" ? (
         <AlertBox
-          title="Votre dossier est en cours de vérification par nos équipes."
+          title="Vos documents sont en cours de vérification par nos équipes."
           message={`Vous serez notifié par email à l'adresse ${young.email} dès qu'il y aura du nouveau !`}
         />
       ) : null}
       {young.statusMilitaryPreparationFiles === "WAITING_CORRECTION" ? (
         <AlertBox
+          color="#FBBF24"
           title="Votre dossier est incomplet et/ou invalide"
           message={`Vous avez reçu un email à l'adresse ${young.email} indiquant les pièces bloquantes. Merci de retéléverser des documents valides. N'oubliez pas de valider vos changements !`}
         />
       ) : null}
       {young.statusMilitaryPreparationFiles === "REFUSED" ? (
-        <AlertBox title="Votre dossier a été refusé." message={`Vous avez reçu un email à l'adresse ${young.email} indiquant les pièces bloquantes.`} />
+        <AlertBox color="#EF4036" title="Votre dossier a été refusé." message={`Vous avez reçu un email à l'adresse ${young.email} indiquant les pièces bloquantes.`} />
       ) : null}
       <HeroContainer>
         <Hero thumbImage="marine.jpg">
