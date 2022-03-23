@@ -423,4 +423,125 @@ describe("Young", () => {
       expect(response.statusCode).toBe(404);
     });
   });
+  describe("PUT /young/inscription/particulieres", () => {
+    async function selfUpdateYoung(body = {}, fields = {}) {
+      const young = await createYoungHelper(getNewYoungFixture(fields));
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      let response = await request(getAppHelper()).put("/young/inscription/particulieres").send(body);
+      updatedYoung = response.body.data;
+      passport.user = previous;
+
+      return response;
+    }
+    it("Should update Young particulieres with statut code 200", async () => {
+      let response = await selfUpdateYoung({
+        handicap: "false",
+        ppsBeneficiary: "false",
+        paiBeneficiary: "false",
+        allergies: "false",
+        highSkilledActivity: "false",
+        moreInformation: "false",
+      });
+      expect(response.statusCode).toBe(200);
+
+      response = await selfUpdateYoung({
+        handicap: "true",
+        ppsBeneficiary: "false",
+        paiBeneficiary: "false",
+        allergies: "false",
+        highSkilledActivity: "false",
+        moreInformation: "true",
+        specificAmenagment: "true",
+        reducedMobilityAccess: "true",
+        handicapInSameDepartment: "false",
+      });
+      expect(response.statusCode).toBe(200);
+
+      response = await selfUpdateYoung({
+        handicap: "true",
+        ppsBeneficiary: "false",
+        paiBeneficiary: "false",
+        allergies: "false",
+        highSkilledActivity: "true",
+        moreInformation: "true",
+        specificAmenagment: "true",
+        reducedMobilityAccess: "true",
+        handicapInSameDepartment: "false",
+        highSkilledActivityInSameDepartment: "false",
+      });
+      expect(response.statusCode).toBe(200);
+    });
+    it("should return 400 when parameters invalid", async () => {
+      response = await selfUpdateYoung({
+        handicap: "false",
+      });
+      expect(response.statusCode).toBe(400);
+
+      response = await selfUpdateYoung({
+        handicap: "Bad parameter",
+        ppsBeneficiary: "false",
+        paiBeneficiary: "false",
+        allergies: "false",
+        highSkilledActivity: "true",
+        moreInformation: "true",
+        specificAmenagment: "true",
+        reducedMobilityAccess: "true",
+        handicapInSameDepartment: "false",
+        highSkilledActivityInSameDepartment: "false",
+      });
+      expect(response.statusCode).toBe(400);
+
+      response = await selfUpdateYoung({
+        handicap: "false",
+        ppsBeneficiary: "false",
+        paiBeneficiary: "false",
+        allergies: "false",
+        highSkilledActivity: "true",
+
+        moreInformation: "true", //error
+
+        specificAmenagment: "true",
+        reducedMobilityAccess: "true",
+        handicapInSameDepartment: "false",
+        highSkilledActivityInSameDepartment: "false",
+      });
+      expect(response.statusCode).toBe(400);
+
+      response = await selfUpdateYoung({
+        handicap: "true",
+        ppsBeneficiary: "true",
+        paiBeneficiary: "true",
+        allergies: "false",
+        highSkilledActivity: "true",
+
+        moreInformation: "false", //error
+
+        specificAmenagment: "true",
+        reducedMobilityAccess: "true",
+        handicapInSameDepartment: "false",
+        highSkilledActivityInSameDepartment: "false",
+      });
+      expect(response.statusCode).toBe(400);
+    });
+    it("should return 404 if user don't exist", async () => {
+      const fixture = getNewYoungFixture();
+      const email = fixture.email.toLowerCase();
+      const response = await request(getAppHelper()).put("/young/inscription/particulieres").send({
+        handicap: "true",
+        ppsBeneficiary: "false",
+        paiBeneficiary: "false",
+        allergies: "false",
+        highSkilledActivity: "true",
+        moreInformation: "true",
+        specificAmenagment: "true",
+        reducedMobilityAccess: "true",
+        handicapInSameDepartment: "false",
+        highSkilledActivityInSameDepartment: "false",
+      });
+      expect(response.statusCode).toBe(404);
+    });
+  });
 });
