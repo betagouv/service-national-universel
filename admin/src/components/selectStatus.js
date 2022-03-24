@@ -7,6 +7,8 @@ import api from "../services/api";
 
 import {
   translate,
+  translatePhase1,
+  translatePhase2,
   YOUNG_STATUS,
   YOUNG_PHASE,
   YOUNG_STATUS_COLORS,
@@ -160,6 +162,16 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
     }
   };
 
+  const translator = (status) => {
+    if (statusName === "statusPhase1") {
+      return translatePhase1(status);
+    } else if (statusName === "statusPhase2") {
+      return translatePhase2(status);
+    } else {
+      return translate(status);
+    }
+  };
+
   if (statusName === "status") {
     options = lookUpAuthorizedStatus({ status: young[statusName], role: user.role });
   }
@@ -232,7 +244,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
       <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button" disabled={disabled || !options.length}>
-            {translate(young[statusName])}
+            {translator(young[statusName])}
             {!!options.length && !disabled && <Chevron color={YOUNG_STATUS_COLORS[young[statusName]]} />}
           </DropdownToggle>
           <DropdownMenu>
@@ -241,7 +253,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
               .map((status) => {
                 return (
                   <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
-                    {translate(status)}
+                    {translator(status)}
                   </DropdownItem>
                 );
               })}

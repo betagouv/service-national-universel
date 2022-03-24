@@ -31,6 +31,7 @@ import {
   YOUNG_STATUS,
   translatePhase2,
   translateApplication,
+  translateEngagement,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -621,7 +622,7 @@ export default function VolontaireList() {
                   dataField="statusPhase2Contract.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "CONTRACT_STATUS") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translateEngagement(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
