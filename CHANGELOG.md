@@ -1,3 +1,10 @@
+## [1.61.2](https://github.com/betagouv/service-national-universel/compare/v1.61.1...v1.61.2) (2022-03-24)
+
+
+### Bug Fixes
+
+* filtre mission comportement intervalle ([a26a7af](https://github.com/betagouv/service-national-universel/commit/a26a7af90e1e1b8c92a47f3117e3ce593f1a5fb8))
+
 ## [1.61.1](https://github.com/betagouv/service-national-universel/compare/v1.61.0...v1.61.1) (2022-03-22)
 
 
