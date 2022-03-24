@@ -52,6 +52,8 @@ export default function Places({ filter }) {
       };
       if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
       if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (filter.source?.length) body.query.bool.filter.push({ terms: { "isJvaMission.keyword": filter.source } });
+
       if (Object.keys(filter.startDate).length) {
         body.query.bool.filter.push({ range: { startAt: filter.startDate } });
       }

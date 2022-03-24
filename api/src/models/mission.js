@@ -253,6 +253,25 @@ const Schema = new mongoose.Schema({
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+
+  //JVA mission
+  lastSyncAt: { type: Date },
+  isJvaMission: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "Mission proposée par JVA",
+    },
+  },
+
+  JvaMissionId: {
+    type: Number,
+    documentation: {
+      description: "JVA mission ID",
+    },
+  },
+  JvaRawData: mongoose.Schema.Types.Mixed,
 });
 
 Schema.virtual("fromUser").set(function (fromUser) {

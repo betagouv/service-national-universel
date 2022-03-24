@@ -10,6 +10,7 @@ const noticePushMission = require("./noticePushMission");
 const applicationPending = require("./applicationPending");
 //const newMissionReminder = require("./newMissionReminder");
 const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
+const jeVeuxAiderDaily = require("./jeVeuxAiderDaily");
 
 // doubt ? -> https://crontab.guru/
 
@@ -62,6 +63,11 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // everyday at 0200
   cron.schedule(everyHours(6), () => {
     apiEngagement.handler();
+  });
+
+  // everyday at 0200
+  cron.schedule(everyHours(6), () => {
+    jeVeuxAiderDaily.handler();
   });
 
   //every hour
