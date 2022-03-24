@@ -20,7 +20,7 @@ export default function StepSpecific() {
   const [data, setData] = useState();
 
   useEffect(() => {
-    if (young !== undefined) {
+    if (young) {
       setData({
         handicap: young.handicap,
         ppsBeneficiary: young.ppsBeneficiary,
