@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { adminURL } from "../config";
 import api from "../services/api";
-import { translate } from "../utils";
+import { translate, translatePhase1, translatePhase2 } from "../utils";
 
 function sendMessage(chat, message) {
   chat.send("chat_session_message", {
@@ -44,9 +44,9 @@ export default function Zammad() {
           if (young) {
             const info = [
               `🧑‍🎓 <a href="${adminURL}/volontaire/${young._id}">${young.firstName + " " + young.lastName}</a> ${young.email}`,
-              `🔋 Statut : <b>${translate(young.status)}</b> (phase1: ${translate(young.statusPhase1)} - phase2: ${translate(young.statusPhase2)} - phase3: ${translate(
+              `🔋 Statut : <b>${translate(young.status)}</b> (phase1: ${translatePhase1(young.statusPhase1)} - phase2: ${translatePhase2(
                 young.statusPhase2,
-              )} )`,
+              )} - phase3: ${translatePhase2(young.statusPhase2)} )`,
             ];
             // We have to create a ticket before initializing first chat message
             // because we have to include link.
