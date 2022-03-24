@@ -58,12 +58,10 @@ export default function Index() {
     } else if (fromDate && toDate) {
       range = {
         startDate: {
-          gte: fromDate,
           lte: toDate,
         },
         endDate: {
           gte: fromDate,
-          lte: toDate,
         },
       };
       //If none of the dates is filled, reset filter
