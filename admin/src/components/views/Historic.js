@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { formatStringLongDate, translateModelFields, translate } from "../../utils";
+import { formatStringLongDate, translateModelFields, translate, translatePhase1, translatePhase2, translateApplication, translateEngagement } from "../../utils";
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 import { HiOutlineChevronUp, HiOutlineChevronDown, HiArrowRight } from "react-icons/hi";
@@ -49,10 +49,24 @@ const Hit = ({ hit, model }) => {
     // on doit le parser car il est affiché sous la forme : field/index
     const elementOfArry = v.match(/(\w*)\/(\d)/);
     if (elementOfArry?.length) {
-      console.log("✍️ ~ elementOfArry", elementOfArry);
+      //console.log("✍️ ~ elementOfArry", elementOfArry);
       return `${translateModelFields(model, elementOfArry[1])} (nº${Number(elementOfArry[2]) + 1})`;
     }
     return v;
+  };
+
+  const translator = (path, value) => {
+    if (path === "/statusPhase1") {
+      return translatePhase1(value);
+    } else if (path === "/statusPhase2") {
+      return translatePhase2(value);
+    } else if (path === "/phase2ApplicationStatus") {
+      return translateApplication(value);
+    } else if (path === "/statusPhase2Contract") {
+      return translateEngagement(value);
+    } else {
+      return translate(value);
+    }
   };
 
   return (
@@ -71,8 +85,8 @@ const Hit = ({ hit, model }) => {
       </div>
       {viewDetails
         ? hit.ops?.map((e, i) => {
-            const originalValue = translate(JSON.stringify(e.originalValue)?.replace(/"/g, ""));
-            const value = translate(JSON.stringify(e.value)?.replace(/"/g, ""));
+            const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
+            const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
             return (
               <div className="flex p-3 justify-between border-b border-[#f3f3f3]" key={`${hit.date}-${i}`}>
                 <div className="flex-1 ">{`${splitElementArray(translateModelFields(model, e.path.substring(1)))}`}&nbsp;:</div>
