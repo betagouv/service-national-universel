@@ -12,6 +12,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import {
   translate,
   translatePhase1,
+  translatePhase2,
   getFilterLabel,
   YOUNG_STATUS_COLORS,
   formatDateFRTimezoneUTC,
@@ -172,7 +173,7 @@ export default function List() {
                         "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
                         Statut: translate(data.status),
                         "Statut Phase 1": translatePhase1(data.statusPhase1),
-                        "Statut Phase 2": translate(data.statusPhase2),
+                        "Statut Phase 2": translatePhase2(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
                         "Dernier statut le": formatLongDateFR(data.lastStatusAt),
                         "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),

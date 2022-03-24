@@ -29,6 +29,8 @@ import {
   getLabelWithdrawnReason,
   departmentLookUp,
   YOUNG_STATUS,
+  translatePhase2,
+  translateApplication,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -255,7 +257,7 @@ export default function VolontaireList() {
                         "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
                         Statut: translate(data.status),
                         "Statut Phase 1": translatePhase1(data.statusPhase1),
-                        "Statut Phase 2": translate(data.statusPhase2),
+                        "Statut Phase 2": translatePhase2(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
                         "Dernier statut le": formatLongDateFR(data.lastStatusAt),
                         "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
@@ -591,7 +593,7 @@ export default function VolontaireList() {
                   dataField="statusPhase2.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_2") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translatePhase2(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
@@ -605,7 +607,7 @@ export default function VolontaireList() {
                   dataField="phase2ApplicationStatus.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "APPLICATION_STATUS") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translateApplication(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}

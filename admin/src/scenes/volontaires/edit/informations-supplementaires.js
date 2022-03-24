@@ -1,7 +1,17 @@
 import React from "react";
 import { Col } from "reactstrap";
 
-import { translate, translatePhase1, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE1_MOTIF, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "../../../utils";
+import {
+  translate,
+  translatePhase1,
+  translatePhase2,
+  YOUNG_PHASE,
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE1_MOTIF,
+  YOUNG_STATUS_PHASE2,
+  YOUNG_STATUS_PHASE3,
+} from "../../../utils";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Select from "../components/Select";
 import Item from "../components/Item";
@@ -54,7 +64,7 @@ export default function InformationsComplementaires({ values, handleChange }) {
             values={values}
             handleChange={handleChange}
             title="Statut Phase 2"
-            options={Object.keys(YOUNG_STATUS_PHASE2).map((s) => ({ value: s, label: translate(s) }))}
+            options={Object.keys(YOUNG_STATUS_PHASE2).map((s) => ({ value: s, label: translatePhase2(s) }))}
           />
           <Select
             name="statusPhase3"

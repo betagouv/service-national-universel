@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import api from "../../../services/api";
-import { ticketStateNameById, copyToClipboard, translate, getAge, formatDateFRTimezoneUTC } from "../../../utils";
+import { ticketStateNameById, copyToClipboard, translate, getAge, formatDateFRTimezoneUTC, translatePhase1, translatePhase2 } from "../../../utils";
 import { appURL } from "../../../config";
 
 export default function TicketInfos({ ticket }) {
@@ -70,21 +70,21 @@ export default function TicketInfos({ ticket }) {
           </div>
           <>
             {user.birthdateAt && <Item title="Date de naissance" content={`Né(e) le ${formatDateFRTimezoneUTC(user.birthdateAt)} • ${getAge(user.birthdateAt)} ans`} />}
-            <Item title="Cohorte" content={user.cohort} />
+            <Item title="Cohorte" content={translate(user.cohort)} />
             <Item title="E-mail" content={user.email} copy />
-            <Item title="Département" content={user.department} />
-            <Item title="Région" content={user.region} />
+            <Item title="Département" content={translate(user.department)} />
+            <Item title="Région" content={translate(user.region)} />
             <hr />
-            <Item title="Statut phase 1" content={user.statusPhase1} />
+            <Item title="Statut phase 1" content={translatePhase1(user.statusPhase1)} />
             <Item title="Centre de cohésion" content={user.cohesionCenterName} />
             <hr />
-            <Item title="Statut phase 2" content={user.statusPhase2} />
+            <Item title="Statut phase 2" content={translatePhase2(user.statusPhase2)} />
             <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
             <Link to={`/volontaire/${user._id}/phase2`} target="_blank" rel="noopener noreferrer">
               <PanelActionButton icon="eye" title="Consulter les candidatures" />
             </Link>
             <hr />
-            <Item title="Statut phase 3" content={user.statusPhase3} />
+            <Item title="Statut phase 3" content={translate(user.statusPhase3)} />
           </>
         </>
       );
@@ -105,9 +105,9 @@ export default function TicketInfos({ ticket }) {
           <hr />
           <>
             <Item title="E-mail" content={user.email} copy />
-            <Item title="Fonction" content={user.role} copy />
-            <Item title="Département" content={user.department} />
-            <Item title="Région" content={user.region} />
+            <Item title="Fonction" content={translate(user.role)} copy />
+            <Item title="Département" content={translate(user.department)} />
+            <Item title="Région" content={translate(user.region)} />
             <hr />
           </>
         </>
