@@ -64,7 +64,7 @@ export default function DatePickerWrapper(props) {
       query = {
         query: {
           bool: {
-            filter: [{ range: { startAt: { gte: fromDate, lte: toDate } } }, { range: { endAt: { gte: fromDate, lte: toDate } } }],
+            filter: [{ range: { startAt: { lte: toDate } } }, { range: { endAt: { gte: fromDate } } }],
           },
         },
       };
