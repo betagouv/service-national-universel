@@ -828,13 +828,22 @@ const Hit = ({ hit, onClick, selected }) => {
 
 const BadgePhase = ({ text, value, redirect, style }) => {
   const history = useHistory();
+  const translator = () => {
+    if (text === "Phase 1") {
+      return translatePhase1(value);
+    } else if (text === "Phase 2") {
+      return translatePhase2(value);
+    } else {
+      return translate(value);
+    }
+  };
 
   return (
     <Badge
       onClick={() => history.push(redirect)}
       minify
       text={text}
-      tooltipText={translate(value)}
+      tooltipText={translator()}
       minTooltipText={`${text}: ${translate(value)}`}
       color={YOUNG_STATUS_COLORS[value]}
       className={style}
