@@ -254,4 +254,80 @@ router.put("/availability/reset", passport.authenticate("young", { session: fals
   }
 });
 
+router.put("/particulieres", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      handicap: Joi.string().trim().required().valid("true", "false"),
+      ppsBeneficiary: Joi.string().trim().required().valid("true", "false"),
+      paiBeneficiary: Joi.string().trim().required().valid("true", "false"),
+      allergies: Joi.string().trim().required().valid("true", "false"),
+      highSkilledActivity: Joi.string().trim().required().valid("true", "false"),
+      moreInformation: Joi.string().trim().required().valid("true", "false"),
+
+      specificAmenagment: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: Joi.string().trim().required().valid("true", "false"),
+        otherwise: Joi.isError(new Error()),
+      }),
+      reducedMobilityAccess: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: Joi.string().trim().required().valid("true", "false"),
+        otherwise: Joi.isError(new Error()),
+      }),
+      handicapInSameDepartment: Joi.alternatives().conditional("moreInformation", {
+        is: "true",
+        then: Joi.string().trim().required().valid("true", "false"),
+        otherwise: Joi.isError(new Error()),
+      }),
+
+      highSkilledActivityInSameDepartment: Joi.alternatives().conditional("highSkilledActivity", {
+        is: "true",
+        then: Joi.string().trim().required().valid("true", "false"),
+        otherwise: Joi.isError(new Error()),
+      }),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    //Additionnal verification
+    if (value.moreInformation === "true" && value.handicap === "false" && value.ppsBeneficiary === "false" && value.paiBeneficiary === "false") {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (value.moreInformation === "false" && (value.handicap === "true" || value.ppsBeneficiary === "true" || value.paiBeneficiary === "true")) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (value.moreInformation === "false") {
+      value.specificAmenagment = "false";
+      value.reducedMobilityAccess = "false";
+      value.handicapInSameDepartment = "false";
+    }
+
+    if (value.highSkilledActivity === "false") {
+      value.highSkilledActivityInSameDepartment = "false";
+    }
+
+    value.inscriptionStep = STEPS.REPRESENTANTS;
+    delete value.moreInformation;
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set(value);
+    await young.save({ fromUser: req.user });
+
+    inscriptionCheck(value, young, req);
+
+    return res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;
