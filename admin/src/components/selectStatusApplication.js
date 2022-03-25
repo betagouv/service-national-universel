@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES } from "../utils";
+import { translate, translateApplication, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES } from "../utils";
 import { toastr } from "react-redux-toastr";
 import Chevron from "./Chevron";
 import ModalConfirmWithMessage from "./modals/ModalConfirmWithMessage";
@@ -108,7 +108,7 @@ export default function SelectStatusApplication({ hit, options = [], callback })
       <ActionBox color={APPLICATION_STATUS_COLORS[application.status]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">
-            {translate(application.status)}
+            {translateApplication(application.status)}
             <Chevron color={APPLICATION_STATUS_COLORS[application.status]} />
           </DropdownToggle>
           <DropdownMenu>
@@ -117,7 +117,7 @@ export default function SelectStatusApplication({ hit, options = [], callback })
               .map((status) => {
                 return (
                   <DropdownItem key={status} className="dropdown-item" onClick={() => onClickStatus(status)}>
-                    {translate(status)}
+                    {translateApplication(status)}
                   </DropdownItem>
                 );
               })}

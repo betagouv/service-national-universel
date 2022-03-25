@@ -14,6 +14,8 @@ import {
   getFilterLabel,
   YOUNG_STATUS_PHASE1,
   translate,
+  translatePhase1,
+  translatePhase2,
   formatDateFRTimezoneUTC,
   isInRuralArea,
   formatLongDateFR,
@@ -178,8 +180,8 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                         "Mis à jour le": formatLongDateFR(data.updatedAt),
                         "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
                         Statut: translate(data.status),
-                        "Statut Phase 1": translate(data.statusPhase1),
-                        "Statut Phase 2": translate(data.statusPhase2),
+                        "Statut Phase 1": translatePhase1(data.statusPhase1),
+                        "Statut Phase 2": translatePhase2(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
                         "Dernier statut le": formatLongDateFR(data.lastStatusAt),
                         "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
@@ -243,7 +245,7 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       dataField="statusPhase1.keyword"
                       react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_1") }}
                       renderItem={(e, count) => {
-                        return `${translate(e)} (${count})`;
+                        return `${translatePhase1(e)} (${count})`;
                       }}
                       title=""
                       URLParams={true}

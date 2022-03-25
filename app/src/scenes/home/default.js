@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { translate, PHASE_STATUS_COLOR, YOUNG_STATUS_PHASE1 } from "../../utils";
+import { translate, PHASE_STATUS_COLOR, YOUNG_STATUS_PHASE1, translatePhase1, translatePhase2 } from "../../utils";
 import { HeroContainer, Hero, Content } from "../../components/Content";
 import Badge from "../../components/Badge";
 import { Link } from "react-router-dom";
@@ -20,13 +20,13 @@ export default function HomeDefault() {
           <WrapperItem to="/phase1">
             <div className="title">
               <span className="link">1. Un séjour de cohésion</span>{" "}
-              <Badge style={{ margin: 0 }} text={translate(young.statusPhase1)} color={PHASE_STATUS_COLOR[young.statusPhase1]} />
+              <Badge style={{ margin: 0 }} text={translatePhase1(young.statusPhase1)} color={PHASE_STATUS_COLOR[young.statusPhase1]} />
             </div>
           </WrapperItem>
           <WrapperItem to="/phase2">
             <div className="title">
               <span className="link">2. Une première mission d&apos;intérêt général</span>{" "}
-              <Badge style={{ margin: 0 }} text={translate(young.statusPhase2)} color={PHASE_STATUS_COLOR[young.statusPhase2]} />
+              <Badge style={{ margin: 0 }} text={translatePhase2(young.statusPhase2)} color={PHASE_STATUS_COLOR[young.statusPhase2]} />
             </div>
           </WrapperItem>
           <WrapperItem to="/phase3">

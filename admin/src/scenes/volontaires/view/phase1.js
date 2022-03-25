@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 
 import {
   translate,
+  translatePhase1,
   YOUNG_STATUS_COLORS,
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE1_MOTIF,
@@ -168,7 +169,7 @@ export default function Phase1(props) {
         <Box>
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-              <Bloc title="Séjour de cohésion" titleRight={<Badge text={translate(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}>
+              <Bloc title="Séjour de cohésion" titleRight={<Badge text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}>
                 {getCohesionStay(young)}
               </Bloc>
               {young.statusPhase1 === "AFFECTED" ? (

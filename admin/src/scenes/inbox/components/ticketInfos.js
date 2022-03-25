@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import api from "../../../services/api";
-import { ticketStateNameById, copyToClipboard, translate, getAge, formatDateFRTimezoneUTC } from "../../../utils";
+import { ticketStateNameById, copyToClipboard, translate, getAge, formatDateFRTimezoneUTC, translatePhase1, translatePhase2 } from "../../../utils";
 import { appURL } from "../../../config";
 
 export default function TicketInfos({ ticket }) {
@@ -75,10 +75,10 @@ export default function TicketInfos({ ticket }) {
             <Item title="Département" content={user.department} />
             <Item title="Région" content={user.region} />
             <hr />
-            <Item title="Statut phase 1" content={user.statusPhase1} />
+            <Item title="Statut phase 1" content={translatePhase1(user.statusPhase1)} />
             <Item title="Centre de cohésion" content={user.cohesionCenterName} />
             <hr />
-            <Item title="Statut phase 2" content={user.statusPhase2} />
+            <Item title="Statut phase 2" content={translatePhase2(user.statusPhase2)} />
             <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
             <Link to={`/volontaire/${user._id}/phase2`} target="_blank" rel="noopener noreferrer">
               <PanelActionButton icon="eye" title="Consulter les candidatures" />

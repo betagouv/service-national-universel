@@ -16,6 +16,7 @@ import Panel from "./panel";
 import Badge from "../../components/Badge";
 import {
   translate,
+  translatePhase1,
   getFilterLabel,
   YOUNG_STATUS_COLORS,
   isInRuralArea,
@@ -28,6 +29,9 @@ import {
   getLabelWithdrawnReason,
   departmentLookUp,
   YOUNG_STATUS,
+  translatePhase2,
+  translateApplication,
+  translateEngagement,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -253,8 +257,8 @@ export default function VolontaireList() {
                         "Mis à jour le": formatLongDateFR(data.updatedAt),
                         "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
                         Statut: translate(data.status),
-                        "Statut Phase 1": translate(data.statusPhase1),
-                        "Statut Phase 2": translate(data.statusPhase2),
+                        "Statut Phase 1": translatePhase1(data.statusPhase1),
+                        "Statut Phase 2": translatePhase2(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
                         "Dernier statut le": formatLongDateFR(data.lastStatusAt),
                         "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
@@ -527,7 +531,7 @@ export default function VolontaireList() {
                   dataField="statusPhase1.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_1") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translatePhase1(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
@@ -590,7 +594,7 @@ export default function VolontaireList() {
                   dataField="statusPhase2.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_2") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translatePhase2(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
@@ -604,7 +608,7 @@ export default function VolontaireList() {
                   dataField="phase2ApplicationStatus.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "APPLICATION_STATUS") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translateApplication(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
@@ -618,7 +622,7 @@ export default function VolontaireList() {
                   dataField="statusPhase2Contract.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "CONTRACT_STATUS") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translateEngagement(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}

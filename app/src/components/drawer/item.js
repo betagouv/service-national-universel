@@ -2,12 +2,23 @@ import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 
-import { translate, PHASE_STATUS_COLOR } from "../../utils";
+import { translate, PHASE_STATUS_COLOR, translatePhase1, translatePhase2 } from "../../utils";
 
 export default function Item({ title, subtitle, to, status, handleClick, disabled, children, open, phase }) {
   const [color, setColor] = useState();
   const [strokeColor, setStrokeColor] = useState();
   const [icon, setIcon] = useState();
+  console.log(status);
+
+  const translator = (el) => {
+    if (to === "/phase1") {
+      return translatePhase1(el);
+    } else if (to === "/phase2") {
+      return translatePhase2(el);
+    } else {
+      return translate(el);
+    }
+  };
 
   useEffect(() => {
     let c = PHASE_STATUS_COLOR[status];
@@ -32,7 +43,7 @@ export default function Item({ title, subtitle, to, status, handleClick, disable
         <div>
           {title}
           <span>
-            {subtitle} • {translate(status)}
+            {subtitle} • {translator(status)}
           </span>
         </div>
       </NavLink>

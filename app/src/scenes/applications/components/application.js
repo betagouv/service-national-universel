@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge, SENDINBLUE_TEMPLATES, ENABLE_PM } from "../../../utils";
+import { translate, translateApplication, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge, SENDINBLUE_TEMPLATES, ENABLE_PM } from "../../../utils";
 import { appURL } from "../../../config";
 import Badge from "../../../components/Badge";
 import DomainThumb from "../../../components/DomainThumb";
@@ -77,7 +77,7 @@ export default function Application({ application, index }) {
             </Col>
             <Col md={5}>
               <TagContainer>
-                <Tag color={APPLICATION_STATUS_COLORS[value.status]}>{translate(value.status)}</Tag>
+                <Tag color={APPLICATION_STATUS_COLORS[value.status]}>{translateApplication(value.status)}</Tag>
                 {value.statusComment ? <StatusComment>{value.statusComment}</StatusComment> : null}
                 {value.status === APPLICATION_STATUS.WAITING_VALIDATION && value?.mission?.placesTotal > 0 ? (
                   value?.mission?.placesLeft > 0 ? (
