@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 
 import api from "../../services/api";
-import { translate, ES_NO_LIMIT, MISSION_STATUS_COLORS } from "../../utils";
+import { translate, ES_NO_LIMIT, MISSION_STATUS_COLORS, htmlCleaner } from "../../utils";
 import Badge from "../../components/Badge";
 import Team from "./components/Team";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -110,7 +110,7 @@ export default function PanelView({ onChange, value }) {
         </div>
       </div>
       <Info title="La structure">
-        <div>{value.description}</div>
+        <div dangerouslySetInnerHTML={{ __html: htmlCleaner(value.description) }} />
         <Details title="Statut" value={translate(value.legalStatus)} />
         {value.legalStatus === "ASSOCIATION" ? <Details title="Agréments" value={value.associationTypes?.length > 0 && value.associationTypes.join(",")} /> : null}
         {value.legalStatus === "PUBLIC" ? (

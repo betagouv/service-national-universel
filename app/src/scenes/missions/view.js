@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../../services/api";
-import { translate, formatStringDateTimezoneUTC } from "../../utils";
+import { translate, formatStringDateTimezoneUTC, htmlCleaner } from "../../utils";
 import SocialIcons from "../../components/SocialIcons";
 import ApplyModal from "./components/ApplyModal";
 import ApplyDoneModal from "./components/ApplyDoneModal";
@@ -185,9 +185,7 @@ const Detail = ({ title, content }) => {
     <div className="detail">
       <div className="detail-title">{title}</div>
       {value.map((e, i) => (
-        <div key={i} className="detail-text">
-          {translate(e)}
-        </div>
+        <div key={i} className="detail-text" dangerouslySetInnerHTML={{ __html: htmlCleaner(translate(e)) }} />
       ))}
     </div>
   ) : (
@@ -221,7 +219,7 @@ const InfoStructure = ({ title, structure }) => {
       <div className="detail-text">
         {rest ? (
           <>
-            {preview + (expandNote ? rest : " ...")}{" "}
+            <div dangerouslySetInnerHTML={{ __html: preview + (expandNote ? rest : " ...") + " " }} />
             <div className="see-more" onClick={toggleNote}>
               {expandNote ? "  VOIR MOINS" : "  VOIR PLUS"}
             </div>

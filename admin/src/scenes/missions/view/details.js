@@ -4,7 +4,7 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS, colors } from "../../../utils";
+import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS, colors, htmlCleaner } from "../../../utils";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
@@ -142,10 +142,10 @@ const Details = ({ title, value, copy }) => {
     }
   }, [copied]);
   return (
-    <div className="detail">
-      <div className="detail-title">{title}&nbsp;:</div>
-      <div className="detail-text">
-        {value}
+    <div className="flex justify-between border-b-[0.5px] border-solid border-[#F4F5F7]/50 text-[14px] mt-4 pb-2">
+      <div className="min-w-[120px] mr-4 text-[#798399]">{title}&nbsp;:</div>
+      <div className="flex">
+        <div className="text-[#1A202C] whitespace-pre-line" dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />
         {copy ? (
           <div
             className="flex items-center justify-center mx-1 cursor-pointer hover:scale-105 text-snu-purple-400"
@@ -164,24 +164,6 @@ const Details = ({ title, value, copy }) => {
 const Wrapper = styled.div`
   padding: 2rem;
   flex: 1;
-  .detail {
-    border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    margin-top: 1rem;
-    padding-bottom: 0.5rem;
-    &-title {
-      min-width: 120px;
-      margin-right: 1rem;
-      color: #798399;
-    }
-    &-text {
-      color: rgba(26, 32, 44);
-      display: flex;
-      white-space: pre-line;
-    }
-  }
   .icon {
     cursor: pointer;
     margin: 0 0.5rem;

@@ -83,6 +83,7 @@
     "reactstrap": "8.10.1",
     "redux": "4.1.2",
     "regenerator-runtime": "0.13.9",
+    "sanitize-html": "^2.7.0",
     "snu-lib": "file:../lib",
     "styled-components": "5.3.3",
     "validator": "13.7.0",

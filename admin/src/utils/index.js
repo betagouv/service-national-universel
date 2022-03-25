@@ -4,6 +4,7 @@ import api from "../services/api";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
 import { environment } from "../config";
+import sanitizeHtml from "sanitize-html";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
@@ -153,3 +154,13 @@ export function classNames(...classes) {
 }
 
 export const ENABLE_PM = true;
+
+export const htmlCleaner = (text) => {
+  const clean = sanitizeHtml(text, {
+    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol"],
+    allowedAttributes: {
+      a: ["href", "target", "rel"],
+    },
+  });
+  return clean;
+};
