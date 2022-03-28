@@ -221,8 +221,7 @@ const sync = async (result) => {
       console.log("ERROR 🚫", e);
     }
   }
-  return false;
-  //return result.next_page_url ? true : false;
+  return result.next_page_url ? true : false;
 };
 
 const cleanData = async () => {
@@ -246,8 +245,6 @@ const cleanData = async () => {
           missionName: mission.name,
         },
       });
-      //Test to remove after
-      mission.remove();
     }
     await slack.success({ title: "sync with JVA missions" });
   } catch (error) {
