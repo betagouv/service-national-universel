@@ -337,9 +337,9 @@ const Hit = ({ hit, onClick, selected, callback }) => {
         {" "}
         <span>
           {value.isJvaMission === "true" ? (
-            <img src={require("../../assets/JVA_round.png")} className="h-9 w-9 group-hover:scale-105" />
+            <img src={require("../../assets/JVA_round.png")} className="h-9 w-9 group-hover:scale-105 mx-auto" />
           ) : (
-            <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 group-hover:scale-105" />
+            <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 group-hover:scale-105 mx-auto" />
           )}
         </span>
       </td>

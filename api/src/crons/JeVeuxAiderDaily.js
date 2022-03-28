@@ -60,7 +60,7 @@ const sync = async (result) => {
   for (let i = 0; i < result.data.length; i++) {
     try {
       const mission = result.data[i];
-      let structure = await StructureModel.findOne({ JvaStructureId: mission.structure.id });
+      let structure = await StructureModel.findOne({ jvaStructureId: mission.structure.id });
       if (!structure) {
         console.log("Create new struct");
         //get JVA struture
@@ -119,8 +119,8 @@ const sync = async (result) => {
             lat: jvaStructure.address.latitude,
           },
           isJvaStructure: "true",
-          JvaStructureId: jvaStructure.id,
-          JvaRawData: jvaStructure,
+          jvaStructureId: jvaStructure.id,
+          jvaRawData: jvaStructure,
         };
 
         const newStructure = await StructureModel.create(infoStructure);
@@ -176,13 +176,13 @@ const sync = async (result) => {
           lon: mission.address.longitude,
         },
         isJvaMission: true,
-        JvaMissionId: mission.id,
-        JvaRawData: mission,
+        jvaMissionId: mission.id,
+        jvaRawData: mission,
         lastSyncAt: Date.now(),
       };
 
       //Check if mission exist
-      const missionExist = await MissionModel.findOne({ JvaMissionId: mission.id });
+      const missionExist = await MissionModel.findOne({ jvaMissionId: mission.id });
       if (!missionExist) {
         console.log("Create new mission");
         const data = await MissionModel.create({ ...infoMission, placesLeft: mission.snu_mig_places });
