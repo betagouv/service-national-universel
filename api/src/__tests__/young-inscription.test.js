@@ -544,4 +544,270 @@ describe("Young", () => {
       expect(response.statusCode).toBe(404);
     });
   });
+  describe("PUT /young/inscription/representant", () => {
+    async function selfUpdateYoung(body = {}, fields = {}) {
+      const young = await createYoungHelper(getNewYoungFixture(fields));
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      let response = await request(getAppHelper()).put("/young/inscription/representant").send(body);
+      updatedYoung = response.body.data;
+      passport.user = previous;
+
+      return response;
+    }
+    function getParent1Fixture(ownCoordonnee, country) {
+      const fixture = getNewYoungFixture();
+      let data = {
+        parent1Status: "mother",
+        parent1FirstName: fixture.parent1FirstName,
+        parent1LastName: fixture.parent1LastName,
+        parent1Email: fixture.parent1Email,
+        parent1Phone: fixture.parent1Phone,
+        parent1FromFranceConnect: "true",
+        parent1OwnAddress: ownCoordonnee,
+      };
+      if (ownCoordonnee === "true") {
+        if (country === "France") {
+          data = {
+            ...data,
+            parent1Country: "France",
+            parent1City: fixture.parent1City,
+            parent1Zip: fixture.parent1Zip,
+            parent1Address: fixture.parent1Address,
+            parent1Location: fixture.parent1Location,
+            parent1Department: fixture.parent1Department,
+            parent1Region: fixture.parent1Region,
+            addressParent1Verified: "true",
+          };
+        } else {
+          data = {
+            ...data,
+            parent1Country: country,
+            parent1City: fixture.parent1City,
+            parent1Zip: fixture.parent1Zip,
+            parent1Address: fixture.parent1Address,
+          };
+        }
+      }
+      return data;
+    }
+    function getParent2Fixture(ownCoordonnee, country = "coucou") {
+      const fixture = getNewYoungFixture();
+      let data = {
+        parent2Status: "mother",
+        parent2FirstName: fixture.parent2FirstName,
+        parent2LastName: fixture.parent2LastName,
+        parent2Email: fixture.parent2Email,
+        parent2Phone: fixture.parent2Phone,
+        parent2FromFranceConnect: "true",
+        parent2OwnAddress: ownCoordonnee,
+      };
+      if (ownCoordonnee === "true") {
+        if (country === "France") {
+          data = {
+            ...data,
+            parent2Country: "France",
+            parent2City: fixture.parent2City,
+            parent2Zip: fixture.parent2Zip,
+            parent2Address: fixture.parent2Address,
+            parent2Location: fixture.parent2Location,
+            parent2Department: fixture.parent2Department,
+            parent2Region: fixture.parent2Region,
+            addressParent2Verified: "true",
+          };
+        } else {
+          data = {
+            ...data,
+            parent2Country: country,
+            parent2City: fixture.parent2City,
+            parent2Zip: fixture.parent2Zip,
+            parent2Address: fixture.parent2Address,
+          };
+        }
+      }
+      return data;
+    }
+
+    //Set country, ownAdress, asdressverif
+    it("Should update Young representant with statut code 200", async () => {
+      const response = await selfUpdateYoung({
+        ...getParent1Fixture("false"),
+        parent2: false,
+        parent2FromFranceConnect: "false",
+      });
+      expect(response.statusCode).toBe(200);
+
+      const response1 = await selfUpdateYoung({
+        ...getParent1Fixture("true", "UK"),
+        parent2: false,
+        parent2FromFranceConnect: "false",
+      });
+      expect(response1.statusCode).toBe(200);
+
+      const response2 = await selfUpdateYoung({
+        ...getParent1Fixture("true", "France"),
+        parent2: false,
+        parent2FromFranceConnect: "false",
+      });
+      expect(response2.statusCode).toBe(200);
+
+      const response3 = await selfUpdateYoung({
+        ...getParent1Fixture("true", "France"),
+        parent2: true,
+        ...getParent2Fixture("false"),
+      });
+      expect(response3.statusCode).toBe(200);
+
+      const response4 = await selfUpdateYoung({
+        ...getParent1Fixture("true", "France"),
+        parent2: true,
+        ...getParent2Fixture("true", "UK"),
+      });
+      expect(response4.statusCode).toBe(200);
+
+      const response5 = await selfUpdateYoung({
+        ...getParent1Fixture("true", "France"),
+        parent2: true,
+        ...getParent2Fixture("true", "France"),
+      });
+      expect(response5.statusCode).toBe(200);
+    });
+    it("should return 400 when parameters invalid", async () => {
+      const response = await selfUpdateYoung({});
+      expect(response.statusCode).toBe(400);
+
+      const response1 = await selfUpdateYoung({
+        ...getParent1Fixture("false"),
+        parent2: true,
+        parent2FromFranceConnect: "false",
+      });
+      expect(response1.statusCode).toBe(400);
+
+      const response2 = await selfUpdateYoung({
+        ...getParent1Fixture("false"),
+        parent2: false,
+        ...getParent2Fixture("false"),
+      });
+      expect(response2.statusCode).toBe(400);
+
+      const response3 = await selfUpdateYoung({
+        ...getParent1Fixture("false", "France"),
+        parent2: true,
+        ...getParent2Fixture("true", "UK"),
+      });
+      expect(response3.statusCode).toBe(200);
+    });
+    it("should return 404 if user don't exist", async () => {
+      const response = await request(getAppHelper())
+        .put("/young/inscription/representant")
+        .send({
+          ...getParent1Fixture("false", "France"),
+          parent2: true,
+          ...getParent2Fixture("true", "UK"),
+        });
+      expect(response.statusCode).toBe(404);
+    });
+  });
+  describe("PUT /young/inscription/representant-fromFranceConnect", () => {
+    async function selfUpdateYoung(body = {}, id) {
+      const young = await createYoungHelper(getNewYoungFixture({}));
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      const response = await request(getAppHelper()).put(`/young/inscription/representant-fromFranceConnect/${id}`).send(body);
+      updatedYoung = response.body.data;
+      passport.user = previous;
+
+      return response;
+    }
+    it("Should update Young reprensentant fields with statut code 200", async () => {
+      const fixture = getNewYoungFixture();
+      const response = await selfUpdateYoung(
+        {
+          parent1FirstName: fixture.parent1FirstName,
+          parent1LastName: fixture.parent1LastName,
+          parent1Email: fixture.parent1Email,
+          parent1FromFranceConnect: "true",
+        },
+        1,
+      );
+      expect(response.statusCode).toBe(200);
+
+      const response1 = await selfUpdateYoung(
+        {
+          parent2FirstName: fixture.parent2FirstName,
+          parent2LastName: fixture.parent2LastName,
+          parent2Email: fixture.parent2Email,
+          parent2FromFranceConnect: "true",
+        },
+        2,
+      );
+      expect(response1.statusCode).toBe(200);
+    });
+    it("should return 400 when parameters invalid", async () => {
+      const fixture = getNewYoungFixture();
+      const response = await selfUpdateYoung(
+        {
+          parent1FirstName: "",
+          parent1LastName: fixture.parent1LastName,
+          parent1Email: fixture.parent1Email,
+          parent1FromFranceConnect: "true",
+        },
+        1,
+      );
+      expect(response.statusCode).toBe(400);
+
+      const response1 = await selfUpdateYoung(
+        {
+          parent1FirstName: fixture.parent1FirstName,
+          parent1LastName: fixture.parent1LastName,
+          parent1Email: fixture.parent1Email,
+          parent1FromFranceConnect: "false",
+        },
+        1,
+      );
+      expect(response1.statusCode).toBe(400);
+
+      const response2 = await selfUpdateYoung(
+        {
+          parent2FirstName: fixture.parent2FirstName,
+          parent2LastName: fixture.parent2LastName,
+        },
+        2,
+      );
+      expect(response2.statusCode).toBe(400);
+
+      const response3 = await selfUpdateYoung(
+        {
+          parent2FirstName: fixture.parent2FirstName,
+          parent2LastName: fixture.parent2LastName,
+          parent2Email: "coucou",
+          parent2FromFranceConnect: "true",
+        },
+        2,
+      );
+      expect(response3.statusCode).toBe(400);
+    });
+    it("should return 404 if user don't exist", async () => {
+      const fixture = getNewYoungFixture();
+      const response = await request(getAppHelper()).put("/young/inscription/representant-fromFranceConnect/2").send({
+        parent2FirstName: fixture.parent2FirstName,
+        parent2LastName: fixture.parent2LastName,
+        parent2Email: fixture.parent2Email,
+        parent2FromFranceConnect: "true",
+      });
+      expect(response.statusCode).toBe(404);
+
+      const response2 = await request(getAppHelper()).put("/young/inscription/representant-fromFranceConnect/1").send({
+        parent1FirstName: fixture.parent1FirstName,
+        parent1LastName: fixture.parent1LastName,
+        parent1Email: fixture.parent1Email,
+        parent1FromFranceConnect: "true",
+      });
+      expect(response2.statusCode).toBe(404);
+    });
+  });
 });

@@ -14,8 +14,7 @@ export default function FranceConnectCallback() {
   async function fetchData(code, id) {
     const { data, tokenId } = await api.post("/young/france-connect/user-info", { code, callback: getFranceConnectCallback(id) });
     if (data && data["email"]) {
-      await saveYoung({
-        ...young,
+      await api.put(`/young/inscription/representant-fromFranceConnect/${id}`, {
         [`parent${id}FirstName`]: data["given_name"],
         [`parent${id}LastName`]: data["family_name"],
         [`parent${id}Email`]: data["email"],

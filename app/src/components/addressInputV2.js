@@ -16,7 +16,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
   const [loading, setLoading] = useState(false);
   const [addressVerified, , addressVerifiedHelpers] = useField({
     value: values[keys.addressVerified],
-    name: "addressVerified",
+    name: keys.addressVerified || "addressVerified",
     validate: (v) => v !== "true" && addressInFrance && "Il est obligatoire de vérifier l'adresse",
   });
 
@@ -194,7 +194,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
                   </div>
                 )}
               </Col>
-              <ErrorMessage errors={errors} touched={touched} name="addressVerified" />
+              <ErrorMessage errors={errors} touched={touched} name={keys.addressVerified || "addressVerified"} />
             </>
           ) : null}
         </Row>
@@ -209,13 +209,14 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
               <SecondaryButton
                 onClick={() => {
                   setSuggestion({});
+                  addressVerifiedHelpers.setError("");
                   addressVerifiedHelpers.setValue("true");
                 }}>
                 Non
               </SecondaryButton>
               <PrimaryButton onClick={onSuggestionSelected}>Oui</PrimaryButton>
             </div>
-            <ErrorMessage errors={errors} touched={touched} name="addressVerified" />
+            <ErrorMessage errors={errors} touched={touched} name={keys.addressVerified || "addressVerified"} />
           </Col>
         </Row>
       )}

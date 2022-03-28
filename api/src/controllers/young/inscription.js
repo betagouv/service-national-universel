@@ -179,7 +179,7 @@ router.put("/coordonnee", passport.authenticate("young", { session: false, failW
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    inscriptionCheck(value, young, req);
+    await inscriptionCheck(value, young, req);
 
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
@@ -321,7 +321,265 @@ router.put("/particulieres", passport.authenticate("young", { session: false, fa
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    inscriptionCheck(value, young, req);
+    await inscriptionCheck(value, young, req);
+
+    return res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/representant", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      //Parent1
+      parent1Status: Joi.string().trim().required().valid("mother", "father", "representant"),
+      parent1FirstName: validateFirstName().trim().required(),
+      parent1LastName: Joi.string().uppercase().trim().required(),
+      parent1Email: Joi.string().lowercase().trim().email().required(),
+      parent1Phone: Joi.string().trim().required(),
+      parent1OwnAddress: Joi.string().trim().required().valid("true", "false"),
+      parent1FromFranceConnect: Joi.string().trim().required().valid("true", "false"),
+
+      //If parent1OwnAdress
+      parent1City: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      parent1Zip: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      parent1Address: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      parent1Country: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+
+      //If parent1OwnAdress and parent1Country === France
+      addressParent1Verified: Joi.alternatives().conditional("parent1OwnAddress", {
+        is: "true",
+        then: Joi.alternatives().conditional("parent1Country", { is: "France", then: Joi.string().trim().required().valid("true"), otherwise: Joi.isError(new Error()) }),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent1Location: Joi.alternatives().conditional("parent1OwnAddress", {
+        is: "true",
+        then: Joi.alternatives().conditional("parent1Country", {
+          is: "France",
+          then: Joi.object()
+            .keys({
+              lat: Joi.number().required().allow(null),
+              lon: Joi.number().required().allow(null),
+            })
+            .default({
+              lat: null,
+              lon: null,
+            })
+            .allow({}, null),
+          otherwise: Joi.isError(new Error()),
+        }),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent1Department: Joi.alternatives().conditional("parent1OwnAddress", {
+        is: "true",
+        then: Joi.alternatives().conditional("parent1Country", { is: "France", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent1Region: Joi.alternatives().conditional("parent1OwnAddress", {
+        is: "true",
+        then: Joi.alternatives().conditional("parent1Country", { is: "France", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        otherwise: Joi.isError(new Error()),
+      }),
+
+      //Parent2
+      parent2: Joi.string().trim().required().valid(true, false),
+
+      //Parent2 informed
+      parent2Status: Joi.alternatives().conditional("parent2", { is: true, then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      parent2FirstName: Joi.alternatives().conditional("parent2", { is: true, then: validateFirstName().trim().required(), otherwise: Joi.isError(new Error()) }),
+      parent2LastName: Joi.alternatives().conditional("parent2", { is: true, then: Joi.string().uppercase().trim().required(), otherwise: Joi.isError(new Error()) }),
+      parent2Email: Joi.alternatives().conditional("parent2", { is: true, then: Joi.string().lowercase().trim().email().required(), otherwise: Joi.isError(new Error()) }),
+      parent2Phone: Joi.alternatives().conditional("parent2", { is: true, then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      parent2OwnAddress: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: Joi.string().trim().required().valid("true", "false"),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent2FromFranceConnect: Joi.string().trim().required().valid("true", "false"),
+
+      //If parent2 and parent1OwnAdress
+      parent2City: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent2Zip: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent2Address: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent2Country: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        otherwise: Joi.isError(new Error()),
+      }),
+
+      //If parent2 and parent1OwnAdress and parent2Country === France
+      addressParent2Verified: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: Joi.alternatives().conditional("parent2OwnAddress", {
+          is: "true",
+          then: Joi.alternatives().conditional("parent2Country", {
+            is: "France",
+            then: Joi.string().trim().required().valid("true"),
+            otherwise: Joi.isError(new Error()),
+          }),
+          otherwise: Joi.isError(new Error()),
+        }),
+        otherwise: Joi.isError(new Error()),
+      }),
+
+      parent2Location: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: Joi.alternatives().conditional("parent2OwnAddress", {
+          is: "true",
+          then: Joi.alternatives().conditional("parent2Country", {
+            is: "France",
+            then: Joi.object()
+              .keys({
+                lat: Joi.number().required().allow(null),
+                lon: Joi.number().required().allow(null),
+              })
+              .default({
+                lat: null,
+                lon: null,
+              })
+              .allow({}, null),
+            otherwise: Joi.isError(new Error()),
+          }),
+          otherwise: Joi.isError(new Error()),
+        }),
+        otherwise: Joi.isError(new Error()),
+      }),
+
+      parent2Department: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: Joi.alternatives().conditional("parent2OwnAddress", {
+          is: "true",
+          then: Joi.alternatives().conditional("parent2Country", {
+            is: "France",
+            then: Joi.string().trim().required(),
+            otherwise: Joi.isError(new Error()),
+          }),
+          otherwise: Joi.isError(new Error()),
+        }),
+        otherwise: Joi.isError(new Error()),
+      }),
+
+      parent2Region: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: Joi.alternatives().conditional("parent2OwnAddress", {
+          is: "true",
+          then: Joi.alternatives().conditional("parent2Country", {
+            is: "France",
+            then: Joi.string().trim().required(),
+            otherwise: Joi.isError(new Error()),
+          }),
+          otherwise: Joi.isError(new Error()),
+        }),
+        otherwise: Joi.isError(new Error()),
+      }),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (value.parent1OwnAddress === "false") {
+      value.parent1City = "";
+      value.parent1Zip = "";
+      value.parent1Address = "";
+      value.parent1Location = { lat: null, lon: null };
+      value.parent1Department = "";
+      value.parent1Region = "";
+      value.parent1Country = "";
+    } else if (value.parent1Country !== "France") {
+      value.parent1Location = { lat: null, lon: null };
+      value.parent1Department = "";
+      value.parent1Region = "";
+    }
+
+    if (value.parent2) {
+      if (value.parent2OwnAddress === "false") {
+        value.parent2City = "";
+        value.parent2Zip = "";
+        value.parent2Address = "";
+        value.parent2Location = { lat: null, lon: null };
+        value.parent2Department = "";
+        value.parent2Region = "";
+        value.parent2Country = "";
+      } else if (value.parent2Country !== "France") {
+        value.parent2Location = { lat: null, lon: null };
+        value.parent2Department = "";
+        value.parent2Region = "";
+      }
+      delete value.addressParent2Verified;
+    } else {
+      value.parent2Status = "";
+      value.parent2FirstName = "";
+      value.parent2LastName = "";
+      value.parent2Email = "";
+      value.parent2Phone = "";
+      value.parent2OwnAddress = "false";
+      value.parent2City = "";
+      value.parent2Zip = "";
+      value.parent2Address = "";
+      value.parent2Location = { lat: null, lon: null };
+      value.parent2Department = "";
+      value.parent2Region = "";
+      value.parent2Country = "";
+      value.parent2FromFranceConnect = "false";
+    }
+
+    delete value.parent2;
+    delete value.addressParent1Verified;
+    value.inscriptionStep = STEPS.CONSENTEMENTS;
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set(value);
+    await young.save({ fromUser: req.user });
+
+    await inscriptionCheck(value, young, req);
+
+    return res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/representant-fromFranceConnect/:id", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { error, value } = Joi.object({
+      [`parent${id}FirstName`]: validateFirstName().trim().required(),
+      [`parent${id}LastName`]: Joi.string().uppercase().trim().required(),
+      [`parent${id}Email`]: Joi.string().lowercase().trim().email().required(),
+      [`parent${id}FromFranceConnect`]: Joi.string().trim().required().valid("true"),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set(value);
+    await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
