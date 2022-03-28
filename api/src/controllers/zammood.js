@@ -111,8 +111,8 @@ router.post("/ticket/form", async (req, res) => {
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { subject, message, firstName, lastName, email, clientId, department, region } = value;
     const userAttributes = [
-      { name: "département", value: department },
-      { name: "région", value: region },
+      { name: "departement", value: department },
+      { name: "region", value: region },
     ];
     const response = await zammood.api("/v0/message", {
       method: "POST",
