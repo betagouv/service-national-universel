@@ -157,7 +157,7 @@ export const ENABLE_PM = true;
 
 export const htmlCleaner = (text) => {
   const clean = sanitizeHtml(text, {
-    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol"],
+    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
     allowedAttributes: {
       a: ["href", "target", "rel"],
     },

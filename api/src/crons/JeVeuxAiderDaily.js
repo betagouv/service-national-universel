@@ -156,24 +156,24 @@ const sync = async (result) => {
       const infoMission = {
         name: mission.name,
         mainDomain: jva2SnuDomaines[mission.domaine.name],
-        startAt: new Date(mission.start_date * 1000),
-        endAt: new Date(mission.end_date * 1000),
+        startAt: new Date(mission.start_date),
+        endAt: new Date(mission.end_date),
         placesTotal: mission.snu_mig_places,
-        //description: mission.illustrations.model.description,
-        //actions: mission.illustrations.model.objectif,
+        description: mission.objectifs,
+        actions: mission.description,
         structureId: structure.id,
         structureName: structure.name,
         status: "WAITING_VALIDATION",
         tutorId: referentMission.id,
         tutorName: `${referentMission.firstName} ${referentMission.lastName}`,
-        zip: mission.zip,
-        city: mission.city,
-        department: departmentLookUp[mission.department],
-        region: department2region[departmentLookUp[mission.department]],
+        zip: mission.address.zip,
+        city: mission.address.city,
+        department: departmentLookUp[mission.address.department],
+        region: department2region[departmentLookUp[mission.address.department]],
         country: "France",
         location: {
-          lat: mission._geoloc.lat,
-          lon: mission._geoloc.lng,
+          lat: mission.address.latitude,
+          lon: mission.address.longitude,
         },
         isJvaMission: true,
         JvaMissionId: mission.id,
@@ -221,7 +221,8 @@ const sync = async (result) => {
       console.log("ERROR 🚫", e);
     }
   }
-  return result.next_page_url ? true : false;
+  return false;
+  //return result.next_page_url ? true : false;
 };
 
 const cleanData = async () => {
@@ -245,6 +246,7 @@ const cleanData = async () => {
           missionName: mission.name,
         },
       });
+      //Test to remove after
       mission.remove();
     }
     await slack.success({ title: "sync with JVA missions" });
