@@ -97,6 +97,7 @@ router.post("/ticket/form", async (req, res) => {
       region: req.body.region,
       formSubjectStep1: req.body.subjectStep1,
       formSubjectStep2: req.body.subjectStep2,
+      role: req.body.role,
     };
     const { error, value } = Joi.object({
       email: Joi.string().email().required(),
@@ -109,14 +110,16 @@ router.post("/ticket/form", async (req, res) => {
       region: Joi.string().required(),
       formSubjectStep1: Joi.string().required(),
       formSubjectStep2: Joi.string().required(),
+      role: Joi.string().required(),
     })
       .unknown()
       .validate(obj);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2 } = value;
+    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role } = value;
     const userAttributes = [
       { name: "departement", value: department },
       { name: "region", value: region },
+      { name: "role", value: role },
     ];
     const response = await zammood.api("/v0/message", {
       method: "POST",
