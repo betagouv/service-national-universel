@@ -56,7 +56,7 @@ const fetchStructure = async (id) => {
 };
 
 const sync = async (result) => {
-  console.log("Nombre de missions traitées (cuurent iteration)", result.data.length);
+  console.log("Nombre de missions traitées (current iteration)", result.data.length);
   console.log("API page", result.current_page);
 
   for (let i = 0; i < result.data.length; i++) {
