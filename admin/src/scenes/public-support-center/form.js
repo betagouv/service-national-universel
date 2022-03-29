@@ -24,12 +24,12 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
         onSubmit={async (values) => {
           try {
             setLoading(true);
-            const { message, subject, name, email, step1, step2, department } = values;
+            const { message, subject, firstName, lastName, email, step1, step2, department } = values;
             const regionTags = [`DEPARTEMENT_${department}`, `REGION_${department2region[department]}`];
-            const { ok, code } = await api.post("/zammad-support-center/public/ticket", {
+            const { ok, code, data } = await api.post("/zammad-support-center/public/ticket", {
               title: `${step1?.label} - ${step2?.label} - ${subject}`,
               subject,
-              name,
+              name: `${firstName} ${lastName}`,
               email,
               message,
               tags: [...new Set([...tags, ...(step1?.tags || []), ...(step2?.tags || []), ...(regionTags || [])])], // we use this dirty hack to remove duplicates
@@ -37,6 +37,19 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
             setLoading(false);
             setOpen(false);
             if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
+            const response = await api.post("/zammood/ticket/form", {
+              message,
+              subject: subject,
+              clientId: data.id,
+              firstName,
+              lastName,
+              email,
+              department,
+              subjectStep1: step1.id,
+              subjectStep2: step2.id,
+              region: department2region[department],
+            });
+            if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
             toastr.success("Ticket créé");
             setSuccessMessage("Votre demande a bien été envoyée ! Nous vous répondrons par mail.");
           } catch (e) {
@@ -47,11 +60,23 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage }) 
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
             <Item
-              name="name"
-              title="Nom et prénom"
-              placeholder="Renseignez vos nom et prénom"
+              name="lastName"
+              title="Nom"
+              placeholder="Renseignez votre nom"
               type="input"
-              value={values.name}
+              value={values.lastName}
+              handleChange={handleChange}
+              validate={(v) => !v && requiredMessage}
+              errors={errors}
+              touched={touched}
+              rows="2"
+            />
+            <Item
+              name="firstName"
+              title="Prénom"
+              placeholder="Renseignez votre prénom"
+              type="input"
+              value={values.firstName}
               handleChange={handleChange}
               validate={(v) => !v && requiredMessage}
               errors={errors}
