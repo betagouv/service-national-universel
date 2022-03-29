@@ -1,10 +1,10 @@
-require("dotenv").config({ path: "../../.env-staging" });
+require("dotenv").config({ path: "../../.env-prod" });
 require("../mongo");
 const client = require("./database");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");
-const TicketModel = require("../models/ticket");
-const TagModel = require("../models/tag");
+const TicketModel = require("../models/zammad-ticket");
+const TagModel = require("../models/supportTag");
 const { intervalToDuration, formatDuration } = require("date-fns");
 const { fr } = require("date-fns/locale");
 const { ENVIRONMENT } = require("../config");

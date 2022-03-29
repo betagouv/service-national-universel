@@ -12,7 +12,6 @@ import { HiAdjustments } from "react-icons/hi";
 import VioletButton from "../../components/buttons/VioletButton";
 import ExportComponent from "../../components/ExportXlsx";
 import SelectStatus from "../../components/selectStatus";
-import BugMessage from "../../components/bugMessage";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
@@ -190,7 +189,6 @@ export default function Inscription() {
                 />
               </div>
             </Header>
-            <BugMessage />
             <Filter>
               <FilterRow visible>
                 <DataSearch

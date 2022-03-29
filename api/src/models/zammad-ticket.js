@@ -3,7 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 
 const esClient = require("../es");
 
-const MODELNAME = "ticket";
+const MODELNAME = "zammadticket";
 
 const Message = new mongoose.Schema(
   {
