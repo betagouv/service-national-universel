@@ -1,3 +1,20 @@
+# [1.62.0](https://github.com/betagouv/service-national-universel/compare/v1.61.2...v1.62.0) (2022-03-29)
+
+
+### Bug Fixes
+
+* `tout sélectionner` filtre places mission ([b5c97f5](https://github.com/betagouv/service-national-universel/commit/b5c97f5188506295564b5be796774f3d6afe4b40))
+* `youngCanChangeSession` array ([7efabf4](https://github.com/betagouv/service-national-universel/commit/7efabf4fdee8e9be68036a493a433950f77c221b))
+* nom de la stucture dans panel ([#1400](https://github.com/betagouv/service-national-universel/issues/1400)) ([895cc2f](https://github.com/betagouv/service-national-universel/commit/895cc2f75539fde54cbfeecc3388dd53d33c3fdb))
+* ouverture du rapport d'inscription aux référents ([e901422](https://github.com/betagouv/service-national-universel/commit/e901422a4e3bec5828c7371752695515f2450bee))
+
+
+### Features
+
+* MIG SNU via JVA ([#1381](https://github.com/betagouv/service-national-universel/issues/1381)) ([01f69e5](https://github.com/betagouv/service-national-universel/commit/01f69e597a88359c886c16213300c4d9b1e7fcab))
+* mutualiser les droits de changement de séjour en fonction d'un profil ([#1365](https://github.com/betagouv/service-national-universel/issues/1365)) ([677a3a4](https://github.com/betagouv/service-national-universel/commit/677a3a4e858f6cf30f683d68260fc152df400253))
+* Tableau de bord mission filtre préférence de mission ([0e11560](https://github.com/betagouv/service-national-universel/commit/0e11560043888557601a67c82b7cf36239e3ca0f))
+
 ## [1.61.2](https://github.com/betagouv/service-national-universel/compare/v1.61.1...v1.61.2) (2022-03-24)
 
 
