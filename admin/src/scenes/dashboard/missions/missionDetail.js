@@ -3,14 +3,18 @@ import { Col, Row } from "reactstrap";
 import CircularProgress, { CircularLine, CircularLineIndex } from "../components/CircularProgress";
 import { translate, MISSION_DOMAINS } from "../../../utils";
 import { Box, BoxTitleCircular as BoxTitle } from "../../../components/box";
+import FiltreCohort from "../components/FilterCohorte";
 
-export default function MissionDetail({ youngsDomains, missionsDomains }) {
+export default function MissionDetail({ youngsDomains, missionsDomains, filter, updateFilter }) {
   const totalMissions = Object.keys(missionsDomains).reduce((acc, a) => acc + missionsDomains[a], 0);
   const totalYoungs = Object.keys(youngsDomains).reduce((acc, a) => acc + youngsDomains[a], 0);
 
   return (
     <React.Fragment>
-      <h3 className="mt-4 mb-2 text-xl">Dans le détail des missions</h3>
+      <div className="flex justify-between items-center mt-4 mb-2">
+        <h3 className=" text-xl">Dans le détail des missions</h3>
+        <FiltreCohort onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} filter={filter} />
+      </div>
       <Box>
         <Row>
           <Col md={6} xl={6} key="1">

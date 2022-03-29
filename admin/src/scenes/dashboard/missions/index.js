@@ -91,7 +91,7 @@ export default function Index() {
           )}
         </Col>
       </Row>
-      {filter && <Statistics filter={filter} />}
+      {filter && <Statistics filter={filter} updateFilter={updateFilter} />}
     </>
   );
 }
