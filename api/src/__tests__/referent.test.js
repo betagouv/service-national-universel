@@ -4,6 +4,7 @@ const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const getNewYoungFixture = require("./fixtures/young");
 const getNewReferentFixture = require("./fixtures/referent");
+const getNewStructureFixture = require("./fixtures/structure");
 const {
   getYoungsHelper,
   getYoungByIdHelper,
@@ -24,6 +25,7 @@ const {
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
 const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
+const { createStructureHelper, getStructureById } = require("./helpers/structure");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { getNewApplicationFixture } = require("./fixtures/application");
@@ -226,7 +228,8 @@ describe("Referent", () => {
     });
     it("should contain applications", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
+      const structure = await createStructureHelper({ ...getNewStructureFixture() });
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, structureId: structure._id });
       const res = await request(getAppHelper())
         .get("/referent/young/" + young._id)
         .send();
@@ -234,6 +237,12 @@ describe("Referent", () => {
       expect(res.body.data.applications).toEqual([
         {
           ...application.toObject(),
+          structure: {
+            ...structure.toObject(),
+            _id: structure._id.toString(),
+            createdAt: structure.createdAt.toISOString(),
+            updatedAt: structure.updatedAt.toISOString(),
+          },
           _id: application._id.toString(),
           createdAt: application.createdAt.toISOString(),
           updatedAt: application.updatedAt.toISOString(),

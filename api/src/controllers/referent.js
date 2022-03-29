@@ -677,7 +677,12 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     const data = await YoungModel.findById(value.id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const applications = await ApplicationModel.find({ youngId: data._id });
+    const applicationsFromDb = await ApplicationModel.find({ youngId: data._id });
+    let applications = [];
+    for (let application of applicationsFromDb) {
+      const structure = await StructureModel.findById(application.structureId);
+      applications.push({ ...application._doc, structure });
+    }
     return res.status(200).send({ ok: true, data: { ...data._doc, applications } });
   } catch (error) {
     capture(error);

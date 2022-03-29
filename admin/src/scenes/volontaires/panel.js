@@ -234,8 +234,12 @@ const ApplicationDetails = ({ application, i }) => {
   return (
     <div className="application-detail">
       <div className="application-detail-text">
+        <Link to={`/structure/${application.structureId}`}>
+          <span className="application-detail-priority">{`# ${i}`}</span>
+          <span className="application-detail-priority">{application.structure?.name}</span>
+        </Link>
         <Link to={`/mission/${application.missionId}`}>
-          <span className="application-detail-priority">{`CHOIX ${i}`}</span>
+          <br />
           {application.missionName}
         </Link>
       </div>
