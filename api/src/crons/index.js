@@ -10,7 +10,7 @@ const noticePushMission = require("./noticePushMission");
 const applicationPending = require("./applicationPending");
 //const newMissionReminder = require("./newMissionReminder");
 const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
-const jeVeuxAiderDaily = require("./jeVeuxAiderDaily");
+const jeVeuxAiderDaily = require("./JeVeuxAiderDaily");
 
 // doubt ? -> https://crontab.guru/
 

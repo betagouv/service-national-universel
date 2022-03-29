@@ -71,7 +71,7 @@ const sync = async (result) => {
         //Struct without resp skip
         if (!jvaStructure?.responsables.length) {
           console.log("Skip structure : no resp");
-          return;
+          continue;
         }
 
         //Create responsable
@@ -81,7 +81,7 @@ const sync = async (result) => {
           const exist = await ReferentModel.findOne({ email: resp.email });
           if (exist) {
             console.log("Skip referent : email already registered");
-            return;
+            continue;
           }
 
           //Create referent
@@ -97,7 +97,7 @@ const sync = async (result) => {
         //Error on referent creation
         if (!newResps.length) {
           console.log("Skip structure : error creation referent");
-          return;
+          continue;
         }
 
         //Create structure
@@ -151,7 +151,7 @@ const sync = async (result) => {
         });
       } else if (referentMission.structureId !== structure.id) {
         console.log("Skip mission : error referent links to another structure");
-        return;
+        continue;
       }
 
       //Create or updade mission
