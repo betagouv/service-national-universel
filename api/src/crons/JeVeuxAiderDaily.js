@@ -34,7 +34,9 @@ const jva2SnuDomaines = {
 };
 
 const fetchMission = (page = 1) => {
-  fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/missions?filter[is_snu_mig_compatible]=1&apikey=${JVA_API_KEY}&page=${page}`, {
+  //preoprod : https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/
+  //prod : https://www.jeveuxaider.gouv.fr/
+  fetch(`https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/api/api-engagement/missions?filter[is_snu_mig_compatible]=1&apikey=${JVA_API_KEY}&page=${page}`, {
     method: "GET",
     redirect: "follow",
   })
@@ -45,7 +47,7 @@ const fetchMission = (page = 1) => {
 };
 
 const fetchStructure = async (id) => {
-  return fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/organisations/${id}?apikey=${JVA_API_KEY}`, {
+  return fetch(`https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/api/api-engagement/organisations/${id}?apikey=${JVA_API_KEY}`, {
     method: "GET",
     redirect: "follow",
   })
@@ -212,6 +214,7 @@ const sync = async (result) => {
         }
       } else {
         console.log("Update mission");
+        delete infoMission.status;
         const left = missionExist.placesLeft + infoMission.placesTotal - missionExist.placesTotal;
         missionExist.set({ ...infoMission, placesLeft: left });
         await missionExist.save();
