@@ -46,6 +46,8 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
               lastName,
               email,
               department,
+              subjectStep1: step1.id,
+              subjectStep2: step2.id,
               region: department2region[department],
             });
             if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
