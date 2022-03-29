@@ -10,7 +10,7 @@ import Volunteer from "./Volunteer";
 import { getLink } from "../../../utils";
 import api from "../../../services/api";
 
-export default function Places({ filter }) {
+export default function Places({ filter, updateFilter }) {
   const [youngsDomains, setYoungsDomains] = useState({});
   const [youngsPeriod, setYoungsPeriod] = useState({});
   const [youngsFormat, setYoungsFormat] = useState({});
@@ -81,6 +81,7 @@ export default function Places({ filter }) {
       };
       if (filter.region?.length) body2.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
       if (filter.department?.length) body2.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (filter.cohort?.length) body2.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["VALIDATED"] } });
       const { responses: youngResponse } = await api.esQuery("young", body2);
 
       if (missionResponse.length) {
@@ -116,7 +117,7 @@ export default function Places({ filter }) {
     <React.Fragment>
       <ProposedPlaces getLink={getLink} filter={filter} missionPlaceLeft={missionPlaceLeft} missionPlaceTotal={missionPlaceTotal} />
       <Status getLink={getLink} filter={filter} data={missionsStatus} />
-      <MissionDetail missionsDomains={missionsDomains} youngsDomains={youngsDomains} />
+      <MissionDetail missionsDomains={missionsDomains} youngsDomains={youngsDomains} filter={filter} updateFilter={updateFilter} />
       <Period youngsPeriod={youngsPeriod} missionsPeriod={missionsPeriod} />
       <Format youngsFormat={youngsFormat} missionsFormat={missionsFormat} />
       <ProfessionalProject youngsProfessionnalProject={youngsProfessionnalProject} youngsProfessionnalProjectPrecision={youngsProfessionnalProjectPrecision} />
