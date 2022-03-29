@@ -47,6 +47,8 @@ import Zammad from "./components/Zammad";
 import GoogleTags from "./components/GoogleTags";
 import { toastr } from "react-redux-toastr";
 
+import { youngCanChangeSession } from "snu-lib";
+
 if (environment === "production") {
   Sentry.init({
     dsn: SENTRY_URL,
@@ -163,7 +165,7 @@ const Espace = () => {
             <Route path="/candidature" component={Applications} />
             <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
-            <Route path="/changer-de-sejour" component={changeSejour} />
+            {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? <Route path="/changer-de-sejour" component={changeSejour} /> : null}
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>

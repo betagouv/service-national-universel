@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { HeroContainer, Hero } from "../../components/Content";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { youngCanChangeSession } from "snu-lib";
 
 export default function NotDone() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -18,7 +19,7 @@ export default function NotDone() {
             <b>Votre phase 1 n&apos;est donc pas validée.</b>
           </p>
           <p>Nous vous invitons à vous rapprocher de votre référent déparemental pour la suite de votre parcours.</p>
-          {["Février 2022"].includes(young.cohort) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
+          {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
         </div>
         <div className="thumb" />
       </Hero>
