@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
-import { apiURL } from "../../config";
+import { apiURL, environment } from "../../config";
 import Panel from "./panel";
 import { formatStringDateTimezoneUTC, translate, getFilterLabel, formatLongDateFR, formatDateFRTimezoneUTC, ES_NO_LIMIT, ROLES } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
@@ -18,7 +18,6 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
-import { environment } from "../../config";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION", "DATE", "SOURCE"];
 
@@ -186,6 +185,8 @@ export default function List() {
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
+                  selectAllLabel="Tout sélectionner"
+                  renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
