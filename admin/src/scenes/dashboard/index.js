@@ -35,7 +35,7 @@ export default function Dashboard() {
           <TabItem title="Centres" to="/dashboard/centres" />
         </nav>
         <div className="flex m-1 justify-end">
-          {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll filter={filter} /> : null}
+          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && currentTab === "inscriptions" ? <ExportAll filter={filter} /> : null}
           <VioletButton
             onClick={() => {
               plausibleEvent("Dashboard/CTA - Exporter statistiques");
