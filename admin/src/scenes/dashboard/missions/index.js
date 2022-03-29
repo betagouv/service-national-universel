@@ -10,6 +10,8 @@ import Statistics from "./Statistics";
 
 import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
 import DateFilter from "../components/DatePickerDashBoard";
+import FilterSource from "../components/FilterSource";
+import { environment } from "../../../config";
 
 export default function Index() {
   const [filter, setFilter] = useState();
@@ -81,6 +83,7 @@ export default function Index() {
               <FiltersList>
                 <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
                 <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
+                {environment !== "production" && <FilterSource onChange={(source) => updateFilter({ source })} value={filter.source} filter={filter} />}
                 <DateFilter title="Date de début" onChange={(e) => setFromDate(e.target.value)} value={fromDate} />
                 <DateFilter title="Date de fin" onChange={(e) => setToDate(e.target.value)} value={toDate} />
               </FiltersList>

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate, ES_NO_LIMIT, ROLES, copyToClipboard } from "../../../utils";
+import { translate, ES_NO_LIMIT, ROLES, copyToClipboard, htmlCleaner } from "../../../utils";
 import StructureView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
@@ -127,7 +127,7 @@ const Details = ({ title, value, copy }) => {
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
+      <div className="detail-text" dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />
       {copy ? (
         <div
           className="icon"

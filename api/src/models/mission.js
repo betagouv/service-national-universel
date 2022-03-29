@@ -253,6 +253,25 @@ const Schema = new mongoose.Schema({
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+
+  //JVA mission
+  lastSyncAt: { type: Date },
+  isJvaMission: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "Mission proposée par JVA",
+    },
+  },
+
+  jvaMissionId: {
+    type: Number,
+    documentation: {
+      description: "JVA mission ID",
+    },
+  },
+  jvaRawData: mongoose.Schema.Types.Mixed,
 });
 
 Schema.virtual("fromUser").set(function (fromUser) {
@@ -276,7 +295,7 @@ Schema.plugin(patchHistory, {
     user: { type: Object, required: false, from: "_user" },
   },
 });
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
+Schema.plugin(mongooseElastic(esClient, { ignore: ["jvaRawData"] }), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

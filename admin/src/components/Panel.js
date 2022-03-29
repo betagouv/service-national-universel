@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { copyToClipboard } from "../utils";
+import { copyToClipboard, htmlCleaner } from "../utils";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
 
@@ -28,7 +28,7 @@ export const Details = ({ title, value, copy }) => {
     <div className="detail">
       <div className="detail-title">{title}&nbsp;:</div>
       <div style={{ display: "flex" }}>
-        <div className="detail-text">{value}</div>
+        {typeof value === "object" ? <div className="detail-text">{value}</div> : <div className="detail-text" dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />}
         {copy ? (
           <div
             className="flex items-center justify-center mx-1 cursor-pointer hover:scale-105 text-snu-purple-400"
@@ -106,7 +106,7 @@ export default styled.div`
     display: flex;
     font-size: 14px;
     text-align: left;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: space-between;
     margin-top: 10px;
     &-title {
@@ -115,7 +115,7 @@ export default styled.div`
       margin-right: 0.5rem;
     }
     &-text {
-      text-align: right;
+      text-align: left;
       color: rgba(26, 32, 44);
       a {
         color: #5245cc;

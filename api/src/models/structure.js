@@ -190,6 +190,24 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  //JVA structure
+  isJvaStructure: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "Structure importée de JVA",
+    },
+  },
+
+  jvaStructureId: {
+    type: Number,
+    documentation: {
+      description: "JVA structure ID",
+    },
+  },
+  jvaRawData: mongoose.Schema.Types.Mixed,
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -215,7 +233,7 @@ Schema.plugin(patchHistory, {
     user: { type: Object, required: false, from: "_user" },
   },
 });
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
+Schema.plugin(mongooseElastic(esClient, { ignore: ["jvaRawData"] }), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

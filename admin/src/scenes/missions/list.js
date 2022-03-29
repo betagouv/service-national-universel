@@ -18,8 +18,9 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
+import { environment } from "../../config";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION", "DATE"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION", "DATE", "SOURCE"];
 
 export default function List() {
   const [mission, setMission] = useState(null);
@@ -212,6 +213,32 @@ export default function List() {
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
                 />
+
+                {environment !== "production" && (
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    placeholder="Source"
+                    componentId="SOURCE"
+                    dataField="isJvaMission.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "SOURCE") }}
+                    renderItem={(e, count) => {
+                      const text = e === "true" ? "JVA" : "SNU";
+                      return `${text} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    renderLabel={(items) => {
+                      if (Object.keys(items).length === 0) return "Source";
+                      const translated = Object.keys(items).map((item) => {
+                        return item === "true" ? "JVA" : "SNU";
+                      });
+                      let value = translated.join(", ");
+                      return value;
+                    }}
+                  />
+                )}
+
                 <ReactiveComponent
                   componentId="DATE"
                   URLParams={true}
@@ -255,6 +282,7 @@ export default function List() {
                     <thead>
                       <tr>
                         <th>Mission</th>
+                        {environment !== "production" && <th style={{ width: "100px" }}>Sources</th>}
                         <th style={{ width: "200px" }}>Dates</th>
                         <th style={{ width: "90px" }}>Places</th>
                         <th style={{ width: "250px" }}>Statut</th>
@@ -308,6 +336,18 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           </p>
         </MultiLine>
       </td>
+      {environment !== "production" && (
+        <td>
+          <span>
+            {value.isJvaMission === "true" ? (
+              <img src={require("../../assets/JVA_round.png")} className="h-9 w-9 group-hover:scale-105 mx-auto" />
+            ) : (
+              <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 group-hover:scale-105 mx-auto" />
+            )}
+          </span>
+        </td>
+      )}
+
       <td>
         <div>
           <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDateTimezoneUTC(value.startAt)}

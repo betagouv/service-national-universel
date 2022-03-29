@@ -38,6 +38,7 @@ const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || "";
 const SLACK_BOT_CHANNEL = process.env.SLACK_BOT_CHANNEL || "";
 
 const JVA_TOKEN = process.env.JVA_TOKEN || "";
+const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
 module.exports = {
   PORT,
@@ -72,6 +73,7 @@ module.exports = {
   SLACK_BOT_TOKEN,
   SLACK_BOT_CHANNEL,
   JVA_TOKEN,
+  JVA_API_KEY,
 };
 
 function getEnvironment() {
