@@ -19,7 +19,6 @@ import Error, { requiredMessage } from "../../components/errorMessage";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
-  const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const isNew = !props?.match?.params?.id;
@@ -33,16 +32,12 @@ export default function Edit(props) {
 
     if (!center || !center?.cohorts || !center?.cohorts?.length) return;
 
-    let sessionsAdded = [];
     for (const cohort of center.cohorts) {
       const sessionPhase1Response = await api.get(`/cohesion-center/${id}/cohort/${cohort}/session-phase1`);
       if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
-      sessionsAdded.push(sessionPhase1Response.data);
       obj[sessionPhase1Response.data.cohort] = sessionPhase1Response.data.placesTotal;
     }
-
     setDefaultValue(obj);
-    setSessions(sessionsAdded);
   }
 
   useEffect(() => {
@@ -50,7 +45,15 @@ export default function Edit(props) {
   }, []);
 
   const updateSessions = async (newValues) => {
-    for (const session of sessions) {
+    //Dynamic update for cohorts
+    let sessionToUpdate = [];
+    for (let i = 0; i < newValues.cohorts.length; i++) {
+      const sessionPhase1Response = await api.get(`/cohesion-center/${newValues._id}/cohort/${newValues.cohorts[i]}/session-phase1`);
+      if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
+      sessionToUpdate.push(sessionPhase1Response.data);
+    }
+
+    for (const session of sessionToUpdate) {
       if (session.placesTotal !== newValues[session.cohort]) {
         const { ok, code } = await api.put(`/session-phase1/${session._id}`, { placesTotal: newValues[session.cohort] });
         if (!ok) return toastr.error(`Oups, une erreur est survenue lors de la mise à jour de la session ${session.cohort}`, translate(code));
@@ -160,12 +163,12 @@ export default function Edit(props) {
                 <Box>
                   <BoxHeadTitle>Nombre de places disponibles par séjour</BoxHeadTitle>
                   <BoxContent direction="column">
-                    {sessions.map((session) => (
+                    {values.cohorts.map((cohort) => (
                       <Item
-                        key={session._id}
-                        title={session.cohort}
+                        key={cohort}
+                        title={cohort}
                         values={values}
-                        name={session.cohort}
+                        name={cohort}
                         placeholder="Nombre de place"
                         handleChange={handleChange}
                         required
