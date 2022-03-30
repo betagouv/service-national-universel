@@ -14,6 +14,7 @@ const ROLE = {
   REFERENT: 5, // referent
   STRUCTURE: 6,
   VISITOR: 7,
+  HEAD_CENTER: 8,
 };
 
 // const ORGANISATION = {
@@ -58,9 +59,12 @@ async function sync(doc, { force } = { force: false }) {
     } else if (doc.role === "visitor") {
       role = ROLE.VISITOR;
       note = `<a href=${`https://admin.snu.gouv.fr/user/${doc._id}`}>Profil visiteur</a>`;
+    } else if (doc.role === "head_center") {
+      role = ROLE.HEAD_CENTER;
+      note = `<a href=${`https://admin.snu.gouv.fr/user/${doc._id}`}>Profil chef de centre</a>`;
     } else if (doc.role === "admin") {
       role = ROLE.ADMIN;
-    } else if (doc.role && !["referent_department", "referent_region", "responsible", "supervisor", "admin", "visitor"].includes(doc.role)) {
+    } else if (doc.role && !["referent_department", "referent_region", "responsible", "supervisor", "admin", "visitor", "head_center"].includes(doc.role)) {
       console.log("NO AUTHORIZED ROLE");
       return;
     } else if (!doc.role) {
