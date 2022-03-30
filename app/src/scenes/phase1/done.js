@@ -28,7 +28,7 @@ export default function Done() {
                 <br />
                 Télécharger votre attestation de réalisation de phase 1
                 <DownloadAttestationButton young={young} uri="1">
-                  Télécharger mon attestation &gt;
+                  Télécharger mon attestation ›
                 </DownloadAttestationButton>
                 <MailAttestationButton
                   young={young}
@@ -36,15 +36,15 @@ export default function Done() {
                   template="certificate"
                   placeholder="Attestation de réalisation de la phase 1"
                   onClick={() => plausibleEvent("Phase1/CTA - Envoi par mail de l'attestation réussite")}>
-                  Envoyer l&apos;attestation de réalisation par mail &gt;
+                  Envoyer l&apos;attestation de réalisation par mail ›
                 </MailAttestationButton>
               </p>
               <p>
                 <strong>Attestation de JDC</strong>
                 <br />
                 Penser à réaliser votre recensement auprès de votre mairie
-                <a href={`${supportURL}/base-de-connaissance/journee-defense-et-citoyennete-1`} target="_blank" rel="noreferrer">
-                  <PrimaryStyle>En savoir plus &gt;</PrimaryStyle>
+                <a href={`${supportURL}/base-de-connaissance/journee-defense-et-citoyennete`} target="_blank" rel="noreferrer">
+                  <PrimaryStyle>En savoir plus ›</PrimaryStyle>
                 </a>
               </p>
             </>
