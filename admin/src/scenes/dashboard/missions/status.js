@@ -30,8 +30,8 @@ export default function Status({ data, filter, getLink, getExportQuery }) {
           <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <ExportComponent
               searchType="_msearch"
-              handleClick={() => plausibleEvent("Mission/DashBoard - Exporter le détail des places")}
-              title="Exporter le détail des places"
+              handleClick={() => plausibleEvent("Mission/DashBoard - Exporter le détail des missions")}
+              title="Exporter le détail des missions"
               defaultQuery={getExportQuery}
               exportTitle="Missions"
               index="mission"
@@ -44,21 +44,50 @@ export default function Status({ data, filter, getLink, getExportQuery }) {
                     result.push({
                       Région: region.key,
                       Département: department.key,
+
                       "Brouillon - Nombre de missions déposées": status.find((stat) => stat.key === "DRAFT")?.doc_count || 0,
-                      "Brouillon - Nombre de places proposées": status.find((stat) => stat.key === "DRAFT")?.placesTotal.value || 0,
-                      "Brouillon - Nombre de places occupées": status.find((stat) => stat.key === "DRAFT")?.placesLeft.value || 0,
+                      "Brouillon - Nombre de places totales": status.find((stat) => stat.key === "DRAFT")?.placesTotal.value || 0,
+                      "Brouillon - Nombre de places disponibles": status.find((stat) => stat.key === "DRAFT")?.placesLeft.value || 0,
+                      "Brouillon - Nombre de places occupées":
+                        status.find((stat) => stat.key === "DRAFT")?.placesTotal.value - status.find((stat) => stat.key === "DRAFT")?.placesLeft.value || 0,
+
+                      "En attente de validation - Nombre de missions déposées": status.find((stat) => stat.key === "WAITING_VALIDATION")?.doc_count || 0,
+                      "En attente de validation - Nombre de places totales": status.find((stat) => stat.key === "WAITING_VALIDATION")?.placesTotal.value || 0,
+                      "En attente de validation - Nombre de places disponibles": status.find((stat) => stat.key === "WAITING_VALIDATION")?.placesLeft.value || 0,
+                      "En attente de validation - Nombre de places occupées":
+                        status.find((stat) => stat.key === "WAITING_VALIDATION")?.placesTotal.value - status.find((stat) => stat.key === "WAITING_VALIDATION")?.placesLeft.value ||
+                        0,
+
                       "En attente de correction - Nombre de missions déposées": status.find((stat) => stat.key === "WAITING_CORRECTION")?.doc_count || 0,
-                      "En attente de correction - Nombre de places proposées": status.find((stat) => stat.key === "WAITING_CORRECTION")?.placesTotal.value || 0,
-                      "En attente de correction - Nombre de places occupées": status.find((stat) => stat.key === "WAITING_CORRECTION")?.placesLeft.value || 0,
+                      "En attente de correction - Nombre de places totales": status.find((stat) => stat.key === "WAITING_CORRECTION")?.placesTotal.value || 0,
+                      "En attente de correction - Nombre de places disponibles": status.find((stat) => stat.key === "WAITING_CORRECTION")?.placesLeft.value || 0,
+                      "En attente de correction - Nombre de places occupées":
+                        status.find((stat) => stat.key === "WAITING_CORRECTION")?.placesTotal.value - status.find((stat) => stat.key === "WAITING_CORRECTION")?.placesLeft.value ||
+                        0,
+
                       "Validée - Nombre de missions déposées": status.find((stat) => stat.key === "VALIDATED")?.doc_count || 0,
-                      "Validée - Nombre de places proposées": status.find((stat) => stat.key === "VALIDATED")?.placesTotal.value || 0,
-                      "Validée - Nombre de places occupées": status.find((stat) => stat.key === "VALIDATED")?.placesLeft.value || 0,
-                      "Archivée - Nombre de missions déposées": status.find((stat) => stat.key === "ARCHIVED")?.doc_count || 0,
-                      "Archivée - Nombre de places proposées": status.find((stat) => stat.key === "ARCHIVED")?.placesTotal.value || 0,
-                      "Archivée - Nombre de places occupées": status.find((stat) => stat.key === "ARCHIVED")?.placesLeft.value || 0,
+                      "Validée - Nombre de places totales": status.find((stat) => stat.key === "VALIDATED")?.placesTotal.value || 0,
+                      "Validée - Nombre de places disponibles": status.find((stat) => stat.key === "VALIDATED")?.placesLeft.value || 0,
+                      "Validée - Nombre de places occupées":
+                        status.find((stat) => stat.key === "VALIDATED")?.placesTotal.value - status.find((stat) => stat.key === "VALIDATED")?.placesLeft.value || 0,
+
+                      "Refusée - Nombre de missions déposées": status.find((stat) => stat.key === "REFUSED")?.doc_count || 0,
+                      "Refusée - Nombre de places totales": status.find((stat) => stat.key === "REFUSED")?.placesTotal.value || 0,
+                      "Refusée - Nombre de places disponibles": status.find((stat) => stat.key === "REFUSED")?.placesLeft.value || 0,
+                      "Refusée - Nombre de places occupées":
+                        status.find((stat) => stat.key === "REFUSED")?.placesTotal.value - status.find((stat) => stat.key === "REFUSED")?.placesLeft.value || 0,
+
                       "Annulée - Nombre de missions déposées": status.find((stat) => stat.key === "CANCEL")?.doc_count || 0,
-                      "Annulée - Nombre de places proposées": status.find((stat) => stat.key === "CANCEL")?.placesTotal.value || 0,
-                      "Annulée - Nombre de places occupées": status.find((stat) => stat.key === "CANCEL")?.placesLeft.value || 0,
+                      "Annulée - Nombre de places totales": status.find((stat) => stat.key === "CANCEL")?.placesTotal.value || 0,
+                      "Annulée - Nombre de places disponibles": status.find((stat) => stat.key === "CANCEL")?.placesLeft.value || 0,
+                      "Annulée - Nombre de places occupées":
+                        status.find((stat) => stat.key === "CANCEL")?.placesTotal.value - status.find((stat) => stat.key === "CANCEL")?.placesLeft.value || 0,
+
+                      "Archivée - Nombre de missions déposées": status.find((stat) => stat.key === "ARCHIVED")?.doc_count || 0,
+                      "Archivée - Nombre de places totales": status.find((stat) => stat.key === "ARCHIVED")?.placesTotal.value || 0,
+                      "Archivée - Nombre de places disponibles": status.find((stat) => stat.key === "ARCHIVED")?.placesLeft.value || 0,
+                      "Archivée - Nombre de places occupées":
+                        status.find((stat) => stat.key === "ARCHIVED")?.placesTotal.value - status.find((stat) => stat.key === "ARCHIVED")?.placesLeft.value || 0,
                     });
                   }
                 }
