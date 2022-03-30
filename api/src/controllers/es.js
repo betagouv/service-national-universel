@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES } = require("snu-lib/roles");
 const { PHASE1_HEADCENTER_ACCESS_LIMIT, COHORTS } = require("snu-lib/constants");
+const { region2department } = require("snu-lib/region-and-departments");
 const { capture } = require("../sentry");
 const esClient = require("../es");
 const { ERRORS, isYoung, getSignedUrlForApiAssociation } = require("../utils");
@@ -172,7 +173,7 @@ router.post("/young-having-school-in-region/export", passport.authenticate(["ref
     }
 
     const filter = [
-      { term: { "schoolRegion.keyword": user.region } },
+      { terms: { "schoolDepartment.keyword": [...region2department[user.region]] } },
       { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
     ];
 
