@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES } = require("snu-lib/roles");
 const { PHASE1_HEADCENTER_ACCESS_LIMIT, COHORTS } = require("snu-lib/constants");
+const { region2department } = require("snu-lib/region-and-departments");
 const { capture } = require("../sentry");
 const esClient = require("../es");
 const { ERRORS, isYoung, getSignedUrlForApiAssociation } = require("../utils");
@@ -152,6 +153,27 @@ router.post("/young-having-school-in-department/export", passport.authenticate([
 
     const filter = [
       { term: { "schoolDepartment.keyword": user.department } },
+      { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
+    ];
+
+    const response = await allRecords("young", applyFilterOnQuery(body.query, filter));
+    return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, error: error.message });
+  }
+});
+// young-having-school-in-region is a special index (that uses a young index)
+// used by REFERENT_REGION to get youngs having a school in their region.
+router.post("/young-having-school-in-region/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    if (user.role !== ROLES.REFERENT_REGION) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const filter = [
+      { terms: { "schoolDepartment.keyword": [...region2department[user.region]] } },
       { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
     ];
 
