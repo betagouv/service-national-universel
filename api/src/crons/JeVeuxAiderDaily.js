@@ -169,6 +169,7 @@ const sync = async (result) => {
         tutorId: referentMission.id,
         tutorName: `${referentMission.firstName} ${referentMission.lastName}`,
         zip: mission.address.zip,
+        address: mission.address.address,
         city: mission.address.city,
         department: departmentLookUp[mission.address.department],
         region: department2region[departmentLookUp[mission.address.department]],
@@ -181,6 +182,9 @@ const sync = async (result) => {
         jvaMissionId: mission.id,
         jvaRawData: mission,
         lastSyncAt: Date.now(),
+
+        updatedAt: new Date(mission.updated_at),
+        createdAt: new Date(mission.created_at),
       };
 
       //Check if mission exist
