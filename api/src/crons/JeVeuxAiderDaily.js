@@ -198,27 +198,31 @@ const sync = async (result) => {
           department: data.department,
           subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
         });
-        if (referentsDepartment?.length) {
-          await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
-            emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
-            params: {
-              cta: `${ADMIN_URL}/mission/${data._id}`,
-            },
-          });
-        }
+
+        // if (referentsDepartment?.length) {
+        //   await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
+        //     emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
+        //     params: {
+        //       cta: `${ADMIN_URL}/mission/${data._id}`,
+        //     },
+        //   });
+        // }
 
         //Send mail to responsable mission
-        if (referentMission) {
-          await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
-            emailTo: [{ name: `${referentMission.firstName} ${referentMission.lastName}`, email: referentMission.email }],
-            params: {
-              missionName: data.name,
-            },
-          });
-        }
+        // if (referentMission) {
+        //   await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
+        //     emailTo: [{ name: `${referentMission.firstName} ${referentMission.lastName}`, email: referentMission.email }],
+        //     params: {
+        //       missionName: data.name,
+        //     },
+        //   });
+        // }
       } else {
         console.log("Update mission");
         delete infoMission.status;
+        delete infoMission.name;
+        delete infoMission.description;
+        delete infoMission.actions;
         const left = missionExist.placesLeft + infoMission.placesTotal - missionExist.placesTotal;
         missionExist.set({ ...infoMission, placesLeft: left });
         await missionExist.save();
