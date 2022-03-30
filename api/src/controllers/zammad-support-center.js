@@ -169,6 +169,8 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       group = ZAMMAD_GROUP.STRUCTURE;
     } else if (req.user.role === ROLES.VISITOR) {
       group = ZAMMAD_GROUP.VISITOR;
+    } else if (req.user.role === ROLES.HEAD_CENTER) {
+      group = ZAMMAD_GROUP.HEAD_CENTER;
     } else {
       group = ZAMMAD_GROUP.CONTACT;
     }

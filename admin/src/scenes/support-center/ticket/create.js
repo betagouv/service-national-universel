@@ -7,7 +7,7 @@ import { NavLink, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { translate, ROLES } from "../../../utils";
 
-import { SelectTag, typesReferent, subjectsReferent, typesAdmin, subjectsAdmin, typesStructure, subjectsStructure } from "./workflow";
+import { SelectTag, typesReferent, subjectsReferent, typesAdmin, subjectsAdmin, typesStructure, subjectsStructure, step1Public } from "./workflow";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
@@ -30,6 +30,8 @@ export default function Create() {
     } else if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
       setTypeList(typesStructure);
       setSubjectsList(subjectsStructure);
+    } else if ([ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role)) {
+      setTypeList(step1Public);
     }
   }, [user]);
 
@@ -40,6 +42,7 @@ export default function Create() {
   if ([ROLES.ADMIN].includes(user.role)) tags.push("EMETTEUR_Admin");
   if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) tags.push("EMETTEUR_Référent");
   if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) tags.push("EMETTEUR_Structure");
+  if (user.role === ROLES.HEAD_CENTER) tags.push("EMETTEUR_Chef_de_centre");
   if (user.role === "visitor") tags.push("EMETTEUR_Visiteur_Régional");
 
   return (
@@ -51,12 +54,12 @@ export default function Create() {
       </Heading>
       <Form>
         <Formik
-          initialValues={{ type: null, subject: null, message: "", messageTitle: "" }}
+          initialValues={{ type: null, subject: null, message: "", messageSubject: "" }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
             try {
-              const { subject, type, message, messageTitle } = values;
+              const { subject, type, message, messageSubject } = values;
 
               // add the default tags
               const computedTags = [...tags];
@@ -65,7 +68,7 @@ export default function Create() {
               // if needed, add the subject tag (we do not add the subject tag if the type is "Autre")
               if (subject?.tags && type?.id !== "OTHER") computedTags.push(...subject.tags);
               let title = type?.label;
-              if (user.role === "visitor") title = messageTitle;
+              if ([ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role)) title = messageSubject;
               if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
               if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
                 const { data, ok, code } = await api.post("/zammad-support-center/ticket", {
@@ -99,38 +102,37 @@ export default function Create() {
           }}>
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
             <>
-              {user.role === "visitor" ? (
+              <SelectTag
+                name="type"
+                options={Object.values(typesList)}
+                title={"Ma demande"}
+                selectPlaceholder={"Choisir la catégorie"}
+                handleChange={handleChange}
+                value={values?.type?.id}
+                errors={errors}
+                touched={touched}
+              />
+              {[ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role) ? (
                 <Item
-                  name="messageTitle"
-                  title="Titre de mon message"
-                  placeholder="Renseignez le titre de votre message"
+                  name="messageSubject"
+                  title="Ma demande"
+                  placeholder="Renseignez le sujet de votre demande"
                   type="input"
-                  value={values.messageTitle}
+                  value={values.messageSubject}
                   handleChange={handleChange}
                   validate={(v) => !v && requiredMessage}
                   errors={errors}
                   touched={touched}
                   rows="5"
                 />
-              ) : (
-                <SelectTag
-                  name="type"
-                  options={Object.values(typesList)}
-                  title={"Ma demande"}
-                  selectPlaceholder={"Choisir la catégorie"}
-                  handleChange={handleChange}
-                  value={values?.type?.id}
-                  errors={errors}
-                  touched={touched}
-                />
-              )}
+              ) : null}
               {values.type?.id === typesReferent.SPECIAL_CASE.id ? (
                 <p className="refNote">
                   Pour vous aider à résoudre ce cas particulier, merci de nous transmettre toutes les informations nécessaires à la compréhension de cette situation. Si vous
                   souhaitez joindre des pièces envoyez votre demande à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
                 </p>
               ) : null}
-              {values.type?.id && values.type?.id !== "OTHER" ? (
+              {values.type?.id && values.type?.id !== "OTHER" && ![ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role) ? (
                 <SelectTag
                   name="subject"
                   options={Object.values(subjectsList).filter((e) => e.parentId === values?.type?.id)}
