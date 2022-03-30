@@ -30,8 +30,8 @@ export default function Status({ data, filter, getLink, getExportQuery }) {
           <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <ExportComponent
               searchType="_msearch"
-              handleClick={() => plausibleEvent("Mission/DashBoard - Exporter details places")}
-              title="Exporter le détail des missions"
+              handleClick={() => plausibleEvent("Mission/DashBoard - Exporter le détail des places")}
+              title="Exporter le détail des places"
               defaultQuery={getExportQuery}
               exportTitle="Missions"
               index="mission"
