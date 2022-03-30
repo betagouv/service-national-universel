@@ -43,18 +43,31 @@ export default function Status({ filter }) {
   return (
     <Row>
       {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-        <Col md={6} xl={2}>
-          <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] })} color={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-            <CardTitle>En cours</CardTitle>
-            <CardSubtitle>Inscriptions en cours</CardSubtitle>
-            <CardValueWrapper>
-              <CardValue>{status.IN_PROGRESS || 0}</CardValue>
-              <CardPercentage>
-                <CardArrow />
-              </CardPercentage>
-            </CardValueWrapper>
-          </LinkCard>
-        </Col>
+        <>
+          <Col md={6} xl={2}>
+            <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] })} color={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+              <CardTitle>En cours</CardTitle>
+              <CardSubtitle>Inscriptions en cours</CardSubtitle>
+              <CardValueWrapper>
+                <CardValue>{status.IN_PROGRESS || 0}</CardValue>
+                <CardPercentage>
+                  <CardArrow />
+                </CardPercentage>
+              </CardValueWrapper>
+            </LinkCard>
+          </Col>
+          <Col md={6} xl={2}>
+            <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"ABANDONED"%5D'] })} color={YOUNG_STATUS_COLORS.ABANDONED}>
+              <CardTitle>Abandonnées</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{status.ABANDONED || 0}</CardValue>
+                <CardPercentage>
+                  <CardArrow />
+                </CardPercentage>
+              </CardValueWrapper>
+            </LinkCard>
+          </Col>
+        </>
       )}
       <Col md={6} xl={2}>
         <LinkCard
@@ -133,17 +146,6 @@ export default function Status({ filter }) {
               <CardTitle>Non éligibles</CardTitle>
               <CardValueWrapper>
                 <CardValue>{status.NOT_ELIGIBLE || 0}</CardValue>
-                <CardPercentage>
-                  <CardArrow />
-                </CardPercentage>
-              </CardValueWrapper>
-            </LinkCard>
-          </Col>
-          <Col md={6} xl={2}>
-            <LinkCard link={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"ABANDONED"%5D'] })} color={YOUNG_STATUS_COLORS.ABANDONED}>
-              <CardTitle>Abandonnées</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{status.ABANDONED || 0}</CardValue>
                 <CardPercentage>
                   <CardArrow />
                 </CardPercentage>
