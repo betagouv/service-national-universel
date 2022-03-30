@@ -36,7 +36,7 @@ export default function Goal() {
     <>
       <Header>
         <div style={{ flex: 1 }}>
-          <Title>Objectifs d&apos;inscriptions au SNU 2021</Title>
+          <Title>Objectifs d&apos;inscriptions au SNU</Title>
         </div>
         <LoadingButton
           loading={loading}
