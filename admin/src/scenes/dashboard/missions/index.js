@@ -23,7 +23,7 @@ export default function Index() {
     setFilter({ ...filter, ...n });
   }
 
-  useEffect(() => {
+  const checkRole = () => {
     const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
       updateFilter({ department: [user.department], status });
@@ -32,6 +32,9 @@ export default function Index() {
     } else {
       updateFilter({ status: Object.keys(YOUNG_STATUS), region: [] });
     }
+  };
+  useEffect(() => {
+    checkRole();
   }, []);
 
   useEffect(() => {
@@ -70,7 +73,8 @@ export default function Index() {
     } else {
       range = { startDate: {}, endDate: {} };
     }
-    updateFilter({ ...range, fromDate, toDate });
+    updateFilter({ startDate: range.startDate, endDate: range.endDate, fromDate: fromDate, toDate: toDate });
+    checkRole();
   }, [fromDate, toDate]);
 
   return (

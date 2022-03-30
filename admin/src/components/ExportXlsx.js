@@ -7,11 +7,19 @@ import ModalConfirm from "./modals/ModalConfirm";
 import api from "../services/api";
 import dayjs from "dayjs";
 
-export default function ExportComponent({ handleClick, title, exportTitle, index, react, transform, defaultQuery = () => ({ query: { query: { match_all: {} } } }) }) {
+export default function ExportComponent({
+  handleClick,
+  title,
+  exportTitle,
+  index,
+  react,
+  transform,
+  searchType = "export",
+  defaultQuery = () => ({ query: { query: { match_all: {} } } }),
+}) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const query = useRef(defaultQuery().query);
-
   const onClick = () => {
     handleClick?.();
     setModal({
@@ -23,6 +31,12 @@ export default function ExportComponent({ handleClick, title, exportTitle, index
     });
   };
 
+  useEffect(() => {
+    if (searchType === "_msearch") {
+      query.current = defaultQuery().query;
+    }
+  }, [defaultQuery()]);
+
   if (exporting) {
     return (
       <ReactiveComponent
@@ -30,7 +44,9 @@ export default function ExportComponent({ handleClick, title, exportTitle, index
         componentId="EXPORT"
         react={react}
         onQueryChange={(prev, next) => {
-          query.current = next.query;
+          if (searchType !== "_msearch") {
+            query.current = next.query;
+          }
         }}
         render={(props) => {
           const { setQuery, data, loading } = props;
@@ -44,6 +60,7 @@ export default function ExportComponent({ handleClick, title, exportTitle, index
               index={index}
               exportTitle={exportTitle}
               transform={transform}
+              searchType={searchType}
             />
           );
         }}
@@ -68,7 +85,7 @@ export default function ExportComponent({ handleClick, title, exportTitle, index
   );
 }
 
-function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index }) {
+function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index, searchType }) {
   const STATUS_LOADING = "Récupération des données";
   const STATUS_TRANSFORM = "Mise en forme";
   const STATUS_EXPORT = "Création du fichier";
@@ -87,7 +104,7 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
     if (!status) {
       setStatus(STATUS_LOADING);
     } else if (status === STATUS_LOADING) {
-      getAllResults(index, currentQuery).then((results) => {
+      getAllResults(index, currentQuery, searchType).then((results) => {
         setData(results);
         setStatus(STATUS_TRANSFORM);
       });
@@ -117,10 +134,17 @@ async function toArrayOfArray(results, transform) {
   return [columns, ...data.map((item) => Object.values(item))];
 }
 
-async function getAllResults(index, query) {
-  const result = await api.post(`/es/${index}/export`, { query });
-  if (!result.data.length) return [];
-  return result.data;
+async function getAllResults(index, query, searchType) {
+  let result;
+  if (searchType === "_msearch") {
+    result = await api.esQuery(index, query);
+    if (!result.responses.length) return [];
+    return result.responses[0];
+  } else {
+    result = await api.post(`/es/${index}/export`, { query });
+    if (!result.data.length) return [];
+    return result.data;
+  }
 }
 
 async function exportData(fileName, csv) {

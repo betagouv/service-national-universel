@@ -9,6 +9,7 @@ import Mobility from "./Mobility";
 import Volunteer from "./Volunteer";
 import { getLink } from "../../../utils";
 import api from "../../../services/api";
+import { ES_NO_LIMIT } from "../../../utils";
 
 export default function Places({ filter, updateFilter }) {
   const [youngsDomains, setYoungsDomains] = useState({});
@@ -29,6 +30,44 @@ export default function Places({ filter, updateFilter }) {
   const [mobilityNearRelative, setMobilityNearRelative] = useState({});
   const [mobilityNearHome, setMobilityNearHome] = useState({});
   const [mobilityTransport, setMobilityTransport] = useState({});
+  const [exportFilter, setExportFilter] = useState([]);
+
+  const getExportQuery = () => {
+    return {
+      query: {
+        query: { bool: { must: { match_all: {} }, filter: [] } },
+        aggs: {
+          filtered: {
+            filter: {
+              bool: {
+                must: exportFilter,
+              },
+            },
+            aggs: {
+              regions: {
+                terms: { field: "region.keyword", size: ES_NO_LIMIT },
+                aggs: {
+                  departments: {
+                    terms: { field: "department.keyword", size: ES_NO_LIMIT },
+                    aggs: {
+                      status: {
+                        terms: { field: "status.keyword" },
+                        aggs: {
+                          placesTotal: { sum: { field: "placesTotal" } },
+                          placesLeft: { sum: { field: "placesLeft" } },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        size: 0,
+      },
+    };
+  };
 
   useEffect(() => {
     async function initStatus() {
@@ -53,13 +92,13 @@ export default function Places({ filter, updateFilter }) {
       if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
       if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
       if (filter.source?.length) body.query.bool.filter.push({ terms: { "isJvaMission.keyword": filter.source } });
-
-      if (Object.keys(filter.startDate).length) {
-        body.query.bool.filter.push({ range: { startAt: filter.startDate } });
+      if (filter?.startDate && Object.keys(filter?.startDate).length) {
+        body.query.bool.filter?.push({ range: { startAt: filter.startDate } });
       }
-      if (Object.keys(filter.endDate).length) {
+      if (filter?.endDate && Object.keys(filter?.endDate).length) {
         body.query.bool.filter.push({ range: { endAt: filter.endDate } });
       }
+      setExportFilter(body.query.bool.filter);
 
       const { responses: missionResponse } = await api.esQuery("mission", body);
 
@@ -116,7 +155,7 @@ export default function Places({ filter, updateFilter }) {
   return (
     <React.Fragment>
       <ProposedPlaces getLink={getLink} filter={filter} missionPlaceLeft={missionPlaceLeft} missionPlaceTotal={missionPlaceTotal} />
-      <Status getLink={getLink} filter={filter} data={missionsStatus} />
+      <Status getLink={getLink} filter={filter} data={missionsStatus} getExportQuery={getExportQuery} />
       <MissionDetail missionsDomains={missionsDomains} youngsDomains={youngsDomains} filter={filter} updateFilter={updateFilter} />
       <Period youngsPeriod={youngsPeriod} missionsPeriod={missionsPeriod} />
       <Format youngsFormat={youngsFormat} missionsFormat={missionsFormat} />
