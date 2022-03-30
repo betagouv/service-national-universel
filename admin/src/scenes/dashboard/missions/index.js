@@ -20,7 +20,6 @@ export default function Index() {
   const [toDate, setToDate] = useState("");
 
   function updateFilter(n) {
-    console.log({ ...filter, ...n });
     setFilter({ ...filter, ...n });
   }
 
