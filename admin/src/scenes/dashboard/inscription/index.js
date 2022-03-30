@@ -33,7 +33,7 @@ export default function Index({ onChangeFilter = () => {} }) {
         academy: [],
         region: [],
         department: [],
-        cohort: filter?.cohort || ["Février 2022", "Juin 2022", "Juillet 2022", "2022"],
+        cohort: filter?.cohort || ["Juin 2022", "Juillet 2022", "2022"],
       }),
       ...n,
     });
