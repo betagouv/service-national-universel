@@ -12,7 +12,7 @@ export default function Details({ center, sessions }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", padding: "2rem 3rem" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-        <h1 style={{ marginBottom: "2rem" }}>{center.name}</h1>
+        <h4 style={{ marginBottom: "2rem" }}>{center.name}</h4>
         {canCreateOrUpdateCohesionCenter(user) ? (
           <div style={{ flexBasis: "0" }}>
             <Link to={`/centre/${center._id}/edit`}>
@@ -26,7 +26,7 @@ export default function Details({ center, sessions }) {
           <Wrapper>
             <Header>
               <h4>
-                <strong>Centre</strong> <span style={{ color: "#9C9C9C", fontSize: "0.85rem" }}>#{center._id}</span>
+                <strong>Informations du centre</strong>
               </h4>
             </Header>
             <Container>

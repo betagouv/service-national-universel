@@ -158,28 +158,30 @@ export default function Edit(props) {
                 </Box>
               </Col>
             </Row>
-            <Row>
-              <Col md={6} style={{ marginBottom: "20px" }}>
-                <Box>
-                  <BoxHeadTitle>Nombre de places disponibles par séjour</BoxHeadTitle>
-                  <BoxContent direction="column">
-                    {values.cohorts.map((cohort) => (
-                      <Item
-                        key={cohort}
-                        title={cohort}
-                        values={values}
-                        name={cohort}
-                        placeholder="Nombre de place"
-                        handleChange={handleChange}
-                        required
-                        errors={errors}
-                        touched={touched}
-                      />
-                    ))}
-                  </BoxContent>
-                </Box>
-              </Col>
-            </Row>
+            {values.cohorts?.length ? (
+              <Row>
+                <Col md={6} style={{ marginBottom: "20px" }}>
+                  <Box>
+                    <BoxHeadTitle>Nombre de places disponibles par séjour</BoxHeadTitle>
+                    <BoxContent direction="column">
+                      {(values.cohorts || []).map((cohort) => (
+                        <Item
+                          key={cohort}
+                          title={cohort}
+                          values={values}
+                          name={cohort}
+                          placeholder="Nombre de place"
+                          handleChange={handleChange}
+                          required
+                          errors={errors}
+                          touched={touched}
+                        />
+                      ))}
+                    </BoxContent>
+                  </Box>
+                </Col>
+              </Row>
+            ) : null}
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               <LoadingButton onClick={handleSubmit} loading={loading}>
