@@ -66,10 +66,9 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   });
 
   // everyday at 0200
-  // uncomment pour lancer en prod
-  // cron.schedule(everyHours(6), () => {
-  //   jeVeuxAiderDaily.handler();
-  // });
+  cron.schedule(everyHours(6), () => {
+    jeVeuxAiderDaily.handler();
+  });
 
   //every hour
   // cron.schedule(EVERY_HOUR, () => {

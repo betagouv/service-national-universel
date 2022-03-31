@@ -36,7 +36,7 @@ const jva2SnuDomaines = {
 const fetchMission = (page = 1) => {
   //preoprod : https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/
   //prod : https://www.jeveuxaider.gouv.fr/
-  fetch(`https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/api/api-engagement/missions?filter[is_snu_mig_compatible]=1&apikey=${JVA_API_KEY}&page=${page}`, {
+  fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/missions?filter[is_snu_mig_compatible]=1&apikey=${JVA_API_KEY}&page=${page}`, {
     method: "GET",
     redirect: "follow",
   })
@@ -47,7 +47,7 @@ const fetchMission = (page = 1) => {
 };
 
 const fetchStructure = async (id) => {
-  return fetch(`https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/api/api-engagement/organisations/${id}?apikey=${JVA_API_KEY}`, {
+  return fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/organisations/${id}?apikey=${JVA_API_KEY}`, {
     method: "GET",
     redirect: "follow",
   })
@@ -199,6 +199,7 @@ const sync = async (result) => {
           subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
         });
 
+        //Uncomment after the first iteration
         // if (referentsDepartment?.length) {
         //   await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
         //     emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
@@ -208,6 +209,7 @@ const sync = async (result) => {
         //   });
         // }
 
+        //Uncomment after the first iteration
         //Send mail to responsable mission
         // if (referentMission) {
         //   await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
