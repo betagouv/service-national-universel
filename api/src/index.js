@@ -73,11 +73,7 @@ app.use("/email", require("./controllers/email"));
 app.use("/meeting-point", require("./controllers/meeting-point"));
 app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
-app.use("/zammad-support-center", require("./controllers/zammad-support-center"));
 app.use("/zammood", require("./controllers/zammood"));
-app.use("/support-center/user", require("./controllers/supportUser"));
-app.use("/support-center/ticket", require("./controllers/supportTicket"));
-app.use("/support-center/knowledge-base", require("./controllers/knowledgeBase"));
 app.use("/signin", require("./controllers/signin"));
 
 //services
