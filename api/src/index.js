@@ -81,9 +81,7 @@ app.use("/support-center/knowledge-base", require("./controllers/knowledgeBase")
 app.use("/signin", require("./controllers/signin"));
 
 //services
-if (ENVIRONMENT !== "production") {
-  app.use("/jeveuxaider", require("./services/jeveuxaider"));
-}
+app.use("/jeveuxaider", require("./services/jeveuxaider"));
 
 app.use(handleError);
 
