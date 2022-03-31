@@ -16,6 +16,7 @@ import FormFooter from "../../../components/form/FormFooter";
 import { STEPS } from "../utils";
 import { setYoung } from "../../../redux/auth/actions";
 import { getAge, translate } from "../../../utils";
+import { supportURL } from "../../../config";
 
 export default function StepDocuments() {
   const young = useSelector((state) => state.Auth.young);
@@ -167,6 +168,24 @@ export default function StepDocuments() {
                 )}
               </>
             )}
+            <div className="text-sm mt-2 text-coolGray-500 italic">
+              <div>
+                Vous avez besoin d&apos;aide pour téléverser les documents&nbsp;?{" "}
+                <a
+                  className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline"
+                  href={`${supportURL}/base-de-connaissance/je-televerse-un-document`}
+                  target="_blank"
+                  rel="noreferrer">
+                  Cliquez ici
+                </a>
+              </div>
+              <div>
+                Si vous n&apos;arrivez pas à téléverser les documents en ayant suivi notre guide ci-dessus, vous pouvez nous les envoyer en pièce-jointe à{" "}
+                <a className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline" href="mailto:contact@snu.gouv.fr">
+                  contact@snu.gouv.fr
+                </a>
+              </div>
+            </div>
             <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
