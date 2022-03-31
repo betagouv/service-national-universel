@@ -117,8 +117,8 @@ const sync = async (result) => {
           region: department2region[departmentLookUp[jvaStructure.address.department]],
           country: jvaStructure.address.country,
           location: {
-            lon: jvaStructure.address.longitude,
-            lat: jvaStructure.address.latitude,
+            lon: Number(jvaStructure.address.longitude),
+            lat: Number(jvaStructure.address.latitude),
           },
           isJvaStructure: "true",
           jvaStructureId: jvaStructure.id,
@@ -175,8 +175,8 @@ const sync = async (result) => {
         region: department2region[departmentLookUp[mission.address.department]],
         country: "France",
         location: {
-          lat: mission.address.latitude,
-          lon: mission.address.longitude,
+          lat: Number(mission.address.latitude),
+          lon: Number(mission.address.longitude),
         },
         isJvaMission: true,
         jvaMissionId: mission.id,
