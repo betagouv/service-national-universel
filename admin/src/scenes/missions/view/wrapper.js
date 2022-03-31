@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import SelectStatusMission from "../../../components/selectStatusMission";
-import { translate, ROLES, colors } from "../../../utils";
+import { translate, ROLES, MISSION_STATUS } from "../../../utils";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
@@ -47,6 +47,7 @@ export default function Wrapper({ mission, tab, children }) {
     mission.name += " (copie)";
     delete mission._id;
     mission.placesLeft = mission.placesTotal;
+    mission.status = MISSION_STATUS.WAITING_VALIDATION;
     const { data, ok, code } = await api.post("/mission", mission);
     if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
     toastr.success("Mission dupliquée !");

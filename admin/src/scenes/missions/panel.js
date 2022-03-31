@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { translate, formatStringDateTimezoneUTC, MISSION_STATUS_COLORS } from "../../utils";
+import { translate, formatStringDateTimezoneUTC, MISSION_STATUS_COLORS, MISSION_STATUS } from "../../utils";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
@@ -65,6 +65,7 @@ export default function PanelView({ onChange, mission }) {
     mission.name += " (copie)";
     delete mission._id;
     mission.placesLeft = mission.placesTotal;
+    mission.status = MISSION_STATUS.WAITING_VALIDATION;
     const { data, ok, code } = await api.post("/mission", mission);
     if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
     toastr.success("Mission dupliquée !");
