@@ -8,8 +8,9 @@ const ReferentModel = require("../models/referent");
 const MissionModel = require("../models/mission");
 const ApplicationModel = require("../models/application");
 const StructureModel = require("../models/structure");
+const YoungModel = require("../models/young");
 const config = require("../config");
-const { ROLES, APPLICATION_STATUS } = require("snu-lib/constants");
+const { ROLES, APPLICATION_STATUS, MISSION_STATUS, CONTRACT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
 const { JWT_MAX_AGE, cookieOptions } = require("../cookie-options");
 const { ERRORS } = require("../utils");
 
@@ -63,23 +64,36 @@ router.get("/actions", async (req, res) => {
 
     // si l'utilisateur existe, on récupère les missions + candidatures qui lui sont liées
     if (user) {
-      const data = { structure: {}, actions: { waitingValidation: 0, contractToBeSigned: 0, contractToBeFilled: 0 } };
+      const data = {
+        structure: {},
+        actions: {
+          applicationWaitingValidation: 0,
+          contractToBeSigned: 0,
+          contractToBeFilled: 0,
+          missionWaitingCorrection: 0,
+          volunteerToHost: 0,
+          missionInProgress: 0,
+        },
+      };
       const structure = await StructureModel.findById(user.structureId);
       data.structure = { name: structure.name };
 
       const missions = await MissionModel.find({ tutorId: user._id.toString() });
 
       for (let mission of missions) {
-        const applications = await ApplicationModel.find({ missionId: mission._id, status: { $in: [APPLICATION_STATUS.WAITING_VALIDATION] } });
-        data.actions.waitingValidation += applications.length;
+        if (mission.status === MISSION_STATUS.WAITING_CORRECTION) data.actions.missionWaitingCorrection += 1;
+
+        const applications = await ApplicationModel.find({ missionId: mission._id });
+        for (const application of applications) {
+          if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) data.actions.applicationWaitingValidation += 1;
+
+          const young = await YoungModel.findOne({ _id: application.youngId });
+          if (young.statusPhase2 === YOUNG_STATUS_PHASE2.IN_PROGRESS) data.actions.missionInProgress += 1;
+          if (young.statusPhase2Contract === CONTRACT_STATUS.DRAFT && application.status === APPLICATION_STATUS.VALIDATED) data.actions.contractToBeFilled += 1;
+          if (young.statusPhase2Contract === CONTRACT_STATUS.SENT) data.actions.contractToBeSigned += 1;
+          if (young.statusPhase2Contract === CONTRACT_STATUS.VALIDATED && young.status === YOUNG_STATUS.VALIDATED) data.actions.volunteerToHost += 1;
+        }
       }
-
-      // todo
-      data.actions.contractToBeSigned = 0;
-
-      // todo
-      data.actions.contractToBeFilled = 0;
-
       // data.raw = { missions, structure };
 
       return res.status(200).send({ ok: true, data });
