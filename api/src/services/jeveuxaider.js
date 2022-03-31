@@ -9,10 +9,11 @@ const MissionModel = require("../models/mission");
 const ApplicationModel = require("../models/application");
 const StructureModel = require("../models/structure");
 const YoungModel = require("../models/young");
+const ContractModel = require("../models/contract");
 const config = require("../config");
 const { ROLES, APPLICATION_STATUS, MISSION_STATUS, CONTRACT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
 const { JWT_MAX_AGE, cookieOptions } = require("../cookie-options");
-const { ERRORS } = require("../utils");
+const { ERRORS, checkStatusContract } = require("../utils");
 
 router.get("/signin", async (req, res) => {
   try {
@@ -85,13 +86,21 @@ router.get("/actions", async (req, res) => {
 
         const applications = await ApplicationModel.find({ missionId: mission._id });
         for (const application of applications) {
-          if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) data.actions.applicationWaitingValidation += 1;
-
           const young = await YoungModel.findOne({ _id: application.youngId });
-          if (young.statusPhase2 === YOUNG_STATUS_PHASE2.IN_PROGRESS) data.actions.missionInProgress += 1;
-          if (young.statusPhase2Contract === CONTRACT_STATUS.DRAFT && application.status === APPLICATION_STATUS.VALIDATED) data.actions.contractToBeFilled += 1;
-          if (young.statusPhase2Contract === CONTRACT_STATUS.SENT) data.actions.contractToBeSigned += 1;
-          if (young.statusPhase2Contract === CONTRACT_STATUS.VALIDATED && young.status === YOUNG_STATUS.VALIDATED) data.actions.volunteerToHost += 1;
+          if (young) {
+            if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) data.actions.applicationWaitingValidation += 1;
+            if (young.statusPhase2 === YOUNG_STATUS_PHASE2.IN_PROGRESS && application.status === APPLICATION_STATUS.VALIDATED) data.actions.missionInProgress += 1;
+
+            const contract = await ContractModel.findOne({ _id: application.contractId });
+            if (contract && application.status === APPLICATION_STATUS.VALIDATED) {
+              const statusContract = checkStatusContract(contract);
+              if (statusContract === CONTRACT_STATUS.DRAFT) data.actions.contractToBeFilled += 1;
+              if (statusContract === CONTRACT_STATUS.SENT && contract.structureManagerStatus === "WAITING_VALIDATION") data.actions.contractToBeSigned += 1;
+              if (statusContract === CONTRACT_STATUS.VALIDATED && young.status === YOUNG_STATUS.VALIDATED) data.actions.volunteerToHost += 1;
+            } else {
+              if (application.status === APPLICATION_STATUS.VALIDATED) data.actions.contractToBeFilled += 1;
+            }
+          }
         }
       }
       // data.raw = { missions, structure };
