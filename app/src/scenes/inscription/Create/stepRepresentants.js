@@ -12,7 +12,7 @@ import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import FranceConnectButton from "../components/FranceConnectButton";
-import { saveYoung, STEPS } from "../utils";
+import { saveYoung } from "../utils";
 import { translate } from "../../../utils";
 import FormLegend from "../../../components/form/FormLegend";
 import FormRow from "../../../components/form/FormRow";
@@ -22,7 +22,7 @@ import InfoIcon from "../../../components/InfoIcon";
 const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }) => {
   const isParentFromFranceConnect = values[`parent${id}FromFranceConnect`] === "true";
 
-  function FranceConnectZone({ id, handleSave }) {
+  function FranceConnectZone({ id }) {
     function getFranceConnectCallback(idRepresentant) {
       return `inscription/france-connect-callback?representant=${idRepresentant}`;
     }
@@ -36,16 +36,13 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
             En tant que représentant légal n°{id}, vous pouvez utiliser ce bouton pour vous identifier avec FranceConnect et récupérer vos données personnelles (nom, prénom et
             email), ou remplir les informations manuellement ci-dessous.
           </p>
-          <FranceConnectButton callback={getFranceConnectCallback(id)} beforeRedirect={() => handleSave()} />
+          <FranceConnectButton callback={getFranceConnectCallback(id)} />
           <p>
             L&apos;identification via <b>FranceConnect</b> dispense de signature numérique du consentement du ou des représentants légaux.
           </p>
         </Col>
       </FormRow>
     );
-  }
-  async function handleSave() {
-    await saveYoung(values);
   }
 
   useEffect(() => {
@@ -59,7 +56,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
     <>
       <FormLegend>
         <h5>Représentant légal n°{id}</h5>
-        <FranceConnectZone handleSave={() => handleSave()} id={id} />
+        <FranceConnectZone id={id} />
       </FormLegend>
 
       <FormRow>
@@ -217,6 +214,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
                     department: `parent${id}Department`,
                     region: `parent${id}Region`,
                     country: `parent${id}Country`,
+                    addressVerified: `addressParent${id}Verified`,
                   }}
                   values={values}
                   handleChange={handleChange}
@@ -239,20 +237,59 @@ export default function StepRepresentants() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
-  const [isParent2Visible, setIsParent2Visible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [data, setData] = useState();
+  const [isParent2Visible, setIsParent2Visible] = useState(false);
 
   const hasParent2Infos = () => {
-    return young && (young.parent2Status || young.parent2FirstName || young.parent2LastName || young.parent2Email || young.parent2Phone);
+    return young?.parent2Status || young?.parent2FirstName || young?.parent2LastName || young?.parent2Email || young?.parent2Phone ? true : false;
   };
+
   useEffect(() => {
-    setIsParent2Visible(hasParent2Infos());
+    if (young) {
+      setData({
+        parent1Status: young.parent1Status,
+        parent1FirstName: young.parent1FirstName,
+        parent1LastName: young.parent1LastName,
+        parent1Email: young.parent1Email,
+        parent1Phone: young.parent1Phone,
+        parent1OwnAddress: young.parent1OwnAddress,
+        parent1City: young.parent1City,
+        parent1Zip: young.parent1Zip,
+        parent1Address: young.parent1Address,
+        parent1Location: young.parent1Location,
+        parent1Department: young.parent1Department,
+        parent1Region: young.parent1Region,
+        parent1Country: young.parent1Country,
+        parent1FromFranceConnect: young.parent1FromFranceConnect,
+        parent2Status: young.parent2Status,
+        parent2FirstName: young.parent2FirstName,
+        parent2LastName: young.parent2LastName,
+        parent2Email: young.parent2Email,
+        parent2Phone: young.parent2Phone,
+        parent2OwnAddress: young.parent2OwnAddress,
+        parent2City: young.parent2City,
+        parent2Zip: young.parent2Zip,
+        parent2Address: young.parent2Address,
+        parent2Location: young.parent2Location,
+        parent2Department: young.parent2Department,
+        parent2Region: young.parent2Region,
+        parent2Country: young.parent2Country,
+        parent2FromFranceConnect: young.parent2FromFranceConnect,
+      });
+      setIsParent2Visible(hasParent2Infos());
+      if (young.parent1Region && young.parent1Region) {
+        setData((data) => ({ ...data, addressParent1Verified: "true" }));
+      }
+      if (young.parent2Region && young.parent2Region) {
+        setData((data) => ({ ...data, addressParent2Verified: "true" }));
+      }
+    } else {
+      history.push("/inscription/profil");
+    }
   }, [young]);
 
-  if (!young) {
-    history.push("/inscription/profil");
-    return <div />;
-  }
+  if (!data) return null;
 
   return (
     <Wrapper>
@@ -261,15 +298,43 @@ export default function StepRepresentants() {
         <p>Faites compléter les informations ci-dessous par votre ou vos représentants légaux.</p>
       </Heading>
       <Formik
-        initialValues={young}
+        initialValues={data}
         enableReinitialize={true}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            values.inscriptionStep = STEPS.CONSENTEMENTS;
-            const { ok, code, data } = await api.put("/young", values);
+            //Check location
+            for (let id = 1; id <= 2; id++) {
+              if (values[`parent${id}OwnAddress`] === "true") {
+                if (values[`parent${id}Country`] !== "France") {
+                  delete values[`parent${id}Region`];
+                  delete values[`parent${id}Department`];
+                  delete values[`parent${id}Location`];
+                  delete values[`addressParent${id}Verified`];
+                }
+              } else {
+                delete values[`parent${id}City`];
+                delete values[`parent${id}Zip`];
+                delete values[`parent${id}Address`];
+                delete values[`parent${id}Location`];
+                delete values[`parent${id}Department`];
+                delete values[`parent${id}Region`];
+                delete values[`parent${id}Country`];
+                delete values[`addressParent${id}Verified`];
+              }
+            }
+            if (!isParent2Visible) {
+              delete values.parent2Email;
+              delete values.parent2FirstName;
+              delete values.parent2LastName;
+              delete values.parent2OwnAddress;
+              delete values.parent2Phone;
+              delete values.parent2Status;
+            }
+            values.parent2 = isParent2Visible;
+            const { ok, code, data } = await api.put("/young/inscription/representant", values);
             if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(data));
             history.push("/inscription/consentements");
