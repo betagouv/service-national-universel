@@ -33,6 +33,21 @@ const jva2SnuDomaines = {
   "Art & Culture pour tous": MISSION_DOMAINS.CULTURE,
 };
 
+const jva2SnuTimePeriod = {
+  week: "semaine",
+  month: "mois",
+  year: "an",
+};
+
+const jva2SnuDuration = {
+  "1_hour": "1 heure",
+  "2_hours": "2 heures",
+  half_day: "Une demi-journée",
+  day: "1 jour",
+  "3_days": "3 jours",
+  "5_days": "5 jours",
+};
+
 const fetchMission = (page = 1) => {
   //preoprod : https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/
   //prod : https://www.jeveuxaider.gouv.fr/
@@ -155,6 +170,12 @@ const sync = async (result) => {
       }
 
       //Create or updade mission
+      const frequence = mission.commitment.time_period
+        ? mission.commitment.duration
+          ? jva2SnuDuration[mission.commitment.duration] + " par " + jva2SnuTimePeriod[mission.commitment.time_period]
+          : ""
+        : "";
+
       const infoMission = {
         name: mission.name,
         mainDomain: jva2SnuDomaines[mission.domaine.name],
@@ -162,6 +183,7 @@ const sync = async (result) => {
         endAt: new Date(mission.end_date),
         placesTotal: mission.snu_mig_places,
         description: mission.objectifs,
+        frequence: frequence,
         actions: mission.description,
         structureId: structure.id,
         structureName: structure.name,
