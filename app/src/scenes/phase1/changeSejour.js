@@ -40,7 +40,7 @@ export default function changeSejour() {
       try {
         const { data } = await api.post("/cohort-session/eligibility/2022", {
           birthDate: young.birthdateAt,
-          schoolLevel: young.schoolLevel,
+          schoolLevel: young.grade,
           department: young.department,
         });
         const sejourGoal = data.map((e) => {
