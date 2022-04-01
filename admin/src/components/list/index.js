@@ -26,7 +26,6 @@ export const HelpText = styled.div`
   padding: 1rem;
   padding-top: 0;
   display: grid;
-  place-items: center;
   color: #666;
   .title {
     color: black;

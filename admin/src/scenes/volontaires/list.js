@@ -716,48 +716,26 @@ export default function VolontaireList() {
             {infosHover || infosClick ? (
               <HelpText>
                 <div>
-                  Pour filtrer les volontaires, cliquez sur les éléments ci-dessus.
+                  Pour filtrer les volontaires, cliquez sur les éléments ci-dessus. Pour en savoir plus sur les différents filtres{" "}
+                  <a href={`${supportURL}/base-de-connaissance/je-filtre-les-volontaires`} target="_blank" rel="noreferrer">
+                    consultez notre article
+                  </a>
                   <div style={{ height: "0.5rem" }} />
                   <div>
-                    <span className="title">Statut :</span>statut du parcours SNU du volontaire
+                    <span className="title">Général :</span>concerne toutes les informations liées au parcours SNU du volontaire. Le statut général Validée est toujours activé.
                   </div>
                   <div>
-                    <span className="title">Cohorte :</span>année d&apos;inscription
+                    <span className="title">Dossier :</span>concerne toutes les informations et documents transmis au moment de son inscription
                   </div>
                   <div>
-                    <span className="title">Régions et Départements :</span>origine du volontaire
+                    <span className="title">Phase 1 , Phase 2 , Phase 3 :</span>concernent tous les éléments de suivi des volontaires
                   </div>
                   <div>
-                    <span className="title">Statut de phase :</span>pour en savoir plus consultez la{" "}
-                    <a href={`${supportURL}/base-de-connaissance/les-phases-du-snu-1`} target="_blank" rel="noreferrer">
-                      base de connaissance
-                    </a>
+                    <span className="title">Filtres sur l’accord (Oui / Non) :</span> Droit à l’image, Utilisation d’autotest
                   </div>
                   <div>
-                    <span className="title">Participations au séjour de cohésion :</span> présent ou absent (phase 1)
-                  </div>
-                  <div>
-                    <span className="title">Fiche sanitaire :</span> reçue (Oui ou Non) (phase 1)
-                  </div>
-                  <div>
-                    <span className="title">Statut de mission :</span> s&apos;active dès la 1ère candidature et concerne le statut de sa candidature. Pour en savoir plus sur les
-                    statuts, consultez la{" "}
-                    <a href={`${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig`} target="_blank" rel="noreferrer">
-                      base de connaissance
-                    </a>
-                  </div>
-                  <div>
-                    <span className="title">Statut documents Préparation Militaire :</span>s&apos;active dès la 1ère candidature à une Préparation Militaire. Pour en savoir plus
-                    sur les statuts de ce filtre consultez la{" "}
-                    <a href={`${supportURL}/base-de-connaissance/je-consulte-les-pieces-justificatives-pour-une-pm`} target="_blank" rel="noreferrer">
-                      base de connaissance
-                    </a>{" "}
-                    (phase 2)
-                  </div>
-                  <div>
-                    <span className="title">Statut contrats :</span>Lorsque la candidature de mission est validée par la structure, le contrat généré est en{" "}
-                    <strong>Brouillon</strong>. Il est ensuite rempli et envoyé par la structure aux parties-prenantes via la plateforme, son statut devient{" "}
-                    <strong>Envoyée</strong> . Lorsque toutes les parties-prenantes l&apos;ont validé, son statut passe en <strong>Validée</strong>.
+                    <span className="title">Filtres sur le téléversement ou réception du document :</span> Règlement intérieur, Fiches sanitaires, Documents de Préparation
+                    Militaire
                   </div>
                 </div>
               </HelpText>
