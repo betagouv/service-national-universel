@@ -13,6 +13,7 @@ import validator from "validator";
 import AddressInput from "../components/addressInput";
 import ModalConfirm from "../components/modals/ModalConfirm";
 import PasswordEye from "../components/PasswordEye";
+import { appURL } from "../config";
 
 export default function Account() {
   const young = useSelector((state) => state.Auth.young);
@@ -63,7 +64,7 @@ export default function Account() {
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
-            <h2 class="md:text-3xl  text-2xl font-bold mb-6">Email</h2>
+            <h2 className="md:text-3xl  text-2xl font-bold mb-6">Email</h2>
             <FormRow>
               <Item
                 name="email"
@@ -99,7 +100,7 @@ export default function Account() {
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
-            <h2 class="md:text-3xl  text-2xl font-bold mb-6">Mot de passe</h2>
+            <h2 className="md:text-3xl  text-2xl font-bold mb-6">Mot de passe</h2>
             <hr />
             <Item required name="password" title="Actuel" errors={errors} touched={touched}>
               <PasswordEye
@@ -143,16 +144,30 @@ export default function Account() {
           if (young.address !== values.address || young.city !== values.city || young.department !== values.department || young.region !== values.region) {
             return setModal({
               isOpen: true,
-              title: "Changement d'adresse",
-              message:
-                "Attention, vous êtes sur le point de changer votre adresse. La proposition des missions et d'autres fonctionnalités dépendent de cette adresse.\n\nAssurez-vous que ce changement est indispensable avant de continuer ! Si ce n'est pas le cas, merci d'annuler cette action.",
+              title: "J’ai déménagé",
+              message: (
+                <p>
+                  <b>Attention, vous êtes sur le point de déclarer un déménagement.</b>
+                  <br />
+                  Votre référent départemental recevra un mail.
+                  <br />
+                  <br />
+                  <i>
+                    Si vous souhaitez accéder à une autre zone de recherche pour la proposition des missions, vous pouvez renseigner l&apos;adresse d’un proche dans{" "}
+                    <a className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline" href={`${appURL}/preferences`} target="_blank" rel="noreferrer">
+                      vos préférences
+                    </a>{" "}
+                    de missions.
+                  </i>
+                </p>
+              ),
               onConfirm: async () => updateYoung(values),
             });
           } else updateYoung(values);
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
-            <h2 class="md:text-3xl  text-2xl font-bold mb-6">Mon profil</h2>
+            <h2 className="md:text-3xl  text-2xl font-bold mb-6">Mon profil</h2>
             <FormRow>
               <Item name="firstName" values={values} handleChange={handleChange} title="Prénom" disabled />
               <Item name="lastName" values={values} handleChange={handleChange} title="Nom" disabled />
@@ -185,7 +200,7 @@ export default function Account() {
                 departAndRegionVisible={false}
               />
             </div>
-            <h2 class="md:text-3xl  text-2xl font-bold mb-6">Représentant Légal</h2>
+            <h2 className="md:text-3xl  text-2xl font-bold mb-6">Représentant Légal</h2>
             <FormRow>
               <Select
                 name="parent1Status"
