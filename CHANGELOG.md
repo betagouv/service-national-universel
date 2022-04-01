@@ -1,3 +1,17 @@
+# [1.64.0](https://github.com/betagouv/service-national-universel/compare/v1.63.1...v1.64.0) (2022-04-01)
+
+
+### Bug Fixes
+
+* `schoolLevel` is not `grade` + date limit change session ([#1421](https://github.com/betagouv/service-national-universel/issues/1421)) ([c82d2eb](https://github.com/betagouv/service-national-universel/commit/c82d2eb91e54d4dc2a0eba06bfbcd305520d398c))
+* FILTRES - Ajouter texte aide ([63e9b2f](https://github.com/betagouv/service-national-universel/commit/63e9b2f6234dbecb634d160feeaa264662f7ea34))
+* modal déménagement ([#1423](https://github.com/betagouv/service-national-universel/issues/1423)) ([1ef1043](https://github.com/betagouv/service-national-universel/commit/1ef10434bc3b7bb0fd652ea9fc9f7b88d1bf958d))
+
+
+### Features
+
+* Amélioration navigation d’une page à une autre ([5bce2e4](https://github.com/betagouv/service-national-universel/commit/5bce2e40bc89366bbe45a423294aa452656b48bc))
+
 ## [1.63.1](https://github.com/betagouv/service-national-universel/compare/v1.63.0...v1.63.1) (2022-03-31)
 
 
