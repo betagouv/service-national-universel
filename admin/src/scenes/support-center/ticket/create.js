@@ -70,7 +70,7 @@ export default function Create() {
               let title = type?.label;
               if ([ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role)) title = messageSubject;
               if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
-              if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
+              if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR || user.role === ROLES.HEAD_CENTER || (user.role === ROLES.VISITOR && user.subRole === "recteur_region")) {
                 const { data, ok, code } = await api.post("/zammad-support-center/ticket", {
                   title,
                   message,

@@ -7,6 +7,7 @@ const Joi = require("joi");
 const { capture } = require("../sentry");
 const zammood = require("../zammood");
 const { ERRORS } = require("../utils");
+const { ROLES } = require("snu-lib/roles");
 const { ADMIN_URL } = require("../config.js");
 
 router.get("/tickets", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -53,13 +54,19 @@ router.post("/ticket", passport.authenticate("referent", { session: false, failW
     const { subject, message, clientId } = value;
     const structureLink = `${ADMIN_URL}/structure/${req.user.structureId}`;
     const missionsLink = `${ADMIN_URL}/structure/${req.user.structureId}/missions`;
+    const centerLink = `${ADMIN_URL}/centre/${req.user.cohesionCenterId}`;
     const userAttributes = [
       { name: "date de création", value: req.user.createdAt },
       { name: "dernière connexion", value: req.user.lastLoginAt },
       { name: "role", value: req.user.role },
-      { name: "lien vers la fiche structure", value: structureLink },
-      { name: "lien général vers la page des missions proposées par la structure", value: missionsLink },
     ];
+    if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
+      userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
+      userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
+    }
+    if (req.user.role === ROLES.HEAD_CENTER) {
+      userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
+    }
     const response = await zammood.api("/v0/message", {
       method: "POST",
       credentials: "include",
