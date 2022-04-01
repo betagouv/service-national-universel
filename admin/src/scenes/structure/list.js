@@ -5,16 +5,19 @@ import { Link } from "react-router-dom";
 
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
-import { apiURL } from "../../config";
+import { apiURL, supportURL } from "../../config";
 import Panel from "./panel";
 import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT, ROLES, getFilterLabel, colors } from "../../utils";
 import VioletButton from "../../components/buttons/VioletButton";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
-import Chevron from "../../components/Chevron";
 import plausibleEvent from "../../services/pausible";
+import { HiAdjustments } from "react-icons/hi";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
+import UnlockedSvg from "../../assets/lock-open.svg";
+import LockedSvg from "../../assets/lock.svg";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION"];
 const formatLongDate = (date) => {
@@ -30,6 +33,12 @@ export default function List() {
   // List of missions associated to the structures
   const [missions, setMissions] = useState([]);
   const [filterVisible, setFilterVisible] = useState(false);
+  const [infosHover, setInfosHover] = useState(false);
+  const [infosClick, setInfosClick] = useState(false);
+
+  const toggleInfos = () => {
+    setInfosClick(!infosClick);
+  };
   const handleShowFilter = () => setFilterVisible(!filterVisible);
 
   useEffect(() => {
@@ -144,6 +153,10 @@ export default function List() {
                   URLParams={true}
                   queryFormat="and"
                 />
+                <HiAdjustments onClick={handleShowFilter} className="text-xl text-coolGray-700 cursor-pointer hover:scale-105" />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <div className="uppercase text-xs text-snu-purple-800">Général</div>
                 {user?.role === ROLES.ADMIN ? (
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
@@ -161,6 +174,9 @@ export default function List() {
                     renderLabel={(items) => getFilterLabel(items, "Statut")}
                   />
                 ) : null}
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -176,11 +192,37 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut juridique")}
                 />
-                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Affiliation à un réseau national"
+                  componentId="WITH_NETWORK"
+                  dataField="networkName.keyword"
+                  title=""
+                  react={{ and: FILTERS.filter((e) => e !== "WITH_NETWORK") }}
+                  URLParams={true}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
+                  sortBy="asc"
+                />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
+                <div className="uppercase text-xs text-snu-purple-800">Spécificité</div>
+
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Préparation Militaire"
+                  componentId="MILITARY_PREPARATION"
+                  dataField="isMilitaryPreparation.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
+                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -198,35 +240,33 @@ export default function List() {
                   URLParams={true}
                   showSearch={false}
                 />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Affiliation à un réseau national"
-                  componentId="WITH_NETWORK"
-                  dataField="networkName.keyword"
-                  title=""
-                  react={{ and: FILTERS.filter((e) => e !== "WITH_NETWORK") }}
-                  URLParams={true}
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  sortBy="asc"
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Préparation Militaire"
-                  componentId="MILITARY_PREPARATION"
-                  dataField="isMilitaryPreparation.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
-                />
+                <Help onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)}>
+                  {infosClick ? <LockIcon src={LockedSvg} /> : <LockIcon src={UnlockedSvg} />}
+                  Aide
+                </Help>
+              </FilterRow>
+              <FilterRow className="flex justify-center" visible={filterVisible}>
+                <DeleteFilters />
               </FilterRow>
             </Filter>
+            {infosHover || infosClick ? (
+              <HelpText>
+                <div>
+                  Pour filtrer les structures, cliquez sur les éléments ci-dessus.
+                  <div style={{ height: "0.5rem" }} />
+                  <div>
+                    <span className="title">Corps en uniforme :</span>rassemble toutes les structures déclarées en tant que corps en uniforme
+                  </div>
+                  <div>
+                    <span className="title">Affiliation à un réseau national :</span>rassemble les structures liées par une structure mère et pilotée par un superviseur
+                    (responsable)
+                  </div>
+                  <div>
+                    <span className="title">Préparation militaire:</span>rassemble toutes les structures qui proposent des PM
+                  </div>
+                </div>
+              </HelpText>
+            ) : null}
             <ResultTable>
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
