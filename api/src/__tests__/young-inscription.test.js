@@ -810,4 +810,125 @@ describe("Young", () => {
       expect(response2.statusCode).toBe(404);
     });
   });
+  describe.only("PUT /young/inscription/consentements", () => {
+    async function selfUpdateYoung(body = {}, fields = {}) {
+      const young = await createYoungHelper(getNewYoungFixture(fields));
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      const response = await request(getAppHelper()).put("/young/inscription/consentements").send(body);
+      updatedYoung = response.body.data;
+      passport.user = previous;
+
+      return response;
+    }
+    it("Should update Young consentements with statut code 200", async () => {
+      //Young 16 years old
+      let date1 = new Date();
+      date1.setFullYear(date1.getFullYear() - 16);
+      const response1 = await selfUpdateYoung(
+        {
+          parentConsentment1: true,
+          parentConsentment2: true,
+          parentConsentment3: true,
+          parentConsentment4: true,
+          parentConsentment5: true,
+          parentConsentment7: true,
+          consentment1: true,
+        },
+        {
+          birthdateAt: date1,
+        },
+      );
+      expect(response1.statusCode).toBe(200);
+
+      //Young 14 years old
+      let date2 = new Date();
+      date2.setFullYear(date2.getFullYear() - 14);
+      const response2 = await selfUpdateYoung(
+        {
+          parentConsentment1: true,
+          parentConsentment2: true,
+          parentConsentment3: true,
+          parentConsentment4: true,
+          parentConsentment5: true,
+          parentConsentment6: true,
+          parentConsentment7: true,
+          consentment1: true,
+          consentment2: true,
+        },
+        {
+          birthdateAt: date2,
+        },
+      );
+      expect(response2.statusCode).toBe(200);
+    });
+    it("should return 400 when parameters invalid", async () => {
+      //Young 16 years old
+      let date1 = new Date();
+      date1.setFullYear(date1.getFullYear() - 16);
+      const response1 = await selfUpdateYoung(
+        {
+          parentConsentment1: true,
+          parentConsentment2: true,
+          parentConsentment3: true,
+          parentConsentment4: true,
+          parentConsentment5: true,
+          parentConsentment6: true,
+          parentConsentment7: true,
+          consentment1: true,
+          consentment2: true,
+        },
+        {
+          birthdateAt: date1,
+        },
+      );
+      expect(response1.statusCode).toBe(400);
+
+      //Young 14 years old
+      let date2 = new Date();
+      date2.setFullYear(date2.getFullYear() - 14);
+      const response2 = await selfUpdateYoung(
+        {
+          parentConsentment1: true,
+          parentConsentment2: true,
+          parentConsentment3: true,
+          parentConsentment4: true,
+          parentConsentment5: true,
+          parentConsentment7: true,
+          consentment1: true,
+        },
+        {
+          birthdateAt: date2,
+        },
+      );
+      expect(response2.statusCode).toBe(400);
+    });
+    it("should return 404 if user don't exist", async () => {
+      const response = await request(getAppHelper()).put("/young/inscription/consentements").send({
+        parentConsentment1: true,
+        parentConsentment2: true,
+        parentConsentment3: true,
+        parentConsentment4: true,
+        parentConsentment5: true,
+        parentConsentment7: true,
+        consentment1: true,
+      });
+      expect(response.statusCode).toBe(404);
+
+      const response2 = await request(getAppHelper()).put("/young/inscription/consentements").send({
+        parentConsentment1: true,
+        parentConsentment2: true,
+        parentConsentment3: true,
+        parentConsentment4: true,
+        parentConsentment5: true,
+        parentConsentment6: true,
+        parentConsentment7: true,
+        consentment1: true,
+        consentment2: true,
+      });
+      expect(response2.statusCode).toBe(404);
+    });
+  });
 });

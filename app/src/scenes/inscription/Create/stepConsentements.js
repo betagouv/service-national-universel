@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -19,12 +19,28 @@ export default function StepConsentements() {
   const young = useSelector((state) => state.Auth.young);
   const isPlural = useSelector((state) => state.Auth.young?.parent1Status && state.Auth.young?.parent2Status);
   const [loading, setLoading] = useState(false);
-
+  const [data, setData] = useState();
   const dispatch = useDispatch();
-  if (!young) {
-    history.push("/inscription/profil");
-    return <div />;
-  }
+
+  useEffect(() => {
+    if (young) {
+      setData({
+        parentConsentment1: young.parentConsentment === "true",
+        parentConsentment2: young.parentConsentment === "true",
+        parentConsentment3: young.parentConsentment === "true",
+        parentConsentment4: young.parentConsentment === "true",
+        parentConsentment5: young.parentConsentment === "true",
+        parentConsentment6: young.parentConsentment === "true",
+        parentConsentment7: young.parentConsentment === "true",
+        consentment1: young.consentment === "true",
+        consentment2: young.consentment === "true",
+      });
+    } else {
+      history.push("/inscription/profil");
+    }
+  }, [young]);
+
+  if (!data) return null;
 
   return (
     <Wrapper>
@@ -33,27 +49,17 @@ export default function StepConsentements() {
         <p>Complétez ci-dessous les consentements</p>
       </Heading>
       <Formik
-        initialValues={{
-          ...young,
-          parentConsentment1: young.parentConsentment,
-          parentConsentment2: young.parentConsentment,
-          parentConsentment3: young.parentConsentment,
-          parentConsentment4: young.parentConsentment,
-          parentConsentment5: young.parentConsentment,
-          parentConsentment6: young.parentConsentment,
-          parentConsentment7: young.parentConsentment,
-          consentment1: young.consentment,
-          consentment2: young.consentment,
-        }}
+        initialValues={data}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            values.parentConsentment = "true";
-            values.consentment = "true";
-            values.inscriptionStep = STEPS.DOCUMENTS;
-            const { ok, code, data } = await api.put("/young", values);
+            if (getAge(young.birthdateAt) > 15) {
+              delete values.consentment2;
+              delete values.parentConsentment6;
+            }
+            const { ok, code, data } = await api.put("/young/inscription/consentements", values);
             if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(data));
             history.push("/inscription/documents");
