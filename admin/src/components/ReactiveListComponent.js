@@ -16,6 +16,7 @@ export default function ReactiveListComponent(props) {
       dataField="createdAt"
       sortBy="desc"
       showLoader={true}
+      URLParams={true}
       loader={<div style={{ position: "absolute", width: "100%", textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Chargement...</div>}
       renderNoResults={() => <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun résultat.</div>}
       renderResultStats={(e) => {
