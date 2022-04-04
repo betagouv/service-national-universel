@@ -55,7 +55,7 @@ export default function StepConsentements() {
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            if (getAge(young.birthdateAt) > 15) {
+            if (getAge(young.birthdateAt) >= 15) {
               delete values.consentment2;
               delete values.parentConsentment6;
             }
