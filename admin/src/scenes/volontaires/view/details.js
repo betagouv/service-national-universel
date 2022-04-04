@@ -3,7 +3,18 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason, CONSENTMENT_TEXTS } from "../../../utils";
+import {
+  translate as t,
+  isInRuralArea,
+  ROLES,
+  copyToClipboard,
+  formatStringDate,
+  getAge,
+  YOUNG_STATUS,
+  getLabelWithdrawnReason,
+  CONSENTMENT_TEXTS,
+  formatPhoneNumberFR,
+} from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -64,7 +75,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
                 <Details title="Pays de naissance" value={young.birthCountry} />
                 {young.frenchNationality === "true" ? <Details title="Nationalité" value="🇫🇷 Nationalité française" /> : null}
                 <Details title="Sexe" value={t(young.gender)} />
-                <Details title="Tel" value={young.phone} />
+                <Details title="Tel" value={formatPhoneNumberFR(young.phone)} />
                 <Details title="Adresse" value={young.address} />
                 <Details title="Ville" value={young.city} />
                 <Details title="Code Postal" value={young.zip} />
@@ -193,7 +204,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   <Details title="Prénom" value={young.parent1FirstName} />
                   <Details title="Nom" value={young.parent1LastName} />
                   <Details title="E-mail" value={young.parent1Email} />
-                  <Details title="Tel" value={young.parent1Phone} />
+                  <Details title="Tel" value={formatPhoneNumberFR(young.parent1Phone)} />
                   <Details title="Adresse" value={young.parent1Address} />
                   <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
                   <Details title="Dép" value={young.parent1Department} />
@@ -206,7 +217,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   <Details title="Prénom" value={young.parent2FirstName} />
                   <Details title="Nom" value={young.parent2LastName} />
                   <Details title="E-mail" value={young.parent2Email} />
-                  <Details title="Tel" value={young.parent2Phone} />
+                  <Details title="Tel" value={formatPhoneNumberFR(young.parent2Phone)} />
                   <Details title="Adresse" value={young.parent2Address} />
                   <Details title="Ville" value={young.parent2City && young.parent2Zip && `${young.parent2City} (${young.parent2Zip})`} />
                   <Details title="Dép" value={young.parent2Department} />

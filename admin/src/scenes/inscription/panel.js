@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, getAge, YOUNG_STATUS, ROLES } from "../../utils";
+import { translate as t, isInRuralArea, getAge, YOUNG_STATUS, ROLES, formatPhoneNumberFR } from "../../utils";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
 import PatchHistoric from "../../components/views/PatchHistoric";
@@ -137,7 +137,7 @@ export default function InscriptionPanel({ onChange, value }) {
       ) : null}
       <Info title="Coordonnées" id={value._id}>
         <Details title="E-mail" value={value.email} copy />
-        <Details title="Tel" value={value.phone} />
+        <Details title="Tel" value={formatPhoneNumberFR(value.phone)} />
         <Details title="Région" value={value.region} />
         <Details title="Dép" value={value.department} />
         <Details title="Ville" value={value.city && value.zip && `${value.city} (${value.zip})`} />
@@ -172,7 +172,7 @@ export default function InscriptionPanel({ onChange, value }) {
         <Details title="Prénom" value={value.parent1FirstName} />
         <Details title="Nom" value={value.parent1LastName} />
         <Details title="E-mail" value={value.parent1Email} />
-        <Details title="Tel" value={value.parent1Phone} />
+        <Details title="Tel" value={formatPhoneNumberFR(value.parent1Phone)} />
         <Details title="Adresse" value={value.parent1Address} />
         <Details title="Ville" value={value.parent1City && value.parent1Zip && `${value.parent1City} (${value.parent1Zip})`} />
         <Details title="Dép" value={value.parent1Department} />
@@ -184,7 +184,7 @@ export default function InscriptionPanel({ onChange, value }) {
           <Details title="Prénom" value={value.parent2FirstName} />
           <Details title="Nom" value={value.parent2LastName} />
           <Details title="E-mail" value={value.parent2Email} />
-          <Details title="Tel" value={value.parent2Phone} />
+          <Details title="Tel" value={formatPhoneNumberFR(value.parent2Phone)} />
           <Details title="Adresse" value={value.parent2Address} />
           <Details title="Ville" value={value.parent2City && value.parent2Zip && `${value.parent2City} (${value.parent2Zip})`} />
           <Details title="Dép" value={value.parent2Department} />

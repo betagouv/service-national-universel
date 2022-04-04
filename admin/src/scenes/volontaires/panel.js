@@ -14,6 +14,7 @@ import {
   ROLES,
   colors,
   translate,
+  formatPhoneNumberFR,
 } from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
@@ -132,7 +133,7 @@ export default function VolontairePanel({ onChange, value }) {
         </Info>
         <Info title="Coordonnées" id={young._id}>
           <Details title="E-mail" value={young.email} copy />
-          <Details title="Tel" value={young.phone} />
+          <Details title="Tel" value={formatPhoneNumberFR(young.phone)} />
           <Details title="Adresse" value={young.address} />
           <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
           <Details title="Dép" value={young.department} />
@@ -185,7 +186,7 @@ export default function VolontairePanel({ onChange, value }) {
             <Details title="Prénom" value={young.parent1FirstName} />
             <Details title="Nom" value={young.parent1LastName} />
             <Details title="E-mail" value={young.parent1Email} />
-            <Details title="Tel" value={young.parent1Phone} />
+            <Details title="Tel" value={formatPhoneNumberFR(young.parent1Phone)} />
             <Details title="Adresse" value={young.parent1Address} />
             <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
             <Details title="Dép" value={young.parent1Department} />
@@ -198,7 +199,7 @@ export default function VolontairePanel({ onChange, value }) {
             <Details title="Prénom" value={young.parent2FirstName} />
             <Details title="Nom" value={young.parent2LastName} />
             <Details title="E-mail" value={young.parent2Email} />
-            <Details title="Tel" value={young.parent2Phone} />
+            <Details title="Tel" value={formatPhoneNumberFR(young.parent2Phone)} />
             <Details title="Adresse" value={young.parent2Address} />
             <Details title="Ville" value={young.parent2City && young.parent2Zip && `${young.parent2City} (${young.parent2Zip})`} />
             <Details title="Dép" value={young.parent2Department} />

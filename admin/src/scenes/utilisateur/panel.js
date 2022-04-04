@@ -3,7 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, ROLES, ES_NO_LIMIT, copyToClipboard, canUpdateReferent, canDeleteReferent } from "../../utils";
+import { translate, ROLES, ES_NO_LIMIT, copyToClipboard, canUpdateReferent, canDeleteReferent, formatPhoneNumberFR } from "../../utils";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -138,8 +138,8 @@ export default function UserPanel({ onChange, value }) {
         <Details title="Fonction" value={translate(value.subRole)} />
         <Details title="Région" value={value.region} />
         <Details title="Département" value={value.department} />
-        <Details title="Tel fixe" value={value.phone} />
-        <Details title="Tel Mobile" value={value.mobile} />
+        <Details title="Tel fixe" value={formatPhoneNumberFR(value.phone)} />
+        <Details title="Tel Mobile" value={formatPhoneNumberFR(value.mobile)} />
       </Info>
       {structure ? (
         <React.Fragment>
