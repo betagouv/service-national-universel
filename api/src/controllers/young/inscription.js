@@ -496,12 +496,12 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
       value.parent1City = "";
       value.parent1Zip = "";
       value.parent1Address = "";
-      value.parent1Location = { lat: null, lon: null };
+      value.parent1Location = { lat: undefined, lon: undefined };
       value.parent1Department = "";
       value.parent1Region = "";
       value.parent1Country = "";
     } else if (value.parent1Country !== "France") {
-      value.parent1Location = { lat: null, lon: null };
+      value.parent1Location = { lat: undefined, lon: undefined };
       value.parent1Department = "";
       value.parent1Region = "";
     }
@@ -511,12 +511,12 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
         value.parent2City = "";
         value.parent2Zip = "";
         value.parent2Address = "";
-        value.parent2Location = { lat: null, lon: null };
+        value.parent2Location = { lat: undefined, lon: undefined };
         value.parent2Department = "";
         value.parent2Region = "";
         value.parent2Country = "";
       } else if (value.parent2Country !== "France") {
-        value.parent2Location = { lat: null, lon: null };
+        value.parent2Location = { lat: undefined, lon: undefined };
         value.parent2Department = "";
         value.parent2Region = "";
       }
@@ -531,7 +531,7 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
       value.parent2City = "";
       value.parent2Zip = "";
       value.parent2Address = "";
-      value.parent2Location = { lat: null, lon: null };
+      value.parent2Location = { lat: undefined, lon: undefined };
       value.parent2Department = "";
       value.parent2Region = "";
       value.parent2Country = "";
