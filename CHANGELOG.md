@@ -1,3 +1,17 @@
+# [1.65.0](https://github.com/betagouv/service-national-universel/compare/v1.64.0...v1.65.0) (2022-04-04)
+
+
+### Bug Fixes
+
+* **admin:** telephone format ([b7a83bd](https://github.com/betagouv/service-national-universel/commit/b7a83bda6a8b341725f130b296cc895e3c087107))
+* **app:** inscription consentement error ([#1432](https://github.com/betagouv/service-national-universel/issues/1432)) ([851d532](https://github.com/betagouv/service-national-universel/commit/851d532fa79330744010fac6712e743233b43868))
+
+
+### Features
+
+* **admin:** delete young button in edit ([#1428](https://github.com/betagouv/service-national-universel/issues/1428)) ([b947190](https://github.com/betagouv/service-national-universel/commit/b947190e773ae8caec100e267f4d3e9a303934f9))
+* **api:** droit referent delete youngs ([3ed4ebf](https://github.com/betagouv/service-national-universel/commit/3ed4ebfab02bdb309ff736820fe5a8d73561dbb3))
+
 # [1.64.0](https://github.com/betagouv/service-national-universel/compare/v1.63.1...v1.64.0) (2022-04-01)
 
 
