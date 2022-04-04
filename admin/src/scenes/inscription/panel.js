@@ -70,7 +70,7 @@ export default function InscriptionPanel({ onChange, value }) {
       <div className="info">
         <div style={{ display: "flex" }}>
           <div className="close" onClick={onChange} />
-          <div className="title">{`${value.firstName} ${value.lastName}`}</div>
+          <div className="title">{value.firstName ? `${value.firstName} ${value.lastName}` : "Compte supprimé"}</div>
         </div>
         <div>
           <Badge text={value.cohort} />
