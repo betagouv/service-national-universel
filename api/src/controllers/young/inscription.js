@@ -7,6 +7,7 @@ const YoungObject = require("../../models/young");
 const { canUpdateYoungStatus, getAge } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { validateFirstName } = require("../../utils/validator");
+const { serializeYoung } = require("../../utils/serializer");
 
 const { ERRORS, YOUNG_SITUATIONS, STEPS, inscriptionCheck, YOUNG_STATUS } = require("../../utils");
 const { getCohortSessionsAvailability } = require("../../utils/cohort");
@@ -38,7 +39,7 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
     young.set({ email, firstName, lastName, birthdateAt, birthCountry, birthCity, birthCityZip });
     await young.save({ fromUser: req.user });
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
@@ -181,7 +182,7 @@ router.put("/coordonnee", passport.authenticate("young", { session: false, failW
 
     await inscriptionCheck(value, young, req);
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -214,7 +215,7 @@ router.put("/availability", passport.authenticate("young", { session: false, fai
     await young.save({ fromUser: req.user });
     await inscriptionCheck(value, young, req);
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -234,7 +235,7 @@ router.put("/availability/notEligible", passport.authenticate("young", { session
     }
 
     await young.save({ fromUser: req.user });
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -247,7 +248,7 @@ router.put("/availability/reset", passport.authenticate("young", { session: fals
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     young.set({ cohort: "2022" });
     await young.save({ fromUser: req.user });
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -323,7 +324,7 @@ router.put("/particulieres", passport.authenticate("young", { session: false, fa
 
     await inscriptionCheck(value, young, req);
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -552,7 +553,7 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
 
     await inscriptionCheck(value, young, req);
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -581,7 +582,7 @@ router.put("/representant-fromFranceConnect/:id", passport.authenticate("young",
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -631,7 +632,7 @@ router.put("/consentements", passport.authenticate("young", { session: false, fa
 
     await inscriptionCheck(consentements, young, req);
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
