@@ -4,9 +4,10 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
 const YoungObject = require("../../models/young");
-const { canUpdateYoungStatus } = require("snu-lib");
+const { canUpdateYoungStatus, getAge } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { validateFirstName } = require("../../utils/validator");
+const { serializeYoung } = require("../../utils/serializer");
 
 const { ERRORS, YOUNG_SITUATIONS, STEPS, inscriptionCheck, YOUNG_STATUS } = require("../../utils");
 const { getCohortSessionsAvailability } = require("../../utils/cohort");
@@ -38,7 +39,7 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
     young.set({ email, firstName, lastName, birthdateAt, birthCountry, birthCity, birthCityZip });
     await young.save({ fromUser: req.user });
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
@@ -181,7 +182,7 @@ router.put("/coordonnee", passport.authenticate("young", { session: false, failW
 
     await inscriptionCheck(value, young, req);
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -214,7 +215,7 @@ router.put("/availability", passport.authenticate("young", { session: false, fai
     await young.save({ fromUser: req.user });
     await inscriptionCheck(value, young, req);
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -234,7 +235,7 @@ router.put("/availability/notEligible", passport.authenticate("young", { session
     }
 
     await young.save({ fromUser: req.user });
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -247,7 +248,7 @@ router.put("/availability/reset", passport.authenticate("young", { session: fals
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     young.set({ cohort: "2022" });
     await young.save({ fromUser: req.user });
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -323,7 +324,7 @@ router.put("/particulieres", passport.authenticate("young", { session: false, fa
 
     await inscriptionCheck(value, young, req);
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -552,7 +553,7 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
 
     await inscriptionCheck(value, young, req);
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -581,7 +582,57 @@ router.put("/representant-fromFranceConnect/:id", passport.authenticate("young",
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/consentements", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const needMoreConsent = getAge(young.birthdateAt) < 15;
+    const { error, value } = Joi.object({
+      parentConsentment1: Joi.boolean().required().valid(true),
+      parentConsentment2: Joi.boolean().required().valid(true),
+      parentConsentment3: Joi.boolean().required().valid(true),
+      parentConsentment4: Joi.boolean().required().valid(true),
+      parentConsentment5: Joi.boolean().required().valid(true),
+      parentConsentment6: Joi.alternatives().conditional("$needMoreConsent", {
+        is: Joi.boolean().valid(true).required(),
+        then: Joi.boolean().required().valid(true),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parentConsentment7: Joi.boolean().required().valid(true),
+      consentment1: Joi.boolean().required().valid(true),
+      consentment2: Joi.alternatives().conditional("$needMoreConsent", {
+        is: Joi.boolean().valid(true).required(),
+        then: Joi.boolean().required().valid(true),
+        otherwise: Joi.isError(new Error()),
+      }),
+    }).validate(req.body, { context: { needMoreConsent: needMoreConsent } });
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const consentements = {
+      parentConsentment: "true",
+      consentment: "true",
+      inscriptionStep: STEPS.DOCUMENTS,
+    };
+
+    young.set(consentements);
+    await young.save({ fromUser: req.user });
+
+    await inscriptionCheck(consentements, young, req);
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
