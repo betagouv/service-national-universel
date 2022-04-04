@@ -57,7 +57,6 @@ export default function SituationParticulieres({ values, handleChange, handleSub
             ]}
           />
           <Select
-            disabled={values.ppsBeneficiary !== "true" && values.paiBeneficiary !== "true" && values.handicap !== "true"}
             name="specificAmenagment"
             values={values}
             handleChange={handleChange}
