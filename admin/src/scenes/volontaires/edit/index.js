@@ -7,7 +7,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import plausibleEvent from "../../../services/pausible";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
@@ -15,11 +15,9 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import { translate, ROLES } from "../../../utils";
 import api from "../../../services/api";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import ActionButtonArchive from "../../../components/buttons/ActionButtonArchive";
 import { appURL } from "../../../config";
 import Loader from "../../../components/Loader";
 
-import DeleteButton from "../components/DeleteButton";
 import Identite from "./identite";
 import Historic from "./historic";
 import Coordonnees from "./coordonnees";
@@ -38,12 +36,14 @@ import MilitaryPreparation from "./military-preparation";
 import JDC from "./JDC";
 import CohesionCenter from "./cohesion-center";
 import MeetingPoint from "./meeting-point";
-import { YOUNG_STATUS } from "../../../utils";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default function VolontaireEdit(props) {
   const [young, setYoung] = useState();
   const user = useSelector((state) => state.Auth.user);
   const setDocumentTitle = useDocumentTitle("Volontaires");
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -54,6 +54,28 @@ export default function VolontaireEdit(props) {
       setYoung(data);
     })();
   }, []);
+
+  const onClickDelete = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: onConfirmDelete,
+      title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async () => {
+    try {
+      const { ok, code } = await api.put(`/young/${young._id}/soft-delete`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Ce volontaire a été supprimé.");
+      return history.push(`/volontaire`);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", translate(e.code));
+    }
+  };
 
   if (young === undefined) return <Loader />;
 
@@ -89,7 +111,7 @@ export default function VolontaireEdit(props) {
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
               <div style={{ display: "flex" }}>
-                {user.role === ROLES.ADMIN ? <ActionButtonArchive young={values} /> : null}
+                <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
                 <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
                   <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                 </a>
@@ -148,23 +170,31 @@ export default function VolontaireEdit(props) {
             {Object.values(errors).filter((e) => !!e).length ? (
               <Alert>Vous ne pouvez pas enregistrer ce volontaires car tous les champs ne sont pas correctement renseignés.</Alert>
             ) : null}
-            <TitleWrapper>
-              {young.status !== YOUNG_STATUS.DELETED ? <DeleteButton young={young} /> : <div />}
-              <div style={{ display: "flex" }}>
-                <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
-                  <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-                </a>
-                <Link to={`/volontaire/${young._id}`}>
-                  <PanelActionButton icon="eye" title="Consulter" />
-                </Link>
-                <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
-                  Enregistrer
-                </LoadingButton>
-              </div>
-            </TitleWrapper>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
+              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
+                <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+              </a>
+              <Link to={`/volontaire/${young._id}`}>
+                <PanelActionButton icon="eye" title="Consulter" />
+              </Link>
+              <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
+                Enregistrer
+              </LoadingButton>
+            </div>
           </>
         )}
       </Formik>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={async () => {
+          await modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Wrapper>
   );
 }

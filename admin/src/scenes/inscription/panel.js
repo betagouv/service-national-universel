@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 
 import { translate as t, isInRuralArea, getAge, YOUNG_STATUS, ROLES, formatPhoneNumberFR } from "../../utils";
 import DownloadButton from "../../components/buttons/DownloadButton";
@@ -13,10 +14,13 @@ import { appURL } from "../../config";
 import Badge from "../../components/Badge";
 import ActionButtonArchive from "../../components/buttons/ActionButtonArchive";
 import plausibleEvent from "../../services/pausible";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -26,6 +30,29 @@ export default function InscriptionPanel({ onChange, value }) {
       setYoung(data);
     })();
   }, [value]);
+
+  const onClickDelete = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: onConfirmDelete,
+      title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async () => {
+    try {
+      const { ok, code } = await api.put(`/young/${young._id}/soft-delete`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok) return toastr.error("Une erreur s'est produite :", t(code));
+      toastr.success("Ce volontaire a été supprimé.");
+      onChange();
+      history.go(0);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", t(e.code));
+    }
+  };
 
   if (!value) return <div />;
 
@@ -43,7 +70,7 @@ export default function InscriptionPanel({ onChange, value }) {
       <div className="info">
         <div style={{ display: "flex" }}>
           <div className="close" onClick={onChange} />
-          <div className="title">{`${value.firstName} ${value.lastName}`}</div>
+          <div className="title">{value.firstName ? `${value.firstName} ${value.lastName}` : "Compte supprimé"}</div>
         </div>
         <div>
           <Badge text={value.cohort} />
@@ -70,7 +97,7 @@ export default function InscriptionPanel({ onChange, value }) {
           <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>
-          {user.role === ROLES.ADMIN ? <ActionButtonArchive young={value} /> : null}
+          <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
         </div>
       </div>
       {[YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(value.status) && value.inscriptionCorrectionMessage ? (
@@ -206,6 +233,16 @@ export default function InscriptionPanel({ onChange, value }) {
           return <div>{`${e}:${value[e]}`}</div>;
         })}
       </div> */}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={async () => {
+          await modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Panel>
   );
 }
