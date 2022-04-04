@@ -62,8 +62,8 @@ router.put("/coordonnee", passport.authenticate("young", { session: false, failW
           lon: Joi.number().required(),
         })
         .default({
-          lat: null,
-          lon: null,
+          lat: undefined,
+          lon: undefined,
         })
         .allow({}, null),
       department: Joi.string().trim().required(),
@@ -364,8 +364,8 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
               lon: Joi.number().required().allow(null),
             })
             .default({
-              lat: null,
-              lon: null,
+              lat: undefined,
+              lon: undefined,
             })
             .allow({}, null),
           otherwise: Joi.isError(new Error()),
@@ -448,8 +448,8 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
                 lon: Joi.number().required().allow(null),
               })
               .default({
-                lat: null,
-                lon: null,
+                lat: undefined,
+                lon: undefined,
               })
               .allow({}, null),
             otherwise: Joi.isError(new Error()),
