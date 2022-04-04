@@ -97,7 +97,6 @@ export default function InscriptionPanel({ onChange, value }) {
           <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Prendre sa place")}>
             <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </a>
-          {user.role === ROLES.ADMIN ? <ActionButtonArchive young={value} /> : null}
           <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
         </div>
       </div>
