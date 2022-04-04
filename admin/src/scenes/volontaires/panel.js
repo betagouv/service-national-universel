@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 
 import {
   YOUNG_SITUATIONS,
@@ -23,11 +24,11 @@ import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
 import plausibleEvent from "../../services/pausible";
 import ModalConfirm from "../../components/modals/ModalConfirm";
-import { toastr } from "react-redux-toastr";
 
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
+  const history = useHistory();
 
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const onClickDelete = () => {
@@ -46,6 +47,7 @@ export default function VolontairePanel({ onChange, value }) {
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce volontaire a été supprimé.");
       onChange();
+      history.go(0);
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", translate(e.code));
@@ -218,8 +220,8 @@ export default function VolontairePanel({ onChange, value }) {
         title={modal?.title}
         message={modal?.message}
         onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={() => {
-          modal?.onConfirm();
+        onConfirm={async () => {
+          await modal?.onConfirm();
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
