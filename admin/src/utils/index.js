@@ -9,6 +9,7 @@ import sanitizeHtml from "sanitize-html";
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
 
+// todo clean up reliquats types de structure
 export const associationTypes = [
   "Agrément jeunesse et éducation populaire",
   "Agrément service civique",
@@ -19,7 +20,6 @@ export const associationTypes = [
   "Association agréée de sécurité civile",
   "Autre agrément",
 ];
-
 export const privateTypes = ["Établissement de santé privé d'intérêt collectif", "Entreprise agréée ESUS", "Autre"];
 export const publicTypes = ["Collectivité territoriale", "Etablissement scolaire", "Etablissement public de santé", "Etablissement public", "Service de l'Etat"];
 export const publicEtatTypes = [
@@ -32,6 +32,29 @@ export const publicEtatTypes = [
 ];
 
 export const corpsEnUniforme = ["SDIS (Service départemental d'Incendie et de Secours)", "Gendarmerie", "Police", "Armées"];
+
+// statuts/types pour les structures
+export const legalStatus = ["PUBLIC", "PRIVATE", "ASSOCIATION", "OTHER"];
+export const typesStructure = {
+  PUBLIC: ["Collectivité territoriale", "Etablissement scolaire", "Etablissement public de santé", "Corps en uniforme", "Service de l'Etat", "Autre établissement public"],
+  PRIVATE: ["Etablissement de santé privée d'intérêt collectif à but non lucratif", "Entreprise agrée ESUS", "Autre structure privée à but non lucratif"],
+  ASSOCIATION: [
+    "Agrément Jeunesse et Education Populaire",
+    "Agrément Service Civique",
+    "Association complémentaire de l'enseignement public",
+    "Associations d'usagers du système de santé",
+    "Association sportive affiliées à une fédération sportive agrée par l'Etat",
+    "Agrément des associations de protection de l'environnement",
+    "Association agrée de sécurité civile",
+    "Autre agrément",
+  ],
+};
+export const sousTypesStructure = {
+  "Collectivité territoriale": ["Commune", "EPCI", "Conseil départemental", "Conseil régional", "Autre"],
+  "Etablissement scolaire": ["Collège", "Lycée", "Autre"],
+  "Etablissement public de santé": ["EHPAD", "Centre hospitalier", "Autre"],
+  "Corps en uniforme": ["Pompiers", "Police", "Gendarmerie", "Armée"],
+};
 
 export const confirmMessageChangePhase1Presence = (value) => {
   if (!value)

@@ -12,7 +12,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 import MultiSelect from "../../components/Multiselect";
 
-import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, getRegionByZip, getDepartmentByZip } from "../../utils";
+import { legalStatus, typesStructure, sousTypesStructure, translate, getRegionByZip, getDepartmentByZip } from "../../utils";
 import { adminURL } from "../../config";
 
 export default function Signup() {
@@ -223,10 +223,11 @@ export default function Signup() {
                       <option value={null} disabled selected>
                         Statut juridique
                       </option>
-                      <option value="PUBLIC">{translate("PUBLIC")}</option>
-                      <option value="PRIVATE">{translate("PRIVATE")}</option>
-                      <option value="ASSOCIATION">{translate("ASSOCIATION")}</option>
-                      <option value="OTHER">{translate("OTHER")}</option>
+                      {legalStatus.map((status) => (
+                        <option key={status} value={status} label={translate(status)}>
+                          {translate(status)}
+                        </option>
+                      ))}
                     </Field>
                     <p className="text-xs text-red-500">{errors.structure?.legalStatus}</p>
                   </div>
@@ -234,10 +235,10 @@ export default function Signup() {
                     <div>
                       <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">DISPOSEZ-VOUS D&apos;UN AGRÉMENT ?</label>
                       <MultiSelect
-                        value={values.structure.associationTypes}
+                        value={values.structure.types}
                         onChange={handleChange}
-                        name="structure.associationTypes"
-                        options={associationTypes}
+                        name="structure.types"
+                        options={typesStructure.ASSOCIATION}
                         placeholder="Sélectionnez un ou plusieurs agréments"
                       />
                     </div>
@@ -251,13 +252,13 @@ export default function Signup() {
                         className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
                         validate={(v) => !v && "Ce champ est obligatoire"}
                         component="select"
-                        name="structure.structurePriveeType"
-                        value={values.structure.structurePriveeType}
+                        name="structure.types"
+                        value={values.structure.types}
                         onChange={handleChange}>
                         <option key="" value="" selected disabled>
                           Type de structure privée
                         </option>
-                        {privateTypes.map((e) => {
+                        {typesStructure.PRIVATE.map((e) => {
                           return (
                             <option key={e} value={e}>
                               {translate(e)}
@@ -265,11 +266,11 @@ export default function Signup() {
                           );
                         })}
                       </Field>
-                      <p className="text-xs text-red-500">{errors.structure?.structurePriveeType}</p>
+                      <p className="text-xs text-red-500">{errors.structure?.types}</p>
                     </div>
                   )}
                   {values.structure.legalStatus === "PUBLIC" && (
-                    <div>
+                    <>
                       <div>
                         <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                           <span className="text-red-500 mr-1">*</span>TYPE DE STRUCTURE PUBLIQUE
@@ -278,13 +279,13 @@ export default function Signup() {
                           className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
                           validate={(v) => !v && "Ce champ est obligatoire"}
                           component="select"
-                          name="structure.structurePubliqueType"
-                          value={values.structure.structurePubliqueType}
+                          name="structure.types"
+                          value={values.structure.types}
                           onChange={handleChange}>
                           <option key="" value="" selected disabled>
                             Type de structure publique
                           </option>
-                          {publicTypes.map((e) => {
+                          {typesStructure.PUBLIC.map((e) => {
                             return (
                               <option key={e} value={e}>
                                 {translate(e)}
@@ -292,24 +293,24 @@ export default function Signup() {
                             );
                           })}
                         </Field>
-                        <p className="text-xs text-red-500">{errors.structure?.structurePubliqueType}</p>
+                        <p className="text-xs text-red-500">{errors.structure?.types}</p>
                       </div>
-                      {["Service de l'Etat", "Etablissement public"].includes(values.structure.structurePubliqueType) && (
+                      {["Collectivité territoriale", "Etablissement scolaire", "Etablissement public de santé", "Corps en uniforme"].includes(values.structure.types) && (
                         <div>
                           <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
-                            <span className="text-red-500 mr-1">*</span>TYPE DE SERVICE DE L&apos;ETAT
+                            <span className="text-red-500 mr-1">*</span>SOUS-TYPE DE STRUCTURE
                           </label>
                           <Field
                             className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
                             validate={(v) => !v && "Ce champ est obligatoire"}
                             component="select"
-                            name="structure.structurePubliqueEtatType"
-                            value={values.structure.structurePubliqueEtatType}
+                            name="structure.sousType"
+                            value={values.structure.sousType}
                             onChange={handleChange}>
                             <option key="" value="" selected disabled>
                               Type de service de l&apos;état
                             </option>
-                            {publicEtatTypes.map((e) => {
+                            {sousTypesStructure[values.structure.types].map((e) => {
                               return (
                                 <option key={e} value={e}>
                                   {translate(e)}
@@ -317,10 +318,10 @@ export default function Signup() {
                               );
                             })}
                           </Field>
-                          <p className="text-xs text-red-500">{errors.structure?.structurePubliqueEtatType}</p>
+                          <p className="text-xs text-red-500">{errors.structure?.sousType}</p>
                         </div>
                       )}
-                    </div>
+                    </>
                   )}
                   <div>
                     <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
