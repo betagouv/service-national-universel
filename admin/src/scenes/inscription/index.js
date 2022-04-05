@@ -13,7 +13,7 @@ import VioletButton from "../../components/buttons/VioletButton";
 import ExportComponent from "../../components/ExportXlsx";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
-import { apiURL, appURL } from "../../config";
+import { apiURL, appURL, supportURL } from "../../config";
 import Panel from "./panel";
 import {
   translate,
@@ -30,11 +30,13 @@ import {
 } from "../../utils";
 import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Badge from "../../components/Badge";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
+import LockedSvg from "../../assets/lock.svg";
+import UnlockedSvg from "../../assets/lock-open.svg";
 
 const FILTERS = [
   "SEARCH",
@@ -64,6 +66,11 @@ export default function Inscription() {
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
+  const [infosHover, setInfosHover] = useState(false);
+  const [infosClick, setInfosClick] = useState(false);
+  const toggleInfos = () => {
+    setInfosClick(!infosClick);
+  };
 
   return (
     <div>
@@ -387,9 +394,32 @@ export default function Inscription() {
                   showMissing
                   missingLabel="Non renseigné"
                 />
+                <Help onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)}>
+                  {infosClick ? <LockIcon src={LockedSvg} /> : <LockIcon src={UnlockedSvg} />}
+                  Aide
+                </Help>
+              </FilterRow>
+              <FilterRow className="flex justify-center" visible={filterVisible}>
                 <DeleteFilters />
               </FilterRow>
             </Filter>
+            {infosHover || infosClick ? (
+              <HelpText>
+                <div>
+                  Pour filtrer les volontaires, cliquez sur les éléments ci-dessus. Pour en savoir plus sur les différents filtres{" "}
+                  <a href={`${supportURL}/base-de-connaissance/je-filtre-les-volontaires`} target="_blank" rel="noreferrer">
+                    consultez notre article
+                  </a>
+                  <div style={{ height: "0.5rem" }} />
+                  <div>
+                    <span className="title">Général :</span>concerne toutes les informations liées au parcours SNU du volontaire. Le statut général Validée est toujours activé.
+                  </div>
+                  <div>
+                    <span className="title">Dossier :</span>concerne toutes les informations et documents transmis au moment de son inscription
+                  </div>
+                </div>
+              </HelpText>
+            ) : null}
             <ResultTable>
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
