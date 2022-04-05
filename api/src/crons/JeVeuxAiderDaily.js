@@ -246,10 +246,6 @@ const sync = async (result) => {
           });
         }
       } else {
-        //ToRemove
-        if (missionExist.status === "CANCEL" || missionExist.status === "ARCHIVED") {
-          missionExist.set({ status: "WAITING_VALIDATION" });
-        }
         // console.log("Update mission");
         delete infoMission.status;
         delete infoMission.name;
