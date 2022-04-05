@@ -71,21 +71,21 @@ const fetchStructure = async (id) => {
 };
 
 const sync = async (result) => {
-  console.log("Nombre de missions traitées (current iteration)", result.data.length);
-  console.log("API page", result.current_page);
+  //console.log("Nombre de missions traitées (current iteration)", result.data.length);
+  //console.log("API page", result.current_page);
 
   for (let i = 0; i < result.data.length; i++) {
     try {
       const mission = result.data[i];
       let structure = await StructureModel.findOne({ jvaStructureId: mission.structure.id });
       if (!structure) {
-        console.log("Create new struct");
+        // console.log("Create new struct");
         //get JVA struture
         let jvaStructure = await fetchStructure(mission.structure.id);
 
         //Struct without resp skip
         if (!jvaStructure?.responsables.length) {
-          console.log("Skip structure : no resp");
+          // console.log("Skip structure : no resp");
           continue;
         }
 
@@ -95,7 +95,7 @@ const sync = async (result) => {
           //Check unique email
           const exist = await ReferentModel.findOne({ email: resp.email });
           if (exist) {
-            console.log("Skip referent : email already registered");
+            // console.log("Skip referent : email already registered");
             continue;
           }
 
@@ -111,7 +111,7 @@ const sync = async (result) => {
 
         //Error on referent creation
         if (!newResps.length) {
-          console.log("Skip structure : error creation referent");
+          // console.log("Skip structure : error creation referent");
           continue;
         }
 
@@ -142,7 +142,7 @@ const sync = async (result) => {
 
         const newStructure = await StructureModel.create(infoStructure);
         if (!newStructure) {
-          console.log("Skip structure : error creation structure");
+          // console.log("Skip structure : error creation structure");
         }
 
         //Set structureId to referent
@@ -165,7 +165,7 @@ const sync = async (result) => {
           structureId: structure.id,
         });
       } else if (referentMission.structureId !== structure.id) {
-        console.log("Skip mission : error referent links to another structure");
+        // console.log("Skip mission : error referent links to another structure");
         continue;
       }
 
@@ -212,7 +212,7 @@ const sync = async (result) => {
       //Check if mission exist
       const missionExist = await MissionModel.findOne({ jvaMissionId: mission.id });
       if (!missionExist) {
-        console.log("Create new mission");
+        // console.log("Create new mission");
         const data = await MissionModel.create({ ...infoMission, placesLeft: mission.snu_mig_places });
 
         //Send mail to responsable department
@@ -240,7 +240,7 @@ const sync = async (result) => {
           });
         }
       } else {
-        console.log("Update mission");
+        // console.log("Update mission");
         delete infoMission.status;
         delete infoMission.name;
         delete infoMission.description;
@@ -272,7 +272,6 @@ const cleanData = async () => {
 
       //Send mail to referent mission
       const referent = await ReferentModel.findOne({ _id: mission.tutorId });
-      console.log(referent);
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_CANCEL, {
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
         params: {
