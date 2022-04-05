@@ -68,6 +68,7 @@ const FILTERS = [
   "AUTOTEST",
   "SPECIFIC_AMENAGEMENT",
   "SAME_DEPARTMENT",
+  "ALLERGIES",
 ];
 
 export default function VolontaireList() {
@@ -564,6 +565,22 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Utilisation d’autotest", "Utilisation d’autotest")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder=""
+                  componentId="ALLERGIES"
+                  dataField="allergies.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "ALLERGIES") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Allergies ou intolérances", "Allergies ou intolérances")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>

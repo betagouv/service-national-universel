@@ -172,7 +172,7 @@ export default function VolontairePanel({ onChange, value }) {
           <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
           <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
           <Details title="Handicap" value={t(young.handicap)} />
-          <Details title="Allergies" value={t(young.allergies)} />
+          <Details title="Allergies ou intolérances" value={t(young.allergies)} />
           <Details title="PPS" value={t(young.ppsBeneficiary)} />
           <Details title="PAI" value={t(young.paiBeneficiary)} />
           <Details title="Suivi médicosocial" value={t(young.medicosocialStructure)} />

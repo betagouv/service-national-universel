@@ -97,7 +97,7 @@ export default function SituationParticulieres({ values, handleChange, handleSub
             name="allergies"
             values={values}
             handleChange={handleChange}
-            title="Allergies ou intolérances alimentaires"
+            title="Allergies ou intolérances"
             options={[
               { value: "true", label: "Oui" },
               { value: "false", label: "Non" },

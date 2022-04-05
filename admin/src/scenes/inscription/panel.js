@@ -184,7 +184,7 @@ export default function InscriptionPanel({ onChange, value }) {
         <Details title="Quartier Prioritaire de la Ville" value={t(value.qpv)} />
         <Details title="Zone Rurale" value={t(isInRuralArea(value))} />
         <Details title="Handicap" value={t(value.handicap)} />
-        <Details title="Allergies" value={t(value.allergies)} />
+        <Details title="Allergies ou intolérances" value={t(value.allergies)} />
         <Details title="PPS" value={t(value.ppsBeneficiary)} />
         <Details title="PAI" value={t(value.paiBeneficiary)} />
         <Details title="Suivi médicosocial" value={t(value.medicosocialStructure)} />
