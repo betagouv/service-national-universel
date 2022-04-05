@@ -4,7 +4,6 @@ import API from "../../services/api";
 import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
 import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
 import Loader from "../Loader";
-
 const KnowledgeBaseSearch = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAnswer, placeholder = "Comment pouvons-nous vous aider ?", className = "" }) => {
   const [search, setSearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -57,6 +56,7 @@ const KnowledgeBaseSearch = ({ restriction, path, showAllowedRoles, showNoAnswer
           onChange={(e) => setSearch(e.target.value)}
           value={search}
         />
+        <span className="material-icons text-xl absolute right-2 text-red-400" onClick={() => setSearch("")}>clear</span>
         <span className="material-icons absolute left-3 text-xl text-gray-400">search</span>
       </div>
       <div className="relative flex w-full items-center">
