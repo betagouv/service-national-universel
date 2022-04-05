@@ -609,10 +609,23 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     let buttonCta = cta || config.APP_URL;
     if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
     if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) buttonCta = `${config.APP_URL}/inscription/coordonnees`;
+    let cc = [];
+
+    if (
+      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_VALIDATION ||
+      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION ||
+      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST ||
+      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED ||
+      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED
+    ) {
+      if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+      if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+    }
 
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName },
+      cc: cc,
     });
 
     return res.status(200).send({ ok: true });
