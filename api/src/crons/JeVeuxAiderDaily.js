@@ -48,6 +48,12 @@ const jva2SnuDuration = {
   "5_days": "5 jours",
 };
 
+function addOneYear(date) {
+  const newDate = new Date(date);
+  newDate.setFullYear(newDate.getFullYear() + 1);
+  return newDate;
+}
+
 const fetchMission = (page = 1) => {
   //preoprod : https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/
   //prod : https://www.jeveuxaider.gouv.fr/
@@ -180,7 +186,7 @@ const sync = async (result) => {
         name: mission.name,
         mainDomain: jva2SnuDomaines[mission.domaine.name],
         startAt: new Date(mission.start_date),
-        endAt: new Date(mission.end_date),
+        endAt: mission.end_date ? new Date(mission.end_date) : addOneYear(mission.start_date),
         placesTotal: mission.snu_mig_places,
         description: mission.objectifs,
         frequence: frequence,
@@ -240,6 +246,10 @@ const sync = async (result) => {
           });
         }
       } else {
+        //ToRemove
+        if (missionExist.status === "CANCEL" || missionExist.status === "ARCHIVED") {
+          missionExist.set({ status: "WAITING_VALIDATION" });
+        }
         // console.log("Update mission");
         delete infoMission.status;
         delete infoMission.name;
