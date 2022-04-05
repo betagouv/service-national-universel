@@ -1,3 +1,18 @@
+# [1.66.0](https://github.com/betagouv/service-national-universel/compare/v1.65.0...v1.66.0) (2022-04-05)
+
+
+### Bug Fixes
+
+* **admin:** translate application status ([0ed9d70](https://github.com/betagouv/service-national-universel/commit/0ed9d70fd641478b8705cc21b8af00795011f55c))
+* MIG SNU JVA endDate + maj status ([8d41be8](https://github.com/betagouv/service-national-universel/commit/8d41be88022b5ac301ea0ac0bf5ebd1ac9be9f19))
+* MIG SNU JVA remove update status ([fe13534](https://github.com/betagouv/service-national-universel/commit/fe135347d0fcfc8577f95de543743e8e0ff9f649))
+* **api:** delete console log jeVeuxAiderDaily ([39ad2ff](https://github.com/betagouv/service-national-universel/commit/39ad2ff3566f1e6ccfa4624844fad8ae447a357a))
+
+
+### Features
+
+* ajout représentants légaux en cc ([#1419](https://github.com/betagouv/service-national-universel/issues/1419)) ([335134d](https://github.com/betagouv/service-national-universel/commit/335134d307ab5db30b37befcd8f5b3fd269e4e21))
+
 # [1.65.0](https://github.com/betagouv/service-national-universel/compare/v1.64.0...v1.65.0) (2022-04-04)
 
 
