@@ -551,6 +551,8 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Règlement intérieur", "Règlement intérieur")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
