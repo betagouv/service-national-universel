@@ -241,7 +241,7 @@ const BadgeCohort = ({ young, onChange }) => {
 
 const CohortDropDown = ({ originalCohort, cohort, onClick, width }) => {
   const user = useSelector((state) => state.Auth.user);
-  const options = ["Juillet 2022", "Juin 2022"];
+  const options = ["Juillet 2022", "Juin 2022", "à venir"];
   const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 
   return (

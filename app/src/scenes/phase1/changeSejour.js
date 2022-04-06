@@ -140,6 +140,9 @@ export default function changeSejour() {
                                 </DropdownItem>
                               );
                             })}
+                          <DropdownItem className="dropdown-item" onClick={() => setNewSejour("à venir")}>
+                            Séjour à venir
+                          </DropdownItem>
                         </DropdownMenu>
                       </UncontrolledDropdown>
                       <a
