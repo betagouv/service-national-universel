@@ -810,7 +810,7 @@ describe("Young", () => {
       expect(response2.statusCode).toBe(404);
     });
   });
-  describe.only("PUT /young/inscription/consentements", () => {
+  describe("PUT /young/inscription/consentements", () => {
     async function selfUpdateYoung(body = {}, fields = {}) {
       const young = await createYoungHelper(getNewYoungFixture(fields));
       const passport = require("passport");
@@ -929,6 +929,132 @@ describe("Young", () => {
         consentment2: true,
       });
       expect(response2.statusCode).toBe(404);
+    });
+  });
+  describe("PUT /young/inscription/documents", () => {
+    async function selfUpdateYoung(body = {}, fields = {}) {
+      const young = await createYoungHelper(getNewYoungFixture(fields));
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      const response = await request(getAppHelper()).put("/young/inscription/documents").send(body);
+      updatedYoung = response.body.data;
+      passport.user = previous;
+
+      return response;
+    }
+    it("Should update Young documents with statut code 200", async () => {
+      //Young 16 years old
+      let date1 = new Date();
+      date1.setFullYear(date1.getFullYear() - 16);
+      const response1 = await selfUpdateYoung(
+        {
+          cniFiles: ["cniFiles.jpg"],
+        },
+        {
+          birthdateAt: date1,
+          parent1FromFranceConnect: "true",
+        },
+      );
+      expect(response1.statusCode).toBe(200);
+
+      //Young 16 years old
+      const response2 = await selfUpdateYoung(
+        {
+          cniFiles: ["cniFiles.jpg"],
+          parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
+        },
+        {
+          birthdateAt: date1,
+          parent1FromFranceConnect: "false",
+        },
+      );
+      expect(response2.statusCode).toBe(200);
+
+      //Young 14 years old
+      let date2 = new Date();
+      date2.setFullYear(date2.getFullYear() - 14);
+      const response3 = await selfUpdateYoung(
+        {
+          cniFiles: ["cniFiles.jpg"],
+          parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
+          dataProcessingConsentmentFiles: ["dataProcessingConsentmentFiles.pdf"],
+        },
+        {
+          birthdateAt: date2,
+          parent1FromFranceConnect: "false",
+        },
+      );
+      expect(response3.statusCode).toBe(200);
+    });
+    it("should return 400 when parameters invalid", async () => {
+      //Young 16 years old
+      let date1 = new Date();
+      date1.setFullYear(date1.getFullYear() - 16);
+      const response1 = await selfUpdateYoung(
+        {
+          cniFiles: ["cniFiles.jpg"],
+        },
+        {
+          birthdateAt: date1,
+          parent1FromFranceConnect: "false",
+        },
+      );
+      expect(response1.statusCode).toBe(400);
+
+      //Young 16 years old
+      const response2 = await selfUpdateYoung(
+        {
+          parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
+        },
+        {
+          birthdateAt: date1,
+          parent1FromFranceConnect: "false",
+        },
+      );
+      expect(response2.statusCode).toBe(400);
+
+      //Young 14 years old
+      let date2 = new Date();
+      date2.setFullYear(date2.getFullYear() - 14);
+      const response3 = await selfUpdateYoung(
+        {
+          cniFiles: ["cniFiles.jpg"],
+          parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
+          dataProcessingConsentmentFiles: [""],
+        },
+        {
+          birthdateAt: date2,
+          parent1FromFranceConnect: "false",
+        },
+      );
+      expect(response3.statusCode).toBe(400);
+    });
+    it("should return 404 if user don't exist", async () => {
+      const response = await request(getAppHelper())
+        .put("/young/inscription/documents")
+        .send({
+          cniFiles: ["cniFiles.jpg"],
+        });
+      expect(response.statusCode).toBe(404);
+
+      const response2 = await request(getAppHelper())
+        .put("/young/inscription/documents")
+        .send({
+          cniFiles: ["cniFiles.jpg"],
+          parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
+        });
+      expect(response2.statusCode).toBe(404);
+
+      const response3 = await request(getAppHelper())
+        .put("/young/inscription/documents")
+        .send({
+          cniFiles: ["cniFiles.jpg"],
+          parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
+          dataProcessingConsentmentFiles: ["dataProcessingConsentmentFiles.pdf"],
+        });
+      expect(response3.statusCode).toBe(404);
     });
   });
 });
