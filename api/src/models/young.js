@@ -300,7 +300,6 @@ const Schema = new mongoose.Schema({
   cohesionStayPresence: {
     type: String,
     enum: ["true", "false", ""],
-    default: "",
     documentation: {
       description: "Le volontaire était présent lors du séjour de cohésion",
     },
@@ -308,7 +307,6 @@ const Schema = new mongoose.Schema({
   cohesionStayMedicalFileReceived: {
     type: String,
     enum: ["true", "false", ""],
-    default: "",
     documentation: {
       description: "La fiche sanitaire a été reçu par le SNU",
     },
