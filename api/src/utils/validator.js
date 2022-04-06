@@ -289,6 +289,7 @@ function validateYoung(young, user) {
     gender: Joi.string().allow(null, ""),
     birthdateAt: Joi.string().allow(null, ""),
     cohort: Joi.string().allow(null, ""),
+    originalCohort: Joi.string().allow(null, ""),
     cohortChangeReason: Joi.string().allow(null, ""),
     cohortDetailedChangeReason: Joi.string().allow(null, ""),
     phase: Joi.string().allow(null, ""),
