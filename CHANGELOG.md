@@ -1,3 +1,15 @@
+# [1.67.0](https://github.com/betagouv/service-national-universel/compare/v1.66.0...v1.67.0) (2022-04-06)
+
+
+### Bug Fixes
+
+* filtre volontaire/inscription : allergies/intolérance ([#1441](https://github.com/betagouv/service-national-universel/issues/1441)) ([5974bc6](https://github.com/betagouv/service-national-universel/commit/5974bc6202b4597470165637ed40f65b9c935e88))
+
+
+### Features
+
+* création d'un composant générique pour les erreurs ([8e0463a](https://github.com/betagouv/service-national-universel/commit/8e0463adac12a179fb86c2872743c0610536d480))
+
 # [1.66.0](https://github.com/betagouv/service-national-universel/compare/v1.65.0...v1.66.0) (2022-04-05)
 
 
