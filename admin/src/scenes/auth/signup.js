@@ -250,11 +250,14 @@ export default function Signup() {
                       </label>
                       <Field
                         className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                        validate={(v) => !v && "Ce champ est obligatoire"}
+                        validate={(v) => (!v || !v?.length) && "Ce champ est obligatoire"}
                         component="select"
                         name="structure.types"
                         value={values.structure.types}
-                        onChange={handleChange}>
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          handleChange({ target: { value: [value], name: "structure.types" } });
+                        }}>
                         <option key="" value="" selected disabled>
                           Type de structure privée
                         </option>
@@ -277,11 +280,14 @@ export default function Signup() {
                         </label>
                         <Field
                           className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                          validate={(v) => !v && "Ce champ est obligatoire"}
+                          validate={(v) => (!v || !v?.length) && "Ce champ est obligatoire"}
                           component="select"
                           name="structure.types"
                           value={values.structure.types}
-                          onChange={handleChange}>
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            handleChange({ target: { value: [value], name: "structure.types" } });
+                          }}>
                           <option key="" value="" selected disabled>
                             Type de structure publique
                           </option>
@@ -295,7 +301,9 @@ export default function Signup() {
                         </Field>
                         <p className="text-xs text-red-500">{errors.structure?.types}</p>
                       </div>
-                      {["Collectivité territoriale", "Etablissement scolaire", "Etablissement public de santé", "Corps en uniforme"].includes(values.structure.types) && (
+                      {values.structure?.types?.some((t) =>
+                        ["Collectivité territoriale", "Etablissement scolaire", "Etablissement public de santé", "Corps en uniforme"].includes(t),
+                      ) && (
                         <div>
                           <label className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                             <span className="text-red-500 mr-1">*</span>SOUS-TYPE DE STRUCTURE

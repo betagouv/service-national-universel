@@ -13,7 +13,7 @@ import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import Invite from "./components/invite";
 import Loader from "../../components/Loader";
-import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, ROLES, ENABLE_PM } from "../../utils";
+import { translate, ROLES, ENABLE_PM, legalStatus, typesStructure, sousTypesStructure } from "../../utils";
 import api from "../../services/api";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -134,19 +134,14 @@ export default function Edit(props) {
                       <span>*</span>STATUT JURIDIQUE
                     </label>
                     <Field validate={(v) => !v && requiredMessage} component="select" name="legalStatus" value={values.legalStatus} onChange={handleChange}>
-                      <option key="" value="" />
-                      <option key="PUBLIC" value="PUBLIC">
-                        {translate("PUBLIC")}
+                      <option value={""} disabled selected>
+                        Statut juridique
                       </option>
-                      <option key="PRIVATE" value="PRIVATE">
-                        {translate("PRIVATE")}
-                      </option>
-                      <option key="ASSOCIATION" value="ASSOCIATION">
-                        {translate("ASSOCIATION")}
-                      </option>
-                      <option key="OTHER" value="OTHER">
-                        {translate("OTHER")}
-                      </option>
+                      {legalStatus.map((status) => (
+                        <option key={status} value={status} label={translate(status)}>
+                          {translate(status)}
+                        </option>
+                      ))}
                     </Field>
                     <ErrorMessage errors={errors} touched={touched} name="legalStatus" />
                   </FormGroup>
@@ -154,10 +149,10 @@ export default function Edit(props) {
                     <FormGroup>
                       <label>DISPOSEZ-VOUS D&apos;UN AGRÉMENT ?</label>
                       <MultiSelect
-                        value={values.associationTypes?.filter((e) => e.length) || []}
+                        value={values.types}
                         onChange={handleChange}
-                        name="associationTypes"
-                        options={associationTypes}
+                        name="types"
+                        options={typesStructure.ASSOCIATION}
                         placeholder="Sélectionnez un ou plusieurs agréments"
                       />
                     </FormGroup>
@@ -167,9 +162,20 @@ export default function Edit(props) {
                       <label>
                         <span>*</span>TYPE DE STRUCTURE PRIVÉE
                       </label>
-                      <Field validate={(v) => !v && requiredMessage} component="select" name="structurePriveeType" value={values.structurePriveeType} onChange={handleChange}>
-                        <option key="" value="" />
-                        {privateTypes.map((e) => {
+                      <Field
+                        className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                        validate={(v) => (!v || !v?.length) && "Ce champ est obligatoire"}
+                        component="select"
+                        name="types"
+                        value={values.types}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          handleChange({ target: { value: [value], name: "types" } });
+                        }}>
+                        <option key="" value="" selected disabled>
+                          Type de structure privée
+                        </option>
+                        {typesStructure.PRIVATE.map((e) => {
                           return (
                             <option key={e} value={e}>
                               {translate(e)}
@@ -177,18 +183,29 @@ export default function Edit(props) {
                           );
                         })}
                       </Field>
-                      <ErrorMessage errors={errors} touched={touched} name="structurePriveeType" />
+                      <ErrorMessage errors={errors} touched={touched} name="types" />
                     </FormGroup>
                   )}
                   {values.legalStatus === "PUBLIC" && (
-                    <div>
+                    <>
                       <FormGroup>
                         <label>
                           <span>*</span>TYPE DE STRUCTURE PUBLIQUE
                         </label>
-                        <Field validate={(v) => !v && requiredMessage} component="select" name="structurePubliqueType" value={values.structurePubliqueType} onChange={handleChange}>
-                          <option key="" value="" />
-                          {publicTypes.map((e) => {
+                        <Field
+                          className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                          validate={(v) => (!v || !v?.length) && "Ce champ est obligatoire"}
+                          component="select"
+                          name="types"
+                          value={values.types}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            handleChange({ target: { value: [value], name: "types" } });
+                          }}>
+                          <option key="" value="" selected disabled>
+                            Type de structure publique
+                          </option>
+                          {typesStructure.PUBLIC.map((e) => {
                             return (
                               <option key={e} value={e}>
                                 {translate(e)}
@@ -196,21 +213,24 @@ export default function Edit(props) {
                             );
                           })}
                         </Field>
-                        <ErrorMessage errors={errors} touched={touched} name="structurePubliqueType" />
+                        <ErrorMessage errors={errors} touched={touched} name="types" />
                       </FormGroup>
-                      {["Service de l'Etat", "Etablissement public"].includes(values.structurePubliqueType) && (
+                      {values.types?.some((t) => ["Collectivité territoriale", "Etablissement scolaire", "Etablissement public de santé", "Corps en uniforme"].includes(t)) && (
                         <FormGroup>
                           <label>
-                            <span>*</span>TYPE DE SERVICE DE L&apos;ETAT
+                            <span>*</span>SOUS-TYPE DE STRUCTURE
                           </label>
                           <Field
-                            validate={(v) => !v && requiredMessage}
+                            className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm  text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                            validate={(v) => !v && "Ce champ est obligatoire"}
                             component="select"
-                            name="structurePubliqueEtatType"
-                            value={values.structurePubliqueEtatType}
+                            name="sousType"
+                            value={values.sousType}
                             onChange={handleChange}>
-                            <option key="" value="" />
-                            {publicEtatTypes.map((e) => {
+                            <option key="" value="" selected disabled>
+                              Type de service de l&apos;état
+                            </option>
+                            {sousTypesStructure[values.types].map((e) => {
                               return (
                                 <option key={e} value={e}>
                                   {translate(e)}
@@ -218,10 +238,10 @@ export default function Edit(props) {
                               );
                             })}
                           </Field>
-                          <ErrorMessage errors={errors} touched={touched} name="structurePubliqueEtatType" />
+                          <ErrorMessage errors={errors} touched={touched} name="sousType" />
                         </FormGroup>
                       )}
-                    </div>
+                    </>
                   )}
                   <FormGroup>
                     <label>PRÉSENTATION SYNTHÉTIQUE DE LA STRUCTURE</label>
