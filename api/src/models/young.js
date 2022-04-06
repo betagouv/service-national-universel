@@ -313,6 +313,16 @@ const Schema = new mongoose.Schema({
       description: "La fiche sanitaire a été reçu par le SNU",
     },
   },
+
+  cohesionStayMedicalFileDownload: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La fiche sanitaire a été reçu par le SNU",
+    },
+  },
+
   sessionPhase1Id: {
     type: String,
     documentation: {
@@ -1070,6 +1080,22 @@ const Schema = new mongoose.Schema({
       description: "Fichier : Formulaire de consentement de droit à l'image",
     },
   },
+  imageRightFilesStatus: {
+    type: String,
+    enum: ["TO_UPLOAD", "WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED"],
+    default: "TO_UPLOAD",
+    documentation: {
+      description: "Status du fichier consentement de droit à l'image ",
+    },
+  },
+
+  imageRightFileComment: {
+    type: String,
+    documentation: {
+      description: "Commentaire du status WAITING_CORRECTION consentement de droit à l'image ",
+    },
+  },
+
   autoTestPCR: {
     type: String,
     enum: ["true", "false"],
@@ -1084,6 +1110,22 @@ const Schema = new mongoose.Schema({
       description: "Fichier : Formulaire de consentement d'autotest PCR",
     },
   },
+  autoTestPCRFilesStatus: {
+    type: String,
+    enum: ["TO_UPLOAD", "WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED"],
+    default: "TO_UPLOAD",
+    documentation: {
+      description: "Status du fichier consentement d'autotest PCR",
+    },
+  },
+
+  autoTestPCRFilesComment: {
+    type: String,
+    documentation: {
+      description: "Commentaire du status WAITING_CORRECTION consentement d'autotest PCR",
+    },
+  },
+
   rulesYoung: {
     type: String,
     enum: ["true", "false"],
@@ -1112,6 +1154,23 @@ const Schema = new mongoose.Schema({
       description: "Fichiers : règlement intérieur",
     },
   },
+
+  rulesFilesStatus: {
+    type: String,
+    enum: ["TO_UPLOAD", "WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED"],
+    default: "TO_UPLOAD",
+    documentation: {
+      description: "Status du fichier règlement intérieur",
+    },
+  },
+
+  rulesFilesComment: {
+    type: String,
+    documentation: {
+      description: "Commentaire du status WAITING_CORRECTION règlement intérieur",
+    },
+  },
+
   informationAccuracy: {
     type: String,
     enum: ["true", "false"],

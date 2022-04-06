@@ -76,7 +76,7 @@ export default function Rules() {
                   try {
                     setLoading(true);
                     const { rulesYoung, rulesParent1, rulesParent2, rulesFiles } = values;
-                    const { ok, code, data: young } = await api.put("/young", { rulesYoung, rulesParent1, rulesParent2, rulesFiles });
+                    const { ok, code, data: young } = await api.put("/young/phase1/rules", { rulesYoung, rulesParent1, rulesParent2, rulesFiles });
                     setLoading(false);
                     if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
                     dispatch(setYoung(young));

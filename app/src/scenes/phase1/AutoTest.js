@@ -81,7 +81,7 @@ export default function AutoTest() {
                   try {
                     setLoading(true);
                     const { autoTestPCR, autoTestPCRFiles } = values;
-                    const { ok, code, data: young } = await api.put("/young", { autoTestPCR, autoTestPCRFiles });
+                    const { ok, code, data: young } = await api.put("/young/phase1/autoTestPCR", { autoTestPCR, autoTestPCRFiles });
                     setLoading(false);
                     if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
                     dispatch(setYoung(young));
