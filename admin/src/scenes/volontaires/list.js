@@ -45,6 +45,7 @@ const FILTERS = [
   "SEARCH",
   "STATUS",
   "COHORT",
+  "ORIGINAL_COHORT",
   "DEPARTMENT",
   "REGION",
   "STATUS_PHASE_1",
@@ -152,6 +153,7 @@ export default function VolontaireList() {
                       return {
                         _id: data._id,
                         Cohorte: data.cohort,
+                        "Cohorte d'origine": data.originalCohort,
                         Prénom: data.firstName,
                         Nom: data.lastName,
                         "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
@@ -403,6 +405,21 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Cohorte", "Cohorte")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Cohorte d’origine"
+                  componentId="ORIGINAL_COHORT"
+                  dataField="originalCohort.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "ORIGINAL_COHORT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Cohorte d’origine", "Cohorte d’origine")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}

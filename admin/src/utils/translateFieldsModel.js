@@ -64,6 +64,12 @@ const translateFieldYoung = (f) => {
       return "Date de naissance";
     case "cohort":
       return "Cohorte";
+    case "originalCohort":
+      return "Cohorte d'origine";
+    case "cohortChangeReason":
+      return "Motif de changement de cohorte";
+    case "cohortDetailedChangeReason":
+      return "Précision du motif de changement de cohorte";
     case "phase":
       return "Phase";
     case "status":

@@ -425,6 +425,11 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       young.set({ meetingPointId: undefined });
     }
 
+    // si le volontaire change pour la première fois de cohorte, on stocke sa cohorte d'origine
+    if (!young.originalCohort) {
+      young.set({ originalCohort: young.cohort });
+    }
+
     young.set({ statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, cohort, cohortChangeReason });
     await young.save({ fromUser: req.user });
 

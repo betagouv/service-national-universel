@@ -524,6 +524,11 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       goalIsReached = false;
     }
 
+    // si le volontaire change pour la première fois de cohorte, on stocke sa cohorte d'origine
+    if (!young.originalCohort) {
+      young.set({ originalCohort: young.cohort });
+    }
+
     if (goalIsReached === true) {
       young.set({
         cohort,
