@@ -10,6 +10,7 @@ import Phase2 from "./phase2";
 import Phase3 from "./phase3";
 import Phase2Contract from "./phase2Contract";
 import History from "./history";
+import Notifications from "./notifications";
 import { YOUNG_STATUS } from "../../../utils";
 
 export default function Index({ ...props }) {
@@ -50,6 +51,7 @@ export default function Index({ ...props }) {
       <Route path="/volontaire/:id/phase2" component={() => <Phase2 young={young} onChange={getYoung} />} />
       <Route path="/volontaire/:id/phase3" component={() => <Phase3 young={young} onChange={getYoung} />} />
       <Route path="/volontaire/:id/historique" component={() => <History young={young} onChange={getYoung} />} />
+      <Route path="/volontaire/:id/notifications" component={() => <Notifications young={young} onChange={getYoung} />} />
       <Route path="/volontaire/:id" component={getDetail} />
     </Switch>
   );
