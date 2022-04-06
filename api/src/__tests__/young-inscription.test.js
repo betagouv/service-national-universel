@@ -1057,4 +1057,78 @@ describe("Young", () => {
       expect(response3.statusCode).toBe(404);
     });
   });
+  describe.only("PUT /young/inscription/documents", () => {
+    async function selfUpdateYoung(body = {}, fields = {}) {
+      const young = await createYoungHelper(getNewYoungFixture(fields));
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      const response = await request(getAppHelper()).put("/young/inscription/done").send(body);
+      updatedYoung = response.body.data;
+      passport.user = previous;
+
+      return response;
+    }
+    it("Should update Young done with statut code 200", async () => {
+      const response1 = await selfUpdateYoung({
+        informationAccuracy: true,
+      });
+      expect(response1.statusCode).toBe(200);
+
+      let grade = "Terminale";
+      const response2 = await selfUpdateYoung(
+        {
+          informationAccuracy: true,
+          aknowledgmentTerminaleSessionAvailability: true,
+        },
+        { grade },
+      );
+      expect(response2.statusCode).toBe(200);
+
+      grade = "Terminale CAP";
+      const response3 = await selfUpdateYoung(
+        {
+          informationAccuracy: true,
+          aknowledgmentTerminaleSessionAvailability: true,
+        },
+        { grade },
+      );
+      expect(response3.statusCode).toBe(200);
+    });
+    it("should return 400 when parameters invalid", async () => {
+      const response1 = await selfUpdateYoung({
+        informationAccuracy: false,
+      });
+      expect(response1.statusCode).toBe(400);
+
+      const response2 = await selfUpdateYoung({
+        informationAccuracy: true,
+        aknowledgmentTerminaleSessionAvailability: true,
+      });
+      expect(response2.statusCode).toBe(400);
+
+      grade = "3eme";
+      const response3 = await selfUpdateYoung(
+        {
+          informationAccuracy: true,
+          aknowledgmentTerminaleSessionAvailability: true,
+        },
+        { grade },
+      );
+      expect(response3.statusCode).toBe(400);
+    });
+    it("should return 404 if user don't exist", async () => {
+      const response = await request(getAppHelper()).put("/young/inscription/done").send({
+        informationAccuracy: true,
+      });
+      expect(response.statusCode).toBe(404);
+
+      const response2 = await request(getAppHelper()).put("/young/inscription/done").send({
+        informationAccuracy: true,
+        aknowledgmentTerminaleSessionAvailability: true,
+      });
+      expect(response2.statusCode).toBe(404);
+    });
+  });
 });
