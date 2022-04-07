@@ -28,6 +28,7 @@ import { toastr } from "react-redux-toastr";
 import Badge from "../../../components/Badge";
 import Select from "../components/Select";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import DocumentPhase1 from "../components/DocumentPhase1";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -241,6 +242,11 @@ export default function Phase1(props) {
                 )}
               </Formik>
             </Col>
+          </Row>
+          <Row>
+            <Bloc title="Documents" disabled={disabled}>
+              <DocumentPhase1 young={young} />
+            </Bloc>
           </Row>
         </Box>
         <div style={{ display: "flex", alignItems: "flex-start" }}>

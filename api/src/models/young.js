@@ -1089,7 +1089,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  imageRightFileComment: {
+  imageRightFilesComment: {
     type: String,
     documentation: {
       description: "Commentaire du status WAITING_CORRECTION consentement de droit à l'image ",

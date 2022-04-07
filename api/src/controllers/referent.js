@@ -37,6 +37,7 @@ const {
   ERRORS,
   isYoung,
   inSevenDays,
+  FILE_STATUS_PHASE1,
   //  updateApplicationsWithYoungOrMission,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
@@ -861,6 +862,95 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/young/:id/phase1Status/:document", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const keys = ["cohesionStayMedical", "autoTestPCR", "imageRight", "rules"];
+    const { error: documentError, value: document } = Joi.string()
+      .required()
+      .valid(...keys)
+      .validate(req.params.document);
+    if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungModel.findById(req.params.id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let values;
+    if (document !== "cohesionStayMedical") {
+      const { error: bodyError, value } = Joi.object({
+        [`${document}FilesStatus`]: Joi.string()
+          .trim()
+          .valid(FILE_STATUS_PHASE1.TO_UPLOAD, FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED)
+          .required(),
+        [`${document}FilesComment`]: Joi.alternatives().conditional(`${document}FilesStatus`, {
+          is: FILE_STATUS_PHASE1.WAITING_CORRECTION,
+          then: Joi.string().trim().required(),
+          otherwise: Joi.isError(new Error()),
+        }),
+      }).validate(req.body);
+      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
+      if (!value[`${document}FilesComment`]) value[`${document}FilesComment`] = undefined;
+      values = value;
+    } else {
+      console.log("Fiche sanitaire");
+      const { error: bodyError, value } = Joi.object({
+        cohesionStayMedicalFileReceived: Joi.string().trim().required().valid("true", "false"),
+        cohesionStayMedicalFileDownloaded: Joi.string().trim().required().valid("true", "false"),
+      }).validate(req.body);
+      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
+      values = value;
+    }
+
+    young.set(values);
+    await young.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.put("/young/:id/phase1Files/:document", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const keys = ["autoTestPCR", "imageRight", "rules"];
+    const { error: documentError, value: document } = Joi.string()
+      .required()
+      .valid(...keys)
+      .validate(req.params.document);
+    if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungModel.findById(req.params.id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let values;
+    if (document !== "rules") {
+      const { error: bodyError, value } = Joi.object({
+        [`${document}`]: Joi.string().trim().valid("true", "false"),
+        [`${document}Files`]: Joi.array().items(Joi.string()),
+      }).validate(req.body);
+      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
+      values = value;
+    } else {
+      const { error: bodyError, value } = Joi.object({
+        rulesYoung: Joi.string().trim().valid("true", "false"),
+        rulesParent1: Joi.string().trim().required().valid("true", "false"),
+        rulesParent2: Joi.string().trim().valid("true", "false"),
+        rulesFiles: Joi.array().items(Joi.string()),
+      }).validate(req.body);
+      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
+      values = value;
+    }
+
+    young.set(values);
+    await young.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
