@@ -3,16 +3,14 @@ import styled from "styled-components";
 
 export default function DownloadButton({ text, tooltipText, minTooltipText, icon, minify = false, ...rest }) {
   return (
-    <>
-      <Badge minify={minify} {...rest}>
-        <div className="flex items-center gap-1">
-          {icon}
-          <span>{text}</span>
-        </div>
-        <div className="tooltiptext">{tooltipText}</div>
-        <div className="minTooltipText">{minTooltipText || tooltipText}</div>
-      </Badge>
-    </>
+    <Badge minify={minify} {...rest}>
+      <div className="flex items-center gap-1">
+        {icon}
+        <span>{text}</span>
+      </div>
+      <div className="tooltiptext">{tooltipText}</div>
+      <div className="minTooltipText">{minTooltipText || tooltipText}</div>
+    </Badge>
   );
 }
 
@@ -29,7 +27,7 @@ const Badge = styled.div`
   border: 1px solid #cecece;
   ${({ color, backgroundColor }) => `
     color: ${color};
-    background-color: ${backgroundColor ? backgroundColor : `${color}33`};
+    background-color: ${backgroundColor ? backgroundColor : `${color}11`};
     border: 0.5px solid ${color};
   `};
   /* Tooltip text */
