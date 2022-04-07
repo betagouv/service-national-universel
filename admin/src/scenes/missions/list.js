@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
-import { apiURL } from "../../config";
+import { apiURL, supportURL } from "../../config";
 import Panel from "./panel";
 import { formatStringDateTimezoneUTC, translate, getFilterLabel, formatLongDateFR, formatDateFRTimezoneUTC, ES_NO_LIMIT, ROLES } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
@@ -287,7 +287,11 @@ export default function List() {
                 <div>
                   <div style={{ height: "0.5rem" }} />
                   <div>
-                    <span className="title">Général :</span>concerne toutes les informations générales de la mission . <strong> La source </strong> correspond à la plateforme sur laquelle a été déposée la mission [JVA & SNU ] ⇒ lien article de la BDC
+                    <span className="title">Général :</span>concerne toutes les informations générales de la mission .
+                    <a href={`${supportURL}/base-de-connaissance/missions-de-la-plateforme-jeveuxaidergouvfr`} target="_blank" rel="noreferrer">
+                      La source
+                    </a>
+                    correspond à la plateforme sur laquelle a été déposée la mission [JVA & SNU ] ⇒ lien article de la BDC
                   </div>
                   <div>
                     <span className="title">Modalités :</span>concerne toutes les condtions de réalisation de la mission.
