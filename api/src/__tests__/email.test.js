@@ -80,15 +80,21 @@ describe("Email", () => {
       let res = await request(getAppHelper()).get("/email?email=test@example.org");
       expect(res.status).toBe(200);
     });
-    it("should reject if not admin", async () => {
+    it("should reject if not ADMIN, REFERENT_DEPARTMENT, REFERENT_REGION", async () => {
       const passport = require("passport");
-      const { ADMIN, ...unauthorizedRoles } = ROLES;
+      const { ADMIN, REFERENT_DEPARTMENT, REFERENT_REGION, ...unauthorizedRoles } = ROLES;
       for (const role of Object.values(unauthorizedRoles)) {
         passport.user.role = role;
         let res = await request(getAppHelper()).get("/email?email=test@example.org");
         expect(res.statusCode).toEqual(403);
       }
       passport.user.role = ADMIN;
+      res = await request(getAppHelper()).get("/email?email=test@example.org");
+      expect(res.statusCode).toEqual(200);
+      passport.user.role = REFERENT_DEPARTMENT;
+      res = await request(getAppHelper()).get("/email?email=test@example.org");
+      expect(res.statusCode).toEqual(200);
+      passport.user.role = REFERENT_REGION;
       res = await request(getAppHelper()).get("/email?email=test@example.org");
       expect(res.statusCode).toEqual(200);
     });
