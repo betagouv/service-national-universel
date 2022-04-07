@@ -4,6 +4,7 @@ import { SuccessMessage, Logo, ContinueButton } from "./components/printable";
 import { HeroContainer, Hero } from "../../components/Content";
 import styled from "styled-components";
 import api from "../../services/api";
+import { setYoung } from "../../redux/auth/actions";
 
 export default function MedicalFile() {
   const young = useSelector((state) => state.Auth.young);

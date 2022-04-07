@@ -29,9 +29,9 @@ export default function DocumentPhase1(props) {
   ];
 
   const cohesionValue = {
-    RECIEVED: { cohesionStayMedicalFileReceived: "true", cohesionStayMedicalFileDownloaded: "true" },
-    TO_DOWNLOAD: { cohesionStayMedicalFileReceived: "false", cohesionStayMedicalFileDownloaded: "false" },
-    DOWNLOADED: { cohesionStayMedicalFileReceived: "false", cohesionStayMedicalFileDownloaded: "true" },
+    RECIEVED: { cohesionStayMedicalFileReceived: "true", cohesionStayMedicalFileDownload: "true" },
+    TO_DOWNLOAD: { cohesionStayMedicalFileReceived: "false", cohesionStayMedicalFileDownload: "false" },
+    DOWNLOADED: { cohesionStayMedicalFileReceived: "false", cohesionStayMedicalFileDownload: "true" },
   };
 
   const updateYoung = async () => {
@@ -42,7 +42,6 @@ export default function DocumentPhase1(props) {
 
   useEffect(() => {
     if (young) {
-      console.log(young);
       if (young.cohesionStayMedicalFileReceived !== "true") {
         if (young.cohesionStayMedicalFileDownload === "false") {
           setStatusCohesionStayMedical("TO_DOWNLOAD");
@@ -134,7 +133,7 @@ export default function DocumentPhase1(props) {
     }
   };
 
-  if (!dataImageRight && !dataAutoTestPCR) return null;
+  if (!dataImageRight && !dataAutoTestPCR && !dataRules) return null;
 
   return (
     <Row>
@@ -180,7 +179,6 @@ export default function DocumentPhase1(props) {
             }}>
             {({ values, handleChange, handleSubmit }) => (
               <>
-                {console.log(values)}
                 <div className="flex flex-col p-2">
                   <Select
                     name="imageRight"

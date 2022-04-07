@@ -243,11 +243,13 @@ export default function Phase1(props) {
               </Formik>
             </Col>
           </Row>
-          <Row>
-            <Bloc title="Documents" disabled={disabled}>
-              <DocumentPhase1 young={young} />
-            </Bloc>
-          </Row>
+          {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? (
+            <Row>
+              <Bloc title="Documents" disabled={disabled}>
+                <DocumentPhase1 young={young} />
+              </Bloc>
+            </Row>
+          ) : null}
         </Box>
         <div style={{ display: "flex", alignItems: "flex-start" }}>
           {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (

@@ -803,16 +803,18 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    let value = {};
+    let values = {};
     if (document !== "cohesionStayMedical") {
-      const { error: bodyError, value: value } = validatePhase1Document(req.body, document);
+      const { error: bodyError, value } = validatePhase1Document(req.body, document);
       if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      value[`${document}FilesStatus`] = "WAITING_VERIFICATION";
+      values = value;
+      values[`${document}FilesStatus`] = "WAITING_VERIFICATION";
+      values[`${document}FilesComment`] = undefined;
     } else {
-      value.cohesionStayMedicalFileDownload = "true";
+      values.cohesionStayMedicalFileDownload = "true";
     }
 
-    young.set(value);
+    young.set(values);
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

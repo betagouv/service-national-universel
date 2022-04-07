@@ -894,15 +894,13 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
       if (!value[`${document}FilesComment`]) value[`${document}FilesComment`] = undefined;
       values = value;
     } else {
-      console.log("Fiche sanitaire");
       const { error: bodyError, value } = Joi.object({
         cohesionStayMedicalFileReceived: Joi.string().trim().required().valid("true", "false"),
-        cohesionStayMedicalFileDownloaded: Joi.string().trim().required().valid("true", "false"),
+        cohesionStayMedicalFileDownload: Joi.string().trim().required().valid("true", "false"),
       }).validate(req.body);
       if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
       values = value;
     }
-
     young.set(values);
     await young.save({ fromUser: req.user });
 
