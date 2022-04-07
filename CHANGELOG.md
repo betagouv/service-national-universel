@@ -1,3 +1,16 @@
+# [1.68.0](https://github.com/betagouv/service-national-universel/compare/v1.67.0...v1.68.0) (2022-04-07)
+
+
+### Bug Fixes
+
+* reinit-fields-change-cohort ([ec7169a](https://github.com/betagouv/service-national-universel/commit/ec7169a94d388252b274df7d48be923cbaa5a442))
+* **app:** remove cookies ([085f4f6](https://github.com/betagouv/service-national-universel/commit/085f4f684aa45eef5b2283fe1c6c504486878ece))
+
+
+### Features
+
+* **admin:** open sendinblue referents ([3df19ef](https://github.com/betagouv/service-national-universel/commit/3df19ef7a3de431a926921959fb916615251e66e))
+
 # [1.67.0](https://github.com/betagouv/service-national-universel/compare/v1.66.0...v1.67.0) (2022-04-06)
 
 
