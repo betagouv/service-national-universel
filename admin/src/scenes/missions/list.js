@@ -5,19 +5,22 @@ import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
-import { apiURL } from "../../config";
+import { apiURL, supportURL } from "../../config";
 import Panel from "./panel";
 import { formatStringDateTimezoneUTC, translate, getFilterLabel, formatLongDateFR, formatDateFRTimezoneUTC, ES_NO_LIMIT, ROLES } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine, Help, HelpText, LockIcon } from "../../components/list";
 import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
+import { HiAdjustments } from "react-icons/hi";
+import LockedSvg from "../../assets/lock.svg";
+import UnlockedSvg from "../../assets/lock-open.svg";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION", "DATE", "SOURCE"];
 
@@ -27,6 +30,11 @@ export default function List() {
   const [structureIds, setStructureIds] = useState();
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
+  const [infosHover, setInfosHover] = useState(false);
+  const [infosClick, setInfosClick] = useState(false);
+  const toggleInfos = () => {
+    setInfosClick(!infosClick);
+  };
 
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
@@ -138,6 +146,12 @@ export default function List() {
                   queryFormat="and"
                   autosuggest={false}
                 />
+                <HiAdjustments onClick={handleShowFilter} className="text-xl text-coolGray-700 cursor-pointer hover:scale-105" />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <div className="uppercase text-xs text-snu-purple-800">Général</div>
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -152,11 +166,31 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
-                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Source"
+                  componentId="SOURCE"
+                  dataField="isJvaMission.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SOURCE") }}
+                  renderItem={(e, count) => {
+                    const text = e === "true" ? "JVA" : "SNU";
+                    return `${text} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => {
+                    if (Object.keys(items).length === 0) return "Source";
+                    const translated = Object.keys(items).map((item) => {
+                      return item === "true" ? "JVA" : "SNU";
+                    });
+                    let value = translated.join(", ");
+                    return value;
+                  }}
+                />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
+                <div className="uppercase text-xs text-snu-purple-800">Modalités</div>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -214,30 +248,9 @@ export default function List() {
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
                 />
-
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Source"
-                  componentId="SOURCE"
-                  dataField="isJvaMission.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "SOURCE") }}
-                  renderItem={(e, count) => {
-                    const text = e === "true" ? "JVA" : "SNU";
-                    return `${text} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => {
-                    if (Object.keys(items).length === 0) return "Source";
-                    const translated = Object.keys(items).map((item) => {
-                      return item === "true" ? "JVA" : "SNU";
-                    });
-                    let value = translated.join(", ");
-                    return value;
-                  }}
-                />
-
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <div className="uppercase text-xs text-snu-purple-800">Dates</div>
                 <ReactiveComponent
                   componentId="DATE"
                   URLParams={true}
@@ -246,7 +259,12 @@ export default function List() {
                     return <DatePickerWrapper setQuery={props.setQuery} value={props.value} />;
                   }}
                 />
-
+                <Help onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)}>
+                  {infosClick ? <LockIcon src={LockedSvg} /> : <LockIcon src={UnlockedSvg} />}
+                  Aide
+                </Help>
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
                 {user.role === ROLES.SUPERVISOR ? (
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
@@ -264,6 +282,26 @@ export default function List() {
                 <DeleteFilters />
               </FilterRow>
             </Filter>
+            {infosHover || infosClick ? (
+              <HelpText>
+                <div>
+                  <div style={{ height: "0.5rem" }} />
+                  <div>
+                    <span className="title">Général :</span>concerne toutes les informations générales de la mission . <strong>La source</strong>
+                    correspond à la plateforme sur laquelle a été déposée la mission
+                    <a href={`${supportURL}/base-de-connaissance/missions-de-la-plateforme-jeveuxaidergouvfr`} target="_blank" rel="noreferrer">
+                      JVA & SNU
+                    </a>
+                  </div>
+                  <div>
+                    <span className="title">Modalités :</span>concerne toutes les condtions de réalisation de la mission.
+                  </div>
+                  <div>
+                    <span className="title">Dates :</span>permettent de filtrer les missions dont les dates de début et de fin sont inclues dans la borne temporelle. Attention les missions dont seulement 1 jour est inclus seront également affichées.
+                  </div>
+                </div>
+              </HelpText>
+            ) : null}
             <ResultTable>
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
