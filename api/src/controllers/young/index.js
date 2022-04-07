@@ -531,9 +531,18 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         cohortDetailedChangeReason,
         status: YOUNG_STATUS.WAITING_LIST,
         statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+        cohesionStayPresence: undefined,
+        cohesionStayMedicalFileReceived: undefined,
       });
     } else {
-      young.set({ cohort, cohortChangeReason, cohortDetailedChangeReason, statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION });
+      young.set({
+        cohort,
+        cohortChangeReason,
+        cohortDetailedChangeReason,
+        statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+        cohesionStayPresence: undefined,
+        cohesionStayMedicalFileReceived: undefined,
+      });
     }
 
     await young.save({ fromUser: req.user });
