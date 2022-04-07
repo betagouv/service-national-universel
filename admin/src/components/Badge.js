@@ -1,13 +1,18 @@
 import React from "react";
 import styled from "styled-components";
 
-export default function DownloadButton({ text, tooltipText, minTooltipText, minify = false, ...rest }) {
+export default function DownloadButton({ text, tooltipText, minTooltipText, icon, minify = false, ...rest }) {
   return (
-    <Badge minify={minify} {...rest}>
-      <span>{text}</span>
-      <div className="tooltiptext">{tooltipText}</div>
-      <div className="minTooltipText">{minTooltipText || tooltipText}</div>
-    </Badge>
+    <>
+      <Badge minify={minify} {...rest}>
+        <div className="flex items-center gap-1">
+          {icon}
+          <span>{text}</span>
+        </div>
+        <div className="tooltiptext">{tooltipText}</div>
+        <div className="minTooltipText">{minTooltipText || tooltipText}</div>
+      </Badge>
+    </>
   );
 }
 
@@ -22,10 +27,10 @@ const Badge = styled.div`
   color: #9a9a9a;
   background-color: #f6f6f6;
   border: 1px solid #cecece;
-  ${({ color }) => `
+  ${({ color, backgroundColor }) => `
     color: ${color};
-    background-color: ${color}33;
-    border: 1px solid ${color};
+    background-color: ${backgroundColor ? backgroundColor : `${color}33`};
+    border: 0.5px solid ${color};
   `};
   /* Tooltip text */
   .minTooltipText,
@@ -39,7 +44,7 @@ const Badge = styled.div`
     position: absolute;
     z-index: 1;
     width: 120px;
-    bottom: 95%;
+    bottom: 100%;
     left: 50%;
     margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
   }

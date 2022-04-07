@@ -5,7 +5,7 @@ import { YOUNG_STATUS_COLORS } from "../../../../utils";
 import { Card, CardTitle, CardValueWrapper, CardValue } from "../../../../components/dashboard";
 
 export default function Status({ youngWhoChangedCohortIn, youngWhoChangedCohortOut, filter }) {
-  return (
+  return filter.cohort.length > 0 ? (
     <Row>
       <Col md={6} xl={4}>
         <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_CORRECTION}>
@@ -24,5 +24,5 @@ export default function Status({ youngWhoChangedCohortIn, youngWhoChangedCohortO
         </Card>
       </Col>
     </Row>
-  );
+  ) : null;
 }

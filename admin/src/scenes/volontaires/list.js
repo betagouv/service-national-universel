@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, MultiDropdownList, DataSearch, SelectedFilters } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 
@@ -10,6 +10,7 @@ import { HiAdjustments } from "react-icons/hi";
 
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
+import IconChangementCohorte from "../../assets/IconChangementCohorte.js";
 import api from "../../services/api";
 import { apiURL, appURL, supportURL } from "../../config";
 import Panel from "./panel";
@@ -794,6 +795,7 @@ export default function VolontaireList() {
                     <thead>
                       <tr>
                         <th width="25%">Volontaire</th>
+                        <th>Cohorte</th>
                         <th>Contextes</th>
                         <th width="10%">Actions</th>
                       </tr>
@@ -845,7 +847,16 @@ const Hit = ({ hit, onClick, selected }) => {
           </MultiLine>
         </td>
         <td>
-          <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
+          <Badge
+            color="#0C7CFF"
+            backgroundColor="#F9FCFF"
+            text={hit.cohort}
+            tooltipText={hit.originalCohort ? `Anciennement ${hit.originalCohort}` : null}
+            style={{ cursor: "default" }}
+            icon={hit.originalCohort ? <IconChangementCohorte /> : null}
+          />
+        </td>
+        <td>
           <Badge minify text="Supprimé" color={YOUNG_STATUS_COLORS.DELETED} tooltipText={translate(hit.status)} />
 
           <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} style={"opacity-50"} />
@@ -869,9 +880,17 @@ const Hit = ({ hit, onClick, selected }) => {
           </MultiLine>
         </td>
         <td>
-          <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
+          <Badge
+            color="#0C7CFF"
+            backgroundColor="#F9FCFF"
+            text={hit.cohort}
+            tooltipText={hit.originalCohort ? `Anciennement ${hit.originalCohort}` : null}
+            style={{ cursor: "default" }}
+            icon={hit.originalCohort ? <IconChangementCohorte /> : null}
+          />
+        </td>
+        <td>
           {hit.status === "WITHDRAWN" && <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} />}
-
           <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} />
           <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} />
           <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} />
