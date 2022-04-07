@@ -137,7 +137,7 @@ export default function DocumentPhase1(props) {
 
   return (
     <Row>
-      <Col>
+      <Col md={6} style={{ borderRight: "2px solid #f4f5f7", borderBottom: "2px solid #f4f5f7" }}>
         <div className="flex row justify-center mx-2 my-1">
           <h1 className="text-center pb-2">Fiche Sanitaire</h1>
           <select disabled={loading} className="form-control" value={statusCohesionStayMedical} name="cohesionStayMedical" onChange={(e) => needModal(e)}>
@@ -149,7 +149,7 @@ export default function DocumentPhase1(props) {
           </select>
         </div>
       </Col>
-      <Col>
+      <Col md={6} style={{ borderBottom: "2px solid #f4f5f7" }}>
         <div className="flex row justify-center mx-2 my-1">
           <h1 className="text-center pb-2">Droit a l'image</h1>
 
@@ -220,7 +220,7 @@ export default function DocumentPhase1(props) {
           </Formik>
         </div>
       </Col>
-      <Col>
+      <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
         <div className="flex row justify-center mx-2 my-1">
           <h1 className="text-center pb-2">Utilisation d'autotest</h1>
           <select disabled={loading} className="form-control" value={statusAutoTestPCR} name="autoTestPCR" onChange={(e) => needModal(e)}>
@@ -289,7 +289,7 @@ export default function DocumentPhase1(props) {
           </Formik>
         </div>
       </Col>
-      <Col>
+      <Col md={6}>
         <div className="flex row justify-center mx-2 my-1">
           <h1 className="text-center pb-2">Reglement interieure</h1>
           <select disabled={loading} className="form-control" value={statusRules} name="rules" onChange={(e) => needModal(e)}>
