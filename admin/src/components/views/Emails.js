@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { formatLongDateUTC, ROLES, colors } from "../../utils";
+import { formatLongDateUTC, colors, canViewEmailHistory } from "../../utils";
 import api from "../../services/api";
 import { Box } from "../../components/box";
 
@@ -18,7 +18,7 @@ export default function Emails({ email }) {
     setMinify(!minify);
   };
 
-  if (user.role !== ROLES.ADMIN) return null;
+  if (!canViewEmailHistory(user)) return null;
 
   const getEmails = async () => {
     if (!email) return;
@@ -33,7 +33,7 @@ export default function Emails({ email }) {
 
   return (
     <Box>
-      <div style={{ fontSize: ".9rem", padding: "1rem", color: colors.darkPurple }}>Emails Sendinblue</div>
+      <div style={{ fontSize: ".9rem", padding: "1rem", color: colors.darkPurple }}>Emails envoyés par la plateforme</div>
       {emails?.length ? (
         <>
           <Table>

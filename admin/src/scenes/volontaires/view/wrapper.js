@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import Badge from "../../../components/Badge";
 
-import { translate, YOUNG_STATUS, ROLES, colors, translateCohort } from "../../../utils";
+import { translate, YOUNG_STATUS, ROLES, colors, translateCohort, canViewEmailHistory } from "../../../utils";
 import SelectStatus from "../../../components/selectStatus";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import TabList from "../../../components/views/TabList";
@@ -83,6 +83,11 @@ export default function Wrapper({ children, young, tab, onChange }) {
             <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
               Historique
             </Tab>
+            {canViewEmailHistory(user) ? (
+              <Tab isActive={tab === "notifications"} onClick={() => history.push(`/volontaire/${young._id}/notifications`)}>
+                Notifications
+              </Tab>
+            ) : null}
           </TabList>
         </div>
         <Row style={{ minWidth: "30%" }}>

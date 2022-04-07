@@ -430,7 +430,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       young.set({ originalCohort: young.cohort });
     }
 
-    young.set({ statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, cohort, cohortChangeReason });
+
+    young.set({ statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, cohort, cohortChangeReason, cohesionStayPresence: undefined, cohesionStayMedicalFileReceived: undefined });
     await young.save({ fromUser: req.user });
 
     // if they had a session, we check if we need to update the places taken / left
