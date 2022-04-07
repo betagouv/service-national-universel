@@ -7,6 +7,7 @@ import { Carousel } from "react-responsive-carousel";
 import DesktopView from "./DesktopView";
 import plausibleEvent from "../../../services/plausible";
 import gtagEvent from "../../../services/gtag";
+import { urlWithScheme } from "../../../utils";
 
 export default function Home({ location }) {
   const history = useHistory();
@@ -130,7 +131,7 @@ const CardPhase = ({ upText, title, downText, to }) => {
   return (
     <a
       className="flex w-full flex-col justify-between items-start border-b-8 border-red-700 rounded-2xl  min-h-[10rem]	 bg-white pt-4	pr-4 pb-8	 pl-4	hover:text-black"
-      href={to}
+      href={urlWithScheme(to)}
       target="_blank"
       rel="noreferrer">
       <div>

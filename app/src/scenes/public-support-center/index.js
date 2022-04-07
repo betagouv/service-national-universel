@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 import { HeroContainer } from "../../components/Content";
 import { supportURL } from "../../config";
-import { colors } from "../../utils";
+import { colors, urlWithScheme } from "../../utils";
 import ZammadForm from "./form";
 
 const articles = [
@@ -117,7 +117,7 @@ export default function Index() {
             </div>
             <p>{article.body}</p>
             <p>
-              <a className="block-link" href={article.url} target="_blank" rel="noreferrer">
+              <a className="block-link" href={urlWithScheme(article.url)} target="_blank" rel="noreferrer">
                 Lire la suite
               </a>
             </p>

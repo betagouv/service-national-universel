@@ -1,7 +1,7 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { translate } from "../../../utils";
+import { translate, urlWithScheme } from "../../../utils";
 
 export default function MissionCard({ mission, image }) {
   if (!mission) return <div />;
@@ -29,7 +29,7 @@ export default function MissionCard({ mission, image }) {
         </Tags>
       </Col>
       <Col md={6} xl={4}>
-        <Button onClick={handleClick} target="_blank" href={mission.applicationUrl}>
+        <Button onClick={handleClick} target="_blank" href={urlWithScheme(mission.applicationUrl)}>
           Voir sur<b> {mission.publisherName}</b>
           <img src={require("../../../assets/external-link.svg")} height={15} width={15} color="white" />
         </Button>

@@ -5,6 +5,7 @@ import styled from "styled-components";
 
 import Chevron from "../../../components/Chevron";
 import plausibleEvent from "../../../services/pausible";
+import { urlWithScheme } from "../../../utils";
 
 export default function Association({ hit, missionsInfo }) {
   const tabs = ["Informations", "Contacts", "Missions"];
@@ -67,7 +68,7 @@ export default function Association({ hit, missionsInfo }) {
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
             }}>
-            <a href={association.url} target="_blank" style={{ decoration: "none", color: "#22252A" }} rel="noreferrer">
+            <a href={urlWithScheme(association.url)} target="_blank" style={{ decoration: "none", color: "#22252A" }} rel="noreferrer">
               <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M11.8513 9.14915C11.1345 8.43273 10.1626 8.03027 9.14926 8.03027C8.13588 8.03027 7.16398 8.43273 6.44726 9.14915L3.74439 11.8511C3.02766 12.5679 2.625 13.54 2.625 14.5536C2.625 15.5672 3.02766 16.5393 3.74439 17.256C4.46112 17.9728 5.43321 18.3754 6.44682 18.3754C7.46043 18.3754 8.43253 17.9728 9.14926 17.256L10.5003 15.905"
@@ -182,7 +183,7 @@ export default function Association({ hit, missionsInfo }) {
                   {
                     label: associationLinks.length > 1 ? "Liens" : "Lien",
                     value: associationLinks.map((e) => (
-                      <a style={{ textDecoration: "underline" }} href={e} key={e}>
+                      <a style={{ textDecoration: "underline" }} href={urlWithScheme(e)} key={e}>
                         {e}
                       </a>
                     )),
@@ -220,7 +221,7 @@ export default function Association({ hit, missionsInfo }) {
                       </div>
                       <MissionButton style={{ maginInline: "auto" }}>
                         <div className="title">
-                          <a href={mission.applicationUrl} target="_blank" style={{ decoration: "none", color: "#22252A" }} rel="noreferrer">
+                          <a href={urlWithScheme(mission.applicationUrl)} target="_blank" style={{ decoration: "none", color: "#22252A" }} rel="noreferrer">
                             Consulter
                           </a>
                         </div>

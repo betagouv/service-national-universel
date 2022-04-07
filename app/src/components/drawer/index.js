@@ -3,7 +3,17 @@ import { NavLink, useLocation, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, permissionPhase1, permissionPhase2, permissionPhase3 } from "../../utils";
+import {
+  YOUNG_STATUS,
+  PHASE_STATUS,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE2,
+  YOUNG_STATUS_PHASE3,
+  permissionPhase1,
+  permissionPhase2,
+  permissionPhase3,
+  urlWithScheme,
+} from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 import SubMenuPhase2 from "./SubMenuPhase2";
@@ -226,7 +236,7 @@ const SocialMedia = () => {
   return (
     <IconsBar>
       {medias.map((el, index) => (
-        <a key={index} href={el.link} target="_blank" style={{ decoration: "none", borderRadius: "100%", padding: "0" }} rel="noreferrer">
+        <a key={index} href={urlWithScheme(el.link)} target="_blank" style={{ decoration: "none", borderRadius: "100%", padding: "0" }} rel="noreferrer">
           <IconContainer>
             <svg width="24" height="24" viewBox="0 0 24 24">
               <path d={el.svg}></path>

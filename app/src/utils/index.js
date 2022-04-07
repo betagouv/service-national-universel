@@ -1,7 +1,6 @@
 import passwordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
 export * from "snu-lib";
-import { environment } from "../config";
 import sanitizeHtml from "sanitize-html";
 
 export function getPasswordErrorMessage(v) {
@@ -62,3 +61,8 @@ export const htmlCleaner = (text) => {
   });
   return clean;
 };
+
+export function urlWithScheme(url) {
+  if (!/^https?:\/\//i.test(url)) return `http://${url}`;
+  return url;
+}

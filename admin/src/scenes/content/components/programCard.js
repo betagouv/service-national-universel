@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { translate, ROLES } from "../../../utils";
+import { translate, ROLES, urlWithScheme } from "../../../utils";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default function ProgramCard({ program, image, enableToggle = true, onDelete }) {
@@ -57,7 +57,7 @@ export default function ProgramCard({ program, image, enableToggle = true, onDel
 
   return (
     <Card>
-      <a href={program.url} target="_blank" className="thumb" rel="noreferrer">
+      <a href={urlWithScheme(program.url)} className="thumb" rel="noreferrer">
         <img src={image} />
         <Badge>{program.type}</Badge>
       </a>
