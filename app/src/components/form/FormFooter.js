@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import { Spinner } from "reactstrap";
 
@@ -12,6 +12,7 @@ export default function FormFooter({ values, handleSubmit, errors, secondButton 
   const dispatch = useDispatch();
   const [loadingSaveBtn, setloadingSaveBtn] = useState(false);
   const [loadingCorrectionDone, setloadingCorrectionDone] = useState(false);
+  const young = useSelector((state) => state.Auth.young);
 
   const handleSave = async () => {
     setloadingSaveBtn(true);
@@ -36,7 +37,7 @@ export default function FormFooter({ values, handleSubmit, errors, secondButton 
     <>
       <Footer>
         <ButtonContainer>
-          {values.status === YOUNG_STATUS.WAITING_CORRECTION ? (
+          {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
             <SecondButton onClick={handleCorrectionDone}>
               {loadingCorrectionDone ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "J'ai terminé la correction de mon dossier"}
             </SecondButton>
