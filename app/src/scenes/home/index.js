@@ -7,6 +7,7 @@ import WaitingCorrection from "./waitingCorrection";
 import Refused from "./refused";
 import Default from "./default";
 import Withdrawn from "./withdrawn";
+import AbandonInscription from "./abandonInscription";
 import WaitingList from "./waitingList";
 import Validated from "./validated";
 import Banner from "./components/banner";
@@ -15,6 +16,13 @@ export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
 
   const renderStep = () => {
+    if (young.status === YOUNG_STATUS.ABANDONED)
+      return (
+        <>
+          {young.cohort === "2021" ? <Banner /> : null}
+          <AbandonInscription />
+        </>
+      );
     if (young.status === YOUNG_STATUS.WITHDRAWN)
       return (
         <>
