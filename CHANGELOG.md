@@ -1,3 +1,16 @@
+## [1.68.1](https://github.com/betagouv/service-national-universel/compare/v1.68.0...v1.68.1) (2022-04-08)
+
+
+### Bug Fixes
+
+* **admin:** remove filter `status` in structures list ([ff292a9](https://github.com/betagouv/service-national-universel/commit/ff292a911aef6e1767d75acfe460d6539ec9bc89))
+* add `Non renseigné` niveau scolaire ([703785a](https://github.com/betagouv/service-national-universel/commit/703785a77f3eb62f1a7a5e6574d2acbea4472465))
+* remove default value `""` ([#1446](https://github.com/betagouv/service-national-universel/issues/1446)) ([4fdd8d7](https://github.com/betagouv/service-national-universel/commit/4fdd8d7907ee2ab76546793408dd6da3fa161dd5))
+* step profil footer ([dbab023](https://github.com/betagouv/service-national-universel/commit/dbab023fd9aa327ee5cdff11d59bd944cd5cc539))
+* **admin:** loader logs email ([73d37dd](https://github.com/betagouv/service-national-universel/commit/73d37dd30d0a655ec36041ee6ed754e7e503e9cc))
+* **admin:** toggle button log email ([87f9aa4](https://github.com/betagouv/service-national-universel/commit/87f9aa48b3dfea812b60084eabfad108fba2e4ac))
+* **app:** display button `J'ai terminé la correction de mon dossier` ([be841f9](https://github.com/betagouv/service-national-universel/commit/be841f94a8923ab8fd9587f6bc012976f3d9d2f5))
+
 # [1.68.0](https://github.com/betagouv/service-national-universel/compare/v1.67.0...v1.68.0) (2022-04-07)
 
 
