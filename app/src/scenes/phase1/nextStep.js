@@ -31,8 +31,8 @@ export default function NextStep() {
           <div className="flex flex-col">
             <h2>Documents complété(s) {documents}/4</h2>
             <p>
-              Status fiche médicale :{" "}
-              {young.cohesionStayMedicalFileReceived === "true" ? "Réceptionné" : young.cohesionStayMedicalFileDownloaded === "true" ? "Téléchargé" : "Non Téléchargé"}
+              Status Fiche Sanitaire:{" "}
+              {young.cohesionStayMedicalFileReceived === "true" ? "Réceptionné" : young.cohesionStayMedicalFileDownload === "true" ? "Téléchargé" : "Non Téléchargé"}
             </p>
             <p>
               Status droit a l'image : {translateFileStatusPhase1(young.imageRightFilesStatus)}{" "}
@@ -43,7 +43,7 @@ export default function NextStep() {
               {young.rulesFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.rulesFilesComment : ""}
             </p>
             <p>
-              Status test PCR : {translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
+              Status Utilisation d'autotest PCR : {translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
               {young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.autoTestPCRFilesComment : ""}
             </p>
           </div>

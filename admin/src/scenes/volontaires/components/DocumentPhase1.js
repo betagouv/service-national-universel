@@ -181,9 +181,12 @@ export default function DocumentPhase1(props) {
               <>
                 <div className="flex flex-col p-2">
                   <Select
+                    placeholder="Non renseigné"
                     name="imageRight"
                     values={values}
-                    handleChange={handleChange}
+                    handleChange={(e) => {
+                      handleChange(e), handleSubmit();
+                    }}
                     title="Autorisation"
                     options={[
                       { value: "true", label: "Oui" },
@@ -250,9 +253,12 @@ export default function DocumentPhase1(props) {
               <>
                 <div className="flex flex-col p-2">
                   <Select
+                    placeholder="Non renseigné"
                     name="autoTestPCR"
                     values={values}
-                    handleChange={handleChange}
+                    handleChange={(e) => {
+                      handleChange(e), handleSubmit();
+                    }}
                     title="Autorisation"
                     options={[
                       { value: "true", label: "Oui" },
@@ -318,39 +324,6 @@ export default function DocumentPhase1(props) {
             {({ values, handleChange, handleSubmit }) => (
               <>
                 <div className="flex flex-col p-2">
-                  <Select
-                    name="rulesYoung"
-                    values={values}
-                    handleChange={handleChange}
-                    title="Autorisation (volontaire)"
-                    options={[
-                      { value: "true", label: "Oui" },
-                      { value: "false", label: "Non" },
-                    ]}
-                  />
-                  <Select
-                    name="rulesParent1"
-                    values={values}
-                    handleChange={handleChange}
-                    title="Autorisation (repres. légal 1)"
-                    options={[
-                      { value: "true", label: "Oui" },
-                      { value: "false", label: "Non" },
-                    ]}
-                  />
-                  {young.parent2email ? (
-                    <Select
-                      name="rulesParent2"
-                      values={values}
-                      handleChange={handleChange}
-                      title="Autorisation (repres. légal 2)"
-                      options={[
-                        { value: "true", label: "Oui" },
-                        { value: "false", label: "Non" },
-                      ]}
-                    />
-                  ) : null}
-
                   <Documents>
                     <h4>Document règlement intérieur</h4>
                     <DndFileInput

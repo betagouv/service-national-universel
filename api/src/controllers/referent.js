@@ -923,26 +923,13 @@ router.put("/young/:id/phase1Files/:document", passport.authenticate("referent",
     const young = await YoungModel.findById(req.params.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    let values;
-    if (document !== "rules") {
-      const { error: bodyError, value } = Joi.object({
-        [`${document}`]: Joi.string().trim().valid("true", "false"),
-        [`${document}Files`]: Joi.array().items(Joi.string()),
-      }).validate(req.body);
-      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      values = value;
-    } else {
-      const { error: bodyError, value } = Joi.object({
-        rulesYoung: Joi.string().trim().valid("true", "false"),
-        rulesParent1: Joi.string().trim().required().valid("true", "false"),
-        rulesParent2: Joi.string().trim().valid("true", "false"),
-        rulesFiles: Joi.array().items(Joi.string()),
-      }).validate(req.body);
-      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      values = value;
-    }
+    const { error: bodyError, value } = Joi.object({
+      [`${document}`]: Joi.string().trim().valid("true", "false"),
+      [`${document}Files`]: Joi.array().items(Joi.string()),
+    }).validate(req.body);
+    if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
 
-    young.set(values);
+    young.set(value);
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
