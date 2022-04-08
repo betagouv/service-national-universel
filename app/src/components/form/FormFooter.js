@@ -37,7 +37,7 @@ export default function FormFooter({ values, handleSubmit, errors, secondButton 
     <>
       <Footer>
         <ButtonContainer>
-          {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
+          {young?.status === YOUNG_STATUS.WAITING_CORRECTION ? (
             <SecondButton onClick={handleCorrectionDone}>
               {loadingCorrectionDone ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "J'ai terminé la correction de mon dossier"}
             </SecondButton>
