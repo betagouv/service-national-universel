@@ -279,6 +279,8 @@ export default function Inscription() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Classe", "Classe")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
