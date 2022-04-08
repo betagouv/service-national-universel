@@ -62,7 +62,7 @@ export default function Emails({ email }) {
               </>
             </tbody>
           </Table>
-          <LoadMore onClick={handleMinify}>{minify ? "Voir plus" : "Réduire"}</LoadMore>
+          {emails.length > SIZE ? <LoadMore onClick={handleMinify}>{minify ? "Voir plus" : "Réduire"}</LoadMore> : null}
         </>
       ) : (
         <NoResult>
