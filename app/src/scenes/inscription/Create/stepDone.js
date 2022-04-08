@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,10 +25,21 @@ export default function StepDone() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
-  if (!young) {
-    history.push("/inscription/profil");
-    return <div />;
-  }
+  const [data, setData] = useState();
+
+  useEffect(() => {
+    if (young) {
+      setData({
+        aknowledgmentTerminaleSessionAvailability: young.aknowledgmentTerminaleSessionAvailability,
+        informationAccuracy: young.informationAccuracy,
+      });
+    } else {
+      history.push("/inscription/profil");
+    }
+  }, [young]);
+
+  if (!data) return null;
+
   return (
     <Container>
       <Info>
@@ -130,7 +141,7 @@ export default function StepDone() {
           </Bloc>
         </InfosContainer>
         <Formik
-          initialValues={young}
+          initialValues={data}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
@@ -138,9 +149,8 @@ export default function StepDone() {
             gtagEvent(cookies, "DC-2971054/snuiz0/bouton2+unique");
             setLoading(true);
             try {
-              values.informationAccuracy = "true";
-              values.aknowledgmentTerminaleSessionAvailability = "true";
-              const { ok, code, data } = await api.put("/young", { ...values, status: YOUNG_STATUS.WAITING_VALIDATION });
+              if (!["Terminale", "Terminale CAP"].includes(young.grade)) delete values.aknowledgmentTerminaleSessionAvailability;
+              const { ok, code, data } = await api.put("/young/inscription/done", values);
               if (!ok) return toastr.error("Une erreur s'est produite :", t(code));
 
               toastr.success("Enregistré");
@@ -170,7 +180,7 @@ export default function StepDone() {
                 </div>
               </RadioLabel>
               <ErrorMessage errors={errors} touched={touched} name="informationAccuracy" />
-              {["Terminale", "Terminale CAP"].includes(values.grade) ? (
+              {["Terminale", "Terminale CAP"].includes(young.grade) ? (
                 <>
                   <RadioLabel>
                     <Field
