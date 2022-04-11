@@ -11,7 +11,6 @@ import SendIcon from "../../../components/SendIcon";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
-import sanitizeHtml from "sanitize-html";
 
 const updateHeightElement = (e) => {
   e.target.style.height = "inherit";
@@ -45,16 +44,6 @@ export default function TicketMessage({ ticket: propTicket }) {
     };
   }, [propTicket]);
 
-  const htmlCleaner = (text) => {
-    // const clean = sanitizeHtml(text, {
-    //   allowedTags: ['b', 'i', 'em', 'strong', 'a', 'li', 'p', 'h1', 'h2', 'h3', 'u', 'ol', 'br'],
-    //   allowedAttributes: {
-    //     a: ['href', 'target', 'rel']
-    //   }
-    // });
-    const clean = text + "test"
-    return clean;
-  }
 
   const send = async () => {
     setSending(true);
