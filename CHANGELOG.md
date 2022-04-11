@@ -1,3 +1,18 @@
+# [1.69.0](https://github.com/betagouv/service-national-universel/compare/v1.68.1...v1.69.0) (2022-04-11)
+
+
+### Bug Fixes
+
+* **admin:** MIG JVA / SNU : bloquer la possibilité pour les référents de modifier la fiche d’une mission JVA ([#1466](https://github.com/betagouv/service-national-universel/issues/1466)) ([286cc6f](https://github.com/betagouv/service-national-universel/commit/286cc6f1aa8c1c5a5a2000170aad0d45009bc3dc))
+* **admin:** panel inscription supprimée ([#1463](https://github.com/betagouv/service-national-universel/issues/1463)) ([9864b54](https://github.com/betagouv/service-national-universel/commit/9864b544639eadbad7f829b491be3411510ca069))
+* **admin:** retour a la ligne et retour chariot ([#1467](https://github.com/betagouv/service-national-universel/issues/1467)) ([8da5f88](https://github.com/betagouv/service-national-universel/commit/8da5f88167cad8b9fd20e460a92099e798079fc8))
+* **app:** home screen abandon inscription ([#1458](https://github.com/betagouv/service-national-universel/issues/1458)) ([fced7fe](https://github.com/betagouv/service-national-universel/commit/fced7fe0ae957896bbb1d0bcf6a81999f0a96bc2))
+
+
+### Features
+
+* add original cohort view ([#1453](https://github.com/betagouv/service-national-universel/issues/1453)) ([11bdc35](https://github.com/betagouv/service-national-universel/commit/11bdc3541d41235a909b3ef5934e9d9290bcadbc))
+
 ## [1.68.1](https://github.com/betagouv/service-national-universel/compare/v1.68.0...v1.68.1) (2022-04-08)
 
 
