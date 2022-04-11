@@ -877,9 +877,9 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
     const young = await YoungModel.findById(req.params.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    let values;
-    if (document !== "cohesionStayMedical") {
-      const { error: bodyError, value } = Joi.object({
+    let value;
+    if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
+      const { error: bodyError, value: tempValue } = Joi.object({
         [`${document}FilesStatus`]: Joi.string()
           .trim()
           .valid(FILE_STATUS_PHASE1.TO_UPLOAD, FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED)
@@ -891,17 +891,19 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
         }),
       }).validate(req.body);
       if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      if (!value[`${document}FilesComment`]) value[`${document}FilesComment`] = undefined;
-      values = value;
-    } else {
-      const { error: bodyError, value } = Joi.object({
+      if (!tempValue[`${document}FilesComment`]) tempValue[`${document}FilesComment`] = undefined;
+      value = tempValue;
+    } else if (document === "cohesionStayMedical") {
+      const { error: bodyError, value: tempValue } = Joi.object({
         cohesionStayMedicalFileReceived: Joi.string().trim().required().valid("true", "false"),
         cohesionStayMedicalFileDownload: Joi.string().trim().required().valid("true", "false"),
       }).validate(req.body);
       if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      values = value;
+      value = tempValue;
+    } else {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    young.set(values);
+    young.set(value);
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

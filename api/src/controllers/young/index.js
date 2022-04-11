@@ -804,14 +804,16 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let values = {};
-    if (document !== "cohesionStayMedical") {
-      const { error: bodyError, value } = validatePhase1Document(req.body, document);
+    if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
+      const { error: bodyError, value: tempValue } = validatePhase1Document(req.body, document);
       if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      values = value;
+      values = tempValue;
       values[`${document}FilesStatus`] = "WAITING_VERIFICATION";
       values[`${document}FilesComment`] = undefined;
-    } else {
+    } else if (document === "cohesionStayMedical") {
       values.cohesionStayMedicalFileDownload = "true";
+    } else {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     young.set(values);

@@ -22,16 +22,22 @@ export default function DocumentPhase1(props) {
   const [dataAutoTestPCR, setDataAutoTestPCR] = useState();
   const [dataRules, setDataRules] = useState();
   const options = [FILE_STATUS_PHASE1.TO_UPLOAD, FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED];
-  const cohesionOptions = [
+  const medicalFileOptions = [
     { value: "RECIEVED", label: "Réceptionné" },
     { value: "TO_DOWNLOAD", label: "Non téléchargé" },
     { value: "DOWNLOADED", label: "Téléchargé" },
   ];
 
-  const cohesionValue = {
+  const medicalFileValue = {
     RECIEVED: { cohesionStayMedicalFileReceived: "true", cohesionStayMedicalFileDownload: "true" },
     TO_DOWNLOAD: { cohesionStayMedicalFileReceived: "false", cohesionStayMedicalFileDownload: "false" },
     DOWNLOADED: { cohesionStayMedicalFileReceived: "false", cohesionStayMedicalFileDownload: "true" },
+  };
+
+  const FILE_TRANSLATION = {
+    autoTestPCR: "utilisation d'autotest",
+    imageRight: "droit a l'image",
+    rules: "règlement interieur",
   };
 
   const updateYoung = async () => {
@@ -96,36 +102,36 @@ export default function DocumentPhase1(props) {
     if (value === FILE_STATUS_PHASE1.WAITING_CORRECTION) {
       setModal({
         isOpen: true,
-        onConfirm: (message) => {
+        onConfirm: (correctionMessage) => {
           setState(name, value);
-          handleChange(value, name, message);
+          handleChange({ value, name, correctionMessage });
         },
-        title: "Vous êtes sur le point de demander la correction du document Utilisation d’autotest",
+        title: `Vous êtes sur le point de demander la correction du document ${FILE_TRANSLATION[name]}`,
         message: `Car celui n’est pas conforme. Merci de préciser ci-dessous les corrections à apporter. 
         Une fois le message validé, il sera transmis par mail à ${young.firstName} ${young.lastName} (${young.email}).`,
       });
     } else {
       setState(name, value);
-      handleChange(value, name);
+      handleChange({ value, name });
     }
   };
 
-  const handleChange = async (value, name, correctionMessage = null) => {
+  const handleChange = async ({ value, name, correctionMessage = null }) => {
     let params = {};
 
-    if (name !== "cohesionStayMedical") {
+    if (["autoTestPCR", "imageRight", "rules"].includes(name)) {
       params[`${name}FilesStatus`] = value;
       if (value === FILE_STATUS_PHASE1.WAITING_CORRECTION && correctionMessage) {
         params[`${name}FilesComment`] = correctionMessage;
       }
-    } else {
-      params = cohesionValue[value];
+    } else if (name === "cohesionStayMedical") {
+      params = medicalFileValue[value];
     }
 
     try {
       const { code, ok } = await api.put(`/referent/young/${young._id}/phase1Status/${name}`, params);
       if (!ok) return toastr.error("Une erreur s'est produite lors de la mise a jour des status :", translate(code));
-      toastr.success("Status mis à jour!");
+      toastr.success("Statut mis à jour!");
       updateYoung();
     } catch (e) {
       console.log(e);
@@ -141,7 +147,7 @@ export default function DocumentPhase1(props) {
         <div className="flex row justify-center mx-2 my-1">
           <h1 className="text-center pb-2">Fiche Sanitaire</h1>
           <select disabled={loading} className="form-control" value={statusCohesionStayMedical} name="cohesionStayMedical" onChange={(e) => needModal(e)}>
-            {cohesionOptions.map((o, i) => (
+            {medicalFileOptions.map((o, i) => (
               <option key={i} value={o.value} label={o.label}>
                 {o.label}
               </option>
@@ -297,7 +303,7 @@ export default function DocumentPhase1(props) {
       </Col>
       <Col md={6}>
         <div className="flex row justify-center mx-2 my-1">
-          <h1 className="text-center pb-2">Reglement interieure</h1>
+          <h1 className="text-center pb-2">Règlement interieur</h1>
           <select disabled={loading} className="form-control" value={statusRules} name="rules" onChange={(e) => needModal(e)}>
             {options.map((o, i) => (
               <option key={i} value={o} label={translateFileStatusPhase1(o)}>
@@ -358,7 +364,9 @@ export default function DocumentPhase1(props) {
         isOpen={modal?.isOpen}
         title={modal?.title}
         message={modal?.message}
-        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onChange={() => {
+          setModal({ isOpen: false, onConfirm: null }), setLoading(false);
+        }}
         onConfirm={(message) => {
           modal?.onConfirm(message);
           setModal({ isOpen: false, onConfirm: null });
