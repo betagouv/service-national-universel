@@ -16,6 +16,7 @@ import Badge from "./Badge";
 import DownloadContractButton from "./buttons/DownloadContractButton";
 import LoadingButton from "./buttons/LoadingButton";
 import ModalConfirm from "./modals/ModalConfirm";
+import HistoricComponent from "./views/Historic";
 
 export default function Contract({ young, admin }) {
   const history = useHistory();
@@ -794,8 +795,12 @@ export default function Contract({ young, admin }) {
           }}
         </Formik>
       )}
+      <div className="mt-4">
+        <h3 className="text-sm my-2 mx-4 uppercase italic text-snu-purple-600">Historique des modifications du contrat d&apos;engagement</h3>
+        <HistoricComponent model="contract" value={contract} />
+      </div>
       {young.statusPhase2 === "VALIDATED" ? (
-        <div style={{ marginTop: "2rem" }}>
+        <div className="mt-4">
           <DownloadAttestationButton young={young} uri="2">
             Télécharger l&apos;attestation de réalisation de la phase 2
           </DownloadAttestationButton>
