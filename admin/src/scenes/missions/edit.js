@@ -37,6 +37,7 @@ export default function Edit(props) {
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
   const [invited, setInvited] = useState();
+  const [isJvaMission, setIsJvaMission] = useState(false);
   const [loadings, setLoadings] = useState({
     saveButton: false,
     submitButton: false,
@@ -54,6 +55,7 @@ export default function Edit(props) {
     if (data && data.endAt) data.endAt = dateForDatePicker(data.endAt);
     setDocumentTitle(`${data.name}`);
     setDefaultValue(data);
+    setIsJvaMission(data.isJvaMission === "true");
   }
   async function initReferents() {
     if (!structure) return;
@@ -242,8 +244,15 @@ export default function Edit(props) {
               </LoadingButton>
             ) : null}
           </Header>
+
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
+            {isJvaMission ? (
+              <div className="bg-[#edecfc] text-[#32257f] p-4 mb-[10px] rounded-[10px] text-center text-base">
+                Les informations grisées sont à modifier par le responsable de la structure depuis son espace jeveuxaider.gouv.fr
+              </div>
+            ) : null}
+
             <Box>
               <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                 <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
@@ -274,7 +283,7 @@ export default function Edit(props) {
                           <li>Merci de sélectionner un domaine principal (requis), ainsi qu&apos;un ou plusieurs domaine(s) secondaire(s) (facultatif)</li>
                         </ul>
                       ) : null}
-                      <Field component="select" value={values.mainDomain} onChange={handleChange} name="mainDomain" validate={(v) => !v && requiredMessage}>
+                      <Field disabled={isJvaMission} component="select" value={values.mainDomain} onChange={handleChange} name="mainDomain" validate={(v) => !v && requiredMessage}>
                         <option value="" label="Sélectionnez un domaine principal">
                           Sélectionnez un domaine principal
                         </option>
@@ -404,6 +413,7 @@ export default function Edit(props) {
                               name="startAt"
                               onChange={handleChange}
                               placeholder="Date de début"
+                              disabled={isJvaMission}
                             />
                             <ErrorMessage errors={errors} touched={touched} name="startAt" />
                           </Col>
@@ -419,6 +429,7 @@ export default function Edit(props) {
                               name="endAt"
                               onChange={handleChange}
                               placeholder="Date de fin"
+                              disabled={isJvaMission}
                             />
                             <ErrorMessage errors={errors} touched={touched} name="endAt" />
                           </Col>
@@ -485,7 +496,7 @@ export default function Edit(props) {
                         <p style={{ color: "#a0aec1", fontSize: 12 }}>
                           Précisez ce nombre en fonction de vos contraintes logistiques et votre capacité à accompagner les volontaires.
                         </p>
-                        <Input name="placesTotal" onChange={handleChange} value={values.placesTotal} type="number" min={1} max={999} />
+                        <Input name="placesTotal" onChange={handleChange} value={values.placesTotal} type="number" min={1} max={999} disabled={isJvaMission} />
                       </FormGroup>
                     </Wrapper>
                   </Row>
@@ -514,14 +525,14 @@ export default function Edit(props) {
                           </span>
                         )}
                       </p>
-                      <Field validate={(v) => !v && requiredMessage} component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
+                      <Field validate={(v) => !v && requiredMessage} disabled={isJvaMission} component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
                         <option value="">Sélectionner un tuteur</option>
                         {referents &&
                           referents.map((referent) => {
                             return <option key={referent._id} value={referent._id}>{`${referent.firstName} ${referent.lastName}`}</option>;
                           })}
                       </Field>
-                      {structure && showTutor && <Invite structure={structure} setInvited={setInvited} />}
+                      {structure && showTutor && !isJvaMission && <Invite structure={structure} setInvited={setInvited} />}
                       <ErrorMessage errors={errors} touched={touched} name="tutorId" />
                     </FormGroup>
                   </Wrapper>
@@ -539,6 +550,7 @@ export default function Edit(props) {
                       touched={touched}
                       validateField={validateField}
                       required={true}
+                      disabled={isJvaMission}
                     />
                   </Wrapper>
                 </Col>
@@ -691,6 +703,9 @@ const FormGroup = styled.div`
     }
     :focus {
       border: 1px solid #aaa;
+    }
+    :disabled {
+      background-color: #e9ecef;
     }
   }
 `;
