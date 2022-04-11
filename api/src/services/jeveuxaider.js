@@ -31,6 +31,9 @@ router.get("/signin", async (req, res) => {
     // si l'utilisateur n'existe pas, on bloque
     if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
 
+    const structure = await StructureModel.findById(user.structureId);
+    if (structure.isJvaStructure !== "true") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     // si l'utilisateur existe, on le connecte, et on le redirige vers la plateforme admin SNU
     if (user) {
       user.set({ lastLoginAt: Date.now() });
@@ -63,6 +66,9 @@ router.get("/actions", async (req, res) => {
     // si l'utilisateur n'existe pas, on bloque
     if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
 
+    const structure = await StructureModel.findById(user.structureId);
+    if (structure.isJvaStructure !== "true") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     // si l'utilisateur existe, on récupère les missions + candidatures qui lui sont liées
     if (user) {
       const data = {
@@ -76,7 +82,6 @@ router.get("/actions", async (req, res) => {
           missionInProgress: 0,
         },
       };
-      const structure = await StructureModel.findById(user.structureId);
       data.structure = { name: structure.name };
 
       const missions = await MissionModel.find({ tutorId: user._id.toString() });
