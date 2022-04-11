@@ -44,15 +44,14 @@ export default function TicketMessage({ ticket: propTicket }) {
     };
   }, [propTicket]);
 
+
   const send = async () => {
     setSending(true);
     if (!message) return setSending(false);
-
     // then send the message
     // todo : we may be able to reset the status in only one call
     // but im not sure the POST for a message can take state in its body
     await api.put(`/zammad-support-center/ticket/${ticket?.id}`, { message, ticket });
-
     // reset ticket and input message
     setMessage("");
     updateTicket(ticket?.id);
@@ -141,11 +140,13 @@ export default function TicketMessage({ ticket: propTicket }) {
 
 const Message = ({ from, date, content, fromMe, internal }) => {
   if (!content || !content.length) return null;
+  const textn = content.replaceAll("\n", "</br>")
+  const textr = textn.replaceAll("\r", "</br>")
   return fromMe ? (
     <MessageContainer>
       <MessageBubble internal={internal} align={"right"} backgroundColor={internal ? "gold" : colors.darkPurple}>
         {internal ? <MessageNote>note interne</MessageNote> : null}
-        <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
+        <MessageContent color="white" dangerouslySetInnerHTML={{ __html: textr }}></MessageContent>
         <MessageDate color="#ccc">{date}</MessageDate>
       </MessageBubble>
     </MessageContainer>
