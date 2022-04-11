@@ -7,7 +7,6 @@ const Joi = require("joi");
 
 const Young = require("./models/young");
 const Referent = require("./models/referent");
-const SupportUser = require("./models/supportUser");
 
 function getToken(req) {
   let token = ExtractJwt.fromAuthHeaderWithScheme("JWT")(req);
@@ -44,22 +43,6 @@ module.exports = function () {
         if (error) return done(null, false);
 
         const referent = await Referent.findById(value._id);
-        if (referent) return done(null, referent);
-      } catch (error) {
-        capture(error);
-      }
-      return done(null, false);
-    }),
-  );
-
-  passport.use(
-    "support-user",
-    new JwtStrategy(opts, async function (jwtPayload, done) {
-      try {
-        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
-        if (error) return done(null, false);
-
-        const referent = await SupportUser.findById(value._id);
         if (referent) return done(null, referent);
       } catch (error) {
         capture(error);
