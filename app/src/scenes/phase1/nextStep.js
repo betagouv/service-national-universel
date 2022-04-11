@@ -7,6 +7,7 @@ import Rules from "./Rules";
 import { useSelector } from "react-redux";
 import { HeroContainer, Hero } from "../../components/Content";
 import { FILE_STATUS_PHASE1, translateFileStatusPhase1 } from "../../utils";
+import { environment } from "../../config";
 
 export default function NextStep() {
   const young = useSelector((state) => state.Auth.young);
@@ -26,29 +27,31 @@ export default function NextStep() {
 
   return (
     <>
-      <HeroContainer>
-        <Hero>
-          <div className="flex flex-col">
-            <h2>Documents complété(s) {documents}/4</h2>
-            <p>
-              Status Fiche Sanitaire:{" "}
-              {young.cohesionStayMedicalFileReceived === "true" ? "Réceptionné" : young.cohesionStayMedicalFileDownload === "true" ? "Téléchargé" : "Non Téléchargé"}
-            </p>
-            <p>
-              Status droit a l'image : {translateFileStatusPhase1(young.imageRightFilesStatus)}{" "}
-              {young.imageRightFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.imageRightFilesComment : ""}
-            </p>
-            <p>
-              Status règlement interieur : {translateFileStatusPhase1(young.rulesFilesStatus)}
-              {young.rulesFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.rulesFilesComment : ""}
-            </p>
-            <p>
-              Status Utilisation d'autotest PCR : {translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
-              {young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.autoTestPCRFilesComment : ""}
-            </p>
-          </div>
-        </Hero>
-      </HeroContainer>
+      {environment !== "production" ? (
+        <HeroContainer>
+          <Hero>
+            <div className="flex flex-col">
+              <h2>Documents complété(s) {documents}/4</h2>
+              <p>
+                Status Fiche Sanitaire:{" "}
+                {young.cohesionStayMedicalFileReceived === "true" ? "Réceptionné" : young.cohesionStayMedicalFileDownload === "true" ? "Téléchargé" : "Non Téléchargé"}
+              </p>
+              <p>
+                Status droit a l'image : {translateFileStatusPhase1(young.imageRightFilesStatus)}{" "}
+                {young.imageRightFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.imageRightFilesComment : ""}
+              </p>
+              <p>
+                Status règlement interieur : {translateFileStatusPhase1(young.rulesFilesStatus)}
+                {young.rulesFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.rulesFilesComment : ""}
+              </p>
+              <p>
+                Status Utilisation d'autotest PCR : {translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
+                {young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.autoTestPCRFilesComment : ""}
+              </p>
+            </div>
+          </Hero>
+        </HeroContainer>
+      ) : null}
       <MedicalFile />
       <ImageRight />
       <AutoTest />
