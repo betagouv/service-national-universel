@@ -37,6 +37,7 @@ import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
+import DeletedInscriptionPanel from "./deletedPanel";
 
 const FILTERS = [
   "SEARCH",
@@ -458,7 +459,11 @@ export default function Inscription() {
               />
             </ResultTable>
           </div>
-          <Panel value={young} onChange={() => setYoung(null)} />
+          {young !== null && young.status === YOUNG_STATUS.DELETED ? (
+            <DeletedInscriptionPanel value={young} onChange={() => setYoung(null)} />
+          ) : (
+            <Panel value={young} onChange={() => setYoung(null)} />
+          )}
         </div>
       </ReactiveBase>
     </div>
