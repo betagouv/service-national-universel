@@ -145,7 +145,7 @@ export default function List() {
                         "Droit à l'image": translate(data.imageRight),
                         "Autotest PCR": translate(data.autoTestPCR),
                         "Règlement intérieur": translate(data.rulesYoung),
-                        "fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
+                        "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
                         "Statut représentant légal 1": translate(data.parent1Status),
                         "Prénom représentant légal 1": data.parent1FirstName,
                         "Nom représentant légal 1": data.parent1LastName,

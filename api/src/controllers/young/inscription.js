@@ -639,4 +639,96 @@ router.put("/consentements", passport.authenticate("young", { session: false, fa
   }
 });
 
+router.put("/documents", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const needMoreConsent = getAge(young.birthdateAt) < 15;
+    let isParentFromFranceconnect = false;
+
+    if (young.parent1Status && young.parent2Status) {
+      isParentFromFranceconnect = young.parent1FromFranceConnect === "true" && young.parent2FromFranceConnect === "true";
+    } else {
+      isParentFromFranceconnect = young.parent1FromFranceConnect === "true";
+    }
+
+    const { error, value } = Joi.object({
+      cniFiles: Joi.array().items(Joi.string().required()).required().min(1),
+      parentConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
+        is: Joi.boolean().valid(false).required(),
+        then: Joi.array().items(Joi.string().required()).required().min(1),
+        otherwise: Joi.isError(new Error()),
+      }),
+      dataProcessingConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
+        is: Joi.boolean().valid(false).required(),
+        then: Joi.alternatives().conditional("$needMoreConsent", {
+          is: Joi.boolean().valid(true).required(),
+          then: Joi.array().items(Joi.string().required()).required().min(1),
+          otherwise: Joi.isError(new Error()),
+        }),
+        otherwise: Joi.isError(new Error()),
+      }),
+    }).validate(req.body, { context: { needMoreConsent, isParentFromFranceconnect } });
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    value.inscriptionStep = STEPS.DONE;
+
+    young.set(value);
+    await young.save({ fromUser: req.user });
+
+    await inscriptionCheck(value, young, req);
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/done", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const needMoreConsent = ["Terminale", "Terminale CAP"].includes(young.grade);
+
+    const { error, value } = Joi.object({
+      informationAccuracy: Joi.boolean().valid(true).required(),
+      aknowledgmentTerminaleSessionAvailability: Joi.alternatives().conditional("$needMoreConsent", {
+        is: true,
+        then: Joi.boolean().valid(true).required(),
+        otherwise: Joi.isError(new Error()),
+      }),
+    }).validate(req.body, { context: { needMoreConsent } });
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const done = {
+      informationAccuracy: "true",
+      aknowledgmentTerminaleSessionAvailability: "true",
+      status: YOUNG_STATUS.WAITING_VALIDATION,
+    };
+
+    young.set(done);
+    await young.save({ fromUser: req.user });
+
+    await inscriptionCheck(done, young, req);
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;

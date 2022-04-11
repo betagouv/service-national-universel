@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -23,11 +23,21 @@ export default function StepDocuments() {
   const history = useHistory();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const [data, setData] = useState();
 
-  if (!young) {
-    history.push("/inscription/profil");
-    return <div />;
-  }
+  useEffect(() => {
+    if (young) {
+      setData({
+        cniFiles: young.cniFiles,
+        parentConsentmentFiles: young.parentConsentmentFiles,
+        dataProcessingConsentmentFiles: young.dataProcessingConsentmentFiles,
+      });
+    } else {
+      history.push("/inscription/profil");
+    }
+  }, [young]);
+
+  if (!data) return null;
 
   const isParentFromFranceConnect = () => {
     if (young.parent1Status && young.parent2Status) {
@@ -45,13 +55,15 @@ export default function StepDocuments() {
       </Heading>
 
       <Formik
-        initialValues={young}
+        initialValues={data}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
           setLoading(true);
           try {
-            const { ok, code, data } = await api.put("/young", { ...values, inscriptionStep: STEPS.DONE });
+            if (isParentFromFranceConnect()) delete values.parentConsentmentFiles;
+            if (getAge(young.birthdateAt) >= 15) delete values.dataProcessingConsentmentFiles;
+            const { ok, code, data } = await api.put("/young/inscription/documents", values);
             if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(data));
             history.push("/inscription/done");

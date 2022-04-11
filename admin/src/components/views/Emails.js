@@ -4,9 +4,10 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { formatLongDateUTC, ROLES, colors } from "../../utils";
+import { formatLongDateUTC, colors, canViewEmailHistory, ROLES } from "../../utils";
 import api from "../../services/api";
 import { Box } from "../../components/box";
+import Loader from "../../components/Loader";
 
 export default function Emails({ email }) {
   const [emails, setEmails] = useState();
@@ -18,22 +19,28 @@ export default function Emails({ email }) {
     setMinify(!minify);
   };
 
-  if (user.role !== ROLES.ADMIN) return null;
+  if (!canViewEmailHistory(user)) return null;
 
   const getEmails = async () => {
     if (!email) return;
     const { ok, data, code } = await api.get(`/email?email=${encodeURIComponent(email)}`);
     if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-    return setEmails(data);
+    if (user.role === ROLES.ADMIN) return setEmails(data);
+    else {
+      const emails = data.filter((e) => e.event === "delivered");
+      return setEmails(emails);
+    }
   };
 
   useEffect(() => {
     getEmails();
   }, []);
 
-  return (
+  return !emails ? (
+    <Loader />
+  ) : (
     <Box>
-      <div style={{ fontSize: ".9rem", padding: "1rem", color: colors.darkPurple }}>Emails Sendinblue</div>
+      <div style={{ fontSize: ".9rem", padding: "1rem", color: colors.darkPurple }}>Emails envoyés par la plateforme</div>
       {emails?.length ? (
         <>
           <Table>
@@ -55,7 +62,7 @@ export default function Emails({ email }) {
               </>
             </tbody>
           </Table>
-          <LoadMore onClick={handleMinify}>{minify ? "Voir plus" : "Réduire"}</LoadMore>
+          {emails.length > SIZE ? <LoadMore onClick={handleMinify}>{minify ? "Voir plus" : "Réduire"}</LoadMore> : null}
         </>
       ) : (
         <NoResult>

@@ -1,3 +1,70 @@
+## [1.68.1](https://github.com/betagouv/service-national-universel/compare/v1.68.0...v1.68.1) (2022-04-08)
+
+
+### Bug Fixes
+
+* **admin:** remove filter `status` in structures list ([ff292a9](https://github.com/betagouv/service-national-universel/commit/ff292a911aef6e1767d75acfe460d6539ec9bc89))
+* add `Non renseigné` niveau scolaire ([703785a](https://github.com/betagouv/service-national-universel/commit/703785a77f3eb62f1a7a5e6574d2acbea4472465))
+* remove default value `""` ([#1446](https://github.com/betagouv/service-national-universel/issues/1446)) ([4fdd8d7](https://github.com/betagouv/service-national-universel/commit/4fdd8d7907ee2ab76546793408dd6da3fa161dd5))
+* step profil footer ([dbab023](https://github.com/betagouv/service-national-universel/commit/dbab023fd9aa327ee5cdff11d59bd944cd5cc539))
+* **admin:** loader logs email ([73d37dd](https://github.com/betagouv/service-national-universel/commit/73d37dd30d0a655ec36041ee6ed754e7e503e9cc))
+* **admin:** toggle button log email ([87f9aa4](https://github.com/betagouv/service-national-universel/commit/87f9aa48b3dfea812b60084eabfad108fba2e4ac))
+* **app:** display button `J'ai terminé la correction de mon dossier` ([be841f9](https://github.com/betagouv/service-national-universel/commit/be841f94a8923ab8fd9587f6bc012976f3d9d2f5))
+
+# [1.68.0](https://github.com/betagouv/service-national-universel/compare/v1.67.0...v1.68.0) (2022-04-07)
+
+
+### Bug Fixes
+
+* reinit-fields-change-cohort ([ec7169a](https://github.com/betagouv/service-national-universel/commit/ec7169a94d388252b274df7d48be923cbaa5a442))
+* **app:** remove cookies ([085f4f6](https://github.com/betagouv/service-national-universel/commit/085f4f684aa45eef5b2283fe1c6c504486878ece))
+
+
+### Features
+
+* **admin:** open sendinblue referents ([3df19ef](https://github.com/betagouv/service-national-universel/commit/3df19ef7a3de431a926921959fb916615251e66e))
+
+# [1.67.0](https://github.com/betagouv/service-national-universel/compare/v1.66.0...v1.67.0) (2022-04-06)
+
+
+### Bug Fixes
+
+* filtre volontaire/inscription : allergies/intolérance ([#1441](https://github.com/betagouv/service-national-universel/issues/1441)) ([5974bc6](https://github.com/betagouv/service-national-universel/commit/5974bc6202b4597470165637ed40f65b9c935e88))
+
+
+### Features
+
+* création d'un composant générique pour les erreurs ([8e0463a](https://github.com/betagouv/service-national-universel/commit/8e0463adac12a179fb86c2872743c0610536d480))
+
+# [1.66.0](https://github.com/betagouv/service-national-universel/compare/v1.65.0...v1.66.0) (2022-04-05)
+
+
+### Bug Fixes
+
+* **admin:** translate application status ([0ed9d70](https://github.com/betagouv/service-national-universel/commit/0ed9d70fd641478b8705cc21b8af00795011f55c))
+* MIG SNU JVA endDate + maj status ([8d41be8](https://github.com/betagouv/service-national-universel/commit/8d41be88022b5ac301ea0ac0bf5ebd1ac9be9f19))
+* MIG SNU JVA remove update status ([fe13534](https://github.com/betagouv/service-national-universel/commit/fe135347d0fcfc8577f95de543743e8e0ff9f649))
+* **api:** delete console log jeVeuxAiderDaily ([39ad2ff](https://github.com/betagouv/service-national-universel/commit/39ad2ff3566f1e6ccfa4624844fad8ae447a357a))
+
+
+### Features
+
+* ajout représentants légaux en cc ([#1419](https://github.com/betagouv/service-national-universel/issues/1419)) ([335134d](https://github.com/betagouv/service-national-universel/commit/335134d307ab5db30b37befcd8f5b3fd269e4e21))
+
+# [1.65.0](https://github.com/betagouv/service-national-universel/compare/v1.64.0...v1.65.0) (2022-04-04)
+
+
+### Bug Fixes
+
+* **admin:** telephone format ([b7a83bd](https://github.com/betagouv/service-national-universel/commit/b7a83bda6a8b341725f130b296cc895e3c087107))
+* **app:** inscription consentement error ([#1432](https://github.com/betagouv/service-national-universel/issues/1432)) ([851d532](https://github.com/betagouv/service-national-universel/commit/851d532fa79330744010fac6712e743233b43868))
+
+
+### Features
+
+* **admin:** delete young button in edit ([#1428](https://github.com/betagouv/service-national-universel/issues/1428)) ([b947190](https://github.com/betagouv/service-national-universel/commit/b947190e773ae8caec100e267f4d3e9a303934f9))
+* **api:** droit referent delete youngs ([3ed4ebf](https://github.com/betagouv/service-national-universel/commit/3ed4ebfab02bdb309ff736820fe5a8d73561dbb3))
+
 # [1.64.0](https://github.com/betagouv/service-national-universel/compare/v1.63.1...v1.64.0) (2022-04-01)
 
 

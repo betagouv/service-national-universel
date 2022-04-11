@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, MultiDropdownList, DataSearch, SelectedFilters } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 
@@ -10,6 +10,7 @@ import { HiAdjustments } from "react-icons/hi";
 
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
+import IconChangementCohorte from "../../assets/IconChangementCohorte.js";
 import api from "../../services/api";
 import { apiURL, appURL, supportURL } from "../../config";
 import Panel from "./panel";
@@ -45,6 +46,7 @@ const FILTERS = [
   "SEARCH",
   "STATUS",
   "COHORT",
+  "ORIGINAL_COHORT",
   "DEPARTMENT",
   "REGION",
   "STATUS_PHASE_1",
@@ -68,6 +70,7 @@ const FILTERS = [
   "AUTOTEST",
   "SPECIFIC_AMENAGEMENT",
   "SAME_DEPARTMENT",
+  "ALLERGIES",
 ];
 
 export default function VolontaireList() {
@@ -151,6 +154,7 @@ export default function VolontaireList() {
                       return {
                         _id: data._id,
                         Cohorte: data.cohort,
+                        "Cohorte d'origine": data.originalCohort,
                         Prénom: data.firstName,
                         Nom: data.lastName,
                         "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
@@ -205,8 +209,8 @@ export default function VolontaireList() {
                         "Droit à l'image": translate(data.imageRight),
                         "Autotest PCR": translate(data.autoTestPCR),
                         "Règlement intérieur": translate(data.rulesYoung),
-                        "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
-                        "Présent au séjour de cohésion": translate(data.cohesionStayPresence),
+                        "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
+                        "Présent au séjour de cohésion": translate(data.cohesionStayPresence) || "Non Renseigné",
                         "Statut représentant légal 1": translate(data.parent1Status),
                         "Prénom représentant légal 1": data.parent1FirstName,
                         "Nom représentant légal 1": data.parent1LastName,
@@ -406,6 +410,21 @@ export default function VolontaireList() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
+                  placeholder="Cohorte d’origine"
+                  componentId="ORIGINAL_COHORT"
+                  dataField="originalCohort.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "ORIGINAL_COHORT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Cohorte d’origine", "Cohorte d’origine")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
@@ -550,6 +569,8 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Règlement intérieur", "Règlement intérieur")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -564,6 +585,22 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Utilisation d’autotest", "Utilisation d’autotest")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder=""
+                  componentId="ALLERGIES"
+                  dataField="allergies.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "ALLERGIES") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Allergies ou intolérances", "Allergies ou intolérances")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
@@ -758,6 +795,7 @@ export default function VolontaireList() {
                     <thead>
                       <tr>
                         <th width="25%">Volontaire</th>
+                        <th>Cohorte</th>
                         <th>Contextes</th>
                         <th width="10%">Actions</th>
                       </tr>
@@ -809,7 +847,16 @@ const Hit = ({ hit, onClick, selected }) => {
           </MultiLine>
         </td>
         <td>
-          <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
+          <Badge
+            color="#0C7CFF"
+            backgroundColor="#F9FCFF"
+            text={hit.cohort}
+            tooltipText={hit.originalCohort ? `Anciennement ${hit.originalCohort}` : null}
+            style={{ cursor: "default" }}
+            icon={hit.originalCohort ? <IconChangementCohorte /> : null}
+          />
+        </td>
+        <td>
           <Badge minify text="Supprimé" color={YOUNG_STATUS_COLORS.DELETED} tooltipText={translate(hit.status)} />
 
           <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} style={"opacity-50"} />
@@ -833,9 +880,17 @@ const Hit = ({ hit, onClick, selected }) => {
           </MultiLine>
         </td>
         <td>
-          <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
+          <Badge
+            color="#0C7CFF"
+            backgroundColor="#F9FCFF"
+            text={hit.cohort}
+            tooltipText={hit.originalCohort ? `Anciennement ${hit.originalCohort}` : null}
+            style={{ cursor: "default" }}
+            icon={hit.originalCohort ? <IconChangementCohorte /> : null}
+          />
+        </td>
+        <td>
           {hit.status === "WITHDRAWN" && <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} />}
-
           <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} />
           <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} />
           <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} />

@@ -22,6 +22,7 @@ export default function AddressInputV2({
   countryByDefault = "",
   required = false,
   departAndRegionVisible = false,
+  disabled = false,
 }) {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
@@ -125,6 +126,7 @@ export default function AddressInputV2({
             <Col md={12}>
               <Label>Pays</Label>
               <Field
+                disabled={disabled}
                 as="select"
                 validate={(v) => required && !v && requiredMessage}
                 className="form-control"
@@ -153,6 +155,7 @@ export default function AddressInputV2({
           <Col md={12} style={{ marginTop: countryVisible ? 15 : 0 }}>
             <Label>Adresse</Label>
             <Field
+              disabled={disabled}
               validate={(v) => required && !v && requiredMessage}
               className="form-control"
               placeholder="Adresse"
@@ -169,6 +172,7 @@ export default function AddressInputV2({
           <Col md={6} style={{ marginTop: 15 }}>
             <Label>Code postal</Label>
             <Field
+              disabled={disabled}
               validate={(v) => required && !v && requiredMessage}
               className="form-control"
               placeholder="Code postal"
@@ -185,6 +189,7 @@ export default function AddressInputV2({
           <Col md={6} style={{ marginTop: 15 }}>
             <Label>Ville</Label>
             <Field
+              disabled={disabled}
               validate={(v) => required && !v && requiredMessage}
               className="form-control"
               placeholder="Ville"

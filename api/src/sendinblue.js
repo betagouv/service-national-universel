@@ -159,7 +159,7 @@ async function sync(obj, type, { force } = { force: false }) {
     if (!user) return console.log("ERROR WITH ", obj);
 
     const email = user.email;
-
+    let parents = [];
     const attributes = {};
     for (let i = 0; i < Object.keys(user).length; i++) {
       const key = Object.keys(user)[i];
@@ -177,7 +177,15 @@ async function sync(obj, type, { force } = { force: false }) {
     attributes.REGISTRED = !!attributes.REGISTRED_AT;
 
     let listIds = [];
-    if (attributes.TYPE === "YOUNG") listIds.push(46);
+    if (attributes.TYPE === "YOUNG") {
+      if (user.parent1Email) {
+        parents.push({ email: user.parent1Email, attributes, listId: [185] });
+      }
+      if (user.parent2Email) {
+        parents.push({ email: user.parent2Email, attributes, listId: [185] });
+      }
+      listIds.push(46);
+    }
     if (attributes.TYPE === "REFERENT") listIds.push(47);
     user.statusPhase1 === "WAITING_ACCEPTATION" && listIds.push(106);
     ["referent_region", "referent_department"].includes(user.role) && listIds.push(147);
@@ -189,6 +197,17 @@ async function sync(obj, type, { force } = { force: false }) {
     delete attributes.LASTNAME;
     delete attributes.FIRSTNAME;
 
+    syncContact(email, attributes, listIds);
+    for (const parent of parents) {
+      syncContact(parent.email, parent.attributes, parent.listId);
+    }
+  } catch (e) {
+    console.log("error", e);
+  }
+}
+
+async function syncContact(email, attributes, listIds) {
+  try {
     const ok = await updateContact(email, { attributes, listIds });
     if (!ok) {
       await createContact({ email, attributes, listIds });
@@ -200,6 +219,13 @@ async function sync(obj, type, { force } = { force: false }) {
 
 async function unsync(obj) {
   try {
+    if (obj.hasOwnProperty("parent1Email") && obj.parent1Email) {
+      await deleteContact(obj.parent1Email);
+    }
+    if (obj.hasOwnProperty("parent2Email") && obj.parent2Email) {
+      await deleteContact(obj.parent2Email);
+    }
+
     await deleteContact(obj.email);
   } catch (e) {
     console.log("Can't delete in sendinblue", obj.email);

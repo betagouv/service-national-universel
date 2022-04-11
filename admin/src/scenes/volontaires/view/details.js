@@ -20,7 +20,6 @@ import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
-import Emails from "../../../components/views/Emails";
 import InfoIcon from "../../../assets/InfoIcon";
 import PatchHistoric from "../../../components/views/PatchHistoric";
 import ExpandComponent from "../../../components/ExpandComponent";
@@ -109,7 +108,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
                 <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
                 <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
                 <Details title="Handicap" value={t(young.handicap)} />
-                <Details title="Allergies" value={t(young.allergies)} />
+                <Details title="Allergies ou intolérances" value={t(young.allergies)} />
                 <Details title="PPS" value={t(young.ppsBeneficiary)} />
                 <Details title="PAI" value={t(young.paiBeneficiary)} />
                 <Details title="Suivi médicosocial" value={t(young.medicosocialStructure)} />
@@ -266,7 +265,6 @@ export default function VolontaireViewDetails({ young, onChange }) {
             </Col>
           </Row>
         </Box>
-        <Emails email={young.email} />
         {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
           <DownloadAttestationButton young={young} uri="snu">
             Télécharger l&apos;attestation de réalisation du SNU

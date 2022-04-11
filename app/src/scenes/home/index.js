@@ -15,6 +15,13 @@ export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
 
   const renderStep = () => {
+    if (young.status === YOUNG_STATUS.ABANDONED)
+      return (
+        <>
+          {young.cohort === "2021" ? <Banner /> : null}
+          <Withdrawn />
+        </>
+      );
     if (young.status === YOUNG_STATUS.WITHDRAWN)
       return (
         <>

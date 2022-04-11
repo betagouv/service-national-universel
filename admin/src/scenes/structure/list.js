@@ -157,26 +157,8 @@ export default function List() {
               </FilterRow>
               <FilterRow visible={filterVisible}>
                 <div className="uppercase text-xs text-snu-purple-800">Général</div>
-                {user?.role === ROLES.ADMIN ? (
-                  <MultiDropdownList
-                    defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    placeholder="Statut juridique"
-                    componentId="STATUS"
-                    dataField="status.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                    renderItem={(e, count) => {
-                      return `${translate(e)} (${count})`;
-                    }}
-                    title=""
-                    URLParams={true}
-                    showSearch={false}
-                    renderLabel={(items) => getFilterLabel(items, "Statut")}
-                  />
-                ) : null}
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"

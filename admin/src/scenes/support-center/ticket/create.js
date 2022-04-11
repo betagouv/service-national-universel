@@ -79,7 +79,7 @@ export default function Create() {
                 if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
                 const response = await api.post("/zammood/ticket", {
                   message,
-                  subject: subject.label,
+                  subject: title,
                   clientId: data.id,
                 });
                 if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));

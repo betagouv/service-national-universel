@@ -21,6 +21,7 @@ import {
   colors,
   SENDINBLUE_TEMPLATES,
   ROLES,
+  translateApplication,
 } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
@@ -146,7 +147,7 @@ export default function Youngs({ mission, applications, updateApplications }) {
                       dataField="status.keyword"
                       react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
                       renderItem={(e, count) => {
-                        return `${translate(e)} (${count})`;
+                        return `${translateApplication(e)} (${count})`;
                       }}
                       title=""
                       URLParams={true}

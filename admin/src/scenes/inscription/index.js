@@ -13,7 +13,7 @@ import VioletButton from "../../components/buttons/VioletButton";
 import ExportComponent from "../../components/ExportXlsx";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
-import { apiURL, appURL } from "../../config";
+import { apiURL, appURL, supportURL } from "../../config";
 import Panel from "./panel";
 import {
   translate,
@@ -30,11 +30,14 @@ import {
 } from "../../utils";
 import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Badge from "../../components/Badge";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
+import LockedSvg from "../../assets/lock.svg";
+import UnlockedSvg from "../../assets/lock-open.svg";
+import DeletedInscriptionPanel from "./deletedPanel";
 
 const FILTERS = [
   "SEARCH",
@@ -54,6 +57,7 @@ const FILTERS = [
   "SPECIFIC_AMENAGEMENT",
   "SAME_DEPARTMENT",
   "PMR",
+  "ALLERGIES",
 ];
 
 export default function Inscription() {
@@ -63,6 +67,11 @@ export default function Inscription() {
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
+  const [infosHover, setInfosHover] = useState(false);
+  const [infosClick, setInfosClick] = useState(false);
+  const toggleInfos = () => {
+    setInfosClick(!infosClick);
+  };
 
   return (
     <div>
@@ -155,7 +164,7 @@ export default function Inscription() {
                         "Droit à l'image": translate(data.imageRight),
                         "Autotest PCR": translate(data.autoTestPCR),
                         "Règlement intérieur": translate(data.rulesYoung),
-                        "fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
+                        "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
                         "Statut représentant légal 1": translate(data.parent1Status),
                         "Prénom représentant légal 1": data.parent1FirstName,
                         "Nom représentant légal 1": data.parent1LastName,
@@ -271,6 +280,8 @@ export default function Inscription() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Classe", "Classe")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -370,9 +381,48 @@ export default function Inscription() {
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Affectation dans son département", "Affectation dans son département")}
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder=""
+                  componentId="ALLERGIES"
+                  dataField="allergies.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "ALLERGIES") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Allergies ou intolérances", "Allergies ou intolérances")}
+                  showMissing
+                  missingLabel="Non renseigné"
+                />
+                <Help onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)}>
+                  {infosClick ? <LockIcon src={LockedSvg} /> : <LockIcon src={UnlockedSvg} />}
+                  Aide
+                </Help>
+              </FilterRow>
+              <FilterRow className="flex justify-center" visible={filterVisible}>
                 <DeleteFilters />
               </FilterRow>
             </Filter>
+            {infosHover || infosClick ? (
+              <HelpText>
+                <div>
+                  Pour filtrer les volontaires, cliquez sur les éléments ci-dessus. Pour en savoir plus sur les différents filtres{" "}
+                  <a href={`${supportURL}/base-de-connaissance/je-filtre-les-volontaires`} target="_blank" rel="noreferrer">
+                    consultez notre article
+                  </a>
+                  <div style={{ height: "0.5rem" }} />
+                  <div>
+                    <span className="title">Général :</span>concerne toutes les informations liées au parcours SNU du volontaire. Le statut général Validée est toujours activé.
+                  </div>
+                  <div>
+                    <span className="title">Dossier :</span>concerne toutes les informations et documents transmis au moment de son inscription
+                  </div>
+                </div>
+              </HelpText>
+            ) : null}
             <ResultTable>
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
@@ -409,7 +459,11 @@ export default function Inscription() {
               />
             </ResultTable>
           </div>
-          <Panel value={young} onChange={() => setYoung(null)} />
+          {young !== null && young.status === YOUNG_STATUS.DELETED ? (
+            <DeletedInscriptionPanel value={young} onChange={() => setYoung(null)} />
+          ) : (
+            <Panel value={young} onChange={() => setYoung(null)} />
+          )}
         </div>
       </ReactiveBase>
     </div>

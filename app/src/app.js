@@ -28,7 +28,6 @@ import Loader from "./components/Loader";
 import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
-import Cookie from "./components/cookie";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
@@ -102,7 +101,6 @@ export default function App() {
           <Route path="/auth" component={Auth} />
           <Route path="/" component={Espace} />
         </Switch>
-        <Cookie />
         <Footer />
       </div>
     </Router>
