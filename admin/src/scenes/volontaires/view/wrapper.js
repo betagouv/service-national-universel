@@ -18,6 +18,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import plausibleEvent from "../../../services/pausible";
 import Chevron from "../../../components/Chevron";
+import IconChangementCohorte from "../../../assets/IconChangementCohorte.js";
 
 export default function Wrapper({ children, young, tab, onChange }) {
   const history = useHistory();
@@ -55,6 +56,9 @@ export default function Wrapper({ children, young, tab, onChange }) {
               <>
                 {young.firstName} {young.lastName}
                 <BadgeCohort young={young} onChange={onChange} />
+                {young.originalCohort ? (
+                  <Badge color="#9A9A9A" backgroundColor="#F6F6F6" text={young.originalCohort} tooltipText={`Anciennement ${young.originalCohort}`} style={{ cursor: "default" }} />
+                ) : null}
               </>
             ) : (
               <>
@@ -153,8 +157,7 @@ const BadgeCohort = ({ young, onChange }) => {
     <>
       <CohortDropDown
         cohort={young.cohort}
-        color="#f6f6f6"
-        width="200px"
+        originalCohort={young.originalCohort}
         onClick={(value) => {
           setNewCohort(value);
           setModalConfirm(true);
@@ -181,11 +184,11 @@ const BadgeCohort = ({ young, onChange }) => {
           <div style={{ display: "grid", marginBlock: "20px", gridTemplateColumns: "1fr 375px", gridGap: "20px", alignItems: "center", justifyItems: "left", minWidth: "75%" }}>
             <p style={{ margin: 0 }}>Précisez le motif de changement de séjour :</p>
 
-            <ActionBox color="#ffffff" width="375px">
+            <ActionBox color="#9a9a9a" backgroundColor="#ffffff" width="375px">
               <UncontrolledDropdown setActiveFromChild>
                 <DropdownToggle tag="button">
                   {motif || <p></p>}
-                  <Chevron color="#9a9a9a" />
+                  <Chevron color="#9a9a9a" style={{ padding: 0, margin: 0, marginLeft: "15px" }} />
                 </DropdownToggle>
                 <DropdownMenu>
                   {motifs
@@ -201,7 +204,7 @@ const BadgeCohort = ({ young, onChange }) => {
               </UncontrolledDropdown>
             </ActionBox>
             <p style={{ margin: 0 }}>Choix de la nouvelle cohorte :</p>
-            <CohortDropDown cohort={newCohort} color="#ffffff" onClick={(value) => setNewCohort(value)} width="375px" />
+            <CohortDropDown cohort={newCohort} onClick={(value) => setNewCohort(value)} width="375px" />
           </div>
           <p style={{ margin: 0, marginTop: "16px" }}>
             Veuillez vous assurer de son éligibilité , pour en savoir plus consulter{" "}
@@ -236,17 +239,20 @@ const BadgeCohort = ({ young, onChange }) => {
   );
 };
 
-const CohortDropDown = ({ cohort, onClick, color, width }) => {
+const CohortDropDown = ({ originalCohort, cohort, onClick, width }) => {
   const user = useSelector((state) => state.Auth.user);
   const options = ["Juillet 2022", "Juin 2022"];
   const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 
   return (
-    <ActionBox color={color} width={width}>
+    <ActionBox color="#0C7CFF" backgroundColor="#F9FCFF" width={width}>
       <UncontrolledDropdown setActiveFromChild>
         <DropdownToggle tag="button" disabled={disabled}>
-          Cohorte {cohort}
-          {!disabled ? <Chevron color="#9a9a9a" /> : null}
+          <div className="flex items-center gap-1">
+            {originalCohort ? <IconChangementCohorte /> : null}
+            {cohort}
+          </div>
+          {!disabled ? <Chevron color="#0C7CFF" style={{ padding: 0, margin: 0, marginLeft: "15px" }} /> : null}
         </DropdownToggle>
         <DropdownMenu>
           {options
@@ -286,18 +292,20 @@ const ActionBox = styled.div`
     }
   }
   button {
-    background-color: ${({ color }) => color};
-    border: 1px solid #cecece;
-    color: #9a9a9a;
+    ${({ color, backgroundColor }) => `
+      color: ${color};
+      background-color: ${backgroundColor ? backgroundColor : `${color}33`};
+      border: 0.5px solid ${color};
+    `};
     display: inline-flex;
     flex: 1;
     justify-content: space-between;
     align-items: center;
     text-align: left;
-    border-radius: 0.5rem;
-    padding: 0 0 0 12px;
-    font-size: 12px;
-    font-weight: 700;
+    border-radius: 99999px;
+    padding: 0.25rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
     cursor: pointer;
     outline: 0;
     width: ${({ width }) => width};
