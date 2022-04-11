@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { HiAdjustments } from "react-icons/hi";
+import DeletedInscriptionPanel from "./deletedPanel";
 
 import VioletButton from "../../components/buttons/VioletButton";
 import ExportComponent from "../../components/ExportXlsx";
@@ -456,7 +457,11 @@ export default function Inscription() {
               />
             </ResultTable>
           </div>
-          <Panel value={young} onChange={() => setYoung(null)} />
+          {young !== null && young.status === YOUNG_STATUS.DELETED ? (
+            <DeletedInscriptionPanel value={young} onChange={() => setYoung(null)} />
+          ) : (
+            <Panel value={young} onChange={() => setYoung(null)} />
+          )}
         </div>
       </ReactiveBase>
     </div>
