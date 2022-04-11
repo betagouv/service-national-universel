@@ -6,7 +6,7 @@ const Joi = require("joi");
 const YoungObject = require("../../models/young");
 const { canUpdateYoungStatus, getAge } = require("snu-lib");
 const { capture } = require("../../sentry");
-const { validateFirstName } = require("../../utils/validator");
+const { validateFirstName, validateInscription } = require("../../utils/validator");
 const { serializeYoung } = require("../../utils/serializer");
 
 const { ERRORS, YOUNG_SITUATIONS, STEPS, inscriptionCheck, YOUNG_STATUS } = require("../../utils");
@@ -147,7 +147,7 @@ router.put("/coordonnee", passport.authenticate("young", { session: false, failW
     }).validate(req.body);
 
     if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      return res.status(400).send({ ok: false, code: error });
     }
 
     if (value.livesInFrance === "true") {
@@ -723,6 +723,39 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
     await young.save({ fromUser: req.user });
 
     await inscriptionCheck(done, young, req);
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/save/:type", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const keys = ["normal", "correction"];
+    const { error: typeError, value: type } = Joi.string()
+      .required()
+      .valid(...keys)
+      .validate(req.params.type);
+    if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const { error: bodyError, value } = validateInscription(req.body);
+    if (bodyError) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (type === "correction") {
+      value.status = YOUNG_STATUS.WAITING_VALIDATION;
+    }
+
+    young.set(value);
+    await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {

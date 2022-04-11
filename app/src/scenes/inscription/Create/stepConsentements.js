@@ -257,7 +257,7 @@ export default function StepConsentements() {
                 )}
               </Col>
             </FormRow>
-            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} secondButton="none" />
           </>
         )}
       </Formik>

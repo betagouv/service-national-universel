@@ -4,9 +4,10 @@ import styled from "styled-components";
 import { Spinner } from "reactstrap";
 
 import { setYoung } from "../../redux/auth/actions";
-import { saveYoung } from "../../scenes/inscription/utils";
 import { appURL } from "../../config";
 import { YOUNG_STATUS } from "../../utils";
+import api from "../../services/api";
+import { toastr } from "react-redux-toastr";
 
 export default function FormFooter({ values, handleSubmit, errors, secondButton = "save", loading }) {
   const dispatch = useDispatch();
@@ -16,14 +17,18 @@ export default function FormFooter({ values, handleSubmit, errors, secondButton 
 
   const handleSave = async () => {
     setloadingSaveBtn(true);
-    const young = await saveYoung(values);
+    const { ok, code, data: young } = await api.put(`/young/inscription/save/normal`, values);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
+    if (ok) toastr.success("Progression enregistrée");
     if (young) dispatch(setYoung(young));
     setloadingSaveBtn(false);
   };
 
   const handleCorrectionDone = async () => {
     setloadingCorrectionDone(true);
-    const young = await saveYoung({ ...values, status: YOUNG_STATUS.WAITING_VALIDATION });
+    const { ok, code, data: young } = await api.put(`/young/inscription/save/correction`, values);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
+    if (ok) toastr.success("Progression enregistrée");
     if (young) dispatch(setYoung(young));
     setloadingCorrectionDone(false);
     handleBackToHome();
@@ -44,9 +49,10 @@ export default function FormFooter({ values, handleSubmit, errors, secondButton 
           ) : null}
           {secondButton === "save" ? (
             <SecondButton onClick={handleSave}> {loadingSaveBtn ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Enregistrer"}</SecondButton>
-          ) : (
+          ) : secondButton !== "none" ? (
             <SecondButton onClick={handleBackToHome}>Retour</SecondButton>
-          )}
+          ) : null}
+
           <ContinueButton onClick={handleSubmit}> {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Continuer"}</ContinueButton>
         </ButtonContainer>
       </Footer>
