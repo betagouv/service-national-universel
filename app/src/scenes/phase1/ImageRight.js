@@ -77,7 +77,7 @@ export default function ImageRight() {
                   try {
                     setLoading(true);
                     const { imageRight, imageRightFiles } = values;
-                    const { ok, code, data: young } = await api.put("/young/phase1/imageRight", { imageRight, imageRightFiles });
+                    const { ok, code, data: young } = await api.put("/young", { imageRight, imageRightFiles });
                     setLoading(false);
                     if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
                     dispatch(setYoung(young));

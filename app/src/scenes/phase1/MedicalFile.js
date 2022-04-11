@@ -1,19 +1,11 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { SuccessMessage, Logo, ContinueButton } from "./components/printable";
 import { HeroContainer, Hero } from "../../components/Content";
 import styled from "styled-components";
-import api from "../../services/api";
-import { setYoung } from "../../redux/auth/actions";
 
 export default function MedicalFile() {
   const young = useSelector((state) => state.Auth.young);
-  const dispatch = useDispatch();
-
-  const updateDocumentInformation = async () => {
-    const { ok, data: young } = await api.put(`/young/phase1/cohesionStayMedical`);
-    if (ok) dispatch(setYoung(young));
-  };
 
   return (
     <HeroContainer>
@@ -69,10 +61,8 @@ export default function MedicalFile() {
             </div>
             {young.cohesionStayMedicalFileReceived !== "true" ? (
               <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
-                <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/fiche_sanitaire_2022.pdf" onClick={updateDocumentInformation}>
-                  <ContinueButton>
-                    {young.cohesionStayMedicalFileDownload === "true" ? "Télécharger de nouveau la fiche sanitaire" : "Télécharger la fiche sanitaire"}
-                  </ContinueButton>
+                <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/fiche_sanitaire_2022.pdf">
+                  <ContinueButton>Télécharger la fiche sanitaire</ContinueButton>
                 </a>
               </div>
             ) : null}
