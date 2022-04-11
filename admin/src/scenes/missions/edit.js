@@ -249,7 +249,10 @@ export default function Edit(props) {
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             {isJvaMission ? (
               <div className="bg-violet-100 text-indigo-800 p-4 mb-2.5 rounded-lg text-center text-base">
-                Les informations grisées sont à modifier par le responsable de la structure depuis son espace <a href="https://www.jeveuxaider.gouv.fr/">jeveuxaider.gouv.fr</a>
+                Les informations grisées sont à modifier par le responsable de la structure depuis son espace{" "}
+                <a target="_blank" rel="noreferrer" href="https://www.jeveuxaider.gouv.fr/">
+                  jeveuxaider.gouv.fr
+                </a>
               </div>
             ) : null}
 
