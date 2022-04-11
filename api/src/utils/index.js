@@ -350,7 +350,11 @@ const updateStatusPhase2 = async (young) => {
   young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
 
   const activeApplication = applications.filter(
-    (a) => a.status === "WAITING_VALIDATION" || a.status === "VALIDATED" || a.status === "IN_PROGRESS" || a.status === "WAITING_VERIFICATION",
+    (a) =>
+      a.status === APPLICATION_STATUS.WAITING_VALIDATION ||
+      a.status === APPLICATION_STATUS.VALIDATED ||
+      a.status === APPLICATION_STATUS.IN_PROGRESS ||
+      a.status === APPLICATION_STATUS.WAITING_VERIFICATION,
   );
 
   // we keep in the doc the date, if we have to display it in the certificate later
