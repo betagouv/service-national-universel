@@ -33,6 +33,7 @@ const {
   // updateApplicationsWithYoungOrMission,
   updatePlacesBus,
   updatePlacesSessionPhase1,
+  translateFileStatusPhase1,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -832,6 +833,13 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
 
     young.set(values);
     await young.save({ fromUser: req.user });
+
+    if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: { type_document: translateFileStatusPhase1(document) },
+      });
+    }
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
