@@ -27,6 +27,7 @@ import {
   ROLES,
   colors,
   departmentLookUp,
+  department2region,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
