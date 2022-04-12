@@ -795,10 +795,12 @@ export default function Contract({ young, admin }) {
           }}
         </Formik>
       )}
-      <div className="mt-4">
-        <h3 className="text-sm my-2 mx-4 uppercase italic text-snu-purple-600">Historique des modifications du contrat d&apos;engagement</h3>
-        <HistoricComponent model="contract" value={contract} />
-      </div>
+      {contract ? (
+        <div className="mt-4">
+          <h3 className="text-sm my-2 mx-4 uppercase italic text-snu-purple-600">Historique des modifications du contrat d&apos;engagement</h3>
+          <HistoricComponent model="contract" value={contract} />
+        </div>
+      ) : null}
       {young.statusPhase2 === "VALIDATED" ? (
         <div className="mt-4">
           <DownloadAttestationButton young={young} uri="2">
