@@ -28,6 +28,8 @@ import { toastr } from "react-redux-toastr";
 import Badge from "../../../components/Badge";
 import Select from "../components/Select";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import DocumentPhase1 from "../components/DocumentPhase1";
+import { environment } from "../../../config";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -242,6 +244,15 @@ export default function Phase1(props) {
               </Formik>
             </Col>
           </Row>
+          {environment !== "production" ? (
+            young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? (
+              <Row>
+                <Bloc title="Documents" disabled={disabled}>
+                  <DocumentPhase1 young={young} />
+                </Bloc>
+              </Row>
+            ) : null
+          ) : null}
         </Box>
         <div style={{ display: "flex", alignItems: "flex-start" }}>
           {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (

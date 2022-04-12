@@ -36,7 +36,7 @@ const {
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
-const { validateYoung, validateId, validateFirstName } = require("../../utils/validator");
+const { validateYoung, validateId, validateFirstName, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
 const { canDeleteYoung } = require("snu-lib/roles");
@@ -799,6 +799,41 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     let data = await YoungObject.findOne({ email: value });
     return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const keys = ["cohesionStayMedical", "autoTestPCR", "imageRight", "rules"];
+    const { error: documentError, value: document } = Joi.string()
+      .required()
+      .valid(...keys)
+      .validate(req.params.document);
+    if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let values = {};
+    if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
+      const { error: bodyError, value: tempValue } = validatePhase1Document(req.body, document);
+      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
+      values = tempValue;
+      values[`${document}FilesStatus`] = "WAITING_VERIFICATION";
+      values[`${document}FilesComment`] = undefined;
+    } else if (document === "cohesionStayMedical") {
+      values.cohesionStayMedicalFileDownload = "true";
+    } else {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    young.set(values);
+    await young.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

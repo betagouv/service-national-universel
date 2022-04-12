@@ -24,7 +24,7 @@ const {
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
-const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib/constants");
+const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1 } = require("snu-lib/constants");
 const { getQPV, getDensity } = require("../geo");
 
 // Set the number of requests allowed to 15 in a 1 hour window
@@ -634,4 +634,5 @@ module.exports = {
   STEPS,
   inscriptionCheck,
   updateApplication,
+  FILE_STATUS_PHASE1,
 };
