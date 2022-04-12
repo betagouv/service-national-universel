@@ -14,6 +14,7 @@ const SessionPhase1Object = require("../models/sessionPhase1");
 const { serializeMissions, serializeSchools, serializeYoungs, serializeStructures, serializeReferents, serializeApplications, serializeHits } = require("../utils/es-serializer");
 const { allRecords } = require("../es/utils");
 const { API_ASSOCIATION_ES_ENDPOINT } = require("../config");
+const Joi = require("joi");
 
 // Routes accessible for youngs and referent
 router.post("/mission/:action(_msearch|export)", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -144,17 +145,25 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
 
 // young-having-school-in-department is a special index (that uses a young index)
 // used by REFERENT_DEPARTMENT to get youngs having a school in their department.
-router.post("/young-having-school-in-department/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/young-having-school-in-department/:view/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const keys = ["volontaires", "inscriptions"];
+    const { error: viewError, value: view } = Joi.string()
+      .required()
+      .valid(...keys)
+      .validate(req.params.view);
+    if (viewError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
     const { user, body } = req;
     if (user.role !== ROLES.REFERENT_DEPARTMENT) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const filter = [
-      { term: { "schoolDepartment.keyword": user.department } },
-      { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
-    ];
+    const filter = [{ term: { "schoolDepartment.keyword": user.department } }];
+
+    if (view === "volontaires") {
+      filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } });
+    }
 
     const response = await allRecords("young", applyFilterOnQuery(body.query, filter));
     return res.status(200).send({ ok: true, data: serializeYoungs(response) });
@@ -165,17 +174,25 @@ router.post("/young-having-school-in-department/export", passport.authenticate([
 });
 // young-having-school-in-region is a special index (that uses a young index)
 // used by REFERENT_REGION to get youngs having a school in their region.
-router.post("/young-having-school-in-region/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/young-having-school-in-region/:view/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const keys = ["volontaires", "inscriptions"];
+    const { error: viewError, value: view } = Joi.string()
+      .required()
+      .valid(...keys)
+      .validate(req.params.view);
+    if (viewError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
     const { user, body } = req;
     if (user.role !== ROLES.REFERENT_REGION) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const filter = [
-      { terms: { "schoolDepartment.keyword": [...region2department[user.region]] } },
-      { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
-    ];
+    const filter = [{ terms: { "schoolDepartment.keyword": [...region2department[user.region]] } }];
+
+    if (view === "volontaires") {
+      filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } });
+    }
 
     const response = await allRecords("young", applyFilterOnQuery(body.query, filter));
     return res.status(200).send({ ok: true, data: serializeYoungs(response) });
