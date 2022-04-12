@@ -140,7 +140,7 @@ export default function TicketMessage({ ticket: propTicket }) {
 
 const Message = ({ from, date, content, fromMe, internal }) => {
   if (!content || !content.length) return null;
-  const text = content.replaceAll("/\n\r/", "<br>")
+  const text = content.replaceAll(/[\n\r]/g, "<br>")
   return fromMe ? (
     <MessageContainer>
       <MessageBubble internal={internal} align={"right"} backgroundColor={internal ? "gold" : colors.darkPurple}>
