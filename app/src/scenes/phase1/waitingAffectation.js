@@ -1,9 +1,10 @@
 import React from "react";
 import styled from "styled-components";
 import { HeroContainer, Hero } from "../../components/Content";
-import { translateCohort } from "../../utils";
+import { translateCohort, FILE_STATUS_PHASE1, translateFileStatusPhase1 } from "../../utils";
 import { supportURL } from "../../config";
 import NextStep from "./nextStep";
+import Files from "./Files";
 import { Link } from "react-router-dom";
 import { youngCanChangeSession } from "snu-lib";
 
@@ -24,7 +25,8 @@ export default function WaitingAffectation({ young }) {
             </p>
             {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
             <Divider />
-            <p>
+            <Files young={young} />
+            <section>
               <strong style={{ color: "#000" }}>Vous êtes en attente d&apos;affectation à un centre</strong>
               <br />
               <span style={{ fontSize: "1rem" }}>
@@ -36,7 +38,7 @@ export default function WaitingAffectation({ young }) {
                 . <br />
                 Merci de votre patience. L&apos;équipe SNU
               </span>
-            </p>
+            </section>
           </div>
           <div className="thumb" />
         </Hero>
