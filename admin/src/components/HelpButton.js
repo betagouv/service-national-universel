@@ -1,35 +1,139 @@
 import React from "react";
-import { supportURL } from "../config";
+import { supportURL, adminURL } from "../config";
+import { useSelector } from "react-redux";
+import QuestionMark from "../assets/QuestionMark";
+import plausibleEvent from "../services/pausible";
 
 export default function HelpButton() {
+  const user = useSelector((state) => state.Auth.user);
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => {
     setOpen((e) => !e);
     setTimeout(() => setOpen(false), 10000);
   };
+
+  const LISTE_LIEN_AIDE_PAR_ROLE = {
+    admin: [
+      {
+        label: "Aide et tutoriels",
+        url: supportURL,
+      },
+      {
+        label: "Contacter le support national",
+        url: `${adminURL}/besoin-d-aide/ticket`,
+      },
+      {
+        label: "Mes messages",
+        url: `${adminURL}/boite-de-reception`,
+      },
+    ],
+    referent_department: [
+      {
+        label: "Aide et tutoriels",
+        url: supportURL,
+      },
+      {
+        label: "Contacter le support national",
+        url: `${adminURL}/besoin-d-aide/ticket`,
+      },
+      {
+        label: "Mes messages",
+        url: `${adminURL}/boite-de-reception`,
+      },
+      {
+        label: "Forum collaboratif - Osmose",
+        url: `${adminURL}/boite-de-reception`,
+      },
+    ],
+    referent_region: [
+      {
+        label: "Aide et tutoriels",
+        url: supportURL,
+      },
+      {
+        label: "Contacter le support national",
+        url: `${adminURL}/besoin-d-aide/ticket`,
+      },
+      {
+        label: "Mes messages",
+        url: `${adminURL}/boite-de-reception`,
+      },
+      {
+        label: "Forum collaboratif - Osmose",
+        url: "",
+      },
+    ],
+    head_center: [
+      {
+        label: "Aide et tutoriels",
+        url: supportURL,
+      },
+      {
+        label: "Contacter mon référent départemental",
+        url: `${adminURL}/besoin-d-aide/ticket`,
+      },
+      {
+        label: "Mes messages",
+        url: `${adminURL}/boite-de-reception`,
+      },
+    ],
+    responsible: [
+      {
+        label: "Aide et tutoriels",
+        url: supportURL,
+      },
+      {
+        label: "Contacter mon référent départemental",
+        url: `${adminURL}/besoin-d-aide/ticket`,
+      },
+      {
+        label: "Mes messages",
+        url: `${adminURL}/boite-de-reception`,
+      },
+    ],
+    supervisor: [
+      {
+        label: "Aide et tutoriels",
+        url: supportURL,
+      },
+      {
+        label: "Contacter mon référent départemental",
+        url: `${adminURL}/besoin-d-aide/ticket`,
+      },
+      {
+        label: "Mes messages",
+        url: `${adminURL}/boite-de-reception`,
+      },
+    ],
+  };
+
   return (
-    <div className="fixed bottom-5 right-2 ">
-      <div className="font-bold text-xl w-10 h-10 shadow-sm rounded-full text-white  cursor-pointer flex justify-center items-center bg-snu-purple-300" onClick={handleOpen}>
-        <div>?</div>
+    <div
+      className="fixed bottom-10 left-10 justify-center flex z-20"
+      onClick={() => {
+        handleOpen();
+        plausibleEvent("Menu/CTA - Besoin Aide");
+      }}>
+      <div
+        className="flex items-center border rounded p-2 text-white hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg cursor-pointer"
+        activeClassName="flex bg-snu-purple-300 p-2">
+        <QuestionMark class="h-6 w-6 flex mr-2 " />
+        <div>
+          <div className=" font-normal text-sm text-center  ">Besoin d&apos;aide ??</div>
+          <div className="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
+        </div>
       </div>
       <div
         className={`${
           open ? "block" : "hidden"
-        } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute right-3 bottom-11 border-3 border-red-600 shadow-sm overflow-hidden`}>
-        <div className="my-2 text-xs px-3 text-coolGray-600">
-          <p>Besoin d&apos;aide ?</p>
-        </div>
-        <hr className="m-0 border-t-coolGray-100" />
-        <a href={supportURL} target="_blank" rel="noreferrer">
-          <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
-            Base de connaissance
-          </div>
-        </a>
-        <a href="/besoin-d-aide" target="_blank" rel="noreferrer">
-          <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
-            Support
-          </div>
-        </a>
+        } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute left-[calc(100%+10px)] bottom-0 border-3 border-red-600 shadow-sm overflow-hidden`}>
+        {(LISTE_LIEN_AIDE_PAR_ROLE[user.role] || []).map((e) => (
+          <a key={e.label} href={e.url} target="_blank" rel="noreferrer">
+            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
+              {e.label}
+            </div>
+          </a>
+        ))}
       </div>
     </div>
   );

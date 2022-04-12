@@ -5,7 +5,6 @@ import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors 
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
 import SuccessIcon from "../SuccessIcon";
-import QuestionMark from "../../assets/QuestionMark";
 import api from "../../services/api";
 import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
@@ -31,23 +30,6 @@ const BlankSeparator = () => (
   />
 );
 
-const HelpButton = ({ onClick, to }) => (
-  <div
-    className="justify-center flex mb-4 p-8"
-    onClick={() => {
-      plausibleEvent("Menu/CTA - Besoin Aide");
-      onClick();
-    }}>
-    <NavLink className=" items-center border rounded flex p-2 hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg" activeClassName="flex bg-snu-purple-300 p-2" to={to}>
-      <QuestionMark class="h-6 w-6 flex mr-2 " />
-      <div>
-        <div className=" font-normal text-sm text-center  ">Besoin d&apos;aide ?</div>
-        <div className="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
-      </div>
-    </NavLink>
-  </div>
-);
-
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
     <div onClick={onClick} className="hover:bg-snu-purple-800 hover:shadow-lg block">
@@ -67,7 +49,6 @@ function responsible({ user, onClick }) {
       <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -79,7 +60,6 @@ function supervisor({ onClick }) {
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -117,7 +97,6 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           </>
         )}
       </DrawerTabWithIcons>
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -154,7 +133,6 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           </>
         )}
       </DrawerTabWithIcons>
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -167,7 +145,6 @@ function headCenter({ onClick, user }) {
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <BlankSeparator />
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -176,7 +153,6 @@ function visitor({ onClick }) {
   return (
     <>
       <BlankSeparator />
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
