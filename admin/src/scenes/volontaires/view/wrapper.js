@@ -222,10 +222,12 @@ const BadgeCohort = ({ young, onChange }) => {
         isOpen={modalConfirmWithMessage}
         title="Veuillez éditer le message ci-dessous pour préciser le motif de changement de cohorte avant de l’envoyer"
         message={
-          <p>
-            Bonjour {young.firstName} {young.lastName},<br /> Votre changement de séjour pour le Service National Universel a été pris en compte.
-            <br /> Vous êtes maintenant positionné(e) sur le séjour se déroulant {translateCohort(newCohort)}.
-          </p>
+          <>
+            Bonjour {young.firstName} {young.lastName},<br />
+            Votre changement de séjour pour le Service National Universel a été pris en compte. <br />
+            Vous êtes maintenant positionné(e) sur le séjour se déroulant :<br />
+            <div className="uppercase text-snu-purple-800"> {translateCohort(newCohort)} </div>
+          </>
         }
         onChange={() => setModalConfirmWithMessage(false)}
         onConfirm={handleChangeCohort}

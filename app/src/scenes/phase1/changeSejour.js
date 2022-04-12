@@ -202,7 +202,9 @@ export default function changeSejour() {
                         message={
                           <>
                             Êtes-vous sûr ? <br /> <br />
-                            Vous vous apprêtez à changer de séjour pour {newSejour}. Cette action est irréversible, souhaitez-vous confirmer cette action ? <br />
+                            Vous vous apprêtez à changer de séjour pour : <br />
+                            <div className="uppercase text-snu-purple-800"> {newSejour} </div>
+                            <div className="text-xs" >Cette action est irréversible, souhaitez-vous confirmer cette action ?</div>
                           </>
                         }
                         onCancel={() => setmodalConfirmControlOk(false)}
