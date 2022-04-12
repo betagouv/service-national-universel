@@ -42,6 +42,10 @@ const translateFieldStructure = (f) => {
       return "créée le";
     case "updatedAt":
       return "mise à jour le";
+    case "jvaStructureId":
+      return "Id de la structure JVA";
+    case "isJvaStructure":
+      return "Structure JVA";
     default:
       return f;
   }
@@ -478,6 +482,12 @@ const translateFieldMission = (f) => {
       return "créé(e) le";
     case "updatedAt":
       return "mis(e) à jour le";
+    case "jvaMissionId":
+      return "Id de la mission JVA";
+    case "lastSyncAt":
+      return "Dernière synchronisation avec JVA";
+    case "isJvaMission":
+      return "Mission JVA";
     default:
       return f;
   }
