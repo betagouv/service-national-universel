@@ -75,6 +75,8 @@ function validateStructure(structure) {
       networkId: Joi.string().allow(null, ""),
       networkName: Joi.string().allow(null, ""),
       legalStatus: Joi.string().allow(null, ""),
+      types: Joi.array().items(Joi.string().allow(null, "")),
+      sousType: Joi.string().allow(null, ""),
       associationTypes: Joi.array().items(Joi.string().allow(null, "")),
       structurePubliqueType: Joi.string().allow(null, ""),
       structurePubliqueEtatType: Joi.string().allow(null, ""),

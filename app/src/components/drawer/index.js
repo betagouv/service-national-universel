@@ -39,6 +39,14 @@ export default function Drawer(props) {
       setStatus3(young.statusPhase3);
     }
 
+    // si le jeune a abandonné son inscription, on lui affiche pas ses status
+    // on affiche tout à "desisté"
+    if (young.status === YOUNG_STATUS.ABANDONED) {
+      setStatus1(YOUNG_STATUS.WITHDRAWN);
+      setStatus2(YOUNG_STATUS.WITHDRAWN);
+      setStatus3(YOUNG_STATUS.WITHDRAWN);
+    }
+
     // si le jeune n'est pas validé, ni désisté
     // -> on ne le considère pas encore dans le snu et on affiche donc les status "IN_COMING"
     // ou les status lié au moment de son désistement

@@ -164,7 +164,7 @@ const Schema = new mongoose.Schema(
     }, // OK
     group: {
       type: String,
-      enum: ["Admin", "Contact", "Inscription", "Jeunes", "Référents", "Structures", "Sous-direction", "Volontaires", "Test", "AnciensUsers"],
+      enum: ["Admin", "Contact", "Inscription", "Jeunes", "Référents", "Structures", "Sous-direction", "Volontaires", "Test", "Chefs de centre", "Visiteurs", "AnciensUsers"],
       documentation: {
         description: "nom du groupe",
       },

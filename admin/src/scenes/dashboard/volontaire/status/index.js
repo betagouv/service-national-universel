@@ -15,6 +15,7 @@ import {
 } from "../../../../utils";
 import api from "../../../../services/api";
 import Status from "./status";
+import ChangementDeCohorte from "./changementDeCohorte";
 import StatusMap from "./statusMap";
 import Participation from "./participation";
 
@@ -27,6 +28,8 @@ export default function StatusIndex({ filter }) {
   const [statusPhase2, setStatusPhase2] = useState({});
   const [statusPhase2Contract, setStatusPhase2Contract] = useState({});
   const [statusPhase3, setStatusPhase3] = useState({});
+  const [youngWhoChangedCohortIn, setYoungWhoChangedCohortIn] = useState({});
+  const [youngWhoChangedCohortOut, setYoungWhoChangedCohortOut] = useState({});
   const [cohesionStayPresence, setCohesionStayPresence] = useState({});
   const [statusApplication, setStatusApplication] = useState({});
 
@@ -101,6 +104,72 @@ export default function StatusIndex({ filter }) {
     })();
   }, [JSON.stringify(filter)]);
 
+  useEffect(() => {
+    (async () => {
+      const body = {
+        query: {
+          bool: {
+            must: { match_all: {} },
+            filter: [
+              {
+                exists: {
+                  field: "originalCohort",
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          cohort: { terms: { field: "cohort.keyword" } },
+        },
+        size: 0,
+      };
+
+      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (filter.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
+
+      const { responses } = await api.esQuery("young", body);
+      if (responses?.length) {
+        setYoungWhoChangedCohortIn(responses[0].aggregations.cohort.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      }
+    })();
+  }, [JSON.stringify(filter)]);
+
+  useEffect(() => {
+    (async () => {
+      const body = {
+        query: {
+          bool: {
+            must: { match_all: {} },
+            filter: [
+              {
+                exists: {
+                  field: "originalCohort",
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          originalCohort: { terms: { field: "originalCohort.keyword" } },
+        },
+        size: 0,
+      };
+
+      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "originalCohort.keyword": filter.cohort } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (filter.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
+
+      const { responses } = await api.esQuery("young", body);
+      if (responses?.length) {
+        setYoungWhoChangedCohortOut(responses[0].aggregations.originalCohort.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      }
+    })();
+  }, [JSON.stringify(filter)]);
+
   return (
     <>
       <TabNavigation>
@@ -124,6 +193,7 @@ export default function StatusIndex({ filter }) {
           <>
             <h3 className="mt-4 mb-2 text-xl">En quelques chiffres</h3>
             <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} filter={filter} getLink={getLink} />
+            <ChangementDeCohorte youngWhoChangedCohortIn={youngWhoChangedCohortIn} youngWhoChangedCohortOut={youngWhoChangedCohortOut} filter={filter} />
           </>
         )}
         {currentSubtab === "phase1" && (
@@ -191,14 +261,6 @@ export default function StatusIndex({ filter }) {
     </>
   );
 }
-
-const SubTitle = styled.h3`
-  color: #242526;
-  font-size: 24px;
-  margin-bottom: 1rem;
-  margin-top: 1.5rem;
-  font-weight: normal;
-`;
 
 const Wrapper = styled.div`
   padding: 1.5rem;

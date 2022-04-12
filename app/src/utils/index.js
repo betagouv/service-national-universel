@@ -25,7 +25,8 @@ export function getPasswordErrorMessage(v) {
 }
 
 const permissionApp = (y) => {
-  if (!y) false;
+  if (!y) return false;
+  if (y.status === YOUNG_STATUS.ABANDONED) return false;
   return y?.status !== YOUNG_STATUS.REFUSED;
 };
 
