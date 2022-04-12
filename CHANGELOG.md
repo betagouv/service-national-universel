@@ -1,3 +1,18 @@
+# [1.70.0](https://github.com/betagouv/service-national-universel/compare/v1.69.0...v1.70.0) (2022-04-12)
+
+
+### Bug Fixes
+
+* **admin:** open form to all visitor to new support ([#1471](https://github.com/betagouv/service-national-universel/issues/1471)) ([5db6320](https://github.com/betagouv/service-national-universel/commit/5db6320cb5e213cd247c884c0bc80e679cc4aab4))
+* Pièces justificatives phase 1 ([#1454](https://github.com/betagouv/service-national-universel/issues/1454)) ([233fe76](https://github.com/betagouv/service-national-universel/commit/233fe76fc9274e380efb874951a12f4d179a7055))
+* **admin:** historic JVA structure/mission ([#1469](https://github.com/betagouv/service-national-universel/issues/1469)) ([8e74ffa](https://github.com/betagouv/service-national-universel/commit/8e74ffa2154e05ee81321042686edea19388f7fa))
+* **api:** MIG JVA SNU add check JVA structure to endpoint ([#1468](https://github.com/betagouv/service-national-universel/issues/1468)) ([aefd170](https://github.com/betagouv/service-national-universel/commit/aefd1708ab28833785a059506bb6e28768d185e6))
+
+
+### Features
+
+* **admin,api:** historic contract ([#1464](https://github.com/betagouv/service-national-universel/issues/1464)) ([31a89f0](https://github.com/betagouv/service-national-universel/commit/31a89f09170fce435f883a22c0af296a0c9209d5))
+
 # [1.69.0](https://github.com/betagouv/service-national-universel/compare/v1.68.1...v1.69.0) (2022-04-11)
 
 
