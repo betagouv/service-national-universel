@@ -12,6 +12,11 @@ import FileCard from "./components/FileCard";
 
 export default function DocumentsPhase1({ young }) {
   const [documents, setDocuments] = useState();
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    console.log(isOpen);
+  }, [isOpen]);
 
   useEffect(() => {
     if (young) {
@@ -25,8 +30,6 @@ export default function DocumentsPhase1({ young }) {
     }
   }, []);
 
-  console.log(young.autoTestPCRFilesStatus);
-
   return (
     <>
       {environment !== "production" ? (
@@ -36,7 +39,8 @@ export default function DocumentsPhase1({ young }) {
             name="Fiche sanitaire"
             icon="sanitaire"
             filled={young.cohesionStayMedicalFileDownload === "true"}
-            status={young.cohesionStayMedicalFileReceived === "true" ? "Réceptionné" : young.cohesionStayMedicalFileDownload === "true" ? "Téléchargé" : "Non Téléchargé"}
+            status={young.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : young.cohesionStayMedicalFileDownload === "true" ? "Téléchargée" : "Non Téléchargée"}
+            onClick={() => setIsOpen(true)}
           />
           <FileCard
             name="Droit à l'image"
@@ -61,6 +65,7 @@ export default function DocumentsPhase1({ young }) {
           />
         </>
       ) : null}
+      <MedicalFile isOpen={isOpen} onCancel={() => setIsOpen(false)} />
     </>
   );
 }
