@@ -225,8 +225,9 @@ const BadgeCohort = ({ young, onChange }) => {
           <>
             Bonjour {young.firstName} {young.lastName},<br />
             Votre changement de séjour pour le Service National Universel a été pris en compte. <br />
-            Vous êtes maintenant positionné(e) sur le séjour se déroulant :<br />
-            <div className="uppercase text-snu-purple-800"> {translateCohort(newCohort)} </div>
+            Ancien séjour : <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={young.cohort} style={{ cursor: "default" }} />
+            <br />
+            Nouveau séjour : <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={translateCohort(newCohort)} style={{ cursor: "default" }} />
           </>
         }
         onChange={() => setModalConfirmWithMessage(false)}
