@@ -1,3 +1,15 @@
+# [1.71.0](https://github.com/betagouv/service-national-universel/compare/v1.70.0...v1.71.0) (2022-04-13)
+
+
+### Bug Fixes
+
+* **app:** Information téléversement du règlement intérieur ([#1475](https://github.com/betagouv/service-national-universel/issues/1475)) ([4cee56f](https://github.com/betagouv/service-national-universel/commit/4cee56fd6b1610a362ed5b4334a80ecefc543634))
+
+
+### Features
+
+* export jeunes scolarisés dans un département / région  ([#1472](https://github.com/betagouv/service-national-universel/issues/1472)) ([428eecd](https://github.com/betagouv/service-national-universel/commit/428eecd6ddc9e3a0f566fd1f1c9877192650d262))
+
 # [1.70.0](https://github.com/betagouv/service-national-universel/compare/v1.69.0...v1.70.0) (2022-04-12)
 
 
