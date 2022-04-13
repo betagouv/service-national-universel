@@ -38,6 +38,7 @@ const {
   isYoung,
   inSevenDays,
   FILE_STATUS_PHASE1,
+  translateFileStatusPhase1,
   //  updateApplicationsWithYoungOrMission,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
@@ -908,9 +909,31 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
     } else {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
+    if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
+      if ([FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED].includes(value[`${document}FilesStatus`])) {
+        const statusToMail = {
+          WAITING_VERIFICATION: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION,
+          WAITING_CORRECTION: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_CORRECTION,
+          VALIDATED: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_VALIDATED,
+        };
+
+        let cc = [];
+        if (young.parent1Email && young.parent1FirstName && young.parent1LastName)
+          cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+        if (young.parent2Email && young.parent2FirstName && young.parent2LastName)
+          cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+
+        await sendTemplate(statusToMail[value[`${document}FilesStatus`]], {
+          emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+          params: { type_document: translateFileStatusPhase1(document), modif: value[`${document}FilesComment`] },
+          cc,
+        });
+      }
+    }
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
