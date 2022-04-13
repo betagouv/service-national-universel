@@ -147,7 +147,7 @@ router.put("/coordonnee", passport.authenticate("young", { session: false, failW
     }).validate(req.body);
 
     if (error) {
-      return res.status(400).send({ ok: false, code: error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     if (value.livesInFrance === "true") {
