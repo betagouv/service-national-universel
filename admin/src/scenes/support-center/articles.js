@@ -5,13 +5,13 @@ export const structureArticles = [
     title: "Livret d'accueil structure",
     emoji: "🏠",
     body: `Découvrez en quelques minutes les éléments de prise en main...`,
-    url: `${supportURL}/base-de-connaissance/livret-daccueil-structure-1`,
+    url: `https://support.snu.gouv.fr/base-de-connaissance/livret-daccueil-structure`,
   },
   {
     title: "Je crée une nouvelle mission",
     emoji: "📇",
     body: "Vidéo",
-    url: `${supportURL}/base-de-connaissance/je-cree-une-nouvelle-mission-1`,
+    url: `https://support.snu.gouv.fr/base-de-connaissance/je-cree-une-nouvelle-mission`,
   },
   {
     title: "Je remplis et envoie le contrat d'engagement",
