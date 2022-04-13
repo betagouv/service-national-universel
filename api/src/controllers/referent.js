@@ -930,6 +930,7 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
         await sendTemplate(statusToMail[value[`${document}FilesStatus`]], {
           emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
           params: { type_document: translateFileStatusPhase1(document), modif: value[`${document}FilesComment`] },
+          cc,
         });
       }
     }
