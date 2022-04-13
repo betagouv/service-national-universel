@@ -242,7 +242,7 @@ export default function Inscription() {
                 )}
                 {user.role === ROLES.REFERENT_REGION && (
                   <ExportComponent
-                    title="Exporter les volontaires inscrits dans la région"
+                    title="Exporter les volontaires inscrits scolarisés dans la région"
                     defaultQuery={getExportQuery}
                     exportTitle="Incriptions"
                     index="young-having-school-in-region/inscriptions"
