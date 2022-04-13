@@ -350,6 +350,14 @@ const updateStatusPhase2 = async (young) => {
   const applications = await ApplicationModel.find({ youngId: young._id });
   young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
 
+  const activeApplication = applications.filter(
+    (a) =>
+      a.status === APPLICATION_STATUS.WAITING_VALIDATION ||
+      a.status === APPLICATION_STATUS.VALIDATED ||
+      a.status === APPLICATION_STATUS.IN_PROGRESS ||
+      a.status === APPLICATION_STATUS.WAITING_VERIFICATION,
+  );
+
   // we keep in the doc the date, if we have to display it in the certificate later
   young.set({ statusPhase2UpdatedAt: Date.now() });
 
@@ -365,8 +373,8 @@ const updateStatusPhase2 = async (young) => {
         cta: `${APP_URL}/phase2`,
       },
     });
-  } else if (Number(young.phase2NumberHoursEstimated) || Number(young.phase2NumberHoursDone)) {
-    // We change young status to IN_PROGRESS if he has estimated hours of phase 2.
+  } else if (activeApplication.length) {
+    // We change young status to IN_PROGRESS if he has an 'active' application.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
   } else {
     // We change young status to WAITING_LIST if he has no estimated hours of phase 2.
