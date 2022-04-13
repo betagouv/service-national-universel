@@ -12,11 +12,14 @@ import FileCard from "./components/FileCard";
 
 export default function DocumentsPhase1({ young }) {
   const [documents, setDocuments] = useState();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenMed, setIsOpenMed] = useState(false);
+  const [isOpenIm, setIsOpenIm] = useState(false);
+  const [isOpenAut, setIsOpenAut] = useState(false);
+  const [isOpenReg, setIsOpenReg] = useState(false);
 
-  useEffect(() => {
-    console.log(isOpen);
-  }, [isOpen]);
+  // useEffect(() => {
+  //   console.log(isOpenReg);
+  // }, [isOpenReg]);
 
   useEffect(() => {
     if (young) {
@@ -34,38 +37,49 @@ export default function DocumentsPhase1({ young }) {
     <>
       {environment !== "production" ? (
         <>
-          <h3>Mes documents justificatifs {documents}/4</h3>
-          <FileCard
-            name="Fiche sanitaire"
-            icon="sanitaire"
-            filled={young.cohesionStayMedicalFileDownload === "true"}
-            status={young.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : young.cohesionStayMedicalFileDownload === "true" ? "Téléchargée" : "Non Téléchargée"}
-            onClick={() => setIsOpen(true)}
-          />
-          <FileCard
-            name="Droit à l'image"
-            icon="image"
-            filled={young.imageRightFilesStatus !== "TO_UPLOAD"}
-            status={translateFileStatusPhase1(young.imageRightFilesStatus)}
-            correction={young.imageRightFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.imageRightFilesComment : ""}
-          />
-          <FileCard
-            name="Utilisation d'autotest"
-            icon="autotest"
-            filled={young.rulesFilesStatus !== "TO_UPLOAD"}
-            status={translateFileStatusPhase1(young.rulesFilesStatus)}
-            correction={young.rulesFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.rulesFilesComment : ""}
-          />
-          <FileCard
-            name="Règlement intérieur"
-            icon="reglement"
-            filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"}
-            status={translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
-            correction={young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.autoTestPCRFilesComment : ""}
-          />
+          <h3>
+            Mes documents justificatifs <strong>({documents}/4)</strong>
+          </h3>
+          <section className="flex justify-between overflow-scroll">
+            <FileCard
+              name="Fiche sanitaire"
+              icon="sanitaire"
+              filled={young.cohesionStayMedicalFileDownload === "true"}
+              bgColor={young.cohesionStayMedicalFileDownload === "true" ? "bg-indigo-700" : "bg-white"}
+              status={young.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : young.cohesionStayMedicalFileDownload === "true" ? "Téléchargée" : "Non Téléchargée"}
+              onClick={() => setIsOpenMed(true)}
+            />
+            <FileCard
+              name="Droit à l'image"
+              icon="image"
+              filled={young.imageRightFilesStatus !== "TO_UPLOAD"}
+              status={translateFileStatusPhase1(young.imageRightFilesStatus)}
+              correction={young.imageRightFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.imageRightFilesComment : ""}
+              onClick={() => setIsOpenIm(true)}
+            />
+            <FileCard
+              name="Utilisation d'autotest"
+              icon="autotest"
+              filled={young.rulesFilesStatus !== "TO_UPLOAD"}
+              status={translateFileStatusPhase1(young.rulesFilesStatus)}
+              correction={young.rulesFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.rulesFilesComment : ""}
+              onClick={() => setIsOpenAut(true)}
+            />
+            <FileCard
+              name="Règlement intérieur"
+              icon="reglement"
+              filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"}
+              status={translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
+              correction={young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.autoTestPCRFilesComment : ""}
+              onClick={() => setIsOpenReg(true)}
+            />
+          </section>
         </>
       ) : null}
-      <MedicalFile isOpen={isOpen} onCancel={() => setIsOpen(false)} />
+      <MedicalFile isOpen={isOpenMed} onCancel={() => setIsOpenMed(false)} />
+      <Rules isOpen={isOpenReg} onCancel={() => setIsOpenReg(false)} />
+      <ImageRight isOpen={isOpenIm} onCancel={() => setIsOpenIm(false)} />
+      <AutoTest isOpen={isOpenAut} onCancel={() => setIsOpenAut(false)} />
     </>
   );
 }

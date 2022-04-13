@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Col, Button } from "reactstrap";
+import { Col, Button, Modal } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { Formik, Field } from "formik";
 import DndFileInput from "../../components/dndFileInput";
 import { HeroContainer, Hero } from "../../components/Content";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
+import { ModalContainer } from "../../components/modals/Modal";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
@@ -12,8 +13,9 @@ import { translate, colors } from "../../utils";
 import { SuccessMessage, RadioLabel, Footer, FormRow, Title, Logo, BackButton, Content } from "./components/printable";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import styled from "styled-components";
+import CloseSvg from "../../assets/Close";
 
-export default function Rules() {
+export default function Rules({ isOpen, onCancel }) {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const isPlural = young?.parent1Status && young?.parent2Status;
@@ -22,8 +24,9 @@ export default function Rules() {
   const [showFields, setShowFields] = useState(!young.rulesFiles?.length);
 
   return (
-    <HeroContainer>
-      <Hero>
+    <Modal centered isOpen={isOpen} toggle={onCancel} size="xl">
+      <ModalContainer>
+        <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={onCancel} />
         <Content style={{ width: "100%" }} id="imageRight">
           <div style={{ display: "flex" }}>
             <div className="icon">
@@ -235,8 +238,8 @@ export default function Rules() {
             </>
           )}
         </Content>
-      </Hero>
-    </HeroContainer>
+      </ModalContainer>
+    </Modal>
   );
 }
 

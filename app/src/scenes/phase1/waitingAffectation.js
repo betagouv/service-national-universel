@@ -7,42 +7,52 @@ import NextStep from "./nextStep";
 import Files from "./Files";
 import { Link } from "react-router-dom";
 import { youngCanChangeSession } from "snu-lib";
+import Container from "./components/Container";
+import hero from "../../assets/hero.png";
+import clock from "../../assets/clock.svg";
 
 export default function WaitingAffectation({ young }) {
   return (
     <>
-      <HeroContainer>
-        <Hero>
-          <div className="content">
-            <h1>
-              <strong>Mon séjour de cohésion</strong>
+      <Container>
+        <>
+          <section className="flex flex-col-reverse items-center lg:flex-row lg:items-center">
+            <article>
+              <h1 className="text-5xl mb-4">
+                Mon séjour de cohésion
+                <br />
+                <strong>{translateCohort(young.cohort)}</strong>
+              </h1>
+              <p className="text-gray-600 text-base md:text-xl">
+                Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des
+                liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
+              </p>
+              {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? (
+                <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button>
+              ) : null}
+            </article>
+            <img src={hero} />
+          </section>
+          <Files young={young} />
+          <Divider />
+          <section className="flex items-center">
+            <img src={clock} />
+            <article className="ml-4">
+              <strong className="text-xl">Vous êtes en attente d&apos;affectation à un centre</strong>
               <br />
-              {translateCohort(young.cohort)}
-            </h1>
-            <p>
-              Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
-              nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
-            </p>
-            {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
-            <Divider />
-            <Files young={young} />
-            <section>
-              <strong style={{ color: "#000" }}>Vous êtes en attente d&apos;affectation à un centre</strong>
-              <br />
-              <span style={{ fontSize: "1rem" }}>
+              <span className="text-gray-500">
                 Votre affectation vous sera communiquée dans les semaines qui précèdent le départ par mail. Pensez à vérifier vos spams et courriers indésirables pour vous assurer
                 que vous recevez bien les communications de la plateforme. Vous pouvez d&apos;ores et déjà préparer votre venue en consultant les{" "}
-                <a href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
+                <a className="text-indigo-600 underline hover:text-indigo-800" href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
                   articles à propos de la Phase 1
                 </a>
-                . <br />
-                Merci de votre patience. L&apos;équipe SNU
+                . Merci de votre patience. L&apos;équipe SNU
               </span>
-            </section>
-          </div>
+            </article>
+          </section>
           <div className="thumb" />
-        </Hero>
-      </HeroContainer>
+        </>
+      </Container>
       <h2 className="text-stone-500 m-auto text-center">Documents à renseigner</h2>
       <NextStep />
     </>
@@ -50,8 +60,8 @@ export default function WaitingAffectation({ young }) {
 }
 
 const Divider = styled.hr`
-  width: 100px;
-  margin: 2rem 0;
+  max-width: 95%;
+  margin: 2rem auto;
 `;
 
 const Button = styled(Link)`

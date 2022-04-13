@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Row, Col, Button } from "reactstrap";
+import { Row, Col, Button, Modal } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { Formik, Field } from "formik";
 import DndFileInput from "../../components/dndFileInput";
@@ -9,11 +9,13 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import { translate, colors } from "../../utils";
+import { ModalContainer } from "../../components/modals/Modal";
 import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, BackButton, Content } from "./components/printable";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import styled from "styled-components";
+import CloseSvg from "../../assets/Close";
 
-export default function AutoTest() {
+export default function AutoTest({ isOpen, onCancel }) {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const isPlural = young?.parent1Status && young?.parent2Status;
@@ -22,8 +24,9 @@ export default function AutoTest() {
   const [showFields, setShowFields] = useState(!young.autoTestPCRFiles?.length);
 
   return (
-    <HeroContainer>
-      <Hero>
+    <Modal centered isOpen={isOpen} toggle={onCancel} size="xl">
+      <ModalContainer>
+        <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={onCancel} />
         <Content style={{ width: "100%" }} id="autoTest">
           <div style={{ display: "flex" }}>
             <div className="icon">
@@ -273,8 +276,8 @@ export default function AutoTest() {
             </>
           )}
         </Content>
-      </Hero>
-    </HeroContainer>
+      </ModalContainer>
+    </Modal>
   );
 }
 

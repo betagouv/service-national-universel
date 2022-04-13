@@ -64,7 +64,6 @@ export const FormGroup = styled.div`
     }
     font-weight: 500;
     text-transform: uppercase;
-    color: #6a6f85;
     display: block;
     margin-bottom: 10px;
     span {
