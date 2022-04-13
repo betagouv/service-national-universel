@@ -28,7 +28,7 @@ const BadgeContainer = styled.div`
   height: fit-content;
   ${({ color, textColor, backgroundColor }) => `
     color: ${textColor || color};
-    background-color: ${backgroundColor || `${color}33`};
+    background-color: ${backgroundColor || `${color}11`};
     border: 1px solid ${textColor || color};
   `};
   /* Tooltip text */
