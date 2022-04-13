@@ -107,9 +107,11 @@ export default function HelpButton() {
     ],
   };
 
+  if (!user) return null;
+
   return (
     <div
-      className="fixed bottom-10 left-10 justify-center flex z-20"
+      className="fixed bottom-10 left-10 justify-center flex z-20 bg-snu-purple-900"
       onClick={() => {
         handleOpen();
         plausibleEvent("Menu/CTA - Besoin Aide");
