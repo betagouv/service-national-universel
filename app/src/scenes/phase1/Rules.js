@@ -220,7 +220,9 @@ export default function Rules() {
                         </Col>
                       </Row>
                     </SignBox> */}
+
                     <Footer className="noPrint">
+                      <div className="text-xs italic"> Vous pouvez téléverser uniquement la dernière page signée du règlement intérieur  </div>
                       <Title />
                       <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                         <LoadingButton loading={loading} disabled={uploading} onClick={handleSubmit}>
