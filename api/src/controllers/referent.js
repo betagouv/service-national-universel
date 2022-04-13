@@ -921,6 +921,12 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
           VALIDATED: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_VALIDATED,
         };
 
+        let cc = [];
+        if (young.parent1Email && young.parent1FirstName && young.parent1LastName)
+          cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+        if (young.parent2Email && young.parent2FirstName && young.parent2LastName)
+          cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+
         await sendTemplate(statusToMail[value[`${document}FilesStatus`]], {
           emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
           params: { type_document: translateFileStatusPhase1(document), modif: value[`${document}FilesComment`] },

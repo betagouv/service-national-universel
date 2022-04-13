@@ -608,12 +608,13 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       missionName: Joi.string().allow(null, ""),
       structureName: Joi.string().allow(null, ""),
       cta: Joi.string().allow(null, ""),
+      type_document: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     // eslint-disable-next-line no-unused-vars
-    const { id, template, message, prevStatus, missionName, structureName, cta } = value;
+    const { id, template, message, prevStatus, missionName, structureName, cta, type_document } = value;
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -631,7 +632,9 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION ||
       template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST ||
       template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED ||
-      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED
+      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED ||
+      template === SENDINBLUE_TEMPLATES.young.PHASE_1_FOLLOW_UP_MEDICAL_FILE ||
+      template === SENDINBLUE_TEMPLATES.young.PHASE_1_FOLLOW_UP_DOCUMENT
     ) {
       if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
       if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
@@ -639,7 +642,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
 
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName },
+      params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName, type_document },
       cc: cc,
     });
 
@@ -835,9 +838,13 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     await young.save({ fromUser: req.user });
 
     if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
+      let cc = [];
+      if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+      if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
       await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: { type_document: translateFileStatusPhase1(document) },
+        cc,
       });
     }
 

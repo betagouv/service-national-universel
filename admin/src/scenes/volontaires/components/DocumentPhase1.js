@@ -7,7 +7,7 @@ import Documents from "../components/Documents";
 import DndFileInput from "../../../components/dndFileInput";
 import { Formik } from "formik";
 
-import { FILE_STATUS_PHASE1, translateFileStatusPhase1, translate } from "../../../utils";
+import { FILE_STATUS_PHASE1, translateFileStatusPhase1, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 
 export default function DocumentPhase1(props) {
@@ -34,16 +34,32 @@ export default function DocumentPhase1(props) {
     DOWNLOADED: { cohesionStayMedicalFileReceived: "false", cohesionStayMedicalFileDownload: "true" },
   };
 
-  const FILE_TRANSLATION = {
-    autoTestPCR: "utilisation d'autotest",
-    imageRight: "droit a l'image",
-    rules: "règlement interieur",
-  };
-
   const updateYoung = async () => {
     const { data } = await api.get(`/referent/young/${young._id}`);
     if (data) setYoung(data);
     setLoading(false);
+  };
+
+  const handleEmailClick = async (view) => {
+    setLoading(true);
+    let template;
+    let body = {};
+    if (["autoTestPCR", "imageRight", "rules"].includes(view)) {
+      template = SENDINBLUE_TEMPLATES.young.PHASE_1_FOLLOW_UP_DOCUMENT;
+      body = { type_document: translateFileStatusPhase1(view) };
+    } else if (view === "cohesionStayMedical") {
+      template = SENDINBLUE_TEMPLATES.young.PHASE_1_FOLLOW_UP_MEDICAL_FILE;
+    }
+
+    try {
+      const { ok } = await api.post(`/young/${young._id}/email/${template}`, body);
+      if (!ok) return toastr.error("Une erreur s'est produite lors de la relance du volontaire");
+      toastr.success("Relance du volontaire envoyée avec succès");
+      setLoading(false);
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oups, une erreur est survenue lors de l'envoie de la relance :", translate(e.code));
+    }
   };
 
   useEffect(() => {
@@ -106,7 +122,7 @@ export default function DocumentPhase1(props) {
           setState(name, value);
           handleChange({ value, name, correctionMessage });
         },
-        title: `Vous êtes sur le point de demander la correction du document ${FILE_TRANSLATION[name]}`,
+        title: `Vous êtes sur le point de demander la correction du document ${translateFileStatusPhase1(name)}`,
         message: `Car celui n’est pas conforme. Merci de préciser ci-dessous les corrections à apporter. 
         Une fois le message validé, il sera transmis par mail à ${young.firstName} ${young.lastName} (${young.email}).`,
       });
@@ -153,6 +169,11 @@ export default function DocumentPhase1(props) {
               </option>
             ))}
           </select>
+          {statusCohesionStayMedical === "TO_DOWNLOAD" && (
+            <button disabled={loading} className="border rounded-lg border-8 m-2 px-4 py-2" onClick={() => handleEmailClick("cohesionStayMedical")}>
+              Relancer le volontaire
+            </button>
+          )}
         </div>
       </Col>
       <Col md={6} style={{ borderBottom: "2px solid #f4f5f7" }}>
@@ -200,7 +221,7 @@ export default function DocumentPhase1(props) {
                     ]}
                   />
                   <Documents>
-                    <h4>Formulaire de consentement d&apos;autotest PCR</h4>
+                    <h4>Formulaire de consentement droit a l'image</h4>
                     <DndFileInput
                       placeholder="un document justificatif"
                       errorMessage="Vous devez téléverser un document justificatif"
@@ -227,6 +248,11 @@ export default function DocumentPhase1(props) {
               </>
             )}
           </Formik>
+          {statusImageRight === FILE_STATUS_PHASE1.TO_UPLOAD && (
+            <button disabled={loading} className="border rounded-lg border-8 m-2 px-4 py-2" onClick={() => handleEmailClick("imageRight")}>
+              Relancer le volontaire
+            </button>
+          )}
         </div>
       </Col>
       <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
@@ -299,6 +325,11 @@ export default function DocumentPhase1(props) {
               </>
             )}
           </Formik>
+          {statusAutoTestPCR === FILE_STATUS_PHASE1.TO_UPLOAD && (
+            <button disabled={loading} className="border rounded-lg border-8 m-2 px-4 py-2" onClick={() => handleEmailClick("autoTestPCR")}>
+              Relancer le volontaire
+            </button>
+          )}
         </div>
       </Col>
       <Col md={6}>
@@ -358,6 +389,11 @@ export default function DocumentPhase1(props) {
               </>
             )}
           </Formik>
+          {statusRules === FILE_STATUS_PHASE1.TO_UPLOAD && (
+            <button disabled={loading} className="border rounded-lg border-8 m-2 px-4 py-2" onClick={() => handleEmailClick("rules")}>
+              Relancer le volontaire
+            </button>
+          )}
         </div>
       </Col>
       <ModalConfirmWithMessage
