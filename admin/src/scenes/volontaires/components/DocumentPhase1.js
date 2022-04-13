@@ -59,6 +59,7 @@ export default function DocumentPhase1(props) {
     } catch (e) {
       console.log(e);
       toastr.error("Oups, une erreur est survenue lors de l'envoie de la relance :", translate(e.code));
+      setLoading(false);
     }
   };
 
