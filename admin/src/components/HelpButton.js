@@ -42,7 +42,7 @@ export default function HelpButton() {
       },
       {
         label: "Forum collaboratif - Osmose",
-        url: `${adminURL}/boite-de-reception`,
+        url: "https://osmose.numerique.gouv.fr/jcms/c_2075355/fr/service-national-universel",
       },
     ],
     referent_region: [
@@ -60,7 +60,7 @@ export default function HelpButton() {
       },
       {
         label: "Forum collaboratif - Osmose",
-        url: "",
+        url: "https://osmose.numerique.gouv.fr/jcms/c_2075355/fr/service-national-universel",
       },
     ],
     head_center: [
