@@ -160,6 +160,7 @@ const Schema = new mongoose.Schema({
       "Police",
       "Gendarmerie",
       "Armée",
+      "Armées",
     ],
     documentation: {
       description: "Statut juridique",
