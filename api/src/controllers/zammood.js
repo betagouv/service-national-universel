@@ -62,7 +62,8 @@ router.post("/ticket", passport.authenticate("referent", { session: false, failW
     const missionsLink = `${ADMIN_URL}/structure/${req.user.structureId}/missions`;
     const centerLink = `${ADMIN_URL}/centre/${req.user.cohesionCenterId}`;
     const profilLink = `${ADMIN_URL}/user/${req.user._id}`;
-    const departmentReferentPhase2Link = `${ADMIN_URL}/user/${departmentReferentPhase2._id}`;
+    const departmentReferentPhase2Link = "";
+    if (departmentReferentPhase2) departmentReferentPhase2Link = `${ADMIN_URL}/user/${departmentReferentPhase2._id}`;
 
     const userAttributes = [
       { name: "date de création", value: req.user.createdAt },
@@ -73,7 +74,7 @@ router.post("/ticket", passport.authenticate("referent", { session: false, failW
     if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
       userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
       userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
-      userAttributes.push({ name: "contact référent phase 2", value: departmentReferentPhase2Link });
+      if (departmentReferentPhase2) userAttributes.push({ name: "lien vers référent phase 2", value: departmentReferentPhase2Link });
     }
     if (req.user.role === ROLES.HEAD_CENTER) {
       userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
