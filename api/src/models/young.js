@@ -91,7 +91,7 @@ const Schema = new mongoose.Schema({
   },
   originalCohort: {
     type: String,
-    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019"],
+    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019", "à venir"],
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
     },
