@@ -1,3 +1,15 @@
+# [1.72.0](https://github.com/betagouv/service-national-universel/compare/v1.71.0...v1.72.0) (2022-04-14)
+
+
+### Bug Fixes
+
+* **admin:** add profile link & departmentReferentPhase2Link to zammood ([#1477](https://github.com/betagouv/service-national-universel/issues/1477)) ([de1c858](https://github.com/betagouv/service-national-universel/commit/de1c858380e9d14483fb4e2a59d73a1a816f0fe4))
+
+
+### Features
+
+* **admin,app:** cohorte `à venir` ([#1450](https://github.com/betagouv/service-national-universel/issues/1450)) ([57608e1](https://github.com/betagouv/service-national-universel/commit/57608e1ffb77e84a00f119b41d1c805b1f3154e4))
+
 # [1.71.0](https://github.com/betagouv/service-national-universel/compare/v1.70.0...v1.71.0) (2022-04-13)
 
 
