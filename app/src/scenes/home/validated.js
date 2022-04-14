@@ -29,10 +29,12 @@ export default function Validated() {
             <section className="mt-6 mb-10">
               <strong className="text-xl mb-4 text-[#242526]">Félicitations, vous allez pouvoir débuter prochainement votre parcours SNU.</strong>
               <br />
-              <article className="flex text-sm leading-5 mt-4">
-                <img src={clock} alt="clock icon" className="w-10 h-10 mr-2" />
-                <p>Vous êtes actuellement en attente d&apos;affectation à un lieu pour votre séjour de cohésion.</p>
-              </article>
+              {young.statusPhase1 === "WAITING_AFFECTATION" && (
+                <article className="flex text-sm leading-5 mt-4">
+                  <img src={clock} alt="clock icon" className="w-10 h-10 mr-2" />
+                  <p>Vous êtes actuellement en attente d&apos;affectation à un lieu pour votre séjour de cohésion.</p>
+                </article>
+              )}
             </section>
             <Link to="/phase1">
               <DownloadButton text="Fournir mes documents justificatifs" />
