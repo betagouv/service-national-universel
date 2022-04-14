@@ -81,6 +81,7 @@ export default function Index({ onChangeFilter = () => {} }) {
               <MultiSelect
                 label="Cohorte(s)"
                 options={[
+                  { value: "à venir", label: "A venir" },
                   { value: "2019", label: "2019" },
                   { value: "2020", label: "2020" },
                   { value: "2021", label: "2021" },
