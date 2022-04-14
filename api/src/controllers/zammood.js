@@ -62,7 +62,7 @@ router.post("/ticket", passport.authenticate("referent", { session: false, failW
     const missionsLink = `${ADMIN_URL}/structure/${req.user.structureId}/missions`;
     const centerLink = `${ADMIN_URL}/centre/${req.user.cohesionCenterId}`;
     const profilLink = `${ADMIN_URL}/user/${req.user._id}`;
-    const departmentReferentPhase2Link = "";
+    let departmentReferentPhase2Link = "";
     if (departmentReferentPhase2) departmentReferentPhase2Link = `${ADMIN_URL}/user/${departmentReferentPhase2._id}`;
 
     const userAttributes = [
