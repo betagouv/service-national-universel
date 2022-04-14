@@ -367,11 +367,14 @@ const updateStatusPhase2 = async (young) => {
   } else if (Number(young.phase2NumberHoursDone) >= 84) {
     // We change young status to DONE if he has 84 hours of phase 2 done.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED });
-    await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED, {
+    let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
+    let cc = youngEmailNeedCc(template, young);
+    await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
         cta: `${APP_URL}/phase2`,
       },
+      cc,
     });
   } else if (activeApplication.length) {
     // We change young status to IN_PROGRESS if he has an 'active' application.
@@ -542,6 +545,11 @@ const updateApplication = async (mission, fromUser = null) => {
     await application.save({ fromUser });
 
     if (sendinblueTemplate) {
+      const young = await YoungModel.findById(application.youngId);
+      let cc = [];
+      if (young) {
+        cc = youngEmailNeedCc(template, young);
+      }
       await sendTemplate(sendinblueTemplate, {
         emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
         params: {
@@ -549,9 +557,20 @@ const updateApplication = async (mission, fromUser = null) => {
           missionName: mission.name,
           message: mission.statusComment,
         },
+        cc,
       });
     }
   }
+};
+
+const youngEmailNeedCc = (template, young) => {
+  let cc = [];
+  if (Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
+    if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+    if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+  }
+  console.log("cc", cc);
+  return cc;
 };
 
 const ERRORS = {
@@ -645,4 +664,5 @@ module.exports = {
   updateApplication,
   FILE_STATUS_PHASE1,
   translateFileStatusPhase1,
+  youngEmailNeedCc,
 };

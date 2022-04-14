@@ -6,7 +6,7 @@ const { capture } = require("../../sentry");
 const renderFromHtml = require("../../htmlToPdf");
 const YoungObject = require("../../models/young");
 const ContractObject = require("../../models/contract");
-const { ERRORS, isYoung, isReferent } = require("../../utils");
+const { ERRORS, isYoung, isReferent, youngEmailNeedCc } = require("../../utils");
 const certificate = require("../../templates/certificate");
 const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
@@ -129,10 +129,14 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
     const content = buffer.toString("base64");
 
-    const mail = await sendTemplate(SENDINBLUE_TEMPLATES.young.DOCUMENT, {
+    let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
+    let cc = youngEmailNeedCc(emailTemplate, young);
+
+    const mail = await sendTemplate(emailTemplate, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       attachment: [{ content, name: fileName }],
       params: { object, message },
+      cc,
     });
     res.status(200).send({ ok: true, data: mail });
   } catch (e) {

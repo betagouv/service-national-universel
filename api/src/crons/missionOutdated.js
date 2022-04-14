@@ -4,10 +4,12 @@ const { capture } = require("../sentry");
 const Mission = require("../models/mission");
 const Referent = require("../models/referent");
 const ApplicationObject = require("../models/application");
+const YoungObject = require("../models/young");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
 const { ADMIN_URL, APP_URL } = require("../config");
+const { youngEmailNeedCc } = require("../utils");
 
 const clean = async () => {
   let countAutoArchived = 0;
@@ -81,6 +83,11 @@ const cancelApplications = async (mission) => {
     await application.save();
 
     if (sendinblueTemplate) {
+      let cc = [];
+      const young = await YoungObject.findById(application.youngId);
+      if (young) {
+        cc = youngEmailNeedCc(template, young);
+      }
       await sendTemplate(sendinblueTemplate, {
         emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
         params: {
@@ -88,6 +95,7 @@ const cancelApplications = async (mission) => {
           missionName: mission.name,
           message: mission.statusComment,
         },
+        cc,
       });
     }
   }
