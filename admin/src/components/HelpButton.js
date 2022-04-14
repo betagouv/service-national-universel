@@ -111,7 +111,7 @@ export default function HelpButton() {
 
   return (
     <div
-      className="fixed bottom-10 left-10 justify-center flex z-20 bg-snu-purple-900"
+      className="justify-center flex bg-snu-purple-900"
       onClick={() => {
         handleOpen();
         plausibleEvent("Menu/CTA - Besoin Aide");
@@ -121,7 +121,7 @@ export default function HelpButton() {
         activeClassName="flex bg-snu-purple-300 p-2">
         <QuestionMark class="h-6 w-6 flex mr-2 " />
         <div>
-          <div className=" font-normal text-sm text-center  ">Besoin d&apos;aide ??</div>
+          <div className="font-normal text-sm text-center">Besoin d&apos;aide ?</div>
           <div className="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
         </div>
       </div>

@@ -9,6 +9,7 @@ import api from "../../services/api";
 import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
 import { environment } from "../../config";
+import HelpButton from "../HelpButton";
 
 const DrawerTab = ({ title, to, onClick, beta }) => {
   if (environment === "production" && beta) return null;
@@ -49,6 +50,7 @@ function responsible({ user, onClick }) {
       <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <HelpButton />
     </>
   );
 }
@@ -60,6 +62,7 @@ function supervisor({ onClick }) {
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <HelpButton />
     </>
   );
 }
@@ -97,6 +100,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           </>
         )}
       </DrawerTabWithIcons>
+      <HelpButton />
     </>
   );
 }
@@ -133,6 +137,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           </>
         )}
       </DrawerTabWithIcons>
+      <HelpButton />
     </>
   );
 }
@@ -145,6 +150,7 @@ function headCenter({ onClick, user }) {
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <BlankSeparator />
+      <HelpButton />
     </>
   );
 }
@@ -153,6 +159,7 @@ function visitor({ onClick }) {
   return (
     <>
       <BlankSeparator />
+      <HelpButton />
     </>
   );
 }
@@ -196,7 +203,7 @@ const Drawer = (props) => {
   if (!user) return <div />;
 
   return (
-    <div className="min-h-screen max-w-[220px] bg-snu-purple-900 text-white fixed z-10 overflow-y-auto bottom-0 top-[56px] pb-4">
+    <div className="min-h-screen w-[220px] bg-snu-purple-900 text-white fixed z-10 overflow-y-auto bottom-0 top-[56px] pb-4">
       {!isOpen ? (
         <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
           <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
