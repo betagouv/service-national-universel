@@ -171,6 +171,8 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const referent = await ReferentObject.findById(mission.tutorId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const young = await YoungObject.findById(application.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && req.user._id.toString() !== application.youngId) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
