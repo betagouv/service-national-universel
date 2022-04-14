@@ -38,6 +38,7 @@ export default function Signin() {
                   const { user, token } = await api.post(`/referent/signin`, { email, password });
                   if (token) api.setToken(token);
                   if (user) {
+                    if (redirect?.startsWith("http")) return (window.location.href = redirect);
                     dispatch(setUser(user));
                   }
                 } catch (e) {
