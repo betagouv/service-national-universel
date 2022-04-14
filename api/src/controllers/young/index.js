@@ -286,7 +286,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
     await data.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young.VALIDATE_PHASE3;
-    let cc = youngEmailNeedCc(template, young);
+    let cc = youngEmailNeedCc(template, data);
     await sendTemplate(template, {
       emailTo: [{ name: `${data.firstName} ${data.lastName}`, email: data.email }],
       params: { cta: `${config.APP_URL}/phase3` },
