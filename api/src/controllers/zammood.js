@@ -9,6 +9,8 @@ const zammood = require("../zammood");
 const { ERRORS } = require("../utils");
 const { ROLES } = require("snu-lib/roles");
 const { ADMIN_URL } = require("../config.js");
+const ReferentObject = require("../models/referent");
+
 
 router.get("/tickets", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -52,17 +54,27 @@ router.post("/ticket", passport.authenticate("referent", { session: false, failW
       .validate(obj);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { subject, message, clientId } = value;
+    const departmentReferentPhase2 = await ReferentObject.findOne({
+      department: req.user.department,
+      subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+    });
     const structureLink = `${ADMIN_URL}/structure/${req.user.structureId}`;
     const missionsLink = `${ADMIN_URL}/structure/${req.user.structureId}/missions`;
     const centerLink = `${ADMIN_URL}/centre/${req.user.cohesionCenterId}`;
+    const profilLink = `${ADMIN_URL}/user/${req.user._id}`;
+    let departmentReferentPhase2Link = "";
+    if (departmentReferentPhase2) departmentReferentPhase2Link = `${ADMIN_URL}/user/${departmentReferentPhase2._id}`;
+
     const userAttributes = [
       { name: "date de création", value: req.user.createdAt },
       { name: "dernière connexion", value: req.user.lastLoginAt },
       { name: "role", value: req.user.role },
+      { name: "lien vers profil", value: profilLink },
     ];
     if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
       userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
       userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
+      if (departmentReferentPhase2) userAttributes.push({ name: "lien vers référent phase 2", value: departmentReferentPhase2Link });
     }
     if (req.user.role === ROLES.HEAD_CENTER) {
       userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
@@ -174,3 +186,4 @@ router.post("/ticket/:id/message", passport.authenticate("referent", { session: 
 });
 
 module.exports = router;
+
