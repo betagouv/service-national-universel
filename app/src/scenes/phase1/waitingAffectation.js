@@ -10,6 +10,7 @@ import { youngCanChangeSession } from "snu-lib";
 import Container from "./components/Container";
 import hero from "../../assets/hero.png";
 import clock from "../../assets/clock.svg";
+import edit from "../../assets/editIcon.svg";
 
 export default function WaitingAffectation({ young }) {
   return (
@@ -21,15 +22,19 @@ export default function WaitingAffectation({ young }) {
               <h1 className="text-5xl mb-4">
                 Mon séjour de cohésion
                 <br />
-                <strong>{translateCohort(young.cohort)}</strong>
+                <strong className="flex items-center">
+                  {translateCohort(young.cohort)}{" "}
+                  {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? (
+                    <Link to="/changer-de-sejour">
+                      <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
+                    </Link>
+                  ) : null}
+                </strong>
               </h1>
               <p className="text-gray-600 text-base md:text-xl">
                 Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région pour créer ainsi des
                 liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
               </p>
-              {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? (
-                <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button>
-              ) : null}
             </article>
             <img src={hero} />
           </section>
@@ -53,8 +58,6 @@ export default function WaitingAffectation({ young }) {
           <div className="thumb" />
         </>
       </Container>
-      <h2 className="text-stone-500 m-auto text-center">Documents à renseigner</h2>
-      <NextStep />
     </>
   );
 }

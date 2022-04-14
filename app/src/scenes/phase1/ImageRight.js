@@ -89,8 +89,8 @@ export default function ImageRight({ isOpen, onCancel }) {
                 }}>
                 {({ values, handleChange, handleSubmit, errors, touched }) => (
                   <>
-                    <FormGroup className="bg-gray-50 rounded-lg px-2.5 py-4 mt-2">
-                      <label className="text-gray-900 ml-1">Informations du représentant légal n°1</label>
+                    <FormGroup className="bg-gray-50 rounded-lg px-2.5 py-4 mt-2 md:flex md:items-center md:justify-center">
+                      <label className="text-gray-900 ml-1 md:mr-5">Informations du représentant légal n°1</label>
                       <Row>
                         <Col md={6}>
                           <Field
@@ -117,8 +117,8 @@ export default function ImageRight({ isOpen, onCancel }) {
                       </Row>
                     </FormGroup>
                     {values.firstName2 ? (
-                      <FormGroup className="bg-gray-50 rounded-lg px-2 py-4 mt-2">
-                        <label className="text-gray-900 ml-1">Informations du représentant légal n°2</label>
+                      <FormGroup className="bg-gray-50 rounded-lg px-2.5 py-4 mt-2 md:flex md:items-center md:justify-center">
+                        <label className="text-gray-900 ml-1 md:mr-5">Informations du représentant légal n°2</label>
                         <Row>
                           <Col md={6}>
                             <Field
@@ -145,7 +145,7 @@ export default function ImageRight({ isOpen, onCancel }) {
                         </Row>
                       </FormGroup>
                     ) : null}
-                    <section className="bg-gray-50 rounded-lg px-2.5 py-4 mt-2">
+                    <section className="bg-gray-50 rounded-lg px-2.5 py-4 mt-2 text-center">
                       <FormRow className="flex items-center justify-center">
                         <Field
                           id="imageRight_true"
@@ -173,10 +173,9 @@ export default function ImageRight({ isOpen, onCancel }) {
                         <label className="mb-0 text-gray-900 text-base ml-2" htmlFor="imageRight_false">
                           {isPlural ? "Nous n'autorisons pas" : "Je n'autorise pas"}
                         </label>
-
-                        <ErrorMessage errors={errors} touched={touched} name="imageRight" />
                       </FormRow>
-                      <p className="text-gray-500 text-center">
+                      <ErrorMessage errors={errors} touched={touched} name="imageRight" />
+                      <p className="text-gray-500">
                         le Ministère de l&apos;Education Nationale, de la Jeunesse et des Sports, ses partenaires et les journalistes à enregistrer,{" "}
                         <strong>reproduire et représenter l&apos;image et/ou la voix du volontaire</strong> représenté en partie ou en intégralité, ensemble ou séparément, sur
                         leurs publications respectives.
@@ -188,20 +187,24 @@ export default function ImageRight({ isOpen, onCancel }) {
                       {/* <Title>
                     <span>Vous pouvez signer le formulaire de deux façons</span>
                   </Title> */}
-                      <section>
+                      <section className="flex flex-col items-center lg:flex-row lg:justify-center mt-2">
                         {/* <BackButton>
                             <DownloadFormButton young={values} uri="imageRight">
                               Télécharger le formulaire pré-rempli
                             </DownloadFormButton>
                           </BackButton> */}
-                        <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/droit_a_l_image_2022.pdf" target="_blank" rel="noreferrer">
-                          <DownloadButton text="Télécharger le modèle à remplir" />
-                        </a>
+                        <div className="bg-gray-50 rounded-lg px-2.5 py-4 sm:my-2 text-center w-full lg:w-[50%] lg:mt-0">
+                          <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/droit_a_l_image_2022.pdf" target="_blank" rel="noreferrer">
+                            <DownloadButton text="Télécharger le modèle à remplir" tw="mx-auto mb-2" />
+                          </a>
+                          <p className="text-sm text-gray-600 mb-3">Puis téléversez le formulaire rempli</p>
+                        </div>
                         <DndFileInput
                           placeholder="le formulaire"
                           errorMessage="Vous devez téléverser le formulaire"
                           value={values.imageRightFiles}
                           name="imageRightFiles"
+                          className="lg:w-[50%] flex flex-col justify-center items-center lg:mt-0"
                           onChange={async (e) => {
                             setUploading(true);
                             const res = await api.uploadFile("/young/file/imageRightFiles", e.target.files);
@@ -243,11 +246,9 @@ export default function ImageRight({ isOpen, onCancel }) {
                     </SignBox> */}
                     <Footer className="noPrint">
                       <Title />
-                      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                        <LoadingButton loading={loading} disabled={uploading} onClick={handleSubmit}>
-                          Valider le consentement
-                        </LoadingButton>
-                      </div>
+                      <LoadingButton loading={loading} disabled={uploading} onClick={handleSubmit}>
+                        Valider le consentement
+                      </LoadingButton>
                       {Object.keys(errors).length ? <h3>Vous ne pouvez pas valider le formulaire car tous les champs ne sont pas correctement renseignés.</h3> : null}
                     </Footer>
                   </>

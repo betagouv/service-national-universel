@@ -3,6 +3,7 @@ import ImageRight from "./ImageRight";
 import AutoTest from "./AutoTest";
 import MedicalFile from "./MedicalFile";
 import Rules from "./Rules";
+import styled from "styled-components";
 
 import { useSelector } from "react-redux";
 import { HeroContainer, Hero } from "../../components/Content";
@@ -17,10 +18,6 @@ export default function DocumentsPhase1({ young }) {
   const [isOpenAut, setIsOpenAut] = useState(false);
   const [isOpenReg, setIsOpenReg] = useState(false);
 
-  // useEffect(() => {
-  //   console.log(isOpenReg);
-  // }, [isOpenReg]);
-
   useEffect(() => {
     if (young) {
       let nb = 0;
@@ -29,7 +26,7 @@ export default function DocumentsPhase1({ young }) {
       if (young.rulesFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
       if (young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
       setDocuments(nb);
-      console.log(young);
+      console.log(young.autoTestPCRFilesStatus);
     }
   }, []);
 
@@ -40,40 +37,45 @@ export default function DocumentsPhase1({ young }) {
           <h3>
             Mes documents justificatifs <strong>({documents}/4)</strong>
           </h3>
-          <section className="flex justify-between overflow-scroll">
+          <ScrollSection className="flex justify-between overflow-x-auto scrollbar-x pt-4">
             <FileCard
               name="Fiche sanitaire"
               icon="sanitaire"
               filled={young.cohesionStayMedicalFileDownload === "true"}
-              bgColor={young.cohesionStayMedicalFileDownload === "true" ? "bg-indigo-700" : "bg-white"}
-              status={young.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : young.cohesionStayMedicalFileDownload === "true" ? "Téléchargée" : "Non Téléchargée"}
+              color={young.cohesionStayMedicalFileDownload === "true" ? "bg-white text-indigo-700" : "bg-indigo-700 text-white"}
+              status={
+                young.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : young.cohesionStayMedicalFileDownload === "true" ? "Télécharger de nouveau" : "Non Téléchargée"
+              }
               onClick={() => setIsOpenMed(true)}
             />
             <FileCard
               name="Droit à l'image"
               icon="image"
               filled={young.imageRightFilesStatus !== "TO_UPLOAD"}
+              color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.imageRightFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
               status={translateFileStatusPhase1(young.imageRightFilesStatus)}
-              correction={young.imageRightFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.imageRightFilesComment : ""}
+              correction={young.imageRightFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.imageRightFilesComment : ""}
               onClick={() => setIsOpenIm(true)}
             />
             <FileCard
               name="Utilisation d'autotest"
               icon="autotest"
-              filled={young.rulesFilesStatus !== "TO_UPLOAD"}
-              status={translateFileStatusPhase1(young.rulesFilesStatus)}
-              correction={young.rulesFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.rulesFilesComment : ""}
+              filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"}
+              color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.rulesFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
+              status={translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
+              correction={young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.autoTestPCRFilesComment : ""}
               onClick={() => setIsOpenAut(true)}
             />
             <FileCard
               name="Règlement intérieur"
               icon="reglement"
-              filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"}
-              status={translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
-              correction={young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? " -> Message : " + young.autoTestPCRFilesComment : ""}
+              filled={young.rulesFilesStatus !== "TO_UPLOAD"}
+              color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.autoTestPCRFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
+              status={translateFileStatusPhase1(young.rulesFilesStatus)}
+              correction={young.rulesFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.rulesFilesComment : ""}
               onClick={() => setIsOpenReg(true)}
             />
-          </section>
+          </ScrollSection>
         </>
       ) : null}
       <MedicalFile isOpen={isOpenMed} onCancel={() => setIsOpenMed(false)} />
@@ -83,3 +85,17 @@ export default function DocumentsPhase1({ young }) {
     </>
   );
 }
+
+const ScrollSection = styled.section`
+  ::-webkit-scrollbar {
+    height: 10px; /* height of horizontal scrollbar ← You're missing this */
+    border: 2px solid #fff;
+    background: rgb(249 250 251);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    height: 5px;
+    background-color: #d5d5d5;
+    border-radius: 10px;
+  }
+`;

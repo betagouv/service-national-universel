@@ -1,8 +1,8 @@
 import React from "react";
 
-export default function DownloadButton({ text, icon, ...rest }) {
+export default function DownloadButton({ text, icon, tw, ...rest }) {
   return (
-    <button className="flex items-center bg-indigo-700 border-2 border-indigo-700 rounded-lg px-4 py-2.5 text-white mt-4" {...rest}>
+    <button className={`flex items-center bg-indigo-700 border-2 border-indigo-700 rounded-lg px-4 py-2.5 text-white mt-4 ${tw}`} {...rest}>
       {icon && (
         <svg className="mr-2.5" width="15" height="16" viewBox="0 0 15 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
