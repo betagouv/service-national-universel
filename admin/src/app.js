@@ -37,8 +37,6 @@ import Footer from "./components/footer";
 import Loader from "./components/Loader";
 import Zammad from "./components/Zammad";
 
-import Help from "./components/HelpButton";
-
 import api from "./services/api";
 
 import { SENTRY_URL, environment, adminURL } from "./config";
@@ -180,7 +178,6 @@ const Home = () => {
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
-      <Help />
     </div>
   );
 };
