@@ -165,10 +165,11 @@ router.post("/ticket/:id/message", passport.authenticate("referent", { session: 
         clientId: req.params.id,
       }),
     });
-    if (!response.ok) slack.error({ title: "Create message Zammod", text: JSON.stringify(e) });
+    if (!response.ok) return res.status(400).send({ ok: false, code: response });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
+    slack.error({ title: "Create message Zammod", text: JSON.stringify(error) });
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
