@@ -24,7 +24,7 @@ router.get("/tickets", passport.authenticate("referent", { session: false, failW
 });
 
 // Get one tickets with its messages.
-router.get("/ticket/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { ok, data } = await zammood.api(`/v0/ticket?clientId=${req.params.id}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -38,7 +38,7 @@ router.get("/ticket/:id", passport.authenticate("referent", { session: false, fa
 });
 
 // Create a new ticket while authenticated
-router.post("/ticket", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const obj = {
       clientId: req.body.clientId,
@@ -164,8 +164,24 @@ router.post("/ticket/form", async (req, res) => {
   }
 });
 
-router.post("/ticket/:id/message", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    console.log("req.user", req.user);
+    const structureLink = `${ADMIN_URL}/structure/${req.user.structureId}`;
+    const missionsLink = `${ADMIN_URL}/structure/${req.user.structureId}/missions`;
+    const centerLink = `${ADMIN_URL}/centre/${req.user.cohesionCenterId}`;
+    const userAttributes = [
+      { name: "date de création", value: req.user.createdAt },
+      { name: "dernière connexion", value: req.user.lastLoginAt },
+      { name: "role", value: req.user.role },
+    ];
+    if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
+      userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
+      userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
+    }
+    if (req.user.role === ROLES.HEAD_CENTER) {
+      userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
+    }
     const response = await zammood.api("/v0/message", {
       method: "POST",
       credentials: "include",
@@ -175,9 +191,10 @@ router.post("/ticket/:id/message", passport.authenticate("referent", { session: 
         email: req.user.email,
         message: req.body.message,
         clientId: req.params.id,
+        attributes: userAttributes,
       }),
     });
-    if (!response.ok) slack.error({ title: "Create message Zammod", text: JSON.stringify(e) });
+    if (!response.ok) slack.error({ title: "Create message Zammod", text: JSON.stringify(response.code) });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
