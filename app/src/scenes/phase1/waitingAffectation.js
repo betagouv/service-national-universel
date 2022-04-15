@@ -19,7 +19,7 @@ export default function WaitingAffectation({ young }) {
         <Container>
           <section className="flex flex-col-reverse items-center lg:flex-row lg:items-center">
             <article>
-              <h1 className="text-5xl mb-4">
+              <h1 className="text-3xl md:text-5xl mb-4">
                 Mon séjour de cohésion
                 <br />
                 <strong className="flex items-center">

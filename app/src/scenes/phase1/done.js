@@ -24,7 +24,7 @@ export default function Done() {
             <article className="flex items-center">
               <img className="mr-4" src={trophy} alt="trophy" />
               <div>
-                <h1 className="text-5xl mb-4">
+                <h1 className="text-3xl md:text-5xl mb-4">
                   <strong>{young.firstName}, vous avez validé votre Phase 1 !</strong>
                 </h1>
                 <p className="text-[#738297]">Bravo pour votre engagement !</p>
