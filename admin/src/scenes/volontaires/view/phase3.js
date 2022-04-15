@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
@@ -7,12 +7,28 @@ import WrapperPhase3 from "./wrapper";
 import SelectStatus from "../../../components/selectStatus";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
+import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
 export default function Phase3({ young, onChange }) {
+
+  const [edit, setEdit] = useState(false)
+  const [information, setInformation] = useState({
+    newStructureName: young.phase3StructureName,
+    newMissionDescription: young.phase3MissionDescription,
+    newTutorFirstName: young.phase3TutorFirstName,
+    newTutorLastName: young.phase3TutorLastName,
+    newTutorEmail: young.phase3TutorEmail,
+    newTutorPhone: young.phase3TutorPhone,
+  })
+
   const getText = () => {
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.WAITING_VALIDATION) return "Le tuteur n'a pas encore validé la mission";
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) return "Le tuteur a validé la mission";
   };
+
+  const handleSubmit = () => {
+    console.log("submit")
+  }
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -33,25 +49,44 @@ export default function Phase3({ young, onChange }) {
           </Bloc>
         </Box>
         {young.statusPhase3 !== YOUNG_STATUS_PHASE3.WAITING_REALISATION ? (
-          <Box>
-            <Row>
-              <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-                <Bloc title="Mission de phase 3 réalisée">
-                  <p style={{ flex: 1 }}>{getText()}</p>
-                  <Details title="Structure" value={young.phase3StructureName} />
-                  <Details title="Descriptif" value={young.phase3MissionDescription} />
-                </Bloc>
-              </Col>
-              <Col md={6}>
-                <Bloc title="Tuteur">
-                  <Details title="Prénom" value={young.phase3TutorFirstName} />
-                  <Details title="Nom" value={young.phase3TutorLastName} />
-                  <Details title="E-mail" value={young.phase3TutorEmail} />
-                  <Details title="Téléphone" value={young.phase3TutorPhone} />
-                </Bloc>
-              </Col>
-            </Row>
-          </Box>
+          <>
+            <Box>
+              <form onSubmit={handleSubmit}>
+                <Row className="pl-8 pt-10  ">
+                  <Col>
+                    <BoxTitle>Mission de phase 3 réalisée</BoxTitle>
+                  </Col>
+                  <Col className="flex">
+                    <BoxTitle>Tuteur</BoxTitle>
+                  </Col>
+                </Row>
+                <Row className="pl-8 pb-2">
+                  <Col>
+                    <Details title="Structure" value={young.phase3StructureName} edit={edit} name={"newStructureName"} information={information} setInformation={setInformation} />
+                    <Details title="Descriptif" value={young.phase3MissionDescription} edit={edit} name={"MissionDescription"} information={information} setInformation={setInformation} />
+                  </Col>
+                  <Col>
+                    <Details title="Prénom" value={young.phase3TutorFirstName} edit={edit} name={"TutorFirstName"} information={information} setInformation={setInformation} />
+                    <Details title="Nom" value={young.phase3TutorLastName} edit={edit} name={"TutorLastName"} information={information} setInformation={setInformation} />
+                    <Details title="E-mail" value={young.phase3TutorEmail} edit={edit} name={"TutorEmail"} information={information} setInformation={setInformation} />
+                    <Details title="Téléphone" value={young.phase3TutorPhone} edit={edit} name={"TutorPhone"} information={information} setInformation={setInformation} />
+                  </Col>
+                </Row>
+                <Row className="pb-2 flex justify-center">
+                  {edit ? (
+                    <>
+                      <input type="submit" value="Envoyer" />
+                      {/* <PanelActionButton icon="close" title="Annuler" /> */}
+                      <div className="border" onClick={() => setEdit(!edit)}> Annuler </div>
+                    </>
+                  ) : (
+                    //<PanelActionButton icon="pencil" title="Modifier"/>
+                    <div className="border" onClick={() => setEdit(!edit)}> Modifier </div>
+                  )}
+                </Row>
+              </form>
+            </Box>
+          </>
         ) : null}
         {young.statusPhase3 === "VALIDATED" ? (
           <DownloadAttestationButton young={young} uri="3">
@@ -63,13 +98,18 @@ export default function Phase3({ young, onChange }) {
   );
 }
 
-const Details = ({ title, value }) => {
+const Details = ({ title, value, edit, name, information, setInformation }) => {
   if (!value) return <div />;
   if (typeof value === "function") value = value();
   return (
-    <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
+    <div className="flex p-2 items-center h-10">
+      <div className="w-1/4 ">{title}</div>
+      {edit ? (
+        <input type="text" placeholder={value} name={name} className="w-3/4 bg-brand-extraLightGrey rounded border mr-2" />
+      ) : (
+        <div className="w-3/4 mr-2">{value}</div>
+      )}
+
     </div>
   );
 };
