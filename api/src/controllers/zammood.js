@@ -166,7 +166,6 @@ router.post("/ticket/form", async (req, res) => {
 
 router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    console.log("req.user", req.user);
     const structureLink = `${ADMIN_URL}/structure/${req.user.structureId}`;
     const missionsLink = `${ADMIN_URL}/structure/${req.user.structureId}/missions`;
     const centerLink = `${ADMIN_URL}/centre/${req.user.cohesionCenterId}`;
