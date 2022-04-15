@@ -18,6 +18,7 @@ const { validateId, validateContract, validateOptionalId } = require("../utils/v
 const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
 const Joi = require("joi");
+const patches = require("./patches");
 
 async function createContract(data, fromUser) {
   const { sendMessage } = data;
@@ -248,6 +249,8 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
+
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, ContractObject));
 
 // Get a contract by its token.
 router.get("/token/:token", async (req, res) => {
