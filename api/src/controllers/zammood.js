@@ -6,7 +6,7 @@ const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const zammood = require("../zammood");
-const { ERRORS } = require("../utils");
+const { ERRORS, isYoung } = require("../utils");
 const { ROLES } = require("snu-lib/roles");
 const { ADMIN_URL } = require("../config.js");
 const ReferentObject = require("../models/referent");
@@ -61,10 +61,9 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     const structureLink = `${ADMIN_URL}/structure/${req.user.structureId}`;
     const missionsLink = `${ADMIN_URL}/structure/${req.user.structureId}/missions`;
     const centerLink = `${ADMIN_URL}/centre/${req.user.cohesionCenterId}`;
-    const profilLink = `${ADMIN_URL}/user/${req.user._id}`;
     let departmentReferentPhase2Link = "";
     if (departmentReferentPhase2) departmentReferentPhase2Link = `${ADMIN_URL}/user/${departmentReferentPhase2._id}`;
-
+    const profilLink = isYoung(req.user) ? `${ADMIN_URL}/volontaire/${req.user._id}` : `${ADMIN_URL}/user/${req.user._id}`;
     const userAttributes = [
       { name: "date de création", value: req.user.createdAt },
       { name: "dernière connexion", value: req.user.lastLoginAt },
@@ -169,14 +168,19 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
     const structureLink = `${ADMIN_URL}/structure/${req.user.structureId}`;
     const missionsLink = `${ADMIN_URL}/structure/${req.user.structureId}/missions`;
     const centerLink = `${ADMIN_URL}/centre/${req.user.cohesionCenterId}`;
+    let departmentReferentPhase2Link = "";
+    if (departmentReferentPhase2) departmentReferentPhase2Link = `${ADMIN_URL}/user/${departmentReferentPhase2._id}`;
+    const profilLink = isYoung(req.user) ? `${ADMIN_URL}/volontaire/${req.user._id}` : `${ADMIN_URL}/user/${req.user._id}`;
     const userAttributes = [
       { name: "date de création", value: req.user.createdAt },
       { name: "dernière connexion", value: req.user.lastLoginAt },
       { name: "role", value: req.user.role },
+      { name: "lien vers profil", value: profilLink },
     ];
     if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
       userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
       userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
+      if (departmentReferentPhase2) userAttributes.push({ name: "lien vers référent phase 2", value: departmentReferentPhase2Link });
     }
     if (req.user.role === ROLES.HEAD_CENTER) {
       userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
