@@ -290,7 +290,7 @@ export default function VolontaireList() {
                     title="Exporter les volontaires scolarisés dans le département"
                     defaultQuery={getExportQuery}
                     exportTitle="Volontaires"
-                    index="young-having-school-in-department"
+                    index="young-having-school-in-department/volontaires"
                     react={{ and: FILTERS }}
                     transform={async (data) => {
                       let all = data;
@@ -332,7 +332,7 @@ export default function VolontaireList() {
                     title="Exporter les volontaires scolarisés dans la région"
                     defaultQuery={getExportQuery}
                     exportTitle="Volontaires"
-                    index="young-having-school-in-region"
+                    index="young-having-school-in-region/volontaires"
                     react={{ and: FILTERS }}
                     transform={async (data) => {
                       let all = data;

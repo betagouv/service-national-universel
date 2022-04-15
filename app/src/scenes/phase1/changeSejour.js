@@ -9,6 +9,7 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { translate, translateCohort, HERO_IMAGES_LIST, SENDINBLUE_TEMPLATES } from "../../utils";
 import Loader from "../../components/Loader";
+import Badge from "../../components/Badge";
 import { setYoung } from "../../redux/auth/actions";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
@@ -140,6 +141,9 @@ export default function changeSejour() {
                                 </DropdownItem>
                               );
                             })}
+                          <DropdownItem className="dropdown-item" onClick={() => setNewSejour("à venir")}>
+                            Séjour à venir
+                          </DropdownItem>
                         </DropdownMenu>
                       </UncontrolledDropdown>
                       <a
@@ -199,7 +203,10 @@ export default function changeSejour() {
                         message={
                           <>
                             Êtes-vous sûr ? <br /> <br />
-                            Vous vous apprêtez à changer de séjour pour {newSejour}. Cette action est irréversible, souhaitez-vous confirmer cette action ? <br />
+                            Ancien séjour : <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={young.cohort} style={{ cursor: "default" }} />
+                            <br />
+                            Nouveau séjour : <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={translateCohort(newSejour)} style={{ cursor: "default" }} />
+                            <div className="text-xs mt-2">Cette action est irréversible, souhaitez-vous confirmer cette action ?</div>
                           </>
                         }
                         onCancel={() => setmodalConfirmControlOk(false)}

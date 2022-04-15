@@ -222,10 +222,13 @@ const BadgeCohort = ({ young, onChange }) => {
         isOpen={modalConfirmWithMessage}
         title="Veuillez éditer le message ci-dessous pour préciser le motif de changement de cohorte avant de l’envoyer"
         message={
-          <p>
-            Bonjour {young.firstName} {young.lastName},<br /> Votre changement de séjour pour le Service National Universel a été pris en compte.
-            <br /> Vous êtes maintenant positionné(e) sur le séjour se déroulant {translateCohort(newCohort)}.
-          </p>
+          <>
+            Bonjour {young.firstName} {young.lastName},<br />
+            Votre changement de séjour pour le Service National Universel a été pris en compte. <br />
+            Ancien séjour : <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={young.cohort} style={{ cursor: "default" }} />
+            <br />
+            Nouveau séjour : <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={translateCohort(newCohort)} style={{ cursor: "default" }} />
+          </>
         }
         onChange={() => setModalConfirmWithMessage(false)}
         onConfirm={handleChangeCohort}
@@ -241,7 +244,7 @@ const BadgeCohort = ({ young, onChange }) => {
 
 const CohortDropDown = ({ originalCohort, cohort, onClick, width }) => {
   const user = useSelector((state) => state.Auth.user);
-  const options = ["Juillet 2022", "Juin 2022"];
+  const options = ["Juillet 2022", "Juin 2022", "à venir"];
   const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 
   return (
