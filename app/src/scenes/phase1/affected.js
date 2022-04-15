@@ -9,7 +9,7 @@ import Files from "./Files";
 import api from "../../services/api";
 import { translate, translateCohort } from "../../utils";
 import ConvocationDetails from "./components/ConvocationDetails";
-import { supportURL } from "../../config";
+import { environment, supportURL } from "../../config";
 import Case from "../../assets/case";
 import Question from "../../assets/question";
 import Bouclier from "../../assets/bouclier";
@@ -45,87 +45,166 @@ export default function Affected() {
   if (!center) return <div />;
   return (
     <>
-      <Container>
-        {showInfoMessage ? (
-          <AlertBoxInformation
-            title="Information"
-            message="Suite au séjour de cohésion, les espaces volontaires vont s'actualiser dans les prochaines semaines, les attestations seront disponibles directement en ligne."
-            onClose={() => setShowInfoMessage(false)}
-          />
-        ) : null}
-        <div>
-          <Section className="hero-container">
-            <section className="content">
-              <section className="flex flex-col-reverse items-center lg:flex-row lg:items-center">
-                <article>
-                  <h1 className="text-5xl mb-4">
-                    Mon séjour de cohésion
-                    <br />{" "}
-                    <strong className="flex items-center">
-                      {translateCohort(young.cohort)}
-                      {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? (
-                        <Link to="/changer-de-sejour">
-                          <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
-                        </Link>
-                      ) : null}
-                    </strong>
+      {environment !== "production" ? (
+        <>
+          <Container>
+            {showInfoMessage ? (
+              <AlertBoxInformation
+                title="Information"
+                message="Suite au séjour de cohésion, les espaces volontaires vont s'actualiser dans les prochaines semaines, les attestations seront disponibles directement en ligne."
+                onClose={() => setShowInfoMessage(false)}
+              />
+            ) : null}
+            <div>
+              <Section className="hero-container">
+                <section className="content">
+                  <section className="flex flex-col-reverse items-center lg:flex-row lg:items-center">
+                    <article>
+                      <h1 className="text-5xl mb-4">
+                        Mon séjour de cohésion
+                        <br />{" "}
+                        <strong className="flex items-center">
+                          {translateCohort(young.cohort)}
+                          {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? (
+                            <Link to="/changer-de-sejour">
+                              <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
+                            </Link>
+                          ) : null}
+                        </strong>
+                      </h1>
+                      <p className="text-gray-600 text-base md:text-xl">
+                        Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région (sauf exception)
+                        pour créer ainsi des liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
+                      </p>
+                    </article>
+                    <img src={hero} />
+                  </section>
+                  <Files young={young} />
+                  <div className="mt-3">
+                    <p className="text-slate-900 font-bold text-xl mb-2">Votre lieu d&apos;affectation</p>
+                    <span className="text-gray-600">Vous êtes actuellement affecté(e) au centre de cohésion de :</span>
+                    <br />
+                    <p className="text-indigo-600 text-lg mb-3">{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</p>
+                  </div>
+                </section>
+                <div className="thumb" />
+              </Section>
+              <Separator style={{ margin: 0 }} />
+              <Protocole href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/protocole-sanitaire-cohesion-2022.pdf" target="_blank" rel="noreferrer">
+                <span>
+                  <Bouclier />
+                  <p>
+                    Protocole sanitaire en vigueur pour les Accueils Collectifs de Mineur
+                    <br />
+                    <em style={{ fontWeight: "bold" }}>Il est recommandé de réaliser un test PCR, antigénique ou autotest moins de 24h avant le départ en séjour.</em>
+                  </p>
+                </span>
+                <img src={right} />
+              </Protocole>
+            </div>
+          </Container>
+          <GoodToKnow className=" smmd:flex smmd:flex-row flex flex-col items-center justify-center">
+            <Case class="h-12 w-12 border p-2 rounded-xl" />
+            <div className="ml-3 smmd:mr-20">
+              <p className="!font-bold !text-black">Dans ma valise, il y a...</p>
+              <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`} target="_blank" rel="noreferrer">
+                Comment bien <span className="!text-snu-purple-200">préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
+              </a>
+            </div>
+            <Question class="h-12 w-12 border p-2 rounded-xl" />
+            <div className="ml-3">
+              <p className="!font-bold !text-black">Vous avez des questions sur le séjour ?</p>
+              <a href={`${supportURL}/base-de-connaissance/phase-1-le-sejour-de-cohesion`} target="_blank" rel="noreferrer">
+                Consulter notre <span className="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
+              </a>
+            </div>
+          </GoodToKnow>
+          <HeroContainer id="convocationPhase1">
+            <Hero>
+              <Content style={{ width: "100%", padding: "3.2rem" }}>
+                <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} />
+              </Content>
+            </Hero>
+          </HeroContainer>
+        </>
+      ) : (
+        <>
+          <HeroContainer>
+            {showInfoMessage ? (
+              <AlertBoxInformation
+                title="Information"
+                message="Suite au séjour de cohésion, les espaces volontaires vont s'actualiser dans les prochaines semaines, les attestations seront disponibles directement en ligne."
+                onClose={() => setShowInfoMessage(false)}
+              />
+            ) : null}
+            <Hero style={{ flexDirection: "column" }}>
+              <Section className="hero-container">
+                <section className="content">
+                  <h1>
+                    <strong>Mon séjour de cohésion </strong>
+                    <br /> <span>{translateCohort(young.cohort)}</span>
                   </h1>
-                  <p className="text-gray-600 text-base md:text-xl">
+                  <p>
                     Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région (sauf exception)
                     pour créer ainsi des liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
                   </p>
-                </article>
-                <img src={hero} />
-              </section>
-              <Files young={young} />
-              <div className="mt-3">
-                <p className="text-slate-900 font-bold text-xl mb-2">Votre lieu d&apos;affectation</p>
-                <span className="text-gray-600">Vous êtes actuellement affecté(e) au centre de cohésion de :</span>
-                <br />
-                <p className="text-indigo-600 text-lg mb-3">{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</p>
-              </div>
-            </section>
-            <div className="thumb" />
-          </Section>
-          <Separator style={{ margin: 0 }} />
-          <Protocole href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/protocole-sanitaire-cohesion-2022.pdf" target="_blank" rel="noreferrer">
-            <span>
-              <Bouclier />
-              <p>
-                Protocole sanitaire en vigueur pour les Accueils Collectifs de Mineur
-                <br />
-                <em style={{ fontWeight: "bold" }}>Il est recommandé de réaliser un test PCR, antigénique ou autotest moins de 24h avant le départ en séjour.</em>
-              </p>
-            </span>
-            <img src={right} />
-          </Protocole>
-        </div>
-      </Container>
-      <GoodToKnow className=" smmd:flex smmd:flex-row flex flex-col items-center justify-center">
-        <Case class="h-12 w-12 border p-2 rounded-xl" />
-        <div className="ml-3 smmd:mr-20">
-          <p className="!font-bold !text-black">Dans ma valise, il y a...</p>
-          <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`} target="_blank" rel="noreferrer">
-            Comment bien <span className="!text-snu-purple-200">préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
-          </a>
-        </div>
-        <Question class="h-12 w-12 border p-2 rounded-xl" />
-        <div className="ml-3">
-          <p className="!font-bold !text-black">Vous avez des questions sur le séjour ?</p>
-          <a href={`${supportURL}/base-de-connaissance/phase-1-le-sejour-de-cohesion`} target="_blank" rel="noreferrer">
-            Consulter notre <span className="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
-          </a>
-        </div>
-      </GoodToKnow>
-      <HeroContainer id="convocationPhase1">
-        <Hero>
-          <Content style={{ width: "100%", padding: "3.2rem" }}>
-            <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} />
-          </Content>
-        </Hero>
-      </HeroContainer>
-      <h2 className="max-w-7xl m-auto px-6 text-stone-500 font-bold text-4xl">Documents à renseigner</h2>
-      <NextStep />
+                  {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? (
+                    <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button>
+                  ) : null}
+                  <Separator style={{ width: "150px" }} />
+                  <p>
+                    <strong style={{ color: "black" }}>Votre lieu d&apos;affectation</strong>
+                    <br />
+                    <strong>
+                      <span>Vous êtes actuellement affecté(e) au centre de cohésion de :</span>
+                    </strong>
+                    <br />
+                    <span style={{ color: "#5145cd" }}>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</span>
+                  </p>
+                </section>
+                <div className="thumb" />
+              </Section>
+              <Separator style={{ margin: 0 }} />
+              <Protocole href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/protocole-sanitaire-cohesion-2022.pdf" target="_blank" rel="noreferrer">
+                <span>
+                  <Bouclier />
+                  <p>
+                    Protocole sanitaire en vigueur pour les Accueils Collectifs de Mineur
+                    <br />
+                    <em style={{ fontWeight: "bold" }}>Il est recommandé de réaliser un test PCR, antigénique ou autotest moins de 24h avant le départ en séjour.</em>
+                  </p>
+                </span>
+                <img src={right} />
+              </Protocole>
+            </Hero>
+          </HeroContainer>
+          <GoodToKnow className=" smmd:flex smmd:flex-row flex flex-col items-center justify-center">
+            <Case class="h-12 w-12 border p-2 rounded-xl" />
+            <div className="ml-3 smmd:mr-20">
+              <p className="!font-bold !text-black">Dans ma valise, il y a...</p>
+              <a href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`} target="_blank" rel="noreferrer">
+                Comment bien <span className="!text-snu-purple-200">préparer&nbsp;son&nbsp;séjour&nbsp;›</span>
+              </a>
+            </div>
+            <Question class="h-12 w-12 border p-2 rounded-xl" />
+            <div className="ml-3">
+              <p className="!font-bold !text-black">Vous avez des questions sur le séjour ?</p>
+              <a href={`${supportURL}/base-de-connaissance/phase-1-le-sejour-de-cohesion`} target="_blank" rel="noreferrer">
+                Consulter notre <span className="!text-snu-purple-200">base&nbsp;de&nbsp;connaissance&nbsp;›</span>
+              </a>
+            </div>
+          </GoodToKnow>
+          <HeroContainer id="convocationPhase1">
+            <Hero>
+              <Content style={{ width: "100%", padding: "3.2rem" }}>
+                <ConvocationDetails young={young} center={center} meetingPoint={meetingPoint} />
+              </Content>
+            </Hero>
+          </HeroContainer>
+          <h2 className="max-w-7xl m-auto px-6 text-stone-500 font-bold text-4xl">Documents à renseigner</h2>
+          <NextStep />
+        </>
+      )}
     </>
   );
 }

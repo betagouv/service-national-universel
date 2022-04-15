@@ -22,11 +22,8 @@ export default function NextStep() {
       if (young.rulesFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
       if (young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
       setDocuments(nb);
-      console.log(young);
     }
   }, []);
-
-  console.log(young.autoTestPCRFilesStatus);
 
   return (
     <>
