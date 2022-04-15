@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 
 import { HeroContainer, Hero, Content, Separator, AlertBoxInformation } from "../../components/Content";
 import NextStep from "./nextStep";
+import Files from "./Files";
 import api from "../../services/api";
 import { translate, translateCohort } from "../../utils";
 import ConvocationDetails from "./components/ConvocationDetails";
@@ -15,6 +16,9 @@ import Bouclier from "../../assets/bouclier";
 import right from "../../assets/right.svg";
 import { Link } from "react-router-dom";
 import { youngCanChangeSession } from "snu-lib";
+import Container from "./components/Container";
+import hero from "../../assets/hero.png";
+import edit from "../../assets/editIcon.svg";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -41,7 +45,7 @@ export default function Affected() {
   if (!center) return <div />;
   return (
     <>
-      <HeroContainer>
+      <Container>
         {showInfoMessage ? (
           <AlertBoxInformation
             title="Information"
@@ -49,30 +53,37 @@ export default function Affected() {
             onClose={() => setShowInfoMessage(false)}
           />
         ) : null}
-        <Hero style={{ flexDirection: "column" }}>
+        <div>
           <Section className="hero-container">
             <section className="content">
-              <h1>
-                <strong>Mon séjour de cohésion </strong>
-                <br /> <span>{translateCohort(young.cohort)}</span>
-              </h1>
-              <p>
-                Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région (sauf exception) pour
-                créer ainsi des liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
-              </p>
-              {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? (
-                <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button>
-              ) : null}
-              <Separator style={{ width: "150px" }} />
-              <p>
-                <strong style={{ color: "black" }}>Votre lieu d&apos;affectation</strong>
+              <section className="flex flex-col-reverse items-center lg:flex-row lg:items-center">
+                <article>
+                  <h1 className="text-5xl mb-4">
+                    Mon séjour de cohésion
+                    <br />{" "}
+                    <strong className="flex items-center">
+                      {translateCohort(young.cohort)}
+                      {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? (
+                        <Link to="/changer-de-sejour">
+                          <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
+                        </Link>
+                      ) : null}
+                    </strong>
+                  </h1>
+                  <p className="text-gray-600 text-base md:text-xl">
+                    Le SNU vous donne l&apos;opportunité de découvrir la vie collective au sein d&apos;un centre accueillant environ 200 jeunes de votre région (sauf exception)
+                    pour créer ainsi des liens nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
+                  </p>
+                </article>
+                <img src={hero} />
+              </section>
+              <Files young={young} />
+              <div className="mt-3">
+                <p className="text-slate-900 font-bold text-xl mb-2">Votre lieu d&apos;affectation</p>
+                <span className="text-gray-600">Vous êtes actuellement affecté(e) au centre de cohésion de :</span>
                 <br />
-                <strong>
-                  <span>Vous êtes actuellement affecté(e) au centre de cohésion de :</span>
-                </strong>
-                <br />
-                <span style={{ color: "#5145cd" }}>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</span>
-              </p>
+                <p className="text-indigo-600 text-lg mb-3">{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</p>
+              </div>
             </section>
             <div className="thumb" />
           </Section>
@@ -88,8 +99,8 @@ export default function Affected() {
             </span>
             <img src={right} />
           </Protocole>
-        </Hero>
-      </HeroContainer>
+        </div>
+      </Container>
       <GoodToKnow className=" smmd:flex smmd:flex-row flex flex-col items-center justify-center">
         <Case class="h-12 w-12 border p-2 rounded-xl" />
         <div className="ml-3 smmd:mr-20">
