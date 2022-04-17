@@ -86,7 +86,6 @@ export const Subtitle = styled.h3`
 `;
 
 export const CardSection = styled.div`
-  font-family: Ubuntu;
   font-style: normal;
   font-weight: bold;
   font-size: 16px;

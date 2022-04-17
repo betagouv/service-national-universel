@@ -70,6 +70,7 @@ export const MultiLine = styled.div`
 `;
 
 export const ResultTable = styled.div`
+  font-family: "Marianne";
   ${({ hide }) => (hide ? "display: none;" : "")}
   background-color: ${({ backgroundColor }) => backgroundColor || "#fff"};
   position: relative;
