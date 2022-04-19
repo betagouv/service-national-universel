@@ -1,3 +1,12 @@
+## [1.72.1](https://github.com/betagouv/service-national-universel/compare/v1.72.0...v1.72.1) (2022-04-19)
+
+
+### Bug Fixes
+
+* **admin:** article pour les référents ([aebab79](https://github.com/betagouv/service-national-universel/commit/aebab795b36cb4851f06514797041c66f8958258))
+* **admin:** url articles besoin d'aide ([ef59473](https://github.com/betagouv/service-national-universel/commit/ef59473a9c2f4a574459706124c3f4eeedc1693a))
+* **app:** wording public besoin d'aide ([87dfba8](https://github.com/betagouv/service-national-universel/commit/87dfba81792ec72ea41db629ef0042a4b384043b))
+
 # [1.72.0](https://github.com/betagouv/service-national-universel/compare/v1.71.0...v1.72.0) (2022-04-14)
 
 
