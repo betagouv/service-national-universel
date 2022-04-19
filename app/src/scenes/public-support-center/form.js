@@ -63,7 +63,7 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
           <>
             <Item
               name="lastName"
-              title="Nom"
+              title="Nom du volontaire"
               placeholder="Renseignez votre nom"
               type="input"
               value={values.lastName}
@@ -75,7 +75,7 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
             />
             <Item
               name="firstName"
-              title="Prénom"
+              title="Prénom du volontaire"
               placeholder="Renseignez votre prénom"
               type="input"
               value={values.firstName}
@@ -173,6 +173,7 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
               errors={errors}
               touched={touched}
               rows="5"
+              infos="Merci d’apporter le plus de précisions possibles afin de faciliter le traitement de votre demande"
             />
             <LoadingButton loading={loading} type="submit" style={{ marginLeft: 15, maxWidth: "150px", marginTop: 15 }} onClick={handleSubmit} disabled={isSubmitting}>
               Envoyer
@@ -184,10 +185,11 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
   );
 }
 
-const Item = ({ title, name, value, handleChange, errors, touched, validate, type, options, placeholder, ...props }) => {
+const Item = ({ title, name, value, handleChange, errors, touched, validate, type, options, placeholder, infos, ...props }) => {
   return (
     <Col style={{ marginTop: 20 }}>
       <Label>{title}</Label>
+      {infos ? <div className="bg-[#FEF9E7] p-2 text-sm text-[#7D6608] rounded overflow-hidden italic mb-2">{infos}</div> : null}
       {type === "select" ? (
         <Field as={type} className="form-control" name={name} value={value} onChange={handleChange} validate={validate} {...props}>
           <option disabled value="" selected={!value} label={placeholder}>
