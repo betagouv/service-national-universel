@@ -53,6 +53,7 @@ module.exports = {
           extraLightGrey: "#fafafa",
           green: "#6CC763",
           grey: "#6e757c",
+          detail_title: "#798399",
           lightBlueGrey: "#e6ebfa",
           lightGold: "#d9bb71",
           lightGrey: "#d7d7d7",

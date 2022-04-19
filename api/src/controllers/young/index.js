@@ -296,6 +296,37 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
   }
 });
 
+router.put("/update_phase3/:young", async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      young: Joi.string().required(),
+      phase3StructureName: Joi.string().required(),
+      phase3MissionDescription: Joi.string().required(),
+      phase3TutorFirstName: Joi.string().required(),
+      phase3TutorLastName: Joi.string().required(),
+      phase3TutorEmail: Joi.string().lowercase().trim().email().required(),
+      phase3TutorPhone: Joi.string().required(),
+    })
+      .validate({ ...req.params, ...req.body });
+    if (error) return res.status(400).send({ ok: false, code: error });
+
+    const data = await YoungObject.findOne({ _id: value.young });
+
+    if (!data) {
+      capture(`Young not found ${value.young}`);
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    delete value.young;
+    data.set(value);
+    await data.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, YoungObject));
 
 router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {

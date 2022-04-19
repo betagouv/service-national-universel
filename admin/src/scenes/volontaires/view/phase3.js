@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
@@ -8,17 +8,19 @@ import SelectStatus from "../../../components/selectStatus";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import { toastr } from "react-redux-toastr";
+import api from "../../../services/api";
 
 export default function Phase3({ young, onChange }) {
 
   const [edit, setEdit] = useState(false)
   const [information, setInformation] = useState({
-    newStructureName: young.phase3StructureName,
-    newMissionDescription: young.phase3MissionDescription,
-    newTutorFirstName: young.phase3TutorFirstName,
-    newTutorLastName: young.phase3TutorLastName,
-    newTutorEmail: young.phase3TutorEmail,
-    newTutorPhone: young.phase3TutorPhone,
+    phase3StructureName: young.phase3StructureName,
+    phase3MissionDescription: young.phase3MissionDescription,
+    phase3TutorFirstName: young.phase3TutorFirstName,
+    phase3TutorLastName: young.phase3TutorLastName,
+    phase3TutorEmail: young.phase3TutorEmail,
+    phase3TutorPhone: young.phase3TutorPhone,
   })
 
   const getText = () => {
@@ -26,8 +28,21 @@ export default function Phase3({ young, onChange }) {
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) return "Le tuteur a validé la mission";
   };
 
-  const handleSubmit = () => {
-    console.log("submit")
+  const handleChange = (e) => {
+
+    setInformation({ ...information, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const { ok } = await api.put(`/young/update_phase3/${young._id}`, information);
+      if (!ok) return;
+      setEdit(false)
+    } catch (e) {
+      console.log(e)
+      return toastr.error("Oups, une erreur est survenue lors du changement de l'information de la phase 3")
+    }
   }
 
   return (
@@ -56,33 +71,37 @@ export default function Phase3({ young, onChange }) {
                   <Col>
                     <BoxTitle>Mission de phase 3 réalisée</BoxTitle>
                   </Col>
-                  <Col className="flex">
+                  <div className="border"></div>
+                  <Col className="flex ">
                     <BoxTitle>Tuteur</BoxTitle>
+                    <div className="mr-2">
+                      {edit ? (
+                        <PanelActionButton icon="close" title="Annuler" onClick={() => setEdit(!edit)} />
+                      ) : (
+                        <PanelActionButton icon="pencil" title="Modifier" onClick={() => setEdit(!edit)} />
+                      )}
+                    </div>
                   </Col>
                 </Row>
                 <Row className="pl-8 pb-2">
                   <Col>
-                    <Details title="Structure" value={young.phase3StructureName} edit={edit} name={"newStructureName"} information={information} setInformation={setInformation} />
-                    <Details title="Descriptif" value={young.phase3MissionDescription} edit={edit} name={"MissionDescription"} information={information} setInformation={setInformation} />
+                    <Details title="Structure" value={information.phase3StructureName} edit={edit} name={"phase3StructureName"} onChange={handleChange} />
+                    <Details title="Descriptif" value={information.phase3MissionDescription} edit={edit} name={"phase3MissionDescription"} onChange={handleChange} />
                   </Col>
+                  <div className="border"></div>
                   <Col>
-                    <Details title="Prénom" value={young.phase3TutorFirstName} edit={edit} name={"TutorFirstName"} information={information} setInformation={setInformation} />
-                    <Details title="Nom" value={young.phase3TutorLastName} edit={edit} name={"TutorLastName"} information={information} setInformation={setInformation} />
-                    <Details title="E-mail" value={young.phase3TutorEmail} edit={edit} name={"TutorEmail"} information={information} setInformation={setInformation} />
-                    <Details title="Téléphone" value={young.phase3TutorPhone} edit={edit} name={"TutorPhone"} information={information} setInformation={setInformation} />
+                    <Details title="Prénom" value={information.phase3TutorFirstName} edit={edit} name={"phase3TutorFirstName"} onChange={handleChange} />
+                    <Details title="Nom" value={information.phase3TutorLastName} edit={edit} name={"phase3TutorLastName"} onChange={handleChange} />
+                    <Details title="E-mail" value={information.phase3TutorEmail} edit={edit} name={"phase3TutorEmail"} onChange={handleChange} />
+                    <Details title="Téléphone" value={information.phase3TutorPhone} edit={edit} name={"phase3TutorPhone"} onChange={handleChange} />
                   </Col>
                 </Row>
                 <Row className="pb-2 flex justify-center">
-                  {edit ? (
-                    <>
-                      <input type="submit" value="Envoyer" />
-                      {/* <PanelActionButton icon="close" title="Annuler" /> */}
-                      <div className="border" onClick={() => setEdit(!edit)}> Annuler </div>
-                    </>
-                  ) : (
-                    //<PanelActionButton icon="pencil" title="Modifier"/>
-                    <div className="border" onClick={() => setEdit(!edit)}> Modifier </div>
-                  )}
+                  <div className="h-10 ml-4">
+                    {edit ? (
+                      <PanelActionButton icon="pencil" title="Valider" type="submit" />
+                    ) : null}
+                  </div>
                 </Row>
               </form>
             </Box>
@@ -94,18 +113,17 @@ export default function Phase3({ young, onChange }) {
           </DownloadAttestationButton>
         ) : null}
       </WrapperPhase3>
-    </div>
+    </div >
   );
 }
 
-const Details = ({ title, value, edit, name, information, setInformation }) => {
-  if (!value) return <div />;
+const Details = ({ title, value, edit, onChange, name }) => {
   if (typeof value === "function") value = value();
   return (
-    <div className="flex p-2 items-center h-10">
-      <div className="w-1/4 ">{title}</div>
+    <div className="flex p-2 items-center h-12 ">
+      <div className="w-1/4 text-brand-detail_title ">{title} : </div>
       {edit ? (
-        <input type="text" placeholder={value} name={name} className="w-3/4 bg-brand-extraLightGrey rounded border mr-2" />
+        <input type="text" value={"  " + value} name={name} className="w-3/4 rounded border mr-4 h-8 " onChange={onChange} />
       ) : (
         <div className="w-3/4 mr-2">{value}</div>
       )}
