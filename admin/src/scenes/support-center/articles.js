@@ -11,7 +11,7 @@ export const structureArticles = [
     title: "Je crée une nouvelle mission",
     emoji: "📇",
     body: "Vidéo",
-    url: `${supportURL}/base-de-connaissance/je-cree-une-nouvelle-mission`
+    url: `${supportURL}/base-de-connaissance/je-cree-une-nouvelle-mission`,
   },
   {
     title: "Je remplis et envoie le contrat d'engagement",
@@ -26,7 +26,7 @@ export const referentArticles = [
     title: "Livret d'accueil référent",
     emoji: "🦺",
     body: `Découvrez en quelques minutes les éléments de prise en main...`,
-    url: `${supportURL}/base-de-connaissance/livret-daccueil-referent-1`,
+    url: `${supportURL}/base-de-connaissance/livret-daccueil-referent`,
   },
   {
     title: "La fiche mission et ses actions",
@@ -38,7 +38,7 @@ export const referentArticles = [
     title: "Phase 3 : Le parcours de l'engagement",
     emoji: "🌟",
     body: `Optionnelle, la phase 3 vous permet de poursuivre votre parcours...`,
-    url: `${supportURL}/base-de-connaissance/phase-3-le-parcours-de-lengagement-1`,
+    url: `${supportURL}/base-de-connaissance/phase-3-le-parcours-de-lengagement`,
   },
 ];
 
@@ -47,13 +47,13 @@ export const adminArticles = [
     title: "Livret d'accueil référent",
     emoji: "🦺",
     body: `Découvrez en quelques minutes les éléments de prise en main...`,
-    url: `${supportURL}/base-de-connaissance/livret-daccueil-referent-1`,
+    url: `${supportURL}/base-de-connaissance/livret-daccueil-referent`,
   },
   {
     title: "Livret d'accueil structure",
     emoji: "🏠",
     body: `Découvrez en quelques minutes les éléments de prise en main...`,
-    url: `${supportURL}/base-de-connaissance/livret-daccueil-structure-1`,
+    url: `${supportURL}/base-de-connaissance/livret-daccueil-structure`,
   },
   {
     title: "Livret d'accueil volontaire",
