@@ -67,9 +67,23 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     const userAttributes = [
       { name: "date de création", value: req.user.createdAt },
       { name: "dernière connexion", value: req.user.lastLoginAt },
-      { name: "role", value: req.user.role },
       { name: "lien vers profil", value: profilLink },
+      { name: "departement", value: req.user.department },
+      { name: "region", value: req.user.region },
     ];
+    if (!isYoung(req.user)) userAttributes.push({ name: "role", value: req.user.role });
+
+    if (isYoung(req.user)) {
+      userAttributes.push({ name: "cohorte", value: req.user.cohort });
+      userAttributes.push({ name: "statut général", value: req.user.status });
+      userAttributes.push({ name: "statut phase 1", value: req.user.statusPhase1 });
+      userAttributes.push({ name: "statut phase 2", value: req.user.statusPhase2 });
+      userAttributes.push({ name: "statut phase 3", value: req.user.statusPhase3 });
+      if (departmentReferentPhase2) userAttributes.push({ name: "lien vers référent phase 2", value: departmentReferentPhase2Link });
+      userAttributes.push({ name: "lien vers candidatures", value: `${ADMIN_URL}/volontaire/${req.user._id}/phase2` });
+      userAttributes.push({ name: "lien vers équipe départementale", value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${req.user.department}%22%5D&ROLE=%5B%22referent_department%22%5D` });
+    }
+
     if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
       userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
       userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
@@ -92,6 +106,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
         attributes: userAttributes,
       }),
     });
+    if (!response.ok) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
@@ -165,6 +180,10 @@ router.post("/ticket/form", async (req, res) => {
 
 router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const departmentReferentPhase2 = await ReferentObject.findOne({
+      department: req.user.department,
+      subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+    });
     const structureLink = `${ADMIN_URL}/structure/${req.user.structureId}`;
     const missionsLink = `${ADMIN_URL}/structure/${req.user.structureId}/missions`;
     const centerLink = `${ADMIN_URL}/centre/${req.user.cohesionCenterId}`;
@@ -174,9 +193,24 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
     const userAttributes = [
       { name: "date de création", value: req.user.createdAt },
       { name: "dernière connexion", value: req.user.lastLoginAt },
-      { name: "role", value: req.user.role },
       { name: "lien vers profil", value: profilLink },
+      { name: "departement", value: req.user.department },
+      { name: "region", value: req.user.region },
     ];
+
+    if (!isYoung(req.user)) userAttributes.push({ name: "role", value: req.user.role });
+
+    if (isYoung(req.user)) {
+      userAttributes.push({ name: "cohorte", value: req.user.cohort });
+      userAttributes.push({ name: "statut général", value: req.user.status });
+      userAttributes.push({ name: "statut phase 1", value: req.user.statusPhase1 });
+      userAttributes.push({ name: "statut phase 2", value: req.user.statusPhase2 });
+      userAttributes.push({ name: "statut phase 3", value: req.user.statusPhase3 });
+      if (departmentReferentPhase2) userAttributes.push({ name: "lien vers référent phase 2", value: departmentReferentPhase2Link });
+      userAttributes.push({ name: "lien vers candidatures", value: `${ADMIN_URL}/volontaire/${req.user._id}/phase2` });
+      userAttributes.push({ name: "lien vers équipe départementale", value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${req.user.department}%22%5D&ROLE=%5B%22referent_department%22%5D` });
+    }
+
     if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
       userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
       userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
