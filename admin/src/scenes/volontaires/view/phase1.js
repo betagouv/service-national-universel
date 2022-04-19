@@ -169,81 +169,61 @@ export default function Phase1(props) {
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase1 young={young} tab="phase1" onChange={props.onChange}>
         <Box>
-          <Row>
-            <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-              <Bloc title="Séjour de cohésion" titleRight={<Badge text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}>
-                {getCohesionStay(young)}
-              </Bloc>
-              {young.statusPhase1 === "AFFECTED" ? (
-                <Bloc title="Point de rassemblement" borderTop>
-                  {getMeetingPoint(young)}
+          <Formik
+            initialValues={young}
+            onSubmit={async (values) => {
+              try {
+                const { ok, code } = await api.put(`/referent/young/${values._id}`, values);
+                if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+                toastr.success("Mis à jour!");
+              } catch (e) {
+                console.log(e);
+                toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+              }
+            }}>
+            {({ values, handleChange }) => (
+              <article className="flex">
+                <Bloc
+                  title="Séjour de cohésion"
+                  titleRight={<Badge text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}
+                  borderRight
+                  borderBottom>
+                  <section className="flex">
+                    <Select
+                      className="px-4 py-2"
+                      placeholder="Non renseigné"
+                      title="Présence :"
+                      options={[
+                        { value: "true", label: "Présent" },
+                        { value: "false", label: "Absent" },
+                      ]}
+                      values={values}
+                      name="cohesionStayPresence"
+                      handleChange={(e) => {
+                        const value = e.target.value;
+                        setModal({
+                          isOpen: true,
+                          onConfirm: () => {
+                            handleChange({ target: { value, name: "cohesionStayPresence" } });
+                            updateYoung({ cohesionStayPresence: value });
+                          },
+                          title: "Changement de présence",
+                          message: confirmMessageChangePhase1Presence(value),
+                        });
+                      }}
+                      disabled={disabled}
+                    />
+                    <p className="px-4 py-2">Attestation de réalisation phase 1 :</p>
+                  </section>
                 </Bloc>
-              ) : null}
-            </Col>
-            <Col md={6}>
-              <Formik
-                initialValues={young}
-                onSubmit={async (values) => {
-                  try {
-                    const { ok, code } = await api.put(`/referent/young/${values._id}`, values);
-                    if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-                    toastr.success("Mis à jour!");
-                  } catch (e) {
-                    console.log(e);
-                    toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-                  }
-                }}>
-                {({ values, handleChange }) => (
-                  <>
-                    <Bloc title="Date de séjour" borderBottom disabled={disabled}>
-                      <Details title="Date" value={translateCohort(young.cohort)} />
-                      <Select
-                        placeholder="Non renseigné"
-                        title="Présence"
-                        options={[
-                          { value: "true", label: "Présent" },
-                          { value: "false", label: "Absent" },
-                        ]}
-                        values={values}
-                        name="cohesionStayPresence"
-                        handleChange={(e) => {
-                          const value = e.target.value;
-                          setModal({
-                            isOpen: true,
-                            onConfirm: () => {
-                              handleChange({ target: { value, name: "cohesionStayPresence" } });
-                              updateYoung({ cohesionStayPresence: value });
-                            },
-                            title: "Changement de présence",
-                            message: confirmMessageChangePhase1Presence(value),
-                          });
-                        }}
-                        disabled={disabled}
-                      />
-                    </Bloc>
-                    <Bloc title="Fiche sanitaire" disabled={disabled}>
-                      <Select
-                        placeholder="Non renseigné"
-                        title="Document"
-                        options={[
-                          { value: "true", label: "Réceptionné" },
-                          { value: "false", label: "Non réceptionné" },
-                        ]}
-                        values={values}
-                        name="cohesionStayMedicalFileReceived"
-                        handleChange={(e) => {
-                          const value = e.target.value;
-                          handleChange({ target: { value, name: "cohesionStayMedicalFileReceived" } });
-                          updateYoung({ cohesionStayMedicalFileReceived: value });
-                        }}
-                        disabled={disabled}
-                      />
-                    </Bloc>
-                  </>
-                )}
-              </Formik>
-            </Col>
-          </Row>
+                <Bloc title="Détails" borderBottom disabled={disabled}>
+                  {getCohesionStay(young)}
+                  <Details title="Dates" value={translateCohort(young.cohort)} className="flex" />
+                  <Details title="Point de rassemblement" value={getMeetingPoint(young)} />
+                </Bloc>
+              </article>
+            )}
+          </Formik>
           {environment !== "production" ? (
             young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? (
               <Row>
@@ -286,29 +266,20 @@ export default function Phase1(props) {
   );
 }
 
-const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled }) => {
+const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled, tw }) => {
   return (
-    <Row
-      style={{
-        width: "100%",
-        borderTop: borderTop ? "2px solid #f4f5f7" : 0,
-        borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
-        borderRight: borderRight ? "2px solid #f4f5f7" : 0,
-        backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}>
-      <Wrapper
-        style={{
-          width: "100%",
-        }}>
-        <div style={{ display: "flex", width: "100%" }}>
-          <BoxTitle>
-            <div>{title}</div>
-            <div>{titleRight}</div>
-          </BoxTitle>
-        </div>
-        {children}
-      </Wrapper>
-    </Row>
+    <section
+      className={`w-full p-12 ${borderTop ? "border-t-2 border-[#f4f5f7]" : ""} ${borderBottom ? "border-b-2 border-[#f4f5f7]" : ""} ${
+        borderRight ? "border-r-2 border-[#f4f5f7]" : ""
+      } ${disabled ? "bg-[#f9f9f9]" : "bg-transparent"} ${tw}`}>
+      <div className="flex w-full">
+        <BoxTitle>
+          <div>{title}</div>
+          <div>{titleRight}</div>
+        </BoxTitle>
+      </div>
+      {children}
+    </section>
   );
 };
 
@@ -316,10 +287,10 @@ const Details = ({ title, value, to }) => {
   if (!value) return <div />;
   if (typeof value === "function") value = value();
   return (
-    <div className="detail">
-      <div className="detail-title">{title}&nbsp;:</div>
-      <div className="detail-text">{to ? <Link to={to}>{value}</Link> : value}</div>
-    </div>
+    <section className="detail grid grid-cols-2 mb-2">
+      <p className="detail-title text-[#738297]">{title}&nbsp;:</p>
+      <p className="detail-text">{to ? <Link to={to}>{value}</Link> : value}</p>
+    </section>
   );
 };
 

@@ -6,9 +6,12 @@ import Select from "../components/Select";
 import Documents from "../components/Documents";
 import DndFileInput from "../../../components/dndFileInput";
 import { Formik } from "formik";
+import styled from "styled-components";
+import FileCard from "./FileCard";
 
 import { FILE_STATUS_PHASE1, translateFileStatusPhase1, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
+import { environment } from "../../../config";
 
 export default function DocumentPhase1(props) {
   const [young, setYoung] = useState(props.young);
@@ -124,7 +127,7 @@ export default function DocumentPhase1(props) {
           handleChange({ value, name, correctionMessage });
         },
         title: `Vous êtes sur le point de demander la correction du document ${translateFileStatusPhase1(name)}`,
-        message: `Car celui n’est pas conforme. Merci de préciser ci-dessous les corrections à apporter. 
+        message: `Car celui n’est pas conforme. Merci de préciser ci-dessous les corrections à apporter.
         Une fois le message validé, il sera transmis par mail à ${young.firstName} ${young.lastName} (${young.email}).`,
       });
     } else {
@@ -159,256 +162,512 @@ export default function DocumentPhase1(props) {
   if (!dataImageRight && !dataAutoTestPCR && !dataRules) return null;
 
   return (
-    <Row>
-      <Col md={6} style={{ borderRight: "2px solid #f4f5f7", borderBottom: "2px solid #f4f5f7" }}>
-        <div className="flex row justify-center mx-2 my-1">
-          <h1 className="text-center pb-2">Fiche Sanitaire</h1>
-          <select disabled={loading} className="form-control" value={statusCohesionStayMedical} name="cohesionStayMedical" onChange={(e) => needModal(e)}>
-            {medicalFileOptions.map((o, i) => (
-              <option key={i} value={o.value} label={o.label}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          {statusCohesionStayMedical === "TO_DOWNLOAD" && (
-            <button disabled={loading} className="border rounded-lg border-8 m-2 px-4 py-2" onClick={() => handleEmailClick("cohesionStayMedical")}>
-              Relancer le volontaire
-            </button>
-          )}
-        </div>
-      </Col>
-      <Col md={6} style={{ borderBottom: "2px solid #f4f5f7" }}>
-        <div className="flex row justify-center mx-2 my-1">
-          <h1 className="text-center pb-2">Droit a l'image</h1>
+    <>
+      {environment === "production" ? (
+        <Row>
+          <Col md={6} style={{ borderRight: "2px solid #f4f5f7", borderBottom: "2px solid #f4f5f7" }}>
+            <div className="flex row justify-center mx-2 my-1">
+              <h1 className="text-center pb-2">Fiche Sanitaire</h1>
+              <select disabled={loading} className="form-control" value={statusCohesionStayMedical} name="cohesionStayMedical" onChange={(e) => needModal(e)}>
+                {medicalFileOptions.map((o, i) => (
+                  <option key={i} value={o.value} label={o.label}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              {statusCohesionStayMedical === "TO_DOWNLOAD" && (
+                <button disabled={loading} className="border rounded-lg m-2 px-4 py-2" onClick={() => handleEmailClick("cohesionStayMedical")}>
+                  Relancer le volontaire
+                </button>
+              )}
+            </div>
+          </Col>
+          <Col md={6} style={{ borderBottom: "2px solid #f4f5f7" }}>
+            <div className="flex row justify-center mx-2 my-1">
+              <h1 className="text-center pb-2">Droit a l&apos;image</h1>
 
-          <select disabled={loading} className="form-control" value={statusImageRight} name="imageRight" onChange={(e) => needModal(e)}>
-            {options.map((o, i) => (
-              <option key={i} value={o} label={translateFileStatusPhase1(o)}>
-                {translateFileStatusPhase1(o)}
-              </option>
-            ))}
-          </select>
-          {young.imageRightFilesComment && <p>Commentaire : {young.imageRightFilesComment}</p>}
+              <select disabled={loading} className="form-control" value={statusImageRight} name="imageRight" onChange={(e) => needModal(e)}>
+                {options.map((o, i) => (
+                  <option key={i} value={o} label={translateFileStatusPhase1(o)}>
+                    {translateFileStatusPhase1(o)}
+                  </option>
+                ))}
+              </select>
+              {young.imageRightFilesComment && <p>Commentaire : {young.imageRightFilesComment}</p>}
 
-          <Formik
-            initialValues={dataImageRight}
-            validateOnChange={false}
-            validateOnBlur={false}
-            onSubmit={async (values) => {
-              try {
-                const { ok, code } = await api.put(`/referent/young/${young._id}/phase1Files/imageRight`, values);
-                if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-                toastr.success("Mis à jour!");
-                updateYoung();
-              } catch (e) {
-                console.log(e);
-                toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-              }
-            }}>
-            {({ values, handleChange, handleSubmit }) => (
-              <>
-                <div className="flex flex-col p-2">
-                  <Select
-                    placeholder="Non renseigné"
-                    name="imageRight"
-                    values={values}
-                    handleChange={(e) => {
-                      handleChange(e), handleSubmit();
-                    }}
-                    title="Autorisation"
-                    options={[
-                      { value: "true", label: "Oui" },
-                      { value: "false", label: "Non" },
-                    ]}
-                  />
-                  <Documents>
-                    <h4>Formulaire de consentement droit a l'image</h4>
-                    <DndFileInput
-                      placeholder="un document justificatif"
-                      errorMessage="Vous devez téléverser un document justificatif"
-                      value={values.imageRightFiles}
-                      source={(e) => api.get(`/referent/youngFile/${young._id}/imageRightFiles/${e}`)}
-                      name="imageRightFiles"
-                      onChange={async (e) => {
-                        const res = await api.uploadFile("/referent/file/imageRightFiles", e.target.files, { youngId: young._id });
-                        if (res.code === "FILE_CORRUPTED") {
-                          return toastr.error(
-                            "Le fichier semble corrompu",
-                            "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                            { timeOut: 0 },
-                          );
-                        }
-                        if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                        // We update and save it instant.
-                        handleChange({ target: { value: res.data, name: "imageRightFiles" } });
-                        handleSubmit();
+              <Formik
+                initialValues={dataImageRight}
+                validateOnChange={false}
+                validateOnBlur={false}
+                onSubmit={async (values) => {
+                  try {
+                    const { ok, code } = await api.put(`/referent/young/${young._id}/phase1Files/imageRight`, values);
+                    if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+                    toastr.success("Mis à jour!");
+                    updateYoung();
+                  } catch (e) {
+                    console.log(e);
+                    toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+                  }
+                }}>
+                {({ values, handleChange, handleSubmit }) => (
+                  <>
+                    <div className="flex flex-col p-2">
+                      <Select
+                        placeholder="Non renseigné"
+                        name="imageRight"
+                        values={values}
+                        handleChange={(e) => {
+                          handleChange(e), handleSubmit();
+                        }}
+                        title="Autorisation"
+                        options={[
+                          { value: "true", label: "Oui" },
+                          { value: "false", label: "Non" },
+                        ]}
+                      />
+                      <Documents>
+                        <h4>Formulaire de consentement droit a l'image</h4>
+                        <DndFileInput
+                          placeholder="un document justificatif"
+                          errorMessage="Vous devez téléverser un document justificatif"
+                          value={values.imageRightFiles}
+                          source={(e) => api.get(`/referent/youngFile/${young._id}/imageRightFiles/${e}`)}
+                          name="imageRightFiles"
+                          onChange={async (e) => {
+                            const res = await api.uploadFile("/referent/file/imageRightFiles", e.target.files, { youngId: young._id });
+                            if (res.code === "FILE_CORRUPTED") {
+                              return toastr.error(
+                                "Le fichier semble corrompu",
+                                "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                                { timeOut: 0 },
+                              );
+                            }
+                            if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                            // We update and save it instant.
+                            handleChange({ target: { value: res.data, name: "imageRightFiles" } });
+                            handleSubmit();
+                          }}
+                        />
+                      </Documents>
+                    </div>
+                  </>
+                )}
+              </Formik>
+              {statusImageRight === FILE_STATUS_PHASE1.TO_UPLOAD && (
+                <button disabled={loading} className="border rounded-lg m-2 px-4 py-2" onClick={() => handleEmailClick("imageRight")}>
+                  Relancer le volontaire
+                </button>
+              )}
+            </div>
+          </Col>
+          <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
+            <div className="flex row justify-center mx-2 my-1">
+              <h1 className="text-center pb-2">Utilisation d&apos;autotest</h1>
+              <select disabled={loading} className="form-control" value={statusAutoTestPCR} name="autoTestPCR" onChange={(e) => needModal(e)}>
+                {options.map((o, i) => (
+                  <option key={i} value={o} label={translateFileStatusPhase1(o)}>
+                    {translateFileStatusPhase1(o)}
+                  </option>
+                ))}
+              </select>
+              {young.autoTestPCRFilesComment && <p>Commentaire : {young.autoTestPCRFilesComment}</p>}
+              <Formik
+                initialValues={dataAutoTestPCR}
+                validateOnChange={false}
+                validateOnBlur={false}
+                onSubmit={async (values) => {
+                  try {
+                    const { ok, code } = await api.put(`/referent/young/${young._id}/phase1Files/autoTestPCR`, values);
+                    if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+                    toastr.success("Mis à jour!");
+                    updateYoung();
+                  } catch (e) {
+                    console.log(e);
+                    toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+                  }
+                }}>
+                {({ values, handleChange, handleSubmit }) => (
+                  <>
+                    <div className="flex flex-col p-2">
+                      <Select
+                        placeholder="Non renseigné"
+                        name="autoTestPCR"
+                        values={values}
+                        handleChange={(e) => {
+                          handleChange(e), handleSubmit();
+                        }}
+                        title="Autorisation"
+                        options={[
+                          { value: "true", label: "Oui" },
+                          { value: "false", label: "Non" },
+                        ]}
+                      />
+                      <Documents>
+                        <h4>Formulaire de consentement d&apos;autotest PCR</h4>
+                        <DndFileInput
+                          placeholder="un document justificatif"
+                          errorMessage="Vous devez téléverser un document justificatif"
+                          value={values.autoTestPCRFiles}
+                          source={(e) => api.get(`/referent/youngFile/${young._id}/autoTestPCRFiles/${e}`)}
+                          name="autoTestPCRFiles"
+                          onChange={async (e) => {
+                            const res = await api.uploadFile("/referent/file/autoTestPCRFiles", e.target.files, { youngId: young._id });
+                            if (res.code === "FILE_CORRUPTED") {
+                              return toastr.error(
+                                "Le fichier semble corrompu",
+                                "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                                { timeOut: 0 },
+                              );
+                            }
+                            if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                            // We update and save it instant.
+                            handleChange({ target: { value: res.data, name: "autoTestPCRFiles" } });
+                            handleSubmit();
+                          }}
+                        />
+                      </Documents>
+                    </div>
+                  </>
+                )}
+              </Formik>
+              {statusAutoTestPCR === FILE_STATUS_PHASE1.TO_UPLOAD && (
+                <button disabled={loading} className="border rounded-lg m-2 px-4 py-2" onClick={() => handleEmailClick("autoTestPCR")}>
+                  Relancer le volontaire
+                </button>
+              )}
+            </div>
+          </Col>
+          <Col md={6}>
+            <div className="flex row justify-center mx-2 my-1">
+              <h1 className="text-center pb-2">Règlement interieur</h1>
+              <select disabled={loading} className="form-control" value={statusRules} name="rules" onChange={(e) => needModal(e)}>
+                {options.map((o, i) => (
+                  <option key={i} value={o} label={translateFileStatusPhase1(o)}>
+                    {translateFileStatusPhase1(o)}
+                  </option>
+                ))}
+              </select>
+              {young.rulesFilesComment && <p>Commentaire : {young.rulesFilesComment}</p>}
+              <Formik
+                initialValues={dataRules}
+                validateOnChange={false}
+                validateOnBlur={false}
+                onSubmit={async (values) => {
+                  try {
+                    const { ok, code } = await api.put(`/referent/young/${young._id}/phase1Files/rules`, values);
+                    if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+                    toastr.success("Mis à jour!");
+                    updateYoung();
+                  } catch (e) {
+                    console.log(e);
+                    toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+                  }
+                }}>
+                {({ values, handleChange, handleSubmit }) => (
+                  <>
+                    <div className="flex flex-col p-2">
+                      <Documents>
+                        <h4>Document règlement intérieur</h4>
+                        <DndFileInput
+                          placeholder="un document justificatif"
+                          errorMessage="Vous devez téléverser un document justificatif"
+                          value={values.rulesFiles}
+                          source={(e) => api.get(`/referent/youngFile/${young._id}/rulesFiles/${e}`)}
+                          name="rulesFiles"
+                          onChange={async (e) => {
+                            const res = await api.uploadFile("/referent/file/rulesFiles", e.target.files, { youngId: young._id });
+                            if (res.code === "FILE_CORRUPTED") {
+                              return toastr.error(
+                                "Le fichier semble corrompu",
+                                "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                                { timeOut: 0 },
+                              );
+                            }
+                            if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                            // We update and save it instant.
+                            handleChange({ target: { value: res.data, name: "rulesFiles" } });
+                            handleSubmit();
+                          }}
+                        />
+                      </Documents>
+                    </div>
+                  </>
+                )}
+              </Formik>
+              {statusRules === FILE_STATUS_PHASE1.TO_UPLOAD && (
+                <button disabled={loading} className="border rounded-lg m-2 px-4 py-2" onClick={() => handleEmailClick("rules")}>
+                  Relancer le volontaire
+                </button>
+              )}
+            </div>
+          </Col>
+          <ModalConfirmWithMessage
+            isOpen={modal?.isOpen}
+            title={modal?.title}
+            message={modal?.message}
+            onChange={() => {
+              setModal({ isOpen: false, onConfirm: null }), setLoading(false);
+            }}
+            onConfirm={(message) => {
+              modal?.onConfirm(message);
+              setModal({ isOpen: false, onConfirm: null });
+            }}
+          />
+        </Row>
+      ) : (
+        <ScrollSection className="flex justify-between overflow-x-auto scrollbar-x pt-4">
+          <FileCard
+            name="Fiche sanitaire"
+            icon="sanitaire"
+            value={statusCohesionStayMedical}
+            onChange={(e) => needModal(e)}
+            files={medicalFileOptions}
+            filled={young.cohesionStayMedicalFileDownload === "true"}
+            color={young.cohesionStayMedicalFileDownload === "true" ? "bg-white text-indigo-700" : "bg-indigo-700 text-white"}
+            status={
+              young.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : young.cohesionStayMedicalFileDownload === "true" ? "Télécharger de nouveau" : "Non Téléchargée"
+            }
+          />
+          <FileCard
+            name="Droit à l'image"
+            icon="image"
+            value={statusImageRight}
+            onChange={(e) => needModal(e)}
+            files={options}
+            color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.imageRightFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
+            status={translateFileStatusPhase1(young.imageRightFilesStatus)}
+            onClick={() => handleEmailClick("imageRight")}>
+            <Formik
+              initialValues={dataImageRight}
+              validateOnChange={false}
+              validateOnBlur={false}
+              onSubmit={async (values) => {
+                try {
+                  const { ok, code } = await api.put(`/referent/young/${young._id}/phase1Files/imageRight`, values);
+                  if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+                  toastr.success("Mis à jour!");
+                  updateYoung();
+                } catch (e) {
+                  console.log(e);
+                  toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+                }
+              }}>
+              {({ values, handleChange, handleSubmit }) => (
+                <>
+                  <div className="flex flex-col p-2">
+                    <select
+                      disabled={loading}
+                      className="form-control"
+                      value={statusImageRight}
+                      name="imageRight"
+                      handleChange={(e) => {
+                        needModal(e), handleSubmit();
+                      }}>
+                      {options.map((o, i) => (
+                        <option key={i} value={o} label={translateFileStatusPhase1(o)}>
+                          {translateFileStatusPhase1(o)}
+                        </option>
+                      ))}
+                    </select>
+                    {young.imageRightFilesComment && <p>Commentaire : {young.imageRightFilesComment}</p>}
+                    <Select
+                      placeholder="Non renseigné"
+                      name="imageRight"
+                      values={values}
+                      handleChange={(e) => {
+                        handleChange(e), handleSubmit();
                       }}
+                      title="Accord"
+                      options={[
+                        { value: "true", label: "Oui" },
+                        { value: "false", label: "Non" },
+                      ]}
                     />
-                  </Documents>
-                </div>
-              </>
-            )}
-          </Formik>
-          {statusImageRight === FILE_STATUS_PHASE1.TO_UPLOAD && (
-            <button disabled={loading} className="border rounded-lg border-8 m-2 px-4 py-2" onClick={() => handleEmailClick("imageRight")}>
-              Relancer le volontaire
-            </button>
-          )}
-        </div>
-      </Col>
-      <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-        <div className="flex row justify-center mx-2 my-1">
-          <h1 className="text-center pb-2">Utilisation d'autotest</h1>
-          <select disabled={loading} className="form-control" value={statusAutoTestPCR} name="autoTestPCR" onChange={(e) => needModal(e)}>
-            {options.map((o, i) => (
-              <option key={i} value={o} label={translateFileStatusPhase1(o)}>
-                {translateFileStatusPhase1(o)}
-              </option>
-            ))}
-          </select>
-          {young.autoTestPCRFilesComment && <p>Commentaire : {young.autoTestPCRFilesComment}</p>}
-          <Formik
-            initialValues={dataAutoTestPCR}
-            validateOnChange={false}
-            validateOnBlur={false}
-            onSubmit={async (values) => {
-              try {
-                const { ok, code } = await api.put(`/referent/young/${young._id}/phase1Files/autoTestPCR`, values);
-                if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-                toastr.success("Mis à jour!");
-                updateYoung();
-              } catch (e) {
-                console.log(e);
-                toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-              }
-            }}>
-            {({ values, handleChange, handleSubmit }) => (
-              <>
-                <div className="flex flex-col p-2">
-                  <Select
-                    placeholder="Non renseigné"
-                    name="autoTestPCR"
-                    values={values}
-                    handleChange={(e) => {
-                      handleChange(e), handleSubmit();
-                    }}
-                    title="Autorisation"
-                    options={[
-                      { value: "true", label: "Oui" },
-                      { value: "false", label: "Non" },
-                    ]}
-                  />
-                  <Documents>
-                    <h4>Formulaire de consentement d&apos;autotest PCR</h4>
-                    <DndFileInput
-                      placeholder="un document justificatif"
-                      errorMessage="Vous devez téléverser un document justificatif"
-                      value={values.autoTestPCRFiles}
-                      source={(e) => api.get(`/referent/youngFile/${young._id}/autoTestPCRFiles/${e}`)}
-                      name="autoTestPCRFiles"
-                      onChange={async (e) => {
-                        const res = await api.uploadFile("/referent/file/autoTestPCRFiles", e.target.files, { youngId: young._id });
-                        if (res.code === "FILE_CORRUPTED") {
-                          return toastr.error(
-                            "Le fichier semble corrompu",
-                            "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                            { timeOut: 0 },
-                          );
-                        }
-                        if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                        // We update and save it instant.
-                        handleChange({ target: { value: res.data, name: "autoTestPCRFiles" } });
-                        handleSubmit();
+                    <Documents>
+                      <DndFileInput
+                        placeholder="un document justificatif"
+                        errorMessage="Vous devez téléverser un document justificatif"
+                        value={values.imageRightFiles}
+                        source={(e) => api.get(`/referent/youngFile/${young._id}/imageRightFiles/${e}`)}
+                        name="imageRightFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/imageRightFiles", e.target.files, { youngId: young._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 },
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "imageRightFiles" } });
+                          handleSubmit();
+                        }}
+                      />
+                    </Documents>
+                  </div>
+                </>
+              )}
+            </Formik>
+          </FileCard>
+          <FileCard
+            name="Utilisation d'autotest"
+            icon="autotest"
+            value={statusAutoTestPCR}
+            onChange={(e) => needModal(e)}
+            files={options}
+            filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"}
+            color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.rulesFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
+            status={translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
+            onClick={() => handleEmailClick("autoTestPCR")}>
+            <select disabled={loading} className="form-control" value={statusAutoTestPCR} name="autoTestPCR" onChange={(e) => needModal(e)}>
+              {options.map((o, i) => (
+                <option key={i} value={o} label={translateFileStatusPhase1(o)}>
+                  {translateFileStatusPhase1(o)}
+                </option>
+              ))}
+            </select>
+            {young.autoTestPCRFilesComment && <p>Commentaire : {young.autoTestPCRFilesComment}</p>}
+            <Formik
+              initialValues={dataAutoTestPCR}
+              validateOnChange={false}
+              validateOnBlur={false}
+              onSubmit={async (values) => {
+                try {
+                  const { ok, code } = await api.put(`/referent/young/${young._id}/phase1Files/autoTestPCR`, values);
+                  if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+                  toastr.success("Mis à jour!");
+                  updateYoung();
+                } catch (e) {
+                  console.log(e);
+                  toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+                }
+              }}>
+              {({ values, handleChange, handleSubmit }) => (
+                <>
+                  {/* <div className="flex flex-col p-2">
+                    <Select
+                      placeholder="Non renseigné"
+                      name="autoTestPCR"
+                      values={values}
+                      handleChange={(e) => {
+                        handleChange(e), handleSubmit();
                       }}
+                      title="Autorisation"
+                      options={[
+                        { value: "true", label: "Oui" },
+                        { value: "false", label: "Non" },
+                      ]}
                     />
-                  </Documents>
-                </div>
-              </>
-            )}
-          </Formik>
-          {statusAutoTestPCR === FILE_STATUS_PHASE1.TO_UPLOAD && (
-            <button disabled={loading} className="border rounded-lg border-8 m-2 px-4 py-2" onClick={() => handleEmailClick("autoTestPCR")}>
-              Relancer le volontaire
-            </button>
-          )}
-        </div>
-      </Col>
-      <Col md={6}>
-        <div className="flex row justify-center mx-2 my-1">
-          <h1 className="text-center pb-2">Règlement interieur</h1>
-          <select disabled={loading} className="form-control" value={statusRules} name="rules" onChange={(e) => needModal(e)}>
-            {options.map((o, i) => (
-              <option key={i} value={o} label={translateFileStatusPhase1(o)}>
-                {translateFileStatusPhase1(o)}
-              </option>
-            ))}
-          </select>
-          {young.rulesFilesComment && <p>Commentaire : {young.rulesFilesComment}</p>}
-          <Formik
-            initialValues={dataRules}
-            validateOnChange={false}
-            validateOnBlur={false}
-            onSubmit={async (values) => {
-              try {
-                const { ok, code } = await api.put(`/referent/young/${young._id}/phase1Files/rules`, values);
-                if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-                toastr.success("Mis à jour!");
-                updateYoung();
-              } catch (e) {
-                console.log(e);
-                toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-              }
-            }}>
-            {({ values, handleChange, handleSubmit }) => (
-              <>
-                <div className="flex flex-col p-2">
-                  <Documents>
-                    <h4>Document règlement intérieur</h4>
-                    <DndFileInput
-                      placeholder="un document justificatif"
-                      errorMessage="Vous devez téléverser un document justificatif"
-                      value={values.rulesFiles}
-                      source={(e) => api.get(`/referent/youngFile/${young._id}/rulesFiles/${e}`)}
-                      name="rulesFiles"
-                      onChange={async (e) => {
-                        const res = await api.uploadFile("/referent/file/rulesFiles", e.target.files, { youngId: young._id });
-                        if (res.code === "FILE_CORRUPTED") {
-                          return toastr.error(
-                            "Le fichier semble corrompu",
-                            "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                            { timeOut: 0 },
-                          );
-                        }
-                        if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                        // We update and save it instant.
-                        handleChange({ target: { value: res.data, name: "rulesFiles" } });
-                        handleSubmit();
-                      }}
-                    />
-                  </Documents>
-                </div>
-              </>
-            )}
-          </Formik>
-          {statusRules === FILE_STATUS_PHASE1.TO_UPLOAD && (
-            <button disabled={loading} className="border rounded-lg border-8 m-2 px-4 py-2" onClick={() => handleEmailClick("rules")}>
-              Relancer le volontaire
-            </button>
-          )}
-        </div>
-      </Col>
-      <ModalConfirmWithMessage
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        onChange={() => {
-          setModal({ isOpen: false, onConfirm: null }), setLoading(false);
-        }}
-        onConfirm={(message) => {
-          modal?.onConfirm(message);
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-      />
-    </Row>
+                    <Documents>
+                      <h4>Formulaire de consentement d&apos;autotest PCR</h4>
+                      <DndFileInput
+                        placeholder="un document justificatif"
+                        errorMessage="Vous devez téléverser un document justificatif"
+                        value={values.autoTestPCRFiles}
+                        source={(e) => api.get(`/referent/youngFile/${young._id}/autoTestPCRFiles/${e}`)}
+                        name="autoTestPCRFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/autoTestPCRFiles", e.target.files, { youngId: young._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 },
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "autoTestPCRFiles" } });
+                          handleSubmit();
+                        }}
+                      />
+                    </Documents>
+                  </div> */}
+                </>
+              )}
+            </Formik>
+          </FileCard>
+          <FileCard
+            name="Règlement intérieur"
+            icon="reglement"
+            filled={young.rulesFilesStatus !== "TO_UPLOAD"}
+            color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.autoTestPCRFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
+            status={translateFileStatusPhase1(young.rulesFilesStatus)}
+            onClick={() => handleEmailClick("rules")}>
+            <select disabled={loading} className="form-control" value={statusRules} name="rules" onChange={(e) => needModal(e)}>
+              {options.map((o, i) => (
+                <option key={i} value={o} label={translateFileStatusPhase1(o)}>
+                  {translateFileStatusPhase1(o)}
+                </option>
+              ))}
+            </select>
+            {young.rulesFilesComment && <p>Commentaire : {young.rulesFilesComment}</p>}
+            <Formik
+              initialValues={dataRules}
+              validateOnChange={false}
+              validateOnBlur={false}
+              onSubmit={async (values) => {
+                try {
+                  const { ok, code } = await api.put(`/referent/young/${young._id}/phase1Files/rules`, values);
+                  if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+                  toastr.success("Mis à jour!");
+                  updateYoung();
+                } catch (e) {
+                  console.log(e);
+                  toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+                }
+              }}>
+              {({ values, handleChange, handleSubmit }) => (
+                <>
+                  {/* <div className="flex flex-col p-2">
+                    <Documents>
+                      <h4>Document règlement intérieur</h4>
+                      <DndFileInput
+                        placeholder="un document justificatif"
+                        errorMessage="Vous devez téléverser un document justificatif"
+                        value={values.rulesFiles}
+                        source={(e) => api.get(`/referent/youngFile/${young._id}/rulesFiles/${e}`)}
+                        name="rulesFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/rulesFiles", e.target.files, { youngId: young._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 },
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "rulesFiles" } });
+                          handleSubmit();
+                        }}
+                      />
+                    </Documents>
+                  </div> */}
+                </>
+              )}
+            </Formik>
+          </FileCard>
+        </ScrollSection>
+      )}
+    </>
   );
 }
+
+const ScrollSection = styled.section`
+  ::-webkit-scrollbar {
+    height: 10px; /* height of horizontal scrollbar ← You're missing this */
+    border: 2px solid #fff;
+    background: rgb(249 250 251);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    height: 5px;
+    background-color: #d5d5d5;
+    border-radius: 10px;
+  }
+`;
