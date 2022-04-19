@@ -25,7 +25,6 @@ export default function Item({ title, placeholder, values, name, handleChange, t
       <>
         <Field
           disabled={disabled}
-          className="form-control"
           value={translate(values[name])}
           name={name}
           onChange={handleChange}
@@ -38,11 +37,11 @@ export default function Item({ title, placeholder, values, name, handleChange, t
     );
   };
   return (
-    <Row className="detail">
-      <Col md={4}>
+    <Row className="flex border flex-col rounded-lg rounded-grey-300 m-2 p-1">
+      <div className="text-gray-500">
         <label>{title}</label>
-      </Col>
-      <Col md={8}>{renderInput()}</Col>
+      </div>
+      {renderInput()}
     </Row>
   );
 }

@@ -72,6 +72,12 @@ const Schema = new mongoose.Schema({
       description: "Nombre de places disponibles",
     },
   },
+  statut: {
+    type: String,
+    documentation: {
+      description: "Statut",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

@@ -17,7 +17,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 
-const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION"];
+const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUT"];
 
 export default function List() {
   const [center, setCenter] = useState(null);
@@ -89,6 +89,7 @@ export default function List() {
                       Observations: data.observations,
                       "Créé lé": formatLongDateFR(data.createdAt),
                       "Mis à jour le": formatLongDateFR(data.updatedAt),
+                      "statut": data.statut,
                     };
                   });
                 }}
@@ -148,6 +149,19 @@ export default function List() {
                   sortBy="asc"
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Statut"
+                  componentId="STATUT"
+                  dataField="statut"
+                  react={{ and: FILTERS.filter((e) => e !== "STATUT") }}
+                  title=""
+                  URLParams={true}
+                  sortBy="asc"
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
                 />
                 <DeleteFilters />
               </FilterRow>

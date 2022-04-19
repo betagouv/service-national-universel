@@ -18,7 +18,7 @@ export default function AddressInputV2({
   touched,
   validateField,
   countryVisible = false,
-  onChangeCountry = () => {},
+  onChangeCountry = () => { },
   countryByDefault = "",
   required = false,
   departAndRegionVisible = false,
@@ -123,13 +123,14 @@ export default function AddressInputV2({
       {suggestion.status !== "FOUND" ? (
         <Row>
           {countryVisible && (
-            <Col md={12}>
-              <Label>Pays</Label>
+            <Col md={12} className="flex border flex-col rounded-lg rounded-grey-300 m-2 p-1">
+              <div className="text-gray-500">
+                <Label>Pays</Label>
+              </div>
               <Field
                 disabled={disabled}
                 as="select"
                 validate={(v) => required && !v && requiredMessage}
-                className="form-control"
                 placeholder="Pays"
                 name={keys.country}
                 value={values[keys.country]}
@@ -152,12 +153,13 @@ export default function AddressInputV2({
               <ErrorMessage errors={errors} touched={touched} name={keys.country} />
             </Col>
           )}
-          <Col md={12} style={{ marginTop: countryVisible ? 15 : 0 }}>
-            <Label>Adresse</Label>
+          <Col md={12} className="flex border flex-col rounded-lg rounded-grey-300 m-2 p-1" style={{ marginTop: countryVisible ? 15 : 0 }}>
+            <div className="text-gray-500">
+              <Label>Adresse</Label>
+            </div>
             <Field
               disabled={disabled}
               validate={(v) => required && !v && requiredMessage}
-              className="form-control"
               placeholder="Adresse"
               name={keys.address}
               value={values[keys.address]}
@@ -169,12 +171,13 @@ export default function AddressInputV2({
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.address} />
           </Col>
-          <Col md={6} style={{ marginTop: 15 }}>
-            <Label>Code postal</Label>
+          <Col className="flex border flex-col rounded-lg rounded-grey-300 m-2 p-1" md={6} style={{ marginTop: 15 }}>
+            <div className="text-gray-500">
+              <Label>Code postal</Label>
+            </div>
             <Field
               disabled={disabled}
               validate={(v) => required && !v && requiredMessage}
-              className="form-control"
               placeholder="Code postal"
               name={keys.zip}
               value={values[keys.zip]}
@@ -186,12 +189,13 @@ export default function AddressInputV2({
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.zip} />
           </Col>
-          <Col md={6} style={{ marginTop: 15 }}>
-            <Label>Ville</Label>
+          <Col className="flex border flex-col rounded-lg rounded-grey-300 m-2 p-1" md={6} style={{ marginTop: 15 }}>
+            <div className="text-gray-500">
+              <Label>Ville</Label>
+            </div>
             <Field
               disabled={disabled}
               validate={(v) => required && !v && requiredMessage}
-              className="form-control"
               placeholder="Ville"
               name={keys.city}
               value={values[keys.city]}
@@ -211,7 +215,6 @@ export default function AddressInputV2({
                   as="select"
                   validate={(v) => !v && requiredMessage}
                   disabled
-                  className="form-control"
                   placeholder="Département"
                   name={keys.department}
                   value={values[keys.department]}>

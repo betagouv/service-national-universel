@@ -97,44 +97,13 @@ export default function Edit(props) {
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas enregistrer ce centre car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Row>
-              <Col md={6} style={{ marginBottom: "20px" }}>
+              <Col md={5} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxHeadTitle>Informations générales sur le centre</BoxHeadTitle>
+                  <BoxHeadTitle>Informations générales</BoxHeadTitle>
                   <BoxContent direction="column">
+                    <div> Nom </div>
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" handleChange={handleChange} />
-                    <Item disabled={user.role !== "admin"} title="Code 2022" values={values} name="code2022" handleChange={handleChange} />
-                    <Select
-                      name="pmr"
-                      values={values}
-                      handleChange={handleChange}
-                      title="Accessibilité aux personnes à mobilité réduite"
-                      options={[
-                        { value: "true", label: "Oui" },
-                        { value: "false", label: "Non" },
-                      ]}
-                      required
-                      errors={errors}
-                      touched={touched}
-                    />
-                    <MultiSelectWithTitle
-                      required
-                      errors={errors}
-                      touched={touched}
-                      title="Séjour(s) de cohésion concerné(s)"
-                      value={values.cohorts}
-                      onChange={handleChange}
-                      name="cohorts"
-                      options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
-                      placeholder="Sélectionner un ou plusieurs séjour de cohésion"
-                    />
-                  </BoxContent>
-                </Box>
-              </Col>
-              <Col md={6} style={{ marginBottom: "20px" }}>
-                <Box>
-                  <BoxHeadTitle>Adresse du centre</BoxHeadTitle>
-                  <BoxContent direction="column">
+                    <div> Adresse </div>
                     <AddressInput
                       keys={{
                         country: "country",
@@ -153,6 +122,42 @@ export default function Edit(props) {
                       touched={touched}
                       validateField={validateField}
                       required
+                    />
+                    <div> Code </div>
+                    <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" handleChange={handleChange} />
+                    <Item disabled={user.role !== "admin"} title="Code 2022" values={values} name="code2022" handleChange={handleChange} />
+                    <div> Accessibilité PMR </div>
+                    <Select
+                      name="pmr"
+                      values={values}
+                      handleChange={handleChange}
+                      title="Accessibilité aux personnes à mobilité réduite"
+                      options={[
+                        { value: "true", label: "Oui" },
+                        { value: "false", label: "Non" },
+                      ]}
+                      required
+                      errors={errors}
+                      touched={touched}
+                    />
+                  </BoxContent>
+                </Box>
+              </Col>
+              <Col md={7} style={{ marginBottom: "20px" }}>
+                <Box>
+                  <BoxHeadTitle>Adresse du centre</BoxHeadTitle>
+                  <BoxContent direction="column">
+
+                    <MultiSelectWithTitle
+                      required
+                      errors={errors}
+                      touched={touched}
+                      title="Séjour(s) de cohésion concerné(s)"
+                      value={values.cohorts}
+                      onChange={handleChange}
+                      name="cohorts"
+                      options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
+                      placeholder="Sélectionner un ou plusieurs séjour de cohésion"
                     />
                   </BoxContent>
                 </Box>
