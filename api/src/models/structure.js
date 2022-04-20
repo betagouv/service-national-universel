@@ -127,7 +127,7 @@ const Schema = new mongoose.Schema({
       "Agrément Service Civique",
       "Association complémentaire de l'enseignement public",
       "Associations d'usagers du système de santé",
-      "Association sportive affiliées à une fédération sportive agrée par l'Etat",
+      "Association sportive affiliée à une fédération sportive agréée par l'Etat",
       "Agrément des associations de protection de l'environnement",
       "Association agréée de sécurité civile",
       "Autre agrément",
