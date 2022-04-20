@@ -121,7 +121,7 @@ const Schema = new mongoose.Schema({
       "Service de l'Etat",
       "Autre établissement public",
       "Etablissement de santé privée d'intérêt collectif à but non lucratif",
-      "Entreprise agrée ESUS",
+      "Entreprise agréée ESUS",
       "Autre structure privée à but non lucratif",
       "Agrément Jeunesse et Education Populaire",
       "Agrément Service Civique",
