@@ -1,3 +1,11 @@
+## [1.72.2](https://github.com/betagouv/service-national-universel/compare/v1.72.1...v1.72.2) (2022-04-20)
+
+
+### Bug Fixes
+
+* add knowledge base public ([#1486](https://github.com/betagouv/service-national-universel/issues/1486)) ([64deb32](https://github.com/betagouv/service-national-universel/commit/64deb32f9ff1cfcb37e20f924f4ec8ce20375f7d))
+* unauthorized on accept cgu ([ec1e2cb](https://github.com/betagouv/service-national-universel/commit/ec1e2cb1956b7c9e170a8ffed51079d012ecaabc))
+
 ## [1.72.1](https://github.com/betagouv/service-national-universel/compare/v1.72.0...v1.72.1) (2022-04-19)
 
 
