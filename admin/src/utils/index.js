@@ -37,15 +37,15 @@ export const corpsEnUniforme = ["SDIS (Service départemental d'Incendie et de S
 export const legalStatus = ["PUBLIC", "PRIVATE", "ASSOCIATION", "OTHER"];
 export const typesStructure = {
   PUBLIC: ["Collectivité territoriale", "Etablissement scolaire", "Etablissement public de santé", "Corps en uniforme", "Service de l'Etat", "Autre établissement public"],
-  PRIVATE: ["Etablissement de santé privée d'intérêt collectif à but non lucratif", "Entreprise agrée ESUS", "Autre structure privée à but non lucratif"],
+  PRIVATE: ["Etablissement de santé privée d'intérêt collectif à but non lucratif", "Entreprise agréée ESUS", "Autre structure privée à but non lucratif"],
   ASSOCIATION: [
     "Agrément Jeunesse et Education Populaire",
     "Agrément Service Civique",
     "Association complémentaire de l'enseignement public",
     "Associations d'usagers du système de santé",
-    "Association sportive affiliées à une fédération sportive agrée par l'Etat",
+    "Association sportive affiliée à une fédération sportive agréée par l'Etat",
     "Agrément des associations de protection de l'environnement",
-    "Association agrée de sécurité civile",
+    "Association agréée de sécurité civile",
     "Autre agrément",
   ],
 };
@@ -53,7 +53,7 @@ export const sousTypesStructure = {
   "Collectivité territoriale": ["Commune", "EPCI", "Conseil départemental", "Conseil régional", "Autre"],
   "Etablissement scolaire": ["Collège", "Lycée", "Autre"],
   "Etablissement public de santé": ["EHPAD", "Centre hospitalier", "Autre"],
-  "Corps en uniforme": ["Pompiers", "Police", "Gendarmerie", "Armée"],
+  "Corps en uniforme": ["Pompiers", "Police", "Gendarmerie", "Armées"],
 };
 
 export const confirmMessageChangePhase1Presence = (value) => {
