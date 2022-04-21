@@ -111,7 +111,9 @@ export default function PanelView({ onChange, value }) {
       </div>
       <Info title="La structure">
         <div dangerouslySetInnerHTML={{ __html: htmlCleaner(value.description) }} />
-        <Details title="Statut" value={translate(value.legalStatus)} />
+        <Details title="Statut juridique" value={translate(value.legalStatus)} />
+        <Details title="Type" value={value.types?.map(translate)?.join(", ")} />
+        <Details title="Sous-type" value={translate(value.sousType)} />
         {value.legalStatus === "ASSOCIATION" ? <Details title="Agréments" value={value.associationTypes?.length > 0 && value.associationTypes.join(",")} /> : null}
         {value.legalStatus === "PUBLIC" ? (
           <div>
