@@ -562,8 +562,9 @@ const updateApplication = async (mission, fromUser = null) => {
 };
 
 const getCcOfYoung = ({ template, young }) => {
+  if (!young || !template) return [];
   let cc = [];
-  if (Object.values(SENDINBLUE_TEMPLATES.young).includes(template) && young) {
+  if (Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
     if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
     if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
   }
