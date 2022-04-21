@@ -26,7 +26,7 @@ export default function Nav({ filter, updateFilter }) {
         <div className="flex flex-1 flex-col lg:flex-row mb-4 border-b">
           <nav className="px-3 flex flex-1  ">
             <TabItem name="region" setCurrentTab={setCurrentTab} active={currentTab === "region"}>
-              Region
+              {user.role === ROLES.REFERENT_REGION ? "Ma région" : "Équipe régionale"}
             </TabItem>
             <TabItem name="department" setCurrentTab={setCurrentTab} active={currentTab === "department"}>
               <FilterDepartment onChange={(event) => updateFilter({ department: [event.target.value] })} value={filter.department} filter={filter} />
