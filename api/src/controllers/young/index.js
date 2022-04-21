@@ -35,6 +35,7 @@ const {
   updatePlacesBus,
   updatePlacesSessionPhase1,
   translateFileStatusPhase1,
+  getCcOfYoung,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -291,9 +292,12 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
     data.set({ statusPhase3: "VALIDATED", phase3TutorNote: value.phase3TutorNote });
     await data.save({ fromUser: req.user });
 
-    await sendTemplate(SENDINBLUE_TEMPLATES.young.VALIDATE_PHASE3, {
+    let template = SENDINBLUE_TEMPLATES.young.VALIDATE_PHASE3;
+    let cc = getCcOfYoung({ template, young: data });
+    await sendTemplate(template, {
       emailTo: [{ name: `${data.firstName} ${data.lastName}`, email: data.email }],
       params: { cta: `${config.APP_URL}/phase3` },
+      cc,
     });
 
     return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
@@ -406,9 +410,13 @@ router.post("/:id/archive", passport.authenticate("referent", { session: false, 
       lastName: "Reliquat 2021 " + young.lastName.replace("Reliquat 2021 ", ""),
     });
     await young.save({ fromUser: req.user });
-    await sendTemplate(SENDINBLUE_TEMPLATES.young.ARCHIVED, {
+
+    let template = SENDINBLUE_TEMPLATES.young.ARCHIVED;
+    let cc = getCcOfYoung({ template, young });
+    await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: previousEmail }],
       params: { cta: `${config.APP_URL}/inscription/profil` },
+      cc,
     });
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
@@ -619,12 +627,15 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         },
       });
     }
-    await sendTemplate(SENDINBLUE_TEMPLATES.young.CHANGE_COHORT, {
+    let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
+    let cc = getCcOfYoung({ template, young });
+    await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
         motif: cohortChangeReason,
         cohortPeriod: translateCohort(cohort),
       },
+      cc,
     });
 
     res.status(200).send({ ok: true, data: young });
@@ -663,25 +674,12 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     let buttonCta = cta || config.APP_URL;
     if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
     if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) buttonCta = `${config.APP_URL}/inscription/coordonnees`;
-    let cc = [];
 
-    if (
-      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_VALIDATION ||
-      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION ||
-      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST ||
-      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED ||
-      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED ||
-      template === SENDINBLUE_TEMPLATES.young.PHASE_1_FOLLOW_UP_MEDICAL_FILE ||
-      template === SENDINBLUE_TEMPLATES.young.PHASE_1_FOLLOW_UP_DOCUMENT
-    ) {
-      if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
-      if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
-    }
-
+    let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName, type_document },
-      cc: cc,
+      cc,
     });
 
     return res.status(200).send({ ok: true });
@@ -876,10 +874,9 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     await young.save({ fromUser: req.user });
 
     if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
-      let cc = [];
-      if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
-      if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION, {
+      let template = SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION;
+      let cc = getCcOfYoung({ template, young });
+      await sendTemplate(template, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: { type_document: translateFileStatusPhase1(document) },
         cc,
