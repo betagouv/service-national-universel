@@ -6,7 +6,7 @@ import { ROLES } from "../../../utils";
 
 export default function Nav({ filter, updateFilter }) {
   const user = useSelector((state) => state.Auth.user);
-  const [currentTab, setCurrentTab] = useState("department");
+  const [currentTab, setCurrentTab] = useState();
 
   useEffect(() => {
     if (currentTab === "region") {
@@ -20,6 +20,12 @@ export default function Nav({ filter, updateFilter }) {
     }
   }, [currentTab]);
 
+  useEffect(() => {
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      setCurrentTab("department");
+    } else setCurrentTab("region");
+  }, [user]);
+
   return (
     <>
       <div className="flex flex-col w-full">
@@ -29,7 +35,11 @@ export default function Nav({ filter, updateFilter }) {
               {user.role === ROLES.REFERENT_REGION ? "Ma région" : "Équipe régionale"}
             </TabItem>
             <TabItem name="department" setCurrentTab={setCurrentTab} active={currentTab === "department"}>
-              <FilterDepartment onChange={(event) => updateFilter({ department: [event.target.value] })} value={filter.department} filter={filter} />
+              {user.role === ROLES.REFERENT_REGION ? (
+                <FilterDepartment onChange={(event) => updateFilter({ department: [event.target.value] })} value={filter.department} filter={filter} />
+              ) : (
+                user.department
+              )}
             </TabItem>
           </nav>
         </div>
