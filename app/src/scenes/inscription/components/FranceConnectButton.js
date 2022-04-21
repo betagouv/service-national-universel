@@ -22,7 +22,7 @@ export default function FranceConnectButton({ callback, beforeRedirect }) {
       <div style={{ cursor: "pointer", marginBottom: "8px" }} onClick={redirectToFranceConnect} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
         {hover ? <ImageHovered /> : <Image />}
       </div>
-      <Url href="https://franceconnect.gouv.fr" target="_blank">
+      <Url href="https://franceconnect.gouv.fr" target="_blank" rel="noreferrer">
         Qu’est-ce que FranceConnect&nbsp;?
       </Url>
     </div>

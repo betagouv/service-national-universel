@@ -70,7 +70,7 @@ export default function Index() {
             <h1>Identifiez vos compétences et explorez vos intérêts</h1>
             <p>Complétez vos expériences, qu&apos;elles soient professionnelles ou personnelles, puis évaluez vos compétences.</p>
 
-            <VioletButton href={urlWithScheme(diagorienteUrl)} target="_blank" onClick={() => plausibleEvent("Compte/CTA - Accéder Diagoriente")}>
+            <VioletButton href={urlWithScheme(diagorienteUrl)} target="_blank" rel="noreferrer" onClick={() => plausibleEvent("Compte/CTA - Accéder Diagoriente")}>
               Accéder à Diagoriente
             </VioletButton>
           </div>

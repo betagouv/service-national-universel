@@ -45,7 +45,7 @@ export default function ProgramCard({ program, image, enableToggle = true }) {
       <h4>{program.name}</h4>
       <div className="desc">{renderText()}</div>
       <div style={{ marginTop: "1rem" }}>
-        <SeeMore href={urlWithScheme(program.url)} target="_blank">
+        <SeeMore href={urlWithScheme(program.url)} target="_blank" rel="noreferrer">
           DÉCOUVRIR
         </SeeMore>
       </div>
