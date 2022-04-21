@@ -1,6 +1,7 @@
 const Joi = require("joi");
 const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib/roles");
 const { isYoung } = require("../utils");
+const { SESSION_STATUS } = require("snu-lib/constants")
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
 const idRegex = /^[0-9a-fA-F]{24}$/;
@@ -272,6 +273,7 @@ const sessionPhase1Keys = {
   waitingList: Joi.array().items(Joi.string().allow(null, "")),
   placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
   placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+  status: Joi.string().allow(null, "").valid(SESSION_STATUS.DRAFT, SESSION_STATUS.VALIDATED),
 };
 
 function validateSessionPhase1(session) {

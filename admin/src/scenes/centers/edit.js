@@ -6,7 +6,7 @@ import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate, translateSessionStatus, SESSION_STATUS, status } from "../../utils";
+import { translate, translateSessionStatus, SESSION_STATUS } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
@@ -16,6 +16,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import AddressInput from "../../components/addressInputV2";
 import MultiSelect from "../../components/Multiselect";
 import Error, { requiredMessage } from "../../components/errorMessage";
+import { SessionStatus } from "@sentry/types";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -24,7 +25,7 @@ export default function Edit(props) {
   const isNew = !props?.match?.params?.id;
   const user = useSelector((state) => state.Auth.user);
   const [sessionShow, setsessionShow] = useState(null)
-  const [sessionStatus, setSessionStatus] = useState()
+  const [SessionStatus, setSessionStatus] = useState(null)
 
   async function init() {
     if (isNew) return setDefaultValue(null);
@@ -34,17 +35,22 @@ export default function Edit(props) {
 
     if (!center || !center?.cohorts || !center?.cohorts?.length) return;
 
+    const optionSessionStatus = []
+    Object.values(SESSION_STATUS).map((status) => (
+      optionSessionStatus.push({ value: `${status}`, label: `${translateSessionStatus(status)}` })
+    ))
+    setSessionStatus(optionSessionStatus)
+
     for (const cohort of center.cohorts) {
       const sessionPhase1Response = await api.get(`/cohesion-center/${id}/cohort/${cohort}/session-phase1`);
       if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
-      obj[sessionPhase1Response.data.cohort] = sessionPhase1Response.data.placesTotal;
+      obj[sessionPhase1Response.data.cohort] = { placesTotal: sessionPhase1Response.data.placesTotal, status: sessionPhase1Response.data.status }
     }
     setDefaultValue(obj);
   }
 
   useEffect(() => {
     init();
-    setSessionStatus(Object.values(SESSION_STATUS))
   }, []);
 
   const updateSessions = async (newValues) => {
@@ -55,10 +61,10 @@ export default function Edit(props) {
       if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
       sessionToUpdate.push(sessionPhase1Response.data);
     }
-
+    console.log(newValues)
     for (const session of sessionToUpdate) {
       if (session.placesTotal !== newValues[session.cohort]) {
-        const { ok, code } = await api.put(`/session-phase1/${session._id}`, { placesTotal: newValues[session.cohort], status: newValues[status] });
+        const { ok, code } = await api.put(`/session-phase1/${session._id}`, { placesTotal: newValues[session.cohort].placesTotal, status: newValues[session.cohort].status });
         if (!ok) return toastr.error(`Oups, une erreur est survenue lors de la mise à jour de la session ${session.cohort}`, translate(code));
       }
     }
@@ -78,7 +84,7 @@ export default function Edit(props) {
           else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
 
           const { ok, code, data } = values._id ? await api.put(`/cohesion-center/${values._id}`, values) : await api.post("/cohesion-center", values);
-          await updateSessions(values);
+          await updateSessions(values, status);
 
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));
@@ -91,6 +97,7 @@ export default function Edit(props) {
       }}>
       {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <div>
+
           <Header>
             <Title>{defaultValue ? values.name : "Création d'un centre"}</Title>
             <LoadingButton onClick={handleSubmit} loading={loading}>
@@ -172,46 +179,38 @@ export default function Edit(props) {
                             </>
                           ))}
                         </div>
-                        <div className="flex justify-start  ml-5 mt-8">
-                          <div className="border w-1/4 p-1 rounded-lg">
-                            <div> Capacite d'acceuil</div>
-                            <Field
-                              disabled={false}
-                              value={translate(values[sessionShow])}
-                              name={sessionShow}
-                              onChange={handleChange}
-                              type={"text"}
-                              validate={(v) => required && !v && requiredMessage}
-                              placeholder={"Nombre de place" || sessionShow}
-                            />
+                        {sessionShow ? (
+                          <div className="flex justify-start  ml-5 mt-8">
+                            <div className="border w-1/4 p-1 rounded-lg">
+                              <div> Capacite d'acceuil</div>
+                              <ElementsSejour
+                                key={`${sessionShow}Places`}
+                                title={''}
+                                values={values[sessionShow].placesTotal}
+                                name={`${sessionShow}.placesTotal`}
+                                placeholder={values[sessionShow].placesTotal}
+                                handleChange={handleChange}
+                                required
+                                errors={errors}
+                                touched={touched}
+                              />
+                            </div>
+                            <div className="w-full">
+                              {console.log(values)}
+                              <Select
+                                name={`${sessionShow}.status`}
+                                values={values[sessionShow].status}
+                                handleChange={handleChange}
+                                title=""
+                                options={SessionStatus}
+                                required
+                                errors={errors}
+                                touched={touched}
+                              />
+                            </div>
                           </div>
-                          <div className="border p-1 rounded-lg w-1/2">
-                            <div> Statut</div>
-                            {console.log("df: ", defaultValue.status)}
-                            <select name="status" value={defaultValue.status} className="w-full" onChange={handleChange}>
-                              {sessionStatus.map((status, index) => (
-                                <option value={status} key={index} > {translateSessionStatus(status)} </option>
-                              ))
-                              }
-                            </select>
-                          </div>
-                        </div>
+                        ) : (null)}
                       </div>
-                      {/* <BoxContent direction="column">
-                        {(values.cohorts || []).map((cohort) => (
-                          <Item
-                            key={cohort}
-                            title={cohort}
-                            values={values}
-                            name={cohort}
-                            placeholder="Nombre de place"
-                            handleChange={handleChange}
-                            required
-                            errors={errors}
-                            touched={touched}
-                          />
-                        ))}
-                      </BoxContent> */}
                     </>) : (null)}
                 </Box>
               </Col>
@@ -243,6 +242,22 @@ const MultiSelectWithTitle = ({ title, value, onChange, name, options, placehold
   );
 };
 
+const ElementsSejour = ({ title, placeholder, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) => {
+  return (
+    <>
+      <Field
+        disabled={disabled}
+        value={translate(values[name])}
+        name={name}
+        onChange={handleChange}
+        type={type}
+        validate={(v) => required && !v && requiredMessage}
+        placeholder={placeholder}
+      />
+      {errors && touched && <Error errors={errors} touched={touched} name={name} />}
+    </>
+  )
+}
 const Wrapper = styled.div`
   padding: 2rem;
   li {

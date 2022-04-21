@@ -89,7 +89,7 @@ export default function List() {
                       Observations: data.observations,
                       "Créé lé": formatLongDateFR(data.createdAt),
                       "Mis à jour le": formatLongDateFR(data.updatedAt),
-                      "statut": data.statut,
+                      "status": data.status,
                     };
                   });
                 }}
@@ -155,7 +155,7 @@ export default function List() {
                   className="dropdown-filter"
                   placeholder="Statut"
                   componentId="STATUT"
-                  dataField="statut"
+                  dataField="status"
                   react={{ and: FILTERS.filter((e) => e !== "STATUT") }}
                   title=""
                   URLParams={true}

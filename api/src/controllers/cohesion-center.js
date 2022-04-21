@@ -180,7 +180,6 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const data = await CohesionCenterModel.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
   } catch (error) {
     capture(error);
