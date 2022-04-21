@@ -38,12 +38,15 @@ export default function Phase3({ young, onChange }) {
     try {
       const { ok } = await api.put(`/young/update_phase3/${young._id}`, information);
       if (!ok) toastr.error("Oups, une erreur est survenue !")
-      else toastr.success("Mis à jour!")
-      setEdit(false)
+      else {
+        toastr.success("Mis à jour!")
+        setEdit(false)
+        onChange()
+      }
     } catch (e) {
       console.log(e)
-      return toastr.error("Oups, une erreur est survenue lors du changement de l'information de la phase 3")
       setEdit(false)
+      return toastr.error("Oups, une erreur est survenue lors du changement de l'information de la phase 3")
     }
   }
 
@@ -87,15 +90,15 @@ export default function Phase3({ young, onChange }) {
                 </Row>
                 <Row className="pl-8 pb-2">
                   <Col>
-                    <Details title="Structure" value={information.phase3StructureName} edit={edit} name={"phase3StructureName"} onChange={handleChange} />
-                    <Details title="Descriptif" value={information.phase3MissionDescription} edit={edit} name={"phase3MissionDescription"} onChange={handleChange} />
+                    <Details title="Structure" value={young.phase3StructureName} valueEdit={information.phase3StructureName} edit={edit} name={"phase3StructureName"} onChange={handleChange} />
+                    <Details title="Descriptif" value={young.phase3MissionDescription} valueEdit={information.phase3MissionDescription} edit={edit} name={"phase3MissionDescription"} onChange={handleChange} />
                   </Col>
                   <div className="border"></div>
                   <Col>
-                    <Details title="Prénom" value={information.phase3TutorFirstName} edit={edit} name={"phase3TutorFirstName"} onChange={handleChange} />
-                    <Details title="Nom" value={information.phase3TutorLastName} edit={edit} name={"phase3TutorLastName"} onChange={handleChange} />
-                    <Details title="E-mail" value={information.phase3TutorEmail} edit={edit} name={"phase3TutorEmail"} onChange={handleChange} />
-                    <Details title="Téléphone" value={information.phase3TutorPhone} edit={edit} name={"phase3TutorPhone"} onChange={handleChange} />
+                    <Details title="Prénom" value={young.phase3TutorFirstName} valueEdit={information.phase3TutorFirstName} edit={edit} name={"phase3TutorFirstName"} onChange={handleChange} />
+                    <Details title="Nom" value={young.phase3TutorLastName} valueEdit={information.phase3TutorLastName} edit={edit} name={"phase3TutorLastName"} onChange={handleChange} />
+                    <Details title="E-mail" value={young.phase3TutorEmail} valueEdit={information.phase3TutorEmail} edit={edit} name={"phase3TutorEmail"} onChange={handleChange} />
+                    <Details title="Téléphone" value={young.phase3TutorPhone} valueEdit={information.phase3TutorPhone} edit={edit} name={"phase3TutorPhone"} onChange={handleChange} />
                   </Col>
                 </Row>
                 <Row className="pb-2 flex justify-center">
@@ -119,13 +122,13 @@ export default function Phase3({ young, onChange }) {
   );
 }
 
-const Details = ({ title, value, edit, onChange, name }) => {
+const Details = ({ title, value, valueEdit, edit, onChange, name }) => {
   if (typeof value === "function") value = value();
   return (
     <div className="flex p-2 items-center h-12 ">
       <div className="w-1/4 text-brand-detail_title ">{title} : </div>
       {edit ? (
-        <input type="text" value={value} name={name} className="w-3/4 rounded border mr-4 h-8 pl-1" onChange={onChange} />
+        <input type="text" required value={valueEdit} name={name} className="w-3/4 rounded border mr-4 h-8 pl-1" onChange={onChange} />
       ) : (
         <div className="w-3/4 mr-2">{value}</div>
       )}
