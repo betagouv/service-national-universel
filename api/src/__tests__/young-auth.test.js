@@ -4,7 +4,7 @@ const getAppHelper = require("./helpers/app");
 const getNewYoungFixture = require("./fixtures/young");
 const { createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
 const { dbConnect, dbClose } = require("./helpers/db");
-const faker = require("faker");
+const { faker } = require("@faker-js/faker");
 const crypto = require("crypto");
 
 const VALID_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
