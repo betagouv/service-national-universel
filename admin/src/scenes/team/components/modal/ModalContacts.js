@@ -151,7 +151,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
                       Téléphone
                     </label>
                     <input
-                      required
+                      required={!edit.contactMail}
                       disabled={isLoading}
                       className="w-full disabled:bg-gray-200"
                       name="contactPhone"
@@ -173,7 +173,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
                       Adresse email
                     </label>
                     <input
-                      required
+                      required={!edit.contactPhone}
                       disabled={isLoading}
                       className="w-full disabled:bg-gray-200"
                       name="contactMail"
