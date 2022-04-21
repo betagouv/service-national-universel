@@ -114,14 +114,14 @@ export default function PanelView({ onChange, value }) {
         <Details title="Statut juridique" value={translate(value.legalStatus)} />
         <Details title="Type" value={value.types?.map(translate)?.join(", ")} />
         <Details title="Sous-type" value={translate(value.sousType)} />
-        {value.legalStatus === "ASSOCIATION" ? <Details title="Agréments" value={value.associationTypes?.length > 0 && value.associationTypes.join(",")} /> : null}
+        {/* {value.legalStatus === "ASSOCIATION" ? <Details title="Agréments" value={value.associationTypes?.length > 0 && value.associationTypes.join(",")} /> : null}
         {value.legalStatus === "PUBLIC" ? (
           <div>
             <Details title="Type" value={value.structurePubliqueType} />
             {["Service de l'Etat", "Etablissement public"].includes(value.structurePubliqueType) ? <Details title="Service" value={value.structurePubliqueEtatType} /> : null}
           </div>
         ) : null}
-        {value.legalStatus === "PRIVATE" ? <Details title="Type" value={value.structurePriveeType} /> : null}
+        {value.legalStatus === "PRIVATE" ? <Details title="Type" value={value.structurePriveeType} /> : null} */}
         <Details title="Région" value={value.region} />
         <Details title="Dép." value={value.department} />
         <Details title="Ville" value={value.city} />
