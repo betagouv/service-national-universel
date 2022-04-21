@@ -6,7 +6,7 @@ import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate } from "../../utils";
+import { translate, translateSessionStatus, SESSION_STATUS, status } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
@@ -23,6 +23,8 @@ export default function Edit(props) {
   const history = useHistory();
   const isNew = !props?.match?.params?.id;
   const user = useSelector((state) => state.Auth.user);
+  const [sessionShow, setsessionShow] = useState(null)
+  const [sessionStatus, setSessionStatus] = useState()
 
   async function init() {
     if (isNew) return setDefaultValue(null);
@@ -42,6 +44,7 @@ export default function Edit(props) {
 
   useEffect(() => {
     init();
+    setSessionStatus(Object.values(SESSION_STATUS))
   }, []);
 
   const updateSessions = async (newValues) => {
@@ -55,7 +58,7 @@ export default function Edit(props) {
 
     for (const session of sessionToUpdate) {
       if (session.placesTotal !== newValues[session.cohort]) {
-        const { ok, code } = await api.put(`/session-phase1/${session._id}`, { placesTotal: newValues[session.cohort] });
+        const { ok, code } = await api.put(`/session-phase1/${session._id}`, { placesTotal: newValues[session.cohort], status: newValues[status] });
         if (!ok) return toastr.error(`Oups, une erreur est survenue lors de la mise à jour de la session ${session.cohort}`, translate(code));
       }
     }
@@ -97,7 +100,7 @@ export default function Edit(props) {
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas enregistrer ce centre car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Row>
-              <Col md={5} style={{ marginBottom: "20px" }}>
+              <Col className="mb-10">
                 <Box>
                   <BoxHeadTitle>Informations générales</BoxHeadTitle>
                   <BoxContent direction="column">
@@ -143,11 +146,10 @@ export default function Edit(props) {
                   </BoxContent>
                 </Box>
               </Col>
-              <Col md={7} style={{ marginBottom: "20px" }}>
+              <Col className="mb-10">
                 <Box>
-                  <BoxHeadTitle>Adresse du centre</BoxHeadTitle>
+                  <BoxHeadTitle>Par séjour</BoxHeadTitle>
                   <BoxContent direction="column">
-
                     <MultiSelectWithTitle
                       required
                       errors={errors}
@@ -160,33 +162,59 @@ export default function Edit(props) {
                       placeholder="Sélectionner un ou plusieurs séjour de cohésion"
                     />
                   </BoxContent>
+                  {values.cohorts?.length ? (
+                    <>
+                      <div>
+                        <div className="flex justify-start ml-10 border-bottom mb-2">
+                          {(values.cohorts || []).map((cohort, index) => (
+                            <>
+                              <div key={index} className={`mx-5 mb-2 ${sessionShow === cohort ? "text-snu-purple-300 border-bottom border-snu-purple-300" : null}`} onClick={() => { setsessionShow(cohort) }}> {cohort} </div>
+                            </>
+                          ))}
+                        </div>
+                        <div className="flex justify-start  ml-5 mt-8">
+                          <div className="border w-1/4 p-1 rounded-lg">
+                            <div> Capacite d'acceuil</div>
+                            <Field
+                              disabled={false}
+                              value={translate(values[sessionShow])}
+                              name={sessionShow}
+                              onChange={handleChange}
+                              type={"text"}
+                              validate={(v) => required && !v && requiredMessage}
+                              placeholder={"Nombre de place" || sessionShow}
+                            />
+                          </div>
+                          <div className="border p-1 rounded-lg w-1/2">
+                            <div> Statut</div>
+                            <select name="status" value={defaultValue.status} className="w-full" onChange={handleChange}>
+                              {sessionStatus.map((status, index) => (
+                                <option value={status} key={index} > {translateSessionStatus(status)} </option>
+                              ))
+                              }
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      {/* <BoxContent direction="column">
+                        {(values.cohorts || []).map((cohort) => (
+                          <Item
+                            key={cohort}
+                            title={cohort}
+                            values={values}
+                            name={cohort}
+                            placeholder="Nombre de place"
+                            handleChange={handleChange}
+                            required
+                            errors={errors}
+                            touched={touched}
+                          />
+                        ))}
+                      </BoxContent> */}
+                    </>) : (null)}
                 </Box>
               </Col>
             </Row>
-            {values.cohorts?.length ? (
-              <Row>
-                <Col md={6} style={{ marginBottom: "20px" }}>
-                  <Box>
-                    <BoxHeadTitle>Nombre de places disponibles par séjour</BoxHeadTitle>
-                    <BoxContent direction="column">
-                      {(values.cohorts || []).map((cohort) => (
-                        <Item
-                          key={cohort}
-                          title={cohort}
-                          values={values}
-                          name={cohort}
-                          placeholder="Nombre de place"
-                          handleChange={handleChange}
-                          required
-                          errors={errors}
-                          touched={touched}
-                        />
-                      ))}
-                    </BoxContent>
-                  </Box>
-                </Col>
-              </Row>
-            ) : null}
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               <LoadingButton onClick={handleSubmit} loading={loading}>

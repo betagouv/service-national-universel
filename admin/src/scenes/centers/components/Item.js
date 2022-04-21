@@ -37,7 +37,7 @@ export default function Item({ title, placeholder, values, name, handleChange, t
     );
   };
   return (
-    <Row className="flex border flex-col rounded-lg rounded-grey-300 m-2 p-1">
+    <Row className="flex border flex-col justify-items-start m-1 rounded-lg rounded-grey-300 p-1">
       <div className="text-gray-500">
         <label>{title}</label>
       </div>

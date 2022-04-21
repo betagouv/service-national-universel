@@ -210,6 +210,7 @@ const updatePlacesSessionPhase1 = async (sessionPhase1) => {
   return sessionPhase1;
 };
 
+
 const updateCenterDependencies = async (center) => {
   const youngs = await YoungModel.find({ cohesionCenterId: center._id });
   youngs.forEach(async (young) => {
