@@ -83,11 +83,9 @@ const cancelApplications = async (mission) => {
     await application.save();
 
     if (sendinblueTemplate) {
-      let cc = [];
       const young = await YoungObject.findById(application.youngId);
-      if (young) {
-        cc = getCcOfYoung({ template: sendinblueTemplate, young });
-      }
+      let cc = getCcOfYoung({ template: sendinblueTemplate, young });
+
       await sendTemplate(sendinblueTemplate, {
         emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
         params: {
