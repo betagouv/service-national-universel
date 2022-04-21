@@ -1,10 +1,10 @@
 import React from "react";
 import styled from "styled-components";
+import { urlWithScheme } from "../utils";
 
 export default function SocialIcons({ value }) {
   function websiteUrl(website) {
-    if (!/^https?:\/\//i.test(website)) return `http://${website}`;
-    return website;
+    return urlWithScheme(website);
   }
   function facebookUrl(facebook) {
     if (!facebook.includes("/")) return `https://facebook.com/${facebook}`;

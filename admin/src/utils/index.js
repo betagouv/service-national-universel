@@ -187,3 +187,8 @@ export const htmlCleaner = (text) => {
   });
   return clean;
 };
+
+export function urlWithScheme(url) {
+  if (!/^https?:\/\//i.test(url)) return `http://${url}`;
+  return url;
+}
