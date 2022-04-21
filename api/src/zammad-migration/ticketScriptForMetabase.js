@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "../../.env-staging" });
+require("dotenv").config({ path: "../../.env-prod" });
 require("../mongo");
 const client = require("./database");
 const YoungModel = require("../models/young");
@@ -10,7 +10,7 @@ const { fr } = require("date-fns/locale");
 const { ENVIRONMENT } = require("../config");
 
 // function call, because eslint is yelling
-const migrateTickets = async ({ force } = { force: false }) => {
+const migrateTickets = async ({ force } = { force: true }) => {
   console.log("MONGO", process.env.MONGO_URL);
   if (ENVIRONMENT !== "production" && !force) return console.log("no migration zammad");
   // Mes étapes
@@ -137,7 +137,7 @@ const migrateTickets = async ({ force } = { force: false }) => {
           if (!tagId) continue;
           tagsIds.push({ id: tagId.zammadId, name: tagName });
           tagNames.push(tagName);
-          console.log("TAGS", tagNames);
+          //console.log("TAGS", tagNames);
         }
       }
       // 7. Rassembler toutes les données et créer un nouveau document dans ma table Ticket ou update un document existant
@@ -168,11 +168,11 @@ const migrateTickets = async ({ force } = { force: false }) => {
         lastContactEmitterAt: ticket.last_contact_customer_at,
         lastContactAgentAt: ticket.last_contact_agent_at,
         feedback: feedback || "neutre",
-        tagIds: tagsIds,
-        tagName1: tagNames[0] || null,
-        tagName2: tagNames[1] || null,
-        tagName3: tagNames[2] || null,
-        tagName4: tagNames[3] || null,
+        // tagIds: tagsIds,
+        // tagName1: tagNames[0] || null,
+        // tagName2: tagNames[1] || null,
+        // tagName3: tagNames[2] || null,
+        // tagName4: tagNames[3] || null,
         messages: messagesArray,
         agentInChargeId,
         agentInChargeZammadId: ticket.owner_id,
@@ -182,13 +182,12 @@ const migrateTickets = async ({ force } = { force: false }) => {
       //console.log("TICKET BODY OKAY ?", ticketBody);
       const ticketExisting = await TicketModel.findOne({ zammadId: ticket.id });
       if (ticketExisting) {
-        console.log("TICKET EXISTING !");
         ticketExisting.set(ticketBody);
         const ticketSaved = await ticketExisting.save();
-        console.log("TICKET ----->", ticketSaved?.title);
+        console.log("TICKET UPDATED", ticketSaved?.title);
       } else {
         const ticketCreated = await TicketModel.create(ticketBody);
-        console.log("TICKET CREATED", ticketCreated?.title);
+        console.log("TICKET CREATED ✨", ticketCreated?.title);
         if (!ticketCreated) {
           console.log("ERROR IN TICKET CREATION");
         }

@@ -1,5 +1,6 @@
 import React from "react";
 import FileIcon from "../../../assets/FileIcon";
+import { translateFileStatusPhase1 } from "../../../utils";
 
 export default function FileCard({ name, status, icon, color, onClick, children, tw, loading, files, value, onChange }) {
   return (
@@ -8,7 +9,7 @@ export default function FileCard({ name, status, icon, color, onClick, children,
         <select disabled={loading} className="form-control" value={value} name="cohesionStayMedical" onChange={onChange}>
           {files?.map((o, i) => (
             <option key={i} value={o.value} label={o.label}>
-              {o.label}
+              {o.label ? o.label : translateFileStatusPhase1(o)}
             </option>
           ))}
         </select>

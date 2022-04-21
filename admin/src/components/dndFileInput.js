@@ -3,13 +3,17 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { requiredMessage } from "./errorMessage";
 import DownloadButton from "./buttons/DownloadButton";
+import RoundDownloadButton from "./buttons/RoundDownloadButton";
+import IconButton from "./buttons/IconButton";
 import ModalConfirm from "./modals/ModalConfirm";
+import download from "../assets/download2.svg";
+import deleteIcon from "../assets/delete.svg";
 
 function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default function DndFileInput({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required }) {
+export default function DndFileInput({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required, tw }) {
   const [filesList, setFilesList] = useState(value || []);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
@@ -32,14 +36,16 @@ export default function DndFileInput({ value, onChange, name, errorMessage = req
 
   return (
     <>
-      <div style={{}}>
+      <div className={tw}>
         {filesList.map((e, i) => (
-          <File key={i}>
+          <>
+            {/* <File key={e}>
             <FileName>{getFileName(e)}</FileName>
             <div>
               <span onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })}>Supprimer</span>
-              <DownloadLink
-                key={i}
+              <DownloadButton
+                className="bg-blue-600"
+                key={e}
                 source={() => {
                   console.log(e);
                   return source(getFileName(e));
@@ -47,9 +53,23 @@ export default function DndFileInput({ value, onChange, name, errorMessage = req
                 title={`Télécharger`}
               />
             </div>
-          </File>
+          </File> */}
+            <File key={e} className="mx-1 bg-gray-50">
+              <FileName className="mr-2">{getFileName(e)}</FileName>
+              <IconButton icon={deleteIcon} bgColor="bg-blue-600" onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })} />
+              <RoundDownloadButton
+                icon={download}
+                bgColor="bg-blue-600"
+                source={() => {
+                  console.log(e);
+                  return source(getFileName(e));
+                }}
+                title={`Télécharger`}
+              />
+            </File>
+          </>
         ))}
-        <ImageInput id="file-drop">
+        <ImageInput id="file-drop" className="mx-1">
           <Field
             type="file"
             accept=".jpg, .jpeg, .png, .pdf"
@@ -60,10 +80,20 @@ export default function DndFileInput({ value, onChange, name, errorMessage = req
             validate={(v) => (required && (!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
             onChange={(e) => onAdd(e.target.files)}
           />
-          <>
-            <span style={{ color: "#5850ec" }}>Téléversez {placeholder}</span>
+          <div className="flex flex-col items-center">
+            <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M21 5H5C3.93913 5 2.92172 5.42143 2.17157 6.17157C1.42143 6.92172 1 7.93913 1 9V29M1 29V33C1 34.0609 1.42143 35.0783 2.17157 35.8284C2.92172 36.5786 3.93913 37 5 37H29C30.0609 37 31.0783 36.5786 31.8284 35.8284C32.5786 35.0783 33 34.0609 33 33V25M1 29L10.172 19.828C10.9221 19.0781 11.9393 18.6569 13 18.6569C14.0607 18.6569 15.0779 19.0781 15.828 19.828L21 25M33 17V25M33 25L29.828 21.828C29.0779 21.0781 28.0607 20.6569 27 20.6569C25.9393 20.6569 24.9221 21.0781 24.172 21.828L21 25M21 25L25 29M29 5H37M33 1V9M21 13H21.02"
+                stroke="#9CA3AF"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+
+            <span className="text-blue-600">Téléversez {placeholder}</span>
             <span style={{ display: "block", fontSize: 13 }}>PDF, PNG ou JPG jusqu&apos;à 5 Mo</span>
-          </>
+          </div>
         </ImageInput>
       </div>
       <ModalConfirm
@@ -87,7 +117,7 @@ const FileName = styled.span`
 `;
 
 const ImageInput = styled.label`
-  border: 1px dashed #d2d6dc;
+  border: 2px dashed #d2d6dc;
   padding: 25px;
   text-align: center;
   outline: 0;
@@ -97,7 +127,6 @@ const ImageInput = styled.label`
   font-size: 14px;
   line-height: 1.7;
   cursor: pointer;
-  margin-bottom: 15px;
   img {
     height: 40px;
     display: block;
