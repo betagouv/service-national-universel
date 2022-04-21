@@ -372,7 +372,7 @@ export default function Signup() {
                     de la plateforme du Service national universel
                   </label>
                 </div>
-                <p className="text-xs text-red-500" errors={errors} touched={touched} name="user.acceptCGU" />
+                <p className="text-xs text-red-500">{errors.user?.acceptCGU}</p>
               </div>
               <LoadingButton
                 className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
