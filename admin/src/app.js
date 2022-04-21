@@ -44,6 +44,7 @@ import { ROLES, ROLES_LIST } from "./utils";
 
 import "./index.css";
 import ModalCGU from "./components/modals/ModalCGU";
+import Team from "./scenes/team";
 
 if (environment === "production") {
   Sentry.init({
@@ -159,6 +160,7 @@ const Home = () => {
             <RestrictedRoute path="/boite-de-reception" component={Inbox} />
             <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
+            {environment !== "production" ? <RestrictedRoute path="/team" component={Team} /> : null}
             <RestrictedRoute path="/" component={renderDashboard} />
           </Switch>
         </div>

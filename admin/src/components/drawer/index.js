@@ -125,6 +125,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
+      <DrawerTab to="/team" title="Mon équipe" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
