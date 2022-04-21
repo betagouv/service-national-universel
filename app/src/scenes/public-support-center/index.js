@@ -30,7 +30,7 @@ const articles = [
     title: "Dans ma valise : matériel (trousseau)",
     emoji: "🧳",
     body: `Que dois-je emporter ? Un trousseau indicatif et national sera publié sur votre espace volontaire...`,
-    url: `${supportURL}/base-de-connaissance/le-snu-est-il-payant-frais-1`,
+    url: `${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`,
   },
   {
     title: "Je me connecte à mon compte",
