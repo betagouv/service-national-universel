@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const NodeClam = require("clamscan");
 const fs = require("fs");
+const FileType = require("file-type");
 
 const config = require("../../config");
 const { capture } = require("../../sentry");
@@ -180,7 +181,12 @@ router.post("/file/:key", passport.authenticate("young", { session: false, failW
         currentFile = currentFile[currentFile.length - 1];
       }
       const { name, tempFilePath, mimetype } = currentFile;
-      if (!["image/jpeg", "image/png", "application/pdf"].includes(mimetype)) return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+      const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+      const validTypes = ["image/jpeg", "image/png", "application/pdf"];
+      if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
+        fs.unlinkSync(tempFilePath);
+        return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+      }
 
       if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
         const clamscan = await new NodeClam().init({
@@ -188,6 +194,7 @@ router.post("/file/:key", passport.authenticate("young", { session: false, failW
         });
         const { isInfected } = await clamscan.isInfected(tempFilePath);
         if (isInfected) {
+          fs.unlinkSync(tempFilePath);
           return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: "File is infected" });
         }
       }
