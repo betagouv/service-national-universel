@@ -33,10 +33,11 @@ const {
   // updateApplicationsWithYoungOrMission,
   updatePlacesBus,
   updatePlacesSessionPhase1,
+  translateFileStatusPhase1,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
-const { validateYoung, validateId, validateFirstName } = require("../../utils/validator");
+const { validateYoung, validateId, validateFirstName, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
 const { canDeleteYoung } = require("snu-lib/roles");
@@ -524,6 +525,11 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       goalIsReached = false;
     }
 
+    // si le volontaire change pour la première fois de cohorte, on stocke sa cohorte d'origine
+    if (!young.originalCohort) {
+      young.set({ originalCohort: young.cohort });
+    }
+
     if (goalIsReached === true) {
       young.set({
         cohort,
@@ -602,12 +608,13 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       missionName: Joi.string().allow(null, ""),
       structureName: Joi.string().allow(null, ""),
       cta: Joi.string().allow(null, ""),
+      type_document: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     // eslint-disable-next-line no-unused-vars
-    const { id, template, message, prevStatus, missionName, structureName, cta } = value;
+    const { id, template, message, prevStatus, missionName, structureName, cta, type_document } = value;
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -625,7 +632,9 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION ||
       template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST ||
       template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED ||
-      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED
+      template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED ||
+      template === SENDINBLUE_TEMPLATES.young.PHASE_1_FOLLOW_UP_MEDICAL_FILE ||
+      template === SENDINBLUE_TEMPLATES.young.PHASE_1_FOLLOW_UP_DOCUMENT
     ) {
       if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
       if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
@@ -633,7 +642,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
 
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName },
+      params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName, type_document },
       cc: cc,
     });
 
@@ -794,6 +803,52 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     let data = await YoungObject.findOne({ email: value });
     return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const keys = ["cohesionStayMedical", "autoTestPCR", "imageRight", "rules"];
+    const { error: documentError, value: document } = Joi.string()
+      .required()
+      .valid(...keys)
+      .validate(req.params.document);
+    if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let values = {};
+    if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
+      const { error: bodyError, value: tempValue } = validatePhase1Document(req.body, document);
+      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
+      values = tempValue;
+      values[`${document}FilesStatus`] = "WAITING_VERIFICATION";
+      values[`${document}FilesComment`] = undefined;
+    } else if (document === "cohesionStayMedical") {
+      values.cohesionStayMedicalFileDownload = "true";
+    } else {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    young.set(values);
+    await young.save({ fromUser: req.user });
+
+    if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
+      let cc = [];
+      if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+      if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: { type_document: translateFileStatusPhase1(document) },
+        cc,
+      });
+    }
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

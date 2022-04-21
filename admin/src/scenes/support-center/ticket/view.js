@@ -79,7 +79,7 @@ export default function View(props) {
     if (!message) return setSending(false);
     const id = props.match?.params?.id;
     await api.put(`/zammad-support-center/ticket/${id}`, { message, ticket });
-    if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
+    if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR || user.role === ROLES.HEAD_CENTER || user.role === ROLES.VISITOR) {
       const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message });
       if (!ok) console.log("ERROR", code);
     }

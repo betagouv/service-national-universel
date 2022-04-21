@@ -1,3 +1,74 @@
+## [1.72.2](https://github.com/betagouv/service-national-universel/compare/v1.72.1...v1.72.2) (2022-04-20)
+
+
+### Bug Fixes
+
+* add knowledge base public ([#1486](https://github.com/betagouv/service-national-universel/issues/1486)) ([64deb32](https://github.com/betagouv/service-national-universel/commit/64deb32f9ff1cfcb37e20f924f4ec8ce20375f7d))
+* unauthorized on accept cgu ([ec1e2cb](https://github.com/betagouv/service-national-universel/commit/ec1e2cb1956b7c9e170a8ffed51079d012ecaabc))
+
+## [1.72.1](https://github.com/betagouv/service-national-universel/compare/v1.72.0...v1.72.1) (2022-04-19)
+
+
+### Bug Fixes
+
+* **admin:** article pour les référents ([aebab79](https://github.com/betagouv/service-national-universel/commit/aebab795b36cb4851f06514797041c66f8958258))
+* **admin:** url articles besoin d'aide ([ef59473](https://github.com/betagouv/service-national-universel/commit/ef59473a9c2f4a574459706124c3f4eeedc1693a))
+* **app:** wording public besoin d'aide ([87dfba8](https://github.com/betagouv/service-national-universel/commit/87dfba81792ec72ea41db629ef0042a4b384043b))
+
+# [1.72.0](https://github.com/betagouv/service-national-universel/compare/v1.71.0...v1.72.0) (2022-04-14)
+
+
+### Bug Fixes
+
+* **admin:** add profile link & departmentReferentPhase2Link to zammood ([#1477](https://github.com/betagouv/service-national-universel/issues/1477)) ([de1c858](https://github.com/betagouv/service-national-universel/commit/de1c858380e9d14483fb4e2a59d73a1a816f0fe4))
+
+
+### Features
+
+* **admin,app:** cohorte `à venir` ([#1450](https://github.com/betagouv/service-national-universel/issues/1450)) ([57608e1](https://github.com/betagouv/service-national-universel/commit/57608e1ffb77e84a00f119b41d1c805b1f3154e4))
+
+# [1.71.0](https://github.com/betagouv/service-national-universel/compare/v1.70.0...v1.71.0) (2022-04-13)
+
+
+### Bug Fixes
+
+* **app:** Information téléversement du règlement intérieur ([#1475](https://github.com/betagouv/service-national-universel/issues/1475)) ([4cee56f](https://github.com/betagouv/service-national-universel/commit/4cee56fd6b1610a362ed5b4334a80ecefc543634))
+
+
+### Features
+
+* export jeunes scolarisés dans un département / région  ([#1472](https://github.com/betagouv/service-national-universel/issues/1472)) ([428eecd](https://github.com/betagouv/service-national-universel/commit/428eecd6ddc9e3a0f566fd1f1c9877192650d262))
+
+# [1.70.0](https://github.com/betagouv/service-national-universel/compare/v1.69.0...v1.70.0) (2022-04-12)
+
+
+### Bug Fixes
+
+* **admin:** open form to all visitor to new support ([#1471](https://github.com/betagouv/service-national-universel/issues/1471)) ([5db6320](https://github.com/betagouv/service-national-universel/commit/5db6320cb5e213cd247c884c0bc80e679cc4aab4))
+* Pièces justificatives phase 1 ([#1454](https://github.com/betagouv/service-national-universel/issues/1454)) ([233fe76](https://github.com/betagouv/service-national-universel/commit/233fe76fc9274e380efb874951a12f4d179a7055))
+* **admin:** historic JVA structure/mission ([#1469](https://github.com/betagouv/service-national-universel/issues/1469)) ([8e74ffa](https://github.com/betagouv/service-national-universel/commit/8e74ffa2154e05ee81321042686edea19388f7fa))
+* **api:** MIG JVA SNU add check JVA structure to endpoint ([#1468](https://github.com/betagouv/service-national-universel/issues/1468)) ([aefd170](https://github.com/betagouv/service-national-universel/commit/aefd1708ab28833785a059506bb6e28768d185e6))
+
+
+### Features
+
+* **admin,api:** historic contract ([#1464](https://github.com/betagouv/service-national-universel/issues/1464)) ([31a89f0](https://github.com/betagouv/service-national-universel/commit/31a89f09170fce435f883a22c0af296a0c9209d5))
+
+# [1.69.0](https://github.com/betagouv/service-national-universel/compare/v1.68.1...v1.69.0) (2022-04-11)
+
+
+### Bug Fixes
+
+* **admin:** MIG JVA / SNU : bloquer la possibilité pour les référents de modifier la fiche d’une mission JVA ([#1466](https://github.com/betagouv/service-national-universel/issues/1466)) ([286cc6f](https://github.com/betagouv/service-national-universel/commit/286cc6f1aa8c1c5a5a2000170aad0d45009bc3dc))
+* **admin:** panel inscription supprimée ([#1463](https://github.com/betagouv/service-national-universel/issues/1463)) ([9864b54](https://github.com/betagouv/service-national-universel/commit/9864b544639eadbad7f829b491be3411510ca069))
+* **admin:** retour a la ligne et retour chariot ([#1467](https://github.com/betagouv/service-national-universel/issues/1467)) ([8da5f88](https://github.com/betagouv/service-national-universel/commit/8da5f88167cad8b9fd20e460a92099e798079fc8))
+* **app:** home screen abandon inscription ([#1458](https://github.com/betagouv/service-national-universel/issues/1458)) ([fced7fe](https://github.com/betagouv/service-national-universel/commit/fced7fe0ae957896bbb1d0bcf6a81999f0a96bc2))
+
+
+### Features
+
+* add original cohort view ([#1453](https://github.com/betagouv/service-national-universel/issues/1453)) ([11bdc35](https://github.com/betagouv/service-national-universel/commit/11bdc3541d41235a909b3ef5934e9d9290bcadbc))
+
 ## [1.68.1](https://github.com/betagouv/service-national-universel/compare/v1.68.0...v1.68.1) (2022-04-08)
 
 

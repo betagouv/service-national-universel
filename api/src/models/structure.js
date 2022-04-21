@@ -100,15 +100,74 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // statut juridique
+  // todo : enlever OTHER
   legalStatus: {
     type: String,
-    default: "ASSOCIATION",
     enum: ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"],
     documentation: {
       description: "Statut juridique",
     },
   },
 
+  // type de structure
+  types: {
+    type: [String],
+    enum: [
+      "Collectivité territoriale",
+      "Etablissement scolaire",
+      "Etablissement public de santé",
+      "Corps en uniforme",
+      "Service de l'Etat",
+      "Autre établissement public",
+      "Etablissement de santé privée d'intérêt collectif à but non lucratif",
+      "Entreprise agréée ESUS",
+      "Autre structure privée à but non lucratif",
+      "Agrément Jeunesse et Education Populaire",
+      "Agrément Service Civique",
+      "Association complémentaire de l'enseignement public",
+      "Associations d'usagers du système de santé",
+      "Association sportive affiliée à une fédération sportive agréée par l'Etat",
+      "Agrément des associations de protection de l'environnement",
+      "Association agréée de sécurité civile",
+      "Autre agrément",
+    ],
+    documentation: {
+      description: "Statut juridique",
+    },
+  },
+
+  // sous type de structure
+  sousType: {
+    type: String,
+    enum: [
+      // Collectivité territoriale
+      "Commune",
+      "EPCI",
+      "Conseil départemental",
+      "Conseil régional",
+      "Autre",
+      // Etablissement scolaire
+      "Collège",
+      "Lycée",
+      // "Autre",
+      // Etablissement public de santé
+      "EHPAD",
+      "Centre hospitalier",
+      // "Autre",
+      // Corps en uniforme
+      "Pompiers",
+      "Police",
+      "Gendarmerie",
+      "Armée",
+      "Armées",
+    ],
+    documentation: {
+      description: "Statut juridique",
+    },
+  },
+
+  // todo clean a partir de cette ligne...
   associationTypes: {
     type: [String],
     documentation: {
@@ -134,6 +193,8 @@ const Schema = new mongoose.Schema({
       description: "Type de structure privée, si applicable",
     },
   },
+  // todo ...jusque ici
+
   address: {
     type: String,
     documentation: {

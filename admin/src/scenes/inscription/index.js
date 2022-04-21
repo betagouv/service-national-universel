@@ -27,6 +27,7 @@ import {
   ROLES,
   colors,
   departmentLookUp,
+  department2region,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -37,6 +38,7 @@ import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
+import DeletedInscriptionPanel from "./deletedPanel";
 
 const FILTERS = [
   "SEARCH",
@@ -61,6 +63,7 @@ const FILTERS = [
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
+  const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } }, track_total_hits: true });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -195,6 +198,91 @@ export default function Inscription() {
                     });
                   }}
                 />
+                {user.role === ROLES.REFERENT_DEPARTMENT && (
+                  <ExportComponent
+                    title="Exporter les inscrits scolarisés dans le département"
+                    defaultQuery={getExportQuery}
+                    exportTitle="Incriptions"
+                    index="young-having-school-in-department/inscriptions"
+                    react={{ and: FILTERS }}
+                    transform={async (data) => {
+                      let all = data;
+                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                      if (schoolsId?.length) {
+                        const { responses } = await api.esQuery("school", {
+                          query: { bool: { must: { ids: { values: schoolsId } } } },
+                          size: ES_NO_LIMIT,
+                        });
+                        if (responses.length) {
+                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                        }
+                      }
+                      return all.map((data) => {
+                        return {
+                          _id: data._id,
+                          Cohorte: data.cohort,
+                          Prénom: data.firstName,
+                          Nom: data.lastName,
+                          Département: data.department,
+                          Situation: translate(data.situation),
+                          Niveau: translate(data.grade),
+                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                          "UAI de l'établissement": data.esSchool?.uai,
+                          Statut: translate(data.status),
+                          "Statut Phase 1": translate(data.statusPhase1),
+                        };
+                      });
+                    }}
+                  />
+                )}
+                {user.role === ROLES.REFERENT_REGION && (
+                  <ExportComponent
+                    title="Exporter les volontaires inscrits scolarisés dans la région"
+                    defaultQuery={getExportQuery}
+                    exportTitle="Incriptions"
+                    index="young-having-school-in-region/inscriptions"
+                    react={{ and: FILTERS }}
+                    transform={async (data) => {
+                      let all = data;
+                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                      if (schoolsId?.length) {
+                        const { responses } = await api.esQuery("school", {
+                          query: { bool: { must: { ids: { values: schoolsId } } } },
+                          size: ES_NO_LIMIT,
+                        });
+                        if (responses.length) {
+                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                        }
+                      }
+                      return all.map((data) => {
+                        return {
+                          _id: data._id,
+                          Cohorte: data.cohort,
+                          Prénom: data.firstName,
+                          Nom: data.lastName,
+                          Département: data.department,
+                          Situation: translate(data.situation),
+                          Niveau: translate(data.grade),
+                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                          "Région de l'établissement": department2region[departmentLookUp[data.esSchool?.region]] || department2region[data.schoolDepartment],
+                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                          "UAI de l'établissement": data.esSchool?.uai,
+                          Statut: translate(data.status),
+                          "Statut Phase 1": translate(data.statusPhase1),
+                        };
+                      });
+                    }}
+                  />
+                )}
               </div>
             </Header>
             <Filter>
@@ -458,7 +546,11 @@ export default function Inscription() {
               />
             </ResultTable>
           </div>
-          <Panel value={young} onChange={() => setYoung(null)} />
+          {young !== null && young.status === YOUNG_STATUS.DELETED ? (
+            <DeletedInscriptionPanel value={young} onChange={() => setYoung(null)} />
+          ) : (
+            <Panel value={young} onChange={() => setYoung(null)} />
+          )}
         </div>
       </ReactiveBase>
     </div>

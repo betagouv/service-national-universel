@@ -5,13 +5,13 @@ export const structureArticles = [
     title: "Livret d'accueil structure",
     emoji: "🏠",
     body: `Découvrez en quelques minutes les éléments de prise en main...`,
-    url: `${supportURL}/base-de-connaissance/livret-daccueil-structure-1`,
+    url: `${supportURL}/base-de-connaissance/livret-daccueil-structure`,
   },
   {
     title: "Je crée une nouvelle mission",
     emoji: "📇",
     body: "Vidéo",
-    url: `${supportURL}/base-de-connaissance/je-cree-une-nouvelle-mission-1`,
+    url: `${supportURL}/base-de-connaissance/je-cree-une-nouvelle-mission`,
   },
   {
     title: "Je remplis et envoie le contrat d'engagement",
@@ -26,19 +26,19 @@ export const referentArticles = [
     title: "Livret d'accueil référent",
     emoji: "🦺",
     body: `Découvrez en quelques minutes les éléments de prise en main...`,
-    url: `${supportURL}/base-de-connaissance/livret-daccueil-referent-1`,
+    url: `${supportURL}/base-de-connaissance/livret-daccueil-referent`,
   },
   {
-    title: "La fiche mission et ses actions",
+    title: "Le parcours d'une MIG",
     emoji: "📇",
-    body: "J'accède à la fiche mission...",
-    url: `${supportURL}/base-de-connaissance/la-fiche-mission-et-ses-actions`,
+    body: "La publication d'une MIG...",
+    url: `${supportURL}/base-de-connaissance/phase-2-le-parcours-dune-mig`,
   },
   {
-    title: "Phase 3 : Le parcours de l'engagement",
+    title: "J'accède à mon tableau de bord",
     emoji: "🌟",
-    body: `Optionnelle, la phase 3 vous permet de poursuivre votre parcours...`,
-    url: `${supportURL}/base-de-connaissance/phase-3-le-parcours-de-lengagement-1`,
+    body: `Ce tutoriel vous montre comment accéder aux différents onglets en fonction des filtres établis...`,
+    url: `${supportURL}/base-de-connaissance/jaccede-a-mon-tableau-de-bord-referents`,
   },
 ];
 
@@ -47,13 +47,13 @@ export const adminArticles = [
     title: "Livret d'accueil référent",
     emoji: "🦺",
     body: `Découvrez en quelques minutes les éléments de prise en main...`,
-    url: `${supportURL}/base-de-connaissance/livret-daccueil-referent-1`,
+    url: `${supportURL}/base-de-connaissance/livret-daccueil-referent`,
   },
   {
     title: "Livret d'accueil structure",
     emoji: "🏠",
     body: `Découvrez en quelques minutes les éléments de prise en main...`,
-    url: `${supportURL}/base-de-connaissance/livret-daccueil-structure-1`,
+    url: `${supportURL}/base-de-connaissance/livret-daccueil-structure`,
   },
   {
     title: "Livret d'accueil volontaire",

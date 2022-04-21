@@ -75,6 +75,8 @@ function validateStructure(structure) {
       networkId: Joi.string().allow(null, ""),
       networkName: Joi.string().allow(null, ""),
       legalStatus: Joi.string().allow(null, ""),
+      types: Joi.array().items(Joi.string().allow(null, "")),
+      sousType: Joi.string().allow(null, ""),
       associationTypes: Joi.array().items(Joi.string().allow(null, "")),
       structurePubliqueType: Joi.string().allow(null, ""),
       structurePubliqueEtatType: Joi.string().allow(null, ""),
@@ -708,6 +710,27 @@ const validateInscription = (value) => {
     })
     .validate(value, { stripUnknown: true });
 };
+function validatePhase1Document(phase1document, key) {
+  switch (key) {
+    case "autoTestPCR":
+      return Joi.object({
+        autoTestPCR: Joi.string().trim().required().valid("true", "false"),
+        autoTestPCRFiles: Joi.array().items(Joi.string().required()).required().min(1),
+      }).validate(phase1document);
+    case "imageRight":
+      return Joi.object({
+        imageRight: Joi.string().trim().required().valid("true", "false"),
+        imageRightFiles: Joi.array().items(Joi.string().required()).required().min(1),
+      }).validate(phase1document);
+    case "rules":
+      return Joi.object({
+        rulesYoung: Joi.string().trim().required().valid("true"),
+        rulesParent1: Joi.string().trim().required().valid("true"),
+        rulesParent2: Joi.string().trim().valid("true"),
+        rulesFiles: Joi.array().items(Joi.string().required()).required().min(1),
+      }).validate(phase1document);
+  }
+}
 
 module.exports = {
   validateId,
@@ -730,4 +753,5 @@ module.exports = {
   validateEvent,
   validateSessionPhase1,
   validateInscription,
+  validatePhase1Document,
 };

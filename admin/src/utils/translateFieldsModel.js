@@ -42,6 +42,10 @@ const translateFieldStructure = (f) => {
       return "créée le";
     case "updatedAt":
       return "mise à jour le";
+    case "jvaStructureId":
+      return "Id de la structure JVA";
+    case "isJvaStructure":
+      return "Structure JVA";
     default:
       return f;
   }
@@ -64,6 +68,12 @@ const translateFieldYoung = (f) => {
       return "Date de naissance";
     case "cohort":
       return "Cohorte";
+    case "originalCohort":
+      return "Cohorte d'origine";
+    case "cohortChangeReason":
+      return "Motif de changement de cohorte";
+    case "cohortDetailedChangeReason":
+      return "Précision du motif de changement de cohorte";
     case "phase":
       return "Phase";
     case "status":
@@ -472,6 +482,133 @@ const translateFieldMission = (f) => {
       return "créé(e) le";
     case "updatedAt":
       return "mis(e) à jour le";
+    case "jvaMissionId":
+      return "Id de la mission JVA";
+    case "lastSyncAt":
+      return "Dernière synchronisation avec JVA";
+    case "isJvaMission":
+      return "Mission JVA";
+    default:
+      return f;
+  }
+};
+
+const translateFieldContract = (f) => {
+  switch (f) {
+    case "youngId":
+      return "Id du volontaire";
+    case "structureId":
+      return "Id de la structure";
+    case "applicationId":
+      return "Id de la candidature";
+    case "missionId":
+      return "Id de la mission";
+    case "tutorId":
+      return "Id du responsable";
+    case "isYoungAdult":
+      return "Volontaire majeur";
+    case "parent1Status":
+      return "Statut signature représentant légal 1";
+    case "parent2Status":
+      return "Statut signature représentant légal 2";
+    case "projectManagerStatus":
+      return "Statut signature représentant de l'Etat";
+    case "structureManagerStatus":
+      return "Statut signature représentant de la structure";
+    case "youngContractStatus":
+      return "Statut signature volontaire";
+    case "invitationSent":
+      return "Contrat envoyé";
+    case "youngFirstName":
+      return "Prénom du volontaire";
+    case "youngLastName":
+      return "Nom du volontaire";
+    case "youngBirthdate":
+      return "Date de naissance du volontaire";
+    case "youngAddress":
+      return "Adresse du volontaire";
+    case "youngCity":
+      return "Ville du volontaire";
+    case "youngDepartment":
+      return "Département du volontaire";
+    case "youngEmail":
+      return "Email du volontaire";
+    case "youngPhone":
+      return "Téléphone du volontaire";
+    case "parent1FirstName":
+      return "Prénom du représentant légal 1";
+    case "parent1LastName":
+      return "Nom du représentant légal 1";
+    case "parent1Address":
+      return "Adresse du représentant légal 1";
+    case "parent1City":
+      return "Ville du représentant légal 1";
+    case "parent1Department":
+      return "Département du représentant légal 1";
+    case "parent1Phone":
+      return "Téléphone du représentant légal 1";
+    case "parent1Email":
+      return "Email du représentant légal 1";
+    case "parent2FirstName":
+      return "Prénom du représentant légal 2";
+    case "parent2LastName":
+      return "Nom du représentant légal 2";
+    case "parent2Address":
+      return "Adresse du représentant légal 2";
+    case "parent2City":
+      return "Ville du représentant légal 2";
+    case "parent2Department":
+      return "Département du représentant légal 2";
+    case "parent2Phone":
+      return "Téléphone du représentant légal 2";
+    case "parent2Email":
+      return "Email du représentant légal 2";
+    case "missionName":
+      return "Nom de la mission";
+    case "missionObjective":
+      return "Objectif de la mission";
+    case "missionAction":
+      return "Action de la mission";
+    case "missionStartAt":
+      return "Date de début de la mission";
+    case "missionEndAt":
+      return "Date de fin de la mission";
+    case "missionAddress":
+      return "Adresse de la mission";
+    case "missionCity":
+      return "Ville de la mission";
+    case "missionZip":
+      return "Code postal de la mission";
+    case "missionDuration":
+      return "Durée de la mission";
+    case "missionFrequence":
+      return "Fréquence de la mission";
+    case "date":
+      return "Date";
+    case "projectManagerFirstName":
+      return "Prénom du représentant de l'Etat";
+    case "projectManagerLastName":
+      return "Nom du représentant de l'Etat";
+    case "projectManagerRole":
+      return "Rôle du représentant de l'Etat";
+    case "projectManagerEmail":
+      return "Email du représentant de l'Etat";
+    case "structureManagerFirstName":
+      return "Prénom du représentant de la structure";
+    case "structureManagerLastName":
+      return "Nom du représentant de la structure";
+    case "structureManagerRole":
+      return "Rôle du représentant de la structure";
+    case "structureManagerEmail":
+      return "Email du représentant de la structure";
+    case "structureSiret":
+      return "Numéro SIRET de la structure";
+    case "structureName":
+      return "Nom de la structure";
+    case "createdAt":
+      return "créé(e) le";
+    case "updatedAt":
+      return "mis(e) à jour le";
     default:
       return f;
   }
@@ -482,6 +619,7 @@ export const translateModelFields = (model, field) => {
   if (model === "young") return translateFieldYoung(field);
   if (model === "referent") return translateFieldReferent(field);
   if (model === "mission") return translateFieldMission(field);
+  if (model === "contract") return translateFieldContract(field);
   return field;
 };
 
