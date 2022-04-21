@@ -37,11 +37,13 @@ export default function Phase3({ young, onChange }) {
     e.preventDefault()
     try {
       const { ok } = await api.put(`/young/update_phase3/${young._id}`, information);
-      if (!ok) return;
+      if (!ok) toastr.error("Oups, une erreur est survenue !")
+      else toastr.success("Mis à jour!")
       setEdit(false)
     } catch (e) {
       console.log(e)
       return toastr.error("Oups, une erreur est survenue lors du changement de l'information de la phase 3")
+      setEdit(false)
     }
   }
 
@@ -123,7 +125,7 @@ const Details = ({ title, value, edit, onChange, name }) => {
     <div className="flex p-2 items-center h-12 ">
       <div className="w-1/4 text-brand-detail_title ">{title} : </div>
       {edit ? (
-        <input type="text" value={"  " + value} name={name} className="w-3/4 rounded border mr-4 h-8 " onChange={onChange} />
+        <input type="text" value={value} name={name} className="w-3/4 rounded border mr-4 h-8 pl-1" onChange={onChange} />
       ) : (
         <div className="w-3/4 mr-2">{value}</div>
       )}
