@@ -58,7 +58,17 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, represe
             <label htmlFor="mobile" className="text-left text-gray-500 w-full">
               Téléphone
             </label>
-            <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="mobile" id="mobile" onChange={handleChange} value={data.mobile} />
+            <input
+              required
+              type="tel"
+              pattern="\d*"
+              disabled={isLoading}
+              className="w-full disabled:bg-gray-200"
+              name="mobile"
+              id="mobile"
+              onChange={handleChange}
+              value={data.mobile}
+            />
           </div>
           <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
             <label htmlFor="email" className="text-left text-gray-500 w-full">

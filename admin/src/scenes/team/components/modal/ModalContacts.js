@@ -151,6 +151,8 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
                       Téléphone
                     </label>
                     <input
+                      type="tel"
+                      pattern="\d*"
                       required={!edit.contactMail}
                       disabled={isLoading}
                       className="w-full disabled:bg-gray-200"
