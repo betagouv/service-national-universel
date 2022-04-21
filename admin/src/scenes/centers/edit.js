@@ -106,7 +106,7 @@ export default function Edit(props) {
                   <BoxContent direction="column">
                     <div> Nom </div>
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <div> Adresse </div>
+                    {/* <div> Adresse </div> */}
                     <AddressInput
                       keys={{
                         country: "country",
@@ -187,6 +187,7 @@ export default function Edit(props) {
                           </div>
                           <div className="border p-1 rounded-lg w-1/2">
                             <div> Statut</div>
+                            {console.log("df: ", defaultValue.status)}
                             <select name="status" value={defaultValue.status} className="w-full" onChange={handleChange}>
                               {sessionStatus.map((status, index) => (
                                 <option value={status} key={index} > {translateSessionStatus(status)} </option>
