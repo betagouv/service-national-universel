@@ -12,7 +12,6 @@ import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import FranceConnectButton from "../components/FranceConnectButton";
-import { saveYoung } from "../utils";
 import { translate } from "../../../utils";
 import FormLegend from "../../../components/form/FormLegend";
 import FormRow from "../../../components/form/FormRow";

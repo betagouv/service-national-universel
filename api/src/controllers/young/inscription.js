@@ -731,11 +731,10 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
   }
 });
 
-router.put("/save/:type", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/save/:type?", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const keys = ["normal", "correction"];
+    const keys = ["correction"];
     const { error: typeError, value: type } = Joi.string()
-      .required()
       .valid(...keys)
       .validate(req.params.type);
     if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });

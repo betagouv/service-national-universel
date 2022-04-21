@@ -5,7 +5,7 @@ import { Spinner } from "reactstrap";
 
 import { setYoung } from "../../redux/auth/actions";
 import { appURL } from "../../config";
-import { YOUNG_STATUS } from "../../utils";
+import { YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 
@@ -17,19 +17,25 @@ export default function FormFooter({ values, handleSubmit, errors, secondButton 
 
   const handleSave = async () => {
     setloadingSaveBtn(true);
-    const { ok, code, data: young } = await api.put(`/young/inscription/save/normal`, values);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
+    const { ok, code, data } = await api.put(`/young/inscription/save`, values);
+    if (!ok) {
+      setloadingSaveBtn(false);
+      return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
+    }
     if (ok) toastr.success("Progression enregistrée");
-    if (young) dispatch(setYoung(young));
+    if (data) dispatch(setYoung(data));
     setloadingSaveBtn(false);
   };
 
   const handleCorrectionDone = async () => {
     setloadingCorrectionDone(true);
-    const { ok, code, data: young } = await api.put(`/young/inscription/save/correction`, values);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
+    const { ok, code, data } = await api.put(`/young/inscription/save/correction`, values);
+    if (!ok) {
+      setloadingSaveBtn(false);
+      return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
+    }
     if (ok) toastr.success("Progression enregistrée");
-    if (young) dispatch(setYoung(young));
+    if (data) dispatch(setYoung(data));
     setloadingCorrectionDone(false);
     handleBackToHome();
   };

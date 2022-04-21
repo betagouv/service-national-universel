@@ -21,13 +21,6 @@ export const STEPS_2020 = {
   DONE: "DONE",
 };
 
-export const saveYoung = async (values) => {
-  const { ok, code, data: young } = await api.put("/young", values);
-  if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
-  if (ok) toastr.success("Progression enregistrée");
-  return young;
-};
-
 export const YOUNG_SITUATIONS = {
   GENERAL_SCHOOL: "GENERAL_SCHOOL",
   PROFESSIONAL_SCHOOL: "PROFESSIONAL_SCHOOL",
