@@ -25,7 +25,7 @@ export default function Signup() {
   const createStructure = async (structureData) => {
     const region = getRegionByZip(structureData.zip);
     const department = getDepartmentByZip(structureData.zip);
-    const { data, ok, code } = await api.post(`/structure`, { ...structureData, region, department });
+    const { data, ok, code } = await api.post("/structure", { ...structureData, region, department });
     if (!ok) return toastr.error("Une erreur s'est produite lors de l'initialisation de votre structure", translate(code));
     return data._id;
   };
