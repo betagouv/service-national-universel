@@ -7,7 +7,7 @@ const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, translate, formatStringDate } = require("snu-lib");
 const { APP_URL } = require("../config");
-const { youngEmailNeedCc } = require("../utils");
+const { getCcOfYoung } = require("../utils");
 
 exports.handler = async () => {
   try {
@@ -40,7 +40,7 @@ exports.handler = async () => {
 
         // send a mail to the young
         let template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO;
-        let cc = youngEmailNeedCc(template, young);
+        let cc = getCcOfYoung({ template, young });
         sendTemplate(template, {
           emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
           params: {

@@ -39,7 +39,7 @@ const {
   inSevenDays,
   FILE_STATUS_PHASE1,
   translateFileStatusPhase1,
-  youngEmailNeedCc,
+  getCcOfYoung,
   //  updateApplicationsWithYoungOrMission,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
@@ -452,7 +452,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     }
 
     let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
-    let cc = youngEmailNeedCc(template, young);
+    let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
@@ -925,7 +925,7 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
           VALIDATED: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_VALIDATED,
         };
 
-        let cc = youngEmailNeedCc(statusToMail[value[`${document}FilesStatus`]], young);
+        let cc = getCcOfYoung({ template: statusToMail[value[`${document}FilesStatus`]], young });
         await sendTemplate(statusToMail[value[`${document}FilesStatus`]], {
           emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
           params: { type_document: translateFileStatusPhase1(document), modif: value[`${document}FilesComment`] },

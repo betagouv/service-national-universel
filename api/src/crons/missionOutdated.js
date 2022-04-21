@@ -9,7 +9,7 @@ const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
 const { ADMIN_URL, APP_URL } = require("../config");
-const { youngEmailNeedCc } = require("../utils");
+const { getCcOfYoung } = require("../utils");
 
 const clean = async () => {
   let countAutoArchived = 0;
@@ -86,7 +86,7 @@ const cancelApplications = async (mission) => {
       let cc = [];
       const young = await YoungObject.findById(application.youngId);
       if (young) {
-        cc = youngEmailNeedCc(template, young);
+        cc = getCcOfYoung({ template: sendinblueTemplate, young });
       }
       await sendTemplate(sendinblueTemplate, {
         emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],

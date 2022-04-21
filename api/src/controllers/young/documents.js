@@ -6,7 +6,7 @@ const { capture } = require("../../sentry");
 const renderFromHtml = require("../../htmlToPdf");
 const YoungObject = require("../../models/young");
 const ContractObject = require("../../models/contract");
-const { ERRORS, isYoung, isReferent, youngEmailNeedCc } = require("../../utils");
+const { ERRORS, isYoung, isReferent, getCcOfYoung } = require("../../utils");
 const certificate = require("../../templates/certificate");
 const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
@@ -130,7 +130,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     const content = buffer.toString("base64");
 
     let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
-    let cc = youngEmailNeedCc(emailTemplate, young);
+    let cc = getCcOfYoung({ template: emailTemplate, young });
 
     const mail = await sendTemplate(emailTemplate, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],

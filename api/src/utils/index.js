@@ -368,7 +368,7 @@ const updateStatusPhase2 = async (young) => {
     // We change young status to DONE if he has 84 hours of phase 2 done.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED });
     let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
-    let cc = youngEmailNeedCc(template, young);
+    let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
@@ -548,7 +548,7 @@ const updateApplication = async (mission, fromUser = null) => {
       const young = await YoungModel.findById(application.youngId);
       let cc = [];
       if (young) {
-        cc = youngEmailNeedCc(template, young);
+        cc = getCcOfYoung({ template, young });
       }
       await sendTemplate(sendinblueTemplate, {
         emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
@@ -563,7 +563,7 @@ const updateApplication = async (mission, fromUser = null) => {
   }
 };
 
-const youngEmailNeedCc = (template, young) => {
+const getCcOfYoung = ({ template, young }) => {
   let cc = [];
   if (Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
     if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
@@ -663,5 +663,5 @@ module.exports = {
   updateApplication,
   FILE_STATUS_PHASE1,
   translateFileStatusPhase1,
-  youngEmailNeedCc,
+  getCcOfYoung,
 };

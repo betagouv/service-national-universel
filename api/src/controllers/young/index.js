@@ -34,7 +34,7 @@ const {
   updatePlacesBus,
   updatePlacesSessionPhase1,
   translateFileStatusPhase1,
-  youngEmailNeedCc,
+  getCcOfYoung,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -286,7 +286,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
     await data.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young.VALIDATE_PHASE3;
-    let cc = youngEmailNeedCc(template, data);
+    let cc = getCcOfYoung({ template, data });
     await sendTemplate(template, {
       emailTo: [{ name: `${data.firstName} ${data.lastName}`, email: data.email }],
       params: { cta: `${config.APP_URL}/phase3` },
@@ -374,7 +374,7 @@ router.post("/:id/archive", passport.authenticate("referent", { session: false, 
     await young.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young.ARCHIVED;
-    let cc = youngEmailNeedCc(template, young);
+    let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: previousEmail }],
       params: { cta: `${config.APP_URL}/inscription/profil` },
@@ -590,7 +590,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       });
     }
     let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
-    let cc = youngEmailNeedCc(template, young);
+    let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
@@ -637,7 +637,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
     if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) buttonCta = `${config.APP_URL}/inscription/coordonnees`;
 
-    let cc = youngEmailNeedCc(template, young);
+    let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName, type_document },
@@ -837,7 +837,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
 
     if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
       let template = SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION;
-      let cc = youngEmailNeedCc(template, young);
+      let cc = getCcOfYoung({ template, young });
       await sendTemplate(template, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: { type_document: translateFileStatusPhase1(document) },

@@ -14,7 +14,7 @@ const { validateUpdateApplication, validateNewApplication } = require("../utils/
 const { ADMIN_URL, APP_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
 const { serializeApplication } = require("../utils/serializer");
-const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, youngEmailNeedCc } = require("../utils");
+const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, getCcOfYoung } = require("../utils");
 
 const updatePlacesMission = async (app, fromUser) => {
   try {
@@ -219,7 +219,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     } else {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    let cc = youngEmailNeedCc(template, young);
+    let cc = getCcOfYoung({ template, young });
     const mail = await sendTemplate(template, {
       emailTo,
       params,
