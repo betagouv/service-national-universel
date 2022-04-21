@@ -1,3 +1,22 @@
+# [1.73.0](https://github.com/betagouv/service-national-universel/compare/v1.72.2...v1.73.0) (2022-04-21)
+
+
+### Bug Fixes
+
+* Modifier les articles mis en avant ([#1492](https://github.com/betagouv/service-national-universel/issues/1492)) ([e0a1a7c](https://github.com/betagouv/service-national-universel/commit/e0a1a7c7bf3556d5b4ee34473ad4dbbc1042f709))
+* **admin:** dashboard structures ([27fd0c5](https://github.com/betagouv/service-national-universel/commit/27fd0c5ca1f694980fe66a0415b942bef5f937c9))
+* **api:** verify file magic numbers + mime type for uploads ([#1490](https://github.com/betagouv/service-national-universel/issues/1490)) ([c241b7c](https://github.com/betagouv/service-national-universel/commit/c241b7c0e2593b718ac98c0acb47adb40938632e))
+* message obligatoire signup structure ([02b5ce0](https://github.com/betagouv/service-national-universel/commit/02b5ce05745b7d645f6aba653bb7aec259bd75a0))
+* **api:** structure can not be created without being authenticated ([#1489](https://github.com/betagouv/service-national-universel/issues/1489)) ([c3e5c69](https://github.com/betagouv/service-national-universel/commit/c3e5c693d8c2ffcc8e3b2c458d1ac33dca0ed0e3))
+* **security:** missing noreferrer ([4a87075](https://github.com/betagouv/service-national-universel/commit/4a87075d75c109b562efe402eacddce732753949))
+* **security:** protect URL in href ([#1455](https://github.com/betagouv/service-national-universel/issues/1455)) ([6aa0b64](https://github.com/betagouv/service-national-universel/commit/6aa0b642cb709ddd2fe62af3ee56847f6143e264))
+
+
+### Features
+
+* **admin:** Possibilité de modifier Phase 3 ([#1484](https://github.com/betagouv/service-national-universel/issues/1484)) ([b355de6](https://github.com/betagouv/service-national-universel/commit/b355de667a015ba94128d85137e99f114662e656))
+* **admin:** structure statuses ([#1443](https://github.com/betagouv/service-national-universel/issues/1443)) ([4f29346](https://github.com/betagouv/service-national-universel/commit/4f293467ee3da25d94405f29cb496400e5f5b171))
+
 ## [1.72.2](https://github.com/betagouv/service-national-universel/compare/v1.72.1...v1.72.2) (2022-04-20)
 
 
