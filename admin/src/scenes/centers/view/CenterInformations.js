@@ -83,7 +83,18 @@ export default function Details({ center, sessions }) {
             <section>
               {sessions.map((session) => (
                 <div className="detail" key={session.cohort}>
-                  <div className="detail-title-first">{session.cohort}&nbsp;:</div>
+                  <div>
+                    <div className="detail-title-first">{session.cohort}&nbsp;:</div>
+                    {session.status ?
+                      <>
+                        {session.status === "DRAFT" ? (
+                          <div className="border border-[#A4D8BC] text-xs rounded-full bg-[#F5FCF3] text-[#27AF66] p-1"> Validé  </div>
+                        ) : (
+                          <div className="border border-[#CECECE] text-xs rounded-full bg-[#F6F6F6] text-[#9A9A9A] p-1 "> Brouillon </div>
+                        )}
+                      </>
+                      : null}
+                  </div>
                   <div className="detail-text">{session.placesTotal} places</div>
                 </div>
               ))}

@@ -155,7 +155,7 @@ export default function List() {
                   className="dropdown-filter"
                   placeholder="Statut"
                   componentId="STATUT"
-                  dataField="placesLeft"
+                  dataField="status"
                   react={{ and: FILTERS.filter((e) => e !== "STATUT") }}
                   title=""
                   URLParams={true}
@@ -224,8 +224,18 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
       <td>
         {sessionsPhase1.map((sessionPhase1) => (
           <SubTd key={sessionPhase1._id}>
-            <Badge text={sessionPhase1._source.cohort} />
-            <Badge text={sessionPhase1._source.status} />
+            <div className="flex items-center">
+              <Badge text={sessionPhase1._source.cohort} />
+              {sessionPhase1._source.status ?
+                <>
+                  {sessionPhase1._source.status === "DRAFT" ? (
+                    <div className="border border-[#A4D8BC] text-xs rounded-full bg-[#F5FCF3] text-[#27AF66] p-1"> Validé </div>
+                  ) : (
+                    <div className="border border-[#CECECE] text-xs rounded-full bg-[#F6F6F6] text-[#9A9A9A] p-1 ">Brouillon  </div>
+                  )}
+                </>
+                : null}
+            </div>
           </SubTd>
         ))}
       </td>

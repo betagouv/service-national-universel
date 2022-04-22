@@ -16,7 +16,6 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import AddressInput from "../../components/addressInputV2";
 import MultiSelect from "../../components/Multiselect";
 import Error, { requiredMessage } from "../../components/errorMessage";
-import { SessionStatus } from "@sentry/types";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -25,7 +24,7 @@ export default function Edit(props) {
   const isNew = !props?.match?.params?.id;
   const user = useSelector((state) => state.Auth.user);
   const [sessionShow, setsessionShow] = useState(null)
-  const [SessionStatus, setSessionStatus] = useState(null)
+  const [sessionStatus, setSessionStatus] = useState(null)
 
   async function init() {
     if (isNew) return setDefaultValue(null);
@@ -34,12 +33,6 @@ export default function Edit(props) {
     let obj = center;
 
     if (!center || !center?.cohorts || !center?.cohorts?.length) return;
-
-    const optionSessionStatus = []
-    Object.values(SESSION_STATUS).map((status) => (
-      optionSessionStatus.push({ value: `${status}`, label: `${translateSessionStatus(status)}` })
-    ))
-    setSessionStatus(optionSessionStatus)
 
     for (const cohort of center.cohorts) {
       const sessionPhase1Response = await api.get(`/cohesion-center/${id}/cohort/${cohort}/session-phase1`);
@@ -50,6 +43,12 @@ export default function Edit(props) {
   }
 
   useEffect(() => {
+    const optionSessionStatus = []
+    Object.values(SESSION_STATUS).map((status) => (
+      optionSessionStatus.push({ value: status, label: translateSessionStatus(status) })
+    ))
+    setSessionStatus(optionSessionStatus)
+
     init();
   }, []);
 
@@ -79,11 +78,13 @@ export default function Edit(props) {
       onSubmit={async (values) => {
         try {
           setLoading(true);
-          if (isNew) values.placesLeft = values.placesTotal;
+          if (isNew) {
+            values.placesLeft = values.placesTotal
+          }
           else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
 
           const { ok, code, data } = values._id ? await api.put(`/cohesion-center/${values._id}`, values) : await api.post("/cohesion-center", values);
-          await updateSessions(values, status);
+          await updateSessions(values);
 
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));
@@ -171,36 +172,35 @@ export default function Edit(props) {
                   {values.cohorts?.length ? (
                     <>
                       <div>
-                        <div className="flex justify-start ml-10 border-bottom mb-2">
+                        <div className="flex justify-start border-bottom mb-2">
                           {(values.cohorts || []).map((cohort, index) => (
                             <>
-                              <div key={index} className={`mx-5 mb-2 ${sessionShow === cohort ? "text-snu-purple-300 border-bottom border-snu-purple-300" : null}`} onClick={() => { setsessionShow(cohort) }}> {cohort} </div>
+                              <div key={index} className={`mx-5 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2 border-snu-purple-300 " : null}`} onClick={() => { setsessionShow(cohort) }}> {cohort} </div>
                             </>
                           ))}
                         </div>
                         {sessionShow ? (
-                          <div className="flex justify-start  ml-5 mt-8">
-                            <div className="border w-1/4 p-1 rounded-lg">
-                              <div> Capacite d'acceuil</div>
+                          <div className="flex ml-2 mt-4">
+                            <div className="w-1/4 flex border flex-col justify-items-start m-1 rounded-lg rounded-grey-300 p-1">
                               <ElementsSejour
-                                key={`${sessionShow}Places`}
-                                title={''}
-                                values={values[sessionShow].placesTotal}
+                                key={`${sessionShow}.Places`}
+                                title={"Capacite d'acceuil"}
+                                values={values[sessionShow]?.placesTotal || ''}
                                 name={`${sessionShow}.placesTotal`}
-                                placeholder={values[sessionShow].placesTotal || 0}
+                                placeholder={values[sessionShow]?.placesTotal || ''}
                                 handleChange={handleChange}
                                 required
                                 errors={errors}
                                 touched={touched}
                               />
                             </div>
-                            <div className="w-full">
+                            <div className="w-2/4 flex border flex-col justify-items-start m-1 rounded-lg rounded-grey-300 p-1">
                               <SelectStatus
                                 name={`${sessionShow}.status`}
-                                values={values[sessionShow].status}
+                                values={values[sessionShow]?.status}
                                 handleChange={handleChange}
                                 title="Statut"
-                                options={SessionStatus}
+                                options={sessionStatus}
                                 required
                                 errors={errors}
                                 touched={touched}
@@ -243,15 +243,8 @@ const MultiSelectWithTitle = ({ title, value, onChange, name, options, placehold
 const ElementsSejour = ({ title, placeholder, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) => {
   return (
     <>
-      <Field
-        disabled={disabled}
-        value={translate(values[name])}
-        name={name}
-        onChange={handleChange}
-        type={type}
-        validate={(v) => required && !v && requiredMessage}
-        placeholder={placeholder}
-      />
+      <div className="text-gray-500"> {title} </div>
+      <input disabled={disabled} value={translate(values[name])} name={name} onChange={handleChange} placeholder={placeholder} validate={(v) => required && !v && requiredMessage}></input>
       {errors && touched && <Error errors={errors} touched={touched} name={name} />}
     </>
   )
@@ -259,9 +252,9 @@ const ElementsSejour = ({ title, placeholder, values, name, handleChange, type =
 
 const SelectStatus = ({ title, name, values, handleChange, disabled, options, required = false, errors, touched }) => {
   return (
-    <div className="flex flex-col border p-2 rounded-xl m-2">
-      <div> {title} </div>
-      <select disabled={disabled} className="form-control" name={name} value={values} onChange={handleChange}>
+    <>
+      <div className="text-gray-500"> {title} </div>
+      <select disabled={disabled} className="" name={name} value={values} onChange={handleChange}>
         <option key={-1} value="" label=""></option>
         {options.map((o, i) => (
           <option key={i} value={o.value} label={o.label}>
@@ -270,7 +263,7 @@ const SelectStatus = ({ title, name, values, handleChange, disabled, options, re
         ))}
       </select>
       {errors && touched && <Error errors={errors} touched={touched} name={name} />}
-    </div>
+    </>
   )
 }
 const Wrapper = styled.div`
