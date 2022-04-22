@@ -47,6 +47,23 @@ export default function StepDocuments() {
     }
   };
 
+  const onSubmit = async ({ values, type }) => {
+    if (type === "next") setLoading(true);
+    try {
+      if (isParentFromFranceConnect()) delete values.parentConsentmentFiles;
+      if (getAge(young.birthdateAt) >= 15) delete values.dataProcessingConsentmentFiles;
+      const { ok, code, data } = await api.put(`/young/inscription/documents/${type}`, values);
+      if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+      dispatch(setYoung(data));
+      if (type === "next") history.push("/inscription/done");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Wrapper>
       <Heading>
@@ -54,26 +71,7 @@ export default function StepDocuments() {
         <p>Téléversez ci-dessous les justificatifs requis pour votre inscription</p>
       </Heading>
 
-      <Formik
-        initialValues={data}
-        validateOnChange={false}
-        validateOnBlur={false}
-        onSubmit={async (values) => {
-          setLoading(true);
-          try {
-            if (isParentFromFranceConnect()) delete values.parentConsentmentFiles;
-            if (getAge(young.birthdateAt) >= 15) delete values.dataProcessingConsentmentFiles;
-            const { ok, code, data } = await api.put("/young/inscription/documents", values);
-            if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(data));
-            history.push("/inscription/done");
-          } catch (e) {
-            console.log(e);
-            toastr.error("Erreur !");
-          } finally {
-            setLoading(false);
-          }
-        }}>
+      <Formik initialValues={data} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit({ values, type: "next" })}>
         {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormRow>
@@ -198,7 +196,7 @@ export default function StepDocuments() {
                 </a>
               </div>
             </div>
-            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} save={onSubmit} />
           </>
         )}
       </Formik>

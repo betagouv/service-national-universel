@@ -37,6 +37,30 @@ export default function StepSpecific() {
     }
   }, [young]);
 
+  const onSubmit = async ({ values, type }) => {
+    if (type === "next") setLoading(true);
+    try {
+      values.moreInformation = values.handicap === "true" || values.ppsBeneficiary === "true" || values.paiBeneficiary === "true" ? "true" : "false";
+      if (values.moreInformation === "false") {
+        delete values.specificAmenagment;
+        delete values.reducedMobilityAccess;
+        delete values.handicapInSameDepartment;
+      }
+      if (values.highSkilledActivity === "false") {
+        delete values.highSkilledActivityInSameDepartment;
+      }
+      const { ok, code, data } = await api.put(`/young/inscription/particulieres/${type}`, values);
+      if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+      dispatch(setYoung(data));
+      if (type === "next") history.push("/inscription/representants");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!data) return null;
 
   return (
@@ -51,33 +75,7 @@ export default function StepSpecific() {
           représentants légaux.
         </p>
       </Heading>
-      <Formik
-        initialValues={data}
-        validateOnChange={false}
-        validateOnBlur={false}
-        onSubmit={async (values) => {
-          setLoading(true);
-          try {
-            values.moreInformation = values.handicap === "true" || values.ppsBeneficiary === "true" || values.paiBeneficiary === "true" ? "true" : "false";
-            if (values.moreInformation === "false") {
-              delete values.specificAmenagment;
-              delete values.reducedMobilityAccess;
-              delete values.handicapInSameDepartment;
-            }
-            if (values.highSkilledActivity === "false") {
-              delete values.highSkilledActivityInSameDepartment;
-            }
-            const { ok, code, data } = await api.put("/young/inscription/particulieres", values);
-            if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(data));
-            history.push("/inscription/representants");
-          } catch (e) {
-            console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
-          } finally {
-            setLoading(false);
-          }
-        }}>
+      <Formik initialValues={data} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit({ values, type: "next" })}>
         {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormLegend style={{ paddingBottom: "0" }}>Handicap et pathologies chroniques</FormLegend>
@@ -171,7 +169,7 @@ export default function StepSpecific() {
                 />
               </>
             )}
-            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} save={onSubmit} />
           </>
         )}
       </Formik>

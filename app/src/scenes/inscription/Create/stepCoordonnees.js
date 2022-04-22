@@ -122,8 +122,8 @@ export default function StepCoordonnees() {
     v.grade = "";
   };
 
-  const onSubmit = async (values) => {
-    setLoading(true);
+  const onSubmit = async ({ values, type }) => {
+    if (type === "next") setLoading(true);
     try {
       if (values.livesInFrance === "true") {
         delete values.foreignAddress;
@@ -134,10 +134,10 @@ export default function StepCoordonnees() {
         delete values.hostLastName;
         delete values.hostRelationship;
       }
-      const { ok, code, data } = await api.put("/young/inscription/coordonnee", values);
+      const { ok, code, data } = await api.put(`/young/inscription/coordonnee/${type}`, values);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(data));
-      history.push("/inscription/availability");
+      if (type === "next") history.push("/inscription/availability");
     } catch (e) {
       console.log(e);
       toastr.error("Erreur !");
@@ -170,7 +170,7 @@ export default function StepCoordonnees() {
         }}
         validateOnChange={false}
         validateOnBlur={false}
-        onSubmit={(values) => onSubmit(values)}>
+        onSubmit={(values) => onSubmit({ values, type: "next" })}>
         {({ values, handleChange, handleSubmit, errors, touched, validateField, setFieldValue }) => {
           useEffect(() => {
             if (values.phone) validateField("phone");
@@ -711,7 +711,7 @@ export default function StepCoordonnees() {
                   <ErrorMessage errors={errors} touched={touched} name="situation" />
                 </Col>
               </FormRow>
-              <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
+              <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} save={onSubmit} />
             </>
           );
         }}

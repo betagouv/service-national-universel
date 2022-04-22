@@ -6,7 +6,7 @@ const Joi = require("joi");
 const YoungObject = require("../../models/young");
 const { canUpdateYoungStatus, getAge } = require("snu-lib");
 const { capture } = require("../../sentry");
-const { validateFirstName, validateInscription } = require("../../utils/validator");
+const { validateFirstName } = require("../../utils/validator");
 const { serializeYoung } = require("../../utils/serializer");
 
 const { ERRORS, YOUNG_SITUATIONS, STEPS, inscriptionCheck, YOUNG_STATUS } = require("../../utils");
@@ -47,101 +47,126 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
   }
 });
 
-router.put("/coordonnee", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/coordonnee/:type", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     //TODO : Check adress + date
+    const { error: typeError, value: type } = checkParameter(req.params.type);
+    if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const isRequired = type !== "save";
+
     const { error, value } = Joi.object({
-      gender: Joi.string().trim().required().valid("female", "male"),
-      phone: Joi.string().trim().required(),
-      country: Joi.string().trim().required(),
-      city: Joi.string().trim().required(),
-      zip: Joi.string().trim().required(),
-      address: Joi.string().trim().required(),
+      gender: needRequired(Joi.string().trim().valid("female", "male"), isRequired),
+      phone: needRequired(Joi.string().trim(), isRequired),
+      country: needRequired(Joi.string().trim(), isRequired),
+      city: needRequired(Joi.string().trim(), isRequired),
+      zip: needRequired(Joi.string().trim(), isRequired),
+      address: needRequired(Joi.string().trim(), isRequired),
       location: Joi.object()
         .keys({
-          lat: Joi.number().required(),
-          lon: Joi.number().required(),
+          lat: needRequired(Joi.number(), isRequired),
+          lon: needRequired(Joi.number(), isRequired),
         })
         .default({
           lat: undefined,
           lon: undefined,
         })
         .allow({}, null),
-      department: Joi.string().trim().required(),
-      region: Joi.string().trim().required(),
+      department: needRequired(Joi.string().trim(), isRequired),
+      region: needRequired(Joi.string().trim(), isRequired),
       cityCode: Joi.string().trim().default("").allow("", null),
-      academy: Joi.string().trim().required(),
-      addressVerified: Joi.string().trim().required().valid("true"),
-      schooled: Joi.string().trim().required().valid("true", "false"),
-      livesInFrance: Joi.string().trim().required().valid("true", "false"),
+      academy: needRequired(Joi.string().trim(), isRequired),
+      addressVerified: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      schooled: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      livesInFrance: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
 
       //Foreign adress -> if livesInFrance = false then required else Error
       hostLastName: Joi.alternatives().conditional("livesInFrance", {
         is: "false",
-        then: Joi.string().trim().required(),
+        then: needRequired(Joi.string().trim(), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
-      hostFirstName: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      hostFirstName: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
       hostRelationship: Joi.alternatives().conditional("livesInFrance", {
         is: "false",
-        then: Joi.string().trim().required().valid("Parent", "Frere/Soeur", "Grand-parent", "Oncle/Tante", "Ami de la famille", "Autre"),
+        then: needRequired(Joi.string().trim().valid("Parent", "Frere/Soeur", "Grand-parent", "Oncle/Tante", "Ami de la famille", "Autre"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
-      foreignCountry: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
-      foreignCity: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
-      foreignZip: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
-      foreignAddress: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      foreignCountry: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      foreignCity: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      foreignZip: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      foreignAddress: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
 
       //student -> if schooled then required else error
       // ! Particular case :
       // If schoolCountry != France then {schoolCity, schoolId, schoolDepartment} not required
-      schoolCountry: Joi.alternatives().conditional("schooled", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
-      schoolName: Joi.alternatives().conditional("schooled", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      schoolCountry: Joi.alternatives().conditional("schooled", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      schoolName: Joi.alternatives().conditional("schooled", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
 
       schoolCity: Joi.alternatives().conditional("schooled", {
         is: "true",
-        then: Joi.alternatives().conditional("schoolCountry", { is: "France", then: Joi.string().trim().required(), otherwise: Joi.string().default("").allow("", null) }),
+        then: Joi.alternatives().conditional("schoolCountry", {
+          is: "France",
+          then: needRequired(Joi.string().trim(), isRequired),
+          otherwise: Joi.string().default("").allow("", null),
+        }),
         otherwise: Joi.isError(new Error()),
       }),
       schoolId: Joi.alternatives().conditional("schooled", {
         is: "true",
         then: Joi.alternatives().conditional("schoolCountry", {
           is: "France",
-          then: Joi.string().trim().required().allow("", null),
+          then: needRequired(Joi.string().trim().allow("", null), isRequired),
           otherwise: Joi.string().default("").allow("", null),
         }),
         otherwise: Joi.isError(new Error()),
       }),
       schoolDepartment: Joi.alternatives().conditional("schooled", {
         is: "true",
-        then: Joi.alternatives().conditional("schoolCountry", { is: "France", then: Joi.string().trim().required(), otherwise: Joi.string().default("").allow("", null) }),
+        then: Joi.alternatives().conditional("schoolCountry", {
+          is: "France",
+          then: needRequired(Joi.string().trim(), isRequired),
+          otherwise: Joi.string().default("").allow("", null),
+        }),
         otherwise: Joi.isError(new Error()),
       }),
       grade: Joi.alternatives().conditional("schooled", {
         is: "true",
-        then: Joi.string().trim().required().valid("3eme", "2nd", "1ere", "1ere CAP", "Terminale", "Terminale CAP", "SEGPA", "Classe relais", "Autre"),
+        then: needRequired(Joi.string().trim().valid("3eme", "2nd", "1ere", "1ere CAP", "Terminale", "Terminale CAP", "SEGPA", "Classe relais", "Autre"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
 
-      employed: Joi.alternatives().conditional("schooled", { is: "false", then: Joi.string().trim().required().valid("true", "false"), otherwise: Joi.string().default("false") }),
+      employed: Joi.alternatives().conditional("schooled", {
+        is: "false",
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        otherwise: Joi.string().default("false"),
+      }),
 
       //Field validation for situation depending on schooled and employed
       situation: Joi.alternatives().conditional("schooled", {
         is: "true",
-        then: Joi.string()
-          .trim()
-          .required()
-          .valid(
-            YOUNG_SITUATIONS.GENERAL_SCHOOL,
-            YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL,
-            YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL,
-            YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
-            YOUNG_SITUATIONS.APPRENTICESHIP,
-          ),
+        then: needRequired(
+          Joi.string()
+            .trim()
+            .valid(
+              YOUNG_SITUATIONS.GENERAL_SCHOOL,
+              YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL,
+              YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL,
+              YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
+              YOUNG_SITUATIONS.APPRENTICESHIP,
+            ),
+          isRequired,
+        ),
         otherwise: Joi.alternatives().conditional("employed", {
           is: "true",
-          then: Joi.string().trim().required().valid(YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY),
-          otherwise: Joi.string().trim().required().valid(YOUNG_SITUATIONS.POLE_EMPLOI, YOUNG_SITUATIONS.MISSION_LOCALE, YOUNG_SITUATIONS.CAP_EMPLOI, YOUNG_SITUATIONS.NOTHING),
+          then: needRequired(
+            Joi.string().trim().valid(YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY),
+            isRequired,
+          ),
+          otherwise: needRequired(
+            Joi.string().trim().valid(YOUNG_SITUATIONS.POLE_EMPLOI, YOUNG_SITUATIONS.MISSION_LOCALE, YOUNG_SITUATIONS.CAP_EMPLOI, YOUNG_SITUATIONS.NOTHING),
+            isRequired,
+          ),
         }),
       }),
     }).validate(req.body);
@@ -170,7 +195,8 @@ router.put("/coordonnee", passport.authenticate("young", { session: false, failW
     }
 
     delete value.livesInFrance;
-    value.inscriptionStep = STEPS.AVAILABILITY;
+    if (type === "next") value.inscriptionStep = STEPS.AVAILABILITY;
+    if (type === "correction") value.status = YOUNG_STATUS.WAITING_VALIDATION;
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -255,35 +281,40 @@ router.put("/availability/reset", passport.authenticate("young", { session: fals
   }
 });
 
-router.put("/particulieres", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/particulieres/:type", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error: typeError, value: type } = checkParameter(req.params.type);
+    if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const isRequired = type !== "save";
+
     const { error, value } = Joi.object({
-      handicap: Joi.string().trim().required().valid("true", "false"),
-      ppsBeneficiary: Joi.string().trim().required().valid("true", "false"),
-      paiBeneficiary: Joi.string().trim().required().valid("true", "false"),
-      allergies: Joi.string().trim().required().valid("true", "false"),
-      highSkilledActivity: Joi.string().trim().required().valid("true", "false"),
-      moreInformation: Joi.string().trim().required().valid("true", "false"),
+      handicap: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      ppsBeneficiary: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      paiBeneficiary: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      allergies: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      highSkilledActivity: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      moreInformation: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
 
       specificAmenagment: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: Joi.string().trim().required().valid("true", "false"),
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
       reducedMobilityAccess: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: Joi.string().trim().required().valid("true", "false"),
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
       handicapInSameDepartment: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: Joi.string().trim().required().valid("true", "false"),
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
 
       highSkilledActivityInSameDepartment: Joi.alternatives().conditional("highSkilledActivity", {
         is: "true",
-        then: Joi.string().trim().required().valid("true", "false"),
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
     }).validate(req.body);
@@ -311,7 +342,8 @@ router.put("/particulieres", passport.authenticate("young", { session: false, fa
       value.highSkilledActivityInSameDepartment = "false";
     }
 
-    value.inscriptionStep = STEPS.REPRESENTANTS;
+    if (type === "next") value.inscriptionStep = STEPS.REPRESENTANTS;
+    if (type === "correction") value.status = YOUNG_STATUS.WAITING_VALIDATION;
     delete value.moreInformation;
 
     const young = await YoungObject.findById(req.user._id);
@@ -331,28 +363,37 @@ router.put("/particulieres", passport.authenticate("young", { session: false, fa
   }
 });
 
-router.put("/representant", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/representant/:type", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error: typeError, value: type } = checkParameter(req.params.type);
+    if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const isRequired = type !== "save";
+
     const { error, value } = Joi.object({
       //Parent1
-      parent1Status: Joi.string().trim().required().valid("mother", "father", "representant"),
-      parent1FirstName: validateFirstName().trim().required(),
-      parent1LastName: Joi.string().uppercase().trim().required(),
-      parent1Email: Joi.string().lowercase().trim().email().required(),
-      parent1Phone: Joi.string().trim().required(),
-      parent1OwnAddress: Joi.string().trim().required().valid("true", "false"),
-      parent1FromFranceConnect: Joi.string().trim().required().valid("true", "false"),
+      parent1Status: needRequired(Joi.string().trim().valid("mother", "father", "representant"), isRequired),
+      parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
+      parent1LastName: needRequired(Joi.string().uppercase().trim(), isRequired),
+      parent1Email: needRequired(Joi.string().lowercase().trim().email(), isRequired),
+      parent1Phone: needRequired(Joi.string().trim(), isRequired),
+      parent1OwnAddress: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      parent1FromFranceConnect: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
 
       //If parent1OwnAdress
-      parent1City: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
-      parent1Zip: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
-      parent1Address: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
-      parent1Country: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      parent1City: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      parent1Zip: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      parent1Address: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      parent1Country: Joi.alternatives().conditional("parent1OwnAddress", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
 
       //If parent1OwnAdress and parent1Country === France
       addressParent1Verified: Joi.alternatives().conditional("parent1OwnAddress", {
         is: "true",
-        then: Joi.alternatives().conditional("parent1Country", { is: "France", then: Joi.string().trim().required().valid("true"), otherwise: Joi.isError(new Error()) }),
+        then: Joi.alternatives().conditional("parent1Country", {
+          is: "France",
+          then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+          otherwise: Joi.isError(new Error()),
+        }),
         otherwise: Joi.isError(new Error()),
       }),
       parent1Location: Joi.alternatives().conditional("parent1OwnAddress", {
@@ -361,8 +402,8 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
           is: "France",
           then: Joi.object()
             .keys({
-              lat: Joi.number().required().allow(null),
-              lon: Joi.number().required().allow(null),
+              lat: needRequired(Joi.number().allow(null), isRequired),
+              lon: needRequired(Joi.number().allow(null), isRequired),
             })
             .default({
               lat: undefined,
@@ -375,50 +416,58 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
       }),
       parent1Department: Joi.alternatives().conditional("parent1OwnAddress", {
         is: "true",
-        then: Joi.alternatives().conditional("parent1Country", { is: "France", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        then: Joi.alternatives().conditional("parent1Country", { is: "France", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
         otherwise: Joi.isError(new Error()),
       }),
       parent1Region: Joi.alternatives().conditional("parent1OwnAddress", {
         is: "true",
-        then: Joi.alternatives().conditional("parent1Country", { is: "France", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        then: Joi.alternatives().conditional("parent1Country", { is: "France", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
         otherwise: Joi.isError(new Error()),
       }),
 
       //Parent2
-      parent2: Joi.string().trim().required().valid(true, false),
+      parent2: needRequired(Joi.string().trim().valid(true, false), isRequired),
 
       //Parent2 informed
-      parent2Status: Joi.alternatives().conditional("parent2", { is: true, then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
-      parent2FirstName: Joi.alternatives().conditional("parent2", { is: true, then: validateFirstName().trim().required(), otherwise: Joi.isError(new Error()) }),
-      parent2LastName: Joi.alternatives().conditional("parent2", { is: true, then: Joi.string().uppercase().trim().required(), otherwise: Joi.isError(new Error()) }),
-      parent2Email: Joi.alternatives().conditional("parent2", { is: true, then: Joi.string().lowercase().trim().email().required(), otherwise: Joi.isError(new Error()) }),
-      parent2Phone: Joi.alternatives().conditional("parent2", { is: true, then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
-      parent2OwnAddress: Joi.alternatives().conditional("parent2", {
+      parent2Status: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      parent2FirstName: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(validateFirstName().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      parent2LastName: Joi.alternatives().conditional("parent2", {
         is: true,
-        then: Joi.string().trim().required().valid("true", "false"),
+        then: needRequired(Joi.string().uppercase().trim(), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
-      parent2FromFranceConnect: Joi.string().trim().required().valid("true", "false"),
+      parent2Email: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: needRequired(Joi.string().lowercase().trim().email(), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent2Phone: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      parent2OwnAddress: Joi.alternatives().conditional("parent2", {
+        is: true,
+        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        otherwise: Joi.isError(new Error()),
+      }),
+      parent2FromFranceConnect: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
 
       //If parent2 and parent1OwnAdress
       parent2City: Joi.alternatives().conditional("parent2", {
         is: true,
-        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
         otherwise: Joi.isError(new Error()),
       }),
       parent2Zip: Joi.alternatives().conditional("parent2", {
         is: true,
-        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
         otherwise: Joi.isError(new Error()),
       }),
       parent2Address: Joi.alternatives().conditional("parent2", {
         is: true,
-        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
         otherwise: Joi.isError(new Error()),
       }),
       parent2Country: Joi.alternatives().conditional("parent2", {
         is: true,
-        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+        then: Joi.alternatives().conditional("parent2OwnAddress", { is: "true", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
         otherwise: Joi.isError(new Error()),
       }),
 
@@ -429,7 +478,7 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
           is: "true",
           then: Joi.alternatives().conditional("parent2Country", {
             is: "France",
-            then: Joi.string().trim().required().valid("true"),
+            then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
             otherwise: Joi.isError(new Error()),
           }),
           otherwise: Joi.isError(new Error()),
@@ -445,8 +494,8 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
             is: "France",
             then: Joi.object()
               .keys({
-                lat: Joi.number().required().allow(null),
-                lon: Joi.number().required().allow(null),
+                lat: needRequired(Joi.number().allow(null), isRequired),
+                lon: needRequired(Joi.number().allow(null), isRequired),
               })
               .default({
                 lat: undefined,
@@ -466,7 +515,7 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
           is: "true",
           then: Joi.alternatives().conditional("parent2Country", {
             is: "France",
-            then: Joi.string().trim().required(),
+            then: needRequired(Joi.string().trim(), isRequired),
             otherwise: Joi.isError(new Error()),
           }),
           otherwise: Joi.isError(new Error()),
@@ -480,7 +529,7 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
           is: "true",
           then: Joi.alternatives().conditional("parent2Country", {
             is: "France",
-            then: Joi.string().trim().required(),
+            then: needRequired(Joi.string().trim(), isRequired),
             otherwise: Joi.isError(new Error()),
           }),
           otherwise: Joi.isError(new Error()),
@@ -541,7 +590,8 @@ router.put("/representant", passport.authenticate("young", { session: false, fai
 
     delete value.parent2;
     delete value.addressParent1Verified;
-    value.inscriptionStep = STEPS.CONSENTEMENTS;
+    if (type === "next") value.inscriptionStep = STEPS.CONSENTEMENTS;
+    if (type === "correction") value.status = YOUNG_STATUS.WAITING_VALIDATION;
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -639,8 +689,13 @@ router.put("/consentements", passport.authenticate("young", { session: false, fa
   }
 });
 
-router.put("/documents", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/documents/:type", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error: typeError, value: type } = checkParameter(req.params.type);
+    if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const isRequired = type !== "save";
+
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -654,22 +709,34 @@ router.put("/documents", passport.authenticate("young", { session: false, failWi
     }
 
     const { error, value } = Joi.object({
-      cniFiles: Joi.array().items(Joi.string().required()).required().min(1),
+      cniFiles: Joi.alternatives().conditional("$isRequired", {
+        is: Joi.boolean().valid(true).required(),
+        then: Joi.array().items(Joi.string().required()).required().min(1),
+        otherwise: Joi.array().items(Joi.string()),
+      }),
       parentConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
         is: Joi.boolean().valid(false).required(),
-        then: Joi.array().items(Joi.string().required()).required().min(1),
+        then: Joi.alternatives().conditional("$isRequired", {
+          is: Joi.boolean().valid(true).required(),
+          then: Joi.array().items(Joi.string().required()).required().min(1),
+          otherwise: Joi.array().items(Joi.string()),
+        }),
         otherwise: Joi.isError(new Error()),
       }),
       dataProcessingConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
         is: Joi.boolean().valid(false).required(),
         then: Joi.alternatives().conditional("$needMoreConsent", {
           is: Joi.boolean().valid(true).required(),
-          then: Joi.array().items(Joi.string().required()).required().min(1),
+          then: Joi.alternatives().conditional("$isRequired", {
+            is: Joi.boolean().valid(true).required(),
+            then: Joi.array().items(Joi.string().required()).required().min(1),
+            otherwise: Joi.array().items(Joi.string()),
+          }),
           otherwise: Joi.isError(new Error()),
         }),
         otherwise: Joi.isError(new Error()),
       }),
-    }).validate(req.body, { context: { needMoreConsent, isParentFromFranceconnect } });
+    }).validate(req.body, { context: { needMoreConsent, isParentFromFranceconnect, isRequired } });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -677,7 +744,8 @@ router.put("/documents", passport.authenticate("young", { session: false, failWi
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    value.inscriptionStep = STEPS.DONE;
+    if (type === "next") value.inscriptionStep = STEPS.DONE;
+    if (type === "correction") value.status = YOUNG_STATUS.WAITING_VALIDATION;
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -731,36 +799,16 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
   }
 });
 
-router.put("/save/:type?", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const keys = ["correction"];
-    const { error: typeError, value: type } = Joi.string()
-      .valid(...keys)
-      .validate(req.params.type);
-    if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+const checkParameter = (parameter) => {
+  const keys = ["next", "save", "correction"];
+  return Joi.string()
+    .valid(...keys)
+    .validate(parameter);
+};
 
-    const young = await YoungObject.findById(req.user._id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const { error: bodyError, value } = validateInscription(req.body);
-    if (bodyError) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    if (type === "correction") {
-      value.status = YOUNG_STATUS.WAITING_VALIDATION;
-    }
-
-    young.set(value);
-    await young.save({ fromUser: req.user });
-
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+const needRequired = (joi, isRequired) => {
+  if (isRequired) return joi.required();
+  else return joi.allow(null, "");
+};
 
 module.exports = router;

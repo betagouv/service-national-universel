@@ -288,6 +288,50 @@ export default function StepRepresentants() {
     }
   }, [young]);
 
+  const onSubmit = async ({ values, type }) => {
+    if (type === "next") setLoading(true);
+    try {
+      //Check location
+      for (let id = 1; id <= 2; id++) {
+        if (values[`parent${id}OwnAddress`] === "true") {
+          if (values[`parent${id}Country`] !== "France") {
+            delete values[`parent${id}Region`];
+            delete values[`parent${id}Department`];
+            delete values[`parent${id}Location`];
+            delete values[`addressParent${id}Verified`];
+          }
+        } else {
+          delete values[`parent${id}City`];
+          delete values[`parent${id}Zip`];
+          delete values[`parent${id}Address`];
+          delete values[`parent${id}Location`];
+          delete values[`parent${id}Department`];
+          delete values[`parent${id}Region`];
+          delete values[`parent${id}Country`];
+          delete values[`addressParent${id}Verified`];
+        }
+      }
+      if (!isParent2Visible) {
+        delete values.parent2Email;
+        delete values.parent2FirstName;
+        delete values.parent2LastName;
+        delete values.parent2OwnAddress;
+        delete values.parent2Phone;
+        delete values.parent2Status;
+      }
+      values.parent2 = isParent2Visible;
+      const { ok, code, data } = await api.put(`/young/inscription/representant/${type}`, values);
+      if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+      dispatch(setYoung(data));
+      if (type === "next") history.push("/inscription/consentements");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!data) return null;
 
   return (
@@ -296,54 +340,7 @@ export default function StepRepresentants() {
         <h2>Coordonnées de votre ou de vos représentants légaux</h2>
         <p>Faites compléter les informations ci-dessous par votre ou vos représentants légaux.</p>
       </Heading>
-      <Formik
-        initialValues={data}
-        enableReinitialize={true}
-        validateOnChange={false}
-        validateOnBlur={false}
-        onSubmit={async (values) => {
-          setLoading(true);
-          try {
-            //Check location
-            for (let id = 1; id <= 2; id++) {
-              if (values[`parent${id}OwnAddress`] === "true") {
-                if (values[`parent${id}Country`] !== "France") {
-                  delete values[`parent${id}Region`];
-                  delete values[`parent${id}Department`];
-                  delete values[`parent${id}Location`];
-                  delete values[`addressParent${id}Verified`];
-                }
-              } else {
-                delete values[`parent${id}City`];
-                delete values[`parent${id}Zip`];
-                delete values[`parent${id}Address`];
-                delete values[`parent${id}Location`];
-                delete values[`parent${id}Department`];
-                delete values[`parent${id}Region`];
-                delete values[`parent${id}Country`];
-                delete values[`addressParent${id}Verified`];
-              }
-            }
-            if (!isParent2Visible) {
-              delete values.parent2Email;
-              delete values.parent2FirstName;
-              delete values.parent2LastName;
-              delete values.parent2OwnAddress;
-              delete values.parent2Phone;
-              delete values.parent2Status;
-            }
-            values.parent2 = isParent2Visible;
-            const { ok, code, data } = await api.put("/young/inscription/representant", values);
-            if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(data));
-            history.push("/inscription/consentements");
-          } catch (e) {
-            console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
-          } finally {
-            setLoading(false);
-          }
-        }}>
+      <Formik initialValues={data} enableReinitialize={true} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit({ values, type: "next" })}>
         {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
           <>
             <Parent id={1} values={values} handleChange={handleChange} errors={errors} touched={touched} validateField={validateField} />
@@ -380,7 +377,7 @@ export default function StepRepresentants() {
               ) : null}
             </FormRow>
             {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} validateField={validateField} /> : null}
-            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} save={onSubmit} />
           </>
         )}
       </Formik>
