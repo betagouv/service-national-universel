@@ -61,7 +61,6 @@ export default function Edit(props) {
       if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
       sessionToUpdate.push(sessionPhase1Response.data);
     }
-    console.log(newValues)
     for (const session of sessionToUpdate) {
       if (session.placesTotal !== newValues[session.cohort]) {
         const { ok, code } = await api.put(`/session-phase1/${session._id}`, { placesTotal: newValues[session.cohort].placesTotal, status: newValues[session.cohort].status });
@@ -188,7 +187,7 @@ export default function Edit(props) {
                                 title={''}
                                 values={values[sessionShow].placesTotal}
                                 name={`${sessionShow}.placesTotal`}
-                                placeholder={values[sessionShow].placesTotal}
+                                placeholder={values[sessionShow].placesTotal || 0}
                                 handleChange={handleChange}
                                 required
                                 errors={errors}
@@ -196,12 +195,11 @@ export default function Edit(props) {
                               />
                             </div>
                             <div className="w-full">
-                              {console.log(values)}
-                              <Select
+                              <SelectStatus
                                 name={`${sessionShow}.status`}
                                 values={values[sessionShow].status}
                                 handleChange={handleChange}
-                                title=""
+                                title="Statut"
                                 options={SessionStatus}
                                 required
                                 errors={errors}
@@ -256,6 +254,23 @@ const ElementsSejour = ({ title, placeholder, values, name, handleChange, type =
       />
       {errors && touched && <Error errors={errors} touched={touched} name={name} />}
     </>
+  )
+}
+
+const SelectStatus = ({ title, name, values, handleChange, disabled, options, required = false, errors, touched }) => {
+  return (
+    <div className="flex flex-col border p-2 rounded-xl m-2">
+      <div> {title} </div>
+      <select disabled={disabled} className="form-control" name={name} value={values} onChange={handleChange}>
+        <option key={-1} value="" label=""></option>
+        {options.map((o, i) => (
+          <option key={i} value={o.value} label={o.label}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {errors && touched && <Error errors={errors} touched={touched} name={name} />}
+    </div>
   )
 }
 const Wrapper = styled.div`
