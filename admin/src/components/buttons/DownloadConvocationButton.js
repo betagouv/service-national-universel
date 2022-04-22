@@ -15,7 +15,7 @@ export default function DownloadConvocationButton({ young, children, uri, ...res
     setLoading(false);
   };
   return (
-    <LoadingButton loading={loading} onClick={() => viewFile(uri)} {...rest}>
+    <LoadingButton color="#EFF6FF" textColor="#1D4ED8" loading={loading} onClick={() => viewFile(uri)} {...rest}>
       {children}
     </LoadingButton>
   );

@@ -118,7 +118,7 @@ export default function Phase1(props) {
     if (young.statusPhase1 === "AFFECTED")
       return (
         <>
-          <p>{young.firstName} a été affecté(e) au centre :</p>
+          <p className="text-base mb-1">{young.firstName} a été affecté(e) au centre :</p>
           <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
           <Details title="Ville" value={cohesionCenter.city} />
           <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
@@ -134,7 +134,7 @@ export default function Phase1(props) {
     if (young.statusPhase1 === "WAITING_LIST")
       return (
         <>
-          <p>{young.firstName} est sur liste d&apos;attente au centre :</p>
+          <p className="text-base mb-1">{young.firstName} est sur liste d&apos;attente au centre :</p>
           <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
           <Details title="Ville" value={cohesionCenter.city} />
           <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
@@ -220,29 +220,42 @@ export default function Phase1(props) {
                         disabled={disabled}
                       />
                     </div>
-                    <div>
-                      <p className="text-gray-500">Attestation de réalisation phase 1 :</p>
-                      <section className="flex mt-3">
-                        {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (
-                          <>
+                    <div className="ml-2">
+                      {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (
+                        <>
+                          <p className="text-gray-500">Attestation de réalisation phase 1 :</p>
+                          <section className="flex mt-3">
                             <DownloadAttestationButton young={young} uri="1" className="mr-2">
-                              <Download color="#60A5FA" />
+                              <Download color="#60A5FA" className="mr-2" />
                               Télécharger
                             </DownloadAttestationButton>
                             <MailAttestationButton young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
-                              <Envelop />
+                              <Envelop className="mr-2" />
                               Envoyer par mail
                             </MailAttestationButton>
-                          </>
-                        ) : null}
-                      </section>
+                          </section>
+                        </>
+                      ) : (
+                        <>
+                          {young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && (young.meetingPointId || young.deplacementPhase1Autonomous === "true") ? (
+                            <>
+                              <p className="text-gray-500 mb-[22px]">Convocation au séjour :</p>
+                              <DownloadConvocationButton young={young} uri="cohesion">
+                                <Download color="#60A5FA" className="mr-2" />
+                                Télécharger
+                              </DownloadConvocationButton>
+                            </>
+                          ) : null}
+                        </>
+                      )}
                     </div>
                   </section>
                 </Bloc>
                 <Bloc title="Détails" borderBottom disabled={disabled}>
                   {getCohesionStay(young)}
                   <Details title="Dates" value={translateCohort(young.cohort)} className="flex" />
-                  <Details title="Point de rassemblement" value={getMeetingPoint(young)} />
+                  <p className="text-base my-1">Point de rassemblement :</p>
+                  {getMeetingPoint(young)}
                 </Bloc>
               </article>
             )}
@@ -257,13 +270,6 @@ export default function Phase1(props) {
             ) : null
           ) : null}
         </Box>
-        <div style={{ display: "flex", alignItems: "flex-start" }}>
-          {young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && (young.meetingPointId || young.deplacementPhase1Autonomous === "true") ? (
-            <DownloadConvocationButton young={young} uri="cohesion">
-              Télécharger la convocation au séjour de cohésion
-            </DownloadConvocationButton>
-          ) : null}
-        </div>
       </WrapperPhase1>
       <ModalConfirm
         isOpen={modal?.isOpen}
