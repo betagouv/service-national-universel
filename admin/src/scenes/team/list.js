@@ -1,7 +1,6 @@
 import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React, { useEffect, useState } from "react";
-import { AiOutlineEye } from "react-icons/ai";
-import { HiLogin, HiUserAdd, HiOutlineTrash } from "react-icons/hi";
+import { HiLogin, HiUserAdd } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
@@ -18,7 +17,9 @@ import plausibleEvent from "../../services/pausible";
 import { canUpdateReferent, ES_NO_LIMIT, formatLongDateFR, formatStringLongDate, getFilterLabel, ROLES, translate, canDeleteReferent } from "../../utils";
 import Nav from "./components/nav";
 import Panel from "./panel";
-import { BiPencil } from "react-icons/bi";
+import Eye from "../../assets/icons/Eye";
+import Pencil from "../../assets/icons/Pencil";
+import Trash from "../../assets/icons/Trash";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -293,20 +294,20 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
   };
   return (
     <>
-      <div className="flex flex-row items-center flex-wrap gap-4">
-        <div className="bg-gray-100 rounded-full p-1  hover:scale-105" onClick={() => setResponsable(hit)}>
-          <AiOutlineEye className="h-6 w-6 flex justify-center items-center text-gray-600 text-xs" />
+      <div className="flex flex-row items-center justify-between flex-wrap">
+        <div className="flex justify-center items-center h-8 w-8 bg-gray-100 text-gray-600 rounded-full hover:scale-105 shadow-sm " onClick={() => setResponsable(hit)}>
+          <Eye width={18} height={18} />
         </div>
         {displayActionButton ? (
           <>
             <Link to={`/user/${hit._id}`}>
-              <div className="bg-gray-100 rounded-full p-1  hover:scale-105">
-                <BiPencil className="h-6 w-6 flex justify-center items-center text-gray-600 text-xs" />
+              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 text-gray-600 rounded-full hover:scale-105 shadow-sm ">
+                <Pencil width={16} height={16} />
               </div>
             </Link>
             {canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? (
-              <div className="bg-gray-100 rounded-full p-1  hover:scale-105" onClick={onClickDelete}>
-                <HiOutlineTrash className="h-6 w-6 flex justify-center items-center text-gray-600 text-xs" />
+              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 text-gray-600 rounded-full hover:scale-105 shadow-sm " onClick={onClickDelete}>
+                <Trash width={16} height={16} />
               </div>
             ) : null}
           </>
