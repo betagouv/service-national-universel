@@ -12,7 +12,7 @@ const { ERRORS } = require("../utils");
 router.post("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   // Validate cohort...
   const { error: errorCohort, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params);
-  if (errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorCohort });
+  if (errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
   // ... then body
   const { error, value: inscriptionsGoals } = Joi.array()
     .items({

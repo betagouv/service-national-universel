@@ -71,7 +71,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorId });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     const structure = await StructureObject.findById(checkedId);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -79,7 +79,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!canModifyStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorStructure, value: checkedStructure } = validateStructure(req.body);
-    if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorStructure });
+    if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     structure.set(checkedStructure);
     await structure.save({ fromUser: req.user });
@@ -106,7 +106,7 @@ router.get("/networks", passport.authenticate("referent", { session: false, fail
 router.get("/:id/children", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const structure = await StructureObject.findById(checkedId);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -139,7 +139,7 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false, f
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await StructureObject.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -164,7 +164,7 @@ router.get("/", passport.authenticate("referent", { session: false, failWithErro
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const structure = await StructureObject.findById(checkedId);
     if (!canDeleteStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
