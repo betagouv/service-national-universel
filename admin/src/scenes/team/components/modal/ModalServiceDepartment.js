@@ -33,7 +33,7 @@ export default function ModalServiceDepartment({ isOpen, setIsOpen, onSubmit, se
             <div className="w-full flex flex-col m-2">
               <div className={`border-[1px] rounded-lg w-full m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
                 <label htmlFor="directionName" className="text-left text-gray-500 w-full">
-                  Nom de la Direction
+                  <span className="text-red-400">*</span>&nbsp;Nom de la Direction
                 </label>
                 <input
                   required
@@ -51,7 +51,6 @@ export default function ModalServiceDepartment({ isOpen, setIsOpen, onSubmit, se
                   Complément d’adresse
                 </label>
                 <input
-                  required
                   disabled={isLoading}
                   className="w-full disabled:bg-gray-200"
                   name="complementAddress"
@@ -63,7 +62,7 @@ export default function ModalServiceDepartment({ isOpen, setIsOpen, onSubmit, se
 
               <div className={`border-[1px] rounded-lg w-full m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
                 <label htmlFor="city" className="text-left text-gray-500 w-full">
-                  Ville
+                  <span className="text-red-400">*</span>&nbsp;Ville
                 </label>
                 <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="city" id="city" onChange={handleChange} value={data.city} />
               </div>
@@ -71,14 +70,14 @@ export default function ModalServiceDepartment({ isOpen, setIsOpen, onSubmit, se
             <div className="w-full flex flex-col m-2">
               <div className={`border-[1px] rounded-lg w-full m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
                 <label htmlFor="address" className="text-left text-gray-500 w-full">
-                  Adresse
+                  <span className="text-red-400">*</span>&nbsp;Adresse
                 </label>
                 <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="address" id="address" onChange={handleChange} value={data.address} />
               </div>
 
               <div className={`border-[1px] rounded-lg w-full m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
                 <label htmlFor="zip" className="text-left text-gray-500 w-full">
-                  Code postal
+                  <span className="text-red-400">*</span>&nbsp;Code postal
                 </label>
                 <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="zip" id="zip" onChange={handleChange} value={data.zip} />
               </div>

@@ -8,7 +8,7 @@ export default function ModalForm({ isOpen, showHeaderText = true, headerText, c
     <Modal className={classNameModal} centered isOpen={isOpen} toggle={onCancel}>
       <ModalContainer>
         <CloseSvg className="close-icon" height={10} onClick={onCancel} />
-        {showHeaderText ? <div className="flex align-center text-sm uppercase text-snu-purple-900">{headerText}</div> : null}
+        {showHeaderText ? <div className="flex align-center text-xl text-black font-medium">{headerText}</div> : null}
         {children}
       </ModalContainer>
     </Modal>
