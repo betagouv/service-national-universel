@@ -39,6 +39,7 @@ export default function Edit(props) {
       const sessionPhase1Response = await api.get(`/cohesion-center/${id}/cohort/${cohort}/session-phase1`);
       if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
       obj[sessionPhase1Response.data.cohort] = { placesTotal: sessionPhase1Response.data.placesTotal, status: sessionPhase1Response.data.status }
+      setsessionShow(sessionPhase1Response.data.cohort)
     }
     setDefaultValue(obj);
   }
