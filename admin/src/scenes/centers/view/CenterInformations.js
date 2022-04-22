@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { translate, getDepartmentNumber, canCreateOrUpdateCohesionCenter } from "../../../utils";
+import { translate, getDepartmentNumber, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../../utils";
 import { Box } from "../../../components/box";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
@@ -86,13 +86,9 @@ export default function Details({ center, sessions }) {
                   <div>
                     <div className="detail-title-first">{session.cohort}&nbsp;:</div>
                     {session.status ?
-                      <>
-                        {session.status === "DRAFT" ? (
-                          <div className="border border-[#A4D8BC] text-xs rounded-full bg-[#F5FCF3] text-[#27AF66] p-1"> Validé  </div>
-                        ) : (
-                          <div className="border border-[#CECECE] text-xs rounded-full bg-[#F6F6F6] text-[#9A9A9A] p-1 "> Brouillon </div>
-                        )}
-                      </>
+                      <div className={`border text-xs rounded-full p-1 ${session.status === "DRAFT" ? ("border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] ") : ("border-[#A4D8BC]  bg-[#F5FCF3] text-[#27AF66]")}`}>
+                        {translateSessionStatus(session.status)}
+                      </div>
                       : null}
                   </div>
                   <div className="detail-text">{session.placesTotal} places</div>

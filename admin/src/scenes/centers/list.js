@@ -7,7 +7,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../utils";
 import VioletButton from "../../components/buttons/VioletButton";
 import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
@@ -227,13 +227,9 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
             <div className="flex items-center">
               <Badge text={sessionPhase1._source.cohort} />
               {sessionPhase1._source.status ?
-                <>
-                  {sessionPhase1._source.status === "DRAFT" ? (
-                    <div className="border border-[#A4D8BC] text-xs rounded-full bg-[#F5FCF3] text-[#27AF66] p-1"> Validé </div>
-                  ) : (
-                    <div className="border border-[#CECECE] text-xs rounded-full bg-[#F6F6F6] text-[#9A9A9A] p-1 ">Brouillon  </div>
-                  )}
-                </>
+                <div className={`border text-xs rounded-full p-1 ${sessionPhase1._source.status === "DRAFT" ? ("border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] ") : ("border-[#A4D8BC]  bg-[#F5FCF3] text-[#27AF66]")}`}>
+                  {translateSessionStatus(sessionPhase1._source.status)}
+                </div>
                 : null}
             </div>
           </SubTd>

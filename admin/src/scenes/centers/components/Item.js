@@ -37,8 +37,8 @@ export default function Item({ title, placeholder, values, name, handleChange, t
     );
   };
   return (
-    <Row className="flex border flex-col justify-items-start m-1 rounded-lg rounded-grey-300 p-1">
-      <div className="text-gray-500">
+    <Row className="flex w-full border flex-col justify-items-start m-1 rounded-lg rounded-grey-300 p-2">
+      <div className="text-gray-500 text-xs">
         <label>{title}</label>
       </div>
       {renderInput()}

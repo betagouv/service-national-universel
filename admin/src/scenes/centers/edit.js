@@ -16,6 +16,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import AddressInput from "../../components/addressInputV2";
 import MultiSelect from "../../components/Multiselect";
 import Error, { requiredMessage } from "../../components/errorMessage";
+import { BiHandicap } from 'react-icons/bi';
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -107,13 +108,13 @@ export default function Edit(props) {
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas enregistrer ce centre car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Row>
-              <Col className="mb-10">
+              <Col className="mb-10 w-1/2">
                 <Box>
-                  <BoxHeadTitle>Informations générales</BoxHeadTitle>
                   <BoxContent direction="column">
-                    <div> Nom </div>
+                    <div className="ml-1 font-bold text-lg">Informations générales</div>
+                    <div className="ml-1 mt-8"> Nom </div>
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    {/* <div> Adresse </div> */}
+                    <div className="ml-1 mt-8"> Adresse </div>
                     <AddressInput
                       keys={{
                         country: "country",
@@ -133,13 +134,10 @@ export default function Edit(props) {
                       validateField={validateField}
                       required
                     />
-                    <div> Code </div>
-                    <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" handleChange={handleChange} />
-                    <Item disabled={user.role !== "admin"} title="Code 2022" values={values} name="code2022" handleChange={handleChange} />
-                    <div> Accessibilité PMR </div>
-                    <Select
+                    <div className="ml-1 mt-8"> Accessibilité PMR </div>
+                    <SelectPMR
                       name="pmr"
-                      values={values}
+                      values={values["pmr"]}
                       handleChange={handleChange}
                       title="Accessibilité aux personnes à mobilité réduite"
                       options={[
@@ -150,10 +148,16 @@ export default function Edit(props) {
                       errors={errors}
                       touched={touched}
                     />
+                    <div className="ml-1 mt-8"> Code </div>
+                    <div className="flex w-full">
+                      <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" handleChange={handleChange} />
+                      <Item disabled={user.role !== "admin"} title="Code 2022" values={values} name="code2022" handleChange={handleChange} />
+                    </div>
+
                   </BoxContent>
                 </Box>
               </Col>
-              <Col className="mb-10">
+              <Col className="mb-10 w-1/2">
                 <Box>
                   <BoxHeadTitle>Par séjour</BoxHeadTitle>
                   <BoxContent direction="column">
@@ -171,17 +175,17 @@ export default function Edit(props) {
                   </BoxContent>
                   {values.cohorts?.length ? (
                     <>
-                      <div>
+                      <div className="">
                         <div className="flex justify-start border-bottom mb-2">
                           {(values.cohorts || []).map((cohort, index) => (
                             <>
-                              <div key={index} className={`mx-5 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2 border-snu-purple-300 " : null}`} onClick={() => { setsessionShow(cohort) }}> {cohort} </div>
+                              <div key={index} className={`mx-5 pb-2 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`} onClick={() => { setsessionShow(cohort) }}> {cohort} </div>
                             </>
                           ))}
                         </div>
                         {sessionShow ? (
-                          <div className="flex ml-2 mt-4">
-                            <div className="w-1/4 flex border flex-col justify-items-start m-1 rounded-lg rounded-grey-300 p-1">
+                          <div className="flex ml-5 mt-4 ">
+                            <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
                               <ElementsSejour
                                 key={`${sessionShow}.Places`}
                                 title={"Capacite d'acceuil"}
@@ -194,7 +198,7 @@ export default function Edit(props) {
                                 touched={touched}
                               />
                             </div>
-                            <div className="w-2/4 flex border flex-col justify-items-start m-1 rounded-lg rounded-grey-300 p-1">
+                            <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
                               <SelectStatus
                                 name={`${sessionShow}.status`}
                                 values={values[sessionShow]?.status}
@@ -243,7 +247,7 @@ const MultiSelectWithTitle = ({ title, value, onChange, name, options, placehold
 const ElementsSejour = ({ title, placeholder, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) => {
   return (
     <>
-      <div className="text-gray-500"> {title} </div>
+      <div className="text-gray-500 text-xs"> {title} </div>
       <input disabled={disabled} value={translate(values[name])} name={name} onChange={handleChange} placeholder={placeholder} validate={(v) => required && !v && requiredMessage}></input>
       {errors && touched && <Error errors={errors} touched={touched} name={name} />}
     </>
@@ -252,9 +256,9 @@ const ElementsSejour = ({ title, placeholder, values, name, handleChange, type =
 
 const SelectStatus = ({ title, name, values, handleChange, disabled, options, required = false, errors, touched }) => {
   return (
-    <>
-      <div className="text-gray-500"> {title} </div>
-      <select disabled={disabled} className="" name={name} value={values} onChange={handleChange}>
+    <div className="">
+      <div className="text-gray-500 text-xs"> {title} </div>
+      <select disabled={disabled} name={name} value={values} onChange={handleChange} className="w-full">
         <option key={-1} value="" label=""></option>
         {options.map((o, i) => (
           <option key={i} value={o.value} label={o.label}>
@@ -263,9 +267,32 @@ const SelectStatus = ({ title, name, values, handleChange, disabled, options, re
         ))}
       </select>
       {errors && touched && <Error errors={errors} touched={touched} name={name} />}
-    </>
+    </div>
   )
 }
+
+const SelectPMR = ({ title, name, values, handleChange, disabled, options, required = false, errors, touched }) => {
+  return (
+    <div className="flex border w-full  justify-items-start ml-0.5 my-1 rounded-lg rounded-grey-300 p-2">
+      <div className="bg-gray-100 rounded-full p-1">
+        <BiHandicap size={28} />
+      </div>
+      <div className="items-start ml-2 w-full">
+        <div className="ml-1 text-gray-500 text-xs"> {title} </div>
+        <select disabled={disabled} className="w-full" name={name} value={values} onChange={handleChange}>
+          <option key={-1} value="" label=""></option>
+          {options.map((o, i) => (
+            <option key={i} value={o.value} label={o.label}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
+      </div>
+    </div>
+  )
+}
+
 const Wrapper = styled.div`
   padding: 2rem;
   li {
