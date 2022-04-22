@@ -42,7 +42,7 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
   return (
     <div className=" flex flex-row rounded-lg bg-white shadow-sm mr-4 hover:cursor-pointer items-center hover:scale-105" onClick={handleShowModal}>
       <div className="flex flex-col px-7 py-6">
-        <div className="text-bold mb-1 text-sm">Contacts convocation</div>
+        <div className="font-bold mb-1 text-sm">Contacts convocation</div>
         <div className="text-gray-500 text-xs">
           {contacts.length} contacts - {nbCohorts} séjours
         </div>

@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { BiCopy } from "react-icons/bi";
-import { HiCheckCircle } from "react-icons/hi";
-import { HiPhone } from "react-icons/hi";
-import { copyToClipboard } from "../../../../utils";
-import { HiPlus } from "react-icons/hi";
+import { HiCheckCircle, HiPhone, HiPlus } from "react-icons/hi";
+import { copyToClipboard, translate, formatPhoneNumberFR } from "../../../../utils";
 import ModalRepresentant from "../modal/ModalRepresentant";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../services/api";
-import { translate } from "../../../../utils";
-import { formatPhoneNumberFR } from "../../../../utils";
 
 export default function CardRepresentant({ representant, getService, department, idServiceDep }) {
   const [copied, setCopied] = React.useState(false);
@@ -38,7 +34,7 @@ export default function CardRepresentant({ representant, getService, department,
       {representant ? (
         <div className="flex flex-col max-w-xs rounded-lg bg-white shadow-sm mr-4 hover:cursor-pointer hover:scale-105" onClick={handleShowModal}>
           <div className="flex flex-1 flex-col px-7 py-6 ">
-            <div className="text-sm text-bold mb-1">Représentant de l’État</div>
+            <div className="text-sm font-bold mb-1">Représentant de l’État</div>
             <div className="text-xs text-gray-500">
               {representant.firstName} {representant.lastName}
             </div>
