@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import InfoDepartement from "./InfoDepartment";
 import FilterDepartment from "./filter/FilterDepartment";
 import { useSelector } from "react-redux";
-import { ROLES } from "../../../utils";
+import { ROLES, getDepartmentNumber } from "../../../utils";
 
 export default function Nav({ filter, updateFilter }) {
   const user = useSelector((state) => state.Auth.user);
@@ -38,7 +38,7 @@ export default function Nav({ filter, updateFilter }) {
               {user.role === ROLES.REFERENT_REGION ? (
                 <FilterDepartment onChange={(event) => updateFilter({ department: [event.target.value] })} value={filter.department} filter={filter} />
               ) : (
-                user.department
+                `${user.department} (${getDepartmentNumber(user.department)})`
               )}
             </TabItem>
           </nav>

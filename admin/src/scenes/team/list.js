@@ -1,7 +1,7 @@
 import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React, { useEffect, useState } from "react";
 import { AiOutlineEye } from "react-icons/ai";
-import { HiLogin, HiUserAdd } from "react-icons/hi";
+import { HiLogin, HiUserAdd, HiOutlineTrash } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
@@ -19,7 +19,6 @@ import { canUpdateReferent, ES_NO_LIMIT, formatLongDateFR, formatStringLongDate,
 import Nav from "./components/nav";
 import Panel from "./panel";
 import { BiPencil } from "react-icons/bi";
-import { HiOutlineTrash } from "react-icons/hi";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -71,7 +70,7 @@ export default function List() {
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
           <div style={{ flex: 1, position: "relative" }}>
             <div className="flex justify-between items-start px-6 mt-6">
-              <Title>Mon équipe - {user.role === ROLES.REFERENT_REGION ? user.region : user.department}</Title>
+              <Title>Mon équipe - {user.role === ROLES.REFERENT_REGION ? `Région ${user.region}` : `Département ${user.department}`}</Title>
               <div className="flex items-center ">
                 <div className="mr-2">
                   <ExportComponent
