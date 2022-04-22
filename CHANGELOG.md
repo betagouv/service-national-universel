@@ -1,3 +1,10 @@
+# [1.74.0](https://github.com/betagouv/service-national-universel/compare/v1.73.0...v1.74.0) (2022-04-22)
+
+
+### Features
+
+* Référents régionaux : Module de gestion d’équipes ([#1488](https://github.com/betagouv/service-national-universel/issues/1488)) ([437e9c7](https://github.com/betagouv/service-national-universel/commit/437e9c793bbb67ff42d2d9f7a98ad49c98e68edd))
+
 # [1.73.0](https://github.com/betagouv/service-national-universel/compare/v1.72.2...v1.73.0) (2022-04-21)
 
 
