@@ -70,8 +70,8 @@ export default function List() {
       <ReactiveBase url={`${apiURL}/es`} app="team" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
           <div style={{ flex: 1, position: "relative" }}>
-            <div className="flex justify-between items-start px-6 mt-6">
-              <Title>Mon équipe - {user.role === ROLES.REFERENT_REGION ? `Région ${user.region}` : `Département ${user.department}`}</Title>
+            <div className="flex justify-between items-start px-6 mt-6 flex-wrap">
+              <div className="text-2xl font-bold text-black">Mon équipe - {user.role === ROLES.REFERENT_REGION ? `Région ${user.region}` : `Département ${user.department}`}</div>
               <div className="flex items-center ">
                 <div className="mr-2">
                   <ExportComponent
@@ -121,7 +121,7 @@ export default function List() {
                 <button
                   className=" box-border border-[1px] rounded-lg border-brand-purple text-brand-purple  hover:shadow-button px-7 py-1 ml-2"
                   onClick={() => setNewUserOpen(true)}>
-                  Inviter un nouvel utilisateur
+                  Inviter&nbsp;un&nbsp;nouvel&nbsp;utilisateur
                 </button>
               </div>
             </div>

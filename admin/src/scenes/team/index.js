@@ -9,7 +9,7 @@ export default function Team() {
 
   return (
     <Switch>
-      <Route path="/team" component={List} />
+      <Route path="/equipe" component={List} />
     </Switch>
   );
 }

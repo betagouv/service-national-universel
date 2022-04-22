@@ -28,19 +28,28 @@ export default function Nav({ filter, updateFilter }) {
 
   return (
     <>
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-full mt-4">
         <div className="flex flex-1 flex-col lg:flex-row mb-4 border-b">
           <nav className="px-3 flex flex-1  ">
-            <TabItem name="region" setCurrentTab={setCurrentTab} active={currentTab === "region"}>
-              {user.role === ROLES.REFERENT_REGION ? "Ma région" : "Équipe régionale"}
-            </TabItem>
-            <TabItem name="department" setCurrentTab={setCurrentTab} active={currentTab === "department"}>
-              {user.role === ROLES.REFERENT_REGION ? (
-                <FilterDepartment onChange={(event) => updateFilter({ department: [event.target.value] })} value={filter.department} filter={filter} />
-              ) : (
-                `${user.department} (${getDepartmentNumber(user.department)})`
-              )}
-            </TabItem>
+            {user.role === ROLES.REFERENT_REGION ? (
+              <>
+                <TabItem name="region" setCurrentTab={setCurrentTab} active={currentTab === "region"}>
+                  Ma région
+                </TabItem>
+                <TabItem name="department" setCurrentTab={setCurrentTab} active={currentTab === "department"}>
+                  <FilterDepartment onChange={(event) => updateFilter({ department: [event.target.value] })} value={filter.department} filter={filter} />
+                </TabItem>
+              </>
+            ) : (
+              <>
+                <TabItem name="department" setCurrentTab={setCurrentTab} active={currentTab === "department"}>
+                  {user.department} ({getDepartmentNumber(user.department)})
+                </TabItem>
+                <TabItem name="region" setCurrentTab={setCurrentTab} active={currentTab === "region"}>
+                  Équipe régionale
+                </TabItem>
+              </>
+            )}
           </nav>
         </div>
         {currentTab === "department" && <InfoDepartement department={filter?.department?.length ? filter.department[0] : null} />}
