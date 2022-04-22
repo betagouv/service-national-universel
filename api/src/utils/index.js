@@ -546,7 +546,7 @@ const updateApplication = async (mission, fromUser = null) => {
 
     if (sendinblueTemplate) {
       const young = await YoungModel.findById(application.youngId);
-      let cc = getCcOfYoung({ template, young });
+      let cc = getCcOfYoung({ template: sendinblueTemplate, young });
 
       await sendTemplate(sendinblueTemplate, {
         emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
