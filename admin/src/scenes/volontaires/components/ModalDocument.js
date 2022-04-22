@@ -9,7 +9,7 @@ import { Formik } from "formik";
 import Select from "../components/Select";
 import { translate } from "../../../utils";
 
-export default function ModalDocument({ isOpen, onCancel, initialValues, young, updateYoung, title, name, nameFiles }) {
+export default function ModalDocument({ isOpen, onCancel, initialValues, young, updateYoung, title, name, nameFiles, comment }) {
   return (
     <Modal centered isOpen={isOpen} toggle={onCancel} size="xl">
       <ModalContainer>
@@ -35,8 +35,12 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
                 <div className="mb-4">
                   <h3 className="mb-3">{title}</h3>
                   {values[nameFiles]?.length && !name ? null : (
-                    <div className="bg-gray-50 rounded-lg px-3 py-6 my-2 mx-auto">
-                      {!values[nameFiles]?.length && <p className="mb-3 ">Le volontaire n&apos;a pas encore renseigné sa pièce justificative.</p>}
+                    <div className="px-3 py-6 my-2 mx-auto">
+                      {!values[nameFiles]?.length && (
+                        <p className="mb-3 text-gray-500">
+                          <em>Le volontaire n&apos;a pas encore renseigné sa pièce justificative.</em>
+                        </p>
+                      )}
                       {name && (
                         <Select
                           placeholder="Non renseigné"
@@ -55,7 +59,7 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
                     </div>
                   )}
                 </div>
-                <section className="flex flex-col items-center">
+                <section className="flex flex-col items-center bg-gray-50 rounded-lg p-10 w-[90%] lg:w-[70%]">
                   <DndFileInput
                     tw="flex"
                     newDesign={true}
@@ -80,10 +84,21 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
                     }}
                   />
                 </section>
+                {comment && (
+                  <section className="flex flex-col items-center bg-gray-50 rounded-lg p-10 w-[90%] lg:w-[70%] my-4">
+                    <p className="w-[90%]">
+                      <strong>Correction demandée :</strong>
+                      <br /> <em>&ldquo;{comment}&rdquo;</em>
+                    </p>
+                  </section>
+                )}
               </div>
             </>
           )}
         </Formik>
+        <button onClick={onCancel} className="w-[90%] border border-gray-300 rounded-md py-2.5 px-6 mt-3 shadow-sm hover:bg-slate-50">
+          Retour
+        </button>
       </ModalContainer>
     </Modal>
   );

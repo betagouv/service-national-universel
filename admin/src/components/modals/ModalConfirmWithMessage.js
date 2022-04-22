@@ -43,7 +43,7 @@ export default function ModalConfirmWithMessage({
           <p>{endMessage}</p>
         </Content>
         <Footer>
-          <ModalButton loading={sending} disabled={sending || !messageTextArea} onClick={submit} primary>
+          <ModalButton loading={sending} disabled={sending || !messageTextArea} onClick={submit} newPrimary>
             Confirmer
           </ModalButton>
           <ModalButton disabled={sending} onClick={onChange}>

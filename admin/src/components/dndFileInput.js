@@ -6,7 +6,7 @@ import DownloadButton from "./buttons/DownloadButton";
 import RoundDownloadButton from "./buttons/RoundDownloadButton";
 import IconButton from "./buttons/IconButton";
 import ModalConfirm from "./modals/ModalConfirm";
-import download from "../assets/download2.svg";
+import download from "../assets/Download.js";
 import deleteIcon from "../assets/delete.svg";
 
 function getFileName(file) {
@@ -54,7 +54,7 @@ export default function DndFileInput({ value, onChange, name, errorMessage = req
               />
             </div>
           </File> */}
-            <File key={e} className="mx-1 bg-gray-50">
+            <File key={e} className="mx-1">
               <FileName className="mr-2">{getFileName(e)}</FileName>
               <IconButton icon={deleteIcon} bgColor="bg-blue-600" onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })} />
               <RoundDownloadButton

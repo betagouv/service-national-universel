@@ -30,14 +30,18 @@ import Select from "../components/Select";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import DocumentPhase1 from "../components/DocumentPhase1";
 import { environment } from "../../../config";
+import Download from "../../../assets/Download.js";
+import Envelop from "../../../assets/Envelop.js";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
   const [young, setYoung] = useState(props.young);
-  const [cohesionCenter, setCohesionCenter] = useState();
+  const [cohesionCenter, setCohesionCenter] = useState({ name: "yolo" });
   const disabled = young.statusPhase1 === "WITHDRAWN" || user.role !== ROLES.ADMIN;
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
+  console.log(young.statusPhase1, cohesionCenter);
 
   useEffect(() => {
     if (!young?.sessionPhase1Id) return;
@@ -188,32 +192,51 @@ export default function Phase1(props) {
                   titleRight={<Badge text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}
                   borderRight
                   borderBottom>
-                  <section className="flex">
-                    <Select
-                      className="px-4 py-2"
-                      placeholder="Non renseigné"
-                      title="Présence :"
-                      options={[
-                        { value: "true", label: "Présent" },
-                        { value: "false", label: "Absent" },
-                      ]}
-                      values={values}
-                      name="cohesionStayPresence"
-                      handleChange={(e) => {
-                        const value = e.target.value;
-                        setModal({
-                          isOpen: true,
-                          onConfirm: () => {
-                            handleChange({ target: { value, name: "cohesionStayPresence" } });
-                            updateYoung({ cohesionStayPresence: value });
-                          },
-                          title: "Changement de présence",
-                          message: confirmMessageChangePhase1Presence(value),
-                        });
-                      }}
-                      disabled={disabled}
-                    />
-                    <p className="px-4 py-2">Attestation de réalisation phase 1 :</p>
+                  <section className="flex items-start">
+                    <div className="mr-4">
+                      <p className="text-gray-500">Présence :</p>
+                      <Select
+                        tw=""
+                        placeholder="Non renseigné"
+                        title=""
+                        options={[
+                          { value: "true", label: "Présent" },
+                          { value: "false", label: "Absent" },
+                        ]}
+                        values={values}
+                        name="cohesionStayPresence"
+                        handleChange={(e) => {
+                          const value = e.target.value;
+                          setModal({
+                            isOpen: true,
+                            onConfirm: () => {
+                              handleChange({ target: { value, name: "cohesionStayPresence" } });
+                              updateYoung({ cohesionStayPresence: value });
+                            },
+                            title: "Changement de présence",
+                            message: confirmMessageChangePhase1Presence(value),
+                          });
+                        }}
+                        disabled={disabled}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Attestation de réalisation phase 1 :</p>
+                      <section className="flex mt-3">
+                        {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (
+                          <>
+                            <DownloadAttestationButton young={young} uri="1" className="mr-2">
+                              <Download color="#60A5FA" />
+                              Télécharger
+                            </DownloadAttestationButton>
+                            <MailAttestationButton young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
+                              <Envelop />
+                              Envoyer par mail
+                            </MailAttestationButton>
+                          </>
+                        ) : null}
+                      </section>
+                    </div>
                   </section>
                 </Bloc>
                 <Bloc title="Détails" borderBottom disabled={disabled}>
@@ -235,16 +258,6 @@ export default function Phase1(props) {
           ) : null}
         </Box>
         <div style={{ display: "flex", alignItems: "flex-start" }}>
-          {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (
-            <div style={{ textAlign: "center" }}>
-              <DownloadAttestationButton young={young} uri="1">
-                Télécharger l&apos;attestation de réalisation de la phase 1
-              </DownloadAttestationButton>
-              <MailAttestationButton style={{ marginTop: ".5rem" }} young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
-                Envoyer l&apos;attestation par mail
-              </MailAttestationButton>
-            </div>
-          ) : null}
           {young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && (young.meetingPointId || young.deplacementPhase1Autonomous === "true") ? (
             <DownloadConvocationButton young={young} uri="cohesion">
               Télécharger la convocation au séjour de cohésion

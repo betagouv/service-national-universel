@@ -3,16 +3,17 @@ import { Spinner, Button } from "reactstrap";
 import styled from "styled-components";
 import { colors } from "../../utils";
 
-export default function ModalButton({ primary, secondary, loading, children, disabled, ...rest }) {
+export default function ModalButton({ primary, newPrimary, secondary, loading, children, disabled, ...rest }) {
   const getBackgroundColor = () => {
     if (disabled) return colors.grey;
     if (primary) return colors.purple;
+    if (newPrimary) return colors.blue;
     if (secondary) return "#ffffff";
     return "#ffffff";
   };
   const getColor = () => {
     if (disabled) return "#bbbbbb";
-    if (primary) return "#ffffff";
+    if (primary || newPrimary) return "#ffffff";
     if (secondary) return colors.grey;
     return colors.grey;
   };

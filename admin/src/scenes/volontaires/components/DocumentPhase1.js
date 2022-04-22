@@ -8,14 +8,15 @@ import DndFileInput from "../../../components/dndFileInput";
 import { Formik } from "formik";
 import styled from "styled-components";
 import FileIcon from "../../../assets/FileIcon";
-import download from "../../../assets/download2.svg";
+import download from "../../../assets/Download.js";
 import CloseSvg from "../../../assets/Close";
 
-import { FILE_STATUS_PHASE1, translateFileStatusPhase1, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { FILE_STATUS_PHASE1, translateFileStatusPhase1, translate, SENDINBLUE_TEMPLATES, htmlCleaner } from "../../../utils";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import { environment } from "../../../config";
 import { ModalContainer } from "../../../components/modals/Modal";
 import ModalDocument from "./ModalDocument";
+import ButtonPlain from "./ButtonPlain";
 
 export default function DocumentPhase1(props) {
   const [young, setYoung] = useState(props.young);
@@ -35,7 +36,10 @@ export default function DocumentPhase1(props) {
   const [isOpenReg, setIsOpenReg] = useState(false);
   const options = [FILE_STATUS_PHASE1.TO_UPLOAD, FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED];
   const medicalFileOptions = [
-    { value: "RECIEVED", label: "Réceptionné" },
+    {
+      value: "RECIEVED",
+      label: "Réceptionné",
+    },
     { value: "TO_DOWNLOAD", label: "Non téléchargé" },
     { value: "DOWNLOADED", label: "Téléchargé" },
   ];
@@ -171,15 +175,15 @@ export default function DocumentPhase1(props) {
   if (!dataImageRight && !dataAutoTestPCR && !dataRules) return null;
 
   return (
-    <article className="flex items-start">
+    <article className="flex items-start justify-between flex-wrap">
       <div className="flex flex-col justify-center items-center">
-        <section className="bg-gray-50 rounded-lg w-[300px] h-[300px] m-2 flex flex-col items-center justify-center p-4">
+        <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
           <div className="flex row justify-center mx-2 mb-3">
-            <select disabled={loading} className="form-control" value={statusCohesionStayMedical} name="cohesionStayMedical" onChange={(e) => needModal(e)}>
+            <select disabled={loading} className="form-control text-sm" value={statusCohesionStayMedical} name="cohesionStayMedical" onChange={(e) => needModal(e)}>
               {medicalFileOptions.map((o) => (
-                <option key={o} value={o.value} label={o.label}>
+                <Option key={o.label} data-color="green" value={o.value} label={o.label}>
                   {o.label}
-                </option>
+                </Option>
               ))}
             </select>
           </div>
@@ -187,30 +191,33 @@ export default function DocumentPhase1(props) {
           <p className="text-base font-bold mt-2">Fiche sanitaire</p>
         </section>
         {statusCohesionStayMedical === "TO_DOWNLOAD" && (
-          <button disabled={loading} className="border rounded-lg m-2 px-4 py-2" onClick={() => handleEmailClick("cohesionStayMedical")}>
+          <ButtonPlain
+            bgColor="bg-white border-2 border-blue-600 text-blue-600"
+            disabled={loading}
+            className="border rounded-lg m-2 px-4 py-2"
+            onClick={() => handleEmailClick("cohesionStayMedical")}>
             Relancer le volontaire
-          </button>
+          </ButtonPlain>
         )}
       </div>
       <div className="flex flex-col justify-center items-center">
         <section
-          className="bg-gray-50 rounded-lg w-[300px] h-[300px] m-2 flex flex-col items-center justify-center p-4"
+          className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4"
           onMouseEnter={() => setDisplayMenu("image")}
           onMouseLeave={() => setDisplayMenu("")}>
           <div className="flex row justify-center mx-2 mb-3">
-            <select disabled={loading} className="form-control" value={statusImageRight} name="imageRight" onChange={(e) => needModal(e)}>
+            <select disabled={loading} className="form-control text-sm" value={statusImageRight} name="imageRight" onChange={(e) => needModal(e)}>
               {options.map((o, i) => (
                 <option key={i} value={o} label={translateFileStatusPhase1(o)}>
                   {translateFileStatusPhase1(o)}
                 </option>
               ))}
             </select>
-            {young.imageRightFilesComment && <p>Commentaire : {young.imageRightFilesComment}</p>}
           </div>
           <FileIcon icon="image" />
           <p className="text-base font-bold mt-2">Droit à l&apos;image</p>
-          <p>Accord : {dataImageRight.imageRight ? translate(dataImageRight.imageRight) : "Non renseigné"}</p>
-          <button onClick={() => setIsOpenImg(true)}>Gérer le document</button>
+          <p className="text-gray-500">Accord : {dataImageRight.imageRight ? translate(dataImageRight.imageRight) : "Non renseigné"}</p>
+          <ButtonPlain onClick={() => setIsOpenImg(true)}>Gérer le document</ButtonPlain>
         </section>
         <ModalDocument
           isOpen={isOpenImg}
@@ -220,32 +227,36 @@ export default function DocumentPhase1(props) {
           name="imageRight"
           nameFiles="imageRightFiles"
           title="Consentement de droit à l'image"
+          comment={young.imageRightFilesComment}
         />
         {statusImageRight === FILE_STATUS_PHASE1.TO_UPLOAD && (
-          <button disabled={loading} className="border rounded-lg m-2 px-4 py-2" onClick={() => handleEmailClick("imageRight")}>
+          <ButtonPlain
+            bgColor="bg-white border-2 border-blue-600 text-blue-600"
+            disabled={loading}
+            className="border rounded-lg m-2 px-4 py-2"
+            onClick={() => handleEmailClick("imageRight")}>
             Relancer le volontaire
-          </button>
+          </ButtonPlain>
         )}
       </div>
       <div className="flex flex-col justify-center items-center">
         <section
-          className="bg-gray-50 rounded-lg w-[300px] h-[300px] m-2 flex flex-col items-center justify-center p-4"
+          className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4"
           onMouseEnter={() => setDisplayMenu("autotest")}
           onMouseLeave={() => setDisplayMenu("")}>
           <div className="flex row justify-center mx-2 mb-3">
-            <select disabled={loading} className="form-control" value={statusAutoTestPCR} name="autoTestPCR" onChange={(e) => needModal(e)}>
+            <select disabled={loading} className="form-control text-sm" value={statusAutoTestPCR} name="autoTestPCR" onChange={(e) => needModal(e)}>
               {options.map((o) => (
                 <option key={o} value={o} label={translateFileStatusPhase1(o)}>
                   {translateFileStatusPhase1(o)}
                 </option>
               ))}
             </select>
-            {young.autoTestPCRFilesComment && <p>Commentaire : {young.autoTestPCRFilesComment}</p>}
           </div>
           <FileIcon icon="autotest" />
           <p className="text-base font-bold mt-2">Autotest PCR</p>
-          <p>Accord : {dataAutoTestPCR.autoTestPCR ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}</p>
-          <button onClick={() => setIsOpenAut(true)}>Gérer le document</button>
+          <p className="text-gray-500">Accord : {dataAutoTestPCR.autoTestPCR ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}</p>
+          <ButtonPlain onClick={() => setIsOpenAut(true)}>Gérer le document</ButtonPlain>
         </section>
         <ModalDocument
           isOpen={isOpenAut}
@@ -255,44 +266,61 @@ export default function DocumentPhase1(props) {
           name="autoTestPCR"
           nameFiles="autoTestPCRFiles"
           title="Consentement à l'utilisation d'autotest COVID"
+          comment={young.autoTestPCRFilesComment}
         />
         {statusAutoTestPCR === FILE_STATUS_PHASE1.TO_UPLOAD && (
-          <button disabled={loading} className="border rounded-lg m-2 px-4 py-2" onClick={() => handleEmailClick("autoTestPCR")}>
+          <ButtonPlain
+            bgColor="bg-white border-2 border-blue-600 text-blue-600"
+            disabled={loading}
+            className="border rounded-lg m-2 px-4 py-2"
+            onClick={() => handleEmailClick("autoTestPCR")}>
             Relancer le volontaire
-          </button>
+          </ButtonPlain>
         )}
       </div>
-      <div className="flex row justify-center mx-2 my-1">
+      <div className="flex flex-col justify-center items-center">
         <section
-          className="bg-gray-50 rounded-lg w-[300px] h-[300px] m-2 flex flex-col items-center justify-center p-4"
+          className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4"
           onMouseEnter={() => setDisplayMenu("autotest")}
           onMouseLeave={() => setDisplayMenu("")}>
           <div className="flex row justify-center mx-2 mb-3">
-            <select disabled={loading} className="form-control" value={statusRules} name="rules" onChange={(e) => needModal(e)}>
+            <select disabled={loading} className="form-control text-sm" value={statusRules} name="rules" onChange={(e) => needModal(e)}>
               {options.map((o, i) => (
                 <option key={i} value={o} label={translateFileStatusPhase1(o)}>
                   {translateFileStatusPhase1(o)}
                 </option>
               ))}
             </select>
-            {young.rulesFilesComment && <p>Commentaire : {young.rulesFilesComment}</p>}
           </div>
           <FileIcon icon="reglement" />
           <p className="text-base font-bold mt-2">Règlement intérieur</p>
-          <p>Accord : {dataRules.rulesParent1 ? translate(dataRules.rulesParent1) : "Non renseigné"}</p>
-          <button onClick={() => setIsOpenReg(true)}>Gérer le document</button>
+          <p className="text-gray-500">Accord : {dataRules.rulesParent1 ? translate(dataRules.rulesParent1) : "Non renseigné"}</p>
+          <ButtonPlain onClick={() => setIsOpenReg(true)}>Gérer le document</ButtonPlain>
         </section>
-        <ModalDocument isOpen={isOpenReg} onCancel={() => setIsOpenReg(false)} initialValues={dataRules} young={young} nameFiles="rulesFiles" title="Règlement intérieur" />
+        <ModalDocument
+          isOpen={isOpenReg}
+          onCancel={() => setIsOpenReg(false)}
+          initialValues={dataRules}
+          young={young}
+          nameFiles="rulesFiles"
+          title="Règlement intérieur"
+          comment={young.rulesFilesComment}
+        />
         {statusRules === FILE_STATUS_PHASE1.TO_UPLOAD && (
-          <button disabled={loading} className="border rounded-lg m-2 px-4 py-2" onClick={() => handleEmailClick("rules")}>
+          <ButtonPlain
+            bgColor="bg-white border-2 border-blue-600 text-blue-600"
+            disabled={loading}
+            className="border rounded-lg m-2 px-4 py-2"
+            onClick={() => handleEmailClick("rules")}>
             Relancer le volontaire
-          </button>
+          </ButtonPlain>
         )}
       </div>
       <ModalConfirmWithMessage
         isOpen={modal?.isOpen}
         title={modal?.title}
         message={modal?.message}
+        placeholder="Précisez les corrections à apporter ici"
         onChange={() => {
           setModal({ isOpen: false, onConfirm: null }), setLoading(false);
         }}
@@ -304,6 +332,18 @@ export default function DocumentPhase1(props) {
     </article>
   );
 }
+
+const Option = styled.option`
+  ::before {
+    content: "";
+    display: inline-block;
+    background-color: green;
+    border-radius: 100%;
+    padding: 2px;
+    width: 10px;
+    height: 10px;
+  }
+`;
 
 const ScrollSection = styled.section`
   ::-webkit-scrollbar {
