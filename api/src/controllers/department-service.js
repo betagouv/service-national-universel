@@ -69,6 +69,31 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
   }
 });
 
+router.delete("/:id/cohort/:cohort/contact/:contactMail", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      cohort: Joi.string().required(),
+      contactMail: Joi.string().required(),
+    }).validate(req.params);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const departmentService = await DepartmentServiceModel.findById(value.id);
+    if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // checking if the contact for this cohort already exists...
+    let contacts = [...departmentService.contacts];
+
+    contacts = contacts.filter((contact) => contact.contactMail !== value.contactMail);
+
+    const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { contacts }, { new: true, upsert: true, useFindAndModify: false });
+    return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData, req.user) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.get("/:department", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: department } = Joi.string().required().validate(req.params.department);
@@ -89,6 +114,37 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
   try {
     const data = await DepartmentServiceModel.find({});
     return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeDepartmentService) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.post("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      firstName: Joi.string().required(),
+      lastName: Joi.string().required(),
+      mobile: Joi.string().required(),
+      email: Joi.string().required(),
+      role: Joi.string().required(),
+    }).validate({ ...req.params, ...req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const departmentService = await DepartmentServiceModel.findById(value.id);
+    if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const newRepresentant = {
+      firstName: value.firstName,
+      lastName: value.lastName,
+      mobile: value.mobile,
+      email: value.email,
+      role: value.role,
+    };
+
+    const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { representantEtat: newRepresentant }, { new: true, upsert: true, useFindAndModify: false });
+    return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

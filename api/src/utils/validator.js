@@ -105,7 +105,9 @@ function validateProgram(program) {
       descriptionFor: Joi.string().allow(null, ""),
       descriptionMoney: Joi.string().allow(null, ""),
       descriptionDuration: Joi.string().allow(null, ""),
-      url: Joi.string().allow(null, ""),
+      url: Joi.string()
+        .uri({ scheme: ["http", "https"] })
+        .allow(null, ""),
       imageFile: Joi.string().allow(null, ""),
       imageString: Joi.string().allow(null, ""),
       type: Joi.string().allow(null, ""),

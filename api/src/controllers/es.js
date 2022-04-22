@@ -535,6 +535,30 @@ router.post("/association/_msearch", passport.authenticate(["referent"], { sessi
   }
 });
 
+router.post("/team/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    let filter = [];
+
+    filter.push({
+      bool: {
+        filter: [{ bool: { must: [{ term: { "region.keyword": user.region } }] } }],
+      },
+    });
+
+    if (req.params.action === "export") {
+      const response = await allRecords("referent", applyFilterOnQuery(req.body.query, filter));
+      return res.status(200).send({ ok: true, data: serializeReferents(response) });
+    } else {
+      const response = await esClient.msearch({ index: "referent", body: withFilterForMSearch(body, filter) });
+      return res.status(200).send(serializeReferents(response.body));
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
+  }
+});
+
 // Add filter to all lines of the body.
 function withFilterForMSearch(body, filter) {
   return (

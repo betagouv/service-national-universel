@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import gear from "../assets/tools.png";
+import { urlWithScheme } from "../utils";
 
 export default function UnavailableFeature({ text, functionality, link, textLink }) {
   return (
@@ -11,7 +12,7 @@ export default function UnavailableFeature({ text, functionality, link, textLink
         <h3>Cette fonctionnalité est momentanément indisponible.</h3>
         <section>
           <p>
-            {text} <a href={link}>{textLink}</a>
+            {text} <a href={urlWithScheme(link)}>{textLink}</a>
           </p>
         </section>
       </article>

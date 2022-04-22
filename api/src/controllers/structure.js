@@ -54,7 +54,7 @@ async function updateResponsibleAndSupervisorRole(structure) {
   }
 }
 
-router.post("/", async (req, res) => {
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedStructure } = validateStructure(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });

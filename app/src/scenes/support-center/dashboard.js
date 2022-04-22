@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 import { HeroContainer } from "../../components/Content";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { ticketStateNameById, colors, translateState } from "../../utils";
+import { ticketStateNameById, colors, translateState, urlWithScheme } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
@@ -144,7 +144,7 @@ export default function Dashboard() {
             </div>
             <p>{article.body}</p>
             <p>
-              <a className="block-link" href={article.url} target="_blank" rel="noreferrer">
+              <a className="block-link" href={urlWithScheme(article.url)} target="_blank" rel="noreferrer">
                 Lire la suite
               </a>
             </p>

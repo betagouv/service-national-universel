@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 //import { HeroContainer } from "../../components/Content";
-import { colors } from "../../utils";
+import { colors, urlWithScheme } from "../../utils";
 import { adminURL, supportURL } from "../../config";
 import ZammadForm from "./form";
 
@@ -106,7 +106,7 @@ export default function PublicSupportCenter() {
             </div>
             <p>{article.body}</p>
             <p>
-              <a className="block-link" href={article.url} target="_blank" rel="noreferrer">
+              <a className="block-link" href={urlWithScheme(article.url)} target="_blank" rel="noreferrer">
                 Lire la suite
               </a>
             </p>

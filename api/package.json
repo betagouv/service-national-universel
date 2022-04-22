@@ -37,7 +37,7 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
     "express-rate-limit": "^6.3.0",
-    "file-type": "^16.2.0",
+    "file-type": "^16.5.3",
     "gm": "^1.23.1",
     "helmet": "^4.5.0",
     "http-aws-es": "^6.0.0",
@@ -62,12 +62,12 @@
     "validator": "^13.5.2"
   },
   "devDependencies": {
+    "@faker-js/faker": "^6.1.2",
     "csv-parser": "3.0.0",
     "eslint": "8.7.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-import": "2.25.4",
     "eslint-plugin-prettier": "4.0.0",
-    "faker": "5.5.3",
     "jest": "27.4.5",
     "jest-cli": "27.4.5",
     "lodash": "4.17.21",
