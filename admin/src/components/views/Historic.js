@@ -7,6 +7,7 @@ import { HiOutlineChevronUp, HiOutlineChevronDown, HiArrowRight } from "react-ic
 
 export default function Historic({ model, value }) {
   const [data, setData] = useState();
+  const [filter, setFilter] = useState("");
 
   const getPatches = async () => {
     try {
@@ -28,15 +29,16 @@ export default function Historic({ model, value }) {
     <div>
       <div className="flex flex-col gap-3 w-full">
         {data.length === 0 ? <div className="italic p-1">Aucune données</div> : null}
+        <input onChange={(e) => setFilter(e.target.value)} value={filter} className="bg-white p-2 rounded-lg w-[350px]" placeholder="Prénom, Nom, etc..." />
         {data.map((hit) => (
-          <Hit model={model} key={hit._id} hit={hit} />
+          <Hit model={model} key={hit._id} hit={hit} filter={filter} />
         ))}
       </div>
     </div>
   );
 }
 
-const Hit = ({ hit, model }) => {
+const Hit = ({ hit, model, filter }) => {
   const [viewDetails, setViewDetails] = useState(true);
   function isIsoDate(str) {
     if (!Date.parse(str)) return false;
@@ -69,6 +71,8 @@ const Hit = ({ hit, model }) => {
     }
   };
 
+  if (!hit || (filter && !hit.ops?.some((e) => translateModelFields(model, e.path.substring(1)).toLowerCase().includes(filter.toLowerCase().trim())))) return null;
+
   return (
     <div className="bg-white shadow-md rounded-lg">
       <div className="flex p-3 border-b justify-between items-center cursor-pointer" onClick={() => setViewDetails((e) => !e)}>
@@ -84,23 +88,29 @@ const Hit = ({ hit, model }) => {
         </div>
       </div>
       {viewDetails
-        ? hit.ops?.map((e, i) => {
-            const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
-            const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
-            if (["/jvaRawData"].includes(e.path)) return null;
-            return (
-              <div className="flex p-3 justify-between border-b border-[#f3f3f3]" key={`${hit.date}-${i}`}>
-                <div className="flex-1 ">{`${splitElementArray(translateModelFields(model, e.path.substring(1)))}`}&nbsp;:</div>
-                <div className="flex-1 text-center">
-                  {(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || <span className="text-coolGray-400 italic">Vide</span>}
+        ? hit.ops
+            ?.filter((e) => {
+              if (filter) {
+                return translateModelFields(model, e.path.substring(1)).toLowerCase().includes(filter.toLowerCase().trim());
+              } else return true;
+            })
+            ?.map((e, i) => {
+              const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
+              const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
+              if (["/jvaRawData"].includes(e.path)) return null;
+              return (
+                <div className="flex p-3 justify-between border-b border-[#f3f3f3]" key={`${hit.date}-${i}`}>
+                  <div className="flex-1 ">{`${splitElementArray(translateModelFields(model, e.path.substring(1)))}`}&nbsp;:</div>
+                  <div className="flex-1 text-center">
+                    {(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || <span className="text-coolGray-400 italic">Vide</span>}
+                  </div>
+                  <div className="text-center">
+                    <HiArrowRight />
+                  </div>
+                  <div className="flex-1 text-center">{(isIsoDate(value) ? formatStringLongDate(value) : value) || "-"}</div>
                 </div>
-                <div className="text-center">
-                  <HiArrowRight />
-                </div>
-                <div className="flex-1 text-center">{(isIsoDate(value) ? formatStringLongDate(value) : value) || "-"}</div>
-              </div>
-            );
-          })
+              );
+            })
         : null}
     </div>
   );
