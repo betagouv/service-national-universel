@@ -132,7 +132,7 @@ const Hit = ({ hit, model, filter }) => {
                   <div className="text-center">
                     <HiArrowRight />
                   </div>
-                  <div className="flex-1 text-center">{(isIsoDate(value) ? formatStringLongDate(value) : value) || "-"}</div>
+                  <div className="flex-1 text-center">{(isIsoDate(value) ? formatStringLongDate(value) : value) || <span className="text-coolGray-400 italic">Vide</span>}</div>
                 </div>
               );
             })
