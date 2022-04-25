@@ -7,7 +7,7 @@ const StructureObject = require("../models/structure");
 const MissionObject = require("../models/mission");
 const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils");
-const { ROLES, canModifyStructure, canDeleteStructure } = require("snu-lib/roles");
+const { ROLES, canModifyStructure, canDeleteStructure, canCreateStructure } = require("snu-lib/roles");
 const patches = require("./patches");
 const { validateId, validateStructure } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
@@ -58,6 +58,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   try {
     const { error, value: checkedStructure } = validateStructure(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
+    if (!canCreateStructure(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await StructureObject.create(checkedStructure);
     await updateNetworkName(data);
     await updateResponsibleAndSupervisorRole(data);

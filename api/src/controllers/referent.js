@@ -57,6 +57,7 @@ const {
   canUpdateReferent,
   canViewYoungMilitaryPreparationFile,
   canSigninAs,
+  canGetReferentByEmail,
 } = require("snu-lib/roles");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
@@ -728,9 +729,24 @@ router.get("/", passport.authenticate(["referent"], { session: false }), async (
   try {
     const { error, value } = Joi.string().required().email().validate(req.query.email);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!canGetReferentByEmail(req.user, data)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let data = await ReferentModel.findOne({ email: value });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, error: "Aucun utilisateur trouvé" });
-    return res.status(200).send({ ok: true, data: serializeReferent(data, req.user) });
+
+    return res.status(200).send({
+      ok: true,
+      // Since this route is only used in a few places and does not require all information,
+      // we return just what we need.
+      data: {
+        _id: data._id,
+        email: data.email,
+        role: data.role,
+        department: data.department,
+        region: data.region,
+        firstName: data.firstName,
+        lastName: data.lastName,
+      },
+    });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
