@@ -4,15 +4,15 @@ const { capture } = require("../sentry");
 
 async function getCohortSessionsAvailability(young) {
   let sessions = [
-    {
-      month: "Juin",
-      excludedGrade: ["3eme", "1ere", "Terminale", "Terminale CAP"],
-      excludedZip: [],
-      includedBirthdate: { begin: "2004-06-25", end: "2007-06-11" },
-      stringDate: "12 au 24 juin 2022",
-      buffer: 1.25,
-      id: "Juin 2022",
-    },
+    // {
+    //   month: "Juin",
+    //   excludedGrade: ["3eme", "1ere", "Terminale", "Terminale CAP"],
+    //   excludedZip: [],
+    //   includedBirthdate: { begin: "2004-06-25", end: "2007-06-11" },
+    //   stringDate: "12 au 24 juin 2022",
+    //   buffer: 1.25,
+    //   id: "Juin 2022",
+    // },
     {
       month: "Juillet",
       excludedGrade: [],
