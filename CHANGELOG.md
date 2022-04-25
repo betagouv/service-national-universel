@@ -1,3 +1,18 @@
+# [1.75.0](https://github.com/betagouv/service-national-universel/compare/v1.74.0...v1.75.0) (2022-04-25)
+
+
+### Bug Fixes
+
+* **admin:** withoutChangingRole updateReferent ([ec103d6](https://github.com/betagouv/service-national-universel/commit/ec103d6a1c25e98482de031759ba2d7ac199519b))
+* **api:** remove error detail on 400 error ([#1497](https://github.com/betagouv/service-national-universel/issues/1497)) ([b1fda56](https://github.com/betagouv/service-national-universel/commit/b1fda5630a77147bc20bdf0231cffa886fbf48e7))
+* **api:** remove error detail on 500 error ([#1500](https://github.com/betagouv/service-national-universel/issues/1500)) ([208181e](https://github.com/betagouv/service-national-universel/commit/208181ef29027ae7366c637af370901d1518c815))
+* **app:** show juin is closed ([b1752fb](https://github.com/betagouv/service-national-universel/commit/b1752fb6d07bc0fdc098069c411e36a97b31a432))
+
+
+### Features
+
+* **admin:** filter historic element ([#1499](https://github.com/betagouv/service-national-universel/issues/1499)) ([289226d](https://github.com/betagouv/service-national-universel/commit/289226dc2654d8289bcb4bcdde3fe9209796bd89))
+
 # [1.74.0](https://github.com/betagouv/service-national-universel/compare/v1.73.0...v1.74.0) (2022-04-22)
 
 
