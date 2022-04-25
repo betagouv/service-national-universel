@@ -111,7 +111,7 @@ router.post("/eligibility/2022", async (req, res) => {
     return res.send({ ok: true, data: sessions });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
