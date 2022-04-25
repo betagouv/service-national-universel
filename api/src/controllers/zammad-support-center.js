@@ -282,7 +282,7 @@ router.post("/ticket/search-by-tags", passport.authenticate(["referent"], { sess
 router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.string().required().validate(req.params.ticketId);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const response = await zammad.api(`/tags?object=Ticket&o_id=${value}`, { method: "GET" });
     if (!response.tags) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -348,7 +348,7 @@ router.post("/ticket/referent/notif", zammadAuth, async (req, res) => {
     if (!ticketCreator) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const { error, value } = Joi.string().required().validate(article.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const department = ticketCreator.department;
     const departmentReferents = await ReferentObject.find({

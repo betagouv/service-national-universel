@@ -60,7 +60,7 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { id, meetingPointId, deplacementPhase1Autonomous } = value;
 
     const young = await YoungModel.findById(id);

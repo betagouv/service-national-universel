@@ -164,7 +164,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.details.map((e) => e.message) });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId } = value;
@@ -482,7 +482,7 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // eslint-disable-next-line no-unused-vars
     const { tutorId, template, subject, message, app, missionName } = value;
@@ -529,7 +529,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { youngId, key, fileName } = value;
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
@@ -566,7 +566,7 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { youngId, key, fileName } = value;
 
     const young = await YoungModel.findById(youngId);
@@ -616,8 +616,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
       youngId: Joi.string().required(),
     }).validate(JSON.parse(body), { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-    if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: bodyError.message });
+    if (error || bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false });
@@ -644,7 +643,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
         Object.keys(req.files || {}).map((e) => req.files[e]),
         { stripUnknown: true },
       );
-    if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: filesError.message });
+    if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     for (let currentFile of files) {
       // If multiple file with same names are provided, currentFile is an array. We just take the latest.
@@ -666,7 +665,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
         const { isInfected } = await clamscan.isInfected(tempFilePath);
         if (isInfected) {
           fs.unlinkSync(tempFilePath);
-          return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: "File is infected" });
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
         }
       }
 
@@ -692,7 +691,7 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
     const { error, value } = Joi.object({ id: Joi.string().required() })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const data = await YoungModel.findById(value.id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const applicationsFromDb = await ApplicationModel.find({ youngId: data._id });
@@ -729,7 +728,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.string().required().email().validate(req.query.email);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     let data = await ReferentModel.findOne({ email: value });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, error: "Aucun utilisateur trouvé" });
     return res.status(200).send({ ok: true, data: serializeReferent(data, req.user) });
@@ -745,7 +744,7 @@ router.get("/manager_department/:department", passport.authenticate(["referent",
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await ReferentModel.findOne({
       subRole: SUB_ROLES.manager_department,
@@ -765,7 +764,7 @@ router.get("/manager_phase2/:department", passport.authenticate(["young", "refer
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // get the referent_department
     let data = await ReferentModel.findOne({
@@ -792,7 +791,7 @@ router.get("/manager_phase2/:department", passport.authenticate(["young", "refer
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateReferent(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const referent = await ReferentModel.findById(req.params.id);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -817,7 +816,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 router.put("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateSelf(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const user = await ReferentModel.findById(req.user._id);
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     user.set(value);
@@ -834,7 +833,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     const { error: errorStructureId, value: checkedStructureId } = validateId(req.params.structureId);
-    if (errorId || errorStructureId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId || errorStructureId });
+    if (errorId || errorStructureId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const structure = await StructureModel.findById(checkedStructureId);
     const referent = await ReferentModel.findById(checkedId);
     if (!referent || !structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
