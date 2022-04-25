@@ -279,7 +279,7 @@ const SelectPMR = ({ title, name, values, handleChange, disabled, options, requi
         <BiHandicap size={28} />
       </div>
       <div className="items-start ml-2 w-full">
-        <div className="ml-1 text-gray-500 text-xs"> {title} </div>
+        <div className="ml-1 text-xs"> {title} </div>
         <select disabled={disabled} className="w-full" name={name} value={values} onChange={handleChange}>
           <option key={-1} value="" label=""></option>
           {options.map((o, i) => (

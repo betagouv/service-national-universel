@@ -89,7 +89,6 @@ export default function List() {
                       Observations: data.observations,
                       "Créé lé": formatLongDateFR(data.createdAt),
                       "Mis à jour le": formatLongDateFR(data.updatedAt),
-                      "status": data.status,
                     };
                   });
                 }}
@@ -149,19 +148,6 @@ export default function List() {
                   sortBy="asc"
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Statut"
-                  componentId="STATUT"
-                  dataField="status"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUT") }}
-                  title=""
-                  URLParams={true}
-                  sortBy="asc"
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
                 />
                 <DeleteFilters />
               </FilterRow>
