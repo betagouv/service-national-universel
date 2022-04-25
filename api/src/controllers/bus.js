@@ -18,7 +18,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     return res.status(200).send({ ok: true, data: serializeBus(data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

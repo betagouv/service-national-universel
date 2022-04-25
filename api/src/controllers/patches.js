@@ -18,7 +18,7 @@ const get = async (req, res, model) => {
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 };
 
@@ -81,7 +81,7 @@ const deletePatches = async ({ req, model }) => {
     return { ok: true };
   } catch (error) {
     capture(error);
-    return { ok: false, code: ERRORS.SERVER_ERROR, codeError: 500 };
+    return { ok: false, code: ERRORS.SERVER_ERROR };
   }
 };
 

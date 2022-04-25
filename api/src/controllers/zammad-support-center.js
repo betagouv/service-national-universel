@@ -52,7 +52,7 @@ router.get("/ticket_overviews", passport.authenticate(["referent"], { session: f
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -76,7 +76,7 @@ router.get("/ticket", passport.authenticate(["referent", "young"], { session: fa
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -92,7 +92,7 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -142,7 +142,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -200,7 +200,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -251,7 +251,7 @@ router.post("/public/ticket", async (req, res) => {
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -274,7 +274,7 @@ router.post("/ticket/search-by-tags", passport.authenticate(["referent"], { sess
     return res.status(200).send({ ok: true, data: [] });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -290,7 +290,7 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
     return res.status(200).send({ ok: true, tags: response.tags });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -330,7 +330,7 @@ router.post("/ticket/update", zammadAuth, async (req, res) => {
     return res.status(200).send({ ok: true, data: [] });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -369,7 +369,7 @@ router.post("/ticket/referent/notif", zammadAuth, async (req, res) => {
     return res.status(200).send({ ok: true, data: [] });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

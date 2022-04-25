@@ -26,7 +26,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     return res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -41,7 +41,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     return res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -59,7 +59,7 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -69,7 +69,7 @@ router.get("/", passport.authenticate("referent", { session: false, failWithErro
     return res.status(200).send({ ok: true, data: data.map(serializeSessionPhase1) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -93,7 +93,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -249,7 +249,7 @@ router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent
     });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

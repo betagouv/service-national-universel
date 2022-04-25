@@ -109,7 +109,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     return res.status(200).send({ ok: true, data: serializeMission(data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -169,7 +169,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -203,7 +203,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     return res.status(200).send({ ok: true, data: { ...serializeMission(mission), tutor: missionTutor } });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -224,7 +224,7 @@ router.get("/:id/application", passport.authenticate("referent", { session: fals
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -261,7 +261,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     return res.status(200).send({ ok: true, data: serializeMission(mission) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

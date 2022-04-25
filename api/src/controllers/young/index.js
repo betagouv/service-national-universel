@@ -95,7 +95,7 @@ router.post("/signup", async (req, res) => {
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -267,7 +267,7 @@ router.get("/validate_phase3/:young/:token", async (req, res) => {
     return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -303,7 +303,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
     return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -317,8 +317,7 @@ router.put("/update_phase3/:young", async (req, res) => {
       phase3TutorLastName: Joi.string().required(),
       phase3TutorEmail: Joi.string().lowercase().trim().email().required(),
       phase3TutorPhone: Joi.string().required(),
-    })
-      .validate({ ...req.params, ...req.body });
+    }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: error });
 
     const data = await YoungObject.findOne({ _id: value.young });
@@ -334,7 +333,7 @@ router.put("/update_phase3/:young", async (req, res) => {
     return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -389,7 +388,7 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -422,7 +421,7 @@ router.post("/:id/archive", passport.authenticate("referent", { session: false, 
   } catch (error) {
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -457,7 +456,7 @@ router.post("/:id/deplacementPhase1Autonomous", passport.authenticate(["referent
   } catch (error) {
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -520,7 +519,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
   } catch (error) {
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -641,7 +640,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -714,7 +713,7 @@ router.get("/:id/application", passport.authenticate(["referent", "young"], { se
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -841,7 +840,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -886,7 +885,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

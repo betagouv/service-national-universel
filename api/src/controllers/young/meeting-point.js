@@ -24,7 +24,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     return res.status(200).send({ ok: true, data: data ? serializeMeetingPoint(data) : null });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -47,7 +47,7 @@ router.put("/cancel", passport.authenticate("referent", { session: false, failWi
     res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -92,7 +92,7 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
     res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

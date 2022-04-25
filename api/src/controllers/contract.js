@@ -202,7 +202,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -227,7 +227,7 @@ router.post("/:id/send-email/:type", passport.authenticate(["referent"], { sessi
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -246,7 +246,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     return res.status(200).send({ ok: true, data: serializeContract(data, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -265,7 +265,7 @@ router.get("/token/:token", async (req, res) => {
     return res.status(200).send({ ok: true, data: serializeContract(data, null, false) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -312,7 +312,7 @@ router.post("/token/:token", async (req, res) => {
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
