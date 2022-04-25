@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "reactstrap";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { SuccessMessage, Logo, ContinueButton } from "./components/printable";
 import { HeroContainer, Hero } from "../../components/Content";
 import CloseSvg from "../../assets/Close";
@@ -10,10 +10,17 @@ import { ModalContainer, Footer, Header } from "../../components/modals/Modal";
 import styled from "styled-components";
 import FileIcon from "../../assets/FileIcon";
 import { environment } from "../../config";
+import api from "../../services/api";
+import { setYoung } from "../../redux/auth/actions";
 
 export default function MedicalFile({ isOpen, onCancel }) {
   const young = useSelector((state) => state.Auth.young);
-  console.log("isOpen", isOpen);
+  const dispatch = useDispatch();
+
+  const updateDocumentInformation = async () => {
+    const { ok, data } = await api.put("/young/phase1/cohesionStayMedical");
+    if (ok) dispatch(setYoung(data));
+  };
 
   return (
     <>
@@ -56,8 +63,8 @@ export default function MedicalFile({ isOpen, onCancel }) {
                 {young.cohesionStayMedicalFileReceived !== "true" ? (
                   <div className="flex flex-col items-center px-4 py-8 border-2 border-dashed border-gray-300 rounded">
                     <FileIcon filled={true} icon="sanitaire" />
-                    <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/fiche_sanitaire_2022.pdf">
-                      <DownloadButton text="Télécharger la fiche sanitaire" />
+                    <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/fiche_sanitaire_2022.pdf" onClick={updateDocumentInformation}>
+                      <DownloadButton text={young.cohesionStayMedicalFileDownload === "true" ? "Télécharger de nouveau la fiche sanitaire" : "Télécharger la fiche sanitaire"} />
                     </a>
                   </div>
                 ) : null}
