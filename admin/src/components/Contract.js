@@ -85,12 +85,13 @@ export default function Contract({ young, admin }) {
     const getManagerDepartment = async () => {
       try {
         if (!young) return;
-        const { ok, data, code } = await api.get(`/referent/manager_department/${young.department}`);
+        const { ok, data, code } = await api.get(`/department-service/${young.department}`);
         if (!ok) {
           toastr.warning(translate(code), `Aucun représentant de l'état n'a été trouvé pour le département ${young.department}`, { timeOut: 5000 });
           return setManagerDepartment({});
         }
-        return setManagerDepartment(data);
+        if (data.representantEtat && Object.keys(data.representantEtat).length) return setManagerDepartment(data.representantEtat);
+        else setManagerDepartment({});
       } catch (e) {
         setManagerDepartment({});
       }
@@ -193,7 +194,7 @@ export default function Contract({ young, admin }) {
       date: dateForDatePicker(new Date()),
       projectManagerFirstName: managerDepartment?.firstName || "",
       projectManagerLastName: managerDepartment?.lastName || "",
-      projectManagerRole: "Chef de Projet départemental",
+      projectManagerRole: managerDepartment?.role || "Chef de Projet départemental",
       projectManagerEmail: managerDepartment?.email || "",
       structureManagerFirstName: tutor?.firstName || "",
       structureManagerLastName: tutor?.lastName || "",
