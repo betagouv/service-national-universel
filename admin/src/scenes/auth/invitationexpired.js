@@ -51,7 +51,11 @@ export default function InvitationExpired() {
                     />
                     <p className="text-xs text-red-500">{errors.email}</p>
                   </div>
-                  <LoadingButton className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple" loading={isSubmitting} type="submit" color="primary">
+                  <LoadingButton
+                    className="block w-max cursor-pointer rounded-md border-0 bg-brand-purple py-3 px-10 text-base font-medium text-white transition-colors hover:bg-brand-darkPurple"
+                    loading={isSubmitting}
+                    type="submit"
+                    color="primary">
                     Cliquez ici pour recevoir une nouvelle invitation valide
                   </LoadingButton>
 
