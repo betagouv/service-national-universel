@@ -58,6 +58,7 @@ const {
   canViewYoungMilitaryPreparationFile,
   canSigninAs,
   canGetReferentByEmail,
+  canEditYoung,
 } = require("snu-lib/roles");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
@@ -305,6 +306,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     const { id } = req.params;
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    if (!canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
