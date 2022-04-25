@@ -194,7 +194,7 @@ export default function Contract({ young, admin }) {
       date: dateForDatePicker(new Date()),
       projectManagerFirstName: managerDepartment?.firstName || "",
       projectManagerLastName: managerDepartment?.lastName || "",
-      projectManagerRole: managerDepartment?.role || "",
+      projectManagerRole: managerDepartment?.role || "Chef de Projet départemental",
       projectManagerEmail: managerDepartment?.email || "",
       structureManagerFirstName: tutor?.firstName || "",
       structureManagerLastName: tutor?.lastName || "",
