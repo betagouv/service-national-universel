@@ -58,6 +58,7 @@ export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const [volontaire, setVolontaire] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [center, setCenter] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
