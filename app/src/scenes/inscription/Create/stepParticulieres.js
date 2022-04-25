@@ -51,6 +51,7 @@ export default function StepSpecific() {
       }
       const { ok, code, data } = await api.put(`/young/inscription/particulieres/${type}`, values);
       if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+      if (type === "save") toastr.success("Vos modifications ont bien été enregistrees !");
       dispatch(setYoung(data));
       if (type === "next") history.push("/inscription/representants");
     } catch (e) {

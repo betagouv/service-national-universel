@@ -54,6 +54,7 @@ export default function StepDocuments() {
       if (getAge(young.birthdateAt) >= 15) delete values.dataProcessingConsentmentFiles;
       const { ok, code, data } = await api.put(`/young/inscription/documents/${type}`, values);
       if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+      if (type === "save") toastr.success("Vos modifications ont bien été enregistrees !");
       dispatch(setYoung(data));
       if (type === "next") history.push("/inscription/done");
     } catch (e) {

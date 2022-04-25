@@ -46,22 +46,22 @@ export default function StepCoordonnees() {
         cityCode: young.cityCode,
         academy: young.academy,
         addressVerified: young.addressVerified,
-        hostLastName: young.hostLastName,
-        hostFirstName: young.hostFirstName,
-        hostRelationship: young.hostRelationship,
-        foreignCountry: young.foreignCountry,
-        foreignCity: young.foreignCountry,
-        foreignZip: young.foreignZip,
-        foreignAddress: young.foreignAddress,
+        hostLastName: young.hostLastName === "" ? undefined : young.hostLastName,
+        hostFirstName: young.hostFirstName === "" ? undefined : young.hostFirstName,
+        hostRelationship: young.hostRelationship === "" ? undefined : young.hostRelationship,
+        foreignCountry: young.foreignCountry === "" ? undefined : young.foreignCountry,
+        foreignCity: young.foreignCity === "" ? undefined : young.foreignCity,
+        foreignZip: young.foreignZip === "" ? undefined : young.foreignZip,
+        foreignAddress: young.foreignAddress === "" ? undefined : young.foreignAddress,
         schooled: young.schooled,
         situation: young.situation,
         employed: young.employed,
-        schoolName: young.schoolName,
-        grade: young.grade,
-        schoolId: young.schoolId,
-        schoolCountry: young.schoolCountry,
-        schoolCity: young.schoolCity,
-        schoolDepartment: young.schoolDepartment,
+        schoolName: young.schoolName === "" ? undefined : young.schoolName,
+        grade: young.grade === "" ? undefined : young.grade,
+        schoolId: young.schoolId === "" ? undefined : young.schoolId,
+        schoolCountry: young.schoolCountry === "" ? undefined : young.schoolCountry,
+        schoolCity: young.schoolCity === "" ? undefined : young.schoolCity,
+        schoolDepartment: young.schoolDepartment === "" ? undefined : young.schoolDepartment,
       });
       if (young.foreignCountry) {
         setData((data) => ({ ...data, livesInFrance: "false" }));
@@ -136,6 +136,7 @@ export default function StepCoordonnees() {
       }
       const { ok, code, data } = await api.put(`/young/inscription/coordonnee/${type}`, values);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      if (type === "save") toastr.success("Vos modifications ont bien été enregistrees !");
       dispatch(setYoung(data));
       if (type === "next") history.push("/inscription/availability");
     } catch (e) {
@@ -175,6 +176,9 @@ export default function StepCoordonnees() {
           useEffect(() => {
             if (values.phone) validateField("phone");
           }, [values.phone]);
+
+          console.log(values);
+
           return (
             <>
               <FormRow>
