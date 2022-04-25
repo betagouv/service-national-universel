@@ -7,7 +7,7 @@ export default function FileCard({ name, status, filled, icon, color, onClick, t
       <FileIcon filled={filled} icon={icon} />
       <section className="min-h-[52px]">
         <p className="text-base font-bold mt-2">{name}</p>
-        <div className="text-sm relative flex items-center">
+        <div className="text-sm relative flex items-center justify-center">
           {["Validé", "En attente de correction"].includes(status) ? <p className="mr-1.5">{status}</p> : null}{" "}
           {status === "En attente de correction" && (
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -19,7 +19,7 @@ export default function FileCard({ name, status, filled, icon, color, onClick, t
           )}
         </div>
       </section>
-      <button className={`${color} border-2 border-blue-700 rounded-md px-4 py-1.5 mt-3 justify-self-end`} onClick={onClick}>
+      <button className={`${color} border-[1px] border-indigo-700 rounded-md px-4 py-1.5 mt-3 justify-self-end`} onClick={onClick}>
         {status === "En attente de correction" ? "À corriger" : status === "Validé" ? "Voir" : status}
       </button>
     </section>
