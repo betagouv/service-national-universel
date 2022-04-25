@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 
-import { formatStringLongDate, translateModelFields, translate, translatePhase1, translatePhase2, translateApplication, translateEngagement } from "../../utils";
+import { formatStringLongDate, translateModelFields, translate, translatePhase1, translatePhase2, translateApplication, translateEngagement, ROLES } from "../../utils";
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 import { HiOutlineChevronUp, HiOutlineChevronDown, HiArrowRight } from "react-icons/hi";
@@ -8,6 +9,7 @@ import { HiOutlineChevronUp, HiOutlineChevronDown, HiArrowRight } from "react-ic
 export default function Historic({ model, value }) {
   const [data, setData] = useState();
   const [filter, setFilter] = useState("");
+  const user = useSelector((state) => state.Auth.user);
 
   const getPatches = async () => {
     try {
@@ -29,7 +31,9 @@ export default function Historic({ model, value }) {
     <div>
       <div className="flex flex-col gap-3 w-full">
         {data.length === 0 ? <div className="italic p-1">Aucune données</div> : null}
-        <input onChange={(e) => setFilter(e.target.value)} value={filter} className="bg-white p-2 rounded-lg w-[350px]" placeholder="Prénom, Nom, etc..." />
+        {user?.role === ROLES.ADMIN ? (
+          <input onChange={(e) => setFilter(e.target.value)} value={filter} className="bg-white p-2 rounded-lg w-[350px]" placeholder="Rechercher..." />
+        ) : null}
         {data.map((hit) => (
           <Hit model={model} key={hit._id} hit={hit} filter={filter} />
         ))}
@@ -71,7 +75,21 @@ const Hit = ({ hit, model, filter }) => {
     }
   };
 
-  if (!hit || (filter && !hit.ops?.some((e) => translateModelFields(model, e.path.substring(1)).toLowerCase().includes(filter.toLowerCase().trim())))) return null;
+  if (
+    !hit ||
+    (filter &&
+      !hit.ops?.some((e) => {
+        const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
+        const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
+
+        const matchFieldName = translateModelFields(model, e.path.substring(1)).toLowerCase().includes(filter.toLowerCase().trim());
+        const matchOriginalValue = (isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue)?.toLowerCase().includes(filter.toLowerCase().trim());
+        const matchFromValue = (isIsoDate(value) ? formatStringLongDate(value) : value)?.toLowerCase().includes(filter.toLowerCase().trim());
+
+        return matchFieldName || matchOriginalValue || matchFromValue;
+      }))
+  )
+    return null;
 
   return (
     <div className="bg-white shadow-md rounded-lg">
@@ -91,7 +109,14 @@ const Hit = ({ hit, model, filter }) => {
         ? hit.ops
             ?.filter((e) => {
               if (filter) {
-                return translateModelFields(model, e.path.substring(1)).toLowerCase().includes(filter.toLowerCase().trim());
+                const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
+                const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
+
+                const matchFieldName = translateModelFields(model, e.path.substring(1)).toLowerCase().includes(filter.toLowerCase().trim());
+                const matchOriginalValue = (isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue)?.toLowerCase().includes(filter.toLowerCase().trim());
+                const matchFromValue = (isIsoDate(value) ? formatStringLongDate(value) : value)?.toLowerCase().includes(filter.toLowerCase().trim());
+
+                return matchFieldName || matchOriginalValue || matchFromValue;
               } else return true;
             })
             ?.map((e, i) => {
