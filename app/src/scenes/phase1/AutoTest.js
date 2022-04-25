@@ -17,7 +17,7 @@ import CloseSvg from "../../assets/Close";
 import DownloadButton from "./components/DownloadButton";
 import { environment } from "../../config";
 
-export default function AutoTest({ isOpen, onCancel }) {
+export default function AutoTest({ isOpen, onCancel, correction }) {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const isPlural = young?.parent1Status && young?.parent2Status;
@@ -50,7 +50,7 @@ export default function AutoTest({ isOpen, onCancel }) {
                   </p>
                 </div>
               </section>
-              {young.autoTestPCRFiles && young.autoTestPCRFiles.length ? (
+              {young.autoTestPCRFiles && young.autoTestPCRFiles.length && !correction ? (
                 <>
                   <SuccessMessage>
                     <Logo>
@@ -190,12 +190,18 @@ export default function AutoTest({ isOpen, onCancel }) {
                             de centre et aux personnes habilitées par ce dernier.
                           </p>
                         </section>
+                        {correction && (
+                          <section className="my-3 text-center bg-[#FFF4F0] rounded-md p-4">
+                            <p className="text-[#EF6737]">Corrections à apporter :</p> <br />
+                            <p className="text-gray-600">{correction}</p>
+                          </section>
+                        )}
                         <div className="noPrint">
                           {/* @todo add with france connect */}
                           {/* <Title>
                     <span>Vous pouvez signer le formulaire de deux façons</span>
                   </Title> */}
-                          <section className="flex flex-col items-center lg:flex-row lg:justify-center mt-2">
+                          <section className="flex flex-col items-start lg:flex-row lg:justify-center mt-4">
                             {/* <BackButton>
                             <DownloadFormButton young={values} uri="autotestPCR">
                               Télécharger le formulaire pré-rempli

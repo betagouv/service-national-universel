@@ -54,7 +54,6 @@ export default function DocumentsPhase1({ young }) {
               filled={young.imageRightFilesStatus !== "TO_UPLOAD"}
               color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.imageRightFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
               status={translateFileStatusPhase1(young.imageRightFilesStatus)}
-              correction={young.imageRightFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.imageRightFilesComment : ""}
               onClick={() => setIsOpenIm(true)}
             />
             <FileCard
@@ -63,7 +62,6 @@ export default function DocumentsPhase1({ young }) {
               filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"}
               color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.rulesFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
               status={translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
-              correction={young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.autoTestPCRFilesComment : ""}
               onClick={() => setIsOpenAut(true)}
             />
             <FileCard
@@ -72,16 +70,23 @@ export default function DocumentsPhase1({ young }) {
               filled={young.rulesFilesStatus !== "TO_UPLOAD"}
               color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.autoTestPCRFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
               status={translateFileStatusPhase1(young.rulesFilesStatus)}
-              correction={young.rulesFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.rulesFilesComment : ""}
               onClick={() => setIsOpenReg(true)}
             />
           </ScrollSection>
         </>
       ) : null}
       <MedicalFile isOpen={isOpenMed} onCancel={() => setIsOpenMed(false)} />
-      <Rules isOpen={isOpenReg} onCancel={() => setIsOpenReg(false)} />
-      <ImageRight isOpen={isOpenIm} onCancel={() => setIsOpenIm(false)} />
-      <AutoTest isOpen={isOpenAut} onCancel={() => setIsOpenAut(false)} />
+      <Rules isOpen={isOpenReg} onCancel={() => setIsOpenReg(false)} correction={young.rulesFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.rulesFilesComment : ""} />
+      <ImageRight
+        isOpen={isOpenIm}
+        onCancel={() => setIsOpenIm(false)}
+        correction={young.imageRightFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.imageRightFilesComment : ""}
+      />
+      <AutoTest
+        isOpen={isOpenAut}
+        onCancel={() => setIsOpenAut(false)}
+        correction={young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.autoTestPCRFilesComment : ""}
+      />
     </>
   );
 }

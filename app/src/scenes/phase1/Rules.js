@@ -17,7 +17,7 @@ import CloseSvg from "../../assets/Close";
 import DownloadButton from "./components/DownloadButton";
 import { environment } from "../../config";
 
-export default function Rules({ isOpen, onCancel }) {
+export default function Rules({ isOpen, onCancel, correction }) {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const isPlural = young?.parent1Status && young?.parent2Status;
@@ -41,7 +41,7 @@ export default function Rules({ isOpen, onCancel }) {
                   </p>
                 </div>
               </section>
-              {young.rulesFiles && young.rulesFiles.length ? (
+              {young.rulesFiles && young.rulesFiles.length && !correction ? (
                 <>
                   <SuccessMessage>
                     <Logo>
@@ -160,12 +160,18 @@ export default function Rules({ isOpen, onCancel }) {
                             </Col>
                           </FormRow>
                         </section>
+                        {correction && (
+                          <section className="my-3 text-center bg-[#FFF4F0] rounded-md p-4">
+                            <p className="text-[#EF6737]">Corrections à apporter :</p> <br />
+                            <p className="text-gray-600">{correction}</p>
+                          </section>
+                        )}
                         <div className="noPrint">
                           {/* @todo add with france connect */}
                           {/* <Title>
                     <span>Vous pouvez signer le formulaire de deux façons</span>
                   </Title> */}
-                          <section className="flex flex-col items-center lg:flex-row lg:justify-center mt-2">
+                          <section className="flex flex-col items-start lg:flex-row lg:justify-center mt-4">
                             {/* <BackButton>
                             <DownloadFormButton young={values} uri="imageRight">
                               Télécharger le formulaire pré-rempli
