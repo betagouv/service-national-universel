@@ -10,7 +10,7 @@ countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
 // eslint-disable-next-line prettier/prettier
-export default function AddressInputV2({
+export default function addressInputVCenter({
   keys,
   values,
   handleChange,
@@ -207,9 +207,9 @@ export default function AddressInputV2({
             </div>
           </div>
           {departAndRegionVisible ? (
-            <div className=" flex ">
-              <div className=" flex border flex-col ml-3 my-1 rounded-lg rounded-grey-300 p-2">
-                <div className="text-gray-500 text-xs">
+            <div className=" flex w-full ">
+              <div className=" bg-gray-200 flex border flex-col ml-3 my-1 rounded-lg rounded-grey-300 p-2 w-full">
+                <div className=" text-gray-500 text-xs">
                   <label>Département</label>
                 </div>
                 <Field
@@ -217,7 +217,7 @@ export default function AddressInputV2({
                   validate={(v) => !v && requiredMessage}
                   disabled
                   placeholder="Département"
-                  className="w-full"
+                  className="w-full bg-gray-200"
                   name={keys.department}
                   value={values[keys.department]}>
                   {departmentList.map((d) => (
@@ -228,11 +228,11 @@ export default function AddressInputV2({
                 </Field>
                 <ErrorMessage errors={errors} touched={touched} name={keys.department} />
               </div>
-              <div className="flex border flex-col ml-2 mr-3 my-1 rounded-lg rounded-grey-300 p-2">
+              <div className="bg-gray-200 flex border flex-col ml-2 mr-3 my-1 rounded-lg rounded-grey-300 p-2 w-full">
                 <div className="text-gray-500 text-xs">
                   <label>Région</label>
                 </div>
-                <Field as="select" validate={(v) => !v && requiredMessage} disabled placeholder="Région" name={keys.region} value={values[keys.region]} className="w-full">
+                <Field as="select" validate={(v) => !v && requiredMessage} disabled placeholder="Région" name={keys.region} value={values[keys.region]} className="w-full bg-gray-200">
                   {regionList.map((r) => (
                     <option key={r} value={r}>
                       {r}

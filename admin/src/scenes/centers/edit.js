@@ -9,10 +9,11 @@ import { useSelector } from "react-redux";
 import { translate, translateSessionStatus, SESSION_STATUS } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { Box, BoxContent } from "../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
+import Select from "./components/Select";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import AddressInput from "../../components/addressInputVCenter";
-import MultiSelect from "./components/MultiselectSejour";
+import MultiSelect from "../../components/Multiselect";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import { BiHandicap } from 'react-icons/bi';
 
@@ -113,6 +114,11 @@ export default function Edit(props) {
                     <div className="ml-1 font-bold text-lg">Informations générales</div>
                     <div className="ml-1 mt-8"> Nom </div>
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    <div className="ml-1 mt-8"> Code </div>
+                    <div className="flex w-full">
+                      <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" handleChange={handleChange} />
+                      <Item disabled={user.role !== "admin"} title="Code 2022" values={values} name="code2022" handleChange={handleChange} />
+                    </div>
                     <div className="ml-1 mt-8"> Adresse </div>
                     <AddressInput
                       keys={{
@@ -147,36 +153,31 @@ export default function Edit(props) {
                       errors={errors}
                       touched={touched}
                     />
-                    <div className="ml-1 mt-8"> Code </div>
-                    <div className="flex w-full">
-                      <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" handleChange={handleChange} />
-                      <Item disabled={user.role !== "admin"} title="Code 2022" values={values} name="code2022" handleChange={handleChange} />
-                    </div>
+
 
                   </BoxContent>
                 </Box>
               </Col>
               <Col className="mb-10 w-1/2">
                 <Box>
-                  <div className=" pl-4 pt-4 pr-4 bg-white">
-                    <div className=" flex justify-between mb-4" >
-                      <div className=" font-bold text-lg ">Par séjour</div>
-                      <MultiSelectSejour
-                        required
-                        errors={errors}
-                        touched={touched}
-                        value={values.cohorts}
-                        onChange={handleChange}
-                        name="cohorts"
-                        options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
-                        placeholder="Ajouter un séjour"
-                      />
-                    </div>
-                  </div>
+                  <BoxHeadTitle>Par séjour</BoxHeadTitle>
+                  <BoxContent direction="column">
+                    <MultiSelectWithTitle
+                      required
+                      errors={errors}
+                      touched={touched}
+                      title="Séjour(s) de cohésion concerné(s)"
+                      value={values.cohorts}
+                      onChange={handleChange}
+                      name="cohorts"
+                      options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
+                      placeholder="Sélectionner un ou plusieurs séjour de cohésion"
+                    />
+                  </BoxContent>
                   {values.cohorts?.length ? (
                     <>
-                      <div >
-                        <div className=" border-bottom flex justify-around">
+                      <div className="">
+                        <div className="flex justify-around border-bottom mb-2">
                           {(values.cohorts || []).map((cohort, index) => (
                             <>
                               <div key={index} className={`pb-2 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`} onClick={() => { setsessionShow(cohort) }}> {cohort} </div>
@@ -184,7 +185,7 @@ export default function Edit(props) {
                           ))}
                         </div>
                         {sessionShow ? (
-                          <div className="flex ml-4 mt-4  ">
+                          <div className="flex ml-5 mt-4 ">
                             <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
                               <ElementsSejour
                                 key={`${sessionShow}.Places`}
@@ -229,13 +230,18 @@ export default function Edit(props) {
     </Formik>
   );
 }
-const MultiSelectSejour = ({ value, onChange, name, options, placeholder, required, errors, touched }) => {
+const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder, required, errors, touched }) => {
   return (
-    <div className="">
-      <Field hidden value={value} name={name} onChange={onChange} validate={(v) => required && !v?.length && requiredMessage} />
-      <MultiSelect value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} />
-      {errors && touched && <Error errors={errors} touched={touched} name={name} />}
-    </div>
+    <Row className="detail">
+      <Col md={4}>
+        <label>{title}</label>
+      </Col>
+      <Col md={8}>
+        <Field hidden value={value} name={name} onChange={onChange} validate={(v) => required && !v?.length && requiredMessage} />
+        <MultiSelect value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} />
+        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
+      </Col>
+    </Row>
   );
 };
 
