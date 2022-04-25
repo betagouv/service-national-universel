@@ -10,7 +10,6 @@ import { translate, translateSessionStatus, SESSION_STATUS } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
-import Item from "./components/Item";
 import Select from "./components/Select";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import AddressInput from "../../components/addressInputVCenter";
@@ -291,6 +290,26 @@ const SelectPMR = ({ title, name, values, handleChange, disabled, options, requi
         {errors && touched && <Error errors={errors} touched={touched} name={name} />}
       </div>
     </div>
+  )
+}
+
+const Item = ({ title, placeholder, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) => {
+  return (
+    <Row className="flex w-full border flex-col justify-items-start m-1 rounded-lg rounded-grey-300 p-2">
+      <div className="text-gray-500 text-xs">
+        <label>{title}</label>
+      </div>
+      <Field
+        disabled={disabled}
+        value={translate(values[name])}
+        name={name}
+        onChange={handleChange}
+        type={type}
+        validate={(v) => required && !v && requiredMessage}
+        placeholder={placeholder || title}
+      />
+      {errors && touched && <Error errors={errors} touched={touched} name={name} />}
+    </Row>
   )
 }
 
