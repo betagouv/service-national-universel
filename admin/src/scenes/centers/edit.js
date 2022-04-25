@@ -13,7 +13,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import Item from "./components/Item";
 import Select from "./components/Select";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import AddressInput from "../../components/addressInputV2";
+import AddressInput from "../../components/addressInputVCenter";
 import MultiSelect from "../../components/Multiselect";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import { BiHandicap } from 'react-icons/bi';
