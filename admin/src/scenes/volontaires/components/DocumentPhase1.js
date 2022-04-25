@@ -17,20 +17,19 @@ import { environment } from "../../../config";
 import { ModalContainer } from "../../../components/modals/Modal";
 import ModalDocument from "./ModalDocument";
 import ButtonPlain from "./ButtonPlain";
+import IconButton from "../../../components/buttons/IconButton";
 
 export default function DocumentPhase1(props) {
   const [young, setYoung] = useState(props.young);
   const [statusCohesionStayMedical, setStatusCohesionStayMedical] = useState();
   const [statusAutoTestPCR, setStatusAutoTestPCR] = useState();
   const [statusImageRight, setStatusImageRight] = useState();
-  const [displayMenu, setDisplayMenu] = useState("");
   const [statusRules, setStatusRules] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(false);
   const [dataImageRight, setDataImageRight] = useState();
   const [dataAutoTestPCR, setDataAutoTestPCR] = useState();
   const [dataRules, setDataRules] = useState();
-  const [isOpenMed, setIsOpenMed] = useState(false);
   const [isOpenImg, setIsOpenImg] = useState(false);
   const [isOpenAut, setIsOpenAut] = useState(false);
   const [isOpenReg, setIsOpenReg] = useState(false);
@@ -181,9 +180,9 @@ export default function DocumentPhase1(props) {
           <div className="flex row justify-center mx-2 mb-3">
             <select disabled={loading} className="form-control text-sm" value={statusCohesionStayMedical} name="cohesionStayMedical" onChange={(e) => needModal(e)}>
               {medicalFileOptions.map((o) => (
-                <Option key={o.label} data-color="green" value={o.value} label={o.label}>
+                <option key={o.label} data-color="green" value={o.value} label={o.label}>
                   {o.label}
-                </Option>
+                </option>
               ))}
             </select>
           </div>
@@ -192,7 +191,7 @@ export default function DocumentPhase1(props) {
         </section>
         {statusCohesionStayMedical === "TO_DOWNLOAD" && (
           <ButtonPlain
-            bgColor="bg-white border-2 border-blue-600 text-blue-600"
+            tw="bg-white border-2 border-indigo-600 text-indigo-600"
             disabled={loading}
             className="border rounded-lg m-2 px-4 py-2"
             onClick={() => handleEmailClick("cohesionStayMedical")}>
@@ -201,10 +200,7 @@ export default function DocumentPhase1(props) {
         )}
       </div>
       <div className="flex flex-col justify-center items-center">
-        <section
-          className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4"
-          onMouseEnter={() => setDisplayMenu("image")}
-          onMouseLeave={() => setDisplayMenu("")}>
+        <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
           <div className="flex row justify-center mx-2 mb-3">
             <select disabled={loading} className="form-control text-sm" value={statusImageRight} name="imageRight" onChange={(e) => needModal(e)}>
               {options.map((o, i) => (
@@ -231,7 +227,7 @@ export default function DocumentPhase1(props) {
         />
         {statusImageRight === FILE_STATUS_PHASE1.TO_UPLOAD && (
           <ButtonPlain
-            bgColor="bg-white border-2 border-blue-600 text-blue-600"
+            tw="bg-white border-2 border-indigo-600 text-indigo-600"
             disabled={loading}
             className="border rounded-lg m-2 px-4 py-2"
             onClick={() => handleEmailClick("imageRight")}>
@@ -240,10 +236,7 @@ export default function DocumentPhase1(props) {
         )}
       </div>
       <div className="flex flex-col justify-center items-center">
-        <section
-          className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4"
-          onMouseEnter={() => setDisplayMenu("autotest")}
-          onMouseLeave={() => setDisplayMenu("")}>
+        <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
           <div className="flex row justify-center mx-2 mb-3">
             <select disabled={loading} className="form-control text-sm" value={statusAutoTestPCR} name="autoTestPCR" onChange={(e) => needModal(e)}>
               {options.map((o) => (
@@ -270,7 +263,7 @@ export default function DocumentPhase1(props) {
         />
         {statusAutoTestPCR === FILE_STATUS_PHASE1.TO_UPLOAD && (
           <ButtonPlain
-            bgColor="bg-white border-2 border-blue-600 text-blue-600"
+            tw="bg-white border-2 border-indigo-600 text-indigo-600"
             disabled={loading}
             className="border rounded-lg m-2 px-4 py-2"
             onClick={() => handleEmailClick("autoTestPCR")}>
@@ -279,10 +272,7 @@ export default function DocumentPhase1(props) {
         )}
       </div>
       <div className="flex flex-col justify-center items-center">
-        <section
-          className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4"
-          onMouseEnter={() => setDisplayMenu("autotest")}
-          onMouseLeave={() => setDisplayMenu("")}>
+        <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
           <div className="flex row justify-center mx-2 mb-3">
             <select disabled={loading} className="form-control text-sm" value={statusRules} name="rules" onChange={(e) => needModal(e)}>
               {options.map((o, i) => (
@@ -308,7 +298,7 @@ export default function DocumentPhase1(props) {
         />
         {statusRules === FILE_STATUS_PHASE1.TO_UPLOAD && (
           <ButtonPlain
-            bgColor="bg-white border-2 border-blue-600 text-blue-600"
+            tw="bg-white border-2 border-indigo-600 text-indigo-600"
             disabled={loading}
             className="border rounded-lg m-2 px-4 py-2"
             onClick={() => handleEmailClick("rules")}>
@@ -332,29 +322,3 @@ export default function DocumentPhase1(props) {
     </article>
   );
 }
-
-const Option = styled.option`
-  ::before {
-    content: "";
-    display: inline-block;
-    background-color: green;
-    border-radius: 100%;
-    padding: 2px;
-    width: 10px;
-    height: 10px;
-  }
-`;
-
-const ScrollSection = styled.section`
-  ::-webkit-scrollbar {
-    height: 10px; /* height of horizontal scrollbar ← You're missing this */
-    border: 2px solid #fff;
-    background: rgb(249 250 251);
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-thumb {
-    height: 5px;
-    background-color: #d5d5d5;
-    border-radius: 10px;
-  }
-`;

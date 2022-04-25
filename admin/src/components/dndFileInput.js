@@ -6,7 +6,7 @@ import DownloadButton from "./buttons/DownloadButton";
 import RoundDownloadButton from "./buttons/RoundDownloadButton";
 import IconButton from "./buttons/IconButton";
 import ModalConfirm from "./modals/ModalConfirm";
-import download from "../assets/Download.js";
+import Download from "../assets/Download.js";
 import deleteIcon from "../assets/delete.svg";
 
 function getFileName(file) {
@@ -56,10 +56,13 @@ export default function DndFileInput({ value, onChange, name, errorMessage = req
           </File> */}
             <File key={e} className="mx-1">
               <FileName className="mr-2">{getFileName(e)}</FileName>
-              <IconButton icon={deleteIcon} bgColor="bg-blue-600" onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })} />
+              <IconButton
+                icon={deleteIcon}
+                bgColor="bg-indigo-600"
+                onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })}
+              />
               <RoundDownloadButton
-                icon={download}
-                bgColor="bg-blue-600"
+                bgColor="bg-indigo-600"
                 source={() => {
                   console.log(e);
                   return source(getFileName(e));
@@ -91,7 +94,7 @@ export default function DndFileInput({ value, onChange, name, errorMessage = req
               />
             </svg>
 
-            <span className="text-blue-600">Téléversez {placeholder}</span>
+            <span className="text-indigo-600">Téléversez {placeholder}</span>
             <span style={{ display: "block", fontSize: 13 }}>PDF, PNG ou JPG jusqu&apos;à 5 Mo</span>
           </div>
         </ImageInput>

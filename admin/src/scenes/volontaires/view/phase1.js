@@ -37,11 +37,9 @@ export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
   const [young, setYoung] = useState(props.young);
-  const [cohesionCenter, setCohesionCenter] = useState({ name: "yolo" });
+  const [cohesionCenter, setCohesionCenter] = useState();
   const disabled = young.statusPhase1 === "WITHDRAWN" || user.role !== ROLES.ADMIN;
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-
-  console.log(young.statusPhase1, cohesionCenter);
 
   useEffect(() => {
     if (!young?.sessionPhase1Id) return;
@@ -226,11 +224,11 @@ export default function Phase1(props) {
                           <p className="text-gray-500">Attestation de réalisation phase 1 :</p>
                           <section className="flex mt-3">
                             <DownloadAttestationButton young={young} uri="1" className="mr-2">
-                              <Download color="#60A5FA" className="mr-2" />
+                              <Download color="#5145cd" className="mr-2" />
                               Télécharger
                             </DownloadAttestationButton>
                             <MailAttestationButton young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
-                              <Envelop className="mr-2" />
+                              <Envelop color="#5145cd" className="mr-2" />
                               Envoyer par mail
                             </MailAttestationButton>
                           </section>
@@ -241,7 +239,7 @@ export default function Phase1(props) {
                             <>
                               <p className="text-gray-500 mb-[22px]">Convocation au séjour :</p>
                               <DownloadConvocationButton young={young} uri="cohesion">
-                                <Download color="#60A5FA" className="mr-2" />
+                                <Download color="#5145cd" className="mr-2" />
                                 Télécharger
                               </DownloadConvocationButton>
                             </>

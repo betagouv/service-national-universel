@@ -33,7 +33,7 @@ export default function ModalConfirmWithMessage({
 
   return (
     <Modal centered isOpen={isOpen} toggle={onChange}>
-      <ModalContainer>
+      <ModalContainer className="pb-0">
         <CloseSvg className="close-icon" height={10} width={10} onClick={onChange} />
         <Header>{topTitle}</Header>
         <Content>
