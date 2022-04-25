@@ -85,7 +85,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!canCreateOrUpdateSessionPhase1(req.user, sessionPhase1)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error, value } = validateSessionPhase1(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     sessionPhase1.set(value);
     await sessionPhase1.save();
