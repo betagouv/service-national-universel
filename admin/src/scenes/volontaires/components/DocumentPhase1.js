@@ -35,16 +35,13 @@ export default function DocumentPhase1(props) {
   const [isOpenReg, setIsOpenReg] = useState(false);
   const options = [FILE_STATUS_PHASE1.TO_UPLOAD, FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED];
   const medicalFileOptions = [
-    {
-      value: "RECIEVED",
-      label: "Réceptionné",
-    },
+    { value: "RECEIVED", label: "Réceptionné" },
     { value: "TO_DOWNLOAD", label: "Non téléchargé" },
     { value: "DOWNLOADED", label: "Téléchargé" },
   ];
 
   const medicalFileValue = {
-    RECIEVED: { cohesionStayMedicalFileReceived: "true", cohesionStayMedicalFileDownload: "true" },
+    RECEIVED: { cohesionStayMedicalFileReceived: "true", cohesionStayMedicalFileDownload: "true" },
     TO_DOWNLOAD: { cohesionStayMedicalFileReceived: "false", cohesionStayMedicalFileDownload: "false" },
     DOWNLOADED: { cohesionStayMedicalFileReceived: "false", cohesionStayMedicalFileDownload: "true" },
   };
