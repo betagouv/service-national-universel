@@ -16,7 +16,6 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
 
   useEffect(() => {
     if (contacts) {
-      let nb = 0;
       let existCohort = [];
       let tempContact = {};
 
