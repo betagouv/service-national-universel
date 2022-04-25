@@ -314,3 +314,42 @@ const Wrapper = styled.div`
     background-color: #f3f3f3;
   }
 `;
+
+
+const PrimaryButton = styled.button`
+  color: #fff;
+  border: 0;
+  background-color: #5145cd;
+  padding: 9px 20px;
+  outline: 0;
+  border-radius: 6px;
+  margin-inline: 5px;
+  margin-top: 10px;
+  display: block;
+  outline: 0;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -2px rgb(0 0 0 / 5%);
+  width: fit-content;
+  :hover {
+    opacity: 0.9;
+  }
+`;
+
+const SecondaryButton = styled.button`
+  border: solid 2px;
+  border-color: #e3e7ea;
+  background-color: #fff;
+  padding: 9px 20px;
+  outline: 0;
+  border-radius: 6px;
+  margin-inline: 5px;
+  margin-top: 10px;
+  display: block;
+  outline: 0;
+  width: fit-content;
+`;
+
+const Label = styled.div`
+  color: #374151;
+  font-size: 14px;
+  margin-bottom: 10px;
+`;
