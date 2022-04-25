@@ -54,7 +54,9 @@ export default function DetailsView({ structure }) {
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Bloc title="La structure" titleRight={<SocialIcons value={structure} />}>
                 <Details title="Présentation" value={structure.description} />
-                <Details title="Statut" value={translate(structure.legalStatus)} />
+                <Details title="Statut Juridique" value={translate(structure.legalStatus)} />
+                <Details title="Type" value={structure.types?.map(translate)?.join(", ")} />
+                <Details title="Sous-type" value={translate(structure.sousType)} />
                 <Details title="Adresse" value={structure.address} />
                 <Details title="Ville" value={structure.city} />
                 <Details title="Code Postal" value={structure.zip} />

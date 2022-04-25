@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, ModalHeader, ModalBody, Row, Col, FormGroup, Input } from "reactstrap";
+import { Modal, ModalHeader, ModalBody, Row, Col, FormGroup } from "reactstrap";
 import { Formik, Field } from "formik";
 import styled from "styled-components";
 import ReactSelect from "react-select";

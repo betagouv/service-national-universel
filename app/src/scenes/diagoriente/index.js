@@ -4,7 +4,7 @@ import { HeroContainer, Hero } from "../../components/Content";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import api from "../../services/api";
-import { translate, formatStringDate } from "../../utils";
+import { translate, formatStringDate, urlWithScheme } from "../../utils";
 import plausibleEvent from "../../services/plausible";
 
 export default function Index() {
@@ -70,7 +70,7 @@ export default function Index() {
             <h1>Identifiez vos compétences et explorez vos intérêts</h1>
             <p>Complétez vos expériences, qu&apos;elles soient professionnelles ou personnelles, puis évaluez vos compétences.</p>
 
-            <VioletButton href={diagorienteUrl} target="_blank" onClick={() => plausibleEvent("Compte/CTA - Accéder Diagoriente")}>
+            <VioletButton href={urlWithScheme(diagorienteUrl)} target="_blank" rel="noreferrer" onClick={() => plausibleEvent("Compte/CTA - Accéder Diagoriente")}>
               Accéder à Diagoriente
             </VioletButton>
           </div>
@@ -117,7 +117,7 @@ export default function Index() {
                     <Separator />
                     <ContainerFooter>
                       <p>
-                        <a target="_blank" href={diagorienteUrl} rel="noreferrer">
+                        <a target="_blank" href={urlWithScheme(diagorienteUrl)} rel="noreferrer">
                           J&apos;AJOUTE UNE EXPERIENCE
                         </a>
                       </p>

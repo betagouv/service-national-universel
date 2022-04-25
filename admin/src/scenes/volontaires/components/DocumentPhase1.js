@@ -250,7 +250,7 @@ export default function DocumentPhase1(props) {
             )}
           </Formik>
           {statusImageRight === FILE_STATUS_PHASE1.TO_UPLOAD && (
-            <button disabled={loading} className="border rounded-lg border-8 m-2 px-4 py-2" onClick={() => handleEmailClick("imageRight")}>
+            <button disabled={loading} className="rounded-lg border-8 m-2 px-4 py-2" onClick={() => handleEmailClick("imageRight")}>
               Relancer le volontaire
             </button>
           )}

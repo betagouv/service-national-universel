@@ -9,16 +9,19 @@ import QuestionMark from "../../assets/QuestionMark";
 import api from "../../services/api";
 import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
-import { RiMenuFill, RiMenuFoldLine } from "react-icons/ri";
+import { environment } from "../../config";
 
-const DrawerTab = ({ title, to, onClick, beta }) => (
-  <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block">
-    <NavLink to={to} className="block py-3 pl-3 text-base hover:!text-white" activeClassName="block bg-snu-purple-300 py-3 pl-3 font-bold">
-      {title}
-      {beta ? <Badge text="bêta" color={colors.yellow} /> : null}
-    </NavLink>
-  </div>
-);
+const DrawerTab = ({ title, to, onClick, beta }) => {
+  if (environment === "production" && beta) return null;
+  return (
+    <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block">
+      <NavLink to={to} className="block py-3 pl-3 text-base hover:!text-white" activeClassName="block bg-snu-purple-300 py-3 pl-3 font-bold">
+        {title}
+        {beta ? <Badge className="ml-2" text="bêta" color={colors.yellow} /> : null}
+      </NavLink>
+    </div>
+  );
+};
 
 const BlankSeparator = () => (
   <div
@@ -125,6 +128,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
+      <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} beta />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />

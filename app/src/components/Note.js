@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { urlWithScheme } from "../../src/utils";
 import plausibleEvent from "../services/plausible";
 
 export default function Note({ title, titleColor, text, textColor, link, textLink, linkColor, backgroundColor, icon, linkInText, sessions, ...rest }) {
@@ -17,7 +18,7 @@ export default function Note({ title, titleColor, text, textColor, link, textLin
               ))}
             </ul>
             {linkInText && (
-              <a href={link} className="link" target="_blank" rel="noreferrer">
+              <a href={urlWithScheme(link)} className="link" target="_blank" rel="noreferrer">
                 {textLink}
               </a>
             )}

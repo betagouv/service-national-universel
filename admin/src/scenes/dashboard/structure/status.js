@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
-import { translate, YOUNG_STATUS_COLORS, getLink } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, getLink, typesStructure, legalStatus as legalStatusList } from "../../../utils";
 
 import api from "../../../services/api";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage } from "../../../components/dashboard";
 
-const legalStatusTypes = ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"];
-
 export default function Status({ filter }) {
-  const [status, setStatus] = useState({});
+  const [legalStatus, setLegalStatus] = useState({});
+  const [types, setTypes] = useState({});
+  const [sousType, setSousType] = useState({});
   const [withNetworkId, setWithNetworkId] = useState(0);
   const [total, setTotal] = useState(0);
 
@@ -18,7 +18,9 @@ export default function Status({ filter }) {
       const body = {
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
-          status: { terms: { field: "legalStatus.keyword" } },
+          legalStatus: { terms: { field: "legalStatus.keyword" } },
+          types: { terms: { field: "types.keyword" } },
+          sousType: { terms: { field: "sousType.keyword" } },
           withNetworkId: { filter: { bool: { must: { exists: { field: "networkId.keyword" } }, must_not: { term: { "networkId.keyword": "" } } } } },
         },
 
@@ -30,7 +32,9 @@ export default function Status({ filter }) {
 
       const { responses } = await api.esQuery("structure", body);
       if (responses.length) {
-        setStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setLegalStatus(responses[0].aggregations.legalStatus.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setTypes(responses[0].aggregations.types.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setSousType(responses[0].aggregations.sousType.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setTotal(responses[0].hits.total.value);
         setWithNetworkId(responses[0].aggregations.withNetworkId.doc_count);
       }
@@ -64,26 +68,47 @@ export default function Status({ filter }) {
           </Link>
         </Col>
       </Row>
-      <Row>
-        {legalStatusTypes.map((l, k) => {
+      {legalStatusList
+        .map((l, k) => {
           return (
-            <Col md={6} xl={3} key={k}>
-              <Link to={getLink({ base: `/structure`, filter, filtersUrl: [`LEGAL_STATUS=%5B"${l}"%5D&`] })}>
-                <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-                  <CardTitle>{`${translate(l)}s`}</CardTitle>
-                  <CardValueWrapper>
-                    <CardValue>{status[l] || 0}</CardValue>
-                    <CardPercentage>
-                      {total ? `${(((status[l] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                      <CardArrow />
-                    </CardPercentage>
-                  </CardValueWrapper>
-                </Card>
-              </Link>
-            </Col>
+            <div className="flex" key={k}>
+              <Col md={6} xl={3}>
+                <Link to={getLink({ base: `/structure`, filter, filtersUrl: [`LEGAL_STATUS=%5B"${l}"%5D&`] })}>
+                  <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={{ marginBottom: 0 }}>
+                    <CardTitle>{`${translate(l)}s`}</CardTitle>
+                    <CardValueWrapper>
+                      <CardValue>{legalStatus[l] || 0}</CardValue>
+                      <CardPercentage>
+                        {total ? `${(((legalStatus[l] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                        <CardArrow />
+                      </CardPercentage>
+                    </CardValueWrapper>
+                  </Card>
+                </Link>
+              </Col>
+              <div className="flex flex-wrap flex-row gap-2 items-start">
+                {(typesStructure[l] || []).map((type, tk) => {
+                  console.log(types);
+                  return (
+                    <Link key={tk} to={getLink({ base: `/structure`, filter, filtersUrl: [`LEGAL_STATUS=%5B"${l}"%5D&`, `TYPE=%5B"${type}"%5D`] })}>
+                      <div className="flex flex-col bg-white p-3 rounded-md shadow-sm cursor-pointer hover:scale-105">
+                        <div>{translate(type)}</div>
+                        <div className="text-xl flex justify-between">
+                          <div>{types[type] || 0}</div>
+                          <div className="text-base text-coolGray-400">
+                            {legalStatus[l] ? `${(((types[type] || 0) * 100) / legalStatus[l]).toFixed(0)}%` : `0%`}
+                            <CardArrow />
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           );
-        })}
-      </Row>
+        })
+        .reduce((prev, curr, i) => [prev, <hr key={`${prev} ${i}`} className="my-4 mx-24" />, curr])}
     </>
   );
 }

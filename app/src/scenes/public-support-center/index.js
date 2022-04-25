@@ -4,63 +4,63 @@ import styled from "styled-components";
 
 import { HeroContainer } from "../../components/Content";
 import { supportURL } from "../../config";
-import { colors } from "../../utils";
+import { colors, urlWithScheme } from "../../utils";
 import ZammadForm from "./form";
 
 const articles = [
   {
-    title: "Mot de passe oublié (ou incorrect)",
-    emoji: "🔐",
-    body: `Pour se connecter à votre compte SNU, rendez-vous sur...`,
-    url: `${supportURL}/base-de-connaissance/jai-oublie-mon-mot-de-passe-volontaire-1`,
+    title: "Mon affectation (lieu de séjour)",
+    emoji: "🗺️",
+    body: `Votre séjour de cohésion se déroule dans un centre d'accueil de votre région, ...`,
+    url: `${supportURL}/base-de-connaissance/mon-affectation-lieu-de-sejour`,
   },
   {
-    title: "Est-ce que le SNU est obligatoire ?",
-    emoji: "❓",
-    body: `Le SNU est pour le moment un dispositif basé sur le volontariat...`,
-    url: `${supportURL}/base-de-connaissance/est-ce-que-le-snu-est-obligatoire`,
+    title: "Le transport",
+    emoji: "🚌",
+    body: `Concernant le transport pour le séjour de cohésion, ...`,
+    url: `${supportURL}/base-de-connaissance/le-transport`,
   },
   {
-    title: "A qui s'adresse le SNU ?",
-    emoji: "👍",
-    body: `Le Service National Universel s'adresse : aux jeunes de nationalité...`,
-    url: `${supportURL}/base-de-connaissance/a-qui-sadresse-le-snu`,
+    title: "Les documents à fournir",
+    emoji: "📋",
+    body: `Les documents du formulaire d’inscription, ...`,
+    url: `${supportURL}/base-de-connaissance/les-documents-a-fournir`,
   },
   {
-    title: "Le SNU est-il payant ?",
-    emoji: "👛",
-    body: `La participation au SNU est gratuite ! Le séjour de cohésion...`,
-    url: `${supportURL}/base-de-connaissance/le-snu-est-il-payant-frais-1`,
+    title: "Dans ma valise : matériel (trousseau)",
+    emoji: "🧳",
+    body: `Que dois-je emporter ? Un trousseau indicatif et national sera publié sur votre espace volontaire...`,
+    url: `${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`,
   },
   {
     title: "Je me connecte à mon compte",
     emoji: "🔐",
     body: `Pour vous connecter : rendez-vous sur...`,
-    url: `${supportURL}/base-de-connaissance/je-me-connecte-a-mon-compte-1`,
+    url: `${supportURL}/base-de-connaissance/je-me-connecte-a-mon-compte`,
   },
   {
     title: "J'ai oublié mon identifiant (mail)",
     emoji: "⛔",
     body: `La plateforme bloque la création de nouveau dossier d'inscription...`,
-    url: `${supportURL}/base-de-connaissance/comment-recuperer-mon-identifiant-dossier-deja-inscrit-1`,
+    url: `${supportURL}/base-de-connaissance/comment-recuperer-mon-identifiant-dossier-deja-inscrit`,
   },
   {
-    title: "J'étais inscrit en 2021, comment me réinscrire en 2022 ?",
-    emoji: "📅",
-    body: `En 2021, vous avez déjà rempli un dossier d'inscription...`,
-    url: `${supportURL}/base-de-connaissance/jetais-inscrit-en-2021-comment-me-reinscrire-en-2022-1-1`,
+    title: "Pendant le séjour (Règles et informations)",
+    emoji: "🌲",
+    body: `...`,
+    url: `${supportURL}/base-de-connaissance/pendant-le-sejour-regles-et-informations`,
   },
   {
-    title: "Prise en charge du code de la route",
-    emoji: "🚗",
-    body: `L'accès à la plateforme en ligne d'apprentissage du code de la...`,
-    url: `${supportURL}/base-de-connaissance/permis-et-code-de-la-route-1`,
+    title: "Pourrais-je quitter le centre pendant le séjour ?",
+    emoji: "🏃",
+    body: `Pour des soucis d’organisation, il n’est pas possible de déroger aux dates prévues pour le séjour de cohésion...`,
+    url: `${supportURL}/base-de-connaissance/pourrais-je-quitter-le-centre-pendant-le-sejour`,
   },
   {
-    title: "Le SNU remplace-t-il la Journée Défense et citoyenneté (JDC)",
-    emoji: "📣",
-    body: `La Journée de Défense et Citoyenneté (JDC) est obligatoire pour tous...`,
-    url: `${supportURL}/base-de-connaissance/journee-defense-et-citoyennete-1`,
+    title: "Je me désiste du SNU",
+    emoji: "🙁",
+    body: `Attention cette action est irréversible, et annule votre entière participation au parcours du SNU. Vous ne pourrez pas revenir en arrière.`,
+    url: `${supportURL}/base-de-connaissance/je-me-desiste-du-snu`,
   },
 ];
 
@@ -117,7 +117,7 @@ export default function Index() {
             </div>
             <p>{article.body}</p>
             <p>
-              <a className="block-link" href={article.url} target="_blank" rel="noreferrer">
+              <a className="block-link" href={urlWithScheme(article.url)} target="_blank" rel="noreferrer">
                 Lire la suite
               </a>
             </p>

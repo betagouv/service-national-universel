@@ -8,7 +8,7 @@ const get = async (req, res, model) => {
     const { error, value } = Joi.object({ id: Joi.string().required() })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const elem = await model.findById(value.id);
@@ -18,7 +18,7 @@ const get = async (req, res, model) => {
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 };
 
@@ -81,7 +81,7 @@ const deletePatches = async ({ req, model }) => {
     return { ok: true };
   } catch (error) {
     capture(error);
-    return { ok: false, code: ERRORS.SERVER_ERROR, codeError: 500 };
+    return { ok: false, code: ERRORS.SERVER_ERROR };
   }
 };
 

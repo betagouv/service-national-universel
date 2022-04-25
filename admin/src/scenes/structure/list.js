@@ -19,7 +19,7 @@ import DeleteFilters from "../../components/buttons/DeleteFilters";
 import UnlockedSvg from "../../assets/lock-open.svg";
 import LockedSvg from "../../assets/lock.svg";
 
-const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION", "TYPE", "SOUS-TYPE"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -172,7 +172,37 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut juridique")}
+                  renderLabel={(items) => getFilterLabel(items, "Statut juridique", "Statut juridique")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Type"
+                  componentId="TYPE"
+                  dataField="types.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "TYPE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Type", "Type")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Sous-type"
+                  componentId="SOUS-TYPE"
+                  dataField="sousType.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SOUS-TYPE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Sous-type", "Sous-type")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -190,7 +220,6 @@ export default function List() {
               </FilterRow>
               <FilterRow visible={filterVisible}>
                 <div className="uppercase text-xs text-snu-purple-800">Spécificité</div>
-
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"

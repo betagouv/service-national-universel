@@ -21,7 +21,7 @@ router.get("/generateUrl", passport.authenticate("young", { session: false, fail
     return res.status(200).send({ ok: true, data: { url: dataUrl } });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -40,7 +40,7 @@ router.get("/getCard", passport.authenticate("young", { session: false, failWith
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

@@ -6,6 +6,7 @@ import DndFileInput from "../../../components/dndFileInput";
 import api from "../../../services/api";
 import ErrorMessage from "../../../components/ErrorMessage";
 import LoadingButton from "../../../components/buttons/LoadingButton";
+import { urlWithScheme } from "../../../utils";
 
 export default function UploadCard({
   values,
@@ -29,7 +30,7 @@ export default function UploadCard({
         {subsubTitle ? <SubSubTitle>{subsubTitle}</SubSubTitle> : null}
         {template ? (
           <LoadingButton style={{ marginBottom: "0.5rem" }}>
-            <a href={template} target="_blank" style={{ decoration: "none", color: "white" }} rel="noreferrer">
+            <a href={urlWithScheme(template)} target="_blank" style={{ decoration: "none", color: "white" }} rel="noreferrer">
               Télécharger le modèle obligatoire
             </a>
           </LoadingButton>

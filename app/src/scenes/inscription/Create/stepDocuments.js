@@ -15,7 +15,7 @@ import api from "../../../services/api";
 import FormFooter from "../../../components/form/FormFooter";
 import { STEPS } from "../utils";
 import { setYoung } from "../../../redux/auth/actions";
-import { getAge, translate } from "../../../utils";
+import { getAge, translate, urlWithScheme } from "../../../utils";
 import { supportURL } from "../../../config";
 
 export default function StepDocuments() {
@@ -224,7 +224,7 @@ const DownloadFormButton = ({ url }) => (
       boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.05)",
       margin: "20px 0",
     }}>
-    <a href={url} target="_blank" style={{ decoration: "none", color: "#22252A" }} rel="noreferrer">
+    <a href={urlWithScheme(url)} target="_blank" style={{ decoration: "none", color: "#22252A" }} rel="noreferrer">
       Télécharger le modèle obligatoire
     </a>
   </div>

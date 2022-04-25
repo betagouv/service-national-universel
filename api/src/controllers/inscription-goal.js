@@ -12,7 +12,7 @@ const { ERRORS } = require("../utils");
 router.post("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   // Validate cohort...
   const { error: errorCohort, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params);
-  if (errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorCohort });
+  if (errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
   // ... then body
   const { error, value: inscriptionsGoals } = Joi.array()
     .items({
@@ -36,7 +36,7 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -49,7 +49,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -64,7 +64,7 @@ router.get("/:department/current", passport.authenticate("referent", { session: 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -79,7 +79,7 @@ router.get("/:cohort/department/:department", passport.authenticate("referent", 
     return res.status(200).send({ ok: true, data: fillingRate });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

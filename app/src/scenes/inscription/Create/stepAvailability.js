@@ -6,9 +6,8 @@ import { useHistory } from "react-router-dom";
 import { Spinner } from "reactstrap";
 
 import api from "../../../services/api";
-import { HERO_IMAGES_LIST, translate } from "../../../utils";
+import { HERO_IMAGES_LIST, translate, urlWithScheme } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
-import { STEPS } from "../utils";
 import InfoIcon from "../../../components/InfoIcon";
 import BackIcon from "../../../components/BackIcon";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
@@ -176,7 +175,7 @@ const AlerteInfo = ({ children, url }) => (
   <div style={{ display: "flex", color: "#32257f", backgroundColor: "#edecfc", padding: "1rem", borderRadius: "6px" }}>
     <InfoIcon color="#32257F" style={{ flex: "none" }} />
     {url ? (
-      <a href={url} target="_blank" style={{ fontSize: ".9rem", marginLeft: "5px", color: "#32267f" }} rel="noreferrer">
+      <a href={urlWithScheme(url)} target="_blank" style={{ fontSize: ".9rem", marginLeft: "5px", color: "#32267f" }} rel="noreferrer">
         {children}
       </a>
     ) : (

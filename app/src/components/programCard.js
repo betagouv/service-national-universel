@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { urlWithScheme } from "../utils";
 
 export default function ProgramCard({ program, image, enableToggle = true }) {
   if (!program) return <div />;
@@ -37,14 +38,14 @@ export default function ProgramCard({ program, image, enableToggle = true }) {
 
   return (
     <Card onClick={handleClick}>
-      <a href={program.url} className="thumb">
+      <a href={urlWithScheme(program.url)} className="thumb">
         <img src={image} />
         <Badge>{program.type}</Badge>
       </a>
       <h4>{program.name}</h4>
       <div className="desc">{renderText()}</div>
       <div style={{ marginTop: "1rem" }}>
-        <SeeMore href={program.url} target="_blank">
+        <SeeMore href={urlWithScheme(program.url)} target="_blank" rel="noreferrer">
           DÉCOUVRIR
         </SeeMore>
       </div>

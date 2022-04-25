@@ -144,9 +144,7 @@ export default function DesktopView() {
                     du <strong>12 au 24 juin 2022</strong>
                   </p>
                   {condition.isDate2 ? (
-                    <p>
-                      <TickIcon />
-                    </p>
+                    <p style={{ color: "red", fontSize: "0.7rem" }}>Inscriptions clôturées</p>
                   ) : (
                     <p>
                       <StopIcon />

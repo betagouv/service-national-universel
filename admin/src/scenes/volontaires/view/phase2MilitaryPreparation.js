@@ -156,7 +156,7 @@ export default function Phase2militaryPrepartion({ young }) {
           titleRight={<Badge text={translate(young.statusMilitaryPreparationFiles)} color={APPLICATION_STATUS_COLORS[young.statusMilitaryPreparationFiles]} />}>
           {applicationsToMilitaryPreparation.map((a, i) => (
             <div key={i}>
-              <LinkStyled href={`/mission/${a.missionId}`} target="_blank">
+              <LinkStyled href={`/mission/${a.missionId}`} target="_blank" rel="noreferrer">
                 {a?.mission?.name || a.missionName}
               </LinkStyled>
               <Badge text={translate(a.status)} color={APPLICATION_STATUS_COLORS[a.status]} />

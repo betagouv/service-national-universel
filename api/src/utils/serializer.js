@@ -9,11 +9,11 @@ function serializeApplication(application) {
   });
 }
 
-function serializeBus(bus, user) {
+function serializeBus(bus) {
   return bus.toObject();
 }
 
-function serializeMission(mission, user) {
+function serializeMission(mission) {
   return mission.toObject({
     transform: (_doc, ret) => {
       delete ret.sqlId;
@@ -65,7 +65,7 @@ function serializeYoung(young, user) {
   });
 }
 
-function serializeReferent(referent, user) {
+function serializeReferent(referent) {
   return referent.toObject({
     transform: (_doc, ret) => {
       delete ret.sqlId;
@@ -93,15 +93,15 @@ function serializeStructure(structure, user) {
     },
   });
 }
-function serializeDepartmentService(departmentService, user) {
+function serializeDepartmentService(departmentService) {
   return departmentService.toObject();
 }
 
-function serializeMeetingPoint(meetingPoint, user) {
+function serializeMeetingPoint(meetingPoint) {
   return meetingPoint.toObject();
 }
 
-function serializeEmail(email, user) {
+function serializeEmail(email) {
   return email.toObject();
 }
 
