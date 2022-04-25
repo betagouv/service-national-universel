@@ -194,7 +194,6 @@ export default function Phase1(props) {
                     <div className="mr-4">
                       <p className="text-gray-500">Présence :</p>
                       <Select
-                        tw=""
                         placeholder="Non renseigné"
                         title=""
                         options={[

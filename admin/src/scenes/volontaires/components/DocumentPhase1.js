@@ -191,7 +191,7 @@ export default function DocumentPhase1(props) {
         </section>
         {statusCohesionStayMedical === "TO_DOWNLOAD" && (
           <ButtonPlain
-            tw="bg-white border-2 border-indigo-600 text-indigo-600"
+            tw="bg-white border-[1px] border-indigo-600 text-indigo-600"
             disabled={loading}
             className="border rounded-lg m-2 px-4 py-2"
             onClick={() => handleEmailClick("cohesionStayMedical")}>
@@ -227,7 +227,7 @@ export default function DocumentPhase1(props) {
         />
         {statusImageRight === FILE_STATUS_PHASE1.TO_UPLOAD && (
           <ButtonPlain
-            tw="bg-white border-2 border-indigo-600 text-indigo-600"
+            tw="bg-white border-[1px] border-indigo-600 text-indigo-600"
             disabled={loading}
             className="border rounded-lg m-2 px-4 py-2"
             onClick={() => handleEmailClick("imageRight")}>
@@ -263,7 +263,7 @@ export default function DocumentPhase1(props) {
         />
         {statusAutoTestPCR === FILE_STATUS_PHASE1.TO_UPLOAD && (
           <ButtonPlain
-            tw="bg-white border-2 border-indigo-600 text-indigo-600"
+            tw="bg-white border-[1px] border-indigo-600 text-indigo-600"
             disabled={loading}
             className="border rounded-lg m-2 px-4 py-2"
             onClick={() => handleEmailClick("autoTestPCR")}>
@@ -298,7 +298,7 @@ export default function DocumentPhase1(props) {
         />
         {statusRules === FILE_STATUS_PHASE1.TO_UPLOAD && (
           <ButtonPlain
-            tw="bg-white border-2 border-indigo-600 text-indigo-600"
+            tw="bg-white border-[1px] border-indigo-600 text-indigo-600"
             disabled={loading}
             className="border rounded-lg m-2 px-4 py-2"
             onClick={() => handleEmailClick("rules")}>
