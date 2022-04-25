@@ -21,7 +21,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     return res.status(200).send({ ok: true, data: serializeDepartmentService(data, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -65,7 +65,7 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
     return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -90,14 +90,14 @@ router.delete("/:id/cohort/:cohort/contact/:contactMail", passport.authenticate(
     return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
 router.get("/:department", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: department } = Joi.string().required().validate(req.params.department);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (isYoung(req.user) && req.user.department !== department) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -106,7 +106,7 @@ router.get("/:department", passport.authenticate(["referent", "young"], { sessio
     return res.status(200).send({ ok: true, data: serializeDepartmentService(data, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -116,7 +116,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
     return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeDepartmentService) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -147,7 +147,7 @@ router.post("/:id/representant", passport.authenticate("referent", { session: fa
     return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

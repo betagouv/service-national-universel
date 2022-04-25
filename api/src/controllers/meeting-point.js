@@ -15,7 +15,7 @@ router.get("/all", passport.authenticate("referent", { session: false, failWithE
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -33,7 +33,7 @@ router.get("/:id", passport.authenticate(["young", "referent"], { session: false
     return res.status(200).send({ ok: true, data: { ...data._doc, bus } });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -50,7 +50,7 @@ router.get("/", passport.authenticate("young", { session: false, failWithError: 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

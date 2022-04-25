@@ -109,14 +109,14 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     return res.status(200).send({ ok: true, data: serializeMission(data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -124,7 +124,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!canModifyMission(req.user, mission)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
-    if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorMission });
+    if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     // await updateApplicationsWithYoungOrMission({ mission, newMission: checkedMission });
 
@@ -169,7 +169,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -203,7 +203,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     return res.status(200).send({ ok: true, data: { ...serializeMission(mission), tutor: missionTutor } });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -212,7 +212,7 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false, f
 router.get("/:id/application", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await ApplicationObject.find({ missionId: id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -224,7 +224,7 @@ router.get("/:id/application", passport.authenticate("referent", { session: fals
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -261,7 +261,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     return res.status(200).send({ ok: true, data: serializeMission(mission) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

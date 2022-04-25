@@ -46,22 +46,22 @@ export default function StepCoordonnees() {
         cityCode: young.cityCode,
         academy: young.academy,
         addressVerified: young.addressVerified,
-        hostLastName: young.hostLastName,
-        hostFirstName: young.hostFirstName,
-        hostRelationship: young.hostRelationship,
-        foreignCountry: young.foreignCountry,
-        foreignCity: young.foreignCountry,
-        foreignZip: young.foreignZip,
-        foreignAddress: young.foreignAddress,
+        hostLastName: young.hostLastName === "" ? undefined : young.hostLastName,
+        hostFirstName: young.hostFirstName === "" ? undefined : young.hostFirstName,
+        hostRelationship: young.hostRelationship === "" ? undefined : young.hostRelationship,
+        foreignCountry: young.foreignCountry === "" ? undefined : young.foreignCountry,
+        foreignCity: young.foreignCity === "" ? undefined : young.foreignCity,
+        foreignZip: young.foreignZip === "" ? undefined : young.foreignZip,
+        foreignAddress: young.foreignAddress === "" ? undefined : young.foreignAddress,
         schooled: young.schooled,
         situation: young.situation,
         employed: young.employed,
-        schoolName: young.schoolName,
-        grade: young.grade,
-        schoolId: young.schoolId,
-        schoolCountry: young.schoolCountry,
-        schoolCity: young.schoolCity,
-        schoolDepartment: young.schoolDepartment,
+        schoolName: young.schoolName === "" ? undefined : young.schoolName,
+        grade: young.grade === "" ? undefined : young.grade,
+        schoolId: young.schoolId === "" ? undefined : young.schoolId,
+        schoolCountry: young.schoolCountry === "" ? undefined : young.schoolCountry,
+        schoolCity: young.schoolCity === "" ? undefined : young.schoolCity,
+        schoolDepartment: young.schoolDepartment === "" ? undefined : young.schoolDepartment,
       });
       if (young.foreignCountry) {
         setData((data) => ({ ...data, livesInFrance: "false" }));
@@ -122,8 +122,8 @@ export default function StepCoordonnees() {
     v.grade = "";
   };
 
-  const onSubmit = async (values) => {
-    setLoading(true);
+  const onSubmit = async ({ values, type }) => {
+    if (type === "next") setLoading(true);
     try {
       if (values.livesInFrance === "true") {
         delete values.foreignAddress;
@@ -134,10 +134,11 @@ export default function StepCoordonnees() {
         delete values.hostLastName;
         delete values.hostRelationship;
       }
-      const { ok, code, data } = await api.put("/young/inscription/coordonnee", values);
+      const { ok, code, data } = await api.put(`/young/inscription/coordonnee/${type}`, values);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      if (type === "save") toastr.success("Vos modifications ont bien été enregistrees !");
       dispatch(setYoung(data));
-      history.push("/inscription/availability");
+      if (type === "next") history.push("/inscription/availability");
     } catch (e) {
       console.log(e);
       toastr.error("Erreur !");
@@ -170,7 +171,7 @@ export default function StepCoordonnees() {
         }}
         validateOnChange={false}
         validateOnBlur={false}
-        onSubmit={(values) => onSubmit(values)}>
+        onSubmit={(values) => onSubmit({ values, type: "next" })}>
         {({ values, handleChange, handleSubmit, errors, touched, validateField, setFieldValue }) => {
           useEffect(() => {
             if (values.phone) validateField("phone");
@@ -711,7 +712,7 @@ export default function StepCoordonnees() {
                   <ErrorMessage errors={errors} touched={touched} name="situation" />
                 </Col>
               </FormRow>
-              <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
+              <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} save={onSubmit} />
             </>
           );
         }}
