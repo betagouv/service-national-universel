@@ -85,11 +85,14 @@ export default function Details({ center, sessions }) {
                 <div className="detail" key={session.cohort}>
                   <div>
                     <div className="detail-title-first">{session.cohort}&nbsp;:</div>
-                    {session.status ?
-                      <div className={`border text-xs rounded-full p-1 ${session.status === "DRAFT" ? ("border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] ") : ("border-[#A4D8BC]  bg-[#F5FCF3] text-[#27AF66]")}`}>
+                    {session.status ? (
+                      <div
+                        className={`flex border text-xs rounded-full p-1 items-center justify-center ${
+                          session.status === "DRAFT" ? "border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] " : "border-[#A4D8BC]  bg-[#F5FCF3] text-[#27AF66]"
+                        }`}>
                         {translateSessionStatus(session.status)}
                       </div>
-                      : null}
+                    ) : null}
                   </div>
                   <div className="detail-text">{session.placesTotal} places</div>
                 </div>
