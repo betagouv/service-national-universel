@@ -41,7 +41,7 @@ export default function Rules({ isOpen, onCancel, correction }) {
                   </p>
                 </div>
               </section>
-              {young.rulesFiles && young.rulesFiles.length && !correction ? (
+              {young.rulesFiles && young.rulesFiles.length ? (
                 <>
                   <SuccessMessage>
                     <Logo>

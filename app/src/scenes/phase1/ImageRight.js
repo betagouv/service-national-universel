@@ -45,7 +45,7 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                   </p>
                 </div>
               </section>
-              {young.imageRightFiles && young.imageRightFiles.length && !correction ? (
+              {young.imageRightFiles && young.imageRightFiles.length ? (
                 <>
                   <SuccessMessage>
                     <Logo>
@@ -56,7 +56,7 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                     Vous avez bien renseigné le document
                   </SuccessMessage>
                   {!showFields && (
-                    <div style={{ display: "flex", justifyContent: "center" }}>
+                    <div className="flex, justify-center text-center">
                       <VioletButton onClick={() => setShowFields(true)}>Modifier</VioletButton>
                     </div>
                   )}

@@ -50,7 +50,7 @@ export default function AutoTest({ isOpen, onCancel, correction }) {
                   </p>
                 </div>
               </section>
-              {young.autoTestPCRFiles && young.autoTestPCRFiles.length && !correction ? (
+              {young.autoTestPCRFiles && young.autoTestPCRFiles.length ? (
                 <>
                   <SuccessMessage>
                     <Logo>
