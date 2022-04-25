@@ -9,11 +9,10 @@ import { useSelector } from "react-redux";
 import { translate, translateSessionStatus, SESSION_STATUS } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
-import Select from "./components/Select";
+import { Box, BoxContent } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import AddressInput from "../../components/addressInputVCenter";
-import MultiSelect from "../../components/Multiselect";
+import MultiSelect from "./components/MultiselectSejour";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import { BiHandicap } from 'react-icons/bi';
 
@@ -159,32 +158,33 @@ export default function Edit(props) {
               </Col>
               <Col className="mb-10 w-1/2">
                 <Box>
-                  <BoxHeadTitle>Par séjour</BoxHeadTitle>
-                  <BoxContent direction="column">
-                    <MultiSelectWithTitle
-                      required
-                      errors={errors}
-                      touched={touched}
-                      title="Séjour(s) de cohésion concerné(s)"
-                      value={values.cohorts}
-                      onChange={handleChange}
-                      name="cohorts"
-                      options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
-                      placeholder="Sélectionner un ou plusieurs séjour de cohésion"
-                    />
-                  </BoxContent>
+                  <div className=" pl-4 pt-4 pr-4 bg-white">
+                    <div className=" flex justify-between mb-4" >
+                      <div className=" font-bold text-lg ">Par séjour</div>
+                      <MultiSelectSejour
+                        required
+                        errors={errors}
+                        touched={touched}
+                        value={values.cohorts}
+                        onChange={handleChange}
+                        name="cohorts"
+                        options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
+                        placeholder="Ajouter un séjour"
+                      />
+                    </div>
+                  </div>
                   {values.cohorts?.length ? (
                     <>
-                      <div className="">
-                        <div className="flex justify-start border-bottom mb-2">
+                      <div >
+                        <div className=" border-bottom flex justify-around">
                           {(values.cohorts || []).map((cohort, index) => (
                             <>
-                              <div key={index} className={`mx-5 pb-2 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`} onClick={() => { setsessionShow(cohort) }}> {cohort} </div>
+                              <div key={index} className={`pb-2 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`} onClick={() => { setsessionShow(cohort) }}> {cohort} </div>
                             </>
                           ))}
                         </div>
                         {sessionShow ? (
-                          <div className="flex ml-5 mt-4 ">
+                          <div className="flex ml-4 mt-4  ">
                             <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
                               <ElementsSejour
                                 key={`${sessionShow}.Places`}
@@ -229,18 +229,13 @@ export default function Edit(props) {
     </Formik>
   );
 }
-const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder, required, errors, touched }) => {
+const MultiSelectSejour = ({ value, onChange, name, options, placeholder, required, errors, touched }) => {
   return (
-    <Row className="detail">
-      <Col md={4}>
-        <label>{title}</label>
-      </Col>
-      <Col md={8}>
-        <Field hidden value={value} name={name} onChange={onChange} validate={(v) => required && !v?.length && requiredMessage} />
-        <MultiSelect value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} />
-        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
-      </Col>
-    </Row>
+    <div className="">
+      <Field hidden value={value} name={name} onChange={onChange} validate={(v) => required && !v?.length && requiredMessage} />
+      <MultiSelect value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} />
+      {errors && touched && <Error errors={errors} touched={touched} name={name} />}
+    </div>
   );
 };
 
@@ -258,7 +253,7 @@ const SelectStatus = ({ title, name, values, handleChange, disabled, options, re
   return (
     <div className="">
       <div className="text-gray-500 text-xs"> {title} </div>
-      <select disabled={disabled} name={name} value={values} onChange={handleChange} className="w-full">
+      <select disabled={disabled} name={name} value={values} onChange={handleChange} className="w-full bg-inherit">
         <option key={-1} value="" label=""></option>
         {options.map((o, i) => (
           <option key={i} value={o.value} label={o.label}>
@@ -279,7 +274,7 @@ const SelectPMR = ({ title, name, values, handleChange, disabled, options, requi
       </div>
       <div className="items-start ml-2 w-full">
         <div className="ml-1 text-xs"> {title} </div>
-        <select disabled={disabled} className="w-full" name={name} value={values} onChange={handleChange}>
+        <select disabled={disabled} className="w-full bg-inherit" name={name} value={values} onChange={handleChange}>
           <option key={-1} value="" label=""></option>
           {options.map((o, i) => (
             <option key={i} value={o.value} label={o.label}>
