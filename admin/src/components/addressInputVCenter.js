@@ -10,7 +10,7 @@ countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
 // eslint-disable-next-line prettier/prettier
-export default function AddressInputV2({
+export default function addressInputVCenter({
   keys,
   values,
   handleChange,
@@ -123,13 +123,12 @@ export default function AddressInputV2({
       {suggestion.status !== "FOUND" ? (
         <Row>
           {countryVisible && (
-            <Col md={12}>
+            <Col className="w-full">
               <Label>Pays</Label>
               <Field
                 disabled={disabled}
                 as="select"
                 validate={(v) => required && !v && requiredMessage}
-                className="form-control"
                 placeholder="Pays"
                 name={keys.country}
                 value={values[keys.country]}
@@ -152,12 +151,13 @@ export default function AddressInputV2({
               <ErrorMessage errors={errors} touched={touched} name={keys.country} />
             </Col>
           )}
-          <Col md={12} style={{ marginTop: countryVisible ? 15 : 0 }}>
-            <Label>Adresse</Label>
+          <Row className="flex border w-full flex-col justify-items-start mx-3 my-1 rounded-lg rounded-grey-300 p-2">
+            <div className="text-gray-500 text-xs">
+              <label>Adresse</label>
+            </div>
             <Field
               disabled={disabled}
               validate={(v) => required && !v && requiredMessage}
-              className="form-control"
               placeholder="Adresse"
               name={keys.address}
               value={values[keys.address]}
@@ -167,55 +167,59 @@ export default function AddressInputV2({
                 addressVerifiedHelpers.setValue("false");
               }}
             />
-            <ErrorMessage errors={errors} touched={touched} name={keys.address} />
-          </Col>
-          <Col md={6} style={{ marginTop: 15 }}>
-            <Label>Code postal</Label>
-            <Field
-              disabled={disabled}
-              validate={(v) => required && !v && requiredMessage}
-              className="form-control"
-              placeholder="Code postal"
-              name={keys.zip}
-              value={values[keys.zip]}
-              onChange={(e) => {
-                const value = e.target.value;
-                handleChange({ target: { name: keys.zip, value } });
-                addressVerifiedHelpers.setValue("false");
-              }}
-            />
-            <ErrorMessage errors={errors} touched={touched} name={keys.zip} />
-          </Col>
-          <Col md={6} style={{ marginTop: 15 }}>
-            <Label>Ville</Label>
-            <Field
-              disabled={disabled}
-              validate={(v) => required && !v && requiredMessage}
-              className="form-control"
-              placeholder="Ville"
-              name={keys.city}
-              value={values[keys.city]}
-              onChange={(e) => {
-                const value = e.target.value;
-                handleChange({ target: { name: keys.city, value } });
-                addressVerifiedHelpers.setValue("false");
-              }}
-            />
-            <ErrorMessage errors={errors} touched={touched} name={keys.city} />
-          </Col>
+          </Row>
+          <div className="flex w-full">
+            <div className="w-1/2 flex border flex-col justify-items-start ml-3 my-1 rounded-lg rounded-grey-300 p-2">
+              <div className="text-gray-500 text-xs">
+                <label>Code postal</label>
+              </div>
+              <Field
+                disabled={disabled}
+                validate={(v) => required && !v && requiredMessage}
+                placeholder="Code postal"
+                name={keys.zip}
+                value={values[keys.zip]}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleChange({ target: { name: keys.zip, value } });
+                  addressVerifiedHelpers.setValue("false");
+                }}
+              />
+              <ErrorMessage errors={errors} touched={touched} name={keys.zip} />
+            </div>
+            <div className="w-1/2 flex border flex-col justify-items-start ml-2 mr-3 my-1 rounded-lg rounded-grey-300 p-2">
+              <div className="text-gray-500 text-xs">
+                <label>Ville</label>
+              </div>
+              <Field
+                disabled={disabled}
+                validate={(v) => required && !v && requiredMessage}
+                placeholder="Ville"
+                name={keys.city}
+                value={values[keys.city]}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleChange({ target: { name: keys.city, value } });
+                  addressVerifiedHelpers.setValue("false");
+                }}
+              />
+              <ErrorMessage errors={errors} touched={touched} name={keys.city} />
+            </div>
+          </div>
           {departAndRegionVisible ? (
-            <>
-              <Col md={6} style={{ marginTop: 15 }}>
-                <Label>Département</Label>
+            <div className=" flex w-full ">
+              <div className=" bg-gray-200 flex border flex-col ml-3 my-1 rounded-lg rounded-grey-300 p-2 w-full">
+                <div className=" text-gray-500 text-xs">
+                  <label>Département</label>
+                </div>
                 <Field
                   as="select"
                   validate={(v) => !v && requiredMessage}
                   disabled
-                  className="form-control"
                   placeholder="Département"
+                  className="w-full bg-gray-200"
                   name={keys.department}
                   value={values[keys.department]}>
-                  <option label=""></option>
                   {departmentList.map((d) => (
                     <option key={d} value={d}>
                       {d}
@@ -223,11 +227,12 @@ export default function AddressInputV2({
                   ))}
                 </Field>
                 <ErrorMessage errors={errors} touched={touched} name={keys.department} />
-              </Col>
-              <Col md={6} style={{ marginTop: 15 }}>
-                <Label>Région</Label>
-                <Field as="select" validate={(v) => !v && requiredMessage} disabled className="form-control" placeholder="Région" name={keys.region} value={values[keys.region]}>
-                  <option label=""></option>
+              </div>
+              <div className="bg-gray-200 flex border flex-col ml-2 mr-3 my-1 rounded-lg rounded-grey-300 p-2 w-full">
+                <div className="text-gray-500 text-xs">
+                  <label>Région</label>
+                </div>
+                <Field as="select" validate={(v) => !v && requiredMessage} disabled placeholder="Région" name={keys.region} value={values[keys.region]} className="w-full bg-gray-200">
                   {regionList.map((r) => (
                     <option key={r} value={r}>
                       {r}
@@ -235,8 +240,8 @@ export default function AddressInputV2({
                   ))}
                 </Field>
                 <ErrorMessage errors={errors} touched={touched} name={keys.region} />
-              </Col>
-            </>
+              </div>
+            </div>
           ) : null}
           {addressInFrance ? (
             <>
@@ -276,8 +281,9 @@ export default function AddressInputV2({
             <ErrorMessage errors={errors} touched={touched} name="addressVerified" />
           </Col>
         </Row>
-      )}
-    </Wrapper>
+      )
+      }
+    </Wrapper >
   );
 }
 

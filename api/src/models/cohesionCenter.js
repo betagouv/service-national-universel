@@ -120,6 +120,13 @@ const Schema = new mongoose.Schema({
       description: "Liste des cohortes concernées par ce centre de cohésion",
     },
   },
+  sessionStatus: {
+    type: String,
+    enum: ["VALIDATED", "DRAFT"],
+    documentation: {
+      description: "Status de la globalite des cohortes d'un centre ",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

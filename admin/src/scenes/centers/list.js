@@ -7,7 +7,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../utils";
 import VioletButton from "../../components/buttons/VioletButton";
 import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
@@ -17,7 +17,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 
-const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION"];
+const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUT"];
 
 export default function List() {
   const [center, setCenter] = useState(null);
@@ -210,7 +210,14 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
       <td>
         {sessionsPhase1.map((sessionPhase1) => (
           <SubTd key={sessionPhase1._id}>
-            <Badge text={sessionPhase1._source.cohort} />
+            <div className="flex items-center">
+              <Badge text={sessionPhase1._source.cohort} />
+              {sessionPhase1._source.status ?
+                <div className={`border text-xs rounded-full p-1 ${sessionPhase1._source.status === "DRAFT" ? ("border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] ") : ("border-[#A4D8BC]  bg-[#F5FCF3] text-[#27AF66]")}`}>
+                  {translateSessionStatus(sessionPhase1._source.status)}
+                </div>
+                : null}
+            </div>
           </SubTd>
         ))}
       </td>
