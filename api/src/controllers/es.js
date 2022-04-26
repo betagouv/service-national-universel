@@ -476,7 +476,9 @@ router.post("/sessionphase1/:action(_msearch|export)", passport.authenticate(["r
     const { user, body } = req;
     let filter = [];
 
-    if (!canSearchSessionPhase1(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    console.log(user.role);
+
+    if (!canSearchSessionPhase1(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
       const response = await allRecords("sessionphase1", applyFilterOnQuery(req.body.query, filter));
