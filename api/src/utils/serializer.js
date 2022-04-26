@@ -74,6 +74,7 @@ function serializeReferent(referent) {
       delete ret.forgotPasswordResetExpires;
       delete ret.invitationToken;
       delete ret.invitationExpires;
+      delete ret.loginAttempts;
       delete ret.__v;
       return ret;
     },

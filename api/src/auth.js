@@ -23,10 +23,18 @@ class Auth {
     try {
       const user = await this.model.findOne({ email });
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      if (user.loginAttempts > 15) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
 
       const match = config.ENVIRONMENT === "development" || (await user.comparePassword(password));
-      if (!match) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      if (!match) {
+        const loginAttempts = (user.loginAttempts || 0) + 1;
+        user.set({ loginAttempts });
+        await user.save();
 
+        return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      }
+
+      user.set({ loginAttempts: 0 });
       user.set({ lastLoginAt: Date.now() });
       await user.save();
 
