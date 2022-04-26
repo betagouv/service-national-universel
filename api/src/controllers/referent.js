@@ -52,6 +52,7 @@ const {
   canInviteUser,
   canDeleteReferent,
   canViewReferent,
+  canViewYoung,
   SUB_ROLES,
   ROLES,
   canUpdateReferent,
@@ -59,6 +60,7 @@ const {
   canSigninAs,
   canGetReferentByEmail,
   canEditYoung,
+  canViewYoungFile,
 } = require("snu-lib/roles");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
@@ -521,7 +523,7 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
   }
 });
 
-//todo: refactor
+// Todo: refactor
 // get /young/:id/file/:key/:filename accessible only by ref or themself
 router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -535,6 +537,11 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { youngId, key, fileName } = value;
+
+    const young = await YoungModel.findById(youngId);
+    if (!young) return res.status(404).send({ ok: false });
+    if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
@@ -695,6 +702,7 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!canViewYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await YoungModel.findById(value.id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const applicationsFromDb = await ApplicationModel.find({ youngId: data._id });

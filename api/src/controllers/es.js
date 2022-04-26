@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchAssociation, canSearchSessionPhase1 } = require("snu-lib/roles");
+const { ROLES, canSearchAssociation, canSearchSessionPhase1, canViewMeetingPoints } = require("snu-lib/roles");
 const { PHASE1_HEADCENTER_ACCESS_LIMIT, COHORTS } = require("snu-lib/constants");
 const { region2department } = require("snu-lib/region-and-departments");
 const { capture } = require("../sentry");
@@ -495,9 +495,7 @@ router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["re
   try {
     const { user, body } = req;
 
-    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!canViewMeetingPoints(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
       const response = await allRecords("meetingpoint", req.body.query);
