@@ -1,41 +1,40 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { Col, Row } from "reactstrap";
-import { Field, Formik } from "formik";
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { Field, Formik } from "formik";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory, Link } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
+import { Link, useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
-import useDocumentTitle from "../../hooks/useDocumentTitle";
-
+import { Col, Row } from "reactstrap";
+import styled from "styled-components";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import DateInput from "../../components/dateInput";
-import {
-  departmentList,
-  regionList,
-  department2region,
-  translate,
-  ROLES,
-  VISITOR_SUBROLES,
-  REFERENT_DEPARTMENT_SUBROLE,
-  REFERENT_REGION_SUBROLE,
-  colors,
-  canUpdateReferent,
-  canDeleteReferent,
-} from "../../utils";
-import api from "../../services/api";
-import { toastr } from "react-redux-toastr";
-import Loader from "../../components/Loader";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
-import { setUser as ReduxSetUser } from "../../redux/auth/actions";
+import DateInput from "../../components/dateInput";
+import { requiredMessage } from "../../components/errorMessage";
+import Loader from "../../components/Loader";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 import Emails from "../../components/views/Emails";
 import HistoricComponent from "../../components/views/Historic";
-import ModalConfirm from "../../components/modals/ModalConfirm";
-import { requiredMessage } from "../../components/errorMessage";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { setUser as ReduxSetUser } from "../../redux/auth/actions";
+import api from "../../services/api";
 import plausibleEvent from "../../services/pausible";
+import {
+  canDeleteReferent,
+  canUpdateReferent,
+  colors,
+  department2region,
+  departmentList,
+  REFERENT_DEPARTMENT_SUBROLE,
+  REFERENT_REGION_SUBROLE,
+  regionList,
+  ROLES,
+  translate,
+  VISITOR_SUBROLES,
+} from "../../utils";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Utilisateurs");
@@ -346,89 +345,7 @@ export default function Edit(props) {
       {canDeleteReferent({ actor: currentUser, originalTarget: user }) ? (
         <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn>
       ) : null}
-      {canUpdateReferent({ actor: currentUser, originalTarget: user }) && user.role === ROLES.REFERENT_DEPARTMENT && (
-        <>
-          <Formik
-            initialValues={service || { department: user.department }}
-            onSubmit={async (values) => {
-              try {
-                const { ok, code, data } = await api.post(`/department-service`, values);
-                if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-                setService(data);
-                toastr.success("Service departemental mis à jour !");
-              } catch (e) {
-                console.log(e);
-                toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-              }
-            }}>
-            {({ values, handleChange, handleSubmit, isSubmitting }) => (
-              <>
-                <TitleWrapper>
-                  <div>
-                    <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
-                  </div>
-                </TitleWrapper>
-                <Row>
-                  <Col md={6} style={{ marginBottom: "20px" }}>
-                    <Box>
-                      <BoxHeadTitle>{`Service Départemental`}</BoxHeadTitle>
-                      <BoxContent direction="column">
-                        <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
-                        <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
-                        <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
-                        <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
-                        <Item title="Ville" values={values} name="city" handleChange={handleChange} />
-                      </BoxContent>
-                      <div style={{ display: "flex", justifyContent: "flex-end", padding: "0 2rem" }}>
-                        <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                          Enregistrer
-                        </SaveBtn>
-                      </div>
-                    </Box>
-                  </Col>
-                </Row>
-              </>
-            )}
-          </Formik>
-          <Row>
-            {["Février 2022", "Juin 2022", "Juillet 2022", "2021"].map((cohort) => (
-              <Formik
-                key={`contact-${cohort}`}
-                initialValues={service?.contacts?.find((e) => e.cohort === cohort) || {}}
-                onSubmit={async (values) => {
-                  try {
-                    // return console.log("✍️ ~ values", values);
-                    const { ok, code, data } = await api.post(`/department-service/${service._id}/cohort/${cohort}/contact`, { ...values, cohort });
-                    if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-                    setService(data);
-                    toastr.success("Service departemental mis à jour !");
-                  } catch (e) {
-                    console.log(e);
-                    toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-                  }
-                }}>
-                {({ values, handleChange, handleSubmit, isSubmitting }) => (
-                  <Col md={6} style={{ marginBottom: "20px" }}>
-                    <Box>
-                      <BoxHeadTitle>Contacts convocation ({cohort})</BoxHeadTitle>
-                      <BoxContent direction="column">
-                        <Item title="Nom du Contact" values={values} name="contactName" handleChange={handleChange} />
-                        <Item title="Tel." values={values} name="contactPhone" handleChange={handleChange} />
-                        <Item title="Email" values={values} name="contactMail" handleChange={handleChange} />
-                      </BoxContent>
-                      <div style={{ display: "flex", justifyContent: "flex-end", padding: "0 2rem" }}>
-                        <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                          Enregistrer
-                        </SaveBtn>
-                      </div>
-                    </Box>
-                  </Col>
-                )}
-              </Formik>
-            ))}
-          </Row>
-        </>
-      )}
+
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}

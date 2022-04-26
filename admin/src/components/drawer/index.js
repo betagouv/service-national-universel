@@ -125,10 +125,10 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
 function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
   return (
     <>
+      <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} />
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
-      <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} beta />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
