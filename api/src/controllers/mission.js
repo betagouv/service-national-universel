@@ -10,15 +10,16 @@ const UserObject = require("../models/referent");
 const ApplicationObject = require("../models/application");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
+// eslint-disable-next-line no-unused-vars
 const { ERRORS, isYoung, updateApplicationsWithYoungOrMission, updateApplication } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
-const { canModifyMission, ROLES } = require("snu-lib/roles");
-const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib/constants");
+const { canModifyMission } = require("snu-lib/roles");
+const { MISSION_STATUS } = require("snu-lib/constants");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { APP_URL, ADMIN_URL } = require("../config");
+const { ADMIN_URL } = require("../config");
 
 const putLocation = async (city, zip) => {
   // try with municipality = city + zip
@@ -233,7 +234,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     const { error: errorStructureId, value: checkedStructureId } = validateId(req.params.structureId);
-    if (errorId || errorStructureId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+    if (errorId || errorStructureId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const structure = await StructureObject.findById(checkedStructureId);
     const mission = await MissionObject.findById(checkedId);
