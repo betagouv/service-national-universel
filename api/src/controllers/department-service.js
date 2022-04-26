@@ -33,50 +33,6 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
       contactName: Joi.string().allow(null, ""),
       contactPhone: Joi.string().allow(null, ""),
       contactMail: Joi.string().allow(null, ""),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const departmentService = await DepartmentServiceModel.findById(value.id);
-    if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const newContact = {
-      cohort: value.cohort,
-      contactName: value.contactName,
-      contactPhone: value.contactPhone,
-      contactMail: value.contactMail,
-    };
-
-    // checking if the contact for this cohort already exists...
-    const alreadyExist = departmentService.contacts.find((c) => c.cohort === value.cohort);
-    let contacts = [...departmentService.contacts];
-    if (!alreadyExist) {
-      //... if not, we add it
-      contacts.push(newContact);
-    } else {
-      //... if yes, we update it
-      contacts = departmentService.contacts.map((c) => {
-        if (value.cohort !== c.cohort) return c;
-        return newContact;
-      });
-    }
-    const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { contacts }, { new: true, upsert: true, useFindAndModify: false });
-    return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData, req.user) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/:id/cohort/:cohort/contact/new", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      cohort: Joi.string().required(),
-      contactName: Joi.string().allow(null, ""),
-      contactPhone: Joi.string().allow(null, ""),
-      contactMail: Joi.string().allow(null, ""),
       contactId: Joi.string().allow(null, ""),
     })
       .unknown()

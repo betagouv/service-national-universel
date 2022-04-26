@@ -160,7 +160,7 @@ const Home = () => {
             <RestrictedRoute path="/boite-de-reception" component={Inbox} />
             <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
-            {environment !== "production" ? <RestrictedRoute path="/equipe" component={Team} /> : null}
+            <RestrictedRoute path="/equipe" component={Team} />
             <RestrictedRoute path="/" component={renderDashboard} />
           </Switch>
         </div>
