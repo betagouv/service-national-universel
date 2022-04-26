@@ -1,3 +1,18 @@
+# [1.76.0](https://github.com/betagouv/service-national-universel/compare/v1.75.0...v1.76.0) (2022-04-26)
+
+
+### Bug Fixes
+
+* close inscription access juin 2022 ([150d0b1](https://github.com/betagouv/service-national-universel/commit/150d0b110adf7c7b6beaa5c1dbc7c6936342dbd0))
+* **admin:** Filtres volontaire : Champs “Non Renseigné” [#1512](https://github.com/betagouv/service-national-universel/issues/1512) ([3790085](https://github.com/betagouv/service-national-universel/commit/3790085136f74dd2ef5635fb0454b4346abdc424))
+* rules deleteReferent ([aec8bea](https://github.com/betagouv/service-national-universel/commit/aec8beacc7602a4effdacc1c4ca940c4e903bbd3))
+
+
+### Features
+
+* **admit:** Ajout statut session ([#1496](https://github.com/betagouv/service-national-universel/issues/1496)) ([fe645bd](https://github.com/betagouv/service-national-universel/commit/fe645bd811b6ec7927a389abf8c001adc23d57c5))
+* **api:** limit login attempts ([#1506](https://github.com/betagouv/service-national-universel/issues/1506)) ([f0a7131](https://github.com/betagouv/service-national-universel/commit/f0a7131081cb9af3148025a4ef533af28d61b654))
+
 # [1.75.0](https://github.com/betagouv/service-national-universel/compare/v1.74.0...v1.75.0) (2022-04-25)
 
 
