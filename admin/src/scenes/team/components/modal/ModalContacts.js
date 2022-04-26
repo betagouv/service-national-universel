@@ -86,7 +86,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         contactId: edit.contactId,
       };
 
-      const { ok } = await api.post(`/department-service/${idServiceDep}/cohort/${currentTab}/contact/new`, value);
+      const { ok } = await api.post(`/department-service/${idServiceDep}/cohort/${currentTab}/contact`, value);
       if (!ok) {
         resetState();
         return toastr.error("Une erreur s'est produite lors de la sauvegarde du contact");
