@@ -7,7 +7,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus, COHORTS } from "../../utils";
 import VioletButton from "../../components/buttons/VioletButton";
 import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
@@ -17,7 +17,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 
-const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUT"];
+const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS"];
 
 export default function List() {
   const [center, setCenter] = useState(null);
@@ -29,6 +29,7 @@ export default function List() {
 
   // list of cohorts selected, used for filtering the sessionPhase1 displayed inline
   const [filterCohorts, setFilterConhorts] = useState([]);
+  const [filterSessionStatus, setfilterSessionStatus] = useState([]);
 
   const user = useSelector((state) => state.Auth.user);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
@@ -69,12 +70,25 @@ export default function List() {
                 react={{ and: FILTERS }}
                 transform={(all) => {
                   return all.map((data) => {
+                    let tempContact = {}
+                    COHORTS.forEach((cohort) => {
+                      tempContact[`${cohort} statut`] = ""
+                      data.cohorts.map((e, index) => {
+                        if (e === cohort) {
+                          tempContact[`${cohort} statut`] = data.sessionStatus[index] || "";
+                        }
+                      }
+                      )
+                    });
+                    console.log(tempContact)
+
                     return {
                       Nom: data.name,
                       id: data._id,
                       "Code (2021)": data.code,
                       "Code (2022)": data.code2022,
                       "Cohorte(s)": data.cohorts?.join(", "),
+                      "Cohorte(s) statut": data.cohorts?.join(", "),
                       COR: data.COR,
                       "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
                       Adresse: data.address,
@@ -89,6 +103,7 @@ export default function List() {
                       Observations: data.observations,
                       "Créé lé": formatLongDateFR(data.createdAt),
                       "Mis à jour le": formatLongDateFR(data.updatedAt),
+                      ...tempContact,
                     };
                   });
                 }}
@@ -149,6 +164,21 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="STATUS"
+                  dataField="sessionStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
+                  onValueChange={setfilterSessionStatus}
+                />
                 <DeleteFilters />
               </FilterRow>
             </Filter>
@@ -175,7 +205,7 @@ export default function List() {
                           key={hit._id}
                           hit={hit}
                           sessionsPhase1={sessionsPhase1
-                            .filter((e) => e?._source?.cohesionCenterId === hit._id && (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)))
+                            .filter((e) => e?._source?.cohesionCenterId === hit._id && (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)) && (!filterSessionStatus.length || filterSessionStatus.includes(e?._source?.status)))
                             .map((e) => e)}
                           onClick={() => setCenter(hit)}
                           selected={center?._id === hit._id}
@@ -195,6 +225,7 @@ export default function List() {
 }
 
 const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
+
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>

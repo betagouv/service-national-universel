@@ -69,6 +69,7 @@ export default function Edit(props) {
     }
   };
 
+
   if (!defaultValue && !isNew) return <Loader />;
 
   return (
@@ -84,8 +85,13 @@ export default function Edit(props) {
           }
           else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
 
+          const sessionStatus = []
+          values.cohorts.map(e => sessionStatus.push(values[e].status))
+          values.sessionStatus = sessionStatus
+
           const { ok, code, data } = values._id ? await api.put(`/cohesion-center/${values._id}`, values) : await api.post("/cohesion-center", values);
           await updateSessions(values);
+
 
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));
@@ -153,7 +159,6 @@ export default function Edit(props) {
                       errors={errors}
                       touched={touched}
                     />
-
 
                   </BoxContent>
                 </Box>
