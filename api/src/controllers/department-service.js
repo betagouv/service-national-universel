@@ -69,12 +69,59 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
   }
 });
 
-router.delete("/:id/cohort/:cohort/contact/:contactMail", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/cohort/:cohort/contact/new", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       cohort: Joi.string().required(),
-      contactMail: Joi.string().required(),
+      contactName: Joi.string().allow(null, ""),
+      contactPhone: Joi.string().allow(null, ""),
+      contactMail: Joi.string().allow(null, ""),
+      contactId: Joi.string().allow(null, ""),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const departmentService = await DepartmentServiceModel.findById(value.id);
+    if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const newContact = {
+      cohort: value.cohort,
+      contactName: value.contactName,
+      contactPhone: value.contactPhone,
+      contactMail: value.contactMail,
+    };
+
+    let contacts = [...departmentService.contacts];
+
+    const contactIndex = contacts.findIndex((contact) => contact._id.toString() === value.contactId);
+    const alreadyExist = contactIndex !== -1;
+    if (!alreadyExist) {
+      // checking if the contact for this cohort already exists...
+      if (contacts.filter((c) => c.cohort === value.cohort).length > 3) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      //... if not, we add it
+      contacts.push(newContact);
+    } else {
+      //... if yes, we update it
+      contacts[contactIndex] = newContact;
+    }
+    const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { contacts }, { new: true, upsert: true, useFindAndModify: false });
+    return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData, req.user) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      cohort: Joi.string().required(),
+      contactId: Joi.string().required(),
     }).validate(req.params);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -84,7 +131,10 @@ router.delete("/:id/cohort/:cohort/contact/:contactMail", passport.authenticate(
     // checking if the contact for this cohort already exists...
     let contacts = [...departmentService.contacts];
 
-    contacts = contacts.filter((contact) => contact.contactMail !== value.contactMail);
+    const exist = contacts.findIndex((contact) => contact._id.toString() === value.contactId);
+    if (exist === -1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    contacts = contacts.filter((contact) => contact._id.toString() !== value.contactId);
 
     const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { contacts }, { new: true, upsert: true, useFindAndModify: false });
     return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData, req.user) });

@@ -41,7 +41,7 @@ const signinLimiter = rateLimit({
 });
 
 function sanitizeAll(text) {
-  return sanitizeHtml(text || "", { allowedTags: [], allowedAttributes: {} });
+  return sanitizeHtml(text || "", { allowedTags: ["li", "br"], allowedAttributes: {} });
 }
 
 function getReq(url, cb) {
