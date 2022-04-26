@@ -1,8 +1,7 @@
 const esClient = require("../es");
 
 // Variables should be renamed to avoid confusion.
-async function* scrollSearch(params, es) {
-  const client = es || esClient;
+async function* scrollSearch(params, client) {
   let response = await client.search(params);
 
   while (true) {
@@ -29,7 +28,7 @@ async function* scrollSearch(params, es) {
 
 // Can get more than 10k results.
 // The es param is given to scroll function
-async function allRecords(index, query, es = null) {
+async function allRecords(index, query, client = esClient) {
   const params = {
     index,
     scroll: "1m",
@@ -39,7 +38,7 @@ async function allRecords(index, query, es = null) {
 
   const result = [];
 
-  for await (const hit of scrollSearch(params, es)) {
+  for await (const hit of scrollSearch(params, client)) {
     result.push({ _id: hit._id, ...hit._source });
   }
   return result;
