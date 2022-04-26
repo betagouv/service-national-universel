@@ -70,31 +70,20 @@ export default function Create() {
               let title = type?.label;
               if ([ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role)) title = messageSubject;
               if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
-              if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR || user.role === ROLES.HEAD_CENTER || user.role === ROLES.VISITOR) {
-                const { data, ok, code } = await api.post("/zammad-support-center/ticket", {
-                  title,
-                  message,
-                  tags: [...new Set([...computedTags])], // dirty hack to remove duplicates
-                });
-                if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
-                const response = await api.post("/zammood/ticket", {
-                  message,
-                  subject: title,
-                  clientId: data.id,
-                });
-                if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
-                toastr.success("Demande envoyée");
-                history.push("/besoin-d-aide");
-              } else {
-                const response = await api.post("/zammad-support-center/ticket", {
-                  title,
-                  message,
-                  tags: [...new Set([...computedTags])], // dirty hack to remove duplicates
-                });
-                if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
-                toastr.success("Demande envoyée");
-                history.push("/besoin-d-aide");
-              }
+              const { data, ok, code } = await api.post("/zammad-support-center/ticket", {
+                title,
+                message,
+                tags: [...new Set([...computedTags])], // dirty hack to remove duplicates
+              });
+              if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
+              const response = await api.post("/zammood/ticket", {
+                message,
+                subject: title,
+                clientId: data.id,
+              });
+              if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
+              toastr.success("Demande envoyée");
+              history.push("/besoin-d-aide");
             } catch (e) {
               console.log(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));

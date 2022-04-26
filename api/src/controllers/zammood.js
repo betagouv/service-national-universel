@@ -94,6 +94,19 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       if (req.user.role === ROLES.HEAD_CENTER) {
         userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
       }
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT || req.user.role === ROLES.REFERENT_REGION) {
+        userAttributes.push({
+          name: "lien vers équipe départementale",
+          value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${req.user.department}%22%5D&ROLE=%5B%22referent_department%22%5D`,
+        });
+        if (req.user.subRole) userAttributes.push({ name: "fonction", value: req.user.subRole });
+      }
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
+        userAttributes.push({
+          name: "lien vers équipe régionale",
+          value: `${ADMIN_URL}/user?REGION=%5B%22${req.user.region}%22%5D&ROLE=%5B%22referent_region%22%5D`,
+        });
+      }
     }
     const response = await zammood.api("/v0/message", {
       method: "POST",
@@ -223,6 +236,19 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
       }
       if (req.user.role === ROLES.HEAD_CENTER) {
         userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
+      }
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT || req.user.role === ROLES.REFERENT_REGION) {
+        userAttributes.push({
+          name: "lien vers équipe départementale",
+          value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${req.user.department}%22%5D&ROLE=%5B%22referent_department%22%5D`,
+        });
+        if (req.user.subRole) userAttributes.push({ name: "fonction", value: req.user.subRole });
+      }
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
+        userAttributes.push({
+          name: "lien vers équipe régionale",
+          value: `${ADMIN_URL}/user?REGION=%5B%22${req.user.region}%22%5D&ROLE=%5B%22referent_region%22%5D`,
+        });
       }
     }
     const response = await zammood.api("/v0/message", {
