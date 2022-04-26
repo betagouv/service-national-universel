@@ -1,18 +1,17 @@
+import { Field, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Formik, Field } from "formik";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import { VISITOR_SUBROLES } from "snu-lib/roles";
+import LoadingButton from "../../components/buttons/LoadingButton";
+import { requiredMessage } from "../../components/errorMessage";
+import Loader from "../../components/Loader";
+import PasswordEye from "../../components/PasswordEye";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import LoadingButton from "../../components/buttons/LoadingButton";
-import Loader from "../../components/Loader";
-import { requiredMessage } from "../../components/errorMessage";
-import { translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, getPasswordErrorMessage } from "../../utils";
-import PasswordEye from "../../components/PasswordEye";
-import { VISITOR_SUBROLES } from "snu-lib/roles";
+import { getPasswordErrorMessage, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate } from "../../utils";
 
 export default function Profil() {
   useDocumentTitle("Mon profil");
@@ -180,85 +179,6 @@ export default function Profil() {
           </Formik>
         </div>
       </div>
-      {user.role === ROLES.REFERENT_DEPARTMENT && (
-        <>
-          <Formik
-            initialValues={service || { department: user.department }}
-            onSubmit={async (values) => {
-              try {
-                const { ok, code, data } = await api.post(`/department-service`, values);
-                if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-                setService(data);
-                toastr.success("Service departemental mis à jour !");
-              } catch (e) {
-                console.log(e);
-                toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-              }
-            }}>
-            {({ values, handleChange, handleSubmit, isSubmitting }) => (
-              <>
-                <div className="my-10 flex items-center">
-                  <h2 className="text-2xl font-bold text-brand-black">Information du service départemental {values.department && `(${values.department})`}</h2>
-                </div>
-
-                <div className="rounded-md bg-white shadow-md">
-                  <div className="border-b border-gray-200 px-8 py-6">
-                    <h3 className="text-lg font-bold text-gray-800">Service Départemental</h3>
-                    <p className="italic text-gray-400">Données partagées par tous les référents de votre département</p>
-                  </div>
-                  <div className="flex flex-col gap-4 p-8">
-                    <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
-                    <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
-                    <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
-                    <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
-                    <Item title="Ville" values={values} name="city" handleChange={handleChange} />
-                    <LoadingButton className="w-full max-w-xs" loading={isSubmitting} onClick={handleSubmit}>
-                      Enregistrer
-                    </LoadingButton>
-                  </div>
-                </div>
-              </>
-            )}
-          </Formik>
-
-          <div className="mt-8 grid grid-cols-2 gap-8">
-            {["Février 2022", "Juin 2022", "Juillet 2022", "2021"].map((cohort) => (
-              <Formik
-                key={`contact-${cohort}`}
-                initialValues={service?.contacts?.find((e) => e.cohort === cohort) || {}}
-                onSubmit={async (values) => {
-                  try {
-                    // return console.log("✍️ ~ values", values);
-                    const { ok, code, data } = await api.post(`/department-service/${service._id}/cohort/${cohort}/contact`, { ...values, cohort });
-                    if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-                    setService(data);
-                    toastr.success("Service departemental mis à jour !");
-                  } catch (e) {
-                    console.log(e);
-                    toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-                  }
-                }}>
-                {({ values, handleChange, handleSubmit, isSubmitting }) => (
-                  <div className="rounded-md bg-white shadow-md">
-                    <div className="border-b border-gray-200 px-8 py-6">
-                      <h3 className="text-lg font-bold text-gray-800">Contacts convocation ({cohort})</h3>
-                    </div>
-                    <div className="flex flex-col gap-4 p-8">
-                      <Item title="Nom du Contact" values={values} name="contactName" handleChange={handleChange} />
-                      <Item title="Tel." values={values} name="contactPhone" handleChange={handleChange} />
-                      <Item title="Email" values={values} name="contactMail" handleChange={handleChange} />
-
-                      <LoadingButton className="w-full max-w-xs" loading={isSubmitting} onClick={handleSubmit}>
-                        Enregistrer
-                      </LoadingButton>
-                    </div>
-                  </div>
-                )}
-              </Formik>
-            ))}
-          </div>
-        </>
-      )}
     </div>
   );
 }
