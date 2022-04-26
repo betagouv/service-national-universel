@@ -30,7 +30,6 @@ class Auth {
         const loginAttempts = (user.loginAttempts || 0) + 1;
         user.set({ loginAttempts });
         await user.save();
-
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 

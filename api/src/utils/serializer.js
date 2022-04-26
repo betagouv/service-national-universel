@@ -56,6 +56,7 @@ function serializeYoung(young, user) {
       delete ret.invitationToken;
       delete ret.invitationExpires;
       delete ret.phase3Token;
+      delete ret.loginAttempts;
       delete ret.__v;
       if (isYoung(user)) {
         delete ret.qpv;
