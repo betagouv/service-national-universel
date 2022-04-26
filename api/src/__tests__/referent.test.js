@@ -187,7 +187,8 @@ describe("Referent", () => {
 
   describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
     it("should return 200 if file is found", async () => {
-      const res = await request(getAppHelper()).get("/referent/youngFile/1/key/test.pdf").send();
+      const young = await createYoungHelper(getNewYoungFixture());
+      const res = await request(getAppHelper()).get("/referent/youngFile/" + young._id + "/key/test.pdf").send();
       expect(res.statusCode).toEqual(200);
       expect(res.body.fileName).toEqual("test.pdf");
       expect(res.body.mimeType).toEqual("application/pdf");

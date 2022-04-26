@@ -561,7 +561,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
