@@ -514,21 +514,31 @@ router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["re
   }
 });
 
-router.post("/association/_msearch", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/association/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { body } = req;
     const options = {
       node: `https://${API_ASSOCIATION_ES_ENDPOINT}`,
     };
     const es = new (require("@elastic/elasticsearch").Client)(options);
-    let { body: response } = await es.msearch({ index: "association", body });
 
-    return res.status(200).send(
-      serializeHits(response, (hit) => {
+    const serializeResponse = (response) => {
+      return serializeHits(response, (hit) => {
         if (hit.logo) hit.logo = hit.logo && !hit.logo.startsWith("http") ? getSignedUrlForApiAssociation(hit.logo) : hit.logo;
         return hit;
-      }),
-    );
+      });
+    };
+
+    if (req.params.action === "export") {
+      const response = await allRecords("association", req.body.query, es);
+      return res.status(200).send({
+        ok: true,
+        data: serializeResponse(response),
+      });
+    } else {
+      let { body: response } = await es.msearch({ index: "association", body });
+      return res.status(200).send(serializeResponse(response));
+    }
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
