@@ -213,9 +213,10 @@ const Footer = ({ application, tutor, onChange }) => {
       const { data } = await api.put(`/application`, { _id: application._id, status });
       let template;
       if (status === APPLICATION_STATUS.ABANDON) template = SENDINBLUE_TEMPLATES.referent.ABANDON_APPLICATION;
-      if (status === APPLICATION_STATUS.CANCEL) template = SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION;
+      if (status === APPLICATION_STATUS.CANCEL) template = [SENDINBLUE_TEMPLATES.young.CANCEL_APPLICATION, SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION];
       if (status === APPLICATION_STATUS.WAITING_VALIDATION || status === APPLICATION_STATUS.WAITING_VERIFICATION) template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION;
-      if (template) await api.post(`/application/${application._id}/notify/${template}`);
+      if (template && !Array.isArray(template)) await api.post(`/application/${application._id}/notify/${template}`);
+      if (template && Array.isArray(template)) template.map(async (temp) => await api.post(`/application/${application._id}/notify/${temp}`));
 
       // if its a new application for a military preparation, we need to send a notification to the young to inform them that they need to upload their documents
       if (ENABLE_PM && application?.mission?.isMilitaryPreparation === "true" && status === APPLICATION_STATUS.WAITING_VERIFICATION) {
@@ -346,13 +347,6 @@ const Footer = ({ application, tutor, onChange }) => {
 
 const ContractInfoContainer = styled.div`
   display: flex;
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-  }
-`;
-
-const MinBadge = styled.span`
   margin-right: 0.5rem;
   width: 1rem;
   height: 1rem;

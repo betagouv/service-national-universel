@@ -195,6 +195,8 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}` };
     } else if (template === SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION) {
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+    } else if (template === SENDINBLUE_TEMPLATES.young.CANCEL_APPLICATION) {
+      emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
     } else if (template === SENDINBLUE_TEMPLATES.referent.ABANDON_APPLICATION) {
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
     } else if (template === SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION) {
