@@ -399,6 +399,10 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
         },
       });
     }
+    if (user.role === ROLES.VISITOR) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     if (req.params.action === "export") {
       const response = await allRecords("referent", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: serializeReferents(response) });

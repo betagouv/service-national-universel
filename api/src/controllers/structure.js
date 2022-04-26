@@ -7,7 +7,7 @@ const StructureObject = require("../models/structure");
 const MissionObject = require("../models/mission");
 const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils");
-const { ROLES, canModifyStructure, canDeleteStructure, canCreateStructure } = require("snu-lib/roles");
+const { ROLES, canModifyStructure, canDeleteStructure, canCreateStructure, canViewStructures, canViewStructureChildren } = require("snu-lib/roles");
 const patches = require("./patches");
 const { validateId, validateStructure } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
@@ -110,6 +110,8 @@ router.get("/:id/children", passport.authenticate("referent", { session: false, 
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    if (!canViewStructureChildren(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const structure = await StructureObject.findById(checkedId);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -143,6 +145,8 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    if (!canViewStructures(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const data = await StructureObject.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -155,6 +159,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 
 router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    if (!canViewStructures(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await StructureObject.find({});
     return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
   } catch (error) {
