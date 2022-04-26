@@ -27,7 +27,6 @@ const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
   validatePassword,
-  signinLimiter,
   ERRORS,
   inSevenDays,
   isYoung,
@@ -47,7 +46,7 @@ const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
 
-router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
+router.post("/signin", (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));

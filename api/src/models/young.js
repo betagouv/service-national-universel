@@ -254,6 +254,13 @@ const Schema = new mongoose.Schema({
       description: "Mot de passe du volontaire",
     },
   },
+  loginAttempts: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "tentative de connexion. Max 15",
+    },
+  },
   lastLoginAt: {
     type: Date,
     default: Date.now,
@@ -1429,7 +1436,7 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
-  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/phase3Token"],
+  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/phase3Token", "/loginAttempts"],
 });
 Schema.plugin(mongooseElastic(esClient, { ignore: ["historic"] }), MODELNAME);
 
