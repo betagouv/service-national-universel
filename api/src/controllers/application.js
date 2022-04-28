@@ -13,7 +13,7 @@ const { sendTemplate } = require("../sendinblue");
 const { ERRORS, isYoung, isReferent } = require("../utils");
 const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
-const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication } = require("snu-lib");
+const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications } = require("snu-lib");
 const { serializeApplication } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, getCcOfYoung } = require("../utils");
 
@@ -175,6 +175,14 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const data = await ApplicationObject.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const young = await YoungObject.findById(data.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canViewYoungApplications(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
@@ -188,6 +196,10 @@ router.post("/notify/docs-military-preparation/:template", passport.authenticate
 
   const toReferent = await getReferentManagerPhase2(req.user.department);
   if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  if (SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED !== template) {
+    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  }
 
   const mail = await sendTemplate(parseInt(template), {
     emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
@@ -220,6 +232,28 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
 
     if (isYoung(req.user) && req.user._id.toString() !== application.youngId) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // - admin can notify for all applications
+    // - referent can notify for applications of their department/region
+    // - responsible and supervisor can notify for applications of their structures
+    if (isReferent(req.user)) {
+      if (!canCreateYoungApplication(req.user, young)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      if (req.user.role === ROLES.RESPONSIBLE) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (application.structureId.toString() !== req.user.structureId.toString()) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
+      if (req.user.role === ROLES.SUPERVISOR) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+        if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
     }
 
     let template = defaultTemplate;
