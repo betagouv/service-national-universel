@@ -171,7 +171,7 @@ export default function List() {
                   dataField="sessionStatus.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translate(e)}`;
                   }}
                   title=""
                   URLParams={true}
