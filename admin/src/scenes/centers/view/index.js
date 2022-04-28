@@ -141,7 +141,6 @@ export default function Index({ ...props }) {
           center={center}
           user={user}
           cohorts={availableCohorts}
-          focusedCohort={focusedCohort}
           onChangeCohort={setFocusedCohort}
           onChangeTab={setFocusedTab}
           focusedSession={focusedSession}
