@@ -89,14 +89,14 @@ describe("Young", () => {
       expect(response.statusCode).toBe(404);
     });
   });
-  describe("PUT /young/inscription/coordonnee", () => {
+  describe("PUT /young/inscription/coordonnee/next", () => {
     async function selfUpdateYoung(body = {}, fields = {}) {
       const young = await createYoungHelper(getNewYoungFixture(fields));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
 
-      let response = await request(getAppHelper()).put("/young/inscription/coordonnee").send(body);
+      let response = await request(getAppHelper()).put("/young/inscription/coordonnee/next").send(body);
       updatedYoung = response.body.data;
       passport.user = previous;
 
@@ -239,7 +239,7 @@ describe("Young", () => {
       const foreign = getForeignFixture();
 
       const response = await request(getAppHelper())
-        .put("/young/inscription/coordonnee")
+        .put("/young/inscription/coordonnee/next")
         .send({
           ...base,
           livesInFrance: "true",
@@ -423,14 +423,14 @@ describe("Young", () => {
       expect(response.statusCode).toBe(404);
     });
   });
-  describe("PUT /young/inscription/particulieres", () => {
+  describe("PUT /young/inscription/particulieres/next", () => {
     async function selfUpdateYoung(body = {}, fields = {}) {
       const young = await createYoungHelper(getNewYoungFixture(fields));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
 
-      let response = await request(getAppHelper()).put("/young/inscription/particulieres").send(body);
+      let response = await request(getAppHelper()).put("/young/inscription/particulieres/next").send(body);
       updatedYoung = response.body.data;
       passport.user = previous;
 
@@ -529,7 +529,7 @@ describe("Young", () => {
     it("should return 404 if user don't exist", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email.toLowerCase();
-      const response = await request(getAppHelper()).put("/young/inscription/particulieres").send({
+      const response = await request(getAppHelper()).put("/young/inscription/particulieres/next").send({
         handicap: "true",
         ppsBeneficiary: "false",
         paiBeneficiary: "false",
@@ -544,14 +544,14 @@ describe("Young", () => {
       expect(response.statusCode).toBe(404);
     });
   });
-  describe("PUT /young/inscription/representant", () => {
+  describe("PUT /young/inscription/representant/next", () => {
     async function selfUpdateYoung(body = {}, fields = {}) {
       const young = await createYoungHelper(getNewYoungFixture(fields));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
 
-      let response = await request(getAppHelper()).put("/young/inscription/representant").send(body);
+      let response = await request(getAppHelper()).put("/young/inscription/representant/next").send(body);
       updatedYoung = response.body.data;
       passport.user = previous;
 
@@ -701,7 +701,7 @@ describe("Young", () => {
     });
     it("should return 404 if user don't exist", async () => {
       const response = await request(getAppHelper())
-        .put("/young/inscription/representant")
+        .put("/young/inscription/representant/next")
         .send({
           ...getParent1Fixture("false", "France"),
           parent2: true,
@@ -931,14 +931,14 @@ describe("Young", () => {
       expect(response2.statusCode).toBe(404);
     });
   });
-  describe("PUT /young/inscription/documents", () => {
+  describe("PUT /young/inscription/documents/next", () => {
     async function selfUpdateYoung(body = {}, fields = {}) {
       const young = await createYoungHelper(getNewYoungFixture(fields));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
 
-      const response = await request(getAppHelper()).put("/young/inscription/documents").send(body);
+      const response = await request(getAppHelper()).put("/young/inscription/documents/next").send(body);
       updatedYoung = response.body.data;
       passport.user = previous;
 
@@ -1033,14 +1033,14 @@ describe("Young", () => {
     });
     it("should return 404 if user don't exist", async () => {
       const response = await request(getAppHelper())
-        .put("/young/inscription/documents")
+        .put("/young/inscription/documents/next")
         .send({
           cniFiles: ["cniFiles.jpg"],
         });
       expect(response.statusCode).toBe(404);
 
       const response2 = await request(getAppHelper())
-        .put("/young/inscription/documents")
+        .put("/young/inscription/documents/next")
         .send({
           cniFiles: ["cniFiles.jpg"],
           parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
@@ -1048,7 +1048,7 @@ describe("Young", () => {
       expect(response2.statusCode).toBe(404);
 
       const response3 = await request(getAppHelper())
-        .put("/young/inscription/documents")
+        .put("/young/inscription/documents/next")
         .send({
           cniFiles: ["cniFiles.jpg"],
           parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
@@ -1057,7 +1057,7 @@ describe("Young", () => {
       expect(response3.statusCode).toBe(404);
     });
   });
-  describe.only("PUT /young/inscription/documents", () => {
+  describe("PUT /young/inscription/done", () => {
     async function selfUpdateYoung(body = {}, fields = {}) {
       const young = await createYoungHelper(getNewYoungFixture(fields));
       const passport = require("passport");

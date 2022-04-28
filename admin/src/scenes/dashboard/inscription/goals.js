@@ -76,7 +76,7 @@ export default function Goal({ filter }) {
 
     let dataMerged = [];
     for (const cohort of filter.cohort) {
-      const { data, ok, code } = await api.get("/inscription-goal/" + cohort);
+      const { data, ok } = await api.get("/inscription-goal/" + cohort);
       if (!ok) return toastr.error("Une erreur s'est produite.");
 
       data.forEach(

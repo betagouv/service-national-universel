@@ -59,13 +59,20 @@ const render = async (young) => {
     const bus = await BusModel.findById(meetingPoint?.busId);
     const service = await DepartmentServiceModel.findOne({ department: young?.department });
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
-    const contact = service?.contacts.find((c) => c.cohort === young.cohort) || {};
+    const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
 
     const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
     return html
-      .replace(/{{REFERENT_NAME}}/g, sanitizeAll(contact?.contactName))
-      .replace(/{{REFERENT_PHONE}}/g, sanitizeAll(contact?.contactPhone))
-      .replace(/{{REFERENT_MAIL}}/g, sanitizeAll(contact?.contactMail))
+      .replace(
+        /{{CONTACTS}}/g,
+        sanitizeAll(
+          contacts
+            .map((contact) => {
+              return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
+            })
+            .join(""),
+        ),
+      )
       .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
       .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
       .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))

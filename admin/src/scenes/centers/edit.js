@@ -159,7 +159,6 @@ export default function Edit(props) {
                       errors={errors}
                       touched={touched}
                     />
-
                   </BoxContent>
                 </Box>
               </Col>

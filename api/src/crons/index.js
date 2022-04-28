@@ -11,6 +11,7 @@ const applicationPending = require("./applicationPending");
 //const newMissionReminder = require("./newMissionReminder");
 const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
 const jeVeuxAiderDaily = require("./JeVeuxAiderDaily");
+const loginAttempts = require("./loginAttempts");
 
 // doubt ? -> https://crontab.guru/
 
@@ -83,5 +84,9 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule(everyHours(1), () => {
     computeGoalsInscription.handler();
+  });
+
+  cron.schedule(everyHours(1), () => {
+    loginAttempts.handler();
   });
 }

@@ -12,7 +12,6 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
-const rateLimit = require("express-rate-limit");
 const { APP_URL } = require("../config");
 const {
   CELLAR_ENDPOINT,
@@ -29,19 +28,8 @@ const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS,
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { getQPV, getDensity } = require("../geo");
 
-// Set the number of requests allowed to 15 in a 1 hour window
-const signinLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 15,
-  skipSuccessfulRequests: true,
-  message: {
-    ok: false,
-    code: "TOO_MANY_REQUESTS",
-  },
-});
-
 function sanitizeAll(text) {
-  return sanitizeHtml(text || "", { allowedTags: [], allowedAttributes: {} });
+  return sanitizeHtml(text || "", { allowedTags: ["li", "br"], allowedAttributes: {} });
 }
 
 function getReq(url, cb) {
@@ -645,7 +633,6 @@ module.exports = {
   sendAutoCancelMeetingPoint,
   listFiles,
   deleteFile,
-  signinLimiter,
   isYoung,
   isReferent,
   inSevenDays,

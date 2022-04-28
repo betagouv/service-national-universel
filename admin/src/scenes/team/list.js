@@ -99,8 +99,8 @@ export default function List() {
                           Prénom: data.firstName,
                           Nom: data.lastName,
                           Email: data.email,
-                          Rôle: data.role,
-                          Fonction: data.subRole,
+                          Rôle: translate(data.role),
+                          Fonction: translate(data.subRole),
                           Téléphone: data.phone,
                           Portable: data.mobile,
                           Département: data.department,
@@ -231,7 +231,7 @@ const Hit = ({ hit, onClick, user, selected, structure, setResponsable }) => {
   const displayActionButton = canUpdateReferent({ actor: user, originalTarget: hit, structure });
 
   return (
-    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
+    <tr style={{ backgroundColor: selected && "#F3F4F6" }} onClick={onClick} className="group">
       <td>
         <MultiLine>
           <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
@@ -295,18 +295,18 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
   return (
     <>
       <div className="flex flex-row items-center justify-between flex-wrap">
-        <div className="flex justify-center items-center h-8 w-8 bg-gray-100 text-gray-600 rounded-full hover:scale-105 shadow-sm " onClick={() => setResponsable(hit)}>
+        <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105" onClick={() => setResponsable(hit)}>
           <Eye width={18} height={18} />
         </div>
         {displayActionButton ? (
           <>
             <Link to={`/user/${hit._id}`}>
-              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 text-gray-600 rounded-full hover:scale-105 shadow-sm ">
+              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
                 <Pencil width={16} height={16} />
               </div>
             </Link>
             {canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? (
-              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 text-gray-600 rounded-full hover:scale-105 shadow-sm " onClick={onClickDelete}>
+              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105" onClick={onClickDelete}>
                 <Trash width={16} height={16} />
               </div>
             ) : null}
