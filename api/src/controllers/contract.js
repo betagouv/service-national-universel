@@ -279,11 +279,26 @@ router.post("/token/:token", async (req, res) => {
     });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (token === data.parent1Token) data.parent1Status = "VALIDATED";
-    if (token === data.parent2Token) data.parent2Status = "VALIDATED";
-    if (token === data.projectManagerToken) data.projectManagerStatus = "VALIDATED";
-    if (token === data.structureManagerToken) data.structureManagerStatus = "VALIDATED";
-    if (token === data.youngContractToken) data.youngContractStatus = "VALIDATED";
+    if (token === data.parent1Token) {
+      data.parent1Status = "VALIDATED";
+      data.parent1ValidationDate = new Date();
+    }
+    if (token === data.parent2Token) {
+      data.parent2Status = "VALIDATED";
+      data.parent2ValidationDate = new Date();
+    }
+    if (token === data.projectManagerToken) {
+      data.projectManagerStatus = "VALIDATED";
+      data.projectManagerValidationDate = new Date();
+    }
+    if (token === data.structureManagerToken) {
+      data.structureManagerStatus = "VALIDATED";
+      data.structureManagerValidationDate = new Date();
+    }
+    if (token === data.youngContractToken) {
+      data.youngContractStatus = "VALIDATED";
+      data.youngContractValidationDate = new Date();
+    }
 
     await data.save({ fromUser: req.user });
 

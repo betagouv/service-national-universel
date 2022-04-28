@@ -5,7 +5,7 @@ import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 import { appURL } from "../config";
 import { useSelector } from "react-redux";
-import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin, copyToClipboard } from "../utils";
+import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin, copyToClipboard, formatDateFR } from "../utils";
 import api from "../services/api";
 import DownloadAttestationButton from "./buttons/DownloadAttestationButton";
 import Loader from "./Loader";
@@ -48,6 +48,7 @@ export default function Contract({ young, admin }) {
       const currentApplication = data.find((e) => e._id === applicationId);
 
       if (currentApplication.contractId) {
+        console.log("contractId", currentApplication.contractId);
         ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
         if (!ok) return toastr.error("Oups, une erreur est survenue", code);
         setContract(data);
@@ -253,6 +254,7 @@ export default function Contract({ young, admin }) {
               token={contract?.projectManagerToken}
               lastName={contract?.projectManagerLastName}
               firstName={contract?.projectManagerFirstName}
+              validationDate={contract?.projectManagerValidationDate}
             />
             <ContractStatusBadge
               title="Représentant structure"
@@ -262,6 +264,7 @@ export default function Contract({ young, admin }) {
               token={contract?.structureManagerToken}
               lastName={contract?.structureManagerLastName}
               firstName={contract?.structureManagerFirstName}
+              validationDate={contract?.structureManagerValidationDate}
             />
             {!isYoungAdult ? (
               <>
@@ -273,6 +276,7 @@ export default function Contract({ young, admin }) {
                   token={contract?.parent1Token}
                   lastName={contract?.parent1LastName}
                   firstName={contract?.parent1FirstName}
+                  validationDate={contract?.parent1ValidationDate}
                 />
                 {young.parent2Email && (
                   <ContractStatusBadge
@@ -283,6 +287,7 @@ export default function Contract({ young, admin }) {
                     token={contract?.parent2Token}
                     lastName={contract?.parent2LastName}
                     firstName={contract?.parent2FirstName}
+                    validationDate={contract?.parent2ValidationDate}
                   />
                 )}
               </>
@@ -295,6 +300,7 @@ export default function Contract({ young, admin }) {
                 token={contract?.youngContractToken}
                 lastName={contract?.youngLastName}
                 firstName={contract?.youngFirstName}
+                validationDate={contract?.youngValidationDate}
               />
             )}
           </div>
@@ -861,14 +867,15 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
   );
 };
 
-function ContractStatusBadge({ title, lastName, firstName, ...rest }) {
+function ContractStatusBadge({ title, lastName, firstName, validationDate, ...rest }) {
   return (
-    <div style={{ textAlign: "center" }}>
+    <div style={{ textAlign: "center" }} className="pt-2">
       <div className="italic text-coolGray-500">{title}</div>
-      <div>
+      <div className="pb-2">
         {lastName} {firstName}
       </div>
       <ContractStatusbadgeItem {...rest} />
+      {validationDate && <div className="pt-2">{formatDateFR(validationDate)}</div>}
     </div>
   );
 }
@@ -920,7 +927,7 @@ function ContractStatusbadgeItem({ contract, status, token, target }) {
   else if (user.role !== ROLES.ADMIN) {
     return (
       <>
-        <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
+        <Badge className="pb-2" text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
         <br />
         <SendContractLink contract={contract} target={target} />
       </>
@@ -928,7 +935,7 @@ function ContractStatusbadgeItem({ contract, status, token, target }) {
   }
   return (
     <>
-      <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
+      <Badge className="pb-2" text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
       <br />
       <CopyLink
         onClick={() => {
