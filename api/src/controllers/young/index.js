@@ -391,39 +391,6 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
   }
 });
 
-router.post("/:id/archive", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-    })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const young = await YoungObject.findById(value.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const previousEmail = young.email;
-    young.set({
-      email: "reliquat-2021+" + young.email.replace("reliquat-2021+", ""),
-      lastName: "Reliquat 2021 " + young.lastName.replace("Reliquat 2021 ", ""),
-    });
-    await young.save({ fromUser: req.user });
-
-    let template = SENDINBLUE_TEMPLATES.young.ARCHIVED;
-    let cc = getCcOfYoung({ template, young });
-    await sendTemplate(template, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: previousEmail }],
-      params: { cta: `${config.APP_URL}/inscription/profil` },
-      cc,
-    });
-    return res.status(200).send({ ok: true, data: young });
-  } catch (error) {
-    capture(error);
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/:id/deplacementPhase1Autonomous", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
