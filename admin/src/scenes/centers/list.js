@@ -76,7 +76,9 @@ export default function List() {
                       tempContact[`${cohort} statut`] = ""
                       data.cohorts.map((e, index) => {
                         if (e === cohort) {
-                          tempContact[`${cohort} statut`] = data.sessionStatus[index] || "";
+                          if (data.sessionStatus !== undefined) {
+                            tempContact[`${cohort} statut`] = data.sessionStatus[index] || "";
+                          }
                         }
                       }
                       )
@@ -87,7 +89,6 @@ export default function List() {
                       "Code (2021)": data.code,
                       "Code (2022)": data.code2022,
                       "Cohorte(s)": data.cohorts?.join(", "),
-                      "Cohorte(s) statut": data.cohorts?.join(", "),
                       COR: data.COR,
                       "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
                       Adresse: data.address,
