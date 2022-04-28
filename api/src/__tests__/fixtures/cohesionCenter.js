@@ -21,6 +21,11 @@ function getNewCohesionCenterFixture() {
     waitingList: [faker.lorem.word(), faker.lorem.word()],
     COR: faker.lorem.word(),
     cohorts: ["2020"],
+    2020: {
+      status: "VALIDATED",
+      placesLeft: placesLeft,
+      placesTotal: placesLeft,
+    },
   };
 }
 
