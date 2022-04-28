@@ -48,7 +48,6 @@ export default function Contract({ young, admin }) {
       const currentApplication = data.find((e) => e._id === applicationId);
 
       if (currentApplication.contractId) {
-        console.log("contractId", currentApplication.contractId);
         ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
         if (!ok) return toastr.error("Oups, une erreur est survenue", code);
         setContract(data);
