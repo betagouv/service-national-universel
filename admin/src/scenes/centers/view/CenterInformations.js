@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { BiHandicap } from 'react-icons/bi';
 
 import { translate, getDepartmentNumber, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../../utils";
 import { Box } from "../../../components/box";
@@ -24,11 +25,14 @@ export default function Details({ center, sessions }) {
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gridGap: "1rem" }}>
         <Box>
           <Wrapper>
-            <Header>
-              <h4>
-                <strong>Informations du centre</strong>
-              </h4>
-            </Header>
+            <div className="flex justify-between">
+              <div>
+                <div className="text-lg text-bold">Informations du centre</div>
+              </div>
+              <div>
+                {center.pmr ? <div className="flex bg-[#14B8A6] px-2 py-1 rounded-xl text-white "> <BiHandicap size={20} /> Accessible PMR </div> : null}
+              </div>
+            </div>
             <Container>
               <section>
                 <div className="detail">
@@ -65,15 +69,11 @@ export default function Details({ center, sessions }) {
                     <div className="detail-text">{center.code2022}</div>
                   </div>
                 ) : null}
-                <div className="detail">
-                  <div className="detail-title-second">Accessibilité aux personnes à mobilité réduite (PMR) :</div>
-                  <div className="detail-text">{translate(center.pmr)}</div>
-                </div>
               </section>
             </Container>
           </Wrapper>
         </Box>
-        <Box>
+        {/* <Box>
           <Wrapper>
             <Header>
               <h4>
@@ -99,7 +99,7 @@ export default function Details({ center, sessions }) {
               ))}
             </section>
           </Wrapper>
-        </Box>
+        </Box> */}
       </div>
     </div>
   );
