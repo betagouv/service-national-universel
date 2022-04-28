@@ -609,7 +609,7 @@ const translateFieldContract = (f) => {
       return "créé(e) le";
     case "updatedAt":
       return "mis(e) à jour le";
-    case " parent1ValidationDate":
+    case "parent1ValidationDate":
       return "Date de validation du représentant légal 1";
     case "projectManagerValidationDate":
       return "Date de validation du représentant de l'Etat";
