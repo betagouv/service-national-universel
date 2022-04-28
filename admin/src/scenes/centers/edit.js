@@ -155,12 +155,12 @@ export default function Edit(props) {
                   {values.cohorts?.length ? (
                     <>
                       <div className="">
-                        <div className="flex justify-around border-bottom mb-2">
+                        <div className="flex justify-left border-bottom mb-2 pl-5">
                           {(values.cohorts || []).map((cohort, index) => (
                             <>
                               <div
                                 key={index}
-                                className={`pb-2 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
+                                className={`pb-2 mr-8 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
                                 onClick={() => {
                                   setsessionShow(cohort);
                                 }}>
