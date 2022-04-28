@@ -46,6 +46,7 @@ router.post("/refresh/:id", passport.authenticate("referent", { session: false, 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateNewCohesionCenter(req.body);
+    console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -56,9 +57,9 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (cohesionCenter.cohorts.length > 0) {
       for (let cohort of cohesionCenter.cohorts) {
         const cohesionCenterId = cohesionCenter._id;
-        const placesTotal = req.body[cohort].placesTotal;
-        const placesLeft = req.body[cohort].placesTotal;
-        const status = req.body[cohort].status;
+        const placesTotal = value[cohort].placesTotal;
+        const placesLeft = value[cohort].placesTotal;
+        const status = value[cohort].status;
         await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft, status });
       }
     }
@@ -297,14 +298,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       if (addedCohorts?.length > 0) {
         for (let cohort of addedCohorts) {
           const cohesionCenterId = center._id;
-          const placesTotal = center.placesTotal;
-          const placesLeft = center.placesTotal;
+          const placesTotal = newCenter[cohort].placesTotal;
+          const placesLeft = newCenter[cohort].placesTotal;
+          const status = newCenter[cohort].status;
           const session = await SessionPhase1.findOne({ cohesionCenterId, cohort });
           if (session) {
-            session.set({ placesTotal, placesLeft });
+            session.set({ placesTotal, placesLeft, status });
             await session.save();
           } else {
-            await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft });
+            await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft, status });
           }
         }
       }

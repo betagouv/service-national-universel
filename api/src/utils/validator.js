@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib/roles");
 const { isYoung } = require("../utils");
-const { SESSION_STATUS } = require("snu-lib/constants")
+const { SESSION_STATUS, COHORTS } = require("snu-lib/constants");
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
 const idRegex = /^[0-9a-fA-F]{24}$/;
@@ -236,35 +236,49 @@ function validateNewApplication(application, user) {
     .validate(application, { stripUnknown: true });
 }
 
-const cohesionCenterKeys = {
-  name: Joi.string().allow(null, ""),
-  code: Joi.string().allow(null, ""),
-  code2022: Joi.string().allow(null, ""),
-  country: Joi.string().allow(null, ""),
-  COR: Joi.string().allow(null, ""),
-  departmentCode: Joi.string().allow(null, ""),
-  address: Joi.string().allow(null, ""),
-  city: Joi.string().allow(null, ""),
-  zip: Joi.string().allow(null, ""),
-  department: Joi.string().allow(null, ""),
-  region: Joi.string().allow(null, ""),
-  addressVerified: Joi.string().allow(null, ""),
-  placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  outfitDelivered: Joi.string().allow(null, ""),
-  observations: Joi.string().allow(null, ""),
-  waitingList: Joi.array().items(Joi.string().allow(null, "")),
-  pmr: Joi.string().allow(null, ""),
-  cohorts: Joi.array().items(Joi.string().allow(null, "")),
-  sessionStatus: Joi.array().items(Joi.string().allow(null, "")),
+const cohesionCenterKeys = () => {
+  let cohorts = {};
+  COHORTS.forEach((c) => {
+    cohorts[c] = Joi.object()
+      .keys({
+        status: Joi.string().allow(null, ""),
+        placesTotal: Joi.number().allow(null, ""),
+        placesLeft: Joi.number().allow(null, ""),
+      })
+      .allow({}, null, "");
+  });
+  let data = {
+    name: Joi.string().allow(null, ""),
+    code: Joi.string().allow(null, ""),
+    code2022: Joi.string().allow(null, ""),
+    country: Joi.string().allow(null, ""),
+    COR: Joi.string().allow(null, ""),
+    departmentCode: Joi.string().allow(null, ""),
+    address: Joi.string().allow(null, ""),
+    city: Joi.string().allow(null, ""),
+    zip: Joi.string().allow(null, ""),
+    department: Joi.string().allow(null, ""),
+    region: Joi.string().allow(null, ""),
+    addressVerified: Joi.string().allow(null, ""),
+    placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+    placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+    outfitDelivered: Joi.string().allow(null, ""),
+    observations: Joi.string().allow(null, ""),
+    waitingList: Joi.array().items(Joi.string().allow(null, "")),
+    pmr: Joi.string().allow(null, ""),
+    cohorts: Joi.array().items(Joi.string().allow(null, "")),
+    sessionStatus: Joi.array().items(Joi.string().allow(null, "")),
+    ...cohorts,
+  };
+  return data;
 };
 
 function validateNewCohesionCenter(application) {
-  return Joi.object().keys(cohesionCenterKeys).validate(application, { stripUnknown: true });
+  return Joi.object().keys(cohesionCenterKeys()).validate(application, { stripUnknown: true });
 }
 
 function validateUpdateCohesionCenter(application) {
-  return Joi.object().keys(cohesionCenterKeys).validate(application, { stripUnknown: true });
+  return Joi.object().keys(cohesionCenterKeys()).validate(application, { stripUnknown: true });
 }
 
 const sessionPhase1Keys = {
