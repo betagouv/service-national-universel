@@ -44,6 +44,12 @@ const Schema = new mongoose.Schema({
     enum: ["WAITING_VALIDATION", "VALIDATED"],
   },
 
+  parent1ValidationDate: { type: Date },
+  projectManagerValidationDate: { type: Date },
+  structureManagerValidationDate: { type: Date },
+  parent2ValidationDate: { type: Date },
+  youngContractValidationDate: { type: Date },
+
   invitationSent: { type: String },
   youngFirstName: { type: String },
   youngLastName: { type: String },
