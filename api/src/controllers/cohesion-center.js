@@ -296,7 +296,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
       for (let cohort of center.cohorts) {
         if (!deletedCohorts.includes(cohort)) {
-          console.log("cochort", cohort);
           const cohesionCenterId = center._id;
           const placesTotal = newCenter[cohort].placesTotal;
           const placesLeft = newCenter[cohort].placesLeft;
@@ -321,7 +320,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
 
-    //const data = await updatePlacesCenter(center);
     await updateCenterDependencies(center);
 
     res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
