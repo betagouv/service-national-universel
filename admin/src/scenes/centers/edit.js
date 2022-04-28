@@ -35,7 +35,11 @@ export default function Edit(props) {
     for (const cohort of center.cohorts) {
       const sessionPhase1Response = await api.get(`/cohesion-center/${id}/cohort/${cohort}/session-phase1`);
       if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
-      obj[sessionPhase1Response.data.cohort] = { placesTotal: sessionPhase1Response.data.placesTotal, status: sessionPhase1Response.data.status };
+      obj[sessionPhase1Response.data.cohort] = {
+        placesTotal: sessionPhase1Response.data.placesTotal,
+        placesLeft: sessionPhase1Response.data.placesLeft,
+        status: sessionPhase1Response.data.status,
+      };
       setsessionShow(sessionPhase1Response.data.cohort);
     }
     setDefaultValue(obj);
@@ -59,21 +63,23 @@ export default function Edit(props) {
       onSubmit={async (values) => {
         try {
           setLoading(true);
-          if (isNew) {
-            values.placesLeft = values.placesTotal;
-          } else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
-
-          const sessionStatus = [];
-          values.cohorts.map((e) => sessionStatus.push(values[e].status));
-          values.sessionStatus = sessionStatus;
+          values.sessionStatus = [];
+          values.cohorts.map((cohort) => {
+            //maj session status
+            values.sessionStatus.push(values[cohort].status);
+            //maj places
+            values[cohort].placesTotal = Number(values[cohort].placesTotal);
+            if (defaultValue && defaultValue[cohort]) values[cohort].placesLeft += values[cohort].placesTotal - defaultValue[cohort].placesTotal;
+            else values[cohort].placesLeft = values[cohort].placesTotal;
+          });
           const { ok, code, data } = values._id ? await api.put(`/cohesion-center/${values._id}`, values) : await api.post("/cohesion-center", values);
-
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));
           history.push(`/centre/${data._id}`);
           toastr.success("Centre enregistré");
         } catch (e) {
           setLoading(false);
+          console.log(e);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre", e?.error?.message);
         }
       }}>
@@ -237,7 +243,9 @@ const ElementsSejour = ({ title, placeholder, values, name, handleChange, type =
         name={name}
         onChange={handleChange}
         placeholder={placeholder}
-        validate={(v) => required && !v && requiredMessage}></input>
+        validate={(v) => required && !v && requiredMessage}
+        required
+      />
       {errors && touched && <Error errors={errors} touched={touched} name={name} />}
     </>
   );

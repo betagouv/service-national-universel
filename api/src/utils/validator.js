@@ -237,9 +237,9 @@ function validateNewApplication(application, user) {
 }
 
 const cohesionCenterKeys = () => {
-  let cohorts = {};
+  let dynamicCohort = {};
   COHORTS.forEach((c) => {
-    cohorts[c] = Joi.object()
+    dynamicCohort[c] = Joi.object()
       .keys({
         status: Joi.string().allow(null, ""),
         placesTotal: Joi.number().allow(null, ""),
@@ -268,7 +268,7 @@ const cohesionCenterKeys = () => {
     pmr: Joi.string().allow(null, ""),
     cohorts: Joi.array().items(Joi.string().allow(null, "")),
     sessionStatus: Joi.array().items(Joi.string().allow(null, "")),
-    ...cohorts,
+    ...dynamicCohort,
   };
   return data;
 };

@@ -58,7 +58,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       for (let cohort of cohesionCenter.cohorts) {
         const cohesionCenterId = cohesionCenter._id;
         const placesTotal = value[cohort].placesTotal;
-        const placesLeft = value[cohort].placesTotal;
+        const placesLeft = value[cohort].placesLeft;
         const status = value[cohort].status;
         await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft, status });
       }
@@ -291,15 +291,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     // if we change the cohorts, we need to update the sessionPhase1
     if (newCenter?.cohorts?.length) {
-      const addedCohorts = newCenter.cohorts.filter((cohort) => !previousCohorts.includes(cohort));
       const deletedCohorts = previousCohorts.filter((cohort) => !newCenter.cohorts.includes(cohort));
-
       // add sessionPhase1 documents linked to this cohesion center
-      if (addedCohorts?.length > 0) {
-        for (let cohort of addedCohorts) {
+
+      for (let cohort of center.cohorts) {
+        if (!deletedCohorts.includes(cohort)) {
+          console.log("cochort", cohort);
           const cohesionCenterId = center._id;
           const placesTotal = newCenter[cohort].placesTotal;
-          const placesLeft = newCenter[cohort].placesTotal;
+          const placesLeft = newCenter[cohort].placesLeft;
           const status = newCenter[cohort].status;
           const session = await SessionPhase1.findOne({ cohesionCenterId, cohort });
           if (session) {
@@ -321,10 +321,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
 
-    const data = await updatePlacesCenter(center);
+    //const data = await updatePlacesCenter(center);
     await updateCenterDependencies(center);
 
-    res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
+    res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
