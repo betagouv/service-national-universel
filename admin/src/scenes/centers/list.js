@@ -80,8 +80,6 @@ export default function List() {
                       }
                       )
                     });
-                    console.log(tempContact)
-
                     return {
                       Nom: data.name,
                       id: data._id,
