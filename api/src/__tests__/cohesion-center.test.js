@@ -32,22 +32,6 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Cohesion Center", () => {
-  describe("POST /cohesion-center/refresh/:id", () => {
-    it("should return 404 when cohesion center is not found", async () => {
-      const res = await request(getAppHelper())
-        .post("/cohesion-center/refresh/" + notExistingCohesionCenterId)
-        .send();
-      expect(res.status).toBe(404);
-    });
-    it("should return 200 when cohesion center is found", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const res = await request(getAppHelper())
-        .post("/cohesion-center/refresh/" + cohesionCenter._id)
-        .send();
-      expect(res.status).toBe(200);
-      expect(res.body.data.placesLeft).toBe(res.body.data.placesTotal);
-    });
-  });
 
   describe("POST /cohesion-center", () => {
     it("should return 200", async () => {
