@@ -361,15 +361,4 @@ describe("Cohesion Center", () => {
     expect(res.status).toBe(403);
     passport.user.role = ROLES.ADMIN;
   });
-
-  describe("GET /cohesion-center/:id/certificate", () => {
-    it("should return 200 when cohesion center is found", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
-      const res = await request(getAppHelper())
-        .post("/cohesion-center/" + cohesionCenter._id + "/certificate")
-        .send();
-      expect(res.status).toBe(200);
-    });
-  });
 });
