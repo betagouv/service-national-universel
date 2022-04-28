@@ -79,7 +79,6 @@ export default function Edit(props) {
           toastr.success("Centre enregistré");
         } catch (e) {
           setLoading(false);
-          console.log(e);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre", e?.error?.message);
         }
       }}>

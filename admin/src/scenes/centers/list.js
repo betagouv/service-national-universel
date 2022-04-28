@@ -71,17 +71,16 @@ export default function List() {
                 react={{ and: FILTERS }}
                 transform={(all) => {
                   return all.map((data) => {
-                    let StatutExport = {}
+                    let statutExport = {};
                     COHORTS.forEach((cohort) => {
-                      StatutExport[`${cohort} statut`] = ""
+                      statutExport[`${cohort} statut`] = "";
                       data.cohorts.map((e, index) => {
                         if (e === cohort) {
                           if (data.sessionStatus !== undefined) {
-                            StatutExport[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
+                            statutExport[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
                           }
                         }
-                      }
-                      )
+                      });
                     });
                     return {
                       Nom: data.name,
@@ -103,7 +102,7 @@ export default function List() {
                       Observations: data.observations,
                       "Créé lé": formatLongDateFR(data.createdAt),
                       "Mis à jour le": formatLongDateFR(data.updatedAt),
-                      ...StatutExport,
+                      ...statutExport,
                     };
                   });
                 }}
@@ -205,7 +204,12 @@ export default function List() {
                           key={hit._id}
                           hit={hit}
                           sessionsPhase1={sessionsPhase1
-                            .filter((e) => e?._source?.cohesionCenterId === hit._id && (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)) && (!filterSessionStatus.length || filterSessionStatus.includes(e?._source?.status)))
+                            .filter(
+                              (e) =>
+                                e?._source?.cohesionCenterId === hit._id &&
+                                (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)) &&
+                                (!filterSessionStatus.length || filterSessionStatus.includes(e?._source?.status)),
+                            )
                             .map((e) => e)}
                           onClick={() => setCenter(hit)}
                           selected={center?._id === hit._id}
@@ -225,7 +229,6 @@ export default function List() {
 }
 
 const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
-
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
@@ -243,11 +246,14 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
           <SubTd key={sessionPhase1._id}>
             <div className="flex items-center">
               <Badge text={sessionPhase1._source.cohort} />
-              {sessionPhase1._source.status ?
-                <div className={`border text-xs rounded-full p-1 ${sessionPhase1._source.status === "DRAFT" ? ("border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] ") : ("border-[#A4D8BC]  bg-[#F5FCF3] text-[#27AF66]")}`}>
+              {sessionPhase1._source.status ? (
+                <div
+                  className={`border text-xs rounded-full p-1 ${
+                    sessionPhase1._source.status === "DRAFT" ? "border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] " : "border-[#A4D8BC]  bg-[#F5FCF3] text-[#27AF66]"
+                  }`}>
                   {translateSessionStatus(sessionPhase1._source.status)}
                 </div>
-                : null}
+              ) : null}
             </div>
           </SubTd>
         ))}

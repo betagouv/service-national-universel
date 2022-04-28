@@ -45,7 +45,6 @@ router.post("/refresh/:id", passport.authenticate("referent", { session: false, 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateNewCohesionCenter(req.body);
-    console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
