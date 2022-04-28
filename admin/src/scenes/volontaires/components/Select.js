@@ -1,39 +1,29 @@
 import React from "react";
+import { Col, Row } from "reactstrap";
 import { Field } from "formik";
 
 import Error, { requiredMessage } from "../../../components/errorMessage";
 
-export default function Select({
-  title,
-  name,
-  values,
-  handleChange,
-  disabled,
-  options,
-  required = false,
-  errors,
-  touched,
-  placeholder,
-  tw = "flex items-center justify-center",
-  ...props
-}) {
+export default function Select({ title, name, values, handleChange, disabled, options, required = false, errors, touched, placeholder = "", tw }) {
   return (
-    <section {...props}>
-      <div className={tw}>
-        <label className="mr-3 mb-0 min-w-[70px]">{title}</label>
+    <Row className="detail">
+      <Col md={4}>
+        <label className={tw}>{title}</label>
+      </Col>
+      <Col md={8}>
         <Field hidden value={values[name]} name={name} onChange={handleChange} validate={(v) => required && !v && requiredMessage} />
-        <select disabled={disabled} className="form-control w-[200px]" name={name} value={values[name]} onChange={handleChange} validate={(v) => required && !v && requiredMessage}>
+        <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={handleChange} validate={(v) => required && !v && requiredMessage}>
           <option disabled key={-1} value="" selected={!values[name]} label={placeholder}>
             {placeholder}
           </option>
-          {options.map((o) => (
-            <option key={o.label} value={o.value} label={o.label}>
+          {options.map((o, i) => (
+            <option key={i} value={o.value} label={o.label}>
               {o.label}
             </option>
           ))}
         </select>
-      </div>
-      {errors && touched && <Error errors={errors} touched={touched} name={name} />}
-    </section>
+        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
+      </Col>
+    </Row>
   );
 }

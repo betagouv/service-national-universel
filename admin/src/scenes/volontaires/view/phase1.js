@@ -190,34 +190,32 @@ export default function Phase1(props) {
                   titleRight={<Badge text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}
                   borderRight
                   borderBottom>
-                  <section className="flex items-start">
-                    <div className="mr-4">
-                      <p className="text-gray-500">Présence :</p>
-                      <Select
-                        placeholder="Non renseigné"
-                        title=""
-                        options={[
-                          { value: "true", label: "Présent" },
-                          { value: "false", label: "Absent" },
-                        ]}
-                        values={values}
-                        name="cohesionStayPresence"
-                        handleChange={(e) => {
-                          const value = e.target.value;
-                          setModal({
-                            isOpen: true,
-                            onConfirm: () => {
-                              handleChange({ target: { value, name: "cohesionStayPresence" } });
-                              updateYoung({ cohesionStayPresence: value });
-                            },
-                            title: "Changement de présence",
-                            message: confirmMessageChangePhase1Presence(value),
-                          });
-                        }}
-                        disabled={disabled}
-                      />
-                    </div>
-                    <div className="ml-2">
+                  <section className="">
+                    <Select
+                      tw="text-gray-500"
+                      placeholder="Non renseigné"
+                      title="Présence :"
+                      options={[
+                        { value: "true", label: "Présent" },
+                        { value: "false", label: "Absent" },
+                      ]}
+                      values={values}
+                      name="cohesionStayPresence"
+                      handleChange={(e) => {
+                        const value = e.target.value;
+                        setModal({
+                          isOpen: true,
+                          onConfirm: () => {
+                            handleChange({ target: { value, name: "cohesionStayPresence" } });
+                            updateYoung({ cohesionStayPresence: value });
+                          },
+                          title: "Changement de présence",
+                          message: confirmMessageChangePhase1Presence(value),
+                        });
+                      }}
+                      disabled={disabled}
+                    />
+                    <div className="mt-4">
                       {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (
                         <>
                           <p className="text-gray-500">Attestation de réalisation phase 1 :</p>
