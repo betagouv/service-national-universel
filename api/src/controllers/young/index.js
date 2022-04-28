@@ -306,7 +306,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
   }
 });
 
-router.put("/update_phase3/:young", async (req, res) => {
+router.put("/update_phase3/:young", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       young: Joi.string().required(),
