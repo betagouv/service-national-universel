@@ -35,7 +35,6 @@ router.post("/refresh/:id", passport.authenticate("referent", { session: false, 
     const data = await CohesionCenterModel.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await updatePlacesCenter(data);
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
   } catch (error) {
     capture(error);
@@ -56,9 +55,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (cohesionCenter.cohorts.length > 0) {
       for (let cohort of cohesionCenter.cohorts) {
         const cohesionCenterId = cohesionCenter._id;
-        const placesTotal = cohesionCenter.placesTotal;
-        const placesLeft = cohesionCenter.placesLeft;
-        await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft });
+        const placesTotal = value[cohort].placesTotal;
+        const placesLeft = value[cohort].placesLeft;
+        const status = value[cohort].status;
+        await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft, status });
       }
     }
 
@@ -126,12 +126,10 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
       await oldCenter.save();
     }
     // update center infos
-    const data = await updatePlacesCenter(center);
-    if (oldCenter) await updatePlacesCenter(oldCenter);
     if (bus) await updatePlacesBus(bus);
 
     return res.status(200).send({
-      data: serializeCohesionCenter(data, req.user),
+      data: serializeCohesionCenter(center, req.user),
       young: serializeYoung(young, req.user),
       ok: true,
     });
@@ -277,6 +275,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error, value: newCenter } = validateUpdateCohesionCenter(req.body);
+
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const center = await CohesionCenterModel.findById(checkedId);
@@ -288,21 +287,21 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     // if we change the cohorts, we need to update the sessionPhase1
     if (newCenter?.cohorts?.length) {
-      const addedCohorts = newCenter.cohorts.filter((cohort) => !previousCohorts.includes(cohort));
       const deletedCohorts = previousCohorts.filter((cohort) => !newCenter.cohorts.includes(cohort));
-
       // add sessionPhase1 documents linked to this cohesion center
-      if (addedCohorts?.length > 0) {
-        for (let cohort of addedCohorts) {
+
+      for (let cohort of center.cohorts) {
+        if (!deletedCohorts.includes(cohort)) {
           const cohesionCenterId = center._id;
-          const placesTotal = center.placesTotal;
-          const placesLeft = center.placesTotal;
+          const placesTotal = newCenter[cohort].placesTotal;
+          const placesLeft = newCenter[cohort].placesLeft;
+          const status = newCenter[cohort].status;
           const session = await SessionPhase1.findOne({ cohesionCenterId, cohort });
           if (session) {
-            session.set({ placesTotal, placesLeft });
+            session.set({ placesTotal, placesLeft, status });
             await session.save();
           } else {
-            await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft });
+            await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft, status });
           }
         }
       }
@@ -317,10 +316,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
 
-    const data = await updatePlacesCenter(center);
     await updateCenterDependencies(center);
 
-    res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
+    res.status(200).send({ ok: true, data: serializeCohesionCenter(center) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
