@@ -71,13 +71,13 @@ export default function List() {
                 react={{ and: FILTERS }}
                 transform={(all) => {
                   return all.map((data) => {
-                    let tempContact = {}
+                    let StatutExport = {}
                     COHORTS.forEach((cohort) => {
-                      tempContact[`${cohort} statut`] = ""
+                      StatutExport[`${cohort} statut`] = ""
                       data.cohorts.map((e, index) => {
                         if (e === cohort) {
                           if (data.sessionStatus !== undefined) {
-                            tempContact[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
+                            StatutExport[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
                           }
                         }
                       }
@@ -103,7 +103,7 @@ export default function List() {
                       Observations: data.observations,
                       "Créé lé": formatLongDateFR(data.createdAt),
                       "Mis à jour le": formatLongDateFR(data.updatedAt),
-                      ...tempContact,
+                      ...StatutExport,
                     };
                   });
                 }}
