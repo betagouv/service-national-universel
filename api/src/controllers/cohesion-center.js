@@ -248,6 +248,7 @@ router.get("/:id/head", passport.authenticate("referent", { session: false, fail
 });
 
 router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  if (!canViewCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   try {
     const data = await CohesionCenterModel.find({});
     return res.status(200).send({ ok: true, data: data.map(serializeCohesionCenter) });
@@ -256,7 +257,7 @@ router.get("/", passport.authenticate("referent", { session: false, failWithErro
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-router.get("/young/:youngId", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/young/:youngId", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.youngId);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });

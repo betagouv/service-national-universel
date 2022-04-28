@@ -225,26 +225,39 @@ describe("Cohesion Center", () => {
   });
 
   describe("GET /cohesion-center/young/:id", () => {
-    it("should return 404 when young is not found", async () => {
+    it("should return 403 when young is not the current young found", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: notExistingCohesionCenterId });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
       const res = await request(getAppHelper())
         .get("/cohesion-center/young/" + notExistingCohesionCenterId)
         .send();
       expect(res.status).toBe(404);
+      passport.user = previous;
     });
     it("should return 404 when young has no center", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: notExistingCohesionCenterId });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
       const res = await request(getAppHelper())
         .get("/cohesion-center/young/" + young._id)
         .send();
       expect(res.status).toBe(404);
+      passport.user = previous;
     });
     it("should return 200 when young has a center", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
       const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
       const res = await request(getAppHelper())
         .get("/cohesion-center/young/" + young._id)
         .send();
       expect(res.status).toBe(200);
+      passport.user = previous;
     });
     it("should only allow young to see their own cohesion center", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
