@@ -62,10 +62,9 @@ export default function Edit(props) {
       sessionToUpdate.push(sessionPhase1Response.data);
     }
     for (const session of sessionToUpdate) {
-      if (session.placesTotal !== newValues[session.cohort]) {
-        const { ok, code } = await api.put(`/session-phase1/${session._id}`, { placesTotal: newValues[session.cohort].placesTotal, status: newValues[session.cohort].status });
-        if (!ok) return toastr.error(`Oups, une erreur est survenue lors de la mise à jour de la session ${session.cohort}`, translate(code));
-      }
+      const left = session.placesLeft + newValues[session.cohort].placesTotal - session.placesTotal;
+      const { ok, code } = await api.put(`/session-phase1/${session._id}`, { placesTotal: newValues[session.cohort].placesTotal, placesLeft: left, status: newValues[session.cohort].status });
+      if (!ok) return toastr.error(`Oups, une erreur est survenue lors de la mise à jour de la session ${session.cohort}`, translate(code));
     }
   };
 
@@ -79,18 +78,13 @@ export default function Edit(props) {
       onSubmit={async (values) => {
         try {
           setLoading(true);
-          if (isNew) {
-            values.placesLeft = values.placesTotal
-          }
-          else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
 
           const sessionStatus = []
           values.cohorts.map(e => sessionStatus.push(values[e].status))
           values.sessionStatus = sessionStatus
 
           const { ok, code, data } = values._id ? await api.put(`/cohesion-center/${values._id}`, values) : await api.post("/cohesion-center", values);
-          await updateSessions(values);
-
+          if (values._id) await updateSessions(values);
 
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));

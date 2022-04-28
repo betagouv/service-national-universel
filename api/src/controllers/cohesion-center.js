@@ -56,9 +56,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (cohesionCenter.cohorts.length > 0) {
       for (let cohort of cohesionCenter.cohorts) {
         const cohesionCenterId = cohesionCenter._id;
-        const placesTotal = cohesionCenter.placesTotal;
-        const placesLeft = cohesionCenter.placesLeft;
-        await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft });
+        const placesTotal = req.body[cohort].placesTotal;
+        const placesLeft = req.body[cohort].placesTotal;
+        const status = req.body[cohort].status;
+        await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft, status });
       }
     }
 
