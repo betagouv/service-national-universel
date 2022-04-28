@@ -77,7 +77,7 @@ export default function List() {
                       data.cohorts.map((e, index) => {
                         if (e === cohort) {
                           if (data.sessionStatus !== undefined) {
-                            tempContact[`${cohort} statut`] = data.sessionStatus[index] || "";
+                            tempContact[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
                           }
                         }
                       }
