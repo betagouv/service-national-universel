@@ -81,6 +81,20 @@ async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   }
 }
 
+async function notifDepartmentChange(department, template, young) {
+  const referents = await ReferentModel.find({ department: department, role: ROLES.REFERENT_DEPARTMENT });
+  for (let referent of referents) {
+    await sendTemplate(template, {
+      emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+      params: {
+        youngFirstName: young.firstName,
+        youngLastName: young.lastName,
+        cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
+      },
+    });
+  }
+}
+
 router.post("/signin", signinLimiter, (req, res) => ReferentAuth.signin(req, res));
 router.post("/logout", (req, res) => ReferentAuth.logout(req, res));
 router.post("/signup", async (req, res) => {
@@ -317,17 +331,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
 
     if (newYoung?.department && young?.department && newYoung?.department !== young?.department) {
-      const referents = await ReferentModel.find({ department: newYoung.department, role: ROLES.REFERENT_DEPARTMENT });
-      for (let referent of referents) {
-        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
-          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-          params: {
-            youngFirstName: young.firstName,
-            youngLastName: young.lastName,
-            cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-          },
-        });
-      }
+      await notifDepartmentChange(newYoung.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young);
+      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young);
     }
 
     if (newYoung.cohesionStayPresence === "true" && young.cohesionStayPresence !== "true") {
