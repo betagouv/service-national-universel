@@ -50,7 +50,6 @@ function responsible({ user, onClick }) {
       <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <HelpButton />
     </>
   );
 }
@@ -62,7 +61,6 @@ function supervisor({ onClick }) {
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <HelpButton />
     </>
   );
 }
@@ -100,7 +98,6 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           </>
         )}
       </DrawerTabWithIcons>
-      <HelpButton />
     </>
   );
 }
@@ -137,7 +134,6 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           </>
         )}
       </DrawerTabWithIcons>
-      <HelpButton />
     </>
   );
 }
@@ -150,7 +146,6 @@ function headCenter({ onClick, user }) {
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <BlankSeparator />
-      <HelpButton />
     </>
   );
 }
@@ -159,7 +154,6 @@ function visitor({ onClick }) {
   return (
     <>
       <BlankSeparator />
-      <HelpButton />
     </>
   );
 }
@@ -203,35 +197,41 @@ const Drawer = (props) => {
   if (!user) return <div />;
 
   return (
-    <div className="min-h-screen w-[220px] bg-snu-purple-900 text-white fixed z-10 overflow-y-auto bottom-0 top-[56px] pb-4">
+    <div className="min-h-screen max-w-[220px] bg-snu-purple-900 text-white fixed z-10 overflow-y-auto bottom-0 top-[56px] pb-4">
       {!isOpen ? (
-        <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
-          <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
-            <ul className="divide-y divide-slate-700">
-              <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
-              {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
-              {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-              {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-              {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
-            </ul>
-          </div>
-        </nav>
+        <>
+          <nav open={open} id="drawer" className="text-white text-base font-normal min-h-full">
+            <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
+              <ul className="divide-y divide-slate-700">
+                <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+                {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+                {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+                {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+                {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+                {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+                {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
+              </ul>
+            </div>
+          </nav>
+          <HelpButton />
+        </>
       ) : (
-        <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-base font-normal min-h-full">
-          <div>
-            <ul className="divide-y divide-slate-700">
-              <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
-              {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
-              {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-              {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-              {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
-            </ul>
-          </div>
-        </nav>
+        <>
+          <nav open={open} id="drawer" className="bg-snu-purple-900 text-white text-base font-normal min-h-full">
+            <div>
+              <ul className="divide-y divide-slate-700">
+                <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+                {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+                {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+                {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+                {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+                {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+                {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
+              </ul>
+            </div>
+          </nav>
+          <HelpButton />
+        </>
       )}
     </div>
   );

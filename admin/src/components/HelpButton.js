@@ -110,33 +110,61 @@ export default function HelpButton() {
   if (!user) return null;
 
   return (
-    <div
-      className="justify-center flex bg-snu-purple-900"
-      onClick={() => {
-        handleOpen();
-        plausibleEvent("Menu/CTA - Besoin Aide");
-      }}>
+    <>
+      {/* // big button */}
       <div
-        className="flex items-center border rounded p-2 text-white hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg cursor-pointer"
-        activeClassName="flex bg-snu-purple-300 p-2">
-        <QuestionMark class="h-6 w-6 flex mr-2 " />
-        <div>
-          <div className="font-normal text-sm text-center">Besoin d&apos;aide ?</div>
-          <div className="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
+        className="hidden lg:flex fixed bottom-10 left-10 justify-center z-20 bg-snu-purple-900"
+        onClick={() => {
+          handleOpen();
+          plausibleEvent("Menu/CTA - Besoin Aide");
+        }}>
+        <div
+          className="flex items-center border rounded p-2 text-white hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg cursor-pointer"
+          activeClassName="flex bg-snu-purple-300 p-2">
+          <QuestionMark class="h-6 w-6 flex mr-2 " />
+          <div>
+            <div className="font-normal text-sm text-center">Besoin d&apos;aide ?</div>
+            <div className="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
+          </div>
+        </div>
+        <div
+          className={`${
+            open ? "block" : "hidden"
+          } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute left-[calc(100%+10px)] bottom-0 border-3 border-red-600 shadow-sm overflow-hidden`}>
+          {(LISTE_LIEN_AIDE_PAR_ROLE[user.role] || []).map((e) => (
+            <a key={e.label} href={e.url} target="_blank" rel="noreferrer">
+              <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
+                {e.label}
+              </div>
+            </a>
+          ))}
         </div>
       </div>
+      {/* // small button */}
       <div
-        className={`${
-          open ? "block" : "hidden"
-        } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute left-[calc(100%+10px)] bottom-0 border-3 border-red-600 shadow-sm overflow-hidden`}>
-        {(LISTE_LIEN_AIDE_PAR_ROLE[user.role] || []).map((e) => (
-          <a key={e.label} href={e.url} target="_blank" rel="noreferrer">
-            <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
-              {e.label}
-            </div>
-          </a>
-        ))}
+        className="flex lg:hidden fixed bottom-5 left-5 justify-center z-20"
+        onClick={() => {
+          handleOpen();
+          plausibleEvent("Menu/CTA - Besoin Aide");
+        }}>
+        <div
+          className="flex items-center rounded-full text-snu-purple-800 bg-[#FFFFFFAA] hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg cursor-pointer"
+          activeClassName="flex bg-snu-purple-300 p-2">
+          <QuestionMark class="h-8 w-8 flex" />
+        </div>
+        <div
+          className={`${
+            open ? "block" : "hidden"
+          } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute left-[calc(100%+10px)] bottom-0 border-3 border-red-600 shadow-sm overflow-hidden`}>
+          {(LISTE_LIEN_AIDE_PAR_ROLE[user.role] || []).map((e) => (
+            <a key={e.label} href={e.url} target="_blank" rel="noreferrer">
+              <div className="group text-coolGray-800 cursor-pointer p-3 hover:bg-coolGray-100 hover:text-coolGray-800 flex items-center gap-2 text-coolGray-800 hover:text-coolGray-800">
+                {e.label}
+              </div>
+            </a>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
