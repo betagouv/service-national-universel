@@ -130,7 +130,7 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     if (bus) await updatePlacesBus(bus);
 
     return res.status(200).send({
-      data: serializeCohesionCenter(data, req.user),
+      data: serializeCohesionCenter(center, req.user),
       young: serializeYoung(young, req.user),
       ok: true,
     });
