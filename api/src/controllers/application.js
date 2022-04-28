@@ -6,13 +6,14 @@ const Joi = require("joi");
 const { capture } = require("../sentry");
 const ApplicationObject = require("../models/application");
 const MissionObject = require("../models/mission");
+const StructureObject = require("../models/structure");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
-const { ERRORS, isYoung } = require("../utils");
+const { ERRORS, isYoung, isReferent } = require("../utils");
 const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
-const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
+const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication } = require("snu-lib");
 const { serializeApplication } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, getCcOfYoung } = require("../utils");
 
@@ -66,7 +67,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const { value, error } = validateNewApplication(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!value.hasOwnProperty("priority")) {
+    if (!Object.prototype.hasOwnProperty.call(value, "priority")) {
       const applications = await ApplicationObject.find({ youngId: value.youngId });
       value.priority = applications.length + 1;
     }
@@ -76,9 +77,30 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // A young can only update create their own applications.
+    // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    // - admin can create all applications
+    // - referent can create applications of their department/region
+    // - responsible and supervisor can create applications of their structures
+    if (isReferent(req.user)) {
+      if (!canCreateYoungApplication(req.user, young)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      if (req.user.role === ROLES.RESPONSIBLE) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (value.structureId.toString() !== req.user.structureId.toString()) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
+      if (req.user.role === ROLES.SUPERVISOR) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+        if (!structures.map((e) => e._id.toString()).includes(value.structureId.toString())) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
     }
 
     const data = await ApplicationObject.create(value);
@@ -107,6 +129,28 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     // A young can only update his own application.
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // - admin can update all applications
+    // - referent can update applications of their department/region
+    // - responsible and supervisor can update applications of their structures
+    if (isReferent(req.user)) {
+      if (!canCreateYoungApplication(req.user, young)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      if (req.user.role === ROLES.RESPONSIBLE) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (application.structureId.toString() !== req.user.structureId.toString()) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
+      if (req.user.role === ROLES.SUPERVISOR) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+        if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
     }
 
     application.set(value);
