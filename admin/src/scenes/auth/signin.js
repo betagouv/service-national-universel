@@ -42,6 +42,7 @@ export default function Signin() {
                     dispatch(setUser(user));
                   }
                 } catch (e) {
+                  actions.setFieldValue("password", "");
                   console.log("ERROR", e);
                   if (e && ["EMAIL_OR_PASSWORD_INVALID", "USER_NOT_EXISTS", "EMAIL_AND_PASSWORD_REQUIRED"].includes(e.code)) {
                     return setUserIsValid(false);

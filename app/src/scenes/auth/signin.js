@@ -60,6 +60,7 @@ export default function Signin() {
                 dispatch(setYoung(young));
               }
             } catch (e) {
+              actions.setFieldValue("password", "");
               console.log("e", e);
               setUserIsValid(false);
               if (e.code === "TOO_MANY_REQUESTS") {
