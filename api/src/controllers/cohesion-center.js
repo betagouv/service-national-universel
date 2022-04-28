@@ -35,7 +35,6 @@ router.post("/refresh/:id", passport.authenticate("referent", { session: false, 
     const data = await CohesionCenterModel.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await updatePlacesCenter(data);
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
   } catch (error) {
     capture(error);
@@ -128,8 +127,6 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
       await oldCenter.save();
     }
     // update center infos
-    const data = await updatePlacesCenter(center);
-    if (oldCenter) await updatePlacesCenter(oldCenter);
     if (bus) await updatePlacesBus(bus);
 
     return res.status(200).send({
