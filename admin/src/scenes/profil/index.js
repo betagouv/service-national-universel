@@ -1,5 +1,5 @@
 import { Field, Formik } from "formik";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
@@ -17,7 +17,6 @@ export default function Profil() {
   useDocumentTitle("Mon profil");
 
   const user = useSelector((state) => state.Auth.user);
-  const [service, setService] = useState();
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -29,14 +28,7 @@ export default function Profil() {
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
 
-  useEffect(() => {
-    (async () => {
-      const { data: d } = await api.get(`/department-service/${user.department}`);
-      setService(d);
-    })();
-  }, []);
-
-  if (user === undefined || service === undefined) return <Loader />;
+  if (user === undefined) return <Loader />;
 
   return (
     <div className="py-5 px-10">
