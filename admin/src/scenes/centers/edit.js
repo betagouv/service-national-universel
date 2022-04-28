@@ -69,7 +69,6 @@ export default function Edit(props) {
     }
   };
 
-
   if (!defaultValue && !isNew) return <Loader />;
 
   return (
