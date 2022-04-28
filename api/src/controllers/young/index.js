@@ -30,6 +30,7 @@ const {
   ERRORS,
   inSevenDays,
   isYoung,
+  isReferent,
   // updateApplicationsWithYoungOrMission,
   updatePlacesBus,
   updatePlacesSessionPhase1,
@@ -41,7 +42,7 @@ const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 const { validateYoung, validateId, validateFirstName, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
-const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung } = require("snu-lib/roles");
+const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSendTemplateToYoung, canViewYoungApplications } = require("snu-lib/roles");
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
@@ -409,6 +410,9 @@ router.post("/:id/deplacementPhase1Autonomous", passport.authenticate(["referent
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    if (isReferent(req.user) && !canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
     const bus = await BusModel.findById(meetingPoint?.busId);
@@ -614,8 +618,6 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
   }
 });
 
-//todo : add operation unauthorized:
-// taking a user and a target, check if the user can send the template to the target
 router.post("/:id/email/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -634,9 +636,22 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     // eslint-disable-next-line no-unused-vars
     const { id, template, message, prevStatus, missionName, structureName, cta, type_document } = value;
 
+    // The template must exist.
+    if (!Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    // The young must exist.
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // If actor is a young it must be the same as the young.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    // If actor is a referent it must be allowed to send template.
+    if (isReferent(req.user) && !canSendTemplateToYoung(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
@@ -665,6 +680,13 @@ router.get("/:id/application", passport.authenticate(["referent", "young"], { se
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (isYoung(req.user) && req.user._id.toString() !== id) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    if (isReferent(req.user) && !canViewYoungApplications(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
