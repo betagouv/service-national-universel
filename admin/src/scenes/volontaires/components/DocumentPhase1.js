@@ -84,7 +84,7 @@ export default function DocumentPhase1(props) {
           setStatusCohesionStayMedical("DOWNLOADED");
         }
       } else {
-        setStatusCohesionStayMedical("RECIEVED");
+        setStatusCohesionStayMedical("RECEIVED");
       }
       setStatusAutoTestPCR(young.autoTestPCRFilesStatus);
       setStatusImageRight(young.imageRightFilesStatus);
@@ -183,7 +183,7 @@ export default function DocumentPhase1(props) {
               ))}
             </select>
           </div>
-          <FileIcon icon="sanitaire" />
+          <FileIcon icon="sanitaire" filled={young.cohesionStayMedicalFileDownload === "true"} />
           <p className="text-base font-bold mt-2">Fiche sanitaire</p>
         </section>
         {statusCohesionStayMedical === "TO_DOWNLOAD" && (
@@ -207,7 +207,7 @@ export default function DocumentPhase1(props) {
               ))}
             </select>
           </div>
-          <FileIcon icon="image" />
+          <FileIcon icon="image" filled={young.imageRightFilesStatus !== "TO_UPLOAD"} />
           <p className="text-base font-bold mt-2">Droit à l&apos;image</p>
           <p className="text-gray-500">Accord : {dataImageRight.imageRight ? translate(dataImageRight.imageRight) : "Non renseigné"}</p>
           <ButtonPlain onClick={() => setIsOpenImg(true)}>Gérer le document</ButtonPlain>
@@ -243,7 +243,7 @@ export default function DocumentPhase1(props) {
               ))}
             </select>
           </div>
-          <FileIcon icon="autotest" />
+          <FileIcon icon="autotest" filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"} />
           <p className="text-base font-bold mt-2">Autotest PCR</p>
           <p className="text-gray-500">Accord : {dataAutoTestPCR.autoTestPCR ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}</p>
           <ButtonPlain onClick={() => setIsOpenAut(true)}>Gérer le document</ButtonPlain>
@@ -279,7 +279,7 @@ export default function DocumentPhase1(props) {
               ))}
             </select>
           </div>
-          <FileIcon icon="reglement" />
+          <FileIcon icon="reglement" filled={young.rulesFilesStatus !== "TO_UPLOAD"} />
           <p className="text-base font-bold mt-2">Règlement intérieur</p>
           <p className="text-gray-500">Accord : {dataRules.rulesParent1 ? translate(dataRules.rulesParent1) : "Non renseigné"}</p>
           <ButtonPlain onClick={() => setIsOpenReg(true)}>Gérer le document</ButtonPlain>
