@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const crypto = require("crypto");
-const { canCreateOrUpdateContract, ROLES } = require("snu-lib/roles");
+const { canCreateOrUpdateContract, canViewContract, ROLES } = require("snu-lib/roles");
 const renderFromHtml = require("../htmlToPdf");
 const { capture } = require("../sentry");
 const ContractObject = require("../models/contract");
@@ -191,11 +191,11 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     if (id) {
       const contract = await ContractObject.findById(id);
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      previousStructureId = contract.structure;
-      currentStructureId = data.structure || contract.structure;
+      previousStructureId = contract.structureId;
+      currentStructureId = data.structureId || contract.structureId;
     } else {
-      previousStructureId = data.structure;
-      currentStructureId = data.structure;
+      previousStructureId = data.structureId;
+      currentStructureId = data.structureId;
     }
     if (req.user.role === ROLES.RESPONSIBLE) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -292,7 +292,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    if (isReferent(req.user) && !canCreateOrUpdateContract(req.user, data)) {
+    if (isReferent(req.user) && !canViewContract(req.user, data)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
