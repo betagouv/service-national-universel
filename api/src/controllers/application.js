@@ -179,7 +179,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     const young = await YoungObject.findById(data.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canViewYoungApplications(req.user)) {
+    if (!canViewYoungApplications(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
