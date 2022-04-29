@@ -60,7 +60,6 @@ export default function addressInputVCenter({
     }
     //POUR LA CORSE
     if (departmentCode === "20") {
-      console.log(zip);
       if (zip === "20000" || zip.substr(0, 3) === "201") departmentCode = "2A";
       else if (zip.substr(0, 3) === "202" || zip.substr(0, 3) === "206") departmentCode = "2B";
     }
