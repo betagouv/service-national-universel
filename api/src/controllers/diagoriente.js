@@ -12,7 +12,7 @@ router.get("/generateUrl", passport.authenticate("young", { session: false, fail
     let options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: `{"query":"{ generateUrl(token:\\\"${process.env.DIAGORIENTE_TOKEN}\\\" ,id:\\\"${req.user._id}\\\",firstName:\\\"${req.user.firstName}\\\",lastName:\\\"${req.user.lastName}\\\") }","variables":null}`,
+      body: `{"query":"{ generateUrl(token:\\"${process.env.DIAGORIENTE_TOKEN}\\" ,id:\\"${req.user._id}\\",firstName:\\"${req.user.firstName}\\",lastName:\\"${req.user.lastName}\\") }","variables":null}`,
     };
     const response = await fetch(url, options);
     const responseAsJson = await response.json();
@@ -31,7 +31,7 @@ router.get("/getCard", passport.authenticate("young", { session: false, failWith
     let options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: `{"query": "{ getCard(token:\\\"${process.env.DIAGORIENTE_TOKEN}\\\",id: \\\"${req.user._id}\\\") { skills{ endDate startDate activities {title} theme { title type activities { title } } } globalCompetences { title value type } }}","variables":{}}`,
+      body: `{"query": "{ getCard(token:\\"${process.env.DIAGORIENTE_TOKEN}\\",id: \\"${req.user._id}\\") { skills{ endDate startDate activities {title} theme { title type activities { title } } } globalCompetences { title value type } }}","variables":{}}`,
     };
     const response = await fetch(url, options);
     const responseAsJson = await response.json();
