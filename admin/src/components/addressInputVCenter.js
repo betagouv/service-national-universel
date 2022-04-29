@@ -18,7 +18,7 @@ export default function addressInputVCenter({
   touched,
   validateField,
   countryVisible = false,
-  onChangeCountry = () => { },
+  onChangeCountry = () => {},
   countryByDefault = "",
   required = false,
   departAndRegionVisible = false,
@@ -169,7 +169,6 @@ export default function addressInputVCenter({
                 addressVerifiedHelpers.setValue("false");
               }}
             />
-            <ErrorMessage errors={errors} touched={touched} name={keys.address} />
           </Row>
           <div className="flex w-full">
             <div className="w-1/2 flex border flex-col justify-items-start ml-3 my-1 rounded-lg rounded-grey-300 p-2">
