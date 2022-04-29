@@ -61,7 +61,7 @@ export default function AddressInputV2({
     //POUR LA CORSE
     if (departmentCode === "20") {
       if (zip === "20000" || zip.substr(0, 3) === "201") departmentCode = "2A";
-      else if (zip.substr(0, 3) === "202" || zip.substr(0, 3) === "206") departmentCode = "2B";
+      else departmentCode = "2B";
     }
 
     handleChange({ target: { name: keys.department, value: departmentLookUp[departmentCode] } });
