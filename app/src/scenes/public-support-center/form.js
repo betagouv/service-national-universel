@@ -25,23 +25,9 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
           try {
             setLoading(true);
             const { message, subject, firstName, lastName, email, step1, step2, department } = values;
-            const regionTags = [`DEPARTEMENT_${department}`, `REGION_${department2region[department]}`];
-            const { ok, code, data } = await api.post("/zammad-support-center/public/ticket", {
-              title: `${step1?.label} - ${step2?.label} - ${subject}`,
-              subject,
-              name: `${firstName} ${lastName}`,
-              email,
-              message,
-              // eslint-disable-next-line no-unsafe-optional-chaining
-              tags: [...new Set([...tags, ...(step1?.tags || []), ...(step2?.tags || []), ...(regionTags || [])])], // we use this dirty hack to remove duplicates
-            });
-            setLoading(false);
-            setOpen(false);
-            if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
             const response = await api.post("/zammood/ticket/form", {
               message,
               subject: subject,
-              clientId: data.id,
               firstName,
               lastName,
               email,
@@ -51,6 +37,8 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
               region: department2region[department],
               role: "young exterior",
             });
+            setLoading(false);
+            setOpen(false);
             if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
             toastr.success("Ticket créé");
             setSuccessMessage("Votre demande a bien été envoyée ! Nous vous répondrons par mail.");

@@ -17,7 +17,8 @@ export default function TicketTabs({ setTicket, selectedTicket }) {
 
   const getTickets = async (tags) => {
     try {
-      const { data } = await api.post(`/zammad-support-center/ticket/search-by-tags?withArticles=true`, { tags });
+      const { ok, data } = await api.get(`/zammood/tickets`);
+      if (!ok) return setTickets([]);
       setTickets(data);
     } catch (err) {
       console.log("Oups, une erreur s'est produite.");
@@ -64,6 +65,13 @@ export default function TicketTabs({ setTicket, selectedTicket }) {
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+        </StateContainer>
+      );
+    if (state === "pending")
+      return (
+        <StateContainer>
+          <MailCloseIcon color="#6495ED" style={{ margin: 0, padding: "5px" }} />
+          {translateState(state)}
         </StateContainer>
       );
   };

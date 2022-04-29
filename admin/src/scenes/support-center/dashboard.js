@@ -36,21 +36,15 @@ const Dashboard = () => {
     }
     const fetchTickets = async () => {
       try {
-        const response = await api.get("/zammad-support-center/ticket?withArticles=true");
-        if (!response.ok) return setUserTickets([]);
-        setUserTickets(response.data);
+        const { ok, data } = await api.get(`/zammood/tickets`);
+        if (!ok) return setUserTickets([]);
+        setUserTickets(data);
       } catch (error) {
         setUserTickets([]);
       }
     };
     fetchTickets();
   }, []);
-
-  const getLastContactName = (array) => {
-    if (!array || array?.error) return "-";
-    const lastTicketFromAgent = array?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))?.find((e) => e.created_by !== user.email);
-    return lastTicketFromAgent?.from || "-";
-  };
 
   const displayState = (state) => {
     if (state === "open")
@@ -71,6 +65,13 @@ const Dashboard = () => {
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+          {translateState(state)}
+        </StateContainer>
+      );
+    if (state === "pending")
+      return (
+        <StateContainer>
+          <MailCloseIcon color="#6495ED" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
@@ -131,14 +132,14 @@ const Dashboard = () => {
         {!userTickets ? <Loader /> : null}
         {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
         {userTickets
-          ?.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+          ?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
           ?.map((ticket) => (
-            <NavLink to={`/besoin-d-aide/ticket/${ticket.id}`} key={ticket.id} className="ticket">
+            <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="ticket">
               <p>{ticket.number}</p>
-              <p>{ticket.title}</p>
-              <p>{getLastContactName(ticket?.articles || [])}</p>
-              <p>{displayState(ticketStateNameById(ticket.state_id))}</p>
-              <div className="ticket-date">{dayjs(new Date(ticket.updated_at)).fromNow()}</div>
+              <p>{ticket.subject}</p>
+              <p>{ticket.agentEmail}</p>
+              <p>{displayState(ticket.status.toLowerCase())}</p>
+              <div className="ticket-date">{dayjs(new Date(ticket.updatedAt)).fromNow()}</div>
             </NavLink>
           ))}
       </List>
