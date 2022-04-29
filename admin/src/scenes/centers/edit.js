@@ -84,7 +84,6 @@ export default function Edit(props) {
       }}>
       {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <div>
-          {console.log(errors)}
           <Header>
             <Title>{defaultValue ? values.name : "Création d'un centre"}</Title>
             <LoadingButton onClick={handleSubmit} loading={loading}>
