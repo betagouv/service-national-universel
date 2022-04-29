@@ -205,10 +205,10 @@ export default function Edit(props) {
                             </div>
                             <div className="flex flex-col items-center w-3/4">
                               <div>
-                                <Error errors={errors} name={"status"} />
+                                <Error errors={errors} name={`${sessionShow}.status`} />
                               </div>
                               <div>
-                                <Error errors={errors} name={"placesTotal"} />
+                                <Error errors={errors} name={`${sessionShow}.placesTotal`} />
                               </div>
                             </div>
                           </div>
