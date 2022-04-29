@@ -18,7 +18,7 @@ export default function AddressInputV2({
   touched,
   validateField,
   countryVisible = false,
-  onChangeCountry = () => { },
+  onChangeCountry = () => {},
   countryByDefault = "",
   required = false,
   departAndRegionVisible = false,
@@ -58,9 +58,13 @@ export default function AddressInputV2({
     if (["97", "98"].includes(departmentCode)) {
       departmentCode = zip.substr(0, 3);
     }
+    //POUR LA CORSE
     if (departmentCode === "20") {
-      if (!["2A", "2B"].includes(departmentCode)) departmentCode = "2B";
+      console.log(zip);
+      if (zip === "20000" || zip.substr(0, 3) === "201") departmentCode = "2A";
+      else if (zip.substr(0, 3) === "202" || zip.substr(0, 3) === "206") departmentCode = "2B";
     }
+
     handleChange({ target: { name: keys.department, value: departmentLookUp[departmentCode] } });
     handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[departmentCode]] } });
     if (keys.academy) handleChange({ target: { name: keys.academy, value: departmentToAcademy[departmentLookUp[departmentCode]] } });
@@ -72,6 +76,7 @@ export default function AddressInputV2({
       depart = suggestion.properties.postcode.substr(0, 3);
     }
     if (depart === "20") {
+      console.log("here");
       depart = suggestion.properties.context.substr(0, 2);
       if (!["2A", "2B"].includes(depart)) depart = "2B";
     }
