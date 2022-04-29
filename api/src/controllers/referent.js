@@ -64,6 +64,9 @@ const {
   canRefuseMilitaryPreparation,
   canChangeYoungCohort,
   canSendTutorTemplate,
+  canModifyStructure,
+  canModifyReferent,
+  canSearchSessionPhase1,
 } = require("snu-lib/roles");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
@@ -853,6 +856,11 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     const structure = await StructureModel.findById(checkedStructureId);
     const referent = await ReferentModel.findById(checkedId);
     if (!referent || !structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canModifyStructure(req.user, structure) || !canModifyReferent(req.user, referent)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const missions = await MissionModel.find({ tutorId: referent._id });
     if (missions.length > 0) return res.status(405).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     referent.set({ structureId: structure._id, role: ROLES.RESPONSIBLE });
@@ -888,6 +896,10 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canSearchSessionPhase1(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const sessions = await SessionPhase1.find({ headCenterId: checkedId });
     return res.status(200).send({ ok: true, data: sessions.map(serializeSessionPhase1) });
