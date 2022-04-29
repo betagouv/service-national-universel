@@ -27,21 +27,6 @@ const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateNewCohesionCenter, validateUpdateCohesionCenter, validateId } = require("../utils/validator");
 
-router.post("/refresh/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const data = await CohesionCenterModel.findById(id);
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateNewCohesionCenter(req.body);
