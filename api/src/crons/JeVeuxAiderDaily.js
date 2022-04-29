@@ -267,7 +267,7 @@ const sync = async (result) => {
 const cleanData = async () => {
   slack.info({ title: "sync with JVA missions", text: "I'm cleaning the outdated JVA missions !" });
   try {
-    const missionsTodelete = await MissionModel.find({ lastSyncAt: { $lte: startTime }, isJvaMission: "true" });
+    const missionsTodelete = await MissionModel.find({ lastSyncAt: { $lte: startTime }, isJvaMission: "true", status: { $nin: ["CANCEL", "ARCHIVED", "REFUSED"] } });
     //Cancel mission
     for (const mission of missionsTodelete) {
       mission.set({ status: "CANCEL" });
