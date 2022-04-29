@@ -11,6 +11,7 @@ export default function Status({ filter }) {
   const [placesLeft, setPlacesLeft] = useState(0);
   const [total, setTotal] = useState(0);
   const [filterStatus, setFilterStatus] = useState(null);
+  const [sessionStatus, setSessionStatus] = useState(null);
 
   useEffect(() => {
     async function initStatus() {
@@ -49,6 +50,9 @@ export default function Status({ filter }) {
       }
     }
     initStatus();
+    const optionSessionStatus = [];
+    Object.values(SESSION_STATUS).map((status) => optionSessionStatus.push({ value: status, label: translateSessionStatus(status) }));
+    setSessionStatus(optionSessionStatus);
   }, [JSON.stringify(filter)]);
 
   return (
@@ -66,12 +70,11 @@ export default function Status({ filter }) {
           </Link>
         </Col>
         <Col>
-          <div>test </div>
-          <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"${"VALIDATED"}"%5D`] })}> vv</Link>
-          {/* {filterStatus?.map((status) =>
-            <div>test</div>
-            //<Link to={getLink({ base: `/status`, filter, filtersUrl: [`STATUS=%5B"${filterstatus[status.value]}}"%5D`] })}> {status.label}</Link>
-          )} */}
+          {sessionStatus?.map((status) =>
+            <div key={status.value} className="">
+              <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"${status.value}"%5D`] })}> {status.label}</Link>
+            </div>
+          )}
         </Col>
       </Row>
       <Row>
