@@ -184,7 +184,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
 
     // - admin and referent can send contract to everybody
     // - responsible and supervisor can send contract in their structures
-    if (!canCreateOrUpdateContract(req.user, contract)) {
+    if (!canCreateOrUpdateContract(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     let previousStructureId, currentStructureId;
@@ -232,7 +232,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
   }
 });
 
@@ -389,8 +389,6 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
     const { error: idError, value: id } = validateId(req.params.id);
     if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: idError.message });
 
-    console.log(`${req.user.id} download contract ${id}`);
-
     const contract = await ContractObject.findById(id);
     if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -414,7 +412,7 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
     res.send(buffer);
   } catch (e) {
     capture(e);
-    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
