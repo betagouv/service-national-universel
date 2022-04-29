@@ -67,7 +67,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const { value, error } = validateNewApplication(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if ("priority" in value) {
+    if (!("priority" in value)) {
       const applications = await ApplicationObject.find({ youngId: value.youngId });
       value.priority = applications.length + 1;
     }
