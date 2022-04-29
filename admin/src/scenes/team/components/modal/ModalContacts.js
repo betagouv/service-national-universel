@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
 import ModalForm from "../../../../components/modals/ModalForm";
 import { BiCopy } from "react-icons/bi";
-import { HiCheckCircle } from "react-icons/hi";
-import { copyToClipboard } from "../../../../utils";
-import { HiPhone } from "react-icons/hi";
-import { HiPlus } from "react-icons/hi";
-import { HiPencil } from "react-icons/hi";
-import { HiOutlineTrash } from "react-icons/hi";
+import { HiCheckCircle, HiPhone, HiPlus, HiPencil, HiOutlineTrash } from "react-icons/hi";
+import { copyToClipboard, translate, formatPhoneNumberFR } from "../../../../utils";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, formatPhoneNumberFR } from "../../../../utils";
 
 export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contacts, cohorts, getService }) {
   const [currentTab, setCurrentTab] = useState();
@@ -112,7 +107,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         <div className="flex flex-1 flex-col lg:flex-row mb-4 border-b">
           <nav className="px-3 flex flex-1 ">
             {cohorts.map((cohort) => (
-              <TabItem name={cohort} setCurrentTab={setCurrentTab} active={currentTab === cohort}>
+              <TabItem name={cohort} key={cohort} setCurrentTab={setCurrentTab} active={currentTab === cohort}>
                 {cohort}
               </TabItem>
             ))}
@@ -123,7 +118,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
             {contacts[currentTab].length ? (
               <div className="grid grid-cols-2 grid-rows-2 gap-4 px-4 pb-4">
                 {contacts[currentTab].map((contact) => (
-                  <Contact contact={contact} setHit={setHit} />
+                  <Contact contact={contact} key={contact} setHit={setHit} />
                 ))}
                 {contacts[currentTab].length < 4 && (
                   <div
