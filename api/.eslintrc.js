@@ -7,8 +7,8 @@ module.exports = {
     es6: true,
   },
   extends: ["eslint:recommended", "plugin:import/recommended", "plugin:prettier/recommended"],
-  plugins: ["prettier"],
+  plugins: ["prettier", "jest"],
   parserOptions: {
-    ecmaVersion: 2020,
+    ecmaVersion: 2021,
   },
 };
