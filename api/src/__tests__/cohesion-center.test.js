@@ -192,31 +192,7 @@ describe("Cohesion Center", () => {
       expect(res.status).toBe(200);
     });
   });
-
-  describe("GET /cohesion-center/:id/head", () => {
-    it("should return 404 when cohesion center is not found", async () => {
-      const res = await request(getAppHelper())
-        .get("/cohesion-center/" + notExistingCohesionCenterId + "/head")
-        .send();
-      expect(res.status).toBe(404);
-    });
-    it("should return 404 when head is not found", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const res = await request(getAppHelper())
-        .get("/cohesion-center/" + cohesionCenter._id + "/head")
-        .send();
-      expect(res.status).toBe(404);
-    });
-    it("should return 200 when cohesion center is found", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.HEAD_CENTER, cohesionCenterId: cohesionCenter._id });
-      const res = await request(getAppHelper())
-        .get("/cohesion-center/" + cohesionCenter._id + "/head")
-        .send();
-      expect(res.status).toBe(200);
-    });
-  });
-
+  
   describe("GET /cohesion-center", () => {
     it("should return 200", async () => {
       const res = await request(getAppHelper()).get("/cohesion-center/").send();
