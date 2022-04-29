@@ -1,3 +1,19 @@
+# [1.77.0](https://github.com/betagouv/service-national-universel/compare/v1.76.0...v1.77.0) (2022-04-28)
+
+
+### Bug Fixes
+
+* **app,admin:** reset password input on wrong login ([86af87b](https://github.com/betagouv/service-national-universel/commit/86af87b185d83e2e8ec92d3774b562c82d28429a))
+* **security:** update phase3 via -id only for login user (referent) ([c3903c6](https://github.com/betagouv/service-national-universel/commit/c3903c6dae3220e5d245ff3c289b0108259352cf))
+
+
+### Features
+
+* **admin:** display cohortChangeReason in panel ([e0b87c7](https://github.com/betagouv/service-national-universel/commit/e0b87c77efa1fb84618178962bcababc1e6e51d1))
+* **admin:** Statut et Export des statuts ([#1513](https://github.com/betagouv/service-national-universel/issues/1513)) ([10de599](https://github.com/betagouv/service-national-universel/commit/10de599ca3f088ee21581f4f5e2ae9bbd0917ee5))
+* **api:** model cohesionCenter ([#1514](https://github.com/betagouv/service-national-universel/issues/1514)) ([9390a4f](https://github.com/betagouv/service-national-universel/commit/9390a4fe4ebee3eacfe8b83a89ac7e2c139280cc))
+* **support:** open support to referent ([#1509](https://github.com/betagouv/service-national-universel/issues/1509)) ([7f9981b](https://github.com/betagouv/service-national-universel/commit/7f9981bf83bf9473f08d984f15ce2dc314d2c0cb))
+
 # [1.76.0](https://github.com/betagouv/service-national-universel/compare/v1.75.0...v1.76.0) (2022-04-26)
 
 

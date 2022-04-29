@@ -35,7 +35,7 @@ export default function MeetingPointView({ values, handleChange, handleSubmit })
   };
 
   const onConfirmDeplacementPhase1Autonomous = async () => {
-    const { data, code, ok } = await api.post(`/young/${values._id}/deplacementPhase1Autonomous`);
+    const { code, ok } = await api.post(`/young/${values._id}/deplacementPhase1Autonomous`);
     if (!ok) {
       setIsLoading(false);
       return toastr.error("error", translate(code));

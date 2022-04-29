@@ -1,21 +1,19 @@
+import { Field, Formik } from "formik";
 import React, { useEffect, useState } from "react";
+import { BiHandicap } from "react-icons/bi";
+import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
-import { Formik, Field } from "formik";
-import { useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
-
-import { translate, translateSessionStatus, SESSION_STATUS } from "../../utils";
-import api from "../../services/api";
-import Loader from "../../components/Loader";
-import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
-import Select from "./components/Select";
-import LoadingButton from "../../components/buttons/LoadingButton";
 import AddressInput from "../../components/addressInputVCenter";
-import MultiSelect from "../../components/Multiselect";
+import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import Error, { requiredMessage } from "../../components/errorMessage";
-import { BiHandicap } from 'react-icons/bi';
+import Loader from "../../components/Loader";
+import MultiSelect from "../../components/Multiselect";
+import api from "../../services/api";
+import { SESSION_STATUS, translate, translateSessionStatus } from "../../utils";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -23,8 +21,8 @@ export default function Edit(props) {
   const history = useHistory();
   const isNew = !props?.match?.params?.id;
   const user = useSelector((state) => state.Auth.user);
-  const [sessionShow, setsessionShow] = useState(null)
-  const [sessionStatus, setSessionStatus] = useState(null)
+  const [sessionShow, setsessionShow] = useState(null);
+  const [sessionStatus, setSessionStatus] = useState(null);
 
   async function init() {
     if (isNew) return setDefaultValue(null);
@@ -37,37 +35,23 @@ export default function Edit(props) {
     for (const cohort of center.cohorts) {
       const sessionPhase1Response = await api.get(`/cohesion-center/${id}/cohort/${cohort}/session-phase1`);
       if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
-      obj[sessionPhase1Response.data.cohort] = { placesTotal: sessionPhase1Response.data.placesTotal, status: sessionPhase1Response.data.status }
-      setsessionShow(sessionPhase1Response.data.cohort)
+      obj[sessionPhase1Response.data.cohort] = {
+        placesTotal: sessionPhase1Response.data.placesTotal,
+        placesLeft: sessionPhase1Response.data.placesLeft,
+        status: sessionPhase1Response.data.status,
+      };
+      setsessionShow(sessionPhase1Response.data.cohort);
     }
     setDefaultValue(obj);
   }
 
   useEffect(() => {
-    const optionSessionStatus = []
-    Object.values(SESSION_STATUS).map((status) => (
-      optionSessionStatus.push({ value: status, label: translateSessionStatus(status) })
-    ))
-    setSessionStatus(optionSessionStatus)
+    const optionSessionStatus = [];
+    Object.values(SESSION_STATUS).map((status) => optionSessionStatus.push({ value: status, label: translateSessionStatus(status) }));
+    setSessionStatus(optionSessionStatus);
 
     init();
   }, []);
-
-  const updateSessions = async (newValues) => {
-    //Dynamic update for cohorts
-    let sessionToUpdate = [];
-    for (let i = 0; i < newValues.cohorts.length; i++) {
-      const sessionPhase1Response = await api.get(`/cohesion-center/${newValues._id}/cohort/${newValues.cohorts[i]}/session-phase1`);
-      if (!sessionPhase1Response.ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la session", translate(sessionPhase1Response.code));
-      sessionToUpdate.push(sessionPhase1Response.data);
-    }
-    for (const session of sessionToUpdate) {
-      if (session.placesTotal !== newValues[session.cohort]) {
-        const { ok, code } = await api.put(`/session-phase1/${session._id}`, { placesTotal: newValues[session.cohort].placesTotal, status: newValues[session.cohort].status });
-        if (!ok) return toastr.error(`Oups, une erreur est survenue lors de la mise à jour de la session ${session.cohort}`, translate(code));
-      }
-    }
-  };
 
   if (!defaultValue && !isNew) return <Loader />;
 
@@ -79,14 +63,16 @@ export default function Edit(props) {
       onSubmit={async (values) => {
         try {
           setLoading(true);
-          if (isNew) {
-            values.placesLeft = values.placesTotal
-          }
-          else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
-
+          values.sessionStatus = [];
+          values.cohorts.map((cohort) => {
+            //maj session status
+            values.sessionStatus.push(values[cohort].status);
+            //maj places
+            values[cohort].placesTotal = Number(values[cohort].placesTotal);
+            if (defaultValue && defaultValue[cohort]) values[cohort].placesLeft += values[cohort].placesTotal - defaultValue[cohort].placesTotal;
+            else values[cohort].placesLeft = values[cohort].placesTotal;
+          });
           const { ok, code, data } = values._id ? await api.put(`/cohesion-center/${values._id}`, values) : await api.post("/cohesion-center", values);
-          await updateSessions(values);
-
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));
           history.push(`/centre/${data._id}`);
@@ -98,7 +84,6 @@ export default function Edit(props) {
       }}>
       {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <div>
-
           <Header>
             <Title>{defaultValue ? values.name : "Création d'un centre"}</Title>
             <LoadingButton onClick={handleSubmit} loading={loading}>
@@ -114,11 +99,6 @@ export default function Edit(props) {
                     <div className="ml-1 font-bold text-lg">Informations générales</div>
                     <div className="ml-1 mt-8"> Nom </div>
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <div className="ml-1 mt-8"> Code </div>
-                    <div className="flex w-full">
-                      <Item disabled={user.role !== "admin"} title="Code" values={values} name="code" handleChange={handleChange} />
-                      <Item disabled={user.role !== "admin"} title="Code 2022" values={values} name="code2022" handleChange={handleChange} />
-                    </div>
                     <div className="ml-1 mt-8"> Adresse </div>
                     <AddressInput
                       keys={{
@@ -153,8 +133,6 @@ export default function Edit(props) {
                       errors={errors}
                       touched={touched}
                     />
-
-
                   </BoxContent>
                 </Box>
               </Col>
@@ -180,7 +158,15 @@ export default function Edit(props) {
                         <div className="flex justify-around border-bottom mb-2">
                           {(values.cohorts || []).map((cohort, index) => (
                             <>
-                              <div key={index} className={`pb-2 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`} onClick={() => { setsessionShow(cohort) }}> {cohort} </div>
+                              <div
+                                key={index}
+                                className={`pb-2 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
+                                onClick={() => {
+                                  setsessionShow(cohort);
+                                }}>
+                                {" "}
+                                {cohort}{" "}
+                              </div>
                             </>
                           ))}
                         </div>
@@ -190,9 +176,9 @@ export default function Edit(props) {
                               <ElementsSejour
                                 key={`${sessionShow}.Places`}
                                 title={"Capacite d'acceuil"}
-                                values={values[sessionShow]?.placesTotal || ''}
+                                values={values[sessionShow]?.placesTotal || ""}
                                 name={`${sessionShow}.placesTotal`}
-                                placeholder={values[sessionShow]?.placesTotal || ''}
+                                placeholder={values[sessionShow]?.placesTotal || ""}
                                 handleChange={handleChange}
                                 required
                                 errors={errors}
@@ -202,7 +188,7 @@ export default function Edit(props) {
                             <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
                               <SelectStatus
                                 name={`${sessionShow}.status`}
-                                values={values[sessionShow]?.status}
+                                values={values[sessionShow]?.status || ""}
                                 handleChange={handleChange}
                                 title="Statut"
                                 options={sessionStatus}
@@ -212,13 +198,14 @@ export default function Edit(props) {
                               />
                             </div>
                           </div>
-                        ) : (null)}
+                        ) : null}
                       </div>
-                    </>) : (null)}
+                    </>
+                  ) : null}
                 </Box>
               </Col>
             </Row>
-            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
+            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas enregistrer ce centre car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               <LoadingButton onClick={handleSubmit} loading={loading}>
                 {defaultValue ? "Enregistrer les modifications" : "Créer le centre"}
@@ -249,18 +236,28 @@ const ElementsSejour = ({ title, placeholder, values, name, handleChange, type =
   return (
     <>
       <div className="text-gray-500 text-xs"> {title} </div>
-      <input disabled={disabled} value={translate(values[name])} name={name} onChange={handleChange} placeholder={placeholder} validate={(v) => required && !v && requiredMessage}></input>
+      <input
+        disabled={disabled}
+        value={translate(values[name])}
+        name={name}
+        onChange={handleChange}
+        placeholder={placeholder}
+        validate={(v) => required && !v && requiredMessage}
+        required
+      />
       {errors && touched && <Error errors={errors} touched={touched} name={name} />}
     </>
-  )
-}
+  );
+};
 
 const SelectStatus = ({ title, name, values, handleChange, disabled, options, required = false, errors, touched }) => {
   return (
     <div className="">
       <div className="text-gray-500 text-xs"> {title} </div>
       <select disabled={disabled} name={name} value={values} onChange={handleChange} className="w-full bg-inherit">
-        <option key={-1} value="" label=""></option>
+        <option disabled value="">
+          Sélectionner un statut
+        </option>
         {options.map((o, i) => (
           <option key={i} value={o.value} label={o.label}>
             {o.label}
@@ -269,8 +266,8 @@ const SelectStatus = ({ title, name, values, handleChange, disabled, options, re
       </select>
       {errors && touched && <Error errors={errors} touched={touched} name={name} />}
     </div>
-  )
-}
+  );
+};
 
 const SelectPMR = ({ title, name, values, handleChange, disabled, options, required = false, errors, touched }) => {
   return (
@@ -291,8 +288,8 @@ const SelectPMR = ({ title, name, values, handleChange, disabled, options, requi
         {errors && touched && <Error errors={errors} touched={touched} name={name} />}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const Item = ({ title, placeholder, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) => {
   return (
@@ -311,8 +308,8 @@ const Item = ({ title, placeholder, values, name, handleChange, type = "text", d
       />
       {errors && touched && <Error errors={errors} touched={touched} name={name} />}
     </Row>
-  )
-}
+  );
+};
 
 const Wrapper = styled.div`
   padding: 2rem;

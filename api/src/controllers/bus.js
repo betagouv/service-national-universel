@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-
+const { canViewBus } = require("snu-lib/roles");
 const { capture } = require("../sentry");
 const BusModel = require("../models/bus");
 const { ERRORS } = require("../utils");
@@ -12,6 +12,8 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canViewBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await BusModel.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

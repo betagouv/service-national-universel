@@ -7,7 +7,8 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES, canCreateOrUpdateCohesionCenter, translateSessionStatus, COHORTS } from "../../utils";
+
 import VioletButton from "../../components/buttons/VioletButton";
 import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
@@ -17,7 +18,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 
-const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUT"];
+const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS"];
 
 export default function List() {
   const [center, setCenter] = useState(null);
@@ -29,6 +30,7 @@ export default function List() {
 
   // list of cohorts selected, used for filtering the sessionPhase1 displayed inline
   const [filterCohorts, setFilterConhorts] = useState([]);
+  const [filterSessionStatus, setfilterSessionStatus] = useState([]);
 
   const user = useSelector((state) => state.Auth.user);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
@@ -69,6 +71,17 @@ export default function List() {
                 react={{ and: FILTERS }}
                 transform={(all) => {
                   return all.map((data) => {
+                    let statutExport = {};
+                    COHORTS.forEach((cohort) => {
+                      statutExport[`${cohort} statut`] = "";
+                      data.cohorts.map((e, index) => {
+                        if (e === cohort) {
+                          if (data.sessionStatus !== undefined) {
+                            statutExport[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
+                          }
+                        }
+                      });
+                    });
                     return {
                       Nom: data.name,
                       id: data._id,
@@ -89,6 +102,7 @@ export default function List() {
                       Observations: data.observations,
                       "Créé lé": formatLongDateFR(data.createdAt),
                       "Mis à jour le": formatLongDateFR(data.updatedAt),
+                      ...statutExport,
                     };
                   });
                 }}
@@ -149,6 +163,21 @@ export default function List() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Places restantes", "Places restantes")}
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="STATUS"
+                  dataField="sessionStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)}`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut", "Statut")}
+                  onValueChange={setfilterSessionStatus}
+                />
                 <DeleteFilters />
               </FilterRow>
             </Filter>
@@ -175,7 +204,12 @@ export default function List() {
                           key={hit._id}
                           hit={hit}
                           sessionsPhase1={sessionsPhase1
-                            .filter((e) => e?._source?.cohesionCenterId === hit._id && (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)))
+                            .filter(
+                              (e) =>
+                                e?._source?.cohesionCenterId === hit._id &&
+                                (!filterCohorts.length || filterCohorts.includes(e?._source?.cohort)) &&
+                                (!filterSessionStatus.length || filterSessionStatus.includes(e?._source?.status)),
+                            )
                             .map((e) => e)}
                           onClick={() => setCenter(hit)}
                           selected={center?._id === hit._id}
@@ -212,11 +246,14 @@ const Hit = ({ hit, onClick, selected, sessionsPhase1 }) => {
           <SubTd key={sessionPhase1._id}>
             <div className="flex items-center">
               <Badge text={sessionPhase1._source.cohort} />
-              {sessionPhase1._source.status ?
-                <div className={`border text-xs rounded-full p-1 ${sessionPhase1._source.status === "DRAFT" ? ("border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] ") : ("border-[#A4D8BC]  bg-[#F5FCF3] text-[#27AF66]")}`}>
+              {sessionPhase1._source.status ? (
+                <div
+                  className={`border text-xs rounded-full p-1 ${
+                    sessionPhase1._source.status === "DRAFT" ? "border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] " : "border-[#A4D8BC]  bg-[#F5FCF3] text-[#27AF66]"
+                  }`}>
                   {translateSessionStatus(sessionPhase1._source.status)}
                 </div>
-                : null}
+              ) : null}
             </div>
           </SubTd>
         ))}
