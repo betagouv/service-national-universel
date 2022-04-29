@@ -75,7 +75,6 @@ export default function AddressInputV2({
       depart = suggestion.properties.postcode.substr(0, 3);
     }
     if (depart === "20") {
-      console.log("here");
       depart = suggestion.properties.context.substr(0, 2);
       if (!["2A", "2B"].includes(depart)) depart = "2B";
     }
