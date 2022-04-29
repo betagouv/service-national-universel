@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const { canViewMeetingPoints } = require("snu-lib/roles");
 const { capture } = require("../sentry");
-
 const { validateId } = require("../utils/validator");
 const MeetingPointModel = require("../models/meetingPoint");
 const CohesionCenterModel = require("../models/cohesionCenter");
@@ -11,6 +11,7 @@ const { ERRORS, isYoung } = require("../utils");
 
 router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await MeetingPointModel.find({});
     return res.status(200).send({ ok: true, data });
   } catch (error) {
