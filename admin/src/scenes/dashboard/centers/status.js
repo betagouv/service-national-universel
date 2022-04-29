@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
-import { YOUNG_STATUS_COLORS, colors, getLink, ES_NO_LIMIT } from "../../../utils";
+import { YOUNG_STATUS_COLORS, colors, getLink, ES_NO_LIMIT, translateSessionStatus, SESSION_STATUS } from "../../../utils";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
 
 import api from "../../../services/api";
@@ -10,6 +10,7 @@ export default function Status({ filter }) {
   const [placesTotal, setPlacesTotal] = useState(0);
   const [placesLeft, setPlacesLeft] = useState(0);
   const [total, setTotal] = useState(0);
+  const [filterStatus, setFilterStatus] = useState(null);
 
   useEffect(() => {
     async function initStatus() {
@@ -33,16 +34,18 @@ export default function Status({ filter }) {
         aggs: {
           placesTotal: { sum: { field: "placesTotal" } },
           placesLeft: { sum: { field: "placesLeft" } },
+          filterStatus: { terms: { field: "status.keywords" } },
         },
         size: 0,
       };
 
       if (filter.cohort?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
       const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
-
       if (responsesSession.length) {
         setPlacesTotal(responsesSession[0].aggregations.placesTotal.value);
         setPlacesLeft(responsesSession[0].aggregations.placesLeft.value);
+        setFilterStatus(responsesSession[0].aggregations.filterStatus.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}))
+        console.log(responsesSession[0].aggregations.filterStatus.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}))
       }
     }
     initStatus();
@@ -61,6 +64,14 @@ export default function Status({ filter }) {
               </CardValueWrapper>
             </Card>
           </Link>
+        </Col>
+        <Col>
+          <div>test </div>
+          <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"${"VALIDATED"}"%5D`] })}> vv</Link>
+          {/* {filterStatus?.map((status) =>
+            <div>test</div>
+            //<Link to={getLink({ base: `/status`, filter, filtersUrl: [`STATUS=%5B"${filterstatus[status.value]}}"%5D`] })}> {status.label}</Link>
+          )} */}
         </Col>
       </Row>
       <Row>

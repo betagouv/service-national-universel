@@ -137,72 +137,73 @@ export default function Edit(props) {
                 </Box>
               </Col>
               <Col className="mb-10 w-1/2">
-                <Box>
-                  <BoxHeadTitle>Par séjour</BoxHeadTitle>
-                  <BoxContent direction="column">
-                    <MultiSelectWithTitle
-                      required
-                      errors={errors}
-                      touched={touched}
-                      title="Séjour(s) de cohésion concerné(s)"
-                      value={values.cohorts}
-                      onChange={handleChange}
-                      name="cohorts"
-                      options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
-                      placeholder="Sélectionner un ou plusieurs séjour de cohésion"
-                    />
-                  </BoxContent>
-                  {values.cohorts?.length ? (
-                    <>
-                      <div className="">
-                        <div className="flex justify-left border-bottom mb-2 pl-5">
-                          {(values.cohorts || []).map((cohort, index) => (
-                            <>
-                              <div
-                                key={index}
-                                className={`pb-2 mr-8 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
-                                onClick={() => {
-                                  setsessionShow(cohort);
-                                }}>
-                                {" "}
-                                {cohort}{" "}
-                              </div>
-                            </>
-                          ))}
-                        </div>
-                        {sessionShow ? (
-                          <div className="flex ml-5 mt-4 ">
-                            <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
-                              <ElementsSejour
-                                key={`${sessionShow}.Places`}
-                                title={"Capacite d'acceuil"}
-                                values={values[sessionShow]?.placesTotal || ""}
-                                name={`${sessionShow}.placesTotal`}
-                                placeholder={values[sessionShow]?.placesTotal || ""}
-                                handleChange={handleChange}
-                                required
-                                errors={errors}
-                                touched={touched}
-                              />
-                            </div>
-                            <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
-                              <SelectStatus
-                                name={`${sessionShow}.status`}
-                                values={values[sessionShow]?.status || ""}
-                                handleChange={handleChange}
-                                title="Statut"
-                                options={sessionStatus}
-                                required
-                                errors={errors}
-                                touched={touched}
-                              />
-                            </div>
+                <div>
+                  <div className="bg-white pb-5 rounded-lg drop-shadow-[ 0px 3px 2px #edf2f7]">
+                    <BoxHeadTitle >Par séjour</BoxHeadTitle>
+                    <BoxContent direction="column">
+                      <MultiSelectWithTitle
+                        required
+                        errors={errors}
+                        touched={touched}
+                        title="Séjour(s) de cohésion concerné(s)"
+                        value={values.cohorts}
+                        onChange={handleChange}
+                        name="cohorts"
+                        options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
+                        placeholder="Sélectionner un ou plusieurs séjour de cohésion"
+                      />
+                    </BoxContent>
+                    {values.cohorts?.length ? (
+                      <>
+                        <div className="">
+                          <div className="flex justify-left border-bottom mb-2 pl-5">
+                            {(values.cohorts || []).map((cohort, index) => (
+                              <>
+                                <div
+                                  key={index}
+                                  className={`pb-2 mr-8 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
+                                  onClick={() => {
+                                    setsessionShow(cohort);
+                                  }}>
+                                  {cohort}
+                                </div>
+                              </>
+                            ))}
                           </div>
-                        ) : null}
-                      </div>
-                    </>
-                  ) : null}
-                </Box>
+                          {sessionShow ? (
+                            <div className="flex ml-5 mt-4 ">
+                              <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
+                                <ElementsSejour
+                                  key={`${sessionShow}.Places`}
+                                  title={"Capacite d'acceuil"}
+                                  values={values[sessionShow]?.placesTotal || ""}
+                                  name={`${sessionShow}.placesTotal`}
+                                  placeholder={values[sessionShow]?.placesTotal || ""}
+                                  handleChange={handleChange}
+                                  required
+                                  errors={errors}
+                                  touched={touched}
+                                />
+                              </div>
+                              <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
+                                <SelectStatus
+                                  name={`${sessionShow}.status`}
+                                  values={values[sessionShow]?.status || ""}
+                                  handleChange={handleChange}
+                                  title="Statut"
+                                  options={sessionStatus}
+                                  required
+                                  errors={errors}
+                                  touched={touched}
+                                />
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
               </Col>
             </Row>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas enregistrer ce centre car tous les champs ne sont pas correctement renseignés.</h3> : null}
