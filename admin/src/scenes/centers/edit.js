@@ -59,28 +59,6 @@ export default function Edit(props) {
     <Formik
       validateOnChange={false}
       validateOnBlur={false}
-      validate={(values) => {
-        const errors = {};
-        if (!values.pmr) errors.pmr = "L'Accessibilité PMR doit être renseignée";
-        if (!values.name) errors.name = "Ce champ est obligatoire";
-        if (!values.country) errors.country = "Ce champ est obligatoire";
-        if (!values.city) errors.city = "Ce champ est obligatoire";
-        if (!values.zip) errors.zip = "Ce champ est obligatoire";
-        if (!values.address) errors.address = "Ce champ est obligatoire";
-        if (!values.location) errors.location = "Ce champ est obligatoire";
-        if (!values.department) errors.department = "Ce champ est obligatoire";
-        if (!values.region) errors.region = "Ce champ est obligatoire";
-        if (!values.addressVerified) errors.addressVerified = "Ce champ est obligatoire";
-        let verificationStatus = true
-        values.cohorts.map((cohort) => { if (values[cohort]?.status === undefined) verificationStatus = false })
-        if (!verificationStatus) errors.status = "Tous les statuts des sessions sont obligatoire";
-        let verificationPlaces = true
-        values.cohorts.map((cohort) => {
-          if (values[cohort]?.placesTotal === "" || values[cohort]?.placesTotal === undefined) verificationPlaces = false
-        })
-        if (!verificationPlaces) errors.placesTotal = "Le nombre de places de chaque session est obligatoire";
-        return errors;
-      }}
       initialValues={defaultValue || {}}
       onSubmit={async (values) => {
         try {
@@ -106,6 +84,7 @@ export default function Edit(props) {
       }}>
       {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <div>
+          {console.log(errors)}
           <Header>
             <Title>{defaultValue ? values.name : "Création d'un centre"}</Title>
             <LoadingButton onClick={handleSubmit} loading={loading}>
@@ -151,7 +130,7 @@ export default function Edit(props) {
                         { value: "true", label: "Oui" },
                         { value: "false", label: "Non" },
                       ]}
-                      required
+                      validate={(e) => !e && "L'Accessibilité PMR doit être renseignée"}
                       errors={errors}
                       touched={touched}
                     />
@@ -159,8 +138,6 @@ export default function Edit(props) {
                       <Error errors={errors} name={"pmr"} />
                     </div>
                   </BoxContent>
-
-
                 </Box>
               </Col>
               <Col className="mb-10 w-1/2">
@@ -183,7 +160,7 @@ export default function Edit(props) {
                   {values.cohorts?.length ? (
                     <>
                       <div className="">
-                        <div className="flex justify-between border-bottom mb-2 pl-5">
+                        <div className="flex border-bottom mb-2 pl-5">
                           {(values.cohorts || []).map((cohort, index) => (
                             <>
                               <div
@@ -201,7 +178,7 @@ export default function Edit(props) {
                           <div className="ml-5 mt-4 ">
                             <div className="flex ">
                               <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
-                                <ElementsSejour
+                                <PlaceCapacity
                                   key={`${sessionShow}.Places`}
                                   title={"Capacite d'acceuil"}
                                   values={values[sessionShow]?.placesTotal || ""}
@@ -210,6 +187,7 @@ export default function Edit(props) {
                                   required
                                   errors={errors}
                                   touched={touched}
+                                  validate={(e) => !e && `La capacité d'acceuil de ${sessionShow} doit être renseignée`}
                                 />
                               </div>
                               <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
@@ -222,17 +200,20 @@ export default function Edit(props) {
                                   required
                                   errors={errors}
                                   touched={touched}
+                                  validate={(e) => !e && `Le status pour la session de ${sessionShow} est obligatoire`}
                                 />
                               </div>
                             </div>
                             <div className="flex flex-col items-center w-3/4">
-                              <div> <Error errors={errors} name={"status"} /> </div>
-                              <div> <Error errors={errors} name={"placesTotal"} /> </div>
+                              <div>
+                                <Error errors={errors} name={"status"} />
+                              </div>
+                              <div>
+                                <Error errors={errors} name={"placesTotal"} />
+                              </div>
                             </div>
                           </div>
-
                         ) : null}
-
                       </div>
                     </>
                   ) : null}
@@ -248,7 +229,7 @@ export default function Edit(props) {
           </Wrapper>
         </div>
       )}
-    </Formik >
+    </Formik>
   );
 }
 const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder, required, errors, touched, setsessionShow }) => {
@@ -266,42 +247,35 @@ const MultiSelectWithTitle = ({ title, value, onChange, name, options, placehold
   );
 };
 
-const ElementsSejour = ({ title, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) => {
+const PlaceCapacity = ({ title, values, name, handleChange, disabled = false, validate }) => {
   return (
     <>
       <div className="text-gray-500 text-xs"> {title} </div>
-      <Field
-        disabled={disabled}
-        value={values}
-        name={name}
-        onChange={handleChange}
-        validate={(v) => required && !v && requiredMessage}
-        required
-      />
+      <Field disabled={disabled} value={values} name={name} onChange={handleChange} validate={validate} />
     </>
   );
 };
 
-const SelectStatus = ({ title, name, values, handleChange, disabled, options, required = false, errors, touched }) => {
+const SelectStatus = ({ title, name, values, handleChange, disabled, options, validate }) => {
   return (
     <div className="">
       <div className="text-gray-500 text-xs"> {title} </div>
+      <Field hidden value={values} name={name} onChange={handleChange} validate={validate} />
       <select disabled={disabled} name={name} value={values} required onChange={handleChange} className="w-full bg-inherit">
         <option disabled value="">
           Sélectionner un statut
         </option>
         {options.map((o, i) => (
-          <option key={i} value={o.value} label={o.label} >
+          <option key={i} value={o.value} label={o.label}>
             {o.label}
           </option>
         ))}
       </select>
-      {errors && touched && <Error errors={errors} touched={touched} name={name} />}
     </div>
   );
 };
 
-const SelectPMR = ({ title, name, values, handleChange, disabled, options, required = false, errors, touched }) => {
+const SelectPMR = ({ title, name, values, handleChange, disabled, options, validate }) => {
   return (
     <div className="flex border w-full  justify-items-start ml-0.5 my-1 rounded-lg rounded-grey-300 p-2">
       <div className="bg-gray-100 rounded-full p-1">
@@ -309,6 +283,7 @@ const SelectPMR = ({ title, name, values, handleChange, disabled, options, requi
       </div>
       <div className="items-start ml-2 w-full">
         <div className="ml-1 text-xs"> {title} </div>
+        <Field hidden value={values} name={name} onChange={handleChange} validate={validate} />
         <select disabled={disabled} className="w-full bg-inherit" name={name} value={values} onChange={handleChange}>
           <option key={-1} value="" label=""></option>
           {options.map((o, i) => (
@@ -318,7 +293,7 @@ const SelectPMR = ({ title, name, values, handleChange, disabled, options, requi
           ))}
         </select>
       </div>
-    </div >
+    </div>
   );
 };
 
