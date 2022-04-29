@@ -25,8 +25,8 @@ export default function DocumentsPhase1({ young }) {
       if (young.cohesionStayMedicalFileReceived === "true") nb++;
       if (young.rulesFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
       if (young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
+      console.log(young.cohesionStayMedicalFileReceived, young.imageRightFilesStatus, young.autoTestPCRFilesStatus, young.rulesFilesStatus);
       setDocuments(nb);
-      console.log(young.autoTestPCRFilesStatus);
     }
   }, []);
 
@@ -38,6 +38,14 @@ export default function DocumentsPhase1({ young }) {
             Mes documents justificatifs <strong>({documents}/4)</strong>
           </h3>
           <ScrollSection className="flex justify-between overflow-x-auto scrollbar-x pt-4">
+            <FileCard
+              name="Règlement intérieur"
+              icon="reglement"
+              filled={young.rulesFilesStatus !== "TO_UPLOAD"}
+              color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.rulesFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
+              status={translateFileStatusPhase1(young.rulesFilesStatus)}
+              onClick={() => setIsOpenReg(true)}
+            />
             <FileCard
               name="Fiche sanitaire"
               icon="sanitaire"
@@ -60,17 +68,9 @@ export default function DocumentsPhase1({ young }) {
               name="Utilisation d'autotest"
               icon="autotest"
               filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"}
-              color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.rulesFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
+              color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.autoTestPCRFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
               status={translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
               onClick={() => setIsOpenAut(true)}
-            />
-            <FileCard
-              name="Règlement intérieur"
-              icon="reglement"
-              filled={young.rulesFilesStatus !== "TO_UPLOAD"}
-              color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.autoTestPCRFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
-              status={translateFileStatusPhase1(young.rulesFilesStatus)}
-              onClick={() => setIsOpenReg(true)}
             />
           </ScrollSection>
         </>

@@ -21,7 +21,7 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
   const young = useSelector((state) => state.Auth.young);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [showFields, setShowFields] = useState(!young.imageRightFiles?.length);
+  const [showFields, setShowFields] = useState(!young.imageRightFiles?.length || correction);
   const isPlural = young?.parent1Status && young?.parent2Status;
 
   const dispatch = useDispatch();
@@ -45,7 +45,7 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                   </p>
                 </div>
               </section>
-              {young.imageRightFiles && young.imageRightFiles.length ? (
+              {young.imageRightFiles && young.imageRightFiles.length && !correction ? (
                 <>
                   <SuccessMessage>
                     <Logo>
@@ -62,6 +62,12 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                   )}
                 </>
               ) : null}
+              {correction && (
+                <section className="my-3 text-center bg-[#FFF4F0] rounded-md p-4">
+                  <p className="text-[#EF6737]">Corrections à apporter :</p> <br />
+                  <p className="text-gray-600">{correction}</p>
+                </section>
+              )}
               {showFields && (
                 <>
                   <Formik
@@ -185,18 +191,11 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                           </p>
                         </section>
 
-                        {correction && (
-                          <section className="my-3 text-center bg-[#FFF4F0] rounded-md p-4">
-                            <p className="text-[#EF6737]">Corrections à apporter :</p> <br />
-                            <p className="text-gray-600">{correction}</p>
-                          </section>
-                        )}
-
                         <div className="noPrint">
                           {/* @todo add with france connect */}
                           {/* <Title>
-                    <span>Vous pouvez signer le formulaire de deux façons</span>
-                  </Title> */}
+                              <span>Vous pouvez signer le formulaire de deux façons</span>
+                            </Title> */}
                           <section className="flex flex-col items-start lg:flex-row lg:justify-center mt-4">
                             {/* <BackButton>
                             <DownloadFormButton young={values} uri="imageRight">
@@ -225,11 +224,12 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                                 setUploading(false);
                               }}
                             />
-                            <ErrorMessage errors={errors} touched={touched} name="imageRightFiles" />
+
                             {/* <div>OU</div>
-                    <div>FRANCE CONNECT</div> */}
+                            <div>FRANCE CONNECT</div> */}
                           </section>
                         </div>
+                        <ErrorMessage className="text-center" errors={errors} touched={touched} name="imageRightFiles" />
                         {/* <SignBox className="onlyPrint">
                       <Row>
                         <Col md={6}>

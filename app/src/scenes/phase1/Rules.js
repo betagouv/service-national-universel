@@ -23,7 +23,7 @@ export default function Rules({ isOpen, onCancel, correction }) {
   const isPlural = young?.parent1Status && young?.parent2Status;
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [showFields, setShowFields] = useState(!young.rulesFiles?.length);
+  const [showFields, setShowFields] = useState(!young.rulesFiles?.length || correction);
 
   return (
     <>
@@ -41,7 +41,7 @@ export default function Rules({ isOpen, onCancel, correction }) {
                   </p>
                 </div>
               </section>
-              {young.rulesFiles && young.rulesFiles.length ? (
+              {young.rulesFiles && young.rulesFiles.length && !correction ? (
                 <>
                   <SuccessMessage>
                     <Logo>
@@ -58,6 +58,12 @@ export default function Rules({ isOpen, onCancel, correction }) {
                   )}
                 </>
               ) : null}
+              {correction && (
+                <section className="my-3 text-center bg-[#FFF4F0] rounded-md p-4">
+                  <p className="text-[#EF6737]">Corrections à apporter :</p> <br />
+                  <p className="text-gray-600">{correction}</p>
+                </section>
+              )}
               {showFields && (
                 <>
                   <Formik
@@ -160,12 +166,6 @@ export default function Rules({ isOpen, onCancel, correction }) {
                             </Col>
                           </FormRow>
                         </section>
-                        {correction && (
-                          <section className="my-3 text-center bg-[#FFF4F0] rounded-md p-4">
-                            <p className="text-[#EF6737]">Corrections à apporter :</p> <br />
-                            <p className="text-gray-600">{correction}</p>
-                          </section>
-                        )}
                         <div className="noPrint">
                           {/* @todo add with france connect */}
                           {/* <Title>

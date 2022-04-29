@@ -23,7 +23,7 @@ export default function AutoTest({ isOpen, onCancel, correction }) {
   const isPlural = young?.parent1Status && young?.parent2Status;
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [showFields, setShowFields] = useState(!young.autoTestPCRFiles?.length);
+  const [showFields, setShowFields] = useState(!young.autoTestPCRFiles?.length || correction);
 
   return (
     <>
@@ -50,7 +50,7 @@ export default function AutoTest({ isOpen, onCancel, correction }) {
                   </p>
                 </div>
               </section>
-              {young.autoTestPCRFiles && young.autoTestPCRFiles.length ? (
+              {young.autoTestPCRFiles && young.autoTestPCRFiles.length && !correction ? (
                 <>
                   <SuccessMessage>
                     <Logo>
@@ -67,6 +67,12 @@ export default function AutoTest({ isOpen, onCancel, correction }) {
                   )}
                 </>
               ) : null}
+              {correction && (
+                <section className="my-3 text-center bg-[#FFF4F0] rounded-md p-4">
+                  <p className="text-[#EF6737]">Corrections à apporter :</p> <br />
+                  <p className="text-gray-600">{correction}</p>
+                </section>
+              )}
               {showFields && (
                 <>
                   <Formik
@@ -190,12 +196,6 @@ export default function AutoTest({ isOpen, onCancel, correction }) {
                             de centre et aux personnes habilitées par ce dernier.
                           </p>
                         </section>
-                        {correction && (
-                          <section className="my-3 text-center bg-[#FFF4F0] rounded-md p-4">
-                            <p className="text-[#EF6737]">Corrections à apporter :</p> <br />
-                            <p className="text-gray-600">{correction}</p>
-                          </section>
-                        )}
                         <div className="noPrint">
                           {/* @todo add with france connect */}
                           {/* <Title>

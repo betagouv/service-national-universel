@@ -29,7 +29,7 @@ export default function MedicalFile({ isOpen, onCancel }) {
           <ModalContainer className="p-12 w-100">
             <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={onCancel} />
             <h2 className="mb-4 text-center">Téléchargez votre fiche sanitaire</h2>
-            <div className="flex flex-col md:flex-row">
+            <div className={`flex flex-col ${young.cohesionStayMedicalFileReceived === "true" ? "" : "md:flex-row"}`}>
               <section>
                 {young.cohesionStayMedicalFileReceived === "true" ? (
                   <SuccessMessage>
