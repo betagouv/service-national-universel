@@ -44,16 +44,20 @@ export default function Done() {
                       J&apos;ai une question sur la JDC ›
                     </a>
                     <div className="flex items-center">
-                      <DownloadAttestationButton young={young} uri="1">
-                        <DownloadButton text="Télécharger mon attestation" tw="bg-indigo-700 text-white mr-3" />
+                      <DownloadAttestationButton
+                        young={young}
+                        uri="1"
+                        className="flex items-center border-[1px] border-indigo-700 rounded-lg px-4 py-2.5 font-sm leading-5  mt-4 shadow-sm bg-indigo-700 text-white mr-3">
+                        Télécharger mon attestation
                       </DownloadAttestationButton>
                       <MailAttestationButton
+                        className="flex items-center border-[1px] border-indigo-700 rounded-lg px-4 py-2.5 font-sm leading-5 mt-4 shadow-sm text-indigo-700 bg-white"
                         young={young}
                         type="1"
                         template="certificate"
                         placeholder="Attestation de réalisation de la phase 1"
                         onClick={() => plausibleEvent("Phase1/CTA - Envoi par mail de l'attestation réussite")}>
-                        <DownloadButton text="Envoyer par mail" tw="text-indigo-700 bg-white" />
+                        Envoyer par mail
                       </MailAttestationButton>
                     </div>
                   </article>
