@@ -65,9 +65,8 @@ export default function changeSejour() {
 
   const onConfirmer = () => {
     if (newSejour && motif) {
-      var isGoalTrue = sejourGoal.find((obj) => obj.goal === true && obj.id === newSejour);
+      let isGoalTrue = sejourGoal.find((obj) => obj.goal === true && obj.sejour === newSejour);
       //si le volontaire est en statut de phase 1 “affectée” et que les objectifs de recrutement sont atteint pour le nouveau séjour choisi
-
       if (isGoalTrue === undefined) {
         setmodalConfirmControlOk(true);
       } else {
