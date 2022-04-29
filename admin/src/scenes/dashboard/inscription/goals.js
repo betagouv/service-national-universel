@@ -19,7 +19,7 @@ export default function Goal({ filter }) {
   }, [total2020Affected, totalValidated]);
   const percent = useMemo(() => {
     if (!goal || !totalInscription) return 0;
-    return Math.round((totalInscription / (goal || 1)) * 100);
+    return ((totalInscription / (goal || 1)) * 100).toFixed(2);
   }, [goal, totalInscription]);
 
   async function fetch2020Affected() {
