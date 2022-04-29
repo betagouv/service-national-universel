@@ -7,7 +7,7 @@ const { validateId } = require("../utils/validator");
 const MeetingPointModel = require("../models/meetingPoint");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const BusModel = require("../models/bus");
-const { ERRORS, isYoung } = require("../utils");
+const { ERRORS, isYoung, isReferent } = require("../utils");
 
 router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -28,6 +28,7 @@ router.get("/:id", passport.authenticate(["young", "referent"], { session: false
     if (isYoung(req.user) && checkedId !== req.user.meetingPointId) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    if (isReferent(req.user) && !canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await MeetingPointModel.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const bus = await BusModel.findById(data.busId);
