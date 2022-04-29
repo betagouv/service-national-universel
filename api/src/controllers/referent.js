@@ -61,6 +61,9 @@ const {
   canGetReferentByEmail,
   canEditYoung,
   canViewYoungFile,
+  canRefuseMilitaryPreparation,
+  canChangeYoungCohort,
+  canSendTutorTemplate,
 } = require("snu-lib/roles");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
@@ -395,6 +398,8 @@ router.post("/young/:id/refuse-military-preparation-files", passport.authenticat
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
+    if (!canRefuseMilitaryPreparation(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
+
     const newYoung = { statusMilitaryPreparationFiles: "REFUSED" };
 
     const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
@@ -417,12 +422,13 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
   try {
     const validatedMessage = Joi.string().required().validate(req.body.message);
     const validatedBody = validateYoung(req.body);
-
     if (validatedBody?.error || validatedMessage?.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { id } = req.params;
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    if (!canChangeYoungCohort(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 
     const { cohort, cohortChangeReason } = validatedBody.value;
 
@@ -493,6 +499,8 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
     const { tutorId, template, subject, message, app, missionName } = value;
     const tutor = await ReferentModel.findById(tutorId);
     if (!tutor) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+
+    if (!canSendTutorTemplate(req.user, tutor)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 
     if (
       [
@@ -630,6 +638,8 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
 
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false });
+
+    if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Validate files with Joi
     const { error: filesError, value: files } = Joi.array()
