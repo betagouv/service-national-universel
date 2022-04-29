@@ -539,7 +539,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     const { youngId, key, fileName } = value;
 
     const young = await YoungModel.findById(youngId);
-    if (!young) return res.status(404).send({ ok: false });
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
