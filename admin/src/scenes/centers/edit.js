@@ -62,6 +62,15 @@ export default function Edit(props) {
       validate={(values) => {
         const errors = {};
         if (!values.pmr) errors.pmr = "L'Accessibilité PMR doit être renseignée";
+        if (!values.name) errors.name = "Ce champ est obligatoire";
+        if (!values.country) errors.country = "Ce champ est obligatoire";
+        if (!values.city) errors.city = "Ce champ est obligatoire";
+        if (!values.zip) errors.zip = "Ce champ est obligatoire";
+        if (!values.address) errors.address = "Ce champ est obligatoire";
+        if (!values.location) errors.location = "Ce champ est obligatoire";
+        if (!values.department) errors.department = "Ce champ est obligatoire";
+        if (!values.region) errors.region = "Ce champ est obligatoire";
+        if (!values.addressVerified) errors.addressVerified = "Ce champ est obligatoire";
         let verificationStatus = true
         values.cohorts.map((cohort) => { if (values[cohort]?.status === undefined) verificationStatus = false })
         if (!verificationStatus) errors.status = "Tous les statuts des sessions sont obligatoire";
