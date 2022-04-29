@@ -183,7 +183,7 @@ export default function Edit(props) {
                   {values.cohorts?.length ? (
                     <>
                       <div className="">
-                        <div className="flex justify-betweeb border-bottom mb-2 pl-5">
+                        <div className="flex justify-between border-bottom mb-2 pl-5">
                           {(values.cohorts || []).map((cohort, index) => (
                             <>
                               <div
