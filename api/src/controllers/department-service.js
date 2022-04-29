@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-const { canCreateOrUpdateDepartmentService } = require("snu-lib/roles");
+const { canCreateOrUpdateDepartmentService, canViewDepartmentService } = require("snu-lib/roles");
 const { capture } = require("../sentry");
 const DepartmentServiceModel = require("../models/departmentService");
-const { ERRORS, isYoung } = require("../utils");
+const { ERRORS, isYoung, isReferent } = require("../utils");
 const { validateDepartmentService } = require("../utils/validator");
 const { serializeDepartmentService, serializeArray } = require("../utils/serializer");
 
@@ -107,7 +107,7 @@ router.get("/:department", passport.authenticate(["referent", "young"], { sessio
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (isYoung(req.user) && req.user.department !== department) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
+    if (isReferent(req.user) && !canViewDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await DepartmentServiceModel.findOne({ department });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: serializeDepartmentService(data, req.user) });
@@ -120,6 +120,7 @@ router.get("/:department", passport.authenticate(["referent", "young"], { sessio
 router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await DepartmentServiceModel.find({});
+    if (!canViewDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeDepartmentService) });
   } catch (error) {
     capture(error);
