@@ -10,22 +10,6 @@ import AddressInput from "../../../components/addressInputV2";
 export default function Coordonnees({ values, handleChange, required = {}, errors, touched, validateField }) {
   const [departmentAndRegionDisabled, setDepartmentAndRegionDisabled] = React.useState(true);
 
-  useEffect(() => {
-    const zip = values.zip;
-    if (values.cohort === "2020") return;
-    if (!zip || zip.length < 2) return;
-    let departmentCode = zip.substr(0, 2);
-    if (["97", "98"].includes(departmentCode)) {
-      departmentCode = zip.substr(0, 3);
-    }
-    if (departmentCode === "20") {
-      if (!["2A", "2B"].includes(departmentCode)) departmentCode = "2B";
-    }
-    handleChange({ target: { name: "department", value: departmentLookUp[departmentCode] } });
-    handleChange({ target: { name: "region", value: department2region[departmentLookUp[departmentCode]] } });
-    handleChange({ target: { name: "academy", value: departmentToAcademy[departmentLookUp[departmentCode]] } });
-  }, [values.zip]);
-
   return (
     <Col md={6} style={{ marginBottom: "20px" }}>
       <Box>
