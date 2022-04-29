@@ -11,7 +11,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import Loader from "../../components/Loader";
-import MultiSelect from "../../components/Multiselect";
+import MultiSelectComponent from "./components/Multiselect";
 import api from "../../services/api";
 import { SESSION_STATUS, translate, translateSessionStatus } from "../../utils";
 
@@ -59,6 +59,19 @@ export default function Edit(props) {
     <Formik
       validateOnChange={false}
       validateOnBlur={false}
+      validate={(values) => {
+        const errors = {};
+        if (!values.pmr) errors.pmr = "L'Accessibilité PMR doit être renseignée";
+        let verificationStatus = true
+        values.cohorts.map((cohort) => { if (values[cohort]?.status === undefined) verificationStatus = false })
+        if (!verificationStatus) errors.status = "Tous les statuts des sessions sont obligatoire";
+        let verificationPlaces = true
+        values.cohorts.map((cohort) => {
+          if (values[cohort]?.placesTotal === "" || values[cohort]?.placesTotal === undefined) verificationPlaces = false
+        })
+        if (!verificationPlaces) errors.placesTotal = "Le nombre de places de chaque session est obligatoire";
+        return errors;
+      }}
       initialValues={defaultValue || {}}
       onSubmit={async (values) => {
         try {
@@ -133,7 +146,12 @@ export default function Edit(props) {
                       errors={errors}
                       touched={touched}
                     />
+                    <div className="flex flex-col items-center ">
+                      <Error errors={errors} name={"pmr"} />
+                    </div>
                   </BoxContent>
+
+
                 </Box>
               </Col>
               <Col className="mb-10 w-1/2">
@@ -150,55 +168,62 @@ export default function Edit(props) {
                       name="cohorts"
                       options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
                       placeholder="Sélectionner un ou plusieurs séjour de cohésion"
+                      setsessionShow={setsessionShow}
                     />
                   </BoxContent>
                   {values.cohorts?.length ? (
                     <>
                       <div className="">
-                        <div className="flex justify-around border-bottom mb-2">
+                        <div className="flex justify-betweeb border-bottom mb-2 pl-5">
                           {(values.cohorts || []).map((cohort, index) => (
                             <>
                               <div
                                 key={index}
-                                className={`pb-2 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
+                                className={`pb-2 mr-5 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
                                 onClick={() => {
                                   setsessionShow(cohort);
                                 }}>
-                                {" "}
-                                {cohort}{" "}
+                                {cohort}
                               </div>
                             </>
                           ))}
                         </div>
                         {sessionShow ? (
-                          <div className="flex ml-5 mt-4 ">
-                            <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
-                              <ElementsSejour
-                                key={`${sessionShow}.Places`}
-                                title={"Capacite d'acceuil"}
-                                values={values[sessionShow]?.placesTotal || ""}
-                                name={`${sessionShow}.placesTotal`}
-                                placeholder={values[sessionShow]?.placesTotal || ""}
-                                handleChange={handleChange}
-                                required
-                                errors={errors}
-                                touched={touched}
-                              />
+                          <div className="ml-5 mt-4 ">
+                            <div className="flex ">
+                              <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
+                                <ElementsSejour
+                                  key={`${sessionShow}.Places`}
+                                  title={"Capacite d'acceuil"}
+                                  values={values[sessionShow]?.placesTotal || ""}
+                                  name={`${sessionShow}.placesTotal`}
+                                  handleChange={handleChange}
+                                  required
+                                  errors={errors}
+                                  touched={touched}
+                                />
+                              </div>
+                              <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
+                                <SelectStatus
+                                  name={`${sessionShow}.status`}
+                                  values={values[sessionShow]?.status || ""}
+                                  handleChange={handleChange}
+                                  title="Statut"
+                                  options={sessionStatus}
+                                  required
+                                  errors={errors}
+                                  touched={touched}
+                                />
+                              </div>
                             </div>
-                            <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
-                              <SelectStatus
-                                name={`${sessionShow}.status`}
-                                values={values[sessionShow]?.status || ""}
-                                handleChange={handleChange}
-                                title="Statut"
-                                options={sessionStatus}
-                                required
-                                errors={errors}
-                                touched={touched}
-                              />
+                            <div className="flex flex-col items-center w-3/4">
+                              <div> <Error errors={errors} name={"status"} /> </div>
+                              <div> <Error errors={errors} name={"placesTotal"} /> </div>
                             </div>
                           </div>
+
                         ) : null}
+
                       </div>
                     </>
                   ) : null}
@@ -214,10 +239,10 @@ export default function Edit(props) {
           </Wrapper>
         </div>
       )}
-    </Formik>
+    </Formik >
   );
 }
-const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder, required, errors, touched }) => {
+const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder, required, errors, touched, setsessionShow }) => {
   return (
     <Row className="detail">
       <Col md={4}>
@@ -225,27 +250,25 @@ const MultiSelectWithTitle = ({ title, value, onChange, name, options, placehold
       </Col>
       <Col md={8}>
         <Field hidden value={value} name={name} onChange={onChange} validate={(v) => required && !v?.length && requiredMessage} />
-        <MultiSelect value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} />
+        <MultiSelectComponent value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} setsessionShow={setsessionShow} />
         {errors && touched && <Error errors={errors} touched={touched} name={name} />}
       </Col>
     </Row>
   );
 };
 
-const ElementsSejour = ({ title, placeholder, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) => {
+const ElementsSejour = ({ title, values, name, handleChange, type = "text", disabled = false, required = false, errors, touched }) => {
   return (
     <>
       <div className="text-gray-500 text-xs"> {title} </div>
-      <input
+      <Field
         disabled={disabled}
-        value={translate(values[name])}
+        value={values}
         name={name}
         onChange={handleChange}
-        placeholder={placeholder}
         validate={(v) => required && !v && requiredMessage}
         required
       />
-      {errors && touched && <Error errors={errors} touched={touched} name={name} />}
     </>
   );
 };
@@ -254,12 +277,12 @@ const SelectStatus = ({ title, name, values, handleChange, disabled, options, re
   return (
     <div className="">
       <div className="text-gray-500 text-xs"> {title} </div>
-      <select disabled={disabled} name={name} value={values} onChange={handleChange} className="w-full bg-inherit">
+      <select disabled={disabled} name={name} value={values} required onChange={handleChange} className="w-full bg-inherit">
         <option disabled value="">
           Sélectionner un statut
         </option>
         {options.map((o, i) => (
-          <option key={i} value={o.value} label={o.label}>
+          <option key={i} value={o.value} label={o.label} >
             {o.label}
           </option>
         ))}
@@ -285,9 +308,8 @@ const SelectPMR = ({ title, name, values, handleChange, disabled, options, requi
             </option>
           ))}
         </select>
-        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
       </div>
-    </div>
+    </div >
   );
 };
 
