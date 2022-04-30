@@ -46,19 +46,23 @@ describe("Meeting point", () => {
       const meetingPoint = await createMeetingPointHelper(getNewMeetingPointFixture());
       const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: meetingPoint._id });
       const passport = require("passport");
+      const previous = passport.user;
       passport.user = young;
       const res = await request(getAppHelper())
         .get("/meeting-point/" + meetingPoint._id)
         .send();
       expect(res.status).toBe(200);
+      passport.user = previous;
     });
     it("should return 403 if young try to access other meetingPoint", async () => {
       const meetingPoint = await createMeetingPointHelper(getNewMeetingPointFixture());
       const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: notExistingMeetingPointId });
       const passport = require("passport");
+      const previous = passport.user;
       passport.user = young;
       const res = await request(getAppHelper()).get("/meeting-point/" + meetingPoint._id);
       expect(res.status).toBe(403);
+      passport.user = previous;
     });
   });
 
@@ -81,9 +85,11 @@ describe("Meeting point", () => {
         cohesionCenterId: notExistingCohesionCenterId,
       });
       const passport = require("passport");
+      const previous = passport.user;
       passport.user = young;
       const res = await request(getAppHelper()).get("/meeting-point").send();
       expect(res.status).toBe(404);
+      passport.user = previous;
     });
     it("should return 200 when young has a meeting point", async () => {
       const code = Date.now().toString();

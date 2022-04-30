@@ -517,24 +517,33 @@ describe("Young", () => {
   });
 
   describe("POST /young/:id/:email/:template", () => {
+    const validTemplate = "170";
+    it("should return 400 if template not found ", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const res = await request(getAppHelper()).post(`/young/${young._id}/email/test/`).send();
+      expect(res.statusCode).toEqual(400);
+    });
     it("should return 404 if young not found ", async () => {
-      const res = await request(getAppHelper()).post(`/young/${notExistingYoungId}/email/test/`).send();
+      const res = await request(getAppHelper()).post(`/young/${notExistingYoungId}/email/${validTemplate}/`).send();
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if young found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      for (const email of ["correction", "validate", "refuse", "waiting_list", "apply"]) {
-        const res = await request(getAppHelper())
-          .post("/young/" + young._id + "/email/" + "170")
-          .send({ message: "hello" });
-        expect(res.statusCode).toEqual(200);
-      }
+      const res = await request(getAppHelper())
+        .post("/young/" + young._id + "/email/" + validTemplate)
+        .send({ message: "hello" });
+      expect(res.statusCode).toEqual(200);
     });
   });
 
   describe("GET /young/:id/application", () => {
-    it("should return empty array when young has no application", async () => {
+    it("should return 404 when young does not exist", async () => {
       const res = await request(getAppHelper()).get("/young/" + notExistingYoungId + "/application");
+      expect(res.status).toBe(404);
+    });
+    it("should return empty array when young has no application", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const res = await request(getAppHelper()).get("/young/" + young._id + "/application");
       expect(res.body.data).toStrictEqual([]);
       expect(res.status).toBe(200);
     });

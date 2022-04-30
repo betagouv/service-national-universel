@@ -12,7 +12,6 @@ const { getDepartmentNumber } = require("snu-lib/region-and-departments");
 
 router.get("/availability/2022", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const young = req.user;
-
   try {
     const sessions = await getCohortSessionsAvailability(young);
     return res.send({ ok: true, data: sessions });

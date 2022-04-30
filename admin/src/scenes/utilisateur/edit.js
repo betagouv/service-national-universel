@@ -65,9 +65,11 @@ export default function Edit(props) {
         const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         data.structureId ? setStructure(s.find((struct) => struct._id === data.structureId)) : null;
         setStructures(s);
-        const responseCenter = await api.get(`/cohesion-center`);
-        const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
-        setCenters(c);
+        if (data.role === ROLES.HEAD_CENTER) {
+          const responseCenter = await api.get(`/cohesion-center`);
+          const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+          setCenters(c);
+        }
         const responseSession = await api.get(`/referent/${id}/session-phase1`);
         setSessionsWhereUserIsHeadCenter(responseSession.data);
       } catch (e) {

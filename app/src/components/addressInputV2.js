@@ -40,8 +40,10 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
     if (["97", "98"].includes(departmentCode)) {
       departmentCode = zip.substr(0, 3);
     }
+    //POUR LA CORSE
     if (departmentCode === "20") {
-      if (!["2A", "2B"].includes(departmentCode)) departmentCode = "2B";
+      if (zip === "20000" || zip.substr(0, 3) === "201") departmentCode = "2A";
+      else departmentCode = "2B";
     }
     handleChange({ target: { name: keys.department, value: departmentLookUp[departmentCode] } });
     handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[departmentCode]] } });

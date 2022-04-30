@@ -30,6 +30,7 @@ const {
   ERRORS,
   inSevenDays,
   isYoung,
+  isReferent,
   // updateApplicationsWithYoungOrMission,
   updatePlacesBus,
   updatePlacesSessionPhase1,
@@ -41,7 +42,7 @@ const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 const { validateYoung, validateId, validateFirstName, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
-const { canDeleteYoung } = require("snu-lib/roles");
+const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSendTemplateToYoung, canViewYoungApplications } = require("snu-lib/roles");
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
@@ -225,6 +226,8 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     const { error, value } = validateYoung(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    if (!canInviteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
     const obj = { ...value };
     const invitation_token = crypto.randomBytes(20).toString("hex");
     obj.invitationToken = invitation_token;
@@ -321,6 +324,8 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
 
     const data = await YoungObject.findOne({ _id: value.young });
 
+    if (!canEditYoung(req.user, data)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
     if (!data) {
       capture(`Young not found ${value.young}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -403,6 +408,9 @@ router.post("/:id/deplacementPhase1Autonomous", passport.authenticate(["referent
     const young = await YoungObject.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (isReferent(req.user) && !canEditYoung(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -610,8 +618,6 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
   }
 });
 
-//todo : add operation unauthorized:
-// taking a user and a target, check if the user can send the template to the target
 router.post("/:id/email/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -630,9 +636,22 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     // eslint-disable-next-line no-unused-vars
     const { id, template, message, prevStatus, missionName, structureName, cta, type_document } = value;
 
+    // The template must exist.
+    if (!Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    // The young must exist.
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // If actor is a young it must be the same as the young.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    // If actor is a referent it must be allowed to send template.
+    if (isReferent(req.user) && !canSendTemplateToYoung(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
@@ -661,6 +680,13 @@ router.get("/:id/application", passport.authenticate(["referent", "young"], { se
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (isYoung(req.user) && req.user._id.toString() !== id) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    if (isReferent(req.user) && !canViewYoungApplications(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -802,6 +828,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
   try {
     const { error, value } = Joi.string().required().email().validate(req.query.email);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!canGetYoungByEmail(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let data = await YoungObject.findOne({ email: value });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
