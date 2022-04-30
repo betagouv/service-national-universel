@@ -72,9 +72,9 @@ export default function Status({ filter }) {
         <Col>
           {sessionStatus?.map((status) =>
             <div key={status.value} className="w-1/3 mb-1">
-              <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"${status.label}"%5D`] })}>
+              <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"${status.value}"%5D`] })}>
                 <div className="flex justify-between bg-white px-3 py-2 rounded-md shadow-sm cursor-pointer hover:scale-105">
-                  <div className="font-bold">{translateSessionStatus(status.label)}</div>
+                  <div className="font-bold">{status.label}</div>
                   <div className="text-base text-coolGray-400">
                     {filterStatus[status.value] || 0}
                   </div>
