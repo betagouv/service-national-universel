@@ -10,7 +10,7 @@ export default function Status({ filter }) {
   const [placesTotal, setPlacesTotal] = useState(0);
   const [placesLeft, setPlacesLeft] = useState(0);
   const [total, setTotal] = useState(0);
-  const [filterStatus, setFilterStatus] = useState(null);
+  const [filterStatus, setFilterStatus] = useState({});
   const [sessionStatus, setSessionStatus] = useState(null);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function Status({ filter }) {
         aggs: {
           placesTotal: { sum: { field: "placesTotal" } },
           placesLeft: { sum: { field: "placesLeft" } },
-          filterStatus: { terms: { field: "status.keywords" } },
+          filterStatus: { terms: { field: "status.keyword" } },
         },
         size: 0,
       };
@@ -46,8 +46,8 @@ export default function Status({ filter }) {
         setPlacesTotal(responsesSession[0].aggregations.placesTotal.value);
         setPlacesLeft(responsesSession[0].aggregations.placesLeft.value);
         setFilterStatus(responsesSession[0].aggregations.filterStatus.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}))
-        console.log(responsesSession[0].aggregations.filterStatus.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}))
       }
+
     }
     initStatus();
     const optionSessionStatus = [];
@@ -57,7 +57,7 @@ export default function Status({ filter }) {
 
   return (
     <>
-      <Row>
+      <Row className=" flex items-center">
         <Col md={6} xl={6}>
           <Link to={getLink({ base: `/centre`, filter })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
@@ -71,8 +71,15 @@ export default function Status({ filter }) {
         </Col>
         <Col>
           {sessionStatus?.map((status) =>
-            <div key={status.value} className="">
-              <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"${status.value}"%5D`] })}> {status.label}</Link>
+            <div key={status.value} className="w-1/3 mb-1">
+              <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"${status.label}"%5D`] })}>
+                <div className="flex justify-between bg-white px-3 py-2 rounded-md shadow-sm cursor-pointer hover:scale-105">
+                  <div className="font-bold">{translateSessionStatus(status.label)}</div>
+                  <div className="text-base text-coolGray-400">
+                    {filterStatus[status.value] || 0}
+                  </div>
+                </div>
+              </Link>
             </div>
           )}
         </Col>

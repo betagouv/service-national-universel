@@ -89,7 +89,6 @@ export default function Status({ filter }) {
               </Col>
               <div className="flex flex-wrap flex-row gap-2 items-start">
                 {(typesStructure[l] || []).map((type, tk) => {
-                  //console.log(types);
                   return (
                     <Link key={tk} to={getLink({ base: `/structure`, filter, filtersUrl: [`LEGAL_STATUS=%5B"${l}"%5D&`, `TYPE=%5B"${type}"%5D`] })}>
                       <div className="flex flex-col bg-white p-3 rounded-md shadow-sm cursor-pointer hover:scale-105">
