@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import validator from "validator";
 
+import plausibleEvent from "../../../services/plausible";
 import Header from "./header";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
@@ -39,36 +40,89 @@ export default function Closed({ location }) {
       <Header showMessage={false} location={location} />
       <Wrapper>
         <TitleContainer>
-          <TopTitle className="mobileOnly">inscription 2021</TopTitle>
+          <TopTitle className="mobileOnly">inscription 2022</TopTitle>
           <Title>Participez au SNU</Title>
-          <PlayButton href="https://www.youtube.com/watch?v=rE-8fe9xPDo" target="_blank" rel="noreferrer">
+          <a
+            className="flex items-center justify-center bg-white mb-4 w-12 h-12 rounded-full md:h-20 md:w-20"
+            onClick={() => plausibleEvent("LP - Video")}
+            href="https://www.youtube.com/watch?v=rE-8fe9xPDo"
+            target="_blank"
+            rel="noreferrer">
             <svg width="20" height="26" viewBox="0 0 20 26" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M19.1346 11.0998L3.79966 0.640236C2.49183 -0.253291 0.722412 0.719077 0.722412 2.32217V23.2149C0.722412 24.8443 2.49183 25.7904 3.79966 24.8969L19.1346 14.4373C20.2886 13.6752 20.2886 11.8882 19.1346 11.0998Z"
                 fill="#D33C4A"
               />
             </svg>
-          </PlayButton>
+          </a>
         </TitleContainer>
-        <CardsContainer>
-          <CardTitle>Une aventure en trois phases</CardTitle>
-          <div className="desktop">
-            <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="Du 21 juin au 2 juillet 2021" />
-            <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion" />
-            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
+        <div className="flex-1 z-10">
+          <p className="text-white mb-4 font-medium text-2xl md:text-base">Une aventure en trois phases</p>
+          {/* Desktop View Cards*/}
+          <div className=" justify-around hidden md:flex">
+            <div className="w-[20rem] lg:w-[25rem] ">
+              <CardPhase
+                onClick={() => plausibleEvent("LP - Phase 1")}
+                upText="phase 1"
+                title="Le séjour de cohésion"
+                downText="3 sessions possibles en février, juin et juillet 2022"
+                to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
+              />
+            </div>
+            <div className="w-[20rem] lg:w-[25rem]">
+              <CardPhase
+                onClick={() => plausibleEvent("LP - Phase 2")}
+                upText="phase 2"
+                title="La mission d'intérêt général"
+                downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
+                to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
+              />
+            </div>
+            <div className="w-[20rem] lg:w-[25rem]  ">
+              <CardPhase
+                onClick={() => plausibleEvent("LP - Phase 3")}
+                upText="phase 3 - facultative"
+                title="L'engagement"
+                downText="Mission facultative de 3 mois minimum"
+                to="https://www.snu.gouv.fr/l-engagement-28"
+              />
+            </div>
           </div>
-          <Carousel className="mobile" showThumbs={false} showStatus={false} showArrows={true}>
-            <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="Du 21 juin au 2 juillet 2021" />
-            <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion" />
-            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
+
+          {/* Mobile View Carusel*/}
+          <Carousel className="flex md:hidden p-3" showThumbs={false} showStatus={false} showArrows={true}>
+            <CardPhase
+              onClick={() => plausibleEvent("LP - Phase 1")}
+              upText="phase 1"
+              title="Le séjour de cohésion"
+              downText="3 sessions possibles en février, juin et juillet 2022"
+              to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
+            />
+            <CardPhase
+              onClick={() => plausibleEvent("LP - Phase 2")}
+              upText="phase 2"
+              title="La mission d'intérêt général"
+              downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
+              to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
+            />
+            <CardPhase
+              onClick={() => plausibleEvent("LP - Phase 3")}
+              upText="phase 3 - facultative"
+              title="L'engagement"
+              downText="Mission facultative de 3 mois minimum"
+              to="https://www.snu.gouv.fr/l-engagement-28"
+            />
           </Carousel>
-          <StartButtonContainer className="desktop">
-            <StartButton>Inscriptions&nbsp;terminées</StartButton>
-          </StartButtonContainer>
-        </CardsContainer>
+          {/* Start Button Desktop View */}
+          <div className="z-50  hidden md:block">
+            <button disabled className="uppercase p-3 pr-4 mt-[3px] lg:mt-[2rem] text-white bg-[#acaaba] font-medium	text-base	cursor-not-allowed tracking-wider	rounded-full">
+              Inscriptions&nbsp;terminées
+            </button>
+          </div>
+        </div>
         <Container>
           <Text>
-            Les inscriptions sont malheureusement closes pour l&apos;<b>édition 2021</b>.<br /> Vous pouvez cependant nous laisser vos coordonnées pour être recontacté(e) par
+            Les inscriptions sont malheureusement closes pour l&apos;<b>édition 2022</b>.<br /> Vous pouvez cependant nous laisser vos coordonnées pour être recontacté(e) par
             l’administration lors de la prochaine campagne d&apos;inscription du SNU.
           </Text>
           <input
@@ -94,9 +148,6 @@ export default function Closed({ location }) {
           </ModalButton>
         </Container>
       </Wrapper>
-      <StartButtonContainer className="mobile">
-        <StartButton>Inscriptions&nbsp;terminées</StartButton>
-      </StartButtonContainer>
     </div>
   );
 }
