@@ -8,7 +8,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a lo
 import { Carousel } from "react-responsive-carousel";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../../utils";
+import { translate, urlWithScheme } from "../../../utils";
 import ModalButton from "../../../components/buttons/ModalButton";
 
 export default function Closed({ location }) {
@@ -190,34 +190,6 @@ const Text = styled.div`
   }
 `;
 
-const CardTitle = styled.div`
-  color: #fff;
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
-  font-weight: 500;
-  @media (max-width: 767px) {
-    font-size: 1rem;
-  }
-`;
-
-const PlayButton = styled.a`
-  background-color: #fff;
-  height: 90px;
-  width: 90px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-  svg {
-    height: 100%;
-  }
-  @media (max-width: 767px) {
-    height: 50px;
-    width: 50px;
-  }
-`;
-
 const TitleContainer = styled.div`
   margin-top: 2rem;
   display: flex;
@@ -226,111 +198,21 @@ const TitleContainer = styled.div`
   z-index: 10;
 `;
 
-const CardsContainer = styled.div`
-  flex: 1;
-  z-index: 2;
-  .mobile {
-    display: none;
-  }
-  .desktop {
-    display: flex;
-    align-items: center;
-    > * {
-      margin: 0 1rem;
-    }
-  }
-  @media (max-width: 767px) {
-    .desktop {
-      display: none;
-    }
-    .mobile {
-      display: flex;
-      > * {
-        margin: 0 1rem;
-      }
-    }
-  }
-`;
-
-const CardPhase = ({ upText, title, downText }) => {
+const CardPhase = ({ upText, title, downText, to }) => {
   return (
-    <Card>
+    <a
+      className="flex w-full flex-col justify-between items-start border-b-8 border-red-700 rounded-2xl  min-h-[10rem]	 bg-white pt-4	pr-4 pb-8	 pl-4	hover:text-black"
+      href={urlWithScheme(to)}
+      target="_blank"
+      rel="noreferrer">
       <div>
-        <CardUpText>{upText}</CardUpText>
-        <CardText>{title}</CardText>
+        <p className="text-left text-[#ef4036]	uppercase text-[0.8rem]	">{upText}</p>
+        <p className="text-lg text-left font-bold md:text-2xl ">{title}</p>
       </div>
-      <CardDownText>{downText}</CardDownText>
-    </Card>
+      <p className="text-left text-base	md:text-sm text-[#6e757c] ">{downText}</p>
+    </a>
   );
 };
-
-const Card = styled.div`
-  padding: 1rem 1rem 2rem 1rem;
-  display: flex;
-  width: 100%;
-  min-height: 170px;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  background-color: #fff;
-  border-radius: 1rem;
-  border-bottom: 7px solid #ef4036;
-`;
-const CardUpText = styled.div`
-  text-align: left;
-  color: #ef4036;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-`;
-
-const CardText = styled.div`
-  color: #000;
-  font-size: 1.5rem;
-  text-align: left;
-  font-weight: 700;
-  @media (max-width: 767px) {
-    font-size: 1.2rem;
-  }
-`;
-
-const CardDownText = styled.div`
-  text-align: left;
-  font-size: 1rem;
-  @media (max-width: 767px) {
-    font-size: 0.85rem;
-  }
-  color: #6e757c;
-`;
-
-const StartButtonContainer = styled.div`
-  z-index: 100;
-  &.mobile {
-    display: none;
-  }
-  justify-content: center;
-  margin-top: 1rem;
-  @media (max-width: 767px) {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translate(-50%, 0);
-    &.mobile {
-      display: inline-block;
-    }
-  }
-`;
-
-const StartButton = styled.div`
-  padding: 1rem 1.5rem;
-  text-transform: uppercase;
-  color: #fff;
-  background-color: #acaaba;
-  font-weight: 500;
-  font-size: 1rem;
-  cursor: not-allowed;
-  letter-spacing: 0.03em;
-  border-radius: 30px;
-`;
 
 const Wrapper = styled.div`
   width: 100%;
