@@ -1,3 +1,13 @@
+## [1.77.2](https://github.com/betagouv/service-national-universel/compare/v1.77.1...v1.77.2) (2022-04-30)
+
+
+### Bug Fixes
+
+* add limit date inscription juillet ([eaf8939](https://github.com/betagouv/service-national-universel/commit/eaf89397a46a05163d3fe8e0c627b87db0cf59a0))
+* auto closed dimanche soir ([f922aa5](https://github.com/betagouv/service-national-universel/commit/f922aa530503ad71c48d8642bc3ddfd7a6ac8742))
+* fermeture inscription dynamiques - 2 etapes ([6c851bd](https://github.com/betagouv/service-national-universel/commit/6c851bd693e3ce0351dd4da4b9f354856b66ddd7))
+* update home closed ([fb58d01](https://github.com/betagouv/service-national-universel/commit/fb58d01a665dc82f283f3794bc935bd957006efd))
+
 ## [1.77.1](https://github.com/betagouv/service-national-universel/compare/v1.77.0...v1.77.1) (2022-04-29)
 
 
