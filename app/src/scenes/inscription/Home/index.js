@@ -7,13 +7,14 @@ import { Carousel } from "react-responsive-carousel";
 import DesktopView from "./DesktopView";
 import plausibleEvent from "../../../services/plausible";
 import gtagEvent from "../../../services/gtag";
-import { urlWithScheme, inscriptionOpenForYoungs } from "../../../utils";
+import { urlWithScheme, inscriptionCreationOpenForYoungs } from "../../../utils";
 import HomeClosed from "./closed";
 
 export default function Home({ location }) {
   const history = useHistory();
   const [cookies] = useCookies(["accept-cookie"]);
-  if (inscriptionOpenForYoungs("2022")) {
+
+  if (inscriptionCreationOpenForYoungs()) {
     return (
       <div>
         <Header location={location} />
