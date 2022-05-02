@@ -7,7 +7,7 @@ const StructureObject = require("../models/structure");
 const MissionObject = require("../models/mission");
 const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils");
-const { ROLES, canModifyStructure, canDeleteStructure, canCreateStructure, canViewStructures, canViewStructureChildren } = require("snu-lib/roles");
+const { ROLES, canModifyStructure, canDeleteStructure, canCreateStructure, canViewMission, canViewStructures, canViewStructureChildren } = require("snu-lib/roles");
 const patches = require("./patches");
 const { validateId, validateStructure } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
@@ -98,6 +98,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 router.get("/networks", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await StructureObject.find({ isNetwork: "true" }).sort("name");
+    if (!canViewStructureChildren(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
   } catch (error) {
     capture(error);
@@ -130,6 +131,8 @@ router.get("/:id/mission", passport.authenticate("referent", { session: false, f
 
     const data = await MissionObject.find({ structureId: checkedId });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     return res.status(200).send({ ok: true, data: data.map(serializeMission) });
   } catch (error) {
