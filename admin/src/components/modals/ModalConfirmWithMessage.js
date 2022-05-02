@@ -33,7 +33,7 @@ export default function ModalConfirmWithMessage({
 
   return (
     <Modal centered isOpen={isOpen} toggle={onChange}>
-      <ModalContainer>
+      <ModalContainer className="pb-0">
         <CloseSvg className="close-icon" height={10} width={10} onClick={onChange} />
         <Header>{topTitle}</Header>
         <Content>
@@ -43,7 +43,7 @@ export default function ModalConfirmWithMessage({
           <p>{endMessage}</p>
         </Content>
         <Footer>
-          <ModalButton loading={sending} disabled={sending || !messageTextArea} onClick={submit} primary>
+          <ModalButton loading={sending} disabled={sending || !messageTextArea} onClick={submit} newPrimary>
             Confirmer
           </ModalButton>
           <ModalButton disabled={sending} onClick={onChange}>

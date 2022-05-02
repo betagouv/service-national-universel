@@ -22,7 +22,8 @@ export default function MailAttestationButton({ young, children, type, template,
   };
   return (
     <>
-      <PrimaryStyle
+      <button
+        className="bg-[#EFF6FF] rounded-md px-6 py-2 text-indigo-700 flex items-center hover:shadow-md"
         {...rest}
         onClick={() => {
           setModal({
@@ -33,7 +34,7 @@ export default function MailAttestationButton({ young, children, type, template,
           });
         }}>
         {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : children}
-      </PrimaryStyle>
+      </button>
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}

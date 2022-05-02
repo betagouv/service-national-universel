@@ -14,7 +14,7 @@ export default function DownloadAttestationButton({ young, children, uri, ...pro
     setLoading(false);
   };
   return (
-    <LoadingButton {...props} loading={loading} onClick={() => viewAttestation(uri)}>
+    <LoadingButton {...props} color="#EFF6FF" textColor="#5145cd" loading={loading} onClick={() => viewAttestation(uri)}>
       {children}
     </LoadingButton>
   );
