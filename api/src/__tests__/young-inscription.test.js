@@ -18,7 +18,7 @@ describe("Young", () => {
       passport.user = young;
 
       const response = await request(getAppHelper()).put("/young/inscription/profile").send(body);
-      updatedYoung = response.body.data;
+      const updatedYoung = response.body.data;
       passport.user = previous;
 
       return { young, updatedYoung, response };
@@ -97,7 +97,6 @@ describe("Young", () => {
       passport.user = young;
 
       let response = await request(getAppHelper()).put("/young/inscription/coordonnee/next").send(body);
-      updatedYoung = response.body.data;
       passport.user = previous;
 
       return response;
@@ -236,7 +235,6 @@ describe("Young", () => {
     });
     it("should return 404 if user don't exist", async () => {
       const base = getBasicFixture();
-      const foreign = getForeignFixture();
 
       const response = await request(getAppHelper())
         .put("/young/inscription/coordonnee/next")
@@ -258,7 +256,7 @@ describe("Young", () => {
       passport.user = young;
 
       const response = await request(getAppHelper()).put("/young/inscription/availability").send(body);
-      updatedYoung = response.body.data;
+      const updatedYoung = response.body.data;
       passport.user = previous;
 
       return { young, updatedYoung, response };
@@ -307,7 +305,7 @@ describe("Young", () => {
       passport.user = young;
 
       const response = await request(getAppHelper()).put("/young/inscription/availability").send(body);
-      updatedYoung = response.body.data;
+      const updatedYoung = response.body.data;
       passport.user = previous;
 
       return { young, updatedYoung, response };
@@ -356,7 +354,7 @@ describe("Young", () => {
       passport.user = young;
 
       const response = await request(getAppHelper()).put("/young/inscription/availability/reset").send(body);
-      updatedYoung = response.body.data;
+      const updatedYoung = response.body.data;
       passport.user = previous;
 
       return { young, updatedYoung, response };
@@ -387,7 +385,7 @@ describe("Young", () => {
       passport.user = young;
 
       const response = await request(getAppHelper()).put("/young/inscription/availability/notEligible").send(body);
-      updatedYoung = response.body.data;
+      const updatedYoung = response.body.data;
       passport.user = previous;
 
       return { young, updatedYoung, response };
@@ -431,7 +429,6 @@ describe("Young", () => {
       passport.user = young;
 
       let response = await request(getAppHelper()).put("/young/inscription/particulieres/next").send(body);
-      updatedYoung = response.body.data;
       passport.user = previous;
 
       return response;
@@ -475,7 +472,7 @@ describe("Young", () => {
       expect(response.statusCode).toBe(200);
     });
     it("should return 400 when parameters invalid", async () => {
-      response = await selfUpdateYoung({
+      let response = await selfUpdateYoung({
         handicap: "false",
       });
       expect(response.statusCode).toBe(400);
@@ -527,8 +524,6 @@ describe("Young", () => {
       expect(response.statusCode).toBe(400);
     });
     it("should return 404 if user don't exist", async () => {
-      const fixture = getNewYoungFixture();
-      const email = fixture.email.toLowerCase();
       const response = await request(getAppHelper()).put("/young/inscription/particulieres/next").send({
         handicap: "true",
         ppsBeneficiary: "false",
@@ -552,7 +547,6 @@ describe("Young", () => {
       passport.user = young;
 
       let response = await request(getAppHelper()).put("/young/inscription/representant/next").send(body);
-      updatedYoung = response.body.data;
       passport.user = previous;
 
       return response;
@@ -718,7 +712,6 @@ describe("Young", () => {
       passport.user = young;
 
       const response = await request(getAppHelper()).put(`/young/inscription/representant-fromFranceConnect/${id}`).send(body);
-      updatedYoung = response.body.data;
       passport.user = previous;
 
       return response;
@@ -818,7 +811,6 @@ describe("Young", () => {
       passport.user = young;
 
       const response = await request(getAppHelper()).put("/young/inscription/consentements").send(body);
-      updatedYoung = response.body.data;
       passport.user = previous;
 
       return response;
@@ -939,7 +931,6 @@ describe("Young", () => {
       passport.user = young;
 
       const response = await request(getAppHelper()).put("/young/inscription/documents/next").send(body);
-      updatedYoung = response.body.data;
       passport.user = previous;
 
       return response;
@@ -1065,7 +1056,6 @@ describe("Young", () => {
       passport.user = young;
 
       const response = await request(getAppHelper()).put("/young/inscription/done").send(body);
-      updatedYoung = response.body.data;
       passport.user = previous;
 
       return response;
@@ -1108,7 +1098,7 @@ describe("Young", () => {
       });
       expect(response2.statusCode).toBe(400);
 
-      grade = "3eme";
+      const grade = "3eme";
       const response3 = await selfUpdateYoung(
         {
           informationAccuracy: true,
