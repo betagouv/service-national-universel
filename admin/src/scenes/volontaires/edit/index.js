@@ -153,10 +153,12 @@ export default function VolontaireEdit(props) {
             <Row>
               <InterTitle>Séjour de cohésion</InterTitle>
             </Row>
-            <Row>
-              <CohesionCenter values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
-              {values.statusPhase1 === "AFFECTED" ? <MeetingPoint values={values} handleChange={handleChange} handleSubmit={handleSubmit} /> : null}
-            </Row>
+            {values.statusPhase1 === "AFFECTED" ? (
+              <Row>
+                <CohesionCenter values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
+                <MeetingPoint values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
+              </Row>
+            ) : null}
             <Row>
               {values.cohort === "2020" ? <JDC values={values} handleChange={handleChange} /> : null}
               {user.role === ROLES.ADMIN ? <InformationsSupplementaires values={values} handleChange={handleChange} /> : null}
