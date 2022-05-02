@@ -1,0 +1,2 @@
+{"index":"young","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[{"terms":{"status.keyword":["WITHDRAWN"]}},{"terms":{"cohort.keyword":["2021"]}}]}},"aggs":{"status":{"terms":{"field":"status.keyword"}},"statusPhase1":{"terms":{"field":"statusPhase1.keyword"}},"statusPhase2":{"terms":{"field":"statusPhase2.keyword"}},"statusPhase2Contract":{"terms":{"field":"statusPhase2Contract.keyword"}},"statusPhase3":{"terms":{"field":"statusPhase3.keyword"}},"cohesionStayPresence":{"terms":{"field":"cohesionStayPresence.keyword"}}},"size":0}

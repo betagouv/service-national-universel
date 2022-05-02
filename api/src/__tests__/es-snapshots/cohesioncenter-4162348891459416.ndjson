@@ -1,0 +1,2 @@
+{"index":"cohesioncenter","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[]}},"size":10000}

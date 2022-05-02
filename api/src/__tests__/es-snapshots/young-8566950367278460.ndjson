@@ -1,0 +1,2 @@
+{"preference":"QPV"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"bool":{"filter":{"term":{"phase.keyword":"INSCRIPTION"}}}}]}}]}},"size":0,"_source":{"includes":["*"],"excludes":[]},"track_total_hits":true,"aggs":{"qpv.keyword":{"terms":{"field":"qpv.keyword","size":100,"order":{"_count":"desc"}}}}}

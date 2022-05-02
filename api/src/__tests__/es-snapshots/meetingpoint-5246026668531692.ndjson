@@ -1,0 +1,2 @@
+{"preference":"result"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"match_all":{}}]}}]}},"size":10,"_source":{"includes":["*"],"excludes":[]},"from":0,"sort":[{"createdAt":{"order":"desc"}}],"track_total_hits":true}

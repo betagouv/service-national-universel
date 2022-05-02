@@ -1,0 +1,2 @@
+{"index":"young","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[{"terms":{"cohort.keyword":["Juin 2022","Juillet 2022","2022"]}},{"term":{"status.keyword":"VALIDATED"}}]}},"aggs":{"status":{"terms":{"field":"status.keyword"}}},"size":0}

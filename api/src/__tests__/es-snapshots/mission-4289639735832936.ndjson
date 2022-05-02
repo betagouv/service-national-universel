@@ -1,0 +1,2 @@
+{"index":"mission","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[]}},"aggs":{"status":{"terms":{"field":"status.keyword"},"aggs":{"placesTotal":{"sum":{"field":"placesTotal"}},"placesLeft":{"sum":{"field":"placesLeft"}}}},"mainDomain":{"terms":{"field":"mainDomain.keyword"}},"period":{"terms":{"field":"period.keyword"}},"format":{"terms":{"field":"format.keyword"}},"placesTotal":{"sum":{"field":"placesTotal"}},"placesLeft":{"sum":{"field":"placesLeft"}}},"size":0}

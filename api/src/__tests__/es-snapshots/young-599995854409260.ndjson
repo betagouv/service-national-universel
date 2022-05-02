@@ -1,0 +1,2 @@
+{"preference":"COHORT"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"bool":{"should":[{"terms":{"status.keyword":["VALIDATED"]}}]}},{"bool":{"filter":{"terms":{"status.keyword":["VALIDATED","WITHDRAWN","WAITING_LIST","DELETED"]}}}}]}}]}},"size":0,"_source":{"includes":["*"],"excludes":[]},"sort":[{"lastName.keyword":"asc"}],"track_total_hits":true,"aggs":{"cohort.keyword":{"terms":{"field":"cohort.keyword","size":100,"order":{"_count":"desc"}}}}}

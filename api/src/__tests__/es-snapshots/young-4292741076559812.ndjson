@@ -1,0 +1,2 @@
+{"index":"young","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[{"exists":{"field":"originalCohort"}},{"terms":{"originalCohort.keyword":["2021"]}},{"terms":{"status.keyword":["VALIDATED"]}}]}},"aggs":{"originalCohort":{"terms":{"field":"originalCohort.keyword"}}},"size":0}

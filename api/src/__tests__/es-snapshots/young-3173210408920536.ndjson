@@ -1,0 +1,2 @@
+{"preference":"SEARCH"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"bool":{"should":[{"terms":{"status.keyword":["VALIDATED"]}}]}}]}}]}},"size":10,"_source":{"includes":["*"],"excludes":[]}}

@@ -1,0 +1,2 @@
+{"index":"structure","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[]}},"aggs":{"legalStatus":{"terms":{"field":"legalStatus.keyword"}},"types":{"terms":{"field":"types.keyword"}},"sousType":{"terms":{"field":"sousType.keyword"}},"withNetworkId":{"filter":{"bool":{"must":{"exists":{"field":"networkId.keyword"}},"must_not":{"term":{"networkId.keyword":""}}}}}},"size":0}

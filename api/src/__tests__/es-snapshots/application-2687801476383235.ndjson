@@ -1,0 +1,2 @@
+{"index":"application","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[{"terms":{"youngCohort.keyword":["2021"]}}]}},"aggs":{"status":{"terms":{"field":"status.keyword"}}},"size":0}

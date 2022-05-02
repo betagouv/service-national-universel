@@ -1,0 +1,2 @@
+{"preference":"PAI"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"bool":{"filter":{"term":{"phase.keyword":"INSCRIPTION"}}}}]}}]}},"size":0,"_source":{"includes":["*"],"excludes":[]},"track_total_hits":true,"aggs":{"paiBeneficiary.keyword":{"terms":{"field":"paiBeneficiary.keyword","size":100,"order":{"_count":"desc"}}}}}

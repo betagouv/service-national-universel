@@ -12,7 +12,7 @@ const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
 const SessionPhase1Object = require("../models/sessionPhase1");
 const { serializeMissions, serializeSchools, serializeYoungs, serializeStructures, serializeReferents, serializeApplications, serializeHits } = require("../utils/es-serializer");
-const { allRecords } = require("../es/utils");
+const { allRecords, applyFilterOnQuery, validateEsQueryFromText, withFilterForMSearch } = require("../es/utils");
 const { API_ASSOCIATION_ES_ENDPOINT } = require("../config");
 const Joi = require("joi");
 
@@ -82,6 +82,9 @@ router.post("/school/_msearch", passport.authenticate(["young", "referent"], { s
 router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;
+
+    console.log(validateEsQueryFromText(body).error);
+
     if (user.role === ROLES.ADMIN) {
       if (req.params.action === "export") {
         const response = await allRecords("young", req.body.query);
@@ -91,6 +94,7 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
         return res.status(200).send(response.body);
       }
     }
+
     const filter = [{ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST", "ABANDONED"] } }];
 
     // Open in progress inscription to referent
@@ -570,40 +574,5 @@ router.post("/team/:action(_msearch|export)", passport.authenticate(["referent"]
     res.status(500).send({ ok: false, error });
   }
 });
-
-// Add filter to all lines of the body.
-function withFilterForMSearch(body, filter) {
-  return (
-    body
-      .split(`\n`)
-      .filter((e) => e)
-      .map((item, key) => {
-        // Declaration line are skipped.
-        if (key % 2 === 0) return item;
-
-        const q = JSON.parse(item);
-        q.query = applyFilterOnQuery(q.query, filter);
-
-        return JSON.stringify(q);
-      })
-      .join(`\n`) + `\n`
-  );
-}
-
-function applyFilterOnQuery(query, filter) {
-  if (!query.bool) {
-    if (query.match_all) {
-      query = { bool: { must: { match_all: {} } } };
-    } else {
-      const tq = { ...query };
-      query = { bool: { must: tq } };
-    }
-  }
-
-  if (query.bool.filter) query.bool.filter = [...query.bool.filter, ...filter];
-  else query.bool.filter = filter;
-
-  return query;
-}
 
 module.exports = router;

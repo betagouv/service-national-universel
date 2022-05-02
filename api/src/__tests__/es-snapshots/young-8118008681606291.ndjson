@@ -1,0 +1,2 @@
+{"index":"young","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[{"terms":{"cohort.keyword":["Juin 2022","Juillet 2022","2022"]}},{"terms":{"status.keyword":["WAITING_VALIDATION","WAITING_CORRECTION","VALIDATED","REFUSED","IN_PROGRESS","WITHDRAWN","DELETED","WAITING_LIST","NOT_ELIGIBLE","ABANDONED"]}}]}},"aggs":{"views":{"date_histogram":{"field":"birthdateAt","interval":"year"}}},"size":0}

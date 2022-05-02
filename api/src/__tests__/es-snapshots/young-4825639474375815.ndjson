@@ -1,0 +1,2 @@
+{"index":"young","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[{"term":{"cohort.keyword":"2020"}},{"term":{"statusPhase1.keyword":"AFFECTED"}}]}},"aggs":{"status":{"terms":{"field":"statusPhase1.keyword"}}},"size":0}

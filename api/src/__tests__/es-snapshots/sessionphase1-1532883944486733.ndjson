@@ -1,0 +1,2 @@
+{"index":"sessionphase1","type":"_doc"}
+{"size":10000,"query":{"bool":{"must":{"match_all":{}},"filter":[{"terms":{"cohesionCenterId.keyword":["626958c27d214f064ff5b72c","609bebb20c1cc9a888ae8fc5","609bebc10c1cc9a888ae905a","609bebc30c1cc9a888ae9074","609bebb60c1cc9a888ae8fd9","609bebbb0c1cc9a888ae9014","609bebcf0c1cc9a888ae9100","609bebc80c1cc9a888ae90af","609bebb50c1cc9a888ae8fd6","609bebb60c1cc9a888ae8fdc"]}}]}}}

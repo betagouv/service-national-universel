@@ -1,0 +1,2 @@
+{"preference":"BUS"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"match_all":{}}]}}]}},"size":0,"_source":{"includes":["*"],"excludes":[]},"track_total_hits":true,"aggs":{"busExcelId.keyword":{"terms":{"field":"busExcelId.keyword","size":1000,"order":{"_term":"asc"}}}}}

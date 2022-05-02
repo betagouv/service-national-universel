@@ -1,0 +1,2 @@
+{"index":"sessionphase1","type":"_doc"}
+{"size":10000,"query":{"bool":{"must":{"match_all":{}},"filter":[{"terms":{"cohesionCenterId.keyword":["626f9ffbab7a1d071a0206cc","626f9e834a8c8154d62ef7ae","626f9e0f4a8c8154d62ef769","626f9d1a239f6905cd4c7ea6","626f9c3b239f6905cd4c7e29","626f8f4a81be181cc7926a65","626c19ace9a2c710841574f7","626c141ee9a2c71084157438","626c0849e9a2c71084157024","626bbc3d6bbb1307c9997c7e"]}}]}}}

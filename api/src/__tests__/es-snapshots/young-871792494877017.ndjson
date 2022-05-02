@@ -1,0 +1,2 @@
+{"index":"young","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[{"terms":{"status.keyword":["WAITING_VALIDATION","WAITING_CORRECTION","VALIDATED","REFUSED","IN_PROGRESS","WITHDRAWN","DELETED","WAITING_LIST","NOT_ELIGIBLE","ABANDONED"]}},{"terms":{"cohort.keyword":["Juin 2022","Juillet 2022","2022"]}}]}},"aggs":{"status":{"terms":{"field":"qpv.keyword"}}},"size":0}
