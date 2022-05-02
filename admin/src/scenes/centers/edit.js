@@ -173,46 +173,52 @@ export default function Edit(props) {
                             </>
                           ))}
                         </div>
-                        {sessionShow ? (
-                          <div className="ml-5 mt-4 ">
-                            <div className="flex ">
-                              <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
-                                <PlaceCapacity
-                                  key={`${sessionShow}.Places`}
-                                  title={"Capacite d'acceuil"}
-                                  values={values[sessionShow]?.placesTotal || ""}
-                                  name={`${sessionShow}.placesTotal`}
-                                  handleChange={handleChange}
-                                  required
-                                  errors={errors}
-                                  touched={touched}
-                                  validate={(e) => !e && `La capacité d'acceuil de ${sessionShow} doit être renseignée`}
-                                />
+                        {sessionShow
+                          ? values.cohorts.map((cohort) => (
+                              <div className="ml-5 mt-4" hidden={cohort !== sessionShow}>
+                                <div className="flex">
+                                  <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
+                                    <PlaceCapacity
+                                      key={`${cohort}.Places`}
+                                      title={"Capacite d'accueil"}
+                                      values={values[cohort]?.placesTotal || ""}
+                                      name={`${cohort}.placesTotal`}
+                                      handleChange={handleChange}
+                                      required
+                                      errors={errors}
+                                      touched={touched}
+                                      validate={(e) => !e && `La capacité d'accueil de ${cohort} doit être renseignée`}
+                                    />
+                                  </div>
+                                  <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
+                                    <SelectStatus
+                                      name={`${cohort}.status`}
+                                      values={values[cohort]?.status || ""}
+                                      handleChange={handleChange}
+                                      title="Statut"
+                                      options={sessionStatus}
+                                      required
+                                      errors={errors}
+                                      touched={touched}
+                                      validate={(e) => !e && `Le status pour la session de ${cohort} est obligatoire`}
+                                    />
+                                  </div>
+                                </div>
                               </div>
-                              <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
-                                <SelectStatus
-                                  name={`${sessionShow}.status`}
-                                  values={values[sessionShow]?.status || ""}
-                                  handleChange={handleChange}
-                                  title="Statut"
-                                  options={sessionStatus}
-                                  required
-                                  errors={errors}
-                                  touched={touched}
-                                  validate={(e) => !e && `Le status pour la session de ${sessionShow} est obligatoire`}
-                                />
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-center w-3/4">
+                            ))
+                          : null}
+                        <div className="ml-5 mt-2 flex flex-col items-center w-3/4">
+                          {values.cohorts.map((cohort) => (
+                            <>
                               <div>
-                                <Error errors={errors} name={`${sessionShow}.status`} />
+                                <Error errors={errors} name={`${cohort}.status`} />
                               </div>
                               <div>
-                                <Error errors={errors} name={`${sessionShow}.placesTotal`} />
+                                <Error errors={errors} name={`${cohort}.placesTotal`} />
                               </div>
-                            </div>
-                          </div>
-                        ) : null}
+                            </>
+                          ))}
+                        </div>
                       </div>
                     </>
                   ) : null}
