@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { BiHandicap } from "react-icons/bi";
 
 import { translate, getDepartmentNumber, canCreateOrUpdateCohesionCenter, translateSessionStatus } from "../../../utils";
 import { Box } from "../../../components/box";
@@ -21,89 +22,41 @@ export default function Details({ center, sessions }) {
           </div>
         ) : null}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gridGap: "1rem" }}>
+      <div className="flex w-2/5">
         <Box>
-          <Wrapper>
-            <Header>
+          <div className="p-9">
+            <div className="flex justify-between ">
               <h4>
                 <strong>Informations du centre</strong>
               </h4>
-            </Header>
-            <Container>
-              <section>
-                <div className="detail">
-                  <div className="detail-title-first">Région :</div>
-                  <div className="detail-text">{center.region}</div>
+              {center.pmr === "true" ?
+                <div className="flex bg-[#14B8A6] rounded-full px-2 py-1 items-center text-[#F0FDFA] text-md">
+                  <BiHandicap size={20} />
+                  <div>  Accessible PMR </div>
                 </div>
-                <div className="detail">
-                  <div className="detail-title-first">Dép :</div>
-                  <div className="detail-text">
-                    {center.department} ({getDepartmentNumber(center.department)})
-                  </div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title-first">Ville :</div>
-                  <div className="detail-text">
-                    {center.city} ({center.zip})
-                  </div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title-first">Adresse</div>
-                  <div className="detail-text">{center.address}</div>
-                </div>
-              </section>
-              <section>
-                {center.code ? (
-                  <div className="detail">
-                    <div className="detail-title-second">Code (2021) :</div>
-                    <div className="detail-text">{center.code}</div>
-                  </div>
-                ) : null}
-                {center.code2022 ? (
-                  <div className="detail">
-                    <div className="detail-title-second">Code (2022) :</div>
-                    <div className="detail-text">{center.code2022}</div>
-                  </div>
-                ) : null}
-                <div className="detail">
-                  <div className="detail-title-second">Accessibilité aux personnes à mobilité réduite (PMR) :</div>
-                  <div className="detail-text">{translate(center.pmr)}</div>
-                </div>
-              </section>
-            </Container>
-          </Wrapper>
-        </Box>
-        <Box>
-          <Wrapper>
-            <Header>
-              <h4>
-                <strong>Séjours</strong>
-              </h4>
-            </Header>
-            <section>
-              {sessions.map((session) => (
-                <div className="detail" key={session.cohort}>
-                  <div>
-                    <div className="detail-title-first">{session.cohort}&nbsp;:</div>
-                    {session.status ? (
-                      <div
-                        className={`flex border text-xs rounded-full p-1 items-center justify-center ${
-                          session.status === "DRAFT" ? "border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] " : "border-[#A4D8BC]  bg-[#F5FCF3] text-[#27AF66]"
-                        }`}>
-                        {translateSessionStatus(session.status)}
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="detail-text">{session.placesTotal} places</div>
-                </div>
-              ))}
-            </section>
-          </Wrapper>
+                : null}
+            </div>
+            <div >
+              <Donnee title={"Région"} value={center.region} number={""} />
+              <Donnee title={"Département"} value={center.department} number={`(${getDepartmentNumber(center.department)})`} />
+              <Donnee title={"Ville"} value={center.city} number={`(${center.zip})`} />
+              <Donnee title={"Adresse"} value={center.address} number={""} />
+            </div>
+          </div>
         </Box>
       </div>
     </div>
   );
 }
+
+const Donnee = ({ title, value, number }) => {
+  return (
+    <div className="flex pt-4">
+      <div className="w-1/2 text-brand-detail_title "> {title} : </div>
+      <div className="w-1/2 font-medium"> {value} {number} </div>
+    </div>
+  );
+};
 
 const Wrapper = styled.div`
   padding: 3rem;

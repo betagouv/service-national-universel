@@ -11,6 +11,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import Loader from "../../components/Loader";
+
 import MultiSelectComponent from "./components/Multiselect";
 import api from "../../services/api";
 import { SESSION_STATUS, translate, translateSessionStatus } from "../../utils";
@@ -164,7 +165,7 @@ export default function Edit(props) {
                             <>
                               <div
                                 key={index}
-                                className={`pb-2 mr-5 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
+                                className={`pb-2 mr-5 cursor-pointer ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
                                 onClick={() => {
                                   setsessionShow(cohort);
                                 }}>
@@ -259,6 +260,7 @@ const SelectStatus = ({ title, name, values, handleChange, disabled, options, va
   return (
     <div className="">
       <div className="text-gray-500 text-xs"> {title} </div>
+
       <Field hidden value={values} name={name} onChange={handleChange} validate={validate} />
       <select disabled={disabled} name={name} value={values} required onChange={handleChange} className="w-full bg-inherit">
         <option disabled value="">
