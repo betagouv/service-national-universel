@@ -18,11 +18,13 @@ async function getCohortSessionsAvailability(young) {
       excludedGrade: [],
       excludedZip: [],
       includedBirthdate: { begin: "2004-07-16", end: "2007-07-02" },
+      inscriptionLimitDate: "2022-05-02, 00:00:01",
       stringDate: "3 au 15 juillet 2022",
       buffer: 1.25,
       id: "Juillet 2022",
     },
   ].filter((el) => {
+    if (Date.now() > new Date(el.inscriptionLimitDate).getTime()) return false;
     if (el.excludedGrade.includes(young.grade)) return false;
     else if (
       new Date(el.includedBirthdate.begin).getTime() <= new Date(young.birthdateAt).getTime() &&
