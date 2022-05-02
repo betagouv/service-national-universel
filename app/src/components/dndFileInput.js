@@ -8,7 +8,7 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default function DndFileInput({ optional, value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier" }) {
+export default function DndFileInput({ optional, value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", ...props }) {
   const [filesList, setFilesList] = useState(value || []);
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function DndFileInput({ optional, value, onChange, name, errorMes
   }
 
   return (
-    <div style={{}}>
+    <div style={{}} {...props}>
       <ImageInput id={`file-drop-${name}`}>
         <Field
           type="file"
@@ -103,7 +103,7 @@ function isFileSupported(fileName) {
 }
 
 const ImageInput = styled.label`
-  border: 1px dashed #d2d6dc;
+  border: 2px dashed #d2d6dc;
   padding: 25px;
   text-align: center;
   outline: 0;
