@@ -36,7 +36,7 @@ export default function Rules({ isOpen, onCancel, correction }) {
                 <div>
                   <h2 className="mt-0">Téléversez votre règlement intérieur</h2>
                   <p className="text-[#9C9C9C] my-3">
-                    Vous et {isPlural ? "vos représentants légaux" : "votre représentant légal"} devez lire et acceptez les règles de fonctionnement propres aux centres du Service
+                    Vous et {isPlural ? "vos représentants légaux" : "votre représentant légal"} devez lire et accepter les règles de fonctionnement propres aux centres du Service
                     National Universel exposées dans le règlement intérieur ci-joint avant votre départ en séjour. Cette étape est un pré-requis au séjour de cohésion.
                   </p>
                 </div>
@@ -178,8 +178,8 @@ export default function Rules({ isOpen, onCancel, correction }) {
                             </DownloadFormButton>
                           </BackButton> */}
                             <div className="bg-gray-50 rounded-lg px-2.5 py-4 sm:my-2 text-center w-full lg:w-[50%] lg:mt-0">
-                              <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/droit_a_l_image_2022.pdf" target="_blank" rel="noreferrer">
-                                <DownloadButton text="Télécharger le modèle à remplir" tw="mx-auto mb-2" />
+                              <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/reglement_interieur_Fevrier_2022.pdf" target="_blank" rel="noreferrer">
+                                <DownloadButton text="Téléchargez le modèle à remplir" tw="mx-auto mb-2" />
                               </a>
                               <p className="text-sm text-gray-600 mb-3">Puis téléversez le formulaire rempli</p>
                             </div>

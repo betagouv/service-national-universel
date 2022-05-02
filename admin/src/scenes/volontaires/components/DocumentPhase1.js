@@ -335,7 +335,7 @@ export default function DocumentPhase1(props) {
           </Col>
           <Col md={6} style={{ borderBottom: "2px solid #f4f5f7" }}>
             <div className="flex row justify-center mx-2 my-1">
-              <h1 className="text-center pb-2">Droit a l'image</h1>
+              <h1 className="text-center pb-2">Droit a l&apos;image</h1>
 
               <select disabled={loading} className="form-control" value={statusImageRight} name="imageRight" onChange={(e) => needModal(e)}>
                 {options.map((o, i) => (

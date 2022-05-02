@@ -204,7 +204,7 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                           </BackButton> */}
                             <div className="bg-gray-50 rounded-lg px-2.5 py-4 sm:my-2 text-center w-full lg:w-[50%] lg:mt-0">
                               <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/droit_a_l_image_2022.pdf" target="_blank" rel="noreferrer">
-                                <DownloadButton text="Télécharger le modèle à remplir" tw="mx-auto mb-2" />
+                                <DownloadButton text="Téléchargez le modèle à remplir" tw="mx-auto mb-2" />
                               </a>
                               <p className="text-sm text-gray-600 mb-3">Puis téléversez le formulaire rempli</p>
                             </div>

@@ -212,7 +212,7 @@ export default function AutoTest({ isOpen, onCancel, correction }) {
                                 href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Consentement_a_l_utilisation_d_autotest_COVID.pdf"
                                 target="_blank"
                                 rel="noreferrer">
-                                <DownloadButton text="Télécharger le modèle à remplir" tw="mx-auto mb-2" />
+                                <DownloadButton text="Téléchargez le modèle à remplir" tw="mx-auto mb-2" />
                               </a>
                               <p className="text-sm text-gray-600 mb-3">Puis téléversez le formulaire rempli</p>
                             </div>
