@@ -6,8 +6,8 @@ import DownloadButton from "./buttons/DownloadButton";
 import RoundDownloadButton from "./buttons/RoundDownloadButton";
 import IconButton from "./buttons/IconButton";
 import ModalConfirm from "./modals/ModalConfirm";
-import Download from "../assets/Download.js";
 import deleteIcon from "../assets/delete.svg";
+import { environment } from "../config";
 
 function getFileName(file) {
   return (file && file.name) || file;
@@ -39,37 +39,40 @@ export default function DndFileInput({ value, onChange, name, errorMessage = req
       <div className={tw}>
         {filesList.map((e, i) => (
           <>
-            {/* <File key={e}>
-            <FileName>{getFileName(e)}</FileName>
-            <div>
-              <span onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })}>Supprimer</span>
-              <DownloadButton
-                className="bg-blue-600"
-                key={e}
-                source={() => {
-                  console.log(e);
-                  return source(getFileName(e));
-                }}
-                title={`Télécharger`}
-              />
-            </div>
-          </File> */}
-            <File key={e} className="mx-1">
-              <FileName className="mr-2">{getFileName(e)}</FileName>
-              <IconButton
-                icon={deleteIcon}
-                bgColor="bg-indigo-600"
-                onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })}
-              />
-              <RoundDownloadButton
-                bgColor="bg-indigo-600"
-                source={() => {
-                  console.log(e);
-                  return source(getFileName(e));
-                }}
-                title={`Télécharger`}
-              />
-            </File>
+            {environment === "production" ? (
+              <File key={e}>
+                <FileName>{getFileName(e)}</FileName>
+                <div>
+                  <span onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })}>Supprimer</span>
+                  <DownloadButton
+                    className="bg-blue-600"
+                    key={e}
+                    source={() => {
+                      console.log(e);
+                      return source(getFileName(e));
+                    }}
+                    title={`Télécharger`}
+                  />
+                </div>
+              </File>
+            ) : (
+              <File key={e} className="mx-1">
+                <FileName className="mr-2">{getFileName(e)}</FileName>
+                <IconButton
+                  icon={deleteIcon}
+                  bgColor="bg-indigo-600"
+                  onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })}
+                />
+                <RoundDownloadButton
+                  bgColor="bg-indigo-600"
+                  source={() => {
+                    console.log(e);
+                    return source(getFileName(e));
+                  }}
+                  title={`Télécharger`}
+                />
+              </File>
+            )}
           </>
         ))}
         <ImageInput id="file-drop" className="mx-1">
