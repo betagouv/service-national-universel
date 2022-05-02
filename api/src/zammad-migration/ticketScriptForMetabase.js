@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "../../.env-prod" });
+require("dotenv").config({ path: "../../.env-staging" });
 require("../mongo");
 const client = require("./database");
 const YoungModel = require("../models/young");
@@ -10,7 +10,7 @@ const { fr } = require("date-fns/locale");
 const { ENVIRONMENT } = require("../config");
 
 // function call, because eslint is yelling
-const migrateTickets = async ({ force } = { force: true }) => {
+const migrateTickets = async ({ force } = { force: false }) => {
   console.log("MONGO", process.env.MONGO_URL);
   if (ENVIRONMENT !== "production" && !force) return console.log("no migration zammad");
   // Mes étapes
