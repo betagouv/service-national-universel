@@ -67,6 +67,7 @@ const {
   canModifyStructure,
   canModifyReferent,
   canSearchSessionPhase1,
+  canCreateOrUpdateSessionPhase1,
 } = require("snu-lib/roles");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
@@ -948,6 +949,10 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    if (!canCreateOrUpdateSessionPhase1(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
@@ -991,6 +996,10 @@ router.put("/young/:id/phase1Files/:document", passport.authenticate("referent",
       [`${document}Files`]: Joi.array().items(Joi.string()),
     }).validate(req.body);
     if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
+
+    if (!canCreateOrUpdateSessionPhase1(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     young.set(value);
     await young.save({ fromUser: req.user });
