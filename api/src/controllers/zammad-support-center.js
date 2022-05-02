@@ -42,20 +42,6 @@ async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, em
   return { ok: true };
 }
 
-// Get the list of tickets stats
-router.get("/ticket_overviews", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const email = req.user.email;
-    const customer_id = await zammad.getCustomerIdByEmail(email);
-    if (!customer_id) return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const response = await zammad.api("/ticket_overviews", { method: "GET" });
-    return res.status(200).send({ ok: true, data: response });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 // Get the list of tickets (with their articles when withArticles query param is provided).
 router.get("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
