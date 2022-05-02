@@ -196,16 +196,16 @@ const Drawer = (props) => {
 
   useEffect(() => {
     try {
-      let tags = [];
-      if (user?.role === ROLES.ADMIN) tags.push(["AGENT_Startup_Support"]);
-      else if (user?.role === ROLES.REFERENT_DEPARTMENT) tags.push(["AGENT_Référent_Département", `DEPARTEMENT_${user.department}`]);
-      else if (user?.role === ROLES.REFERENT_REGION) tags.push(["AGENT_Référent_Région", `REGION_${user.region}`]);
+      let query = undefined;
+      if (user.role === ROLES.ADMIN) query = {};
+      else if (user.role === ROLES.REFERENT_DEPARTMENT) query = { department: user.department, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
+      else if (user.role === ROLES.REFERENT_REGION) query = { region: department2region[user.region], subject: "J'ai une question", role: "young", canal: "PLATFORM" };
 
-      const getTickets = async (tags) => {
-        const { data } = await api.post(`/zammad-support-center/ticket/search-by-tags?withArticles=true`, { tags });
+      const getTickets = async (query) => {
+        const { ok, data } = await api.post(`/zammood/tickets`, query);
         props.dispatchTickets(data);
       };
-      if (tags.length) getTickets(tags);
+      if (query) getTickets(query);
     } catch (e) {
       console.log("Oups, une erreur s'est produite.");
     }

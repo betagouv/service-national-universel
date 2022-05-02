@@ -47,28 +47,28 @@ const Dashboard = () => {
   }, []);
 
   const displayState = (state) => {
-    if (state === "open")
+    if (state === "OPEN")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
-    if (state === "closed")
+    if (state === "CLOSED")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
-    if (state === "new")
+    if (state === "NEW")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
-    if (state === "pending")
+    if (state === "PENDING")
       return (
         <StateContainer>
           <MailCloseIcon color="#6495ED" style={{ margin: 0, padding: "5px" }} />
@@ -138,7 +138,7 @@ const Dashboard = () => {
               <p>{ticket.number}</p>
               <p>{ticket.subject}</p>
               <p>{ticket.agentEmail}</p>
-              <p>{displayState(ticket.status.toLowerCase())}</p>
+              <p>{displayState(ticket.status)}</p>
               <div className="ticket-date">{dayjs(new Date(ticket.updatedAt)).fromNow()}</div>
             </NavLink>
           ))}

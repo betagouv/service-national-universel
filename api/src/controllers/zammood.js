@@ -9,11 +9,31 @@ const zammood = require("../zammood");
 const { ERRORS, isYoung } = require("../utils");
 const { ROLES } = require("snu-lib/roles");
 const { ADMIN_URL } = require("../config.js");
+const { sendTemplate } = require("../sendinblue");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const ReferentObject = require("../models/referent");
+const YoungObject = require("../models/young");
+
 
 router.get("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { ok, data } = await zammood.api(`/v0/ticket?email=${req.user.email}`, { method: "GET", credentials: "include" });
+    if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+
+router.post("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { ok, data } = await zammood.api(`/v0/ticket/search`, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify(req.body)
+    });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -64,6 +84,10 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       }),
     });
     if (!response.ok) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
+    else if (isYoung(req.user)) {
+      const isNotified = await notifyReferent(response.date, req.body.message);
+      if (!isNotified) slack.error({ title: "Notify referent new message to zammood", text: JSON.stringify(response.code) });
+    }
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
@@ -72,6 +96,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
   }
 });
 
+//create ticket for non authenticated users
 router.post("/ticket/form", async (req, res) => {
   try {
     const obj = {
@@ -131,6 +156,26 @@ router.post("/ticket/form", async (req, res) => {
   }
 });
 
+// Update one ticket.
+router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  const { status } = req.body;
+  try {
+    const email = req.user.email;
+    const response = await zammood.api(`/v0/ticket/${req.params.id}`, {
+      method: "PUT",
+      credentials: "include",
+      body: JSON.stringify({
+        status,
+      }),
+    });
+    if (!response.id) return res.status(400).send({ ok: false });
+    return res.status(200).send({ ok: true, data: response });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const userAttributes = await getUserAttributes(req.user);
@@ -146,7 +191,11 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
         attributes: userAttributes,
       }),
     });
-    if (!response.ok) slack.error({ title: "Create message Zammod", text: JSON.stringify(response.code) });
+    if (!response.ok) slack.error({ title: "Create message Zammood", text: JSON.stringify(response.code) });
+    else if (isYoung(req.user)) {
+      const isNotified = await notifyReferent(response.date, req.body.message);
+      if (!isNotified) slack.error({ title: "Notify referent new message to zammood", text: JSON.stringify(response.code) });
+    }
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
@@ -199,5 +248,29 @@ const getUserAttributes = async (user) => {
     }
   }
   return userAttributes;
+}
+
+const notifyReferent = async (ticket, message) => {
+  if (!ticket) return false;
+  let ticketCreator = await YoungObject.findOne({ email: ticket.contactEmail });
+  if (!ticketCreator) return false;
+
+  const department = ticketCreator.department;
+  const departmentReferents = await ReferentObject.find({
+    role: ROLES.REFERENT_DEPARTMENT,
+    department,
+  });
+
+  for (let referent of departmentReferents) {
+    sendTemplate(SENDINBLUE_TEMPLATES.referent.MESSAGE_NOTIFICATION, {
+      emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: `${referent.email}` }],
+      params: {
+        cta: `${ADMIN_URL}/boite-de-reception`,
+        message,
+        from: `${ticketCreator.firstName} ${ticketCreator.lastName}`,
+      },
+    });
+  }
+  return true;
 }
 module.exports = router;
