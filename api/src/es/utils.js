@@ -100,7 +100,13 @@ function validateEsQueryFromText(body) {
 }
 
 function validateEsQuery(line) {
+  const sumSchema = Joi.object({
+    sum: Joi.object({
+      field: Joi.string().required(),
+    }),
+  });
   const termsSchema = Joi.object({
+    term: Joi.object().pattern(/.*/, Joi.string()),
     terms: Joi.alternatives().try(
       Joi.object().pattern(/.*/, Joi.array().max(50).items(Joi.string())).max(50),
       Joi.object({
@@ -110,6 +116,13 @@ function validateEsQuery(line) {
         missing: Joi.string(),
       }),
     ),
+  });
+  const exixtsOrTermSchema = Joi.object({
+    exists: Joi.object({ field: Joi.string().required() }),
+    term: Joi.object().pattern(/.*/, Joi.string().allow(null, "")),
+  });
+  const boolNestedField = Joi.object({
+    bool: Joi.object().pattern(/must|must_not/, exixtsOrTermSchema),
   });
   const boolShouldTermsSchema = Joi.object({
     bool: Joi.object({
@@ -127,25 +140,15 @@ function validateEsQuery(line) {
                 fuzziness: Joi.number(),
               }),
             }),
-            Joi.object({
-              bool: Joi.object({
-                must_not: Joi.object({
-                  exists: Joi.object({
-                    field: Joi.string().required(),
-                  }),
-                }),
-              }),
-            }),
+            boolNestedField,
           ),
         ),
       minimum_should_match: Joi.string(),
     }),
   });
-  const boolFilterTermsSchema = Joi.object({
-    bool: Joi.object({
-      filter: termsSchema,
-    }),
-  });
+  const boolFilterTermsSchema = Joi.object({ bool: Joi.object({ filter: termsSchema }) });
+  // {"filter":{"bool":{"must":{"exists":{"field":"networkId.keyword"}},"must_not":{"term":{"networkId.keyword":""}}}}}
+  const filterSchema = Joi.alternatives().try(termsSchema, boolNestedField, exixtsOrTermSchema);
   const matchAllSchema = Joi.object({ match_all: Joi.object({}) });
   return Joi.object({
     size: Joi.number(),
@@ -153,9 +156,9 @@ function validateEsQuery(line) {
       matchAllSchema,
       Joi.object({
         bool: Joi.object({
-          filter: Joi.array().max(50).items(termsSchema),
+          filter: Joi.array().max(50).items(filterSchema),
           must: Joi.alternatives().try(
-            Joi.object({ match_all: Joi.object({}) }),
+            Joi.object({ match_all: Joi.object({}), filter: Joi.array().max(50).items(filterSchema) }),
             Joi.array()
               .max(50)
               .items(
@@ -177,7 +180,24 @@ function validateEsQuery(line) {
     sort: Joi.array()
       .items(Joi.object().pattern(/.*/, Joi.alternatives().try(Joi.string(), Joi.object({ order: Joi.string().valid("asc", "desc") }))))
       .max(50),
-    aggs: Joi.object().pattern(/.*/, termsSchema),
+    //"views":{"date_histogram":{"field":"birthdateAt","interval":"year"}}
+    aggs: Joi.object().pattern(
+      /.*/,
+      Joi.alternatives().try(
+        Joi.object({
+          date_histogram: Joi.object({
+            field: Joi.string().required(),
+            interval: Joi.string().required(),
+          }),
+        }),
+        termsSchema,
+        Joi.object({ filter: filterSchema }),
+        sumSchema,
+        termsSchema.keys({
+          aggs: Joi.object().pattern(/.*/, Joi.alternatives().try(termsSchema, sumSchema)),
+        }),
+      ),
+    ),
     track_total_hits: Joi.boolean(),
   }).validate(line);
 }
