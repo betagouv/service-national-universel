@@ -40,22 +40,6 @@ describe("Session Phase 1", () => {
     });
   });
 
-  describe("GET /session-phase1/:id", () => {
-    it("should return 404 when session-phase1 is not found", async () => {
-      const res = await request(getAppHelper())
-        .get("/session-phase1/" + notExistingSessionPhase1Id)
-        .send();
-      expect(res.status).toBe(404);
-    });
-    it("should return 200 when session-phase1 is found", async () => {
-      const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
-      const res = await request(getAppHelper())
-        .get("/session-phase1/" + sessionPhase1._id)
-        .send();
-      expect(res.status).toBe(200);
-    });
-  });
-
   describe("GET /session-phase1", () => {
     it("should return 200", async () => {
       const res = await request(getAppHelper()).get("/cohesion-center/").send();
@@ -65,16 +49,20 @@ describe("Session Phase 1", () => {
 
   describe("PUT /session-phase1/:id", () => {
     it("should return 404 when session-phase1 is not found", async () => {
-      const res = await request(getAppHelper()).put("/session-phase1/" + notExistingSessionPhase1Id).send({
-        cohort: '2020'
-      });
+      const res = await request(getAppHelper())
+        .put("/session-phase1/" + notExistingSessionPhase1Id)
+        .send({
+          cohort: "2020",
+        });
       expect(res.status).toBe(404);
     });
     it("should return 200 when session-phase1 is found", async () => {
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
-      const res = await request(getAppHelper()).put("/session-phase1/" + sessionPhase1._id).send({
-        cohort: "2020",
-      });
+      const res = await request(getAppHelper())
+        .put("/session-phase1/" + sessionPhase1._id)
+        .send({
+          cohort: "2020",
+        });
       expect(res.status).toBe(200);
       expect(res.body.data.cohort).toBe("2020");
     });
@@ -82,9 +70,11 @@ describe("Session Phase 1", () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
-      const res = await request(getAppHelper()).put("/session-phase1/" + sessionPhase1._id).send({
-        cohort: "2020",
-      });
+      const res = await request(getAppHelper())
+        .put("/session-phase1/" + sessionPhase1._id)
+        .send({
+          cohort: "2020",
+        });
       expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
