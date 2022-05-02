@@ -102,16 +102,16 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           <div />
         ) : (
           <>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-              <MailCloseIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+              <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
               <div>{newTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-              <MailOpenIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+              <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
               <div>{openedTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-              <SuccessIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+              <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
               <div>{closedTickets}</div>
             </div>
           </>
@@ -139,16 +139,16 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           <div />
         ) : (
           <>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-              <MailCloseIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+              <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
               <div>{newTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-              <MailOpenIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+              <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
               <div>{openedTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-              <SuccessIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+              <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
               <div>{closedTickets}</div>
             </div>
           </>
