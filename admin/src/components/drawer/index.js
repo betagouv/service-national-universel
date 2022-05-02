@@ -41,7 +41,7 @@ const HelpButton = ({ onClick, to }) => (
     <NavLink className=" items-center border rounded flex p-2 hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg" activeClassName="flex bg-snu-purple-300 p-2" to={to}>
       <QuestionMark class="h-6 w-6 flex mr-2 " />
       <div>
-        <div className=" font-normal text-sm text-center  ">Besoin d&apos;aide ?</div>
+        <div className=" font-normal text-sm text-center  ">Besoin d&apos;aide&nbsp;?</div>
         <div className="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
       </div>
     </NavLink>
@@ -125,10 +125,10 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
 function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
   return (
     <>
+      <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} />
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
-      <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} beta />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />

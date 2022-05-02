@@ -12,7 +12,6 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import { appURL } from "../../config";
 import Badge from "../../components/Badge";
-import ActionButtonArchive from "../../components/buttons/ActionButtonArchive";
 import plausibleEvent from "../../services/pausible";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 

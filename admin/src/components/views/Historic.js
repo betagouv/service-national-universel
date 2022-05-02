@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 
-import { formatStringLongDate, translateModelFields, translate, translatePhase1, translatePhase2, translateApplication, translateEngagement } from "../../utils";
+import { formatStringLongDate, translateModelFields, translate, translatePhase1, translatePhase2, translateApplication, translateEngagement, ROLES } from "../../utils";
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 import { HiOutlineChevronUp, HiOutlineChevronDown, HiArrowRight } from "react-icons/hi";
 
 export default function Historic({ model, value }) {
   const [data, setData] = useState();
+  const [filter, setFilter] = useState("");
+  const user = useSelector((state) => state.Auth.user);
 
   const getPatches = async () => {
     try {
@@ -28,15 +31,18 @@ export default function Historic({ model, value }) {
     <div>
       <div className="flex flex-col gap-3 w-full">
         {data.length === 0 ? <div className="italic p-1">Aucune données</div> : null}
+        {user?.role === ROLES.ADMIN ? (
+          <input onChange={(e) => setFilter(e.target.value)} value={filter} className="bg-white p-2 rounded-lg w-[350px]" placeholder="Rechercher..." />
+        ) : null}
         {data.map((hit) => (
-          <Hit model={model} key={hit._id} hit={hit} />
+          <Hit model={model} key={hit._id} hit={hit} filter={filter} />
         ))}
       </div>
     </div>
   );
 }
 
-const Hit = ({ hit, model }) => {
+const Hit = ({ hit, model, filter }) => {
   const [viewDetails, setViewDetails] = useState(true);
   function isIsoDate(str) {
     if (!Date.parse(str)) return false;
@@ -69,6 +75,22 @@ const Hit = ({ hit, model }) => {
     }
   };
 
+  if (
+    !hit ||
+    (filter &&
+      !hit.ops?.some((e) => {
+        const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
+        const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
+
+        const matchFieldName = translateModelFields(model, e.path.substring(1)).toLowerCase().includes(filter.toLowerCase().trim());
+        const matchOriginalValue = (isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue)?.toLowerCase().includes(filter.toLowerCase().trim());
+        const matchFromValue = (isIsoDate(value) ? formatStringLongDate(value) : value)?.toLowerCase().includes(filter.toLowerCase().trim());
+
+        return matchFieldName || matchOriginalValue || matchFromValue;
+      }))
+  )
+    return null;
+
   return (
     <div className="bg-white shadow-md rounded-lg">
       <div className="flex p-3 border-b justify-between items-center cursor-pointer" onClick={() => setViewDetails((e) => !e)}>
@@ -84,23 +106,36 @@ const Hit = ({ hit, model }) => {
         </div>
       </div>
       {viewDetails
-        ? hit.ops?.map((e, i) => {
-            const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
-            const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
-            if (["/jvaRawData"].includes(e.path)) return null;
-            return (
-              <div className="flex p-3 justify-between border-b border-[#f3f3f3]" key={`${hit.date}-${i}`}>
-                <div className="flex-1 ">{`${splitElementArray(translateModelFields(model, e.path.substring(1)))}`}&nbsp;:</div>
-                <div className="flex-1 text-center">
-                  {(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || <span className="text-coolGray-400 italic">Vide</span>}
+        ? hit.ops
+            ?.filter((e) => {
+              if (filter) {
+                const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
+                const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
+
+                const matchFieldName = translateModelFields(model, e.path.substring(1)).toLowerCase().includes(filter.toLowerCase().trim());
+                const matchOriginalValue = (isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue)?.toLowerCase().includes(filter.toLowerCase().trim());
+                const matchFromValue = (isIsoDate(value) ? formatStringLongDate(value) : value)?.toLowerCase().includes(filter.toLowerCase().trim());
+
+                return matchFieldName || matchOriginalValue || matchFromValue;
+              } else return true;
+            })
+            ?.map((e, i) => {
+              const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
+              const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
+              if (["/jvaRawData"].some((blackfield) => e.path.includes(blackfield))) return null;
+              return (
+                <div className="flex p-3 justify-between border-b border-[#f3f3f3]" key={`${hit.date}-${i}`}>
+                  <div className="flex-1 ">{`${splitElementArray(translateModelFields(model, e.path.substring(1)))}`}&nbsp;:</div>
+                  <div className="flex-1 text-center">
+                    {(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || <span className="text-coolGray-400 italic">Vide</span>}
+                  </div>
+                  <div className="text-center">
+                    <HiArrowRight />
+                  </div>
+                  <div className="flex-1 text-center">{(isIsoDate(value) ? formatStringLongDate(value) : value) || <span className="text-coolGray-400 italic">Vide</span>}</div>
                 </div>
-                <div className="text-center">
-                  <HiArrowRight />
-                </div>
-                <div className="flex-1 text-center">{(isIsoDate(value) ? formatStringLongDate(value) : value) || "-"}</div>
-              </div>
-            );
-          })
+              );
+            })
         : null}
     </div>
   );

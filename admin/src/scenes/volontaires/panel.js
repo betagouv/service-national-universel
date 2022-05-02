@@ -117,6 +117,12 @@ export default function VolontairePanel({ onChange, value }) {
             <div className="quote">{young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
           </Info>
         ) : null}
+        {young.cohortChangeReason ? (
+          <Info title="Motif de changement de cohorte :" id={young._id}>
+            <div>{young.cohortChangeReason}</div>
+            {young.cohortDetailedChangeReason ? <div className="quote">«&nbsp;{young.cohortDetailedChangeReason}&nbsp;»</div> : null}
+          </Info>
+        ) : null}
         <Info title="Recherche de MIG" id={young._id}>
           {young.applications.length ? (
             <>

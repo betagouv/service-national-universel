@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import styled from "styled-components";
 import { Spinner } from "reactstrap";
-
-import { setYoung } from "../../redux/auth/actions";
-import { saveYoung } from "../../scenes/inscription/utils";
+import styled from "styled-components";
 import { appURL } from "../../config";
 import { YOUNG_STATUS } from "../../utils";
 
-export default function FormFooter({ values, handleSubmit, errors, secondButton = "save", loading }) {
+export default function FormFooter({ values, handleSubmit, errors, secondButton = "save", loading, save }) {
   const dispatch = useDispatch();
   const [loadingSaveBtn, setloadingSaveBtn] = useState(false);
   const [loadingCorrectionDone, setloadingCorrectionDone] = useState(false);
@@ -16,15 +13,13 @@ export default function FormFooter({ values, handleSubmit, errors, secondButton 
 
   const handleSave = async () => {
     setloadingSaveBtn(true);
-    const young = await saveYoung(values);
-    if (young) dispatch(setYoung(young));
+    await save({ values, type: "save" });
     setloadingSaveBtn(false);
   };
 
   const handleCorrectionDone = async () => {
     setloadingCorrectionDone(true);
-    const young = await saveYoung({ ...values, status: YOUNG_STATUS.WAITING_VALIDATION });
-    if (young) dispatch(setYoung(young));
+    await save({ values, type: "correction" });
     setloadingCorrectionDone(false);
     handleBackToHome();
   };
@@ -38,16 +33,21 @@ export default function FormFooter({ values, handleSubmit, errors, secondButton 
       <Footer>
         <ButtonContainer>
           {young?.status === YOUNG_STATUS.WAITING_CORRECTION ? (
-            <SecondButton onClick={handleCorrectionDone}>
+            <SecondButton disabled={loading || loadingSaveBtn || loadingCorrectionDone} onClick={handleCorrectionDone}>
               {loadingCorrectionDone ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "J'ai terminé la correction de mon dossier"}
             </SecondButton>
           ) : null}
           {secondButton === "save" ? (
-            <SecondButton onClick={handleSave}> {loadingSaveBtn ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Enregistrer"}</SecondButton>
-          ) : (
+            <SecondButton disabled={loading || loadingSaveBtn || loadingCorrectionDone} onClick={handleSave}>
+              {loadingSaveBtn ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Enregistrer"}
+            </SecondButton>
+          ) : secondButton !== "none" ? (
             <SecondButton onClick={handleBackToHome}>Retour</SecondButton>
-          )}
-          <ContinueButton onClick={handleSubmit}> {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Continuer"}</ContinueButton>
+          ) : null}
+
+          <ContinueButton disabled={loading || loadingSaveBtn || loadingCorrectionDone} onClick={handleSubmit}>
+            {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Continuer"}
+          </ContinueButton>
         </ButtonContainer>
       </Footer>
       {Object.keys(errors).filter((key) => errors[key]).length ? (

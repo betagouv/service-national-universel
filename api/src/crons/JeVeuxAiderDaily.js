@@ -13,7 +13,7 @@ const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
 
-const { ROLES, departmentLookUp, department2region, MISSION_DOMAINS } = require("snu-lib");
+const { ROLES, departmentLookUp, department2region, MISSION_DOMAINS, MISSION_STATUS } = require("snu-lib");
 const { updateApplication } = require("../utils/index.js");
 
 let startTime = new Date();
@@ -193,7 +193,7 @@ const sync = async (result) => {
         actions: mission.description,
         structureId: structure.id,
         structureName: structure.name,
-        status: "WAITING_VALIDATION",
+        status: MISSION_STATUS.WAITING_VALIDATION,
         tutorId: referentMission.id,
         tutorName: `${referentMission.firstName} ${referentMission.lastName}`,
         zip: mission.address.zip,
@@ -267,10 +267,14 @@ const sync = async (result) => {
 const cleanData = async () => {
   slack.info({ title: "sync with JVA missions", text: "I'm cleaning the outdated JVA missions !" });
   try {
-    const missionsTodelete = await MissionModel.find({ lastSyncAt: { $lte: startTime }, isJvaMission: "true" });
+    const missionsTodelete = await MissionModel.find({
+      lastSyncAt: { $lte: startTime },
+      isJvaMission: "true",
+      status: { $nin: [MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED] },
+    });
     //Cancel mission
     for (const mission of missionsTodelete) {
-      mission.set({ status: "CANCEL" });
+      mission.set({ status: MISSION_STATUS.CANCEL });
       await mission.save();
 
       //Check and cancel application link to the mission

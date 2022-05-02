@@ -11,7 +11,6 @@ const { ROLES } = require("snu-lib/roles");
 const { ADMIN_URL } = require("../config.js");
 const ReferentObject = require("../models/referent");
 
-
 router.get("/tickets", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await zammood.api(`/ticket?email=${req.user.email}`, { method: "GET", credentials: "include" });
@@ -19,7 +18,7 @@ router.get("/tickets", passport.authenticate("referent", { session: false, failW
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -33,7 +32,7 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
     return res.status(200).send({ ok: true, data: messages.data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -82,9 +81,11 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       userAttributes.push({ name: "statut phase 3", value: req.user.statusPhase3 });
       if (departmentReferentPhase2) userAttributes.push({ name: "lien vers référent phase 2", value: departmentReferentPhase2Link });
       userAttributes.push({ name: "lien vers candidatures", value: `${ADMIN_URL}/volontaire/${req.user._id}/phase2` });
-      userAttributes.push({ name: "lien vers équipe départementale", value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${req.user.department}%22%5D&ROLE=%5B%22referent_department%22%5D` });
-    }
-    else {
+      userAttributes.push({
+        name: "lien vers équipe départementale",
+        value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${req.user.department}%22%5D&ROLE=%5B%22referent_department%22%5D`,
+      });
+    } else {
       if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
         userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
         userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
@@ -92,6 +93,19 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       }
       if (req.user.role === ROLES.HEAD_CENTER) {
         userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
+      }
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT || req.user.role === ROLES.REFERENT_REGION) {
+        userAttributes.push({
+          name: "lien vers équipe départementale",
+          value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${req.user.department}%22%5D&ROLE=%5B%22referent_department%22%5D`,
+        });
+        if (req.user.subRole) userAttributes.push({ name: "fonction", value: req.user.subRole });
+      }
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
+        userAttributes.push({
+          name: "lien vers équipe régionale",
+          value: `${ADMIN_URL}/user?REGION=%5B%22${req.user.region}%22%5D&ROLE=%5B%22referent_region%22%5D`,
+        });
       }
     }
     const response = await zammood.api("/v0/message", {
@@ -113,7 +127,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -176,7 +190,7 @@ router.post("/ticket/form", async (req, res) => {
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -202,7 +216,6 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
       { name: "role", value: role },
     ];
 
-
     if (isYoung(req.user)) {
       userAttributes.push({ name: "cohorte", value: req.user.cohort });
       userAttributes.push({ name: "statut général", value: req.user.status });
@@ -211,10 +224,11 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
       userAttributes.push({ name: "statut phase 3", value: req.user.statusPhase3 });
       if (departmentReferentPhase2) userAttributes.push({ name: "lien vers référent phase 2", value: departmentReferentPhase2Link });
       userAttributes.push({ name: "lien vers candidatures", value: `${ADMIN_URL}/volontaire/${req.user._id}/phase2` });
-      userAttributes.push({ name: "lien vers équipe départementale", value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${req.user.department}%22%5D&ROLE=%5B%22referent_department%22%5D` });
-    }
-    else {
-
+      userAttributes.push({
+        name: "lien vers équipe départementale",
+        value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${req.user.department}%22%5D&ROLE=%5B%22referent_department%22%5D`,
+      });
+    } else {
       if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
         userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
         userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
@@ -222,6 +236,19 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
       }
       if (req.user.role === ROLES.HEAD_CENTER) {
         userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
+      }
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT || req.user.role === ROLES.REFERENT_REGION) {
+        userAttributes.push({
+          name: "lien vers équipe départementale",
+          value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${req.user.department}%22%5D&ROLE=%5B%22referent_department%22%5D`,
+        });
+        if (req.user.subRole) userAttributes.push({ name: "fonction", value: req.user.subRole });
+      }
+      if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
+        userAttributes.push({
+          name: "lien vers équipe régionale",
+          value: `${ADMIN_URL}/user?REGION=%5B%22${req.user.region}%22%5D&ROLE=%5B%22referent_region%22%5D`,
+        });
       }
     }
     const response = await zammood.api("/v0/message", {
@@ -240,9 +267,8 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
 module.exports = router;
-

@@ -124,12 +124,25 @@ img.bg {
 #convocation-cohesion > .referent {
   font-size: 0.8rem;
   position: absolute;
-  left: 130px;
+  left: 50px;
   top: 150px;
-  font-weight: bold;
+  text-align: left;
+  min-width: 50%;
+}
+
+#convocation-cohesion > .referent  > .title {
+   font-size: 0.8rem;
+  font-weight: bold; 
   text-decoration: underline;
-  text-align: right;
+  text-align: left;
   max-width: 50%;
+  padding-bottom: 2px;
+}
+
+#convocation-cohesion > .referent > .info {
+  font-size: 0.8rem;
+  text-align: left;
+  max-width: 100%;
 }
 
 #convocation-cohesion > .infos-young {

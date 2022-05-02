@@ -100,6 +100,9 @@ const addSignature = (str, context, field) => {
         ${sanitizeAll(context.projectManagerFirstName)}
         </div>
         ${badgeSignature(sanitizeAll(context.projectManagerStatus))}
+        <div>
+        ${context.projectManagerValidationDate ? formatDateFRTimezoneUTC(context.projectManagerValidationDate) : ""}
+        </div>
       </div>
       <div style="text-align: center;">
         <div>Représentant structure</div>
@@ -108,6 +111,9 @@ const addSignature = (str, context, field) => {
         ${sanitizeAll(context.structureManagerFirstName)}
         </div>  
         ${badgeSignature(sanitizeAll(context.structureManagerStatus))}
+        <div>
+        ${context.structureManagerValidationDate ? formatDateFRTimezoneUTC(context.structureManagerValidationDate) : ""}
+        </div>
       </div>
       ${
         context.isYoungAdult == "true"
@@ -119,6 +125,9 @@ const addSignature = (str, context, field) => {
             ${sanitizeAll(context.youngContractFirstName)}
             </div>
             ${badgeSignature(sanitizeAll(context.youngContractStatus))}
+            <div>
+            ${context.youngContractValidationDate ? formatDateFRTimezoneUTC(context.youngContractValidationDate) : ""}
+            </div>
           </div>
       `
           : `<div style="text-align: center;">
@@ -128,6 +137,9 @@ const addSignature = (str, context, field) => {
               ${sanitizeAll(context.parent1FirstName)}
               </div>
               ${badgeSignature(sanitizeAll(context.parent1Status))}
+              <div>
+              ${context.parent1ValidationDate ? formatDateFRTimezoneUTC(context.parent1ValidationDate) : ""}
+              </div>
             </div>
       ${
         context.parent2Email
@@ -138,6 +150,9 @@ const addSignature = (str, context, field) => {
               ${sanitizeAll(context.parent2FirstName)}
               </div>
               ${badgeSignature(sanitizeAll(context.parent2Status))}
+              <div>
+              ${context.parent2ValidationDate ? formatDateFRTimezoneUTC(context.parent2ValidationDate) : ""}
+              </div>
             </div>`
           : ``
       }

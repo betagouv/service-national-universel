@@ -163,7 +163,7 @@ async function sync(obj, type, { force } = { force: false }) {
     const attributes = {};
     for (let i = 0; i < Object.keys(user).length; i++) {
       const key = Object.keys(user)[i];
-      if (key.indexOf("At") !== -1) {
+      if (key.endsWith("At")) {
         // if its a date
         if (user[key]) attributes[key.toUpperCase()] = user[key].slice(0, 10);
       } else {

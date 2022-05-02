@@ -3,7 +3,6 @@ import CardServiceDepartemental from "./card/CardServiceDepartemental";
 import CardContacts from "./card/CardContacts";
 import api from "../../../services/api";
 import CardRepresentant from "./card/CardRepresentant";
-import { environment } from "../../../config";
 
 export default function InfoDepartement({ department }) {
   const [servicesDep, setServicesDep] = useState();
@@ -27,7 +26,7 @@ export default function InfoDepartement({ department }) {
   return (
     <div className="flex flex-row flex-stretch flex-wrap gap-y-4">
       {department ? <CardServiceDepartemental servicesDep={servicesDep} department={department} getService={getService} /> : null}
-      {environment !== "production" ? <CardRepresentant representant={representant} getService={getService} department={department} idServiceDep={servicesDep._id} /> : null}
+      {department ? <CardRepresentant representant={representant} getService={getService} department={department} idServiceDep={servicesDep._id} /> : null}
       {contacts ? <CardContacts contacts={contacts} idServiceDep={servicesDep._id} getService={getService} /> : null}
     </div>
   );

@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import api from "../../../services/api";
 import { franceConnectUrl } from "../../../config";
-import { saveYoung } from "../utils";
 
 function getFranceConnectCallback(idRepresentant) {
   return `inscription/france-connect-callback?representant=${idRepresentant}`;

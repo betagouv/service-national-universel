@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
@@ -12,8 +12,7 @@ import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 
 export default function Phase3({ young, onChange }) {
-
-  const [edit, setEdit] = useState(false)
+  const [edit, setEdit] = useState(false);
   const [information, setInformation] = useState({
     phase3StructureName: young.phase3StructureName,
     phase3MissionDescription: young.phase3MissionDescription,
@@ -21,34 +20,34 @@ export default function Phase3({ young, onChange }) {
     phase3TutorLastName: young.phase3TutorLastName,
     phase3TutorEmail: young.phase3TutorEmail,
     phase3TutorPhone: young.phase3TutorPhone,
-  })
+  });
 
+  // eslint-disable-next-line no-unused-vars
   const getText = () => {
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.WAITING_VALIDATION) return "Le tuteur n'a pas encore validé la mission";
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) return "Le tuteur a validé la mission";
   };
 
   const handleChange = (e) => {
-
-    setInformation({ ...information, [e.target.name]: e.target.value })
-  }
+    setInformation({ ...information, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       const { ok } = await api.put(`/young/update_phase3/${young._id}`, information);
-      if (!ok) toastr.error("Oups, une erreur est survenue !")
+      if (!ok) toastr.error("Oups, une erreur est survenue !");
       else {
-        toastr.success("Mis à jour!")
-        setEdit(false)
-        onChange()
+        toastr.success("Mis à jour!");
+        setEdit(false);
+        onChange();
       }
     } catch (e) {
-      console.log(e)
-      setEdit(false)
-      return toastr.error("Oups, une erreur est survenue lors du changement de l'information de la phase 3")
+      console.log(e);
+      setEdit(false);
+      return toastr.error("Oups, une erreur est survenue lors du changement de l'information de la phase 3");
     }
-  }
+  };
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -90,23 +89,54 @@ export default function Phase3({ young, onChange }) {
                 </Row>
                 <Row className="pl-8 pb-2">
                   <Col>
-                    <Details title="Structure" value={young.phase3StructureName} valueEdit={information.phase3StructureName} edit={edit} name={"phase3StructureName"} onChange={handleChange} />
-                    <Details title="Descriptif" value={young.phase3MissionDescription} valueEdit={information.phase3MissionDescription} edit={edit} name={"phase3MissionDescription"} onChange={handleChange} />
+                    <Details
+                      title="Structure"
+                      value={young.phase3StructureName}
+                      valueEdit={information.phase3StructureName}
+                      edit={edit}
+                      name={"phase3StructureName"}
+                      onChange={handleChange}
+                    />
+                    <Details
+                      title="Descriptif"
+                      value={young.phase3MissionDescription}
+                      valueEdit={information.phase3MissionDescription}
+                      edit={edit}
+                      name={"phase3MissionDescription"}
+                      onChange={handleChange}
+                    />
                   </Col>
                   <div className="border"></div>
                   <Col>
-                    <Details title="Prénom" value={young.phase3TutorFirstName} valueEdit={information.phase3TutorFirstName} edit={edit} name={"phase3TutorFirstName"} onChange={handleChange} />
-                    <Details title="Nom" value={young.phase3TutorLastName} valueEdit={information.phase3TutorLastName} edit={edit} name={"phase3TutorLastName"} onChange={handleChange} />
+                    <Details
+                      title="Prénom"
+                      value={young.phase3TutorFirstName}
+                      valueEdit={information.phase3TutorFirstName}
+                      edit={edit}
+                      name={"phase3TutorFirstName"}
+                      onChange={handleChange}
+                    />
+                    <Details
+                      title="Nom"
+                      value={young.phase3TutorLastName}
+                      valueEdit={information.phase3TutorLastName}
+                      edit={edit}
+                      name={"phase3TutorLastName"}
+                      onChange={handleChange}
+                    />
                     <Details title="E-mail" value={young.phase3TutorEmail} valueEdit={information.phase3TutorEmail} edit={edit} name={"phase3TutorEmail"} onChange={handleChange} />
-                    <Details title="Téléphone" value={young.phase3TutorPhone} valueEdit={information.phase3TutorPhone} edit={edit} name={"phase3TutorPhone"} onChange={handleChange} />
+                    <Details
+                      title="Téléphone"
+                      value={young.phase3TutorPhone}
+                      valueEdit={information.phase3TutorPhone}
+                      edit={edit}
+                      name={"phase3TutorPhone"}
+                      onChange={handleChange}
+                    />
                   </Col>
                 </Row>
                 <Row className="pb-2 flex justify-center">
-                  <div className="h-10 ml-4">
-                    {edit ? (
-                      <PanelActionButton icon="pencil" title="Valider" type="submit" />
-                    ) : null}
-                  </div>
+                  <div className="h-10 ml-4">{edit ? <PanelActionButton icon="pencil" title="Valider" type="submit" /> : null}</div>
                 </Row>
               </form>
             </Box>
@@ -118,7 +148,7 @@ export default function Phase3({ young, onChange }) {
           </DownloadAttestationButton>
         ) : null}
       </WrapperPhase3>
-    </div >
+    </div>
   );
 }
 
@@ -132,7 +162,6 @@ const Details = ({ title, value, valueEdit, edit, onChange, name }) => {
       ) : (
         <div className="w-3/4 mr-2">{value}</div>
       )}
-
     </div>
   );
 };

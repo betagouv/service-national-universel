@@ -1,3 +1,80 @@
+## [1.77.2](https://github.com/betagouv/service-national-universel/compare/v1.77.1...v1.77.2) (2022-04-30)
+
+
+### Bug Fixes
+
+* add limit date inscription juillet ([eaf8939](https://github.com/betagouv/service-national-universel/commit/eaf89397a46a05163d3fe8e0c627b87db0cf59a0))
+* auto closed dimanche soir ([f922aa5](https://github.com/betagouv/service-national-universel/commit/f922aa530503ad71c48d8642bc3ddfd7a6ac8742))
+* fermeture inscription dynamiques - 2 etapes ([6c851bd](https://github.com/betagouv/service-national-universel/commit/6c851bd693e3ce0351dd4da4b9f354856b66ddd7))
+* update home closed ([fb58d01](https://github.com/betagouv/service-national-universel/commit/fb58d01a665dc82f283f3794bc935bd957006efd))
+
+## [1.77.1](https://github.com/betagouv/service-national-universel/compare/v1.77.0...v1.77.1) (2022-04-29)
+
+
+### Bug Fixes
+
+* **admin:** Ajout erreur formulaire centre ([#1525](https://github.com/betagouv/service-national-universel/issues/1525)) ([09bb92f](https://github.com/betagouv/service-national-universel/commit/09bb92f4dffdfc4ed67be461ba85151e24936517))
+* **admin:** head-center bug in user list ([e09a67a](https://github.com/betagouv/service-national-universel/commit/e09a67a6c07da24cc8e2a7a594d420be4f1c913a))
+* **api:** check authorization everywhere ([#1503](https://github.com/betagouv/service-national-universel/issues/1503)) ([859acbe](https://github.com/betagouv/service-national-universel/commit/859acbe355b4bc01cf252bae529c9de30768fc9c))
+* **api:** clean outdated mission status blacklist ([#1522](https://github.com/betagouv/service-national-universel/issues/1522)) ([ac3a52f](https://github.com/betagouv/service-national-universel/commit/ac3a52f48c37837edcab8b941172ba24e9d1b740))
+* **api:** remove dead ([#1517](https://github.com/betagouv/service-national-universel/issues/1517)) ([f25a86c](https://github.com/betagouv/service-national-universel/commit/f25a86c3b999bcfc51a80762050cee4b8547f584))
+* **app:** goal inscription modal ([#1527](https://github.com/betagouv/service-national-universel/issues/1527)) ([a25831a](https://github.com/betagouv/service-national-universel/commit/a25831a88890e07db41ae739e78c92a563d7d4ba))
+* ajout décimal taux de remplissage ([8d5108b](https://github.com/betagouv/service-national-universel/commit/8d5108bb32c3908a4fac25fa77622afe75f5f8fa))
+* blacklist historic fields ([c951cc2](https://github.com/betagouv/service-national-universel/commit/c951cc23be52797342fb1aab966faf91dd11e5af))
+
+# [1.77.0](https://github.com/betagouv/service-national-universel/compare/v1.76.0...v1.77.0) (2022-04-28)
+
+
+### Bug Fixes
+
+* **app,admin:** reset password input on wrong login ([86af87b](https://github.com/betagouv/service-national-universel/commit/86af87b185d83e2e8ec92d3774b562c82d28429a))
+* **security:** update phase3 via -id only for login user (referent) ([c3903c6](https://github.com/betagouv/service-national-universel/commit/c3903c6dae3220e5d245ff3c289b0108259352cf))
+
+
+### Features
+
+* **admin:** display cohortChangeReason in panel ([e0b87c7](https://github.com/betagouv/service-national-universel/commit/e0b87c77efa1fb84618178962bcababc1e6e51d1))
+* **admin:** Statut et Export des statuts ([#1513](https://github.com/betagouv/service-national-universel/issues/1513)) ([10de599](https://github.com/betagouv/service-national-universel/commit/10de599ca3f088ee21581f4f5e2ae9bbd0917ee5))
+* **api:** model cohesionCenter ([#1514](https://github.com/betagouv/service-national-universel/issues/1514)) ([9390a4f](https://github.com/betagouv/service-national-universel/commit/9390a4fe4ebee3eacfe8b83a89ac7e2c139280cc))
+* **support:** open support to referent ([#1509](https://github.com/betagouv/service-national-universel/issues/1509)) ([7f9981b](https://github.com/betagouv/service-national-universel/commit/7f9981bf83bf9473f08d984f15ce2dc314d2c0cb))
+
+# [1.76.0](https://github.com/betagouv/service-national-universel/compare/v1.75.0...v1.76.0) (2022-04-26)
+
+
+### Bug Fixes
+
+* close inscription access juin 2022 ([150d0b1](https://github.com/betagouv/service-national-universel/commit/150d0b110adf7c7b6beaa5c1dbc7c6936342dbd0))
+* **admin:** Filtres volontaire : Champs “Non Renseigné” [#1512](https://github.com/betagouv/service-national-universel/issues/1512) ([3790085](https://github.com/betagouv/service-national-universel/commit/3790085136f74dd2ef5635fb0454b4346abdc424))
+* rules deleteReferent ([aec8bea](https://github.com/betagouv/service-national-universel/commit/aec8beacc7602a4effdacc1c4ca940c4e903bbd3))
+
+
+### Features
+
+* **admit:** Ajout statut session ([#1496](https://github.com/betagouv/service-national-universel/issues/1496)) ([fe645bd](https://github.com/betagouv/service-national-universel/commit/fe645bd811b6ec7927a389abf8c001adc23d57c5))
+* **api:** limit login attempts ([#1506](https://github.com/betagouv/service-national-universel/issues/1506)) ([f0a7131](https://github.com/betagouv/service-national-universel/commit/f0a7131081cb9af3148025a4ef533af28d61b654))
+
+# [1.75.0](https://github.com/betagouv/service-national-universel/compare/v1.74.0...v1.75.0) (2022-04-25)
+
+
+### Bug Fixes
+
+* **admin:** withoutChangingRole updateReferent ([ec103d6](https://github.com/betagouv/service-national-universel/commit/ec103d6a1c25e98482de031759ba2d7ac199519b))
+* **api:** remove error detail on 400 error ([#1497](https://github.com/betagouv/service-national-universel/issues/1497)) ([b1fda56](https://github.com/betagouv/service-national-universel/commit/b1fda5630a77147bc20bdf0231cffa886fbf48e7))
+* **api:** remove error detail on 500 error ([#1500](https://github.com/betagouv/service-national-universel/issues/1500)) ([208181e](https://github.com/betagouv/service-national-universel/commit/208181ef29027ae7366c637af370901d1518c815))
+* **app:** show juin is closed ([b1752fb](https://github.com/betagouv/service-national-universel/commit/b1752fb6d07bc0fdc098069c411e36a97b31a432))
+
+
+### Features
+
+* **admin:** filter historic element ([#1499](https://github.com/betagouv/service-national-universel/issues/1499)) ([289226d](https://github.com/betagouv/service-national-universel/commit/289226dc2654d8289bcb4bcdde3fe9209796bd89))
+
+# [1.74.0](https://github.com/betagouv/service-national-universel/compare/v1.73.0...v1.74.0) (2022-04-22)
+
+
+### Features
+
+* Référents régionaux : Module de gestion d’équipes ([#1488](https://github.com/betagouv/service-national-universel/issues/1488)) ([437e9c7](https://github.com/betagouv/service-national-universel/commit/437e9c793bbb67ff42d2d9f7a98ad49c98e68edd))
+
 # [1.73.0](https://github.com/betagouv/service-national-universel/compare/v1.72.2...v1.73.0) (2022-04-21)
 
 

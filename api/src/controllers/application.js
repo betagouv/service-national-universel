@@ -6,13 +6,14 @@ const Joi = require("joi");
 const { capture } = require("../sentry");
 const ApplicationObject = require("../models/application");
 const MissionObject = require("../models/mission");
+const StructureObject = require("../models/structure");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
-const { ERRORS, isYoung } = require("../utils");
+const { ERRORS, isYoung, isReferent } = require("../utils");
 const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
-const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
+const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications } = require("snu-lib");
 const { serializeApplication } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, getCcOfYoung } = require("../utils");
 
@@ -64,9 +65,9 @@ const getReferentManagerPhase2 = async (department) => {
 router.post("/", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateNewApplication(req.body, req.user);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!value.hasOwnProperty("priority")) {
+    if (!("priority" in value)) {
       const applications = await ApplicationObject.find({ youngId: value.youngId });
       value.priority = applications.length + 1;
     }
@@ -76,9 +77,30 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // A young can only update create their own applications.
+    // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    // - admin can create all applications
+    // - referent can create applications of their department/region
+    // - responsible and supervisor can create applications of their structures
+    if (isReferent(req.user)) {
+      if (!canCreateYoungApplication(req.user, young)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      if (req.user.role === ROLES.RESPONSIBLE) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (value.structureId.toString() !== req.user.structureId.toString()) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
+      if (req.user.role === ROLES.SUPERVISOR) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+        if (!structures.map((e) => e._id.toString()).includes(value.structureId.toString())) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
     }
 
     const data = await ApplicationObject.create(value);
@@ -89,14 +111,14 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
 router.put("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateUpdateApplication(req.body, req.user);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const application = await ApplicationObject.findById(value._id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -107,6 +129,28 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     // A young can only update his own application.
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // - admin can update all applications
+    // - referent can update applications of their department/region
+    // - responsible and supervisor can update applications of their structures
+    if (isReferent(req.user)) {
+      if (!canCreateYoungApplication(req.user, young)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      if (req.user.role === ROLES.RESPONSIBLE) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (application.structureId.toString() !== req.user.structureId.toString()) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
+      if (req.user.role === ROLES.SUPERVISOR) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+        if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
     }
 
     application.set(value);
@@ -120,30 +164,42 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await ApplicationObject.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const young = await YoungObject.findById(data.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canViewYoungApplications(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
 router.post("/notify/docs-military-preparation/:template", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const { error, value: template } = Joi.string().required().validate(req.params.template);
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
   const toReferent = await getReferentManagerPhase2(req.user.department);
   if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  if (SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED !== template) {
+    return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  }
 
   const mail = await sendTemplate(parseInt(template), {
     emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
@@ -176,6 +232,28 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
 
     if (isYoung(req.user) && req.user._id.toString() !== application.youngId) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // - admin can notify for all applications
+    // - referent can notify for applications of their department/region
+    // - responsible and supervisor can notify for applications of their structures
+    if (isReferent(req.user)) {
+      if (!canCreateYoungApplication(req.user, young)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      if (req.user.role === ROLES.RESPONSIBLE) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (application.structureId.toString() !== req.user.structureId.toString()) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
+      if (req.user.role === ROLES.SUPERVISOR) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+        if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
     }
 
     let template = defaultTemplate;
@@ -228,7 +306,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     return res.status(200).send({ ok: true, data: mail });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

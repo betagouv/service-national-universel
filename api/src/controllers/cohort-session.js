@@ -12,7 +12,6 @@ const { getDepartmentNumber } = require("snu-lib/region-and-departments");
 
 router.get("/availability/2022", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const young = req.user;
-
   try {
     const sessions = await getCohortSessionsAvailability(young);
     return res.send({ ok: true, data: sessions });
@@ -57,7 +56,7 @@ router.post("/eligibility/2022", async (req, res) => {
       excludedGrade: ["3eme", "1ere", "Terminale", "Terminale CAP"],
       excludedZip: [],
       includedBirthdate: { begin: "2004-06-25", end: "2007-06-11" },
-      inscriptionLimitDate: "2022-04-27, 00:00:00",
+      inscriptionLimitDate: "2022-04-25, 00:00:01",
       stringDate: "12 au 24 juin 2022",
       buffer: 1.25,
       id: "Juin 2022",
@@ -67,7 +66,7 @@ router.post("/eligibility/2022", async (req, res) => {
       excludedGrade: [],
       excludedZip: [],
       includedBirthdate: { begin: "2004-07-16", end: "2007-07-02" },
-      inscriptionLimitDate: "2022-05-01, 00:00:00",
+      inscriptionLimitDate: "2022-05-02, 00:00:01",
       stringDate: "3 au 15 juillet 2022",
       buffer: 1.25,
       id: "Juillet 2022",
@@ -111,7 +110,7 @@ router.post("/eligibility/2022", async (req, res) => {
     return res.send({ ok: true, data: sessions });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
