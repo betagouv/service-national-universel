@@ -1,3 +1,15 @@
+# [1.78.0](https://github.com/betagouv/service-national-universel/compare/v1.77.2...v1.78.0) (2022-05-02)
+
+
+### Bug Fixes
+
+* invalid date for session ([8a4d9a6](https://github.com/betagouv/service-national-universel/commit/8a4d9a6517d2e70ab70acb3a11ce831a904d2a86))
+
+
+### Features
+
+* **admin:** dashboard status center + front center ([#1528](https://github.com/betagouv/service-national-universel/issues/1528)) ([1af6fc4](https://github.com/betagouv/service-national-universel/commit/1af6fc44575ae736f73578568886958529c652d5))
+
 ## [1.77.2](https://github.com/betagouv/service-national-universel/compare/v1.77.1...v1.77.2) (2022-04-30)
 
 
