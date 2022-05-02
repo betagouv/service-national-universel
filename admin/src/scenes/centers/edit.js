@@ -134,11 +134,14 @@ export default function Edit(props) {
                       errors={errors}
                       touched={touched}
                     />
+                    <div className="flex flex-col items-center ">
+                      <Error errors={errors} name={"pmr"} />
+                    </div>
                   </BoxContent>
                 </Box>
               </Col>
               <Col className="mb-10 w-1/2">
-             <Box>
+                <Box>
                   <BoxHeadTitle>Par séjour</BoxHeadTitle>
                   <BoxContent direction="column">
                     <MultiSelectWithTitle
@@ -162,7 +165,7 @@ export default function Edit(props) {
                             <>
                               <div
                                 key={index}
-                                className={`pb-2 mr-5 ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
+                                className={`pb-2 mr-5 cursor-pointer ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
                                 onClick={() => {
                                   setsessionShow(cohort);
                                 }}>
