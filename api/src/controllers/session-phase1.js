@@ -9,7 +9,7 @@ const CohesionCenterModel = require("../models/cohesionCenter");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
-const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll } = require("../utils");
+const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, isReferent } = require("../utils");
 const { canCreateOrUpdateSessionPhase1, canViewCohesionCenter, canSearchSessionPhase1, canDownloadYoungDocuments, canAssignCohesionCenter } = require("snu-lib/roles");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
@@ -41,7 +41,11 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
     const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
     if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canViewCohesionCenter(req.user, cohesionCenter)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isYoung(req.user)) {
+      if (session._id.toString() !== req.user.sessionPhase1Id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else if (!canViewCohesionCenter(req.user, cohesionCenter)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED })
+    }
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
   } catch (error) {
