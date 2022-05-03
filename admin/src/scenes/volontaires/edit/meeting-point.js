@@ -65,7 +65,7 @@ export default function MeetingPointView({ values, handleChange, handleSubmit })
       getData();
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
+      return toastr.error("Oups, une erreur est survenue pendant l'annulation du choix du point de rassemblement :", translate(e.code));
     }
   };
 

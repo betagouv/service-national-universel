@@ -618,6 +618,43 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
   }
 });
 
+router.post("/:id/session-phase1/cancel", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
+    const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    const oldSessionPhase1Id = young.sessionPhase1Id;
+    const oldMeetingPointId = young.meetingPointId;
+    young.set({ sessionPhase1Id: undefined });
+    young.set({ meetingPointId: undefined });
+
+    await young.save({ fromUser: req.user });
+
+    // if they had a session, we check if we need to update the places taken / left
+    if (oldSessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+    }
+
+    // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
+    if (oldMeetingPointId) {
+      const meetingPoint = await MeetingPointModel.findById(oldMeetingPointId);
+      if (meetingPoint) {
+        const bus = await BusModel.findById(meetingPoint.busId);
+        if (bus) await updatePlacesBus(bus);
+      }
+    }
+
+    res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/:id/email/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
