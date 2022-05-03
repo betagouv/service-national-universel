@@ -159,12 +159,10 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
   );
 }
 
-function headCenter({ onClick, centers }) {
+function headCenter({ onClick, user }) {
   return (
     <>
-      {centers.map((center) => (
-        <DrawerTab to={`/centre/${center._id}`} upTitle="Mon Centre" title={center.name} onClick={onClick} key={center._id} />
-      ))}
+      {user.cohesionCenterId && <DrawerTab to={`/centre/${user.cohesionCenterId}`} title="Mon Centre" onClick={onClick} />}
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
@@ -191,8 +189,7 @@ const Drawer = (props) => {
   const closedTickets = useSelector((state) => state.Tickets.closed);
   const tickets = useSelector((state) => state.Tickets.tickets);
   const [open, setOpen] = useState();
-  const [centers, setCenters] = useState([]);
-  const [environmentBannerVisible, setEnvironmentBannerVisible] = useState(true);
+
   useEffect(() => {
     setOpen(props.open);
     setIsOpen(props.open);
@@ -214,18 +211,6 @@ const Drawer = (props) => {
       console.log("Oups, une erreur s'est produite.");
     }
   }, []);
-
-  useEffect(() => {
-    if (!user?._id) return;
-    try {
-      (async () => {
-        const { data } = await api.get(`/referent/${user._id}/cohesion-center`);
-        setCenters(data);
-      })();
-    } catch (e) {
-      console.log("Oups, une erreur s'est produite.");
-    }
-  }, [user]);
 
   const handleClick = () => {
     if (open) {
