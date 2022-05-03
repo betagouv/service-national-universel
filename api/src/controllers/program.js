@@ -81,7 +81,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

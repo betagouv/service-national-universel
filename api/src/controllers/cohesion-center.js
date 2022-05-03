@@ -249,7 +249,7 @@ router.get("/young/:youngId", passport.authenticate(["young"], { session: false,
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -324,7 +324,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

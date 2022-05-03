@@ -67,7 +67,7 @@ router.post("/", ipAllowListMiddleware, async (req, res) => {
         date: Joi.string().allow(null, ""),
       })
       .validate(req.body, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     await EmailObject.create({
       event: value.event,
@@ -83,14 +83,14 @@ router.post("/", ipAllowListMiddleware, async (req, res) => {
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
 router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: email } = Joi.string().lowercase().trim().email().required().validate(req.query.email);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canViewEmailHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const data = await EmailObject.find({ email }).sort("-date");

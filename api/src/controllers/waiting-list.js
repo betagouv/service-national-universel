@@ -9,7 +9,7 @@ const { validateWaitingList } = require("../utils/validator");
 router.post("/", async (req, res) => {
   try {
     const { error, value } = validateWaitingList(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     const data = await WaitingListModel.create(value);
     return res.status(200).send({ ok: true, data });
   } catch (error) {

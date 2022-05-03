@@ -57,7 +57,7 @@ async function updateResponsibleAndSupervisorRole(structure) {
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedStructure } = validateStructure(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!canCreateStructure(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await StructureObject.create(checkedStructure);
@@ -126,7 +126,7 @@ router.get("/:id/children", passport.authenticate("referent", { session: false, 
 router.get("/:id/mission", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await MissionObject.find({ structureId: checkedId });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -181,7 +181,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
