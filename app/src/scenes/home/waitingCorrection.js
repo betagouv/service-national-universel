@@ -8,7 +8,7 @@ import { inscriptionModificationOpenForYoungs } from "../../utils";
 export default function WaitingCorrection() {
   const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
-  const message = young.inscriptionCorrectionMessage?.split("\n").map((line) => <p key={line}>{line}</p>);
+  const message = young.inscriptionCorrectionMessage?.split(/\r\n|\r|\n/).map((line) => <p key={line}>{line}</p>);
 
   return (
     <HeroContainer>
