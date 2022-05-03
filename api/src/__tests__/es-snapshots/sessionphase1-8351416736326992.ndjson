@@ -1,0 +1,2 @@
+{"index":"sessionphase1","type":"_doc"}
+{"size":10000,"query":{"bool":{"must":{"match_all":{}},"filter":[{"terms":{"cohesionCenterId.keyword":["626bb9d08cd26d412ca1714a"]}}]}}}

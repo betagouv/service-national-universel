@@ -1,0 +1,2 @@
+{"index":"mission","type":"_doc"}
+{"size":10000,"query":{"bool":{"must":{"match_all":{}},"filter":[{"terms":{"structureId.keyword":["624d7f53a202ed07b3437ed3","6214b13e92959807aa77dd6e","6205197e2e629407a668ee09","6205197e2e629407a668ee03","6205197e2e629407a668edfd","61fa6bdf5305f307a304fadb","6033859428cc1009a723d919","6033859428cc1009a723d886","60c06f1775a8a107989f2b47","60c713a97153470798800ecf"]}}]}}}

@@ -1,0 +1,2 @@
+{"index":"referent","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[{"terms":{"structureId.keyword":["6033859328cc1009e723d596"]}}]}},"size":10000}

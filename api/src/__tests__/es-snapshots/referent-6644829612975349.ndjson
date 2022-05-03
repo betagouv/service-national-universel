@@ -1,0 +1,2 @@
+{"preference":"EXPORT"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"bool":{"should":[{"terms":{"role.keyword":["referent_region"]}}]}},{"match_all":{}}]}}],"filter":[]}},"size":1,"_source":{"includes":["*"],"excludes":[]},"track_total_hits":true}

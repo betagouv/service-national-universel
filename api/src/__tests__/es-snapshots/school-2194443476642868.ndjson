@@ -1,0 +1,2 @@
+{"index":"school","type":"_doc"}
+{"query":{"bool":{"must":{"ids":{"values":["5fea42677dee27560534e1af","5fea43517d7e275e0534ee0d"]}}}},"size":10000}

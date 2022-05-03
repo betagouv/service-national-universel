@@ -1,0 +1,2 @@
+{"index":"referent","type":"_doc"}
+{"size":10000,"query":{"bool":{"must":{"ids":{"type":"_doc","values":["6239ea09b970e1219c62a22b"]}},"filter":[]}}}

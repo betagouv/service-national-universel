@@ -1,0 +1,2 @@
+{"preference":"EXPORT"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"bool":{"should":[{"terms":{"qpv.keyword":["true"]}}]}},{"bool":{"should":[{"terms":{"handicap.keyword":["true"]}}]}},{"bool":{"filter":{"term":{"phase.keyword":"INSCRIPTION"}}}}]}}]}},"size":1,"_source":{"includes":["*"],"excludes":[]},"track_total_hits":true}

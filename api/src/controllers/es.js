@@ -12,13 +12,16 @@ const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
 const SessionPhase1Object = require("../models/sessionPhase1");
 const { serializeMissions, serializeSchools, serializeYoungs, serializeStructures, serializeReferents, serializeApplications, serializeHits } = require("../utils/es-serializer");
-const { allRecords, applyFilterOnQuery, validateEsQueryFromText, withFilterForMSearch } = require("../es/utils");
+const { allRecords, applyFilterOnQuery, withFilterForMSearch, validateFromRequest } = require("../es/utils");
 const { API_ASSOCIATION_ES_ENDPOINT } = require("../config");
 const Joi = require("joi");
 
 // Routes accessible for youngs and referent
 router.post("/mission/:action(_msearch|export)", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { user, body } = req;
     const filter = [];
 
@@ -58,6 +61,9 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
 // Routes accessible by young only
 router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { body } = req;
     const response = await esClient.msearch({ index: "missionapi", body });
     return res.status(200).send(response.body);
@@ -69,6 +75,9 @@ router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: 
 
 router.post("/school/_msearch", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { body } = req;
     const response = await esClient.msearch({ index: "school", body });
     return res.status(200).send(serializeSchools(response.body));
@@ -81,9 +90,10 @@ router.post("/school/_msearch", passport.authenticate(["young", "referent"], { s
 // Routes accessible by referents only
 router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { user, body } = req;
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
 
-    console.log(validateEsQueryFromText(body).error);
+    const { user, body } = req;
 
     if (user.role === ROLES.ADMIN) {
       if (req.params.action === "export") {
@@ -151,6 +161,9 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
 // used by REFERENT_DEPARTMENT to get youngs having a school in their department.
 router.post("/young-having-school-in-department/:view/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const keys = ["volontaires", "inscriptions"];
     const { error: viewError, value: view } = Joi.string()
       .required()
@@ -180,6 +193,9 @@ router.post("/young-having-school-in-department/:view/export", passport.authenti
 // used by REFERENT_REGION to get youngs having a school in their region.
 router.post("/young-having-school-in-region/:view/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const keys = ["volontaires", "inscriptions"];
     const { error: viewError, value: view } = Joi.string()
       .required()
@@ -209,6 +225,9 @@ router.post("/young-having-school-in-region/:view/export", passport.authenticate
 // cohesionyoung is a special index, so we need to use the index "young" and specify a center ID.
 router.post("/cohesionyoung/:id/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { user, body } = req;
 
     if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
@@ -253,6 +272,9 @@ router.post("/cohesionyoung/:id/:action(_msearch|export)", passport.authenticate
 
 router.post("/sessionphase1young/:id/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { user, body } = req;
 
     if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
@@ -313,6 +335,9 @@ router.post("/sessionphase1young/:id/:action(_msearch|export)", passport.authent
 
 router.post("/structure/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { body, user } = req;
     const filter = [];
 
@@ -350,6 +375,9 @@ router.post("/structure/:action(_msearch|export)", passport.authenticate(["refer
 });
 router.post("/referent/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { user, body } = req;
     let filter = [];
 
@@ -422,6 +450,9 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
 
 router.post("/application/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { user, body } = req;
     const filter = [];
 
@@ -456,6 +487,9 @@ router.post("/application/:action(_msearch|export)", passport.authenticate(["ref
 
 router.post("/cohesioncenter/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { user, body } = req;
     let filter = [];
 
@@ -481,6 +515,9 @@ router.post("/cohesioncenter/:action(_msearch|export)", passport.authenticate(["
 
 router.post("/sessionphase1/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { user, body } = req;
     let filter = [];
 
@@ -501,6 +538,9 @@ router.post("/sessionphase1/:action(_msearch|export)", passport.authenticate(["r
 
 router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { user, body } = req;
 
     if (!canSearchMeetingPoints(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -520,6 +560,9 @@ router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["re
 
 router.post("/association/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { body } = req;
     const options = {
       node: `https://${API_ASSOCIATION_ES_ENDPOINT}`,
@@ -553,6 +596,9 @@ router.post("/association/:action(_msearch|export)", passport.authenticate(["ref
 
 router.post("/team/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { error } = validateFromRequest(req);
+    if (error) return res.status(400).send({ ok: false, error: ERRORS.INVALID_PARAMS });
+
     const { user, body } = req;
     let filter = [];
 

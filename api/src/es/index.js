@@ -21,17 +21,13 @@ if (ES_ENDPOINT) {
   esClient = new Client({ node: `https://${ES_ENDPOINT}` });
   esClient.originalMsearch = esClient.msearch;
   esClient.msearch = async (...params) => {
-    // Print each query in a file in ../__tests__/fixtures.*.ndjson. First we check if file with the same content exists.
-    // If not, we create it.
     const { body, index } = params[0];
-    const fileName = __dirname + `/../__tests__/fixtures/es/${index}-${cyrb53(body)}.ndjson`;
+    const fileName = __dirname + `/../__tests__/es-snapshots/${index}-${cyrb53(body)}.ndjson`;
     const fileContent = body;
-    /*
     const fileExists = fs.existsSync(fileName);
     if (!fileExists) {
       fs.writeFileSync(fileName, fileContent);
     }
-    */
     return esClient.originalMsearch(...params);
   };
 } else {

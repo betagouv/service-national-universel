@@ -1,0 +1,2 @@
+{"preference":"ROLE"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"match_all":{}}]}}],"filter":[{"bool":{"must":[{"terms":{"role.keyword":["head_center"]}}]}}]}},"size":0,"_source":{"includes":["*"],"excludes":[]},"track_total_hits":true,"aggs":{"role.keyword":{"terms":{"field":"role.keyword","size":100,"order":{"_count":"desc"}}}}}

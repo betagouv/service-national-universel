@@ -1,0 +1,2 @@
+{"index":"referent","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[{"terms":{"structureId.keyword":["626127042f0997ce08ee5b02","626e06f3aae990a21663c25c","625531bf4cec3807b72aee07"]}}]}},"size":10000}

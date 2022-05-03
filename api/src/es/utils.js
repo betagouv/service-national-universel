@@ -80,6 +80,14 @@ function applyFilterOnQuery(query, filter) {
   return query;
 }
 
+function validateFromRequest(req) {
+  if (req.params.action === "export") {
+    return validateEsQuery(req.body);
+  } else {
+    return validateEsQueryFromText(req.body);
+  }
+}
+
 function validateEsQueryFromText(body) {
   const MAX_LINES_IN_QUERY = 50000;
   const lines = body.split(`\n`).filter((e) => e);
@@ -106,9 +114,10 @@ function validateEsQuery(line) {
     }),
   });
   const termsSchema = Joi.object({
-    term: Joi.object().pattern(/.*/, Joi.string()),
+    exists: Joi.object({ field: Joi.string().required(), boost: Joi.number() }),
+    term: Joi.object().pattern(/.*/, Joi.string().allow(null, "")),
     terms: Joi.alternatives().try(
-      Joi.object().pattern(/.*/, Joi.array().max(50).items(Joi.string())).max(50),
+      Joi.object().pattern(/.*/, Joi.array().max(10_000).items(Joi.string())).max(50),
       Joi.object({
         field: Joi.string().required(),
         size: Joi.number().integer().min(0).max(10_000),
@@ -117,15 +126,12 @@ function validateEsQuery(line) {
       }),
     ),
   });
-  const exixtsOrTermSchema = Joi.object({
-    exists: Joi.object({ field: Joi.string().required() }),
-    term: Joi.object().pattern(/.*/, Joi.string().allow(null, "")),
-  });
   const boolNestedField = Joi.object({
-    bool: Joi.object().pattern(/must|must_not/, exixtsOrTermSchema),
+    bool: Joi.object().pattern(/must|must_not/, Joi.alternatives().try(termsSchema, Joi.array().max(50).items(termsSchema))),
   });
   const boolShouldTermsSchema = Joi.object({
     bool: Joi.object({
+      must: Joi.object({ match_all: Joi.object({}) }),
       should: Joi.array()
         .max(50)
         .items(
@@ -146,25 +152,38 @@ function validateEsQuery(line) {
       minimum_should_match: Joi.string(),
     }),
   });
-  const boolFilterTermsSchema = Joi.object({ bool: Joi.object({ filter: termsSchema }) });
-  // {"filter":{"bool":{"must":{"exists":{"field":"networkId.keyword"}},"must_not":{"term":{"networkId.keyword":""}}}}}
-  const filterSchema = Joi.alternatives().try(termsSchema, boolNestedField, exixtsOrTermSchema);
-  const matchAllSchema = Joi.object({ match_all: Joi.object({}) });
+  const rangeSchema = Joi.object({
+    range: Joi.object().pattern(/.*/, Joi.object().pattern(/.*/, Joi.alternatives().try(Joi.string(), Joi.number()))),
+  });
+  const filterSchema = Joi.alternatives().try(
+    Joi.alternatives().try(termsSchema, boolNestedField, rangeSchema),
+    Joi.array().max(50).items(Joi.alternatives().try(termsSchema, boolNestedField, rangeSchema)),
+  );
+  const boolFilterSchema = Joi.object({ bool: Joi.object({ filter: filterSchema }) });
+  const matchAllSchema = Joi.object({ match_all: Joi.object({}), filter: filterSchema });
+  const idsSchema = Joi.object({
+    ids: Joi.object({
+      values: Joi.array().max(10_000).items(Joi.string()),
+      type: Joi.string(),
+    }),
+  });
   return Joi.object({
     size: Joi.number(),
     query: Joi.alternatives().try(
+      idsSchema,
       matchAllSchema,
       Joi.object({
         bool: Joi.object({
-          filter: Joi.array().max(50).items(filterSchema),
+          filter: filterSchema,
           must: Joi.alternatives().try(
-            Joi.object({ match_all: Joi.object({}), filter: Joi.array().max(50).items(filterSchema) }),
+            matchAllSchema,
+            idsSchema,
             Joi.array()
               .max(50)
               .items(
                 Joi.object({
                   bool: Joi.object({
-                    must: Joi.array().max(50).items(Joi.alternatives().try(matchAllSchema, boolShouldTermsSchema, boolFilterTermsSchema)),
+                    must: Joi.array().max(50).items(Joi.alternatives().try(matchAllSchema, boolShouldTermsSchema, boolFilterSchema)),
                   }),
                 }),
               ),
@@ -180,7 +199,6 @@ function validateEsQuery(line) {
     sort: Joi.array()
       .items(Joi.object().pattern(/.*/, Joi.alternatives().try(Joi.string(), Joi.object({ order: Joi.string().valid("asc", "desc") }))))
       .max(50),
-    //"views":{"date_histogram":{"field":"birthdateAt","interval":"year"}}
     aggs: Joi.object().pattern(
       /.*/,
       Joi.alternatives().try(
@@ -207,4 +225,5 @@ module.exports = {
   applyFilterOnQuery,
   validateEsQueryFromText,
   withFilterForMSearch,
+  validateFromRequest,
 };

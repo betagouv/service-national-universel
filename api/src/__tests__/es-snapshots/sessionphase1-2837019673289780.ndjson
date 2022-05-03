@@ -1,0 +1,2 @@
+{"index":"sessionphase1","type":"_doc"}
+{"query":{"bool":{"must":{"match_all":{}},"filter":[{"term":{"headCenterId":"610d51b0e38bdfd9d822c1d9"}}]}},"aggs":{"placesTotal":{"sum":{"field":"placesTotal"}},"placesLeft":{"sum":{"field":"placesLeft"}}},"size":0}

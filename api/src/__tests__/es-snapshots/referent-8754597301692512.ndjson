@@ -1,0 +1,10 @@
+{"preference":"SEARCH"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"bool":{"should":[{"terms":{"role.keyword":["referent_department"]}}]}}]}}],"filter":[]}},"size":10,"_source":{"includes":["*"],"excludes":[]}}
+{"preference":"REGION"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"bool":{"should":[{"terms":{"role.keyword":["referent_department"]}}]}},{"match_all":{}}]}}],"filter":[]}},"size":0,"_source":{"includes":["*"],"excludes":[]},"track_total_hits":true,"aggs":{"region.keyword":{"terms":{"field":"region.keyword","size":100,"order":{"_term":"asc"}}}}}
+{"preference":"DEPARTMENT"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"bool":{"should":[{"terms":{"role.keyword":["referent_department"]}}]}},{"match_all":{}}]}}],"filter":[]}},"size":0,"_source":{"includes":["*"],"excludes":[]},"track_total_hits":true,"aggs":{"department.keyword":{"terms":{"field":"department.keyword","size":150,"order":{"_term":"asc"}}}}}
+{"preference":"SUBROLE"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"bool":{"should":[{"terms":{"role.keyword":["referent_department"]}}]}},{"match_all":{}}]}}],"filter":[]}},"size":0,"_source":{"includes":["*"],"excludes":[]},"track_total_hits":true,"aggs":{"subRole.keyword":{"terms":{"field":"subRole.keyword","size":100,"order":{"_count":"desc"}}}}}
+{"preference":"result"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"bool":{"should":[{"terms":{"role.keyword":["referent_department"]}}]}},{"match_all":{}}]}}],"filter":[]}},"size":10,"_source":{"includes":["*"],"excludes":[]},"from":0,"sort":[{"lastName.keyword":{"order":"asc"}}],"track_total_hits":true}
