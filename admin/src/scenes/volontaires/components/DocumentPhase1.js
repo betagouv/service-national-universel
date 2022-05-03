@@ -213,6 +213,7 @@ export default function DocumentPhase1(props) {
               isOpen={isOpenImg}
               onCancel={() => setIsOpenImg(false)}
               initialValues={dataImageRight}
+              updateYoung={updateYoung}
               young={young}
               name="imageRight"
               nameFiles="imageRightFiles"
