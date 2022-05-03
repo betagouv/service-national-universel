@@ -15,7 +15,6 @@ const MissionModel = require("../models/mission");
 const ApplicationModel = require("../models/application");
 const SessionPhase1 = require("../models/sessionPhase1");
 const MeetingPointModel = require("../models/meetingPoint");
-const CohesionCenterModel = require("../models/cohesionCenter");
 const BusModel = require("../models/bus");
 const StructureModel = require("../models/structure");
 const AuthObject = require("../auth");
@@ -915,24 +914,6 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-router.get("/:id/cohesion-center", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
-
-    const sessions = await SessionPhase1.find({ headCenterId: checkedId });
-    let centers = [];
-    for (let i = 0; i < sessions.length; i++) {
-      const session = sessions[i];
-      const center = await CohesionCenterModel.findById(session.cohesionCenterId);
-      if (!centers.some((c) => c._id.toString() === center._id.toString())) centers.push(center);
-    }
-    return res.status(200).send({ ok: true, data: centers.map(serializeCohesionCenter) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
   }
 });
 
