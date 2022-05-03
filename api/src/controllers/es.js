@@ -51,7 +51,7 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error: error.message });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -63,7 +63,7 @@ router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: 
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -74,7 +74,7 @@ router.post("/school/_msearch", passport.authenticate(["young", "referent"], { s
     return res.status(200).send(serializeSchools(response.body));
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -139,7 +139,7 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error: error.message });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -169,7 +169,7 @@ router.post("/young-having-school-in-department/:view/export", passport.authenti
     return res.status(200).send({ ok: true, data: serializeYoungs(response) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error: error.message });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 // young-having-school-in-region is a special index (that uses a young index)
@@ -198,7 +198,7 @@ router.post("/young-having-school-in-region/:view/export", passport.authenticate
     return res.status(200).send({ ok: true, data: serializeYoungs(response) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error: error.message });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -243,7 +243,7 @@ router.post("/cohesionyoung/:id/:action(_msearch|export)", passport.authenticate
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -303,7 +303,7 @@ router.post("/sessionphase1young/:id/:action(_msearch|export)", passport.authent
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -341,7 +341,7 @@ router.post("/structure/:action(_msearch|export)", passport.authenticate(["refer
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 router.post("/referent/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -412,7 +412,7 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -446,7 +446,7 @@ router.post("/application/:action(_msearch|export)", passport.authenticate(["ref
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -471,7 +471,7 @@ router.post("/cohesioncenter/:action(_msearch|export)", passport.authenticate(["
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -491,7 +491,7 @@ router.post("/sessionphase1/:action(_msearch|export)", passport.authenticate(["r
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -510,7 +510,7 @@ router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["re
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -543,7 +543,7 @@ router.post("/association/:action(_msearch|export)", passport.authenticate(["ref
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -567,7 +567,7 @@ router.post("/team/:action(_msearch|export)", passport.authenticate(["referent"]
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

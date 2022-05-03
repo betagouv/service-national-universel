@@ -10,7 +10,7 @@ const { canCreateEvent } = require("snu-lib/roles");
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: event } = validateEvent(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     // Only accessible by persons who can access associations for now (aka referents and admins).
     // The only event creatable id of type "ASSOCIATION" currently.
     if (!canCreateEvent(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

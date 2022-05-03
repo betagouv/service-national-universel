@@ -23,7 +23,7 @@ router.get("/all", passport.authenticate("referent", { session: false, failWithE
 router.get("/:id", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, errorId });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     //A young can only see his own meetingPoint.
     if (isYoung(req.user) && checkedId !== req.user.meetingPointId) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

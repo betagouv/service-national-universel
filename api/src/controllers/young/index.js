@@ -74,7 +74,7 @@ router.post("/signup", async (req, res) => {
     if (error) {
       if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
       if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
-      return res.status(400).send({ ok: false, code: error.toString() });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung } = value;
@@ -320,7 +320,7 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
       phase3TutorEmail: Joi.string().lowercase().trim().email().required(),
       phase3TutorPhone: Joi.string().required(),
     }).validate({ ...req.params, ...req.body });
-    if (error) return res.status(400).send({ ok: false, code: error });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await YoungObject.findOne({ _id: value.young });
 
@@ -857,7 +857,7 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

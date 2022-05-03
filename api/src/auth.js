@@ -59,7 +59,7 @@ class Auth {
       return res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);
-      return res.status(500).send({ ok: false, error });
+      return res.status(500).send({ ok: false });
     }
   }
 

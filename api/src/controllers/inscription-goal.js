@@ -21,7 +21,7 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
       max: Joi.number().allow(null),
     })
     .validate(req.body, { stripUnknown: true });
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
   if (!canUpdateInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -45,7 +45,7 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
 router.get("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -60,7 +60,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
 
 router.get("/:department/current", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.params);
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
   if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -78,7 +78,7 @@ router.get("/:department/current", passport.authenticate("referent", { session: 
 
 router.get("/:cohort/department/:department", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   const { error, value } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params);
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
   if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
