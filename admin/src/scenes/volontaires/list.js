@@ -137,6 +137,7 @@ export default function VolontaireList() {
                   exportTitle="Volontaires"
                   index="young"
                   react={{ and: FILTERS }}
+                  fields={["firstName", "lastName"]}
                   transform={async (data) => {
                     let all = data;
                     const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
@@ -244,17 +245,17 @@ export default function VolontaireList() {
                         "Département représentant légal 2": data.parent2Department,
                         "Région représentant légal 2": data.parent2Region,
                         "Motivations à participer au SNU": data.motivations,
-                        "Domaine de MIG 1": data.domains[0],
-                        "Domaine de MIG 2": data.domains[1],
-                        "Domaine de MIG 3": data.domains[2],
+                        "Domaine de MIG 1": (data.domains || [])[0],
+                        "Domaine de MIG 2": (data.domains || [])[1],
+                        "Domaine de MIG 3": (data.domains || [])[2],
                         "Projet professionnel": translate(data.professionnalProject),
                         "Information supplémentaire sur le projet professionnel": data.professionnalProjectPrecision,
                         "Période privilégiée pour réaliser des missions": data.period,
-                        "Choix 1 période": translate(data.periodRanking[0]),
-                        "Choix 2 période": translate(data.periodRanking[1]),
-                        "Choix 3 période": translate(data.periodRanking[2]),
-                        "Choix 4 période": translate(data.periodRanking[3]),
-                        "Choix 5 période": translate(data.periodRanking[4]),
+                        "Choix 1 période": translate((data.periodRanking || [])[0]),
+                        "Choix 2 période": translate((data.periodRanking || [])[1]),
+                        "Choix 3 période": translate((data.periodRanking || [])[2]),
+                        "Choix 4 période": translate((data.periodRanking || [])[3]),
+                        "Choix 5 période": translate((data.periodRanking || [])[4]),
                         "Mobilité aux alentours de son établissement": translate(data.mobilityNearSchool),
                         "Mobilité aux alentours de son domicile": translate(data.mobilityNearHome),
                         "Mobilité aux alentours d'un de ses proches": translate(data.mobilityNearRelative),

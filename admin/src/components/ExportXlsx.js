@@ -6,6 +6,7 @@ import LoadingButton from "./buttons/LoadingButton";
 import ModalConfirm from "./modals/ModalConfirm";
 import api from "../services/api";
 import dayjs from "dayjs";
+import { translate } from "../utils";
 
 export default function ExportComponent({
   handleClick,
@@ -16,18 +17,48 @@ export default function ExportComponent({
   transform,
   searchType = "export",
   defaultQuery = () => ({ query: { query: { match_all: {} } } }),
+  fields = [],
 }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const query = useRef(defaultQuery().query);
+  const [checkedFields, setCheckedFields] = useState([]);
+
+  const handleCheck = (event) => {
+    event.persist();
+    setCheckedFields((previousList) => {
+      const newList = [...previousList];
+      if (event.target?.checked) {
+        if (!newList.includes(event.target.value)) newList.push(event.target.value);
+      } else {
+        newList.filter((e) => e !== event.target.value);
+      }
+      return newList;
+    });
+  };
+
   const onClick = () => {
     handleClick?.();
     setModal({
       isOpen: true,
       onConfirm: () => setExporting(true),
       title: "Téléchargement",
-      message:
-        "En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)",
+      message: (
+        <div>
+          <p>
+            En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données
+            personnelles (RGPD, CNIL)
+          </p>
+          {fields.map((field) => (
+            <div className="flex items-center gap-1" key={field}>
+              <input id={`checkbox ${field}`} className="!min-w-0 !m-0 cursor-pointer" value={field} type="checkbox" onChange={handleCheck} />
+              <label htmlFor={`checkbox ${field}`} className="cursor-pointer mb-0">
+                {field}
+              </label>
+            </div>
+          ))}
+        </div>
+      ),
     });
   };
 
@@ -61,6 +92,7 @@ export default function ExportComponent({
               exportTitle={exportTitle}
               transform={transform}
               searchType={searchType}
+              fields={checkedFields}
             />
           );
         }}
@@ -85,13 +117,13 @@ export default function ExportComponent({
   );
 }
 
-function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index, searchType }) {
+function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index, searchType, fields }) {
   const STATUS_LOADING = "Récupération des données";
   const STATUS_TRANSFORM = "Mise en forme";
   const STATUS_EXPORT = "Création du fichier";
   const [status, setStatus] = useState(null);
   const [data, setData] = useState([]);
-
+  console.log("Loading", { fields });
   const [run, setRun] = useState(false);
 
   useEffect(() => {
@@ -109,7 +141,7 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
         setStatus(STATUS_TRANSFORM);
       });
     } else if (status === STATUS_TRANSFORM) {
-      toArrayOfArray(data, transform).then((results) => {
+      toArrayOfArray(data, transform, fields).then((results) => {
         setData(results);
         setStatus(STATUS_EXPORT);
       });
@@ -128,9 +160,19 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
   );
 }
 
-async function toArrayOfArray(results, transform) {
-  const data = transform ? await transform(results) : results;
+async function toArrayOfArray(results, transform, fields) {
+  let data = results;
+  if (fields?.length > 0) {
+    data = data.reduce((prev, current) => {
+      const d = fields
+        .filter((key) => key in current) // line can be removed to make it inclusive
+        .reduce((obj, key) => ((obj[key] = current[key]), obj), {});
+
+      return [...prev, d];
+    }, []);
+  }
   let columns = Object.keys(data[0] ?? []);
+  data = transform ? await transform(data) : data;
   return [columns, ...data.map((item) => Object.values(item))];
 }
 
