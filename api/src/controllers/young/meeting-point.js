@@ -2,12 +2,13 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
+const { canEditYoung } = require("snu-lib/roles");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
 const MeetingPointModel = require("../../models/meetingPoint");
 const BusModel = require("../../models/bus");
-const { ERRORS, updatePlacesBus, isYoung } = require("../../utils");
+const { ERRORS, updatePlacesBus, isYoung, isReferent } = require("../../utils");
 const { serializeMeetingPoint, serializeYoung } = require("../../utils/serializer");
 const { validateId } = require("../../utils/validator");
 
@@ -35,6 +36,10 @@ router.put("/cancel", passport.authenticate("referent", { session: false, failWi
 
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const oldMeetingPoint = await MeetingPointModel.findById(young.meetingPointId);
     const oldBus = await BusModel.findById(oldMeetingPoint?.busId);
@@ -69,6 +74,10 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
     // A young can only update their own meeting points.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    if (isReferent(req.user) && !canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     let bus = null;

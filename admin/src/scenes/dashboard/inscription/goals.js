@@ -19,7 +19,7 @@ export default function Goal({ filter }) {
   }, [total2020Affected, totalValidated]);
   const percent = useMemo(() => {
     if (!goal || !totalInscription) return 0;
-    return Math.round((totalInscription / (goal || 1)) * 100);
+    return ((totalInscription / (goal || 1)) * 100).toFixed(2);
   }, [goal, totalInscription]);
 
   async function fetch2020Affected() {
@@ -76,7 +76,7 @@ export default function Goal({ filter }) {
 
     let dataMerged = [];
     for (const cohort of filter.cohort) {
-      const { data, ok, code } = await api.get("/inscription-goal/" + cohort);
+      const { data, ok } = await api.get("/inscription-goal/" + cohort);
       if (!ok) return toastr.error("Une erreur s'est produite.");
 
       data.forEach(

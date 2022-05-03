@@ -1,0 +1,74 @@
+import React from "react";
+import MultiSelect from "react-multi-select-component";
+import styled from "styled-components";
+import { translate } from "../../../utils";
+
+export default function MultiSelectComponent({ value, name, onChange, options, placeholder, valueToExclude, valueRenderer = () => { }, filterOptions = (options) => options, setsessionShow }) {
+  const filteredOptions = options.filter((o) => o !== valueToExclude);
+  const transformOptions = filteredOptions.map((e) => {
+    return { label: translate(e), value: e };
+  });
+
+  function valueForMultiselect(options, values) {
+    const arr = [];
+    for (let i in values) {
+      const value = values[i];
+      const option = options.find((e) => e.value === value);
+      if (!option) continue;
+      const obj = { label: option.label, value: option.value };
+      arr.push(obj);
+    }
+    return arr;
+  }
+
+  function handleChange(v) {
+    const arr = transformOptions.slice.call(v).map((option) => option.value);
+    onChange({ target: { value: arr, name } });
+    v.length > 0 ? setsessionShow(v[v.length - 1].label) : setsessionShow(null);
+  }
+
+  const selected = valueForMultiselect(transformOptions, value);
+  return (
+    <Wrapper>
+      <MultiSelect
+        hasSelectAll={false}
+        disableSearch={true}
+        valueRenderer={valueRenderer}
+        options={transformOptions}
+        filterOptions={filterOptions}
+        value={selected}
+        onChange={(v) => handleChange(v)}
+        overrideStrings={{ selectSomeItems: placeholder, allItemsAreSelected: "Toutes les options." }}
+      />
+    </Wrapper>
+  );
+}
+
+const Wrapper = styled.div`
+  .dropdown-container:focus-within,
+  .dropdown-container:focus {
+    border-color: #aaa;
+  }
+  cursor: pointer;
+  div.item-renderer {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  div {
+    width: 100%;
+    span {
+      color: #6a6f85;
+      font-size: 14px;
+      margin-right: 0;
+    }
+    input {
+      border-radius: 0;
+      border: 0;
+    }
+    input[type="checkbox"] {
+      width: auto;
+      margin-right: 5px;
+    }
+  }
+`;

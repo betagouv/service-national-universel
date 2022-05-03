@@ -10,15 +10,16 @@ const UserObject = require("../models/referent");
 const ApplicationObject = require("../models/application");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
+// eslint-disable-next-line no-unused-vars
 const { ERRORS, isYoung, updateApplicationsWithYoungOrMission, updateApplication } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
-const { canModifyMission, ROLES } = require("snu-lib/roles");
-const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib/constants");
+const { canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib/roles");
+const { MISSION_STATUS } = require("snu-lib/constants");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { APP_URL, ADMIN_URL } = require("../config");
+const { ADMIN_URL } = require("../config");
 
 const putLocation = async (city, zip) => {
   // try with municipality = city + zip
@@ -68,13 +69,12 @@ const putLocation = async (city, zip) => {
   };
 };
 
-// todo : add canCreateOrUpdateMission()
-// if admin or referent from the same area or responsoble or supervisor
-// if structure is validated
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedMission } = validateMission(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
+    if (!canCreateOrModifyMission(req.user, checkedMission)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
 
     if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
       checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
@@ -121,7 +121,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canModifyMission(req.user, mission)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrModifyMission(req.user, mission)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -181,6 +181,8 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (!isYoung(req.user) && !canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     // Add tutor info.
     let missionTutor;
     if (mission.tutorId) {
@@ -214,6 +216,8 @@ router.get("/:id/application", passport.authenticate("referent", { session: fals
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    if (!canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const data = await ApplicationObject.find({ missionId: id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     for (let i = 0; i < data.length; i++) {
@@ -233,7 +237,9 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     const { error: errorStructureId, value: checkedStructureId } = validateId(req.params.structureId);
-    if (errorId || errorStructureId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+    if (errorId || errorStructureId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canModifyMissionStructureId(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const structure = await StructureObject.findById(checkedStructureId);
     const mission = await MissionObject.findById(checkedId);
@@ -269,6 +275,8 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+
+    if (!canCreateOrModifyMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

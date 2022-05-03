@@ -3,7 +3,6 @@ import CardServiceDepartemental from "./card/CardServiceDepartemental";
 import CardContacts from "./card/CardContacts";
 import api from "../../../services/api";
 import CardRepresentant from "./card/CardRepresentant";
-import { environment } from "../../../config";
 
 export default function InfoDepartement({ department }) {
   const [servicesDep, setServicesDep] = useState();

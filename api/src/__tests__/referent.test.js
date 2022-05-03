@@ -5,36 +5,18 @@ const getAppHelper = require("./helpers/app");
 const getNewYoungFixture = require("./fixtures/young");
 const getNewReferentFixture = require("./fixtures/referent");
 const getNewStructureFixture = require("./fixtures/structure");
-const {
-  getYoungsHelper,
-  getYoungByIdHelper,
-  deleteYoungByIdHelper,
-  createYoungHelper,
-  expectYoungToEqual,
-  notExistingYoungId,
-} = require("./helpers/young");
-const {
-  getReferentsHelper,
-  deleteReferentByIdHelper,
-  notExistingReferentId,
-  createReferentHelper,
-  expectReferentToEqual,
-  deleteAllReferentBySubrole,
-  getReferentByIdHelper,
-} = require("./helpers/referent");
+const { getYoungByIdHelper, deleteYoungByIdHelper, createYoungHelper, expectYoungToEqual, notExistingYoungId } = require("./helpers/young");
+const { getReferentsHelper, deleteReferentByIdHelper, notExistingReferentId, createReferentHelper, expectReferentToEqual, getReferentByIdHelper } = require("./helpers/referent");
 const { dbConnect, dbClose } = require("./helpers/db");
-const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
 const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
-const { createStructureHelper, getStructureById } = require("./helpers/structure");
+const { createStructureHelper } = require("./helpers/structure");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
-const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { getNewApplicationFixture } = require("./fixtures/application");
 const { createApplication, getApplicationsHelper } = require("./helpers/application");
 const { createMissionHelper, getMissionsHelper } = require("./helpers/mission");
 const getNewMissionFixture = require("./fixtures/mission");
-const { SUB_ROLES, ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const VALID_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -83,7 +65,7 @@ describe("Referent", () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
       await createReferentHelper({ ...fixture, email });
-      res = await request(getAppHelper()).post("/referent/signup_invite/001").send(fixture);
+      let res = await request(getAppHelper()).post("/referent/signup_invite/001").send(fixture);
       expect(res.status).toBe(409);
     });
   });
@@ -91,7 +73,7 @@ describe("Referent", () => {
   describe("PUT /referent/young/:id", () => {
     async function createYoungThenUpdate(params, fields) {
       const youngFixture = getNewYoungFixture();
-      const originalYoung = await createYoungHelper({...youngFixture, ...fields});
+      const originalYoung = await createYoungHelper({ ...youngFixture, ...fields });
       const modifiedYoung = { ...youngFixture, ...fields, ...params };
       const response = await request(getAppHelper()).put(`/referent/young/${originalYoung._id}`).send(modifiedYoung);
       const young = await getYoungByIdHelper(originalYoung._id);
@@ -108,27 +90,33 @@ describe("Referent", () => {
       expectYoungToEqual(young, modifiedYoung);
     });
     it("should cascade young statuses when sending status WITHDRAWN", async () => {
-      const { young, response } = await createYoungThenUpdate({
-        status: "WITHDRAWN",
-      },{
-        statusPhase1: "AFFECTED",
-        statusPhase2: "WAITING_REALISATION",
-        statusPhase3: "WAITING_REALISATION",
-      });
+      const { young, response } = await createYoungThenUpdate(
+        {
+          status: "WITHDRAWN",
+        },
+        {
+          statusPhase1: "AFFECTED",
+          statusPhase2: "WAITING_REALISATION",
+          statusPhase3: "WAITING_REALISATION",
+        },
+      );
       expect(response.statusCode).toEqual(200);
       expect(young.status).toEqual("WITHDRAWN");
       expect(young.statusPhase1).toEqual("WITHDRAWN");
       expect(young.statusPhase2).toEqual("WITHDRAWN");
       expect(young.statusPhase3).toEqual("WITHDRAWN");
     });
-     it("should not cascade status to WITHDRAWN if validated", async () => {
-      const { young, response } = await createYoungThenUpdate({
-        status: "WITHDRAWN",
-      },{
-        statusPhase1: "DONE",
-        statusPhase2: "WAITING_REALISATION",
-        statusPhase3: "VALIDATED",
-      });
+    it("should not cascade status to WITHDRAWN if validated", async () => {
+      const { young, response } = await createYoungThenUpdate(
+        {
+          status: "WITHDRAWN",
+        },
+        {
+          statusPhase1: "DONE",
+          statusPhase2: "WAITING_REALISATION",
+          statusPhase3: "VALIDATED",
+        },
+      );
       expect(response.statusCode).toEqual(200);
       expect(young.status).toEqual("WITHDRAWN");
       expect(young.statusPhase1).toEqual("DONE");
@@ -136,7 +124,7 @@ describe("Referent", () => {
       expect(young.statusPhase3).toEqual("VALIDATED");
     });
     it("should update young statuses when sending cohection stay presence true", async () => {
-      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" }, {cohesionStayPresence: undefined});
+      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" }, { cohesionStayPresence: undefined });
       expect(response.statusCode).toEqual(200);
       expect(young.statusPhase1).toEqual("DONE");
       expect(young.cohesionStayPresence).toEqual("true");
@@ -187,7 +175,10 @@ describe("Referent", () => {
 
   describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
     it("should return 200 if file is found", async () => {
-      const res = await request(getAppHelper()).get("/referent/youngFile/1/key/test.pdf").send();
+      const young = await createYoungHelper(getNewYoungFixture());
+      const res = await request(getAppHelper())
+        .get("/referent/youngFile/" + young._id + "/key/test.pdf")
+        .send();
       expect(res.statusCode).toEqual(200);
       expect(res.body.fileName).toEqual("test.pdf");
       expect(res.body.mimeType).toEqual("application/pdf");
@@ -277,7 +268,7 @@ describe("Referent", () => {
           expect.objectContaining({
             ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/firstName", value: "MY NEW NAME" })]),
           }),
-        ])
+        ]),
       );
     });
   });
@@ -300,25 +291,6 @@ describe("Referent", () => {
       const res = await request(getAppHelper()).get(`/referent/${referent._id}`).send();
       expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
-    });
-  });
-
-  describe("GET /referent/manager_department/:department", () => {
-    it("should return 404 if manager not found", async () => {
-      const res = await request(getAppHelper()).get(`/referent/manager_department/foo`).send();
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should return 200 if manager found", async () => {
-      await deleteAllReferentBySubrole("manager_department");
-      const referent = await createReferentHelper({
-        ...getNewReferentFixture(),
-        department: "bar",
-        subRole: SUB_ROLES.manager_department,
-        role: ROLES.REFERENT_DEPARTMENT,
-      });
-      const res = await request(getAppHelper()).get(`/referent/manager_department/bar`).send();
-      expect(res.statusCode).toEqual(200);
-      expectReferentToEqual(referent, res.body.data);
     });
   });
 
@@ -349,7 +321,7 @@ describe("Referent", () => {
         expect.objectContaining({
           firstName: "My New Name",
           lastName: "MY NEW LAST NAME",
-        })
+        }),
       );
     });
     it("should return 403 if role is not admin", async () => {
@@ -438,7 +410,7 @@ describe("Referent", () => {
           _id: referent._id.toString(),
           firstName: referent.firstName,
           lastName: referent.lastName,
-        })
+        }),
       );
     });
     it("should return 200 if young found", async () => {
@@ -452,7 +424,7 @@ describe("Referent", () => {
           _id: young._id.toString(),
           firstName: young.firstName,
           lastName: young.lastName,
-        })
+        }),
       );
     });
     it("should return a jwt token", async () => {

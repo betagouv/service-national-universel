@@ -12,6 +12,7 @@ import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, Header, Title } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Association from "./components/Association";
+import ExportComponent from "../../components/ExportXlsx";
 
 const FILTERS = ["SEARCH", "REGION", "DEPARTMENT", "DOMAIN"];
 
@@ -98,15 +99,45 @@ export default function List() {
     },
   });
 
+  const getExportQuery = () => ({ query: { ...getDefaultQuery(), size: ES_NO_LIMIT } });
+
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="association" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
           <div style={{ flex: 1, position: "relative" }}>
             <Header>
-              <div>
+              <div className="flex flex-1">
                 <Title>Annuaire des associations</Title>
               </div>
+              <ExportComponent
+                title="Exporter les associations"
+                defaultQuery={getExportQuery}
+                exportTitle="Associations"
+                index="association"
+                react={{ and: FILTERS }}
+                transform={async (data) => {
+                  return data.map((association) => {
+                    return {
+                      "Nom association": association.identite_nom,
+                      Description: association.description || association.activites_objet,
+                      Adresse: association.coordonnees_adresse_nom_complet,
+                      SIREN: association.identite_id_siren || association.id_siren,
+                      "Statut juridique": association.statut_juridique || association.identite_lib_forme_juridique,
+                      "Domaine d’action": association.activites_lib_theme1,
+                      RNA: association.id_rna,
+                      "Nombre de mission publiées sur la plateforme": missionsInfo[association._id]?.countMissions || 0,
+                      "Nombre de places disponible sur la plateforme": missionsInfo[association._id]?.countPlaces || 0,
+                      Mail: association.coordonnees_courriel,
+                      Téléphone: association.coordonnees_telephone,
+                      "Lien facebook": association.facebook,
+                      "Lien linkedin": association.linkedin,
+                      "Lien web": association.url,
+                      "Lien twitter": association.twitter,
+                    };
+                  });
+                }}
+              />
             </Header>
             <Filter>
               <FilterRow visible>

@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import Badge from "../../../components/Badge";
 
-import { translate, YOUNG_STATUS, ROLES, colors, translateCohort, canViewEmailHistory } from "../../../utils";
+import { translate, YOUNG_STATUS, ROLES, translateCohort, canViewEmailHistory } from "../../../utils";
 import SelectStatus from "../../../components/selectStatus";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import TabList from "../../../components/views/TabList";

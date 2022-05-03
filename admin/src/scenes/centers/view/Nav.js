@@ -6,25 +6,14 @@ import { colors, ROLES } from "../../../utils";
 import { Filter } from "../../../components/list";
 import TabList from "../../../components/views/TabList";
 
-export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedSession, user, cohorts }) {
+export default function Nav({ center, tab, onChangeTab, focusedSession, user, cohorts }) {
   const history = useHistory();
 
   if (!center || !focusedSession) return null;
   return (
     <Header>
       <div style={{ flex: 1, display: "flex" }}>
-        <Filter style={{ padding: "0 1rem 0 0" }}>
-          <select className="form-control" value={null} onChange={(e) => onChangeCohort(e.target.value)}>
-            <option disabled value={null} label="Sélectionner une période">
-              Sélectionner une période
-            </option>
-            {cohorts.map((c) => (
-              <option key={c} value={c} label={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </Filter>
+
         <TabList style={{ width: "100%" }}>
           <Tab
             isActive={tab === "equipe"}
@@ -62,11 +51,11 @@ export default function Nav({ center, tab, onChangeCohort, onChangeTab, focusedS
           ) : null} */}
         </TabList>
       </div>
+
       <BoxPlaces style={{ borderRight: "1px solid rgba(0,0,0,0.2)", borderRadius: "0" }}>
         <DetailCardTitle>Taux d&apos;occupation</DetailCardTitle>
-        <DetailCardContent>{`${
-          focusedSession.placesTotal ? (((focusedSession.placesTotal - focusedSession.placesLeft) * 100) / focusedSession.placesTotal).toFixed(2) : 0
-        } %`}</DetailCardContent>
+        <DetailCardContent>{`${focusedSession.placesTotal ? (((focusedSession.placesTotal - focusedSession.placesLeft) * 100) / focusedSession.placesTotal).toFixed(2) : 0
+          } %`}</DetailCardContent>
       </BoxPlaces>
       <BoxPlaces>
         <DetailCardTitle>{Math.max(0, focusedSession.placesLeft)} places restantes</DetailCardTitle>

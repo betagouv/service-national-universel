@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES } = require("snu-lib/roles");
+const { ROLES, canSearchAssociation, canSearchSessionPhase1, canSearchMeetingPoints } = require("snu-lib/roles");
 const { PHASE1_HEADCENTER_ACCESS_LIMIT, COHORTS } = require("snu-lib/constants");
 const { region2department } = require("snu-lib/region-and-departments");
 const { capture } = require("../sentry");
@@ -399,6 +399,10 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
         },
       });
     }
+    if (user.role === ROLES.VISITOR) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     if (req.params.action === "export") {
       const response = await allRecords("referent", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: serializeReferents(response) });
@@ -476,9 +480,7 @@ router.post("/sessionphase1/:action(_msearch|export)", passport.authenticate(["r
     const { user, body } = req;
     let filter = [];
 
-    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!canSearchSessionPhase1(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
       const response = await allRecords("sessionphase1", applyFilterOnQuery(req.body.query, filter));
@@ -497,9 +499,7 @@ router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["re
   try {
     const { user, body } = req;
 
-    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!canSearchMeetingPoints(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
       const response = await allRecords("meetingpoint", req.body.query);
@@ -514,21 +514,33 @@ router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["re
   }
 });
 
-router.post("/association/_msearch", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/association/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { body } = req;
     const options = {
       node: `https://${API_ASSOCIATION_ES_ENDPOINT}`,
     };
     const es = new (require("@elastic/elasticsearch").Client)(options);
-    let { body: response } = await es.msearch({ index: "association", body });
 
-    return res.status(200).send(
-      serializeHits(response, (hit) => {
+    if (!canSearchAssociation(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const serializeResponse = (response) => {
+      return serializeHits(response, (hit) => {
         if (hit.logo) hit.logo = hit.logo && !hit.logo.startsWith("http") ? getSignedUrlForApiAssociation(hit.logo) : hit.logo;
         return hit;
-      }),
-    );
+      });
+    };
+
+    if (req.params.action === "export") {
+      const response = await allRecords("association", req.body.query, es);
+      return res.status(200).send({
+        ok: true,
+        data: serializeResponse(response),
+      });
+    } else {
+      let { body: response } = await es.msearch({ index: "association", body });
+      return res.status(200).send(serializeResponse(response));
+    }
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });

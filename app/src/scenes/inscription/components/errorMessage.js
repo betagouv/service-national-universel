@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 
-export default function ErrorMessage({ errors, name }) {
-  return <Error>{errors[name]}</Error>;
+export default function ErrorMessage({ errors, name, ...props }) {
+  return <Error {...props}>{errors[name]}</Error>;
 }
 
 const Error = styled.div`

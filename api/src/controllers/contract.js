@@ -2,14 +2,15 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const crypto = require("crypto");
-
+const { canCreateOrUpdateContract, canViewContract, ROLES } = require("snu-lib/roles");
 const renderFromHtml = require("../htmlToPdf");
 const { capture } = require("../sentry");
 const ContractObject = require("../models/contract");
 const YoungObject = require("../models/young");
 const ApplicationObject = require("../models/application");
 const ReferentObject = require("../models/referent");
-const { ERRORS, isYoung } = require("../utils");
+const StructureObject = require("../models/structure");
+const { ERRORS, isYoung, isReferent } = require("../utils");
 const { sendTemplate } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
@@ -181,6 +182,35 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     const { error, value: data } = validateContract(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
 
+    // - admin and referent can send contract to everybody
+    // - responsible and supervisor can send contract in their structures
+    if (!canCreateOrUpdateContract(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    let previousStructureId, currentStructureId;
+    if (id) {
+      const contract = await ContractObject.findById(id);
+      if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      previousStructureId = contract.structureId;
+      currentStructureId = data.structureId || contract.structureId;
+    } else {
+      previousStructureId = data.structureId;
+      currentStructureId = data.structureId;
+    }
+    if (req.user.role === ROLES.RESPONSIBLE) {
+      if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (previousStructureId.toString() !== req.user.structureId.toString() || currentStructureId.toString() !== req.user.structureId.toString()) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+    }
+    if (req.user.role === ROLES.SUPERVISOR) {
+      if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+      if (!structures.map((e) => e._id.toString()).includes(contract.structureId.toString()) || !structures.map((e) => e._id.toString()).includes(currentStructureId.toString())) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+    }
+
     // Create or update contract.
     const contract = id ? await updateContract(id, data, req.user) : await createContract(data, req.user);
 
@@ -202,7 +232,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
   }
 });
 
@@ -217,6 +247,25 @@ router.post("/:id/send-email/:type", passport.authenticate(["referent"], { sessi
 
     const contract = await ContractObject.findById(id);
     if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // - admin and referent can send contract to everybody
+    // - responsible and supervisor can send contract in their structures
+    if (!canCreateOrUpdateContract(req.user, contract)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    if (req.user.role === ROLES.RESPONSIBLE) {
+      if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (contract.structureId.toString() !== req.user.structureId.toString()) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+    }
+    if (req.user.role === ROLES.SUPERVISOR) {
+      if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+      if (!structures.map((e) => e._id.toString()).includes(contract.structureId.toString())) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+    }
 
     if (type === "projectManager") await sendProjectManagerContractEmail(contract, false);
     if (type === "structureManager") await sendStructureManagerContractEmail(contract, false);
@@ -240,6 +289,10 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && data.youngId.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    if (isReferent(req.user) && !canViewContract(req.user, data)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
@@ -279,11 +332,26 @@ router.post("/token/:token", async (req, res) => {
     });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (token === data.parent1Token) data.parent1Status = "VALIDATED";
-    if (token === data.parent2Token) data.parent2Status = "VALIDATED";
-    if (token === data.projectManagerToken) data.projectManagerStatus = "VALIDATED";
-    if (token === data.structureManagerToken) data.structureManagerStatus = "VALIDATED";
-    if (token === data.youngContractToken) data.youngContractStatus = "VALIDATED";
+    if (token === data.parent1Token) {
+      data.parent1Status = "VALIDATED";
+      data.parent1ValidationDate = new Date();
+    }
+    if (token === data.parent2Token) {
+      data.parent2Status = "VALIDATED";
+      data.parent2ValidationDate = new Date();
+    }
+    if (token === data.projectManagerToken) {
+      data.projectManagerStatus = "VALIDATED";
+      data.projectManagerValidationDate = new Date();
+    }
+    if (token === data.structureManagerToken) {
+      data.structureManagerStatus = "VALIDATED";
+      data.structureManagerValidationDate = new Date();
+    }
+    if (token === data.youngContractToken) {
+      data.youngContractStatus = "VALIDATED";
+      data.youngContractValidationDate = new Date();
+    }
 
     await data.save({ fromUser: req.user });
 
@@ -321,13 +389,15 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
     const { error: idError, value: id } = validateId(req.params.id);
     if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: idError.message });
 
-    console.log(`${req.user.id} download contract ${id}`);
-
     const contract = await ContractObject.findById(id);
     if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // A young can only download their own documents.
     if (isYoung(req.user) && contract.youngId.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    if (isReferent(req.user) && !canCreateOrUpdateContract(req.user, contract)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
@@ -342,7 +412,7 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
     res.send(buffer);
   } catch (e) {
     capture(e);
-    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

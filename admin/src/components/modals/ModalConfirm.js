@@ -32,7 +32,7 @@ export default function ModalConfirm({
 
   return (
     <Modal size={size} centered isOpen={isOpen} toggle={onCancel || onChange}>
-      <ModalContainer>
+      <ModalContainer className="pb-0">
         <CloseSvg className="close-icon" height={10} width={10} onClick={onCancel || onChange} />
         {showHeaderText ? <Header>{headerText}</Header> : null}
         {showHeaderIcon ? <RoundWarning style={{ marginBottom: "1.5rem" }} /> : null}

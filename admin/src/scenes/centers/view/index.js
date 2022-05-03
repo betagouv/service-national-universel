@@ -135,16 +135,21 @@ export default function Index({ ...props }) {
   return (
     <>
       <CenterInformations center={center} sessions={sessions} />
+      <div className="flex justify-left border-bottom mb-2 pl-5">
+        {(availableCohorts || []).map((cohort, index) => (
+          <div
+            key={index}
+            className={`pb-2 mr-8 flex align-items cursor-pointer  ${focusedCohort === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
+            onClick={() => {
+              setFocusedCohort(cohort);
+            }}>
+            {cohort}
+            {center.sessionStatus[index] === "DRAFT" ? <div className="border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] border text-xs rounded-full p-1 ml-1">Brouillon</div> : null}
+          </div>
+        ))}
+      </div>
       <div style={{ padding: "0 3rem" }}>
-        <Nav
-          tab={focusedTab}
-          center={center}
-          user={user}
-          cohorts={availableCohorts}
-          onChangeCohort={setFocusedCohort}
-          onChangeTab={setFocusedTab}
-          focusedSession={focusedSession}
-        />
+        <Nav tab={focusedTab} center={center} user={user} cohorts={availableCohorts} onChangeTab={setFocusedTab} focusedSession={focusedSession} />
         <Switch>
           {/* liste-attente reliquat ? */}
           <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />

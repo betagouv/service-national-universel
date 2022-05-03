@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
 import ModalForm from "../../../../components/modals/ModalForm";
 import { BiCopy } from "react-icons/bi";
-import { HiCheckCircle } from "react-icons/hi";
-import { copyToClipboard } from "../../../../utils";
-import { HiPhone } from "react-icons/hi";
-import { HiPlus } from "react-icons/hi";
-import { HiPencil } from "react-icons/hi";
-import { HiOutlineTrash } from "react-icons/hi";
+import { HiCheckCircle, HiPhone, HiPlus, HiPencil, HiOutlineTrash } from "react-icons/hi";
+import { copyToClipboard, translate, formatPhoneNumberFR } from "../../../../utils";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, formatPhoneNumberFR } from "../../../../utils";
 
 export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contacts, cohorts, getService }) {
   const [currentTab, setCurrentTab] = useState();
@@ -47,7 +42,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
       } else if (hit) {
         let firstName = hit.contactName.substring(0, hit.contactName.indexOf(" "));
         let lastName = hit.contactName.substring(hit.contactName.indexOf(" ") + 1);
-        setEdit({ firstName, lastName, contactPhone: hit.contactPhone, contactMail: hit.contactMail });
+        setEdit({ firstName, lastName, contactPhone: hit.contactPhone, contactMail: hit.contactMail, contactId: hit._id });
       }
     }
   }, [newContact, hit]);
@@ -61,8 +56,11 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   const handleDelete = async () => {
     setIsLoading(true);
     try {
-      const { ok } = await api.remove(`/department-service/${idServiceDep}/cohort/${currentTab}/contact/${hit.contactMail}`);
-      if (!ok) return toastr.error("Une erreur s'est produite lors de la suppression du contact");
+      const { ok } = await api.remove(`/department-service/${idServiceDep}/cohort/${currentTab}/contact/${hit._id}`);
+      if (!ok) {
+        resetState();
+        return toastr.error("Une erreur s'est produite lors de la suppression du contact");
+      }
       toastr.success("Le contact a été supprimé !");
       await getService();
       resetState();
@@ -80,10 +78,14 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         contactName: `${edit.firstName} ${edit.lastName}`,
         contactPhone: edit.contactPhone,
         contactMail: edit.contactMail,
+        contactId: edit.contactId,
       };
 
-      const { ok, data } = await api.post(`/department-service/${idServiceDep}/cohort/${currentTab}/contact`, value);
-      if (!ok) return toastr.error("Une erreur s'est produite lors de la sauvegarde du contact");
+      const { ok } = await api.post(`/department-service/${idServiceDep}/cohort/${currentTab}/contact`, value);
+      if (!ok) {
+        resetState();
+        return toastr.error("Une erreur s'est produite lors de la sauvegarde du contact");
+      }
       toastr.success("Le contact a été sauvegardé !");
       await getService();
       resetState();
@@ -105,7 +107,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         <div className="flex flex-1 flex-col lg:flex-row mb-4 border-b">
           <nav className="px-3 flex flex-1 ">
             {cohorts.map((cohort) => (
-              <TabItem name={cohort} setCurrentTab={setCurrentTab} active={currentTab === cohort}>
+              <TabItem name={cohort} key={cohort} setCurrentTab={setCurrentTab} active={currentTab === cohort}>
                 {cohort}
               </TabItem>
             ))}
@@ -114,17 +116,18 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         {!edit ? (
           <>
             {contacts[currentTab].length ? (
-              // <div className="grid grid-cols-2 gap-4 px-4 pb-4">
-              <div className="flex items-center justify-center mb-4 ">
+              <div className="grid grid-cols-2 grid-rows-2 gap-4 px-4 pb-4">
                 {contacts[currentTab].map((contact) => (
-                  <Contact contact={contact} setHit={setHit} />
+                  <Contact contact={contact} key={contact} setHit={setHit} />
                 ))}
-                {/* <div
-                  className="flex flex-row border-dashed border-indigo-700 rounded-lg bg-white border-grey-200 border-[1px] shadow-sm mr-4 px-2 items-center justify-center hover:cursor-pointer"
-                  onClick={() => setNewContact(true)}>
-                  <HiPlus className="text-indigo-300" />
-                  <div className="pl-2 text-indigo-700 text-lg">Ajouter un contact</div>
-                </div> */}
+                {contacts[currentTab].length < 4 && (
+                  <div
+                    className="flex flex-row border-dashed border-indigo-700 rounded-lg bg-white border-grey-200 border-[1px] shadow-sm mr-4 px-2 items-center justify-center hover:cursor-pointer"
+                    onClick={() => setNewContact(true)}>
+                    <HiPlus className="text-indigo-300" />
+                    <div className="pl-2 text-indigo-700 text-lg">Ajouter un contact</div>
+                  </div>
+                )}
               </div>
             ) : (
               <div
@@ -138,15 +141,24 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         ) : (
           <form className="w-full" onSubmit={handleSubmit}>
             <div className="flex flex-col items-center justify-center px-8 pb-4">
-              <div className="w-full flex flex-row  justify-center ">
-                <div className="w-full flex flex-col">
-                  <div className={`border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+              <div className="w-full flex flex-col justify-center ">
+                <div className="flex flex-row">
+                  <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
                     <label htmlFor="firstName" className="w-full m-0 text-left text-gray-500">
                       Prénom
                     </label>
                     <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="firstName" id="firstName" onChange={handleChange} value={edit.firstName} />
                   </div>
-                  <div className={`border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+
+                  <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                    <label htmlFor="lastName" className="w-full m-0 text-left text-gray-500">
+                      Nom
+                    </label>
+                    <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="lastName" id="lastName" onChange={handleChange} value={edit.lastName} />
+                  </div>
+                </div>
+                <div className="flex flex-row">
+                  <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
                     <label htmlFor="contactPhone" className="w-full m-0 text-left text-gray-500">
                       Téléphone
                     </label>
@@ -162,16 +174,8 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
                       value={edit.contactPhone}
                     />
                   </div>
-                </div>
-                <div className="w-full flex flex-col">
-                  <div className={`border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="firstName" className="w-full m-0 text-left text-gray-500">
-                      Nom
-                    </label>
-                    <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="lastName" id="lastName" onChange={handleChange} value={edit.lastName} />
-                  </div>
-                  <div className={`border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="firstName" className="w-full m-0 text-left text-gray-500">
+                  <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                    <label htmlFor="contactMail" className="w-full m-0 text-left text-gray-500">
                       Adresse email
                     </label>
                     <input
@@ -239,23 +243,27 @@ const Contact = ({ contact, setHit }) => {
           <HiPencil className="text-blue-500 tex-lg" />
         </div>
       </div>
-      <div className="flex flex-row border-t-[1px] border-gray-200">
-        <div className="flex flex-1 flex-row justify-center items-center border-r-[1px] border-gray-200 my-2 px-2">
-          <HiPhone className="text-gray-400" />
-          <div className="pl-2 text-gray-700 whitespace-nowrap">{formatPhoneNumberFR(contact.contactPhone)}</div>
-        </div>
 
-        <div className="flex flex-2 my-2 px-2 truncate">
-          <div className="pr-2  flex-row text-gray-700 truncate">{contact.contactMail}</div>
-          <div
-            className="flex items-center justify-center cursor-pointer hover:scale-105"
-            onClick={() => {
-              copyToClipboard(contact.contactMail);
-              setCopied(true);
-            }}>
-            {copied ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
+      <div className="flex flex-row border-t-[1px] border-gray-200">
+        {contact.contactPhone ? (
+          <div className="flex flex-1 flex-row justify-center items-center my-2 px-2">
+            <HiPhone className="text-gray-400" />
+            <div className="pl-2 text-gray-700 whitespace-nowrap">{formatPhoneNumberFR(contact.contactPhone)}</div>
           </div>
-        </div>
+        ) : null}
+        {contact.contactMail ? (
+          <div className="flex flex-2 my-2 px-2 border-l-[1px] border-gray-200 truncate w-full justify-center items-center">
+            <div className="pr-2 flex-row text-gray-700 truncate ">{contact.contactMail}</div>
+            <div
+              className="flex items-center justify-center cursor-pointer hover:scale-105"
+              onClick={() => {
+                copyToClipboard(contact.contactMail);
+                setCopied(true);
+              }}>
+              {copied ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

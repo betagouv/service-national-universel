@@ -15,8 +15,9 @@ import Drawer from "./Create/drawer";
 import Desistement from "../../scenes/desistement";
 
 import { useSelector } from "react-redux";
-import { colors, YOUNG_STATUS, inscriptionCreationAndModificationOpenForYoungs, COHORTS } from "../../utils";
+import { colors, YOUNG_STATUS, inscriptionModificationOpenForYoungs, inscriptionCreationOpenForYoungs, COHORTS } from "../../utils";
 
+import Closed from "./Home/closed.js";
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
 import HelpButton from "../../components/buttons/HelpButton";
@@ -57,7 +58,7 @@ const Step = ({ step }) => {
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
 
-  const allowedCohorts = COHORTS.filter((c) => inscriptionCreationAndModificationOpenForYoungs(c));
+  const allowedCohorts = COHORTS.filter((c) => inscriptionModificationOpenForYoungs(c));
   if (young?.cohort && !allowedCohorts.includes(young?.cohort)) {
     return <Redirect to={{ pathname: "/" }} />;
   }
@@ -69,17 +70,26 @@ export default function Index() {
 
   return (
     <Switch>
-      <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
-      <Route path="/inscription/coordonnees" component={() => <Step step={STEPS.COORDONNEES} />} />
-      <Route path="/inscription/particulieres" component={() => <Step step={STEPS.PARTICULIERES} />} />
-      <Route path="/inscription/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
-      <Route path="/inscription/consentements" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
-      <Route path="/inscription/documents" component={() => <Step step={STEPS.DOCUMENTS} />} />
-      <Route path="/inscription/availability" component={() => <Step step={STEPS.AVAILABILITY} />} />
-      <Route path="/inscription/done" component={() => <Step step={STEPS.DONE} />} />
-      <Route path="/inscription/france-connect-callback" component={() => <FranceConnectCallback />} />
-      <Route path="/inscription/desistement" component={Desistement} />
-      <Route path="/inscription" component={Home} />
+      {inscriptionCreationOpenForYoungs(young?.cohort) ||
+      (inscriptionModificationOpenForYoungs(young?.cohort) && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young?.status)) ? (
+        <>
+          <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
+          <Route path="/inscription/coordonnees" component={() => <Step step={STEPS.COORDONNEES} />} />
+          <Route path="/inscription/particulieres" component={() => <Step step={STEPS.PARTICULIERES} />} />
+          <Route path="/inscription/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
+          <Route path="/inscription/consentements" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
+          <Route path="/inscription/documents" component={() => <Step step={STEPS.DOCUMENTS} />} />
+          <Route path="/inscription/availability" component={() => <Step step={STEPS.AVAILABILITY} />} />
+          <Route path="/inscription/done" component={() => <Step step={STEPS.DONE} />} />
+          <Route path="/inscription/france-connect-callback" component={() => <FranceConnectCallback />} />
+          <Route path="/inscription/desistement" component={Desistement} />
+          <Route path="/inscription" exact component={Home} />
+        </>
+      ) : (
+        <>
+          <Route path="/inscription" component={Home} />
+        </>
+      )}
     </Switch>
   );
 }
