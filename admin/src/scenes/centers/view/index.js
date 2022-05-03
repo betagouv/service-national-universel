@@ -121,7 +121,7 @@ export default function Index({ ...props }) {
 
   const setChefCenter = async (teamate) => {
     try {
-      let { data: referent } = await api.get(`/referent?email=${teamate.email}`);
+      let { data: referent } = await api.get(`/referent?email=${encodeURIComponent(teamate.email)}`);
 
       if (!referent) {
         // todo : create chef de centre
