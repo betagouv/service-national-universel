@@ -8,6 +8,7 @@ const FileType = require("file-type");
 const Joi = require("joi");
 const NodeClam = require("clamscan");
 const fs = require("fs");
+const fileUpload = require("express-fileupload");
 
 const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
@@ -618,27 +619,31 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
   }
 });
 
-router.post("/file/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      key: Joi.string().required(),
-      body: Joi.string().required(),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    const { key, body } = value;
-    const {
-      error: bodyError,
-      value: { names, youngId },
-    } = Joi.object({
-      names: Joi.array().items(Joi.string()).required(),
-      youngId: Joi.string().required(),
-    }).validate(JSON.parse(body), { stripUnknown: true });
+router.post(
+  "/file/:key",
+  passport.authenticate("referent", { session: false, failWithError: true }),
+  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  async (req, res) => {
+    try {
+      const { error, value } = Joi.object({
+        key: Joi.string().required(),
+        body: Joi.string().required(),
+      })
+        .unknown()
+        .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+      const { key, body } = value;
+      const {
+        error: bodyError,
+        value: { names, youngId },
+      } = Joi.object({
+        names: Joi.array().items(Joi.string()).required(),
+        youngId: Joi.string().required(),
+      }).validate(JSON.parse(body), { stripUnknown: true });
 
-    if (error || bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (error || bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const young = await YoungModel.findById(youngId);
-    if (!young) return res.status(404).send({ ok: false });
+      const young = await YoungModel.findById(youngId);
+      if (!young) return res.status(404).send({ ok: false });
 
     if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -657,54 +662,61 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
               data: Joi.binary().required(),
               tempFilePath: Joi.string().allow("").optional(),
             }).unknown(),
+            Joi.array().items(
+              Joi.object({
+                name: Joi.string().required(),
+                data: Joi.binary().required(),
+                tempFilePath: Joi.string().allow("").optional(),
+              }).unknown(),
+            ),
           ),
-        ),
-      )
-      .validate(
-        Object.keys(req.files || {}).map((e) => req.files[e]),
-        { stripUnknown: true },
-      );
-    if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+        )
+        .validate(
+          Object.keys(req.files || {}).map((e) => req.files[e]),
+          { stripUnknown: true },
+        );
+      if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    for (let currentFile of files) {
-      // If multiple file with same names are provided, currentFile is an array. We just take the latest.
-      if (Array.isArray(currentFile)) {
-        currentFile = currentFile[currentFile.length - 1];
-      }
-      const { name, tempFilePath, mimetype } = currentFile;
-      const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
-      const validTypes = ["image/jpeg", "image/png", "application/pdf"];
-      if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
-        fs.unlinkSync(tempFilePath);
-        return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
-      }
-
-      if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-        const clamscan = await new NodeClam().init({
-          removeInfected: true,
-        });
-        const { isInfected } = await clamscan.isInfected(tempFilePath);
-        if (isInfected) {
-          fs.unlinkSync(tempFilePath);
-          return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      for (let currentFile of files) {
+        // If multiple file with same names are provided, currentFile is an array. We just take the latest.
+        if (Array.isArray(currentFile)) {
+          currentFile = currentFile[currentFile.length - 1];
         }
-      }
+        const { name, tempFilePath, mimetype } = currentFile;
+        const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+        const validTypes = ["image/jpeg", "image/png", "application/pdf"];
+        if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
+          fs.unlinkSync(tempFilePath);
+          return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+        }
 
-      const data = fs.readFileSync(tempFilePath);
-      const encryptedBuffer = encrypt(data);
-      const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-      await uploadFile(`app/young/${young._id}/${key}/${name}`, resultingFile);
-      fs.unlinkSync(tempFilePath);
+        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
+          const clamscan = await new NodeClam().init({
+            removeInfected: true,
+          });
+          const { isInfected } = await clamscan.isInfected(tempFilePath);
+          if (isInfected) {
+            fs.unlinkSync(tempFilePath);
+            return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+          }
+        }
+
+        const data = fs.readFileSync(tempFilePath);
+        const encryptedBuffer = encrypt(data);
+        const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+        await uploadFile(`app/young/${young._id}/${key}/${name}`, resultingFile);
+        fs.unlinkSync(tempFilePath);
+      }
+      young.set({ [key]: names });
+      await young.save({ fromUser: req.user });
+      return res.status(200).send({ data: names, ok: true });
+    } catch (error) {
+      capture(error);
+      if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: "FILE_CORRUPTED" });
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-    young.set({ [key]: names });
-    await young.save({ fromUser: req.user });
-    return res.status(200).send({ data: names, ok: true });
-  } catch (error) {
-    capture(error);
-    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: "FILE_CORRUPTED" });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 //todo: refactor: in young controller (if referent, add the applications)
 router.get("/young/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
