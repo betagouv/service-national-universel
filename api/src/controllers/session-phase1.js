@@ -10,7 +10,7 @@ const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
 const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll } = require("../utils");
-const { canCreateOrUpdateSessionPhase1 } = require("snu-lib/roles");
+const { canCreateOrUpdateSessionPhase1, canViewCohesionCenter, canSearchSessionPhase1, canDownloadYoungDocuments, canAssignCohesionCenter } = require("snu-lib/roles");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
@@ -56,6 +56,8 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
     const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
     if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (!canViewCohesionCenter(req.user, cohesionCenter)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
   } catch (error) {
     capture(error);
@@ -64,6 +66,7 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
 });
 
 router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   try {
     const data = await SessionPhase1Model.find({});
     return res.status(200).send({ ok: true, data: data.map(serializeSessionPhase1) });
@@ -105,6 +108,10 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
   const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
   if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
+    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  }
 
   const body = {
     sessionPhase1Id: session._id,
@@ -210,6 +217,8 @@ router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent
     const session = await SessionPhase1Model.findById(sessionId);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
+
+    if (!canAssignCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // update youngs infos
     young.set({

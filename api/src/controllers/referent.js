@@ -61,6 +61,13 @@ const {
   canGetReferentByEmail,
   canEditYoung,
   canViewYoungFile,
+  canRefuseMilitaryPreparation,
+  canChangeYoungCohort,
+  canSendTutorTemplate,
+  canModifyStructure,
+  canModifyReferent,
+  canSearchSessionPhase1,
+  canCreateOrUpdateSessionPhase1,
 } = require("snu-lib/roles");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
@@ -395,6 +402,8 @@ router.post("/young/:id/refuse-military-preparation-files", passport.authenticat
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
+    if (!canRefuseMilitaryPreparation(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
+
     const newYoung = { statusMilitaryPreparationFiles: "REFUSED" };
 
     const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
@@ -417,12 +426,13 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
   try {
     const validatedMessage = Joi.string().required().validate(req.body.message);
     const validatedBody = validateYoung(req.body);
-
     if (validatedBody?.error || validatedMessage?.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { id } = req.params;
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    if (!canChangeYoungCohort(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 
     const { cohort, cohortChangeReason } = validatedBody.value;
 
@@ -493,6 +503,8 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
     const { tutorId, template, subject, message, app, missionName } = value;
     const tutor = await ReferentModel.findById(tutorId);
     if (!tutor) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+
+    if (!canSendTutorTemplate(req.user, tutor)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 
     if (
       [
@@ -630,6 +642,8 @@ router.post("/file/:key", passport.authenticate("referent", { session: false, fa
 
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false });
+
+    if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Validate files with Joi
     const { error: filesError, value: files } = Joi.array()
@@ -843,6 +857,11 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     const structure = await StructureModel.findById(checkedStructureId);
     const referent = await ReferentModel.findById(checkedId);
     if (!referent || !structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canModifyStructure(req.user, structure) || !canModifyReferent(req.user, referent)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const missions = await MissionModel.find({ tutorId: referent._id });
     if (missions.length > 0) return res.status(405).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     referent.set({ structureId: structure._id, role: ROLES.RESPONSIBLE });
@@ -878,6 +897,10 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canSearchSessionPhase1(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const sessions = await SessionPhase1.find({ headCenterId: checkedId });
     return res.status(200).send({ ok: true, data: sessions.map(serializeSessionPhase1) });
@@ -926,6 +949,10 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    if (!canCreateOrUpdateSessionPhase1(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
@@ -969,6 +996,10 @@ router.put("/young/:id/phase1Files/:document", passport.authenticate("referent",
       [`${document}Files`]: Joi.array().items(Joi.string()),
     }).validate(req.body);
     if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
+
+    if (!canCreateOrUpdateSessionPhase1(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     young.set(value);
     await young.save({ fromUser: req.user });
