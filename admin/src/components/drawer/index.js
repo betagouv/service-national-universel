@@ -159,10 +159,10 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
   );
 }
 
-function headCenter({ onClick, user }) {
+function headCenter({ onClick, activeSession }) {
   return (
     <>
-      {user.cohesionCenterId && <DrawerTab to={`/centre/${user.cohesionCenterId}`} title="Mon Centre" onClick={onClick} />}
+      {activeSession && <DrawerTab to={`/centre/${activeSession.cohesionCenterId}`} title="Mon Centre" onClick={onClick} />}
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
@@ -227,7 +227,7 @@ const Drawer = (props) => {
           <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
             <ul className="divide-y divide-slate-700">
               <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, activeSession: props.activeSession })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
               {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}

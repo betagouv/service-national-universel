@@ -101,6 +101,10 @@ const Home = () => {
 
   const [drawerVisible, setDrawerVisible] = useState(false);
 
+  // pour les chefs de centre, il faut afficher une seul session à la fois si il y en a plusieurs (peu importe le centre de cohésion)
+  const [sessionPhase1List, setSessionPhase1List] = useState(null);
+  const [activeSession, setActiveSession] = useState(null);
+
   const renderDashboard = () => {
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsible />;
     if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenter />;
@@ -136,11 +140,28 @@ const Home = () => {
     }
   }, [user]);
 
+  React.useEffect(() => {
+    if (!user) return;
+    if (user.role !== ROLES.HEAD_CENTER) return;
+    (async () => {
+      const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1`);
+      if (!ok) return console.log(`Error: ${code}`);
+      setSessionPhase1List(data);
+      setActiveSession(data[0]);
+    })();
+  }, [user]);
+
   return (
     <div>
-      <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} />
+      <Header
+        onClickBurger={() => setDrawerVisible((e) => !e)}
+        drawerVisible={drawerVisible}
+        sessionsList={sessionPhase1List}
+        activeSession={activeSession}
+        setActiveSession={setActiveSession}
+      />
       <div className="flex">
-        <Drawer open={drawerVisible} onOpen={setDrawerVisible} />
+        <Drawer open={drawerVisible} onOpen={setDrawerVisible} activeSession={activeSession} />
         <div className={drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`}>
           <Switch>
             <Route path="/auth" component={Auth} />

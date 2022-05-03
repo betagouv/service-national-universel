@@ -1,32 +1,23 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 
 import { ROLES } from "../../utils";
 import { environment } from "../../config";
 import User from "./user";
 import { RiMenuFill, RiMenuFoldLine } from "react-icons/ri";
-import api from "../../services/api";
 import Selector from "../../assets/icons/Selector";
+import Check from "../../assets/icons/Check";
 import SwitchHorizontal from "../../assets/icons/SwitchHorizontal";
 
-export default function HeaderIndex({ onClickBurger, drawerVisible }) {
+export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList, activeSession, setActiveSession }) {
   const { user } = useSelector((state) => state.Auth);
+  const history = useHistory();
   const [environmentBannerVisible, setEnvironmentBannerVisible] = React.useState(true);
-  const [sessionPhase1, setSessionPhase1] = React.useState();
-  const [selectSessionOpen, setSelectSessionOpen] = React.useState(true);
-
-  React.useEffect(() => {
-    if (!user) return;
-    if (user.role !== ROLES.HEAD_CENTER) return;
-    (async () => {
-      const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1`);
-      if (!ok) return console.log(`Error: ${code}`);
-      setSessionPhase1(data);
-    })();
-  }, [user]);
+  const [selectSessionOpen, setSelectSessionOpen] = React.useState(false);
 
   if (!user) return <div />;
+  if (user.role === ROLES.HEAD_CENTER && !activeSession) return <div />;
 
   function getName() {
     if (user.role === ROLES.ADMIN) return "Espace modérateur";
@@ -45,7 +36,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible }) {
   }
 
   const renderBanner = () => {
-    if (user.role === ROLES.HEAD_CENTER && sessionPhase1?.length) {
+    if (user.role === ROLES.HEAD_CENTER && activeSession) {
       return (
         <>
           <div className="flex items-center gap-2 mx-3 ">
@@ -55,7 +46,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible }) {
             <div className="flex items-center group hover:text-black gap-2 mx-3 cursor-pointer" onClick={() => setSelectSessionOpen((e) => !e)}>
               <div>
                 <div className="text-gray-500 text-xs uppercase font-medium">mon espace chef de centre</div>
-                <div className="text-sm font-normal">blabla</div>
+                <div className="text-sm font-normal">{activeSession.cohort}</div>
               </div>
               <div className="ml-4">
                 <Selector className="text-gray-500 group-hover:scale-105" />
@@ -66,17 +57,26 @@ export default function HeaderIndex({ onClickBurger, drawerVisible }) {
             className={`${
               selectSessionOpen ? "block" : "hidden"
             } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute top-[calc(100%+5px)] left-20 border-3 border-red-600 shadow overflow-hidden`}>
-            {sessionPhase1?.map((session) => (
+            {(sessionsList || [])?.map((session) => (
               <div
                 key={session.cohort}
                 className="flex items-center group hover:text-black gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100"
-                onClick={(e) => console.log("select", e.target.value)}>
+                onClick={() => {
+                  setActiveSession(session);
+                  setSelectSessionOpen(false);
+                  // on retourne au dashboard !
+                  history.push("/");
+                }}>
                 <div>
                   <div className="text-gray-500 text-xs uppercase font-medium">mon espace chef de centre</div>
                   <div className="text-sm font-normal">{session.cohort}</div>
                 </div>
                 <div className="ml-4">
-                  <SwitchHorizontal className="text-gray-500 group-hover:scale-105" />
+                  {activeSession.cohort === session.cohort ? (
+                    <Check className="text-green-500 group-hover:scale-105" />
+                  ) : (
+                    <SwitchHorizontal className="text-gray-500 group-hover:scale-105" />
+                  )}
                 </div>
               </div>
             ))}
