@@ -1,3 +1,19 @@
+# [1.79.0](https://github.com/betagouv/service-national-universel/compare/v1.78.0...v1.79.0) (2022-05-03)
+
+
+### Bug Fixes
+
+* **admin:** error on delete document phase1 ([42edcf7](https://github.com/betagouv/service-national-universel/commit/42edcf791a9eb68be5c885a63c3b0a50f744f3bc))
+* **api:** can view cohesion center ([0efbc8c](https://github.com/betagouv/service-national-universel/commit/0efbc8cd93736a60f7b20339270521f279592f90))
+* **security:** check authorization step 2 ([#1524](https://github.com/betagouv/service-national-universel/issues/1524)) ([b2da1c3](https://github.com/betagouv/service-national-universel/commit/b2da1c3abdf9cb33d59a30f765479843890bbd63))
+* **security:** remove last error leak info ([#1538](https://github.com/betagouv/service-national-universel/issues/1538)) ([d6695be](https://github.com/betagouv/service-national-universel/commit/d6695bea15a4ab05aceb36817a8ab2605afc5022))
+
+
+### Features
+
+* **admin:** cancel-session-young ([#1533](https://github.com/betagouv/service-national-universel/issues/1533)) ([23b32d1](https://github.com/betagouv/service-national-universel/commit/23b32d16ea42ecf60b5c0d2301e3e53c181ce6dc))
+* **admin:** referent-can-change-meeting-point ([#1532](https://github.com/betagouv/service-national-universel/issues/1532)) ([7a45b3b](https://github.com/betagouv/service-national-universel/commit/7a45b3bbcf011fb9456f50517131390c81f3c4c6))
+
 # [1.78.0](https://github.com/betagouv/service-national-universel/compare/v1.77.2...v1.78.0) (2022-05-02)
 
 
