@@ -225,7 +225,25 @@ export default function Index({ ...props }) {
               {/* // équipe */}
               <div className="flex flex-col justify-between items-start bg-white rounded-lg shadow-sm p-4 max-w-xl">
                 <div>
-                  <div className="text-lg font-medium mb-1 text-gray-900">L&apos;équipe</div>
+                  <div className="flex justify-between mb-1">
+                    <div className="text-lg font-medium text-gray-900">L&apos;équipe</div>
+                    <div className="flex flex-row -space-x-2">
+                      {(focusedSession?.team || []).map((member, index) => {
+                        const getInitials = (word) =>
+                          (word || "")
+                            .match(/\b(\w)/g)
+                            .join("")
+                            .substring(0, 2)
+                            .toUpperCase();
+                        if (index < 6)
+                          return (
+                            <div key={index} className={`h-8 w-8 flex justify-center items-center rounded-full bg-gray-100 text-indigo-600 text-xs border-2 border-white`}>
+                              {getInitials(`${member.firstName} ${member.lastName}`)}
+                            </div>
+                          );
+                      })}
+                    </div>
+                  </div>
                   <div className="text-sm font-normal text-gray-400 mb-3">Les coordonnées du chef de centre, du cadre spécialisé, de compagnie...</div>
                 </div>
                 <button
