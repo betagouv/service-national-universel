@@ -69,12 +69,6 @@ export default function List() {
             <Header>
               <div>
                 <Title>Structures</Title>
-                <div className="font-thin">thin</div>
-                <div className="font-normal">normal</div>
-                <div className="font-medium">medium</div>
-                <div className="font-bold">bold</div>
-                <div className="font-bold italic">bold italic</div>
-                <div className="italic"> italic</div>
               </div>
               <div style={{ display: "flex" }}>
                 <Link to="/structure/create" onClick={() => plausibleEvent("Structure/CTA - Inviter nouvelle structure")}>
