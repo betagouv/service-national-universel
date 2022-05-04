@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Switch, Route, useHistory } from "react-router-dom";
+import { Switch, Route, useHistory, NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
@@ -11,6 +11,7 @@ import Affectation from "./affectation";
 import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
 import { translate, CENTER_ROLES, ROLES } from "../../../utils";
+import { environment } from "../../../config";
 
 export default function Index({ ...props }) {
   const [center, setCenter] = useState();
@@ -139,7 +140,7 @@ export default function Index({ ...props }) {
         {(availableCohorts || []).map((cohort, index) => (
           <div
             key={index}
-            className={`pb-2 mr-8 flex align-items cursor-pointer  ${focusedCohort === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
+            className={`pb-2 px-4 flex align-items cursor-pointer  ${focusedCohort === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
             onClick={() => {
               setFocusedCohort(cohort);
             }}>
@@ -150,25 +151,31 @@ export default function Index({ ...props }) {
       </div>
       <div style={{ padding: "0 3rem" }}>
         <Nav tab={focusedTab} center={center} user={user} cohorts={availableCohorts} onChangeTab={setFocusedTab} focusedSession={focusedSession} />
-        <Switch>
-          {/* liste-attente reliquat ? */}
-          <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
-          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
-            <Route
-              path="/centre/:id/volontaires"
-              component={() => <Youngs center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} focusedSession={focusedSession} />}
-            />
-          ) : null}
-          <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
-          <Route
-            path="/centre/:id"
-            component={() => (
-              <>
-                <Team center={center} focusedSession={focusedSession} deleteTeamate={deleteTeamate} addTeamate={addTeamate} />
-              </>
-            )}
-          />
-        </Switch>
+        {environment !== "production" ? (
+          <>{center?._id && focusedSession?._id ? <NavLink to={`/centre/${center._id}/${focusedSession._id}/volontaires`}>Voir volontaires</NavLink> : null}</>
+        ) : (
+          <>
+            <Switch>
+              {/* liste-attente reliquat ? */}
+              <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
+              {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
+                <Route
+                  path="/centre/:id/volontaires"
+                  component={() => <Youngs center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} focusedSession={focusedSession} />}
+                />
+              ) : null}
+              <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
+              <Route
+                path="/centre/:id"
+                component={() => (
+                  <>
+                    <Team center={center} focusedSession={focusedSession} deleteTeamate={deleteTeamate} addTeamate={addTeamate} />
+                  </>
+                )}
+              />
+            </Switch>
+          </>
+        )}
       </div>
     </>
   );

@@ -37,7 +37,7 @@ export default function PanelCenter({ onChange, center }) {
       <div className="info">
         <div style={{ display: "flex", marginBottom: "15px" }}>
           <Subtitle>CENTRE </Subtitle>
-          <span style={{ color: "#9C9C9C" }}> #{center._id}</span>
+          <span style={{ color: "#9C9C9C" }}>&nbsp;#{center._id}</span>
           <div className="close" onClick={onChange} />
         </div>
         <div className="title">{center.name}</div>

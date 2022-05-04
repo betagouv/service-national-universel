@@ -13,7 +13,6 @@ export default function Nav({ center, tab, onChangeTab, focusedSession, user, co
   return (
     <Header>
       <div style={{ flex: 1, display: "flex" }}>
-
         <TabList style={{ width: "100%" }}>
           <Tab
             isActive={tab === "equipe"}
@@ -54,8 +53,9 @@ export default function Nav({ center, tab, onChangeTab, focusedSession, user, co
 
       <BoxPlaces style={{ borderRight: "1px solid rgba(0,0,0,0.2)", borderRadius: "0" }}>
         <DetailCardTitle>Taux d&apos;occupation</DetailCardTitle>
-        <DetailCardContent>{`${focusedSession.placesTotal ? (((focusedSession.placesTotal - focusedSession.placesLeft) * 100) / focusedSession.placesTotal).toFixed(2) : 0
-          } %`}</DetailCardContent>
+        <DetailCardContent>{`${
+          focusedSession.placesTotal ? (((focusedSession.placesTotal - focusedSession.placesLeft) * 100) / focusedSession.placesTotal).toFixed(2) : 0
+        } %`}</DetailCardContent>
       </BoxPlaces>
       <BoxPlaces>
         <DetailCardTitle>{Math.max(0, focusedSession.placesLeft)} places restantes</DetailCardTitle>
