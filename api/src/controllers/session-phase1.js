@@ -10,7 +10,7 @@ const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
 const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, isReferent } = require("../utils");
-const { canCreateOrUpdateSessionPhase1, canViewCohesionCenter, canSearchSessionPhase1, canDownloadYoungDocuments, canAssignCohesionCenter } = require("snu-lib/roles");
+const { canCreateOrUpdateSessionPhase1, canViewCohesionCenter, canSearchSessionPhase1, canViewSessionPhase1, canDownloadYoungDocuments, canAssignCohesionCenter } = require("snu-lib/roles");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
@@ -48,6 +48,25 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
     }
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const session = await SessionPhase1Model.findById(id);
+    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canViewSessionPhase1(req.user, session)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED })
+    }
+
+    return res.status(200).send({ ok: true, data: serializeSessionPhase1(session) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
