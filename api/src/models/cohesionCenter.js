@@ -121,7 +121,7 @@ const Schema = new mongoose.Schema({
     },
   },
   sessionStatus: {
-    type: String,
+    type: [String],
     enum: ["VALIDATED", "DRAFT"],
     documentation: {
       description: "Status de la globalite des cohortes d'un centre ",

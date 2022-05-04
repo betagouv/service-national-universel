@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
 import ModalForm from "../../../../components/modals/ModalForm";
 import { BiCopy } from "react-icons/bi";
-import { HiCheckCircle } from "react-icons/hi";
-import { copyToClipboard } from "../../../../utils";
-import { HiPhone } from "react-icons/hi";
-import { HiPlus } from "react-icons/hi";
-import { HiPencil } from "react-icons/hi";
-import { HiOutlineTrash } from "react-icons/hi";
+import { HiCheckCircle, HiPhone, HiPlus, HiPencil, HiOutlineTrash } from "react-icons/hi";
+import { copyToClipboard, translate, formatPhoneNumberFR } from "../../../../utils";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, formatPhoneNumberFR } from "../../../../utils";
 
 export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contacts, cohorts, getService }) {
   const [currentTab, setCurrentTab] = useState();
@@ -86,7 +81,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         contactId: edit.contactId,
       };
 
-      const { ok } = await api.post(`/department-service/${idServiceDep}/cohort/${currentTab}/contact/new`, value);
+      const { ok } = await api.post(`/department-service/${idServiceDep}/cohort/${currentTab}/contact`, value);
       if (!ok) {
         resetState();
         return toastr.error("Une erreur s'est produite lors de la sauvegarde du contact");
@@ -112,7 +107,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         <div className="flex flex-1 flex-col lg:flex-row mb-4 border-b">
           <nav className="px-3 flex flex-1 ">
             {cohorts.map((cohort) => (
-              <TabItem name={cohort} setCurrentTab={setCurrentTab} active={currentTab === cohort}>
+              <TabItem name={cohort} key={cohort} setCurrentTab={setCurrentTab} active={currentTab === cohort}>
                 {cohort}
               </TabItem>
             ))}
@@ -123,7 +118,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
             {contacts[currentTab].length ? (
               <div className="grid grid-cols-2 grid-rows-2 gap-4 px-4 pb-4">
                 {contacts[currentTab].map((contact) => (
-                  <Contact contact={contact} setHit={setHit} />
+                  <Contact contact={contact} key={contact} setHit={setHit} />
                 ))}
                 {contacts[currentTab].length < 4 && (
                   <div
@@ -146,15 +141,24 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
         ) : (
           <form className="w-full" onSubmit={handleSubmit}>
             <div className="flex flex-col items-center justify-center px-8 pb-4">
-              <div className="w-full flex flex-row  justify-center ">
-                <div className="w-full flex flex-col">
-                  <div className={`border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+              <div className="w-full flex flex-col justify-center ">
+                <div className="flex flex-row">
+                  <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
                     <label htmlFor="firstName" className="w-full m-0 text-left text-gray-500">
                       Prénom
                     </label>
                     <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="firstName" id="firstName" onChange={handleChange} value={edit.firstName} />
                   </div>
-                  <div className={`border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+
+                  <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                    <label htmlFor="lastName" className="w-full m-0 text-left text-gray-500">
+                      Nom
+                    </label>
+                    <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="lastName" id="lastName" onChange={handleChange} value={edit.lastName} />
+                  </div>
+                </div>
+                <div className="flex flex-row">
+                  <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
                     <label htmlFor="contactPhone" className="w-full m-0 text-left text-gray-500">
                       Téléphone
                     </label>
@@ -170,16 +174,8 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
                       value={edit.contactPhone}
                     />
                   </div>
-                </div>
-                <div className="w-full flex flex-col">
-                  <div className={`border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="firstName" className="w-full m-0 text-left text-gray-500">
-                      Nom
-                    </label>
-                    <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="lastName" id="lastName" onChange={handleChange} value={edit.lastName} />
-                  </div>
-                  <div className={`border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
-                    <label htmlFor="firstName" className="w-full m-0 text-left text-gray-500">
+                  <div className={`flex flex-1 flex-col border-[1px] rounded-lg m-2 py-1 px-2 ${isLoading && "bg-gray-200"}`}>
+                    <label htmlFor="contactMail" className="w-full m-0 text-left text-gray-500">
                       Adresse email
                     </label>
                     <input

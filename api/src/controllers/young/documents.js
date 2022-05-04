@@ -12,7 +12,7 @@ const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
 const contractPhase2 = require("../../templates/contractPhase2");
 const { sendTemplate } = require("../../sendinblue");
-const { canSendFileByMail } = require("snu-lib/roles");
+const { canSendFileByMail, canDownloadYoungDocuments } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 async function getHtmlTemplate(type, template, young, contract) {
@@ -72,6 +72,9 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
 
     // A young can only download their own documents.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 

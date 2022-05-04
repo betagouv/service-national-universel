@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { capture } = require("../sentry");
 const Joi = require("joi");
-
+const { canUpdateInscriptionGoals, canViewInscriptionGoals } = require("snu-lib/roles");
+const { capture } = require("../sentry");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
@@ -21,7 +21,9 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
       max: Joi.number().allow(null),
     })
     .validate(req.body, { stripUnknown: true });
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+  if (!canUpdateInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
   try {
     const promises = inscriptionsGoals.map((item) => {
@@ -43,7 +45,10 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
 router.get("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     // 2021 can be empty in database. This could be removed once all data is migrated.
     const data = await InscriptionGoalModel.find({ cohort: value.cohort === "2021" ? ["2021", null] : value.cohort });
     return res.status(200).send({ ok: true, data });
@@ -55,7 +60,10 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
 
 router.get("/:department/current", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.params);
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+  if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
   try {
     const y2020 = await YoungModel.find({ cohort: "2020", statusPhase1: "WAITING_AFFECTATION", department: value.department }).count();
     const y2021 = await YoungModel.find({ cohort: "2021", status: "VALIDATED", department: value.department }).count();
@@ -70,7 +78,10 @@ router.get("/:department/current", passport.authenticate("referent", { session: 
 
 router.get("/:cohort/department/:department", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   const { error, value } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params);
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+  if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
   try {
     const { department, cohort } = value;
     const youngCount = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).count();

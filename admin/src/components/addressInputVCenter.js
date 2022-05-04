@@ -18,7 +18,7 @@ export default function addressInputVCenter({
   touched,
   validateField,
   countryVisible = false,
-  onChangeCountry = () => { },
+  onChangeCountry = () => {},
   countryByDefault = "",
   required = false,
   departAndRegionVisible = false,
@@ -58,8 +58,10 @@ export default function addressInputVCenter({
     if (["97", "98"].includes(departmentCode)) {
       departmentCode = zip.substr(0, 3);
     }
+    //POUR LA CORSE
     if (departmentCode === "20") {
-      if (!["2A", "2B"].includes(departmentCode)) departmentCode = "2B";
+      if (zip === "20000" || zip.substr(0, 3) === "201") departmentCode = "2A";
+      else departmentCode = "2B";
     }
     handleChange({ target: { name: keys.department, value: departmentLookUp[departmentCode] } });
     handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[departmentCode]] } });
@@ -232,7 +234,14 @@ export default function addressInputVCenter({
                 <div className="text-gray-500 text-xs">
                   <label>Région</label>
                 </div>
-                <Field as="select" validate={(v) => !v && requiredMessage} disabled placeholder="Région" name={keys.region} value={values[keys.region]} className="w-full bg-gray-200">
+                <Field
+                  as="select"
+                  validate={(v) => !v && requiredMessage}
+                  disabled
+                  placeholder="Région"
+                  name={keys.region}
+                  value={values[keys.region]}
+                  className="w-full bg-gray-200">
                   {regionList.map((r) => (
                     <option key={r} value={r}>
                       {r}
@@ -281,9 +290,8 @@ export default function addressInputVCenter({
             <ErrorMessage errors={errors} touched={touched} name="addressVerified" />
           </Col>
         </Row>
-      )
-      }
-    </Wrapper >
+      )}
+    </Wrapper>
   );
 }
 

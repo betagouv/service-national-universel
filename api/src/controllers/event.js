@@ -5,11 +5,15 @@ const { capture } = require("../sentry");
 const EventObject = require("../models/event");
 const { ERRORS, isYoung } = require("../utils");
 const { validateEvent } = require("../utils/validator");
+const { canCreateEvent } = require("snu-lib/roles");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: event } = validateEvent(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    // Only accessible by persons who can access associations for now (aka referents and admins).
+    // The only event creatable id of type "ASSOCIATION" currently.
+    if (!canCreateEvent(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     await EventObject.create({ ...event, userId: req.user.id, userType: isYoung(req.user) ? "young" : "referent" });
     return res.status(200).send({ ok: true });

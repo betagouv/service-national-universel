@@ -35,7 +35,7 @@ export default function MeetingPointView({ values, handleChange, handleSubmit })
   };
 
   const onConfirmDeplacementPhase1Autonomous = async () => {
-    const { data, code, ok } = await api.post(`/young/${values._id}/deplacementPhase1Autonomous`);
+    const { code, ok } = await api.post(`/young/${values._id}/deplacementPhase1Autonomous`);
     if (!ok) {
       setIsLoading(false);
       return toastr.error("error", translate(code));
@@ -65,7 +65,7 @@ export default function MeetingPointView({ values, handleChange, handleSubmit })
       getData();
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
+      return toastr.error("Oups, une erreur est survenue pendant l'annulation du choix du point de rassemblement :", translate(e.code));
     }
   };
 

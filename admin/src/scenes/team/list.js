@@ -8,7 +8,7 @@ import Badge from "../../components/Badge";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import ExportComponent from "../../components/ExportXlsx";
 import Invite from "../../components/header/invite";
-import { Filter, FilterRow, MultiLine, ResultTable, Table, Title } from "../../components/list";
+import { Filter, FilterRow, MultiLine, ResultTable, Table } from "../../components/list";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import { apiURL } from "../../config";
@@ -99,8 +99,8 @@ export default function List() {
                           Prénom: data.firstName,
                           Nom: data.lastName,
                           Email: data.email,
-                          Rôle: data.role,
-                          Fonction: data.subRole,
+                          Rôle: translate(data.role),
+                          Fonction: translate(data.subRole),
                           Téléphone: data.phone,
                           Portable: data.mobile,
                           Département: data.department,

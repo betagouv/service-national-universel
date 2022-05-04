@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import LoadingButton from "./LoadingButton";
 import downloadPDF from "../../utils/download-pdf";
 
-export default function DownloadAttestationButton({ young, children, uri }) {
+export default function DownloadAttestationButton({ young, children, uri, ...props }) {
   const [loading, setLoading] = useState();
 
   const viewAttestation = async (a) => {
@@ -14,7 +14,7 @@ export default function DownloadAttestationButton({ young, children, uri }) {
     setLoading(false);
   };
   return (
-    <LoadingButton loading={loading} onClick={() => viewAttestation(uri)}>
+    <LoadingButton {...props} color="#EFF6FF" textColor="#5145cd" loading={loading} onClick={() => viewAttestation(uri)}>
       {children}
     </LoadingButton>
   );

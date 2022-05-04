@@ -1,16 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const { canViewMeetingPoints } = require("snu-lib/roles");
 const { capture } = require("../sentry");
-
 const { validateId } = require("../utils/validator");
 const MeetingPointModel = require("../models/meetingPoint");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const BusModel = require("../models/bus");
-const { ERRORS, isYoung } = require("../utils");
+const { ERRORS, isYoung, isReferent } = require("../utils");
 
 router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await MeetingPointModel.find({});
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -22,11 +23,12 @@ router.get("/all", passport.authenticate("referent", { session: false, failWithE
 router.get("/:id", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, errorId });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     //A young can only see his own meetingPoint.
     if (isYoung(req.user) && checkedId !== req.user.meetingPointId) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    if (isReferent(req.user) && !canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await MeetingPointModel.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const bus = await BusModel.findById(data.busId);

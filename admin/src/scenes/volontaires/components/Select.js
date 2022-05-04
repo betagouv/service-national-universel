@@ -4,11 +4,11 @@ import { Field } from "formik";
 
 import Error, { requiredMessage } from "../../../components/errorMessage";
 
-export default function Select({ title, name, values, handleChange, disabled, options, required = false, errors, touched, placeholder = "" }) {
+export default function Select({ title, name, values, handleChange, disabled, options, required = false, errors, touched, placeholder = "", tw }) {
   return (
     <Row className="detail">
       <Col md={4}>
-        <label>{title}</label>
+        <label className={tw}>{title}</label>
       </Col>
       <Col md={8}>
         <Field hidden value={values[name]} name={name} onChange={handleChange} validate={(v) => required && !v && requiredMessage} />

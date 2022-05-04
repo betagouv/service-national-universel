@@ -33,9 +33,8 @@ const VioletButtonHeader = styled(Button)`
   text-overflow: ellipsis;
   border: none;
   border-radius: 5px;
-  padding: 7px 30px;
+  padding: 0.5rem 1.5rem;
   margin: 0;
-  margin-left: 1rem;
   font-size: 14px;
   font-weight: 700;
   color: ${({ textColor }) => (textColor ? `${textColor}` : `#fff`)} !important;

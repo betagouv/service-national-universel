@@ -41,7 +41,7 @@ import { SENTRY_URL, environment, appURL } from "./config";
 import ModalCGU from "./components/modals/ModalCGU";
 
 import "./index.css";
-import { YOUNG_STATUS, ENABLE_PM } from "./utils";
+import { YOUNG_STATUS, ENABLE_PM, inscriptionCreationOpenForYoungs } from "./utils";
 import Zammad from "./components/Zammad";
 import GoogleTags from "./components/GoogleTags";
 import { toastr } from "react-redux-toastr";
@@ -140,7 +140,10 @@ const Espace = () => {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
     return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/inscription" }} />;
   }
-  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status)) return <Redirect to="/inscription/coordonnees" />;
+  const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status);
+
+  if (!inscriptionCreationOpenForYoungs(young?.cohort) && youngInProcessInscription) return <Redirect to="/inscription" />;
+  if (youngInProcessInscription) return <Redirect to="/inscription/coordonnees" />;
 
   return (
     <>

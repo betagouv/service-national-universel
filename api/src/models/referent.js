@@ -46,6 +46,13 @@ const Schema = new mongoose.Schema({
       description: "Mot de passe de l'utilisateur",
     },
   },
+  loginAttempts: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "tentative de connexion. Max 15",
+    },
+  },
   acceptCGU: {
     type: String,
     enum: ["true", "false"],
@@ -213,7 +220,7 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
-  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires"],
+  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/loginAttempts"],
 });
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 

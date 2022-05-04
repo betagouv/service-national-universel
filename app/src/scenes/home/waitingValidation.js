@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { HeroContainer, Hero, Content, Alert, WhiteButton } from "../../components/Content";
-import { YOUNG_STATUS, inscriptionCreationAndModificationOpenForYoungs, translate } from "../../utils";
+import { YOUNG_STATUS, inscriptionModificationOpenForYoungs, translate } from "../../utils";
 import styled from "styled-components";
 import plausibleEvent from "../../services/plausible";
 
@@ -37,7 +37,7 @@ export default function WaitingValidation() {
             </p>
           </IconContainer>
           <p>Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l&apos;avancement de votre inscription.</p>
-          {young.status === YOUNG_STATUS.WAITING_VALIDATION && inscriptionCreationAndModificationOpenForYoungs(young.cohort) ? (
+          {young.status === YOUNG_STATUS.WAITING_VALIDATION && inscriptionModificationOpenForYoungs(young.cohort) ? (
             <>
               <p>Vous pouvez consulter les informations renseignées dans votre dossier jusqu&apos;à validation de votre inscription.</p>
               <Link to="/inscription/coordonnees">

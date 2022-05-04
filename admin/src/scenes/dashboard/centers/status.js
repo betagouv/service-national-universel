@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
-import { YOUNG_STATUS_COLORS, colors, getLink, ES_NO_LIMIT } from "../../../utils";
+import { YOUNG_STATUS_COLORS, colors, getLink, ES_NO_LIMIT, translateSessionStatus, SESSION_STATUS } from "../../../utils";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
 
 import api from "../../../services/api";
@@ -10,6 +10,8 @@ export default function Status({ filter }) {
   const [placesTotal, setPlacesTotal] = useState(0);
   const [placesLeft, setPlacesLeft] = useState(0);
   const [total, setTotal] = useState(0);
+  const [filterStatus, setFilterStatus] = useState({});
+  const [sessionStatus, setSessionStatus] = useState(null);
 
   useEffect(() => {
     async function initStatus() {
@@ -33,24 +35,29 @@ export default function Status({ filter }) {
         aggs: {
           placesTotal: { sum: { field: "placesTotal" } },
           placesLeft: { sum: { field: "placesLeft" } },
+          filterStatus: { terms: { field: "status.keyword" } },
         },
         size: 0,
       };
 
       if (filter.cohort?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
       const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
-
       if (responsesSession.length) {
         setPlacesTotal(responsesSession[0].aggregations.placesTotal.value);
         setPlacesLeft(responsesSession[0].aggregations.placesLeft.value);
+        setFilterStatus(responsesSession[0].aggregations.filterStatus.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}))
       }
+
     }
     initStatus();
+    const optionSessionStatus = [];
+    Object.values(SESSION_STATUS).map((status) => optionSessionStatus.push({ value: status, label: translateSessionStatus(status) }));
+    setSessionStatus(optionSessionStatus);
   }, [JSON.stringify(filter)]);
 
   return (
     <>
-      <Row>
+      <Row className=" flex items-center">
         <Col md={6} xl={6}>
           <Link to={getLink({ base: `/centre`, filter })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
@@ -61,6 +68,20 @@ export default function Status({ filter }) {
               </CardValueWrapper>
             </Card>
           </Link>
+        </Col>
+        <Col>
+          {sessionStatus?.map((status) =>
+            <div key={status.value} className="w-1/3 mb-1">
+              <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"${status.value}"%5D`] })}>
+                <div className="flex justify-between bg-white px-3 py-2 rounded-md shadow-sm cursor-pointer hover:scale-105">
+                  <div className="font-bold">{status.label}</div>
+                  <div className="text-base text-coolGray-400">
+                    {filterStatus[status.value] || 0}
+                  </div>
+                </div>
+              </Link>
+            </div>
+          )}
         </Col>
       </Row>
       <Row>

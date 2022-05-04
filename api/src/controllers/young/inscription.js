@@ -230,7 +230,9 @@ router.put("/availability", passport.authenticate("young", { session: false, fai
       cohort: Joi.string()
         .trim()
         .required()
-        .valid(...sessionsId),
+        // We have to add an invalid cohort to trigger error when no cohort is available.
+        // Because valid() with no params *is* valid.
+        .valid(...(sessionsId.length ? sessionsId : ["INVALID_COHORT"])),
     }).validate(req.body);
 
     if (error) {

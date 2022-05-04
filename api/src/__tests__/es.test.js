@@ -4,7 +4,7 @@ const request = require("supertest");
 
 // This part should be done at the beginning (before require models or anything else.).
 process.env.ES_ENDPOINT = "http://localhost:9200";
-jest.mock("@selego/mongoose-elastic", () => () => () => {});
+jest.mock("@selego/mongoose-elastic", () => () => () => { });
 jest.mock("@elastic/elasticsearch", () => ({
   Client: jest.fn().mockImplementation(() => {
     return {
@@ -33,6 +33,11 @@ jest.setTimeout(10_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+
+jest.mock("../utils", () => ({
+  ...jest.requireActual("../utils"),
+  isReferent: (user) => Boolean(user.role),
+}));
 
 const matchAll = { query: { match_all: {} } };
 
@@ -372,11 +377,7 @@ describe("Es", () => {
       res = await msearch("referent", buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(200);
       expect(getFilter()[0].terms["role.keyword"]).toStrictEqual([ROLES.RESPONSIBLE, ROLES.SUPERVISOR]);
-      expect(getFilter()[1].terms["structureId.keyword"]).toStrictEqual([
-        structure._id.toString(),
-        parent._id.toString(),
-        anotherStructure._id.toString(),
-      ]);
+      expect(getFilter()[1].terms["structureId.keyword"]).toStrictEqual([structure._id.toString(), parent._id.toString(), anotherStructure._id.toString()]);
 
       passport.user = previousUser;
     });
@@ -498,7 +499,7 @@ describe("Es", () => {
       passport.user.role = ROLES.ADMIN;
     });
   */
- 
+
     it("should filter region for referent region", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.REFERENT_REGION;

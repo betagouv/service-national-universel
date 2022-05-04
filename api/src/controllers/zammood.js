@@ -68,6 +68,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       .unknown()
       .validate(obj);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
     const { subject, message } = value;
     const userAttributes = await getUserAttributes(req.user);
     const response = await zammood.api("/v0/message", {
@@ -176,6 +177,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
   }
 });
 
+
 router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const userAttributes = await getUserAttributes(req.user);
@@ -246,6 +248,19 @@ const getUserAttributes = async (user) => {
     if (user.role === ROLES.HEAD_CENTER) {
       userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
     }
+    if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) {
+        userAttributes.push({
+          name: "lien vers équipe départementale",
+          value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${user.department}%22%5D&ROLE=%5B%22referent_department%22%5D`,
+        });
+        if (user.subRole) userAttributes.push({ name: "fonction", value: user.subRole });
+      }
+      if (user.role === ROLES.REFERENT_DEPARTMENT) {
+        userAttributes.push({
+          name: "lien vers équipe régionale",
+          value: `${ADMIN_URL}/user?REGION=%5B%22${user.region}%22%5D&ROLE=%5B%22referent_region%22%5D`,
+        });
+      }
   }
   return userAttributes;
 }
