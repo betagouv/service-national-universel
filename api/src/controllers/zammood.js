@@ -194,10 +194,6 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
       }),
     });
     if (!response.ok) slack.error({ title: "Create message Zammood", text: JSON.stringify(response.code) });
-    else if (isYoung(req.user && subject.includes("J'ai une question"))) {
-      const isNotified = await notifyReferent(response.data, req.body.message);
-      if (!isNotified) slack.error({ title: "Notify referent new message to zammood", text: JSON.stringify(response.code) });
-    }
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
