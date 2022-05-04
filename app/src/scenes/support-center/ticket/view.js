@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById, translateState, translate } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById, translateState, translate, htmlCleaner } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -40,7 +40,7 @@ export default function TicketView(props) {
           fromMe: young.lastName === message.authorLastName && young.firstName === message.authorFirstName,
           from: `${message.authorFirstName} ${message.authorLastName}`,
           date: formatStringLongDate(message.createdAt),
-          content: message.text,
+          content: htmlCleaner(message.text),
           createdAt: message.createdAt,
         };
       }).filter((message) => message !== undefined);
