@@ -16,7 +16,7 @@ export default function CenterIndex() {
       <Route path="/centre/nouveau" component={Edit} />
       <Route path="/centre/:id/edit" component={Edit} />
       <Route path="/centre/:id/:sessionId/equipe" component={Team} />
-      <Route path="/centre/:id/:sessionId/volontaires" component={Youngs} />
+      <Route path="/centre/:id/:sessionId/:currentTab" component={Youngs} />
       <Route path="/centre/:id" component={View} />
       <Route path="/centre" component={List} />
     </Switch>

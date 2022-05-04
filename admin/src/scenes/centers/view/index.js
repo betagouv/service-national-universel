@@ -160,7 +160,7 @@ export default function Index({ ...props }) {
         <div className="text-lg font-medium mb-1 text-gray-900">Taux d&apos;occupation</div>
         <div className="flex gap-4">
           {/* barre */}
-          <div className="flex flex-col justify-end w-9 h-[100px] bg-gray-100 rounded-lg overflow-hidden">
+          <div className="flex flex-col justify-end w-9 h-[100px] bg-gray-200 rounded-lg overflow-hidden">
             <div className={`flex justify-center items-center w-9 ${height} ${bgColor} rounded-lg text-white font-bold text-xs`}>{Math.floor(occupationPercentage)}%</div>
           </div>
           {/* nombres */}
@@ -173,7 +173,7 @@ export default function Index({ ...props }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-gray-100" />
+              <div className="h-2 w-2 rounded-full bg-gray-200" />
               <div>
                 <div className="text-xs font-normal">Place libres</div>
                 <div className="text-base font-bold">{placesLeft}</div>
@@ -214,7 +214,7 @@ export default function Index({ ...props }) {
                 </div>
                 <button
                   className="px-4 py-2 rounded-md bg-snu-purple-300 text-sm text-white hover:shadow-lg"
-                  onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/volontaires`)}>
+                  onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
                   Voir les volontaires
                 </button>
               </div>
