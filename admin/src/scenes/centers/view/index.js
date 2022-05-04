@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Switch, Route, useHistory, NavLink } from "react-router-dom";
+import { Switch, Route, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
@@ -207,9 +207,11 @@ export default function Index({ ...props }) {
           center?._id && focusedSession?._id ? (
             <div className="flex gap-3">
               {/* // liste des volontaires */}
-              <div className="bg-white rounded-lg shadow-sm p-4 max-w-xl">
-                <div className="text-lg font-medium mb-1 text-gray-900">Liste des volontaires</div>
-                <div className="text-sm font-normal text-gray-400 mb-3">Accès à la liste des volontaires affectés, au tableau de pointage...</div>
+              <div className="flex flex-col justify-between items-start bg-white rounded-lg shadow-sm p-4 max-w-xl">
+                <div>
+                  <div className="text-lg font-medium mb-1 text-gray-900">Liste des volontaires</div>
+                  <div className="text-sm font-normal text-gray-400 mb-3">Accès à la liste des volontaires affectés, au tableau de pointage...</div>
+                </div>
                 <button
                   className="px-4 py-2 rounded-md bg-snu-purple-300 text-sm text-white hover:shadow-lg"
                   onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/volontaires`)}>
@@ -221,15 +223,15 @@ export default function Index({ ...props }) {
               <OccupationCard occupationPercentage={occupationPercentage} placesTotal={focusedSession.placesTotal} placesLeft={focusedSession.placesLeft} />
 
               {/* // équipe */}
-              <div className="bg-white rounded-lg shadow-sm p-4 max-w-xl">
-                <div className="flex justify-between">
+              <div className="flex flex-col justify-between items-start bg-white rounded-lg shadow-sm p-4 max-w-xl">
+                <div>
                   <div className="text-lg font-medium mb-1 text-gray-900">L&apos;équipe</div>
+                  <div className="text-sm font-normal text-gray-400 mb-3">Les coordonnées du chef de centre, du cadre spécialisé, de compagnie...</div>
                 </div>
-                <div className="text-sm font-normal text-gray-400 mb-3">Les coordonnées du chef de centre, du cadre spécialisé, de compagnie...</div>
                 <button
                   className="px-4 py-2 rounded-md border-[1px] border-snu-purple-300 text-sm text-snu-purple-300 hover:shadow-lg hover:text-white hover:bg-snu-purple-300"
                   // todo screen equipe
-                  onClick={() => {}}>
+                  onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/equipe`)}>
                   Voir l&apos;équipe
                 </button>
               </div>

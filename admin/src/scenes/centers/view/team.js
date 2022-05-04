@@ -4,13 +4,27 @@ import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Formik, Field } from "formik";
-import { colors, CENTER_ROLES } from "../../../utils";
+import { useParams } from "react-router";
 
+import { colors, CENTER_ROLES } from "../../../utils";
 import { Box } from "../../../components/box";
 import api from "../../../services/api";
 import BinSVG from "../../../assets/bin.svg";
 
-export default function Team({ focusedSession, deleteTeamate, addTeamate }) {
+export default function Team({ focusedSession: focusedSessionfromProps, deleteTeamate, addTeamate }) {
+  const { sessionId } = useParams();
+  const [focusedSession, setFocusedSession] = useState(focusedSessionfromProps);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    (async () => {
+      const { data } = await api.get(`/session-phase1/${sessionId}`);
+      setFocusedSession(data);
+    })();
+  }, [sessionId]);
+
+  if (!focusedSession) return null;
+
   return (
     <Box>
       <Wrapper gridTemplateColumns="repeat(2,1fr)" style={{ background: "linear-gradient(#E5E4E8,#E5E4E8) center/1px 100% no-repeat" }}>
