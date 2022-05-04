@@ -492,7 +492,7 @@ const completeRules = () => {
         </p>
         <p className="pt-6 pb-2">Tableau indicatif des sanctions (non exhaustif)</p>
         <div className="flex justify-center">
-          <img className="md:max-w-2xl" src={require("../../../assets/tabRulesyoung.png")} />
+          <img className="md:max-w-2xl" src={require("../../../assets/tabRulesYoung.png")} />
         </div>
       </div>
     </div>
