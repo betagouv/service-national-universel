@@ -645,9 +645,14 @@ function validatePhase1Document(phase1document, key) {
     case "rules":
       return Joi.object({
         rulesYoung: Joi.string().trim().required().valid("true"),
-        rulesParent1: Joi.string().trim().required().valid("true"),
-        rulesParent2: Joi.string().trim().valid("true"),
-        rulesFiles: Joi.array().items(Joi.string().required()).required().min(1),
+      }).validate(phase1document);
+    case "agreement":
+      return Joi.object({
+        youngPhase1Agreement: Joi.string().trim().required().valid("true"),
+      }).validate(phase1document);
+    case "cohesionStayMedical":
+      return Joi.object({
+        cohesionStayMedicalFileDownload: Joi.string().trim().required().valid("true"),
       }).validate(phase1document);
   }
 }

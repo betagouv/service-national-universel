@@ -876,7 +876,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const keys = ["cohesionStayMedical", "autoTestPCR", "imageRight", "rules"];
+    const keys = ["cohesionStayMedical", "autoTestPCR", "imageRight", "rules", "agreement"];
     const { error: documentError, value: document } = Joi.string()
       .required()
       .valid(...keys)
@@ -886,20 +886,15 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    let values = {};
-    if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
-      const { error: bodyError, value: tempValue } = validatePhase1Document(req.body, document);
-      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      values = tempValue;
-      values[`${document}FilesStatus`] = "WAITING_VERIFICATION";
-      values[`${document}FilesComment`] = undefined;
-    } else if (document === "cohesionStayMedical") {
-      values.cohesionStayMedicalFileDownload = "true";
-    } else {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { error: bodyError, value } = validatePhase1Document(req.body, document);
+    if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
+
+    if (["autoTestPCR", "imageRight"].includes(document)) {
+      value[`${document}FilesStatus`] = "WAITING_VERIFICATION";
+      value[`${document}FilesComment`] = undefined;
     }
 
-    young.set(values);
+    young.set(value);
     await young.save({ fromUser: req.user });
 
     if (["autoTestPCR", "imageRight", "rules"].includes(document)) {

@@ -921,7 +921,7 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let value;
-    if (["autoTestPCR", "imageRight", "rules"].includes(document)) {
+    if (["autoTestPCR", "imageRight"].includes(document)) {
       const { error: bodyError, value: tempValue } = Joi.object({
         [`${document}FilesStatus`]: Joi.string()
           .trim()
@@ -940,6 +940,12 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
       const { error: bodyError, value: tempValue } = Joi.object({
         cohesionStayMedicalFileReceived: Joi.string().trim().required().valid("true", "false"),
         cohesionStayMedicalFileDownload: Joi.string().trim().required().valid("true", "false"),
+      }).validate(req.body);
+      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
+      value = tempValue;
+    } else if (document === "rules") {
+      const { error: bodyError, value: tempValue } = Joi.object({
+        rulesYoung: Joi.string().trim().required().valid("true", "false"),
       }).validate(req.body);
       if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
       value = tempValue;
