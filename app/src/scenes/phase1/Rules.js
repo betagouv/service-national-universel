@@ -14,9 +14,8 @@ import { SuccessMessage, RadioLabel, Footer, FormRow, Title, Logo, BackButton, C
 import LoadingButton from "../../components/buttons/LoadingButton";
 import styled from "styled-components";
 import CloseSvg from "../../assets/Close";
-import DownloadButton from "./components/DownloadButton";
 import { environment } from "../../config";
-import RulesDetail from "./components/rulesDetail";
+import RulesDetail from "./components/RulesDetail";
 
 export default function Rules({ isOpen, onCancel, correction }) {
   const young = useSelector((state) => state.Auth.young);
