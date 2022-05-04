@@ -102,16 +102,16 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           <div />
         ) : (
           <>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-              <MailCloseIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+              <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
               <div>{newTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-              <MailOpenIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+              <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
               <div>{openedTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-              <SuccessIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+              <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
               <div>{closedTickets}</div>
             </div>
           </>
@@ -139,16 +139,16 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           <div />
         ) : (
           <>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-              <MailCloseIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+              <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
               <div>{newTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-              <MailOpenIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+              <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
               <div>{openedTickets}</div>
             </div>
-            <div className="flex justify-center content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-              <SuccessIcon />
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+              <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
               <div>{closedTickets}</div>
             </div>
           </>
@@ -196,16 +196,16 @@ const Drawer = (props) => {
 
   useEffect(() => {
     try {
-      let tags = [];
-      if (user?.role === ROLES.ADMIN) tags.push(["AGENT_Startup_Support"]);
-      else if (user?.role === ROLES.REFERENT_DEPARTMENT) tags.push(["AGENT_Référent_Département", `DEPARTEMENT_${user.department}`]);
-      else if (user?.role === ROLES.REFERENT_REGION) tags.push(["AGENT_Référent_Région", `REGION_${user.region}`]);
+      let query = undefined;
+      if (user.role === ROLES.ADMIN) query = {};
+      else if (user.role === ROLES.REFERENT_DEPARTMENT) query = { department: user.department, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
+      else if (user.role === ROLES.REFERENT_REGION) query = { region: department2region[user.region], subject: "J'ai une question", role: "young", canal: "PLATFORM" };
 
-      const getTickets = async (tags) => {
-        const { data } = await api.post(`/zammad-support-center/ticket/search-by-tags?withArticles=true`, { tags });
+      const getTickets = async (query) => {
+        const { ok, data } = await api.post(`/zammood/tickets`, query);
         props.dispatchTickets(data);
       };
-      if (tags.length) getTickets(tags);
+      if (query) getTickets(query);
     } catch (e) {
       console.log("Oups, une erreur s'est produite.");
     }

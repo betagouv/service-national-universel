@@ -13,8 +13,8 @@ import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
 
 const updateHeightElement = (e) => {
-  e.target.style.height = "inherit";
-  e.target.style.height = `${e.target.scrollHeight}px`;
+  e.style.height = "inherit";
+  e.style.height = `${e.scrollHeight}px`;
 };
 
 export default function TicketMessage({ ticket: propTicket }) {
@@ -23,87 +23,65 @@ export default function TicketMessage({ ticket: propTicket }) {
   const [messages, setMessages] = useState([]);
   const user = useSelector((state) => state.Auth.user);
   const [sending, setSending] = useState(false);
+  const inputRef = React.useRef();
 
-  const updateTicket = async (id) => {
+
+  const getTicket = async (id) => {
     try {
-      if (!id) {
-        return setTicket(undefined);
-      }
-      const response = await api.get(`/zammad-support-center/ticket/${id}`);
-      if (response.error || !response.ok) return setTicket(propTicket);
-      setTicket(response.data);
-      const arr = response.data?.articles
-        ?.filter((article) => !article.internal)
-        ?.map((article) => ({
-          id: article.id,
-          fromMe: user.email === article.created_by,
-          from: article.from,
-          date: formatStringLongDate(article.created_at),
-          content: article.body,
-          createdAt: article.created_at,
-        }));
-      setMessages(arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      if (!id) return setTicket(undefined);
       const { data, ok } = await api.get(`/zammood/ticket/${id}?`);
       if (!ok) return;
-      const zammoodMessages = data?.map((message) => {
-        if (!message.clientId) {
-          return {
-            id: message._id,
-            fromMe: user.lastName === message.authorLastName && user.firstName === message.authorFirstName,
-            from: `${message.authorFirstName} ${message.authorLastName}`,
-            date: formatStringLongDate(message.createdAt),
-            content: message.text,
-            createdAt: message.createdAt,
-          };
-        }
-      });
-      setMessages([...arr, ...zammoodMessages].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).filter(m => m !== undefined));
+      setTicket(data.ticket);
+      const zammoodMessages = data?.messages.map((message) => {
+        return {
+          id: message._id,
+          fromMe: user.lastName === message.authorLastName && user.firstName === message.authorFirstName,
+          from: `${message.authorFirstName} ${message.authorLastName}`,
+          date: formatStringLongDate(message.createdAt),
+          content: message.text,
+          createdAt: message.createdAt,
+        };
+      }).filter((message) => message !== undefined);
+      setMessages(zammoodMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
       setTicket(undefined);
     }
   };
 
   useEffect(() => {
-    updateTicket(propTicket?.id);
-    // const ping = setInterval(() => updateTicket(propTicket?.id), 5000);
-    // return () => {
-    //   clearInterval(ping);
-    // };
+    getTicket(propTicket?._id);
   }, [propTicket]);
 
   const send = async () => {
     setSending(true);
+    const id = ticket?._id;
     if (!message) return setSending(false);
-    // then send the message
-    // todo : we may be able to reset the status in only one call
-    // but im not sure the POST for a message can take state in its body
-    await api.put(`/zammad-support-center/ticket/${ticket?.id}`, { message, ticket });
-    // reset ticket and input message
-    const { ok, code } = await api.post(`/zammood/ticket/${ticket?.id}/message`, { message });
-    if (!ok) console.log("ERROR", code);
+    const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message });
+    if (!ok) toastr.error("Oups, une erreur est survenue", translate(code));
     setMessage("");
-    updateTicket(ticket?.id);
+    updateHeightElement(inputRef?.current);
+    getTicket(id);
     setSending(false);
   };
 
   if (ticket === null) return <Loader />;
 
   const displayState = (state) => {
-    if (state === "open")
+    if (state === "OPEN")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
-    if (state === "closed")
+    if (state === "CLOSED")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
-    if (state === "new")
+    if (state === "NEW")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
@@ -121,11 +99,11 @@ export default function TicketMessage({ ticket: propTicket }) {
           <Heading>
             <div>
               <h1>
-                Demande #{ticket?.number} - {ticket?.title}
+                Demande #{ticket?.number} - {ticket?.subject}
               </h1>
-              <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+              <Details title="Crée le" content={ticket?.createdAt && formatStringLongDate(ticket?.createdAt)} />
             </div>
-            {displayState(ticketStateNameById(ticket?.state_id))}
+            {displayState(ticket?.status)}
           </Heading>
           <Messages>
             {messages?.map((message) => (
@@ -135,12 +113,13 @@ export default function TicketMessage({ ticket: propTicket }) {
           </Messages>
           <InputContainer>
             <textarea
+              ref={inputRef}
               row={2}
               placeholder="Mon message..."
               className="form-control"
               onChange={(e) => {
                 setMessage(e.target.value);
-                updateHeightElement(e);
+                updateHeightElement(e.target);
               }}
               value={message}
             />

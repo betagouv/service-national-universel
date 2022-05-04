@@ -16,20 +16,17 @@ export default function TicketInfos({ ticket }) {
 
   useEffect(() => {
     (async () => {
-      if (!ticket?.articles?.length) return;
-      const email = ticket.articles[0].created_by;
-      const { tags } = await api.get(`/zammad-support-center/ticket/${ticket.id}/tags`);
-      if (tags?.includes("EMETTEUR_Volontaire")) {
-        const { data } = await api.get(`/young?email=${email}`);
-        setUser(data);
-        setTag("EMETTEUR_Volontaire");
-      } else if (tags?.find((tag) => tag.includes("EMETTEUR"))) {
-        const response = await api.get(`/referent?email=${email}`);
-        setUser(response.data);
-        setTag("EMETTEUR_other");
-      } else {
-        const response = await api.get(`/referent?email=${email}`);
-        setUser(response.data);
+      const email = ticket?.contactEmail;
+      if (ticket) {
+        if (ticket?.contactGroup === "young") {
+          const { data } = await api.get(`/young?email=${email}`);
+          setUser(data);
+          setTag("EMETTEUR_Volontaire");
+        }
+        else {
+          const response = await api.get(`/referent?email=${email}`);
+          setUser(response.data);
+        }
       }
     })();
   }, [ticket]);
@@ -45,9 +42,7 @@ export default function TicketInfos({ ticket }) {
   }, [user]);
 
   const resolveTicket = async () => {
-    const response = await api.put(`/zammad-support-center/ticket/${ticket.id}`, {
-      state: "closed",
-    });
+    const response = await api.put(`/zammood/ticket/${ticket._id}`, { status: "CLOSED" })
     if (!response.ok) console.log(response.status, "error");
     if (response.ok) toastr.success("Ticket résolu !");
     history.go(0);
@@ -131,7 +126,7 @@ export default function TicketInfos({ ticket }) {
         <div />
       ) : (
         <>
-          {ticketStateNameById(ticket?.state_id) !== "closed" ? (
+          {ticket?.status !== "CLOSED" ? (
             <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
               <button className="button" onClick={resolveTicket}>
                 Archiver la demande

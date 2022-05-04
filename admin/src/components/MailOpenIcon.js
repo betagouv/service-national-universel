@@ -3,8 +3,8 @@ import styled from "styled-components";
 
 export default function MailOpenIcon({ ...props }) {
   return (
-    <div className=" flex items-center rounded-lg align-center w-8"{...props}>
-      <svg className ="align-center w-5 h-5 fill-transparent" viewBox="-2 -2 20 20"  xmlns="http://www.w3.org/2000/svg">
+    <MailContainer {...props}>
+      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           fillRule="evenodd"
           clipRule="evenodd"
@@ -12,7 +12,15 @@ export default function MailOpenIcon({ ...props }) {
           fill="white"
         />
       </svg>
-    </div>
+    </MailContainer>
   );
 }
 
+const MailContainer = styled.div`
+  svg {
+    height: 17px;
+  }
+  svg path {
+    fill: ${({ color }) => `${color}`};
+  }
+`;

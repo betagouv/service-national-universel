@@ -31,35 +31,20 @@ export default function TicketView(props) {
     try {
       const id = props.match?.params?.id;
       if (!id) return setTicket(null);
-      const response = await api.get(`/zammad-support-center/ticket/${id}`);
-      if (response.error || !response.ok) return setTicket(null);
-      setTicket(response.data);
-      const arr = response.data?.articles
-        ?.filter((article) => !article.internal)
-        ?.map((article) => ({
-          id: article.id,
-          fromMe: young.email === article.created_by,
-          from: article.from,
-          date: formatStringLongDate(article.created_at),
-          content: article.body,
-          createdAt: article.created_at,
-        }));
-      setMessages(arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
       const { data, ok } = await api.get(`/zammood/ticket/${id}?`);
       if (!ok) return;
-      const zammoodMessages = data?.map((message) => {
-        if (!message.clientId) {
-          return {
-            id: message._id,
-            fromMe: young.lastName === message.authorLastName && young.firstName === message.authorFirstName,
-            from: `${message.authorFirstName} ${message.authorLastName}`,
-            date: formatStringLongDate(message.createdAt),
-            content: message.text,
-            createdAt: message.createdAt,
-          };
-        }
+      setTicket(data.ticket);
+      const zammoodMessages = data?.messages.map((message) => {
+        return {
+          id: message._id,
+          fromMe: young.lastName === message.authorLastName && young.firstName === message.authorFirstName,
+          from: `${message.authorFirstName} ${message.authorLastName}`,
+          date: formatStringLongDate(message.createdAt),
+          content: message.text,
+          createdAt: message.createdAt,
+        };
       }).filter((message) => message !== undefined);
-      setMessages([...arr, ...zammoodMessages].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      setMessages(zammoodMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
       setTicket(null);
     }
@@ -73,7 +58,6 @@ export default function TicketView(props) {
     setSending(true);
     if (!message) return setSending(false);
     const id = props.match?.params?.id;
-    await api.put(`/zammad-support-center/ticket/${id}`, { message, ticket });
     const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message });
     if (!ok) toastr.error("Oups, une erreur est survenue", translate(code));
     setMessage("");
@@ -85,24 +69,31 @@ export default function TicketView(props) {
   if (ticket === undefined) return <Loader />;
 
   const displayState = (state) => {
-    if (state === "open")
+    if (state === "OPEN")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
-    if (state === "closed")
+    if (state === "CLOSED")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
-    if (state === "new")
+    if (state === "NEW")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+          {translateState(state)}
+        </StateContainer>
+      );
+    if (state === "PENDING")
+      return (
+        <StateContainer>
+          <MailCloseIcon color="#6495ED" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
@@ -119,11 +110,11 @@ export default function TicketView(props) {
             <Heading>
               <div>
                 <h1>
-                  Demande #{ticket?.number} - {ticket?.title}
+                  Demande #{ticket?.number} - {ticket?.subject}
                 </h1>
-                <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+                <Details title="Crée le" content={ticket?.createdAt && formatStringLongDate(ticket?.createdAt)} />
               </div>
-              {displayState(ticketStateNameById(ticket?.state_id))}
+              {displayState(ticket?.status)}
             </Heading>
             <Messages>
               {messages?.map((message) => (

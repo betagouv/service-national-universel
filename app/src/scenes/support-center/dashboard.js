@@ -45,9 +45,9 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const response = await api.get("/zammad-support-center/ticket?withArticles=true");
-        if (!response.ok) return console.log(response);
-        setUserTickets(response.data);
+        const { ok, data } = await api.get(`/zammood/tickets`);
+        if (!ok) return setUserTickets([]);
+        setUserTickets(data);
       } catch (error) {
         console.log(error);
       }
@@ -55,30 +55,33 @@ export default function Dashboard() {
     fetchTickets();
   }, []);
 
-  const getLastContactName = (array) => {
-    const lastTicketFromAgent = array?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))?.find((e) => e.created_by !== young.email);
-    return lastTicketFromAgent?.from;
-  };
 
   const displayState = (state) => {
-    if (state === "open")
+    if (state === "OPEN")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
-    if (state === "closed")
+    if (state === "CLOSED")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
-    if (state === "new")
+    if (state === "NEW")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+          {translateState(state)}
+        </StateContainer>
+      );
+    if (state === "PENDING")
+      return (
+        <StateContainer>
+          <MailCloseIcon color="#6495ED" style={{ margin: 0, padding: "5px" }} />
           {translateState(state)}
         </StateContainer>
       );
@@ -164,14 +167,14 @@ export default function Dashboard() {
         {!userTickets ? <Loader /> : null}
         {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
         {userTickets
-          ?.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+          ?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
           ?.map((ticket) => (
-            <NavLink to={`/besoin-d-aide/ticket/${ticket.id}`} key={ticket.id} className="ticket">
+            <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="ticket">
               <p>{ticket.number}</p>
-              <p>{ticket.title}</p>
-              <p>{getLastContactName(ticket?.articles)}</p>
-              <p>{displayState(ticketStateNameById(ticket.state_id))}</p>
-              <p className="ticket-date">{dayjs(new Date(ticket.updated_at)).fromNow()}</p>
+              <p>{ticket.subject}</p>
+              <p>{ticket.agentEmail}</p>
+              <p>{displayState(ticket.status)}</p>
+              <p className="ticket-date">{dayjs(new Date(ticket.updatedAt)).fromNow()}</p>
             </NavLink>
           ))}
       </List>
@@ -203,8 +206,7 @@ const Container = styled.div`
     grid-template-rows: 2fr 1fr;
     text-align: center;
   }
-  ${
-    "" /* .help-section-text {
+  ${"" /* .help-section-text {
     flex: 3;
   } */
   }
