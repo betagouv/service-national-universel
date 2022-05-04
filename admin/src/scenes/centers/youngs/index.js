@@ -8,7 +8,7 @@ import { environment } from "../../../config";
 export default function CenterIndex() {
   useDocumentTitle("Centres");
 
-  if (environment !== "production") return null;
+  if (environment === "production") return null;
 
   return (
     <Switch>
