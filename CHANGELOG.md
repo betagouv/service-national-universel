@@ -1,3 +1,26 @@
+# [1.80.0](https://github.com/betagouv/service-national-universel/compare/v1.79.0...v1.80.0) (2022-05-04)
+
+
+### Bug Fixes
+
+* canModifyReferent ([6977d83](https://github.com/betagouv/service-national-universel/commit/6977d837b87b65a7d86bb797ed65bb82ff5a449b))
+* center ui ([c43d774](https://github.com/betagouv/service-national-universel/commit/c43d774b65af03ceabb915744039ce7d17a95822))
+* centre affichage membres équipe ([16b18d5](https://github.com/betagouv/service-national-universel/commit/16b18d5225c1f4cec8b92e54608d6c2d1b8329e3))
+* equipe centre ([32b995f](https://github.com/betagouv/service-national-universel/commit/32b995fbbfb44c01c5e02a8e90c677d19b092aac))
+* htmlCleaner messagerie ([1c77247](https://github.com/betagouv/service-national-universel/commit/1c772470d1af6966e806d3138f369e40da6bdd58))
+* translate state tickets ([e5f8dfd](https://github.com/betagouv/service-national-universel/commit/e5f8dfdae111973eff7aa673defdb25f4dfcf248))
+* url zammood ([5ec20cc](https://github.com/betagouv/service-national-universel/commit/5ec20cc698421d50fce7661b88ee355d0e52c1b6))
+* view center ([339a801](https://github.com/betagouv/service-national-universel/commit/339a80150c758bf0629ca1ee383942b2737a60e8))
+* **api:** includes zammood ([92a4e7a](https://github.com/betagouv/service-national-universel/commit/92a4e7a545384b1979b301742eb6bd98af746127))
+* **api:** notify referent ([376924c](https://github.com/betagouv/service-national-universel/commit/376924ccb5e251067bf20b77ca3f5097c863b04a))
+* **api:** remove notif update ticket support ([20e8077](https://github.com/betagouv/service-national-universel/commit/20e80771954f393971b158448d135442de2746f0))
+
+
+### Features
+
+* **admin:** font Marianne ([#1494](https://github.com/betagouv/service-national-universel/issues/1494)) ([cf6a44b](https://github.com/betagouv/service-national-universel/commit/cf6a44b3bfc3f0e17d778e79c3a002dd0b03e141))
+* pointage sejour - 1 ([#1544](https://github.com/betagouv/service-national-universel/issues/1544)) ([622f06f](https://github.com/betagouv/service-national-universel/commit/622f06f38486211bef71f700e15f6718aaabec85))
+
 # [1.79.0](https://github.com/betagouv/service-national-universel/compare/v1.78.0...v1.79.0) (2022-05-03)
 
 
