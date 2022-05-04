@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById, translateState, ROLES } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById, translateState, htmlCleaner } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -26,9 +26,6 @@ export default function View(props) {
   const user = useSelector((state) => state.Auth.user);
   const inputRef = React.useRef();
 
-
-
-
   const getTicket = async () => {
     try {
       const id = props.match?.params?.id;
@@ -36,16 +33,18 @@ export default function View(props) {
       const { data, ok } = await api.get(`/zammood/ticket/${id}?`);
       if (!ok) return;
       setTicket(data.ticket);
-      const zammoodMessages = data?.messages.map((message) => {
-        return {
-          id: message._id,
-          fromMe: user.lastName === message.authorLastName && user.firstName === message.authorFirstName,
-          from: `${message.authorFirstName} ${message.authorLastName}`,
-          date: formatStringLongDate(message.createdAt),
-          content: message.text,
-          createdAt: message.createdAt,
-        };
-      }).filter((message) => message !== undefined);
+      const zammoodMessages = data?.messages
+        .map((message) => {
+          return {
+            id: message._id,
+            fromMe: user.lastName === message.authorLastName && user.firstName === message.authorFirstName,
+            from: `${message.authorFirstName} ${message.authorLastName}`,
+            date: formatStringLongDate(message.createdAt),
+            content: htmlCleaner(message.text),
+            createdAt: message.createdAt,
+          };
+        })
+        .filter((message) => message !== undefined);
       setMessages(zammoodMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
       setTicket(null);
@@ -55,8 +54,6 @@ export default function View(props) {
   useEffect(() => {
     getTicket();
   }, []);
-
-
 
   const send = async () => {
     setSending(true);
