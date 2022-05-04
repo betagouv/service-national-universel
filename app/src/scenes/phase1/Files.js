@@ -23,9 +23,8 @@ export default function DocumentsPhase1({ young }) {
       let nb = 0;
       if (young.imageRightFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
       if (young.cohesionStayMedicalFileReceived === "true") nb++;
-      if (young.rulesFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
+      if (young.rulesYoung === "true") nb++;
       if (young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
-      console.log(young.cohesionStayMedicalFileReceived, young.imageRightFilesStatus, young.autoTestPCRFilesStatus, young.rulesFilesStatus);
       setDocuments(nb);
     }
   }, []);
@@ -41,9 +40,9 @@ export default function DocumentsPhase1({ young }) {
             <FileCard
               name="Règlement intérieur"
               icon="reglement"
-              filled={young.rulesFilesStatus !== "TO_UPLOAD"}
-              color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.rulesFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
-              status={translateFileStatusPhase1(young.rulesFilesStatus)}
+              filled={young.rulesYoung === "true"}
+              color={young.rulesYoung !== "true" ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
+              status={young.rulesYoung === "true" ? "Accepté" : "À renseigner"}
               onClick={() => setIsOpenReg(true)}
             />
             <FileCard
@@ -76,7 +75,7 @@ export default function DocumentsPhase1({ young }) {
         </>
       ) : null}
       <MedicalFile isOpen={isOpenMed} onCancel={() => setIsOpenMed(false)} />
-      <Rules isOpen={isOpenReg} onCancel={() => setIsOpenReg(false)} correction={young.rulesFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.rulesFilesComment : ""} />
+      <Rules isOpen={isOpenReg} onCancel={() => setIsOpenReg(false)} />
       <ImageRight
         isOpen={isOpenIm}
         onCancel={() => setIsOpenIm(false)}

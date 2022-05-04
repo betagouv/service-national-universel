@@ -16,6 +16,7 @@ import styled from "styled-components";
 import CloseSvg from "../../assets/Close";
 import DownloadButton from "./components/DownloadButton";
 import { environment } from "../../config";
+import RulesDetail from "./components/rulesDetail";
 
 export default function Rules({ isOpen, onCancel, correction }) {
   const young = useSelector((state) => state.Auth.young);
@@ -32,16 +33,9 @@ export default function Rules({ isOpen, onCancel, correction }) {
           <ModalContainer>
             <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={onCancel} />
             <div className="w-full py-8 px-8 lg:px-20" id="imageRight">
-              <section className="flex text-center">
-                <div>
-                  <h2 className="mt-0">Téléversez votre règlement intérieur</h2>
-                  <p className="text-[#9C9C9C] my-3">
-                    Vous et {isPlural ? "vos représentants légaux" : "votre représentant légal"} devez lire et accepter les règles de fonctionnement propres aux centres du Service
-                    National Universel exposées dans le règlement intérieur ci-joint avant votre départ en séjour. Cette étape est un pré-requis au séjour de cohésion.
-                  </p>
-                </div>
-              </section>
-              {young.rulesFiles && young.rulesFiles.length && !correction ? (
+              <h2 className="mt-0 text-center mb-2">Acceptez le Règlement Intérieur</h2>
+
+              {young.rulesYoung === "true" ? (
                 <>
                   <SuccessMessage>
                     <Logo>
@@ -49,198 +43,11 @@ export default function Rules({ isOpen, onCancel, correction }) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                       </svg>
                     </Logo>
-                    Vous avez bien renseigné le document
+                    Vous avez accepté le réglement intérieur.
                   </SuccessMessage>
-                  {!showFields && (
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <VioletButton onClick={() => setShowFields(true)}>Modifier</VioletButton>
-                    </div>
-                  )}
                 </>
-              ) : null}
-              {correction && (
-                <section className="my-3 text-center bg-[#FFF4F0] rounded-md p-4">
-                  <p className="text-[#EF6737]">Corrections à apporter :</p> <br />
-                  <p className="text-gray-600">{correction}</p>
-                </section>
-              )}
-              {showFields && (
-                <>
-                  <Formik
-                    initialValues={{
-                      ...young,
-                      firstName1: young.parent1FirstName,
-                      lastName1: young.parent1LastName,
-                      firstName2: young.parent2FirstName,
-                      lastName2: young.parent2LastName,
-                    }}
-                    validateOnChange={false}
-                    validateOnBlur={false}
-                    onSubmit={async (values) => {
-                      try {
-                        setLoading(true);
-                        const { rulesYoung, rulesParent1, rulesParent2, rulesFiles } = values;
-                        const { ok, code, data: young } = await api.put("/young/phase1/rules", { rulesYoung, rulesParent1, rulesParent2, rulesFiles });
-                        setLoading(false);
-                        if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
-                        dispatch(setYoung(young));
-                        toastr.success("Mis à jour !");
-                        setShowFields(false);
-                      } catch (e) {
-                        setLoading(false);
-                        console.log(e);
-                        toastr.error("Erreur !");
-                      }
-                    }}>
-                    {({ values, handleChange, handleSubmit, errors, touched }) => (
-                      <>
-                        <section className="bg-gray-50 rounded-lg px-3 py-4 mt-2 text-center">
-                          <FormRow>
-                            <Col>
-                              <RadioLabel>
-                                <Field
-                                  id="rulesYoung"
-                                  validate={(v) => !v && requiredMessage}
-                                  type="radio"
-                                  name="rulesYoung"
-                                  value="true"
-                                  checked={values.rulesYoung === "true"}
-                                  onChange={handleChange}
-                                  className="accent-indigo-700 checked:bg-indigo-700"
-                                />
-                                <label htmlFor="rulesYoung">
-                                  Je,{" "}
-                                  <b>
-                                    {young.firstName} {young.lastName}
-                                  </b>{" "}
-                                  certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur
-                                  ci-joint.
-                                </label>
-                              </RadioLabel>
-                              <ErrorMessage errors={errors} touched={touched} name="rulesYoung" />
-                              <RadioLabel>
-                                <Field
-                                  id="rulesParent1"
-                                  validate={(v) => !v && requiredMessage}
-                                  type="radio"
-                                  name="rulesParent1"
-                                  value="true"
-                                  checked={values.rulesParent1 === "true"}
-                                  onChange={handleChange}
-                                  className="accent-indigo-700 checked:bg-indigo-700"
-                                />
-                                <label htmlFor="rulesParent1">
-                                  Je,{" "}
-                                  <b>
-                                    {young.parent1FirstName} {young.parent1LastName}
-                                  </b>{" "}
-                                  certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur
-                                  ci-joint.
-                                </label>
-                              </RadioLabel>
-                              <ErrorMessage errors={errors} touched={touched} name="rulesParent1" />
-                              {young.parent2FirstName && (
-                                <>
-                                  <RadioLabel>
-                                    <Field
-                                      id="rulesParent2"
-                                      validate={(v) => !v && requiredMessage}
-                                      type="radio"
-                                      name="rulesParent2"
-                                      value="true"
-                                      checked={values.rulesParent2 === "true"}
-                                      onChange={handleChange}
-                                    />
-                                    <label htmlFor="rulesParent2">
-                                      Je,{" "}
-                                      <b>
-                                        {young.parent2FirstName} {young.parent2LastName}
-                                      </b>{" "}
-                                      certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement
-                                      intérieur ci-joint.
-                                    </label>
-                                  </RadioLabel>
-                                  <ErrorMessage errors={errors} touched={touched} name="rulesParent2" />
-                                </>
-                              )}
-                            </Col>
-                          </FormRow>
-                        </section>
-                        <div className="noPrint">
-                          {/* @todo add with france connect */}
-                          {/* <Title>
-                    <span>Vous pouvez signer le formulaire de deux façons</span>
-                  </Title> */}
-                          <section className="flex flex-col items-start lg:flex-row lg:justify-center mt-4">
-                            {/* <BackButton>
-                            <DownloadFormButton young={values} uri="imageRight">
-                              Télécharger le formulaire pré-rempli
-                            </DownloadFormButton>
-                          </BackButton> */}
-                            <div className="bg-gray-50 rounded-lg px-2.5 py-4 sm:my-2 text-center w-full lg:w-[50%] lg:mt-0">
-                              <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/reglement_interieur_Fevrier_2022.pdf" target="_blank" rel="noreferrer">
-                                <DownloadButton text="Téléchargez le modèle à remplir" tw="mx-auto mb-2" />
-                              </a>
-                              <p className="text-sm text-gray-600 mb-3">Puis téléversez le formulaire rempli</p>
-                            </div>
-                            <DndFileInput
-                              placeholder="le formulaire"
-                              errorMessage="Vous devez téléverser le formulaire"
-                              value={values.rulesFiles}
-                              name="rulesFiles"
-                              className="lg:w-[50%] flex flex-col justify-center items-center lg:mt-0"
-                              onChange={async (e) => {
-                                setUploading(true);
-                                const res = await api.uploadFile("/young/file/rulesFiles", e.target.files);
-                                if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                                // We update it instant ( because the bucket is updated instant )
-                                toastr.success("Fichier téléversé");
-                                handleChange({ target: { value: res.data, name: "rulesFiles" } });
-                                setUploading(false);
-                              }}
-                            />
-                            <ErrorMessage errors={errors} touched={touched} name="rulesFiles" />
-                            {/* <div>OU</div>
-                    <div>FRANCE CONNECT</div> */}
-                          </section>
-                        </div>
-                        {/* <SignBox className="onlyPrint">
-                      <Row>
-                        <Col md={6}>
-                          <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
-                          <div>Fait à :</div>
-                          <div>Le :</div>
-                          <div>
-                            Signature du représentant légal n°1
-                            <br />
-                            Précédée(s) de la mention « lu et approuvé – bon pour accord »
-                          </div>
-                        </Col>
-                        <Col md={6}>
-                          <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
-                          <div>Fait à :</div>
-                          <div>Le :</div>
-                          <div>
-                            Signature du représentant légal n°2
-                            <br />
-                            Précédée(s) de la mention « lu et approuvé – bon pour accord »
-                          </div>
-                        </Col>
-                      </Row>
-                    </SignBox> */}
-                        <Footer className="noPrint">
-                          <Title />
-                          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                            <LoadingButton loading={loading} disabled={uploading} onClick={handleSubmit}>
-                              Valider le consentement
-                            </LoadingButton>
-                          </div>
-                          {Object.keys(errors).length ? <h3>Vous ne pouvez pas valider le formulaire car tous les champs ne sont pas correctement renseignés.</h3> : null}
-                        </Footer>
-                      </>
-                    )}
-                  </Formik>
-                </>
+              ) : (
+                <RulesDetail young={young} />
               )}
             </div>
           </ModalContainer>

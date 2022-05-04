@@ -1367,6 +1367,15 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  youngPhase1Agreement: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "Le volontaire a accepté les conditions de la phase 1",
+    },
+  },
+
   // TODO : clean interests
   defenseInterest: { type: String },
   defenseTypeInterest: { type: String },

@@ -18,7 +18,7 @@ export default function MedicalFile({ isOpen, onCancel }) {
   const dispatch = useDispatch();
 
   const updateDocumentInformation = async () => {
-    const { ok, data } = await api.put("/young/phase1/cohesionStayMedical");
+    const { ok, data } = await api.put("/young/phase1/cohesionStayMedical", { cohesionStayMedicalFileDownload: "true" });
     if (ok) dispatch(setYoung(data));
   };
 
