@@ -67,7 +67,7 @@ module.exports = () => {
           options: { babelrc: true },
         },
         {
-          test: /\.(gif|png|jpe?g|svg|woff|woff2|otf|ttf)$/i,
+          test: /\.(gif|png|jpe?g|svg|woff|woff2)$/i,
           exclude: /node_modules/,
           type: "asset/resource",
         },
