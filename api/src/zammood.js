@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 const environment = getEnvironment();
-let SUPPORT_URL = "http://localhost:3000";
+let SUPPORT_URL = process.env.SUPPORT_URL;
 
 if (environment === "staging") {
   SUPPORT_URL = "https://app-e08e5b05-2416-486c-ad68-2d511fadbe50.cleverapps.io";
@@ -16,6 +16,7 @@ const getCustomerIdByEmail = async (email) => {
 };
 
 const api = async (path, options = {}) => {
+  if (!SUPPORT_URL) return { ok: true, code: "ignore zammood, no support url" };
   const res = await fetch(`${SUPPORT_URL}${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", apikey: process.env.SUPPORT_APIKEY, ...(options.headers || {}) },
