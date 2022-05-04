@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById, translateState } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById, translateState, translate } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -25,23 +26,24 @@ export default function TicketMessage({ ticket: propTicket }) {
   const [sending, setSending] = useState(false);
   const inputRef = React.useRef();
 
-
   const getTicket = async (id) => {
     try {
       if (!id) return setTicket(undefined);
       const { data, ok } = await api.get(`/zammood/ticket/${id}?`);
       if (!ok) return;
       setTicket(data.ticket);
-      const zammoodMessages = data?.messages.map((message) => {
-        return {
-          id: message._id,
-          fromMe: user.lastName === message.authorLastName && user.firstName === message.authorFirstName,
-          from: `${message.authorFirstName} ${message.authorLastName}`,
-          date: formatStringLongDate(message.createdAt),
-          content: message.text,
-          createdAt: message.createdAt,
-        };
-      }).filter((message) => message !== undefined);
+      const zammoodMessages = data?.messages
+        .map((message) => {
+          return {
+            id: message._id,
+            fromMe: user.lastName === message.authorLastName && user.firstName === message.authorFirstName,
+            from: `${message.authorFirstName} ${message.authorLastName}`,
+            date: formatStringLongDate(message.createdAt),
+            content: message.text,
+            createdAt: message.createdAt,
+          };
+        })
+        .filter((message) => message !== undefined);
       setMessages(zammoodMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
       setTicket(undefined);
@@ -109,7 +111,6 @@ export default function TicketMessage({ ticket: propTicket }) {
             {messages?.map((message) => (
               <Message key={message?.id} fromMe={message?.fromMe} from={message?.from} date={message?.date} content={message?.content} />
             ))}
-
           </Messages>
           <InputContainer>
             <textarea
@@ -137,7 +138,7 @@ export default function TicketMessage({ ticket: propTicket }) {
 
 const Message = ({ from, date, content, fromMe, internal }) => {
   if (!content || !content.length) return null;
-  const text = content.replaceAll(/[\n\r]/g, "<br>")
+  const text = content.replaceAll(/[\n\r]/g, "<br>");
   return fromMe ? (
     <MessageContainer>
       <MessageBubble internal={internal} align={"right"} backgroundColor={internal ? "gold" : colors.darkPurple}>
