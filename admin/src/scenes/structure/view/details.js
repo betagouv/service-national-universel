@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate, ES_NO_LIMIT, ROLES, copyToClipboard, htmlCleaner } from "../../../utils";
+import { translate, ES_NO_LIMIT, ROLES, copyToClipboard, htmlCleaner, canDeleteResponsible } from "../../../utils";
 import StructureView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
@@ -16,8 +16,32 @@ import Badge from "../../../components/Badge";
 
 export default function DetailsView({ structure }) {
   const [referents, setReferents] = useState([]);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [parentStructure, setParentStructure] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+
+  const onClickDelete = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: () => onConfirmDelete(),
+      title: `Êtes-vous sûr(e) de vouloir supprimer le profil de ${user.firstName} ${user.lastName} ?`,
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async () => {
+    try {
+      const { ok, code } = await api.remove(`/referent/${user._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && code === "LINKED_OBJECT") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Ce profil a été supprimé.");
+      return history.push(`/user`);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la suppression du profil :", translate(e.code));
+    }
+  };
 
   const getReferents = async () => {
     if (!structure) return;
@@ -89,7 +113,8 @@ export default function DetailsView({ structure }) {
                     <Link to={`/user/${referent._id}`} key={referent._id}>
                       <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={referent._id}>
                         <Avatar name={`${referent.firstName} ${referent.lastName}`} />
-                        <div>{`${referent.firstName} ${referent.lastName}`}</div>
+                        <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
+                        {canDeleteResponsible({ actor: user, originalTarget: referent }) && <DeleteBtn onClick={onClickDelete}>{"🗑"}</DeleteBtn>}
                       </div>
                     </Link>
                   ))}
@@ -103,6 +128,20 @@ export default function DetailsView({ structure }) {
     </div>
   );
 }
+
+const DeleteBtn = styled.button`
+  background-color: #bd2130;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  :hover {
+    background: #dc3545;
+  }
+`;
 
 const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled }) => {
   return (

@@ -344,6 +344,7 @@ export default function Edit(props) {
                         <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }}>
                           <Avatar name={`${referent.firstName} ${referent.lastName}`} />
                           <div>{`${referent.firstName} ${referent.lastName}`}</div>
+                          <div>{`${referent.firstName} ${referent.lastName}`}</div>
                         </div>
                       </Link>
                     ))}
