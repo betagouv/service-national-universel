@@ -51,7 +51,7 @@ export default function VolontairePanel({ onChange, value }) {
       history.go(0);
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", translate(e.code));
+      return toastr.error("Oups, une erreur est survenue pendant la suppression du volontaire :", translate(e.code));
     }
   };
 

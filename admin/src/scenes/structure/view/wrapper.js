@@ -31,7 +31,7 @@ export default function Wrapper({ children, structure, tab }) {
       return history.push(`/structure`);
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression de la structure :", translate(e.code));
+      return toastr.error("Oups, une erreur est survenue pendant la suppression de la structure :", translate(e.code));
     }
   };
   if (!structure) return null;

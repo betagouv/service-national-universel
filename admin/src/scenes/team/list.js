@@ -289,7 +289,7 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
       toastr.success("Ce profil a été supprimé.");
       return history.go(0);
     } catch (e) {
-      return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
+      return toastr.error("Oups, une erreur est survenue pendant la suppression du profil :", translate(e.code));
     }
   };
   return (

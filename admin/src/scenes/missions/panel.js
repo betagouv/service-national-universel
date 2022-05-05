@@ -53,7 +53,7 @@ export default function PanelView({ onChange, mission }) {
       return history.go(0);
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression de la mission :", translate(e.code));
+      return toastr.error("Oups, une erreur est survenue pendant la suppression de la mission :", translate(e.code));
     }
   };
 
