@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev": "nodemon ./src/index.js",
+    "debug": "DEBUG=express:* nodemon ./src/index.js",
     "start": "node ./src/index.js",
     "test": "jest --silent --runInBand",
     "coverage": "jest --runInBand --coverage --silent",
