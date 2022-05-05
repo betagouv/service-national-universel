@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate, ES_NO_LIMIT, ROLES, copyToClipboard, htmlCleaner, canDeleteResponsable } from "../../../utils";
+import { translate, ES_NO_LIMIT, ROLES, copyToClipboard, htmlCleaner, canDeleteReferent } from "../../../utils";
 import StructureView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
@@ -13,6 +13,7 @@ import SocialIcons from "../../../components/SocialIcons";
 import Invite from "../components/invite";
 import { Box, BoxTitle } from "../../../components/box";
 import Badge from "../../../components/Badge";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default function DetailsView({ structure }) {
   const [referents, setReferents] = useState([]);
@@ -110,14 +111,26 @@ export default function DetailsView({ structure }) {
                   <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
                   {referents.length ? null : <i>Aucun compte n&apos;est associé à cette structure.</i>}
                   {referents.map((referent) => (
-                    <Link to={`/user/${referent._id}`} key={referent._id}>
-                      <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={referent._id}>
-                        <Avatar name={`${referent.firstName} ${referent.lastName}`} />
-                        <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
-                        {canDeleteResponsable({ actor: user, originalTarget: referent }) && <DeleteBtn onClick={onClickDelete}>{"🗑"}</DeleteBtn>}
-                      </div>
-                    </Link>
+                    <>
+                      <Link to={`/user/${referent._id}`} key={referent._id}>
+                        <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={referent._id}>
+                          <Avatar name={`${referent.firstName} ${referent.lastName}`} />
+                          <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
+                        </div>
+                      </Link>
+                      {canDeleteReferent({ actor: user, originalTarget: referent }) && <DeleteBtn onClick={onClickDelete}>{"🗑"}</DeleteBtn>}
+                    </>
                   ))}
+                  <ModalConfirm
+                    isOpen={modal?.isOpen}
+                    title={modal?.title}
+                    message={modal?.message}
+                    onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+                    onConfirm={() => {
+                      modal?.onConfirm();
+                      setModal({ isOpen: false, onConfirm: null });
+                    }}
+                  />
                 </Wrapper>
               </Row>
               <Invite structure={structure} onSent={getReferents} />
