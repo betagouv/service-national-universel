@@ -5,6 +5,8 @@ import { useParams } from "react-router";
 
 import { apiURL } from "../../../config";
 import SelectStatus from "../../../components/selectStatus";
+import Badge from "../../../components/Badge";
+import FilterSvg from "../../../assets/icons/Filter";
 import api from "../../../services/api";
 import Panel from "../../volontaires/panel";
 import Chevron from "../../../components/Chevron";
@@ -26,9 +28,10 @@ import {
   confirmMessageChangePhase1Presence,
   ES_NO_LIMIT,
   PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE,
+  YOUNG_STATUS_COLORS,
 } from "../../../utils";
 import Loader from "../../../components/Loader";
-import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
+import { Filter, FilterRow, ResultTable } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
@@ -41,7 +44,9 @@ export default function Youngs({ updateCenter }) {
   const { id, sessionId } = useParams();
 
   const getDefaultQuery = () => ({
-    query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { term: { "cohort.keyword": focusedSession?.cohort } }] } },
+    query: {
+      bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { term: { "sessionPhase1Id.keyword": focusedSession?._id.toString() } }] },
+    },
     sort: [{ "lastName.keyword": "asc" }],
     track_total_hits: true,
   });
@@ -97,6 +102,16 @@ export default function Youngs({ updateCenter }) {
                       autosuggest={false}
                       queryFormat="and"
                     />
+                    <div
+                      className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
+                      onClick={() => setFilterVisible((e) => !e)}>
+                      <FilterSvg className="text-gray-400" />
+                      Filtres
+                    </div>
+                  </FilterRow>
+                  <FilterRow visible={filterVisible}>
+                    <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                    <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -141,34 +156,32 @@ export default function Youngs({ updateCenter }) {
                       showMissing
                       missingLabel="Non renseigné"
                     />
-                    <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={() => setFilterVisible((e) => !e)} />
-                  </FilterRow>
-                  <FilterRow visible={filterVisible}>
-                    <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                    <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                   </FilterRow>
                 </Filter>
-                <ResultTable style={{ borderRadius: "8px", boxShadow: "0px 3px 2px #edf2f7" }}>
+                <ResultTable>
                   <ReactiveListComponent
                     defaultQuery={getDefaultQuery}
                     react={{ and: FILTERS }}
                     dataField="lastName.keyword"
                     sortBy="asc"
                     render={({ data }) => (
-                      <Table>
-                        <thead>
-                          <tr>
-                            <th width="65%">Volontaire</th>
-                            <th>Affectation</th>
-                            <th>Présence</th>
+                      <table className="w-full">
+                        <thead className="">
+                          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
+                            <th className="py-3 pl-4">Volontaire</th>
+                            <th className="">Présence à l&apos;arrivée</th>
+                            <th className="">Présence JDM</th>
+                            <th className="">Départ</th>
+                            <th className="">Fiche Sanitaire</th>
+                            <th className="">Statut phase 1</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-gray-100">
                           {data.map((hit) => (
-                            <Hit key={hit._id} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} onChangeYoung={updateCenter} />
+                            <Line key={hit._id} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} onChangeYoung={updateCenter} />
                           ))}
                         </tbody>
-                      </Table>
+                      </table>
                     )}
                   />
                 </ResultTable>
@@ -187,14 +200,8 @@ export default function Youngs({ updateCenter }) {
   );
 }
 
-const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
+const Line = ({ hit, onClick, selected, onChangeYoung }) => {
   const [value, setValue] = useState(null);
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const updateYoung = async (v) => {
-    const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
-    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
-    setValue(data);
-  };
 
   useEffect(() => {
     setValue(hit);
@@ -203,58 +210,32 @@ const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
   if (!value) return <></>;
 
   return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
-      <td>
-        <MultiLine>
-          <span className="font-bold text-black">{`${hit.firstName} ${hit.lastName}`}</span>
-          <p>
+    <tr className="hover:bg-gray-100 rounded-lg" onClick={onClick}>
+      <td className="py-3 pl-4">
+        <div>
+          <div className="font-bold text-[#242526] text-[15px]">{`${hit.firstName} ${hit.lastName}`}</div>
+          <div className="font-normal text-xs text-[#738297]">
             {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
-          </p>
-        </MultiLine>
+          </div>
+        </div>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <SelectStatus
-          disabled
-          hit={hit}
-          callback={onChangeYoung}
-          options={Object.keys(YOUNG_STATUS_PHASE1).filter((e) => e !== "WAITING_LIST")}
-          statusName="statusPhase1"
-          phase="COHESION_STAY"
-        />
+      <td>
+        <div className="font-normal text-xs text-[#242526]">{translate(value.cohesionStayPresence)}</div>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <Select
-          placeholder="Non renseigné"
-          options={[
-            { value: "true", label: "Présent" },
-            { value: "false", label: "Absent" },
-          ]}
-          value={value.cohesionStayPresence}
-          name="cohesionStayPresence"
-          disabled={PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE[value.cohort].getTime() > Date.now()}
-          handleChange={(e) => {
-            const value = e.target.value;
-            setModal({
-              isOpen: true,
-              onConfirm: () => {
-                updateYoung({ cohesionStayPresence: value });
-              },
-              title: "Changement de présence",
-              message: confirmMessageChangePhase1Presence(value),
-            });
-          }}
-        />
+      <td>
+        <div className="font-normal text-xs text-[#242526]">Absent</div>
       </td>
-      <ModalConfirm
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={() => {
-          modal?.onConfirm();
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-      />
+      <td>
+        <div className="font-normal text-xs text-[#242526]">ø</div>
+      </td>
+      <td>
+        <div className="font-normal text-xs text-[#242526]">{translate(value.cohesionStayMedicalFileReceived)}</div>
+      </td>
+      <td>
+        <div>
+          <Badge text={translate(value.statusPhase1)} color={YOUNG_STATUS_COLORS[value.statusPhase1]} />
+        </div>
+      </td>
     </tr>
   );
 };
