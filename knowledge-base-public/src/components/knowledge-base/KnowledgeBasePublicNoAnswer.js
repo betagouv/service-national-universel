@@ -21,6 +21,7 @@ const KnowledgeBasePublicNoAnswer = ({ className = "" }) => {
             <br />
             ⚠️ Ce formulaire n'est pas un formulaire de contact . Vous ne recevrez pas de réponse après l'avoir rempli.
           </p>
+          <div>Vous pouvez nous contacter <a href="https://moncompte.snu.gouv.fr/public-besoin-d-aide" target="_blank" rel="noopener noreferrer">en cliquant ici.</a></div>
         </div>
       </Modal>
       <button
