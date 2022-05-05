@@ -76,6 +76,7 @@
     "react-is": "17.0.2",
     "regenerator-runtime": "0.13.9",
     "ssh2": "1.5.0",
-    "supertest": "6.1.6"
+    "supertest": "6.1.6",
+    "xlsx": "^0.18.5"
   }
 }
