@@ -875,6 +875,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   try {
     const referent = await ReferentModel.findById(req.params.id);
     if (!referent) return res.status(404).send({ ok: false });
+    if (referent.role === ROLES.ADMIN) return res.status(403).send({ ok: false, code: ERRORS.CANT_KILL_ADMIN });
     let structure;
     if (referent.role === ROLES.RESPONSIBLE) {
       structure = await StructureModel.findById(referent.structureId);
