@@ -1,3 +1,12 @@
+## [1.80.1](https://github.com/betagouv/service-national-universel/compare/v1.80.0...v1.80.1) (2022-05-05)
+
+
+### Bug Fixes
+
+* lib/inscriptionModificationOpenForYoungs ([e4557ef](https://github.com/betagouv/service-national-universel/commit/e4557efaab7d66a94db501f1543f751e60bf14d8))
+* step center ([42ee685](https://github.com/betagouv/service-national-universel/commit/42ee685db5c6287e9110860c8706933f1dc6a16d))
+* **app:** home "a venir" ([347e8fe](https://github.com/betagouv/service-national-universel/commit/347e8fe1a72393d6bdc577c51a5337b2cd5956ff))
+
 # [1.80.0](https://github.com/betagouv/service-national-universel/compare/v1.79.0...v1.80.0) (2022-05-04)
 
 
