@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate, ES_NO_LIMIT, ROLES, copyToClipboard, htmlCleaner, canDeleteResponsible } from "../../../utils";
+import { translate, ES_NO_LIMIT, ROLES, copyToClipboard, htmlCleaner, canDeleteResponsable } from "../../../utils";
 import StructureView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
@@ -114,7 +114,7 @@ export default function DetailsView({ structure }) {
                       <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={referent._id}>
                         <Avatar name={`${referent.firstName} ${referent.lastName}`} />
                         <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
-                        {canDeleteResponsible({ actor: user, originalTarget: referent }) && <DeleteBtn onClick={onClickDelete}>{"🗑"}</DeleteBtn>}
+                        {canDeleteResponsable({ actor: user, originalTarget: referent }) && <DeleteBtn onClick={onClickDelete}>{"🗑"}</DeleteBtn>}
                       </div>
                     </Link>
                   ))}
