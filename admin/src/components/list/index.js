@@ -131,6 +131,43 @@ export const ResultTable = styled.div`
   }
 `;
 
+export const Filter2 = styled.div`
+  padding: 0 25px;
+  margin-bottom: 20px;
+  .searchbox {
+    font-size: 12px;
+    display: block;
+    width: 25rem;
+    background-color: #fff;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+    outline: 0;
+    padding: 15px 20px;
+    border-radius: 6px;
+    margin-right: 15px;
+    ::placeholder {
+      color: #767676;
+    }
+  }
+  .dropdown-filter {
+    button {
+      height: 2.5rem;
+      background-color: #fff;
+      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+      border: 0;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 14px;
+      color: #242526;
+      min-width: 150px;
+      cursor: pointer;
+      div {
+        width: 100%;
+        overflow: visible;
+      }
+    }
+  }
+`;
 export const Filter = styled.div`
   padding: 0 25px;
   margin-bottom: 20px;

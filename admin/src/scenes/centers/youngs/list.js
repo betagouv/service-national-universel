@@ -31,7 +31,7 @@ import {
   YOUNG_STATUS_COLORS,
 } from "../../../utils";
 import Loader from "../../../components/Loader";
-import { Filter, FilterRow, ResultTable } from "../../../components/list";
+import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
@@ -87,8 +87,8 @@ export default function Youngs({ updateCenter }) {
           <ReactiveBase url={`${apiURL}/es`} app={`sessionphase1young/${focusedSession._id}`} headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
               <div style={{ flex: 1, position: "relative" }}>
-                <Filter>
-                  <FilterRow visible>
+                <Filter2>
+                  <div className="flex items-center mb-2 gap-2">
                     <DataSearch
                       defaultQuery={getDefaultQuery}
                       showIcon={false}
@@ -97,7 +97,6 @@ export default function Youngs({ updateCenter }) {
                       dataField={["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"]}
                       react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                       // fuzziness={2}
-                      style={{ flex: 1, marginRight: "1rem" }}
                       innerClass={{ input: "searchbox" }}
                       autosuggest={false}
                       queryFormat="and"
@@ -108,7 +107,7 @@ export default function Youngs({ updateCenter }) {
                       <FilterSvg className="text-gray-400" />
                       Filtres
                     </div>
-                  </FilterRow>
+                  </div>
                   <FilterRow visible={filterVisible}>
                     <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                     <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
@@ -157,7 +156,7 @@ export default function Youngs({ updateCenter }) {
                       missingLabel="Non renseigné"
                     />
                   </FilterRow>
-                </Filter>
+                </Filter2>
                 <ResultTable>
                   <ReactiveListComponent
                     defaultQuery={getDefaultQuery}

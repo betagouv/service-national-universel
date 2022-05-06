@@ -43,7 +43,7 @@ const TabItem = ({ to, title, icon }) => (
   <NavLink
     to={to}
     activeClassName="text-snu-purple-800 bg-white border-none"
-    className="px-3 py-2 cursor-pointer text-gray-600 rounded-t-lg bg-gray-50 border-t-[1px] border-r-[1px] border-l-[1px] border-gray-200 hover:text-snu-purple-800">
+    className="text-[13px] px-3 py-2 cursor-pointer text-gray-600 rounded-t-lg bg-gray-50 border-t-[1px] border-r-[1px] border-l-[1px] border-gray-200 hover:text-snu-purple-800">
     <div className="flex items-center gap-2">
       {icon} {title}
     </div>
