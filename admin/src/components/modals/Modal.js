@@ -7,7 +7,7 @@ export const ModalContainer = styled.div`
   align-items: center;
   flex-direction: column;
   background-color: #fff;
-  padding: 2rem 0;
+  padding-top: 2rem;
   border-radius: 1rem;
   overflow: hidden;
   .close-icon {
