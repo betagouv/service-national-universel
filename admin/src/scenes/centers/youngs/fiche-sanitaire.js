@@ -1,47 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import { toastr } from "react-redux-toastr";
 import { useParams } from "react-router";
+import { toastr } from "react-redux-toastr";
 
 import { apiURL } from "../../../config";
-import SelectStatus from "../../../components/selectStatus";
-import Badge from "../../../components/Badge";
 import FilterSvg from "../../../assets/icons/Filter";
 import api from "../../../services/api";
 import Panel from "../../volontaires/panel";
-import Chevron from "../../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../../components/filters";
-import Select from "../../volontaires-head-center/components/Select";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
-import {
-  getFilterLabel,
-  YOUNG_STATUS_PHASE1,
-  translate,
-  translatePhase1,
-  translatePhase2,
-  formatDateFRTimezoneUTC,
-  isInRuralArea,
-  formatLongDateFR,
-  getAge,
-  colors,
-  getLabelWithdrawnReason,
-  confirmMessageChangePhase1Presence,
-  ES_NO_LIMIT,
-  PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE,
-  YOUNG_STATUS_COLORS,
-} from "../../../utils";
+import ModalPointageFicheSanitaire from "../components/modals/ModalPointageFicheSanitaire";
+import { getFilterLabel, translate, translatePhase1, getAge } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
-export default function General({ updateCenter }) {
+export default function FicheSanitaire() {
   const [young, setYoung] = useState();
-  const [center, setCenter] = useState(null);
-  const [meetingPoints, setMeetingPoints] = useState(null);
   const [focusedSession, setFocusedSession] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
-  const { id, sessionId } = useParams();
+  const { sessionId } = useParams();
 
   const getDefaultQuery = () => ({
     query: {
@@ -50,21 +28,7 @@ export default function General({ updateCenter }) {
     sort: [{ "lastName.keyword": "asc" }],
     track_total_hits: true,
   });
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await api.get("/meeting-point/all");
-      setMeetingPoints(data);
-    })();
-  }, []);
-  useEffect(() => {
-    if (!id) return;
-    (async () => {
-      const { data } = await api.get(`/cohesion-center/${id}`);
-      setCenter(data);
-    })();
-  }, [id]);
   useEffect(() => {
     if (!sessionId) return;
     (async () => {
@@ -175,7 +139,7 @@ export default function General({ updateCenter }) {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {data.map((hit) => (
-                            <Line key={hit._id} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} onChangeYoung={updateCenter} />
+                            <Line key={hit._id} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} />
                           ))}
                         </tbody>
                       </table>
@@ -197,8 +161,9 @@ export default function General({ updateCenter }) {
   );
 }
 
-const Line = ({ hit, onClick, selected, onChangeYoung }) => {
+const Line = ({ hit, onClick, selected }) => {
   const [value, setValue] = useState(null);
+  const [modalPointageFicheSanitaire, setModalPointageFicheSanitaire] = useState({ isOpen: false });
 
   useEffect(() => {
     setValue(hit);
@@ -206,19 +171,67 @@ const Line = ({ hit, onClick, selected, onChangeYoung }) => {
 
   if (!value) return <></>;
 
+  const bgColor = selected && "bg-snu-purple-300";
+  const mainTextColor = selected ? "text-white" : "text-[#242526]";
+  const secondTextColor = selected ? "text-blue-100" : "text-[#738297]";
+
+  const ficheSanitaireBgColor = value.cohesionStayMedicalFileReceived === "false" && "bg-gray-100";
+  const ficheSanitaireTextColor = !value.cohesionStayMedicalFileReceived && "text-gray-400";
+
+  const onSubmit = async (v) => {
+    // todo route api expres pour changer les présences de phase1
+    const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
+    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
+    setValue(data);
+    setModalPointageFicheSanitaire({ isOpen: false, value: null });
+  };
+
   return (
-    <tr className="hover:bg-gray-100 rounded-lg" onClick={onClick}>
-      <td className="py-3 pl-4">
-        <div>
-          <div className="font-bold text-[#242526] text-[15px]">{`${hit.firstName} ${hit.lastName}`}</div>
-          <div className="font-normal text-xs text-[#738297]">
-            {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
+    <>
+      <tr className={`${!selected && "hover:!bg-gray-100"}`} onClick={onClick}>
+        <td className={`${bgColor} py-3 pl-4 ml-2 rounded-l-lg`}>
+          <div>
+            <div className={`font-bold ${mainTextColor} text-[15px]`}>{`${hit.firstName} ${hit.lastName}`}</div>
+            <div className={`font-normal text-xs ${secondTextColor}`}>
+              {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
+            </div>
           </div>
-        </div>
-      </td>
-      <td>
-        <div className="font-normal text-xs text-[#242526]">{translate(value.cohesionStayMedicalFileReceived)}</div>
-      </td>
-    </tr>
+        </td>
+        <td className={`${bgColor}`}>
+          <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
+            <select
+              className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer ${ficheSanitaireBgColor} ${ficheSanitaireTextColor}`}
+              value={value.cohesionStayMedicalFileReceived || ""}
+              onChange={(e) => {
+                setModalPointageFicheSanitaire({
+                  isOpen: true,
+                  value: e.target.value,
+                });
+              }}
+              style={{ fontFamily: "Marianne" }}>
+              <option disabled label="Fiche sanitaire">
+                Présence à l&apos;arrivée
+              </option>
+              {[
+                { label: "Non renseignée", value: "", disabled: true, hidden: true },
+                { label: "Réceptionnée", value: "true" },
+                { label: "Non réceptionnée", value: "false" },
+              ].map((option, i) => (
+                <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </td>
+      </tr>
+      <ModalPointageFicheSanitaire
+        isOpen={modalPointageFicheSanitaire?.isOpen}
+        onCancel={() => setModalPointageFicheSanitaire({ isOpen: false, value: null })}
+        onSubmit={onSubmit}
+        value={modalPointageFicheSanitaire?.value}
+        young={value}
+      />
+    </>
   );
 };
