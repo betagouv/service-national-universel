@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
@@ -7,13 +7,18 @@ import { toastr } from "react-redux-toastr";
 export default function RulesDetail({ young, setShowStep = null, show = null }) {
   const dispatch = useDispatch();
   const [showCompleteRules, setShowCompleteRules] = useState(false);
-  const [accept, setAccept] = useState(false);
+  const [accept, setAccept] = useState();
   const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (young) {
+      setAccept(young.rulesYoung === "true");
+    }
+  }, [young]);
 
   const handleSubmit = async () => {
     if (accept) {
-      console.log(show);
-      if (show) setShowStep({ ...show, step1: false });
+      if (show) setShowStep(!show);
       const { data, ok } = await api.put(`/young/phase1/rules`, { rulesYoung: "true" });
       if (!ok) return toastr.error("Une erreur est survenue lors de la validation du réglement");
       toastr.success("Modification enregistrée");
@@ -28,7 +33,7 @@ export default function RulesDetail({ young, setShowStep = null, show = null }) 
       <div className="flex flex-col px-2 md:px-14">
         <p className="text-sm text-gray-600 leading-5 text-center">
           Vous devez lire et accepter les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint avant votre
-          départ en séjour. Cette étape est Un pré-requis au séjour de cohésion.
+          départ en séjour. Cette étape est un pré-requis au séjour de cohésion.
         </p>
         {showCompleteRules ? (
           completeRules()
@@ -55,15 +60,15 @@ export default function RulesDetail({ young, setShowStep = null, show = null }) 
                 1.2.3 Laïcité <br /> Le respect de la laïcité s'impose aux cadres, personnels, intervenants et aux volontaires des centres SNU : l'ensemble des cadres, intervenants
                 et des personnels mobilisés dans le cadre des centres SNU exercent une mission de service public et sont donc soumis à l'obligation de stricte neutralité
                 religieuse, en application de l'article 1er de la loi du 20 avril 2016. Les signes et manifestations d'appartenance religieuse des cadres, intervenants et
-                personnels sont rigoureusement proscrits au sein du centre SNU et au cours des activités. De la même façon, il est interdit auxvolontaires de porter tout signe
+                personnels sont rigoureusement proscrits au sein du centre SNU et au cours des activités. De la même façon, il est interdit aux volontaires de porter tout signe
                 ostensible d'appartenance religieuse au sein des centres SNU, à l'exclusion des espaces privés (le cas échéant, leur chambre personnelle uniquement). Un espace
-                dédié, accessible à tous et réservé au recueillement individuel, est aménagé dans chaque centre.*
+                dédié, accessible à tous et réservé au recueillement individuel, est aménagé dans chaque centre.
               </p>
             </div>
           </>
         )}
         <div className="flex flex-row bg-gray-50 rounded-xl mt-6 px-8 py-2">
-          <input type="checkbox" className="rounded-lg mr-3 cursor-pointer" value={accept} onChange={() => setAccept(!accept)} />
+          <input type="checkbox" className="rounded-lg mr-3 cursor-pointer" checked={accept} onChange={(e) => setAccept(e.target.checked)} disabled={young.rulesYoung === "true"} />
           <div className="flex-1 text-xs md:text-sm leading-5 text-gray-500">
             Je,{" "}
             <strong>
@@ -75,13 +80,15 @@ export default function RulesDetail({ young, setShowStep = null, show = null }) 
         {error ? <p className="text-xs text-red-500 text-center">Vous devez accepter le reglement interieure pour continuer</p> : null}
 
         <div className="flex justify-center md:justify-end items-stretch my-6">
-          <button
-            type="button"
-            className={`flex-1 md:flex-none md:px-16 py-2 bg-blue-600 text-white rounded-lg text-sm hover:scale-105 hover:shadow-sm disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none disabled:cursor-auto cursor-pointer`}
-            disabled={!showCompleteRules}
-            onClick={handleSubmit}>
-            Accepter
-          </button>
+          {young.rulesYoung !== "true" ? (
+            <button
+              type="button"
+              className={`flex-1 md:flex-none md:px-16 py-2 bg-blue-600 text-white rounded-lg text-sm hover:scale-105 hover:shadow-sm disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none disabled:cursor-auto cursor-pointer`}
+              disabled={!showCompleteRules}
+              onClick={handleSubmit}>
+              Accepter
+            </button>
+          ) : null}
         </div>
       </div>
     </>

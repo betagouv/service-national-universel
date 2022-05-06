@@ -1,21 +1,43 @@
 import React, { useState } from "react";
-import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
-import api from "../../../services/api";
+import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { useDispatch } from "react-redux";
-
-import { setYoung } from "../../../redux/auth/actions";
-import { Separator, Content } from "../../../components/Content";
-import { translate } from "../../../utils";
-import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
-import roundRight from "../../../assets/roundRight.svg";
-import roundLeft from "../../../assets/roundLeft.svg";
-import questionMark from "../../../assets/question-mark.svg";
+import { toastr } from "react-redux-toastr";
+import styled from "styled-components";
+import Calendar from "../../../assets/calendar";
+import LinearMap from "../../../assets/Linear-map.js";
 import map from "../../../assets/map.png";
-import { supportURL } from "../../../config";
-import Convocation from "./Convocation";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
+import questionMark from "../../../assets/question-mark.svg";
+import roundLeft from "../../../assets/roundLeft.svg";
+import roundRight from "../../../assets/roundRight.svg";
+import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
 import LoadingButton from "../../../components/buttons/LoadingButton";
+import { Content, Separator } from "../../../components/Content";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
+import { environment, supportURL } from "../../../config";
+import { setYoung } from "../../../redux/auth/actions";
+import api from "../../../services/api";
+import { translate } from "../../../utils";
+import Convocation from "./Convocation";
+
+const departureMeetingDate = {
+  2021: "le lundi 20 février, 14:00",
+  "Février 2022": "le dimanche 13 février, 16:00",
+  "Juin 2022": "le dimanche 12 juin, 16:00",
+  "Juillet 2022": "le dimanche 03 juillet, 16:00",
+};
+const returnMeetingDate = {
+  2021: "le mardi 02 juillet, 14:00",
+  "Février 2022": "le vendredi 25 février, 11:00",
+  "Juin 2022": "le vendredi 24 juin, 11:00",
+  "Juillet 2022": "le vendredi 15 juillet, 11:00",
+};
+
+const cohortToMonth = {
+  2021: "FEVR",
+  "Février 2022": "FEVR",
+  "Juin 2022": "JUIN",
+  "Juillet 2022": "JUIL",
+};
 
 export default function ConvocationDetails({ young, center, meetingPoint }) {
   const [open, setOpen] = useState(false);
@@ -54,155 +76,313 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
     dispatch(setYoung(data));
     setIsAutonomous(data.deplacementPhase1Autonomous === "true");
     setIsLoading(false);
+    setOpen(false);
     return toastr.success("Mis à jour !");
   }
   return (
     <>
-      <Container>
-        <section className="download">
-          <div>
-            <h2>Votre convocation</h2>
-            <p>
-              Votre convocation sera à présenter à votre arrivée muni d&apos;une <strong>pièce d&apos;identité valide</strong>.
-            </p>
-            <p className="show-convocation">
-              En cas de problème de téléchargement : <span onClick={() => setShowConvocation((e) => !e)}>afficher ma convocation</span>
-            </p>
-          </div>
-          <div className="button-container">
-            <ContinueButton>
-              <DownloadConvocationButton young={young} uri="cohesion">
-                Télécharger&nbsp;ma&nbsp;convocation
-              </DownloadConvocationButton>
-            </ContinueButton>
-          </div>
-        </section>
-      </Container>
-      {showConvocation ? (
+      {environment !== "production" ? (
         <>
-          <Separator />
-          <Convocation />
-        </>
-      ) : null}
-      <Separator />
-      <Container>
-        <div className="meeting">
-          <img src={map} className="icon" />
-          <section className="meeting-point">
-            <h3>Mon point de rassemblement</h3>
-            {isAutonomous ? (
-              <p style={{ margin: 0 }}>{[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}</p>
-            ) : (
-              <p style={{ margin: 0 }}>
-                {meetingPoint
-                  ? `${[meetingPoint?.departureAddress, meetingPoint?.departureZip, meetingPoint?.departureCity, meetingPoint?.departureDepartment, meetingPoint?.departureRegion]
-                      .filter((e) => e)
-                      .join(", ")}`
-                  : "Aucun point de rassemblement ne vous a été assigné pour le moment."}
-              </p>
-            )}
-          </section>
-          <section className="meeting-dates">
-            <div className="meeting-dates-detail">
-              <img src={roundRight} />
-              <article>
-                <p>ALLER</p>
-                {isAutonomous ? <span>Le dimanche 13 février 2022 à 16 heures</span> : <span>{meetingPoint ? `Le ${meetingPoint?.departureAtString}` : "Horaire à venir"}</span>}
-              </article>
-            </div>
-            <div className="meeting-dates-detail">
-              <img src={roundLeft} />
-              <article>
-                <p>RETOUR</p>
-                {isAutonomous ? <span>Le vendredi 25 février 2022 à 11 heures</span> : <span>{meetingPoint ? `Le ${meetingPoint?.returnAtString}` : "Horaire à venir"}</span>}
-              </article>
-            </div>
-          </section>
-        </div>
-        <Separator className="mobile-only" />
-        {isAutonomous ? (
-          <p style={{ color: "#5145cd", marginTop: "2rem" }}>Vous avez choisi de vous rendre au centre de cohésion par vos propres moyens.</p>
-        ) : (
-          <section className="autonomous">
-            <div className="autonomous-switch">
-              <p className="black-bold">Vous souhaitez vous rendre au centre et en revenir par vos propres moyens ?</p>
-              {open ? (
-                <button className="autonomous-button" onClick={() => setOpen(false)}>
-                  ↑ Réduire{" "}
-                </button>
-              ) : (
-                <button className="autonomous-button" onClick={() => setOpen(true)}>
-                  <svg width="11" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5.5 1v4m0 0v4m0-4h4m-4 0h-4" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  En savoir plus{" "}
-                </button>
-              )}
-            </div>
-            {open ? (
-              <>
-                <div className="meeting meeting-autonomous">
-                  <img src={map} className="icon" />
-                  <p className="meeting-center">
-                    <strong>{[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}</strong>
-                  </p>
-                  <section className="meeting-dates">
-                    <div className="meeting-dates-detail">
-                      <img src={roundRight} />
-                      <article>
-                        <p>ALLER</p>
-                        <span>Le dimanche 13 février 2022 à 16 heures</span>
-                      </article>
-                    </div>
-                    <div className="meeting-dates-detail">
-                      <img src={roundLeft} />
-                      <article>
-                        <p>RETOUR</p>
-                        <span>Le vendredi 25 février 2022 à 11 heures</span>
-                      </article>
-                    </div>
-                  </section>
+          <div className="bg-white md:!bg-gray-50 rounded-xl px-4 mt-6">
+            <div className="flex flex-col lg:flex-row items-center">
+              <div className="flex flex-row items-center my-3 lg:border-r-[1px] md:pr-4">
+                <LinearMap className="w-16 h-16 mr-3" />
+                <div className="flex flex-col">
+                  <div className="text-sm leading-7 font-bold">Lieu de rassemblement</div>
+                  <div className="text-sm text-gray-800 leading-5 max-w-sm">
+                    {meetingPoint && !isAutonomous ? (
+                      <p style={{ margin: 0 }}>
+                        {[meetingPoint?.departureAddress, meetingPoint?.departureZip, meetingPoint?.departureCity, meetingPoint?.departureDepartment, meetingPoint?.departureRegion]
+                          .filter((e) => e)
+                          .join(", ")}
+                      </p>
+                    ) : (
+                      <p style={{ margin: 0 }}>{[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}</p>
+                    )}
+                  </div>
                 </div>
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                  <LoadingButton loading={isLoading} disabled={isLoading} onClick={handleAutonomousClick}>
-                    Je confirme venir et rentrer par mes propres moyens&nbsp;
-                    <svg width="16" height="12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7l4 4L15 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </LoadingButton>
-                </div>
-              </>
-            ) : null}
-          </section>
-        )}
+              </div>
+              <div className="flex flex-row items-center flex-1 md:!justify-center pb-3 md:!pb-0 my-3">
+                <Calendar
+                  date={meetingPoint && !isAutonomous ? meetingPoint?.returnAtString.split(" ")[1] : departureMeetingDate[young.cohort].split(" ")[2]}
+                  month={cohortToMonth[young.cohort]}
+                  className="shadow-sm mr-3 w-7 h-10 md:w-11 md:h-12 md:mx-3"
+                />
 
-        <Separator />
-        <section className="more-info">
-          <div className="more-info-question">
-            <img src={questionMark} />
-            <p className="black-bold">Des questions sur le transport ?</p>
+                <div className="flex flex-col">
+                  <div className="font-bold text-sm whitespace-nowrap">
+                    Aller à{meetingPoint && !isAutonomous ? meetingPoint?.returnAtString.split(",")[1] : departureMeetingDate[young.cohort].split(",")[1]}
+                  </div>
+                  <div className="text-sm text-gray-600 whitespace-nowrap">
+                    {meetingPoint && !isAutonomous
+                      ? meetingPoint?.returnAtString
+                          .split(/[,\s]+/)
+                          .slice(0, 3)
+                          .join(" ")
+                      : departureMeetingDate[young.cohort]
+                          .split(/[,\s]+/)
+                          .slice(1, 4)
+                          .join(" ")}
+                  </div>
+                </div>
+                <Calendar
+                  date={meetingPoint && !isAutonomous ? meetingPoint?.returnAtString.split(" ")[1] : returnMeetingDate[young.cohort].split(" ")[2]}
+                  month={cohortToMonth[young.cohort]}
+                  className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12"
+                />
+                <div className="flex flex-col">
+                  <div className="font-bold text-sm whitespace-nowrap">
+                    Retour à{meetingPoint && !isAutonomous ? meetingPoint?.returnAtString.split(",")[1] : returnMeetingDate[young.cohort].split(",")[1]}
+                  </div>
+                  <div className="text-sm text-gray-600 whitespace-nowrap">
+                    {meetingPoint && !isAutonomous
+                      ? meetingPoint?.returnAtString
+                          .split(/[,\s]+/)
+                          .slice(0, 3)
+                          .join(" ")
+                      : returnMeetingDate[young.cohort]
+                          .split(/[,\s]+/)
+                          .slice(1, 4)
+                          .join(" ")}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr className="flex md:hidden text-gray-200 -mx-6" />
+            {!isAutonomous ? (
+              <p className="flex md:hidden text-gray-700 py-3 text-center" onClick={() => setOpen(!open)}>
+                Je souhaite me rendre au centre et en revenir par mes propres moyens mobile
+              </p>
+            ) : (
+              <p className="flex md:hidden text-gray-700 py-3 text-center">Vous vous rendez au centre et en revenez par vos propres moyens.</p>
+            )}
+            {/* Mobile */}
+            {open ? <div className="flex md:hidden flex-col pb-4">{changeAffectation({ center, young, isLoading, handleAutonomousClick })}</div> : null}
           </div>
-          <a href={`${supportURL}/base-de-connaissance/le-transport`} target="_blank" rel="noreferrer">
-            Rendez-vous sur notre <span>base&nbsp;de&nbsp;connaissance&nbsp;›</span>
-          </a>
-        </section>
-      </Container>
-      <ModalConfirm
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        confirmText={modal?.confirmText}
-        onConfirm={() => {
-          modal?.onConfirm();
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-        onCancel={() => {
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-      />
+          {!isAutonomous ? (
+            <div className="hidden md:flex flex-row items-center hover:underline cursor-pointer" onClick={() => setOpen(!open)}>
+              <p className="text-gray-800 py-3 text-sm pr-1">Je souhaite me rendre au centre et en revenir par mes propres moyens</p>
+              {open ? <HiChevronUp className="text-gray-800" /> : <HiChevronDown className="text-gray-800" />}
+            </div>
+          ) : (
+            <p className="hidden md:flex text-gray-800 py-3 text-sm pr-1">Vous vous rendez au centre et en revenez par vos propres moyens.</p>
+          )}
+          {/* Desktop */}
+          {open ? <div className="hidden md:flex flex-col pb-4">{changeAffectation({ center, young, isLoading, handleAutonomousClick })}</div> : null}
+          <ModalConfirm
+            isOpen={modal?.isOpen}
+            title={modal?.title}
+            message={modal?.message}
+            confirmText={modal?.confirmText}
+            onConfirm={() => {
+              modal?.onConfirm();
+              setModal({ isOpen: false, onConfirm: null });
+            }}
+            onCancel={() => {
+              setModal({ isOpen: false, onConfirm: null });
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <Container>
+            <section className="download">
+              <div>
+                <h2>Votre convocation</h2>
+                <p>
+                  Votre convocation sera à présenter à votre arrivée muni d&apos;une <strong>pièce d&apos;identité valide</strong>.
+                </p>
+                <p className="show-convocation">
+                  En cas de problème de téléchargement : <span onClick={() => setShowConvocation((e) => !e)}>afficher ma convocation</span>
+                </p>
+              </div>
+              <div className="button-container">
+                <ContinueButton>
+                  <DownloadConvocationButton young={young} uri="cohesion">
+                    Télécharger&nbsp;ma&nbsp;convocation
+                  </DownloadConvocationButton>
+                </ContinueButton>
+              </div>
+            </section>
+          </Container>
+          {showConvocation ? (
+            <>
+              <Separator />
+              <Convocation />
+            </>
+          ) : null}
+          <Separator />
+          <Container>
+            <div className="meeting">
+              <img src={map} className="icon" />
+              <section className="meeting-point">
+                <h3>Mon point de rassemblement</h3>
+                {isAutonomous ? (
+                  <p style={{ margin: 0 }}>{[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}</p>
+                ) : (
+                  <p style={{ margin: 0 }}>
+                    {meetingPoint
+                      ? `${[
+                          meetingPoint?.departureAddress,
+                          meetingPoint?.departureZip,
+                          meetingPoint?.departureCity,
+                          meetingPoint?.departureDepartment,
+                          meetingPoint?.departureRegion,
+                        ]
+                          .filter((e) => e)
+                          .join(", ")}`
+                      : "Aucun point de rassemblement ne vous a été assigné pour le moment."}
+                  </p>
+                )}
+              </section>
+              <section className="meeting-dates">
+                <div className="meeting-dates-detail">
+                  <img src={roundRight} />
+                  <article>
+                    <p>ALLER</p>
+                    {isAutonomous ? (
+                      <span>Le dimanche 13 février 2022 à 16 heures</span>
+                    ) : (
+                      <span>{meetingPoint ? `Le ${meetingPoint?.departureAtString}` : "Horaire à venir"}</span>
+                    )}
+                  </article>
+                </div>
+                <div className="meeting-dates-detail">
+                  <img src={roundLeft} />
+                  <article>
+                    <p>RETOUR</p>
+                    {isAutonomous ? <span>Le vendredi 25 février 2022 à 11 heures</span> : <span>{meetingPoint ? `Le ${meetingPoint?.returnAtString}` : "Horaire à venir"}</span>}
+                  </article>
+                </div>
+              </section>
+            </div>
+            <Separator className="mobile-only" />
+            {isAutonomous ? (
+              <p style={{ color: "#5145cd", marginTop: "2rem" }}>Vous avez choisi de vous rendre au centre de cohésion par vos propres moyens.</p>
+            ) : (
+              <section className="autonomous">
+                <div className="autonomous-switch">
+                  <p className="black-bold">Vous souhaitez vous rendre au centre et en revenir par vos propres moyens ?</p>
+                  {open ? (
+                    <button className="autonomous-button" onClick={() => setOpen(false)}>
+                      ↑ Réduire{" "}
+                    </button>
+                  ) : (
+                    <button className="autonomous-button" onClick={() => setOpen(true)}>
+                      <svg width="11" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.5 1v4m0 0v4m0-4h4m-4 0h-4" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      En savoir plus{" "}
+                    </button>
+                  )}
+                </div>
+                {open ? (
+                  <>
+                    <div className="meeting meeting-autonomous">
+                      <img src={map} className="icon" />
+                      <p className="meeting-center">
+                        <strong>{[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}</strong>
+                      </p>
+                      <section className="meeting-dates">
+                        <div className="meeting-dates-detail">
+                          <img src={roundRight} />
+                          <article>
+                            <p>ALLER</p>
+                            <span>Le dimanche 13 février 2022 à 16 heures</span>
+                          </article>
+                        </div>
+                        <div className="meeting-dates-detail">
+                          <img src={roundLeft} />
+                          <article>
+                            <p>RETOUR</p>
+                            <span>Le vendredi 25 février 2022 à 11 heures</span>
+                          </article>
+                        </div>
+                      </section>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                      <LoadingButton loading={isLoading} disabled={isLoading} onClick={handleAutonomousClick}>
+                        Je confirme venir et rentrer par mes propres moyens&nbsp;
+                        <svg width="16" height="12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1 7l4 4L15 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </LoadingButton>
+                    </div>
+                  </>
+                ) : null}
+              </section>
+            )}
+
+            <Separator />
+            <section className="more-info">
+              <div className="more-info-question">
+                <img src={questionMark} />
+                <p className="black-bold">Des questions sur le transport ?</p>
+              </div>
+              <a href={`${supportURL}/base-de-connaissance/le-transport`} target="_blank" rel="noreferrer">
+                Rendez-vous sur notre <span>base&nbsp;de&nbsp;connaissance&nbsp;›</span>
+              </a>
+            </section>
+          </Container>
+          <ModalConfirm
+            isOpen={modal?.isOpen}
+            title={modal?.title}
+            message={modal?.message}
+            confirmText={modal?.confirmText}
+            onConfirm={() => {
+              modal?.onConfirm();
+              setModal({ isOpen: false, onConfirm: null });
+            }}
+            onCancel={() => {
+              setModal({ isOpen: false, onConfirm: null });
+            }}
+          />
+        </>
+      )}
     </>
   );
 }
+
+const changeAffectation = ({ center, young, isLoading, handleAutonomousClick }) => {
+  return (
+    <>
+      <div className="flex flex-col lg:flex-row items-center lg:pb-4">
+        <div className=" flex flex-col pr-6 pb-3 lg:!pb-0">
+          <div className="text-sm md:text-base font-bold pb-1 text-center md:!text-left">Rendez vous directement à votre lieu d'affectation</div>
+          <div className="text-sm leading-5 text-gray-800 text-center md:!text-left">
+            {[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}
+          </div>
+        </div>
+        <div className="flex flex-row items-center flex-1 pb-3 md:!pb-0 my-3">
+          <div className="flex flex-col border-l-[3px] border-blue-700 px-6">
+            <div className="font-bold text-sm whitespace-nowrap">Aller à{departureMeetingDate[young.cohort].split(",")[1]}</div>
+            <div className="text-sm text-gray-600 whitespace-nowrap">
+              {departureMeetingDate[young.cohort]
+                .split(/[,\s]+/)
+                .slice(1, 4)
+                .join(" ")}
+            </div>
+          </div>
+          <div className="flex flex-col border-l-[3px] border-blue-700 px-6">
+            <div className="font-bold text-sm whitespace-nowrap">Retour à{returnMeetingDate[young.cohort].split(",")[1]}</div>
+            <div className="text-sm text-gray-600 whitespace-nowrap">
+              {returnMeetingDate[young.cohort]
+                .split(/[,\s]+/)
+                .slice(1, 4)
+                .join(" ")}
+            </div>
+          </div>
+        </div>
+      </div>
+      <LoadingButton loading={isLoading} disabled={isLoading} onClick={handleAutonomousClick} className="max-w-fit">
+        Je confirme venir et rentrer par mes propres moyens&nbsp;
+        <svg width="16" height="12" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-2">
+          <path d="M1 7l4 4L15 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </LoadingButton>
+    </>
+  );
+};
 
 const Container = styled.div`
   h2 {

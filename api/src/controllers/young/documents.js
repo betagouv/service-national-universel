@@ -52,6 +52,12 @@ function getMailParams(type, template, young, contract) {
       object: `Contrat de la mission ${contract.missionName}`,
       message: `Vous trouverez en pièce-jointe de ce mail le contract de la mission ${contract.missionName}.`,
     };
+  if (type === "convocation" && template === "cohesion") {
+    return {
+      object: `Convocation au séjour de cohésion de ${young.firstName} ${young.lastName}`,
+      message: "Vous trouverez en pièce-jointe de ce mail votre convocation au séjour de cohésion à présenter à votre arrivée au point de rassemblement.",
+    };
+  }
 
   //todo: add other templates
   // if (type === "form" && template === "imageRight") return { object: "", message: "" };
