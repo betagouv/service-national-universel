@@ -14,6 +14,7 @@ import Invite from "../components/invite";
 import { Box, BoxTitle } from "../../../components/box";
 import Badge from "../../../components/Badge";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import DeleteBtnComponent from "../components/DeleteBtnComponent";
 
 export default function DetailsView({ structure }) {
   const [referents, setReferents] = useState([]);
@@ -112,13 +113,13 @@ export default function DetailsView({ structure }) {
                   {referents.length ? null : <i>Aucun compte n&apos;est associé à cette structure.</i>}
                   {referents.map((referent) => (
                     <>
-                      <Link to={`/user/${referent._id}`} key={referent._id}>
-                        <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={referent._id}>
+                      <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={referent._id}>
+                        <Link to={`/user/${referent._id}`} key={referent._id}>
                           <Avatar name={`${referent.firstName} ${referent.lastName}`} />
                           <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
-                        </div>
-                      </Link>
-                      {canDeleteReferent({ actor: user, originalTarget: referent }) && <DeleteBtn onClick={() => onClickDelete(referent)}>{"🗑"}</DeleteBtn>}
+                        </Link>
+                        {canDeleteReferent({ actor: user, originalTarget: referent }) && <DeleteBtnComponent onClick={() => onClickDelete(referent)}></DeleteBtnComponent>}
+                      </div>
                     </>
                   ))}
                   <ModalConfirm
@@ -141,20 +142,6 @@ export default function DetailsView({ structure }) {
     </div>
   );
 }
-
-const DeleteBtn = styled.button`
-  background-color: #bd2130;
-  border: none;
-  border-radius: 5px;
-  padding: 7px 30px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  cursor: pointer;
-  :hover {
-    background: #dc3545;
-  }
-`;
 
 const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled }) => {
   return (
