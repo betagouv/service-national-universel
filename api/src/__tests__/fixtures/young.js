@@ -30,6 +30,7 @@ function getNewYoungFixture(fields = {}) {
     password: faker.internet.password(),
     cniFiles: [],
     cohesionStayPresence: "true",
+    presenceJDM: "true",
     cohesionStayMedicalFileReceived: "false",
     cohesionCenterId: "",
     cohesionCenterName: "",

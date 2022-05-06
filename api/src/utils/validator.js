@@ -338,6 +338,7 @@ function validateYoung(young, user) {
     cniFiles: Joi.array().items(Joi.string().allow(null, "")),
     acceptCGU: Joi.string().allow(null, ""),
     cohesionStayPresence: Joi.string().allow(null, ""),
+    presenceJDM: Joi.string().allow(null, ""),
     cohesionStayMedicalFileReceived: Joi.string().allow(null, ""),
     sessionPhase1Id: Joi.string().allow(null, ""),
     cohesionCenterId: Joi.string().allow(null, ""),

@@ -318,6 +318,13 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire était présent lors du séjour de cohésion",
     },
   },
+  presenceJDM: {
+    type: String,
+    enum: ["true", "false", ""],
+    documentation: {
+      description: "Le volontaire était présent lors de la JDM",
+    },
+  },
   cohesionStayMedicalFileReceived: {
     type: String,
     enum: ["true", "false", ""],
