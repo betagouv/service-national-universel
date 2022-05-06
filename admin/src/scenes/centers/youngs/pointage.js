@@ -9,13 +9,14 @@ import api from "../../../services/api";
 import Panel from "../../volontaires/panel";
 import { RegionFilter, DepartmentFilter } from "../../../components/filters";
 import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePresenceArrivee";
+import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
 import { getFilterLabel, translate, translatePhase1, getAge } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
-export default function Pointage({}) {
+export default function Pointage() {
   const [young, setYoung] = useState();
   const [focusedSession, setFocusedSession] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
@@ -165,7 +166,8 @@ export default function Pointage({}) {
 
 const Line = ({ hit, onClick, selected }) => {
   const [value, setValue] = useState(null);
-  const [modal, setModal] = useState({ isOpen: false });
+  const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
+  const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
 
   useEffect(() => {
     setValue(hit);
@@ -188,7 +190,8 @@ const Line = ({ hit, onClick, selected }) => {
     const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
     if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
     setValue(data);
-    setModal({ isOpen: false, value: null });
+    setModalPointagePresenceArrivee({ isOpen: false, value: null });
+    setModalPointagePresenceJDM({ isOpen: false, value: null });
   };
 
   return (
@@ -208,7 +211,7 @@ const Line = ({ hit, onClick, selected }) => {
               className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer ${cohesionStayPresenceBgColor} ${cohesionStayPresenceTextColor}`}
               value={value.cohesionStayPresence || ""}
               onChange={(e) => {
-                setModal({
+                setModalPointagePresenceArrivee({
                   isOpen: true,
                   value: e.target.value,
                 });
@@ -233,9 +236,9 @@ const Line = ({ hit, onClick, selected }) => {
           <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
             <select
               className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer ${presenceJDMBgColor} ${presenceJDMTextColor}`}
-              value={""}
+              value={value.presenceJDM || ""}
               onChange={(e) => {
-                setModal({
+                setModalPointagePresenceJDM({
                   isOpen: true,
                   value: e.target.value,
                 });
@@ -263,7 +266,20 @@ const Line = ({ hit, onClick, selected }) => {
           </div>
         </td>
       </tr>
-      <ModalPointagePresenceArrivee isOpen={modal?.isOpen} onCancel={() => setModal({ isOpen: false, value: null })} onSubmit={onSubmit} value={modal?.value} young={value} />
+      <ModalPointagePresenceArrivee
+        isOpen={modalPointagePresenceArrivee?.isOpen}
+        onCancel={() => setModalPointagePresenceArrivee({ isOpen: false, value: null })}
+        onSubmit={onSubmit}
+        value={modalPointagePresenceArrivee?.value}
+        young={value}
+      />
+      <ModalPointagePresenceJDM
+        isOpen={modalPointagePresenceJDM?.isOpen}
+        onCancel={() => setModalPointagePresenceJDM({ isOpen: false, value: null })}
+        onSubmit={onSubmit}
+        value={modalPointagePresenceJDM?.value}
+        young={value}
+      />
     </>
   );
 };

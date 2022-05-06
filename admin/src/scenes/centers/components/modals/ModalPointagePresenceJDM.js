@@ -2,16 +2,16 @@ import React from "react";
 import ModalForm from "../../../../components/modals/ModalForm";
 import SpeakerPhone from "../../../../assets/icons/SpeakerPhone";
 
-export default function ModalPointagePresenceArrivee({ isOpen, onSubmit, onCancel, value, young }) {
+export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, value, young }) {
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const getTitle = () => `Marquer ${young.firstName} ${value === "true" ? "présent(e)" : "absent(e)"}`;
-  const getMessage = () => `Vous êtes sur le point de marquer ${young.firstName} ${value === "true" ? "présent(e)" : "absent(e)"} au séjour de cohésion.`;
+  const getTitle = () => `Marquer ${young.firstName} ${value === "true" ? "présent(e)" : "absent(e)"} à la JDM`;
+  const getMessage = () => `Vous êtes sur le point de marquer ${young.firstName} ${value === "true" ? "présent(e)" : "absent(e)"} à la JDM.`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    await onSubmit({ cohesionStayPresence: value });
+    await onSubmit({ presenceJDM: value });
     setIsLoading(false);
   };
 
