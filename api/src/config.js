@@ -40,6 +40,8 @@ const SLACK_BOT_CHANNEL = process.env.SLACK_BOT_CHANNEL || "";
 const JVA_TOKEN = process.env.JVA_TOKEN || "";
 const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
+const EDUCONNECT_CERT = process.env.EDUCONNECT_CERT || "";
+
 module.exports = {
   PORT,
   MONGO_URL,
@@ -74,6 +76,7 @@ module.exports = {
   SLACK_BOT_CHANNEL,
   JVA_TOKEN,
   JVA_API_KEY,
+  EDUCONNECT_CERT,
 };
 
 function getEnvironment() {
