@@ -21,18 +21,18 @@ export default function DetailsView({ structure }) {
   const [parentStructure, setParentStructure] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
-  const onClickDelete = () => {
+  const onClickDelete = (target) => {
     setModal({
       isOpen: true,
-      onConfirm: () => onConfirmDelete(),
-      title: `Êtes-vous sûr(e) de vouloir supprimer le profil de ${user.firstName} ${user.lastName} ?`,
+      onConfirm: () => onConfirmDelete(target),
+      title: `Êtes-vous sûr(e) de vouloir supprimer le profil de ${target.firstName} ${target.lastName} ?`,
       message: "Cette action est irréversible.",
     });
   };
 
-  const onConfirmDelete = async () => {
+  const onConfirmDelete = async (target) => {
     try {
-      const { ok, code } = await api.remove(`/referent/${user._id}`);
+      const { ok, code } = await api.remove(`/referent/${target._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok && code === "LINKED_OBJECT") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
@@ -118,7 +118,7 @@ export default function DetailsView({ structure }) {
                           <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
                         </div>
                       </Link>
-                      {canDeleteReferent({ actor: user, originalTarget: referent }) && <DeleteBtn onClick={onClickDelete}>{"🗑"}</DeleteBtn>}
+                      {canDeleteReferent({ actor: user, originalTarget: referent }) && <DeleteBtn onClick={() => onClickDelete(referent)}>{"🗑"}</DeleteBtn>}
                     </>
                   ))}
                   <ModalConfirm
