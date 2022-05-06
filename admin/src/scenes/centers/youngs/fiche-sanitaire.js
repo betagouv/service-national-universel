@@ -35,7 +35,7 @@ import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
-export default function Youngs({ updateCenter }) {
+export default function General({ updateCenter }) {
   const [young, setYoung] = useState();
   const [center, setCenter] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
@@ -163,16 +163,14 @@ export default function Youngs({ updateCenter }) {
                     react={{ and: FILTERS }}
                     dataField="lastName.keyword"
                     sortBy="asc"
+                    paginationAt="bottom"
+                    showTopResultStats={false}
                     render={({ data }) => (
                       <table className="w-full">
                         <thead className="">
                           <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
                             <th className="py-3 pl-4">Volontaire</th>
-                            <th className="">Présence à l&apos;arrivée</th>
-                            <th className="">Présence JDM</th>
-                            <th className="">Départ</th>
                             <th className="">Fiche Sanitaire</th>
-                            <th className="">Statut phase 1</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -219,21 +217,7 @@ const Line = ({ hit, onClick, selected, onChangeYoung }) => {
         </div>
       </td>
       <td>
-        <div className="font-normal text-xs text-[#242526]">{translate(value.cohesionStayPresence)}</div>
-      </td>
-      <td>
-        <div className="font-normal text-xs text-[#242526]">Absent</div>
-      </td>
-      <td>
-        <div className="font-normal text-xs text-[#242526]">ø</div>
-      </td>
-      <td>
         <div className="font-normal text-xs text-[#242526]">{translate(value.cohesionStayMedicalFileReceived)}</div>
-      </td>
-      <td>
-        <div>
-          <Badge text={translate(value.statusPhase1)} color={YOUNG_STATUS_COLORS[value.statusPhase1]} />
-        </div>
       </td>
     </tr>
   );

@@ -2,7 +2,9 @@ import React from "react";
 import { useParams, useHistory, NavLink } from "react-router-dom";
 
 import { environment } from "../../../config";
-import List from "./list";
+import General from "./general";
+import Pointage from "./pointage";
+import FicheSanitaire from "./fiche-sanitaire";
 import Menu from "../../../assets/icons/Menu";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
@@ -30,9 +32,9 @@ export default function CenterYoungIndex() {
           </nav>
         </div>
         <div className="bg-white pt-4">
-          {currentTab === "general" && <List />}
-          {currentTab === "tableau-de-pointage" && <div>Tableau de pointage</div>}
-          {currentTab === "fiche-sanitaire" && <div>Fiche sanitaire</div>}
+          {currentTab === "general" && <General />}
+          {currentTab === "tableau-de-pointage" && <Pointage />}
+          {currentTab === "fiche-sanitaire" && <FicheSanitaire />}
         </div>
       </div>
     </>

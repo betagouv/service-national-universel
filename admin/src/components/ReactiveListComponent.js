@@ -3,16 +3,15 @@ import { ReactiveList } from "@appbaseio/reactivesearch";
 import { TopResultStats, BottomResultStats } from "./list";
 import { getResultLabel } from "../utils";
 
-export default function ReactiveListComponent(props) {
-  const PAGE_SIZE = props.pageSize || 10;
+export default function ReactiveListComponent({ showTopResultStats = true, showBottomResultStats = true, pageSize = 10, pagination = true, paginationAt = "both", ...props }) {
   return (
     <ReactiveList
       // default props
       componentId="result"
-      pagination={true}
-      paginationAt="both"
+      pagination={pagination}
+      paginationAt={paginationAt}
       innerClass={{ pagination: "pagination", sortOptions: "sort-options" }}
-      size={PAGE_SIZE}
+      size={pageSize}
       dataField="createdAt"
       sortBy="desc"
       showLoader={true}
@@ -22,8 +21,8 @@ export default function ReactiveListComponent(props) {
       renderResultStats={(e) => {
         return (
           <>
-            <TopResultStats>{getResultLabel(e, PAGE_SIZE)}</TopResultStats>
-            <BottomResultStats>{getResultLabel(e, PAGE_SIZE)}</BottomResultStats>
+            {showTopResultStats ? <TopResultStats>{getResultLabel(e, pageSize)}</TopResultStats> : null}
+            {showBottomResultStats ? <BottomResultStats>{getResultLabel(e, pageSize)}</BottomResultStats> : null}
           </>
         );
       }}
