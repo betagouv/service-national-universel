@@ -1,3 +1,21 @@
+# [1.81.0](https://github.com/betagouv/service-national-universel/compare/v1.80.1...v1.81.0) (2022-05-06)
+
+
+### Bug Fixes
+
+* center wip ([f18b423](https://github.com/betagouv/service-national-universel/commit/f18b423cd284cae135aba3835c0695956a67535b))
+* centre onglet pointage ([7c9d0ff](https://github.com/betagouv/service-national-universel/commit/7c9d0ff2350faebf9dc20c89f15dd6fd216a956b))
+* modal pointage jdm ([bcb601a](https://github.com/betagouv/service-national-universel/commit/bcb601a14cdc8d09e9080d36a3842e613519de89))
+* pointage fiche sanitaire ([56ceb41](https://github.com/betagouv/service-national-universel/commit/56ceb4126c3312fe0f392a87db971efddb01b245))
+* style filter volontaires centres ([af6350c](https://github.com/betagouv/service-national-universel/commit/af6350ca89cf2cc2847e10c5ab61cfca662e9649))
+* style pointage ([ab40df2](https://github.com/betagouv/service-national-universel/commit/ab40df2ce081c6c0e546c8b8f81366c4f6adb111))
+* style pointage general ([0bc9413](https://github.com/betagouv/service-national-universel/commit/0bc9413f0b781a7f34b2b6b321353add1804b3b2))
+
+
+### Features
+
+* **api:** ajout `presenceJDM` ([aff60a1](https://github.com/betagouv/service-national-universel/commit/aff60a180ceffae9901ff8a84ff3f3f9f731e55c))
+
 ## [1.80.1](https://github.com/betagouv/service-national-universel/compare/v1.80.0...v1.80.1) (2022-05-05)
 
 
