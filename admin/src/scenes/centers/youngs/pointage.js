@@ -208,12 +208,16 @@ const Line = ({ hit, onClick, selected, onChangeYoung }) => {
 
   if (!value) return <></>;
 
+  const bgColor = selected && "bg-snu-purple-300";
+  const mainTextColor = selected ? "text-white" : "text-[#242526]";
+  const secondTextColor = selected ? "text-blue-100" : "text-[#738297]";
+
   return (
-    <tr className="hover:bg-gray-100 rounded-lg" onClick={onClick}>
-      <td className="py-3 pl-4">
+    <tr className={`${!selected && "hover:!bg-gray-100"}`} onClick={onClick}>
+      <td className={`${bgColor} py-3 pl-4 ml-2 rounded-l-lg`}>
         <div>
-          <div className="font-bold text-[#242526] text-[15px]">{`${hit.firstName} ${hit.lastName}`}</div>
-          <div className="font-normal text-xs text-[#738297]">
+          <div className={`font-bold ${mainTextColor} text-[15px]`}>{`${hit.firstName} ${hit.lastName}`}</div>
+          <div className={`font-normal text-xs ${secondTextColor}`}>
             {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
           </div>
         </div>
