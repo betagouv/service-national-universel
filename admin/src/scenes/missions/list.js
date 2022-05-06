@@ -122,6 +122,7 @@ export default function List() {
                       Département: data.department,
                       Région: data.region,
                       Statut: translate(data.status),
+                      Motif: data.statusComment,
                       "Créé lé": formatLongDateFR(data.createdAt),
                       "Mis à jour le": formatLongDateFR(data.updatedAt),
                     };
@@ -296,7 +297,8 @@ export default function List() {
                     <span className="title">Modalités :</span>concerne toutes les condtions de réalisation de la mission.
                   </div>
                   <div>
-                    <span className="title">Dates :</span>permettent de filtrer les missions dont les dates de début et de fin sont inclues dans la borne temporelle. Attention les missions dont seulement 1 jour est inclus seront également affichées.
+                    <span className="title">Dates :</span>permettent de filtrer les missions dont les dates de début et de fin sont inclues dans la borne temporelle. Attention les
+                    missions dont seulement 1 jour est inclus seront également affichées.
                   </div>
                 </div>
               </HelpText>
