@@ -188,16 +188,28 @@ const Line = ({ hit, onClick, selected }) => {
         </div>
       </td>
       <td className={`${bgColor}`}>
-        <div className={`font-normal text-xs ${mainTextColor}`}>{translate(value.cohesionStayPresence)}</div>
+        <div className={`font-normal text-xs ${mainTextColor}`}>
+          {!value.cohesionStayPresence && <span className="text-gray-400 italic">Non renseignée</span>}
+          {value.cohesionStayPresence === "true" && "Présent"}
+          {value.cohesionStayPresence === "false" && "Absent"}
+        </div>
       </td>
       <td className={`${bgColor}`}>
-        <div className={`font-normal text-xs ${mainTextColor}`}>Absent</div>
+        <div className={`font-normal text-xs ${mainTextColor}`}>
+          {!value.presenceJDM && <span className="text-gray-400 italic">Non renseignée</span>}
+          {value.presenceJDM === "true" && "Présent"}
+          {value.presenceJDM === "false" && "Absent"}
+        </div>
       </td>
       <td className={`${bgColor}`}>
         <div className={`font-normal text-xs ${mainTextColor}`}>ø</div>
       </td>
       <td className={`${bgColor}`}>
-        <div className={`font-normal text-xs ${mainTextColor}`}>{translate(value.cohesionStayMedicalFileReceived)}</div>
+        <div className={`font-normal text-xs ${mainTextColor}`}>
+          {!value.cohesionStayMedicalFileReceived && <span className="text-gray-400 italic">Non renseignée</span>}
+          {value.cohesionStayMedicalFileReceived === "true" && "Réceptionnée"}
+          {value.cohesionStayMedicalFileReceived === "false" && "Non réceptionnée"}
+        </div>
       </td>
       <td className={`${bgColor} rounded-r-lg`}>
         <div>
