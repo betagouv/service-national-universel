@@ -8,7 +8,7 @@ const {
   EDUCONNECT_SP_CERT,
   EDUCONNECT_SP_KEY,
   EDUCONNECT_IDP_CERT,
-} = require("../config.js");
+} = require("../../config");
 const { fetch, toPassportConfig, claimsToCamelCase } = require("passport-saml-metadata");
 const path = require("path");
 
