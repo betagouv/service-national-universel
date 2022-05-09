@@ -666,12 +666,14 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       structureName: Joi.string().allow(null, ""),
       cta: Joi.string().allow(null, ""),
       type_document: Joi.string().allow(null, ""),
+      object: Joi.string().allow(null, ""),
+      link: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     // eslint-disable-next-line no-unused-vars
-    const { id, template, message, prevStatus, missionName, structureName, cta, type_document } = value;
+    const { id, template, message, prevStatus, missionName, structureName, cta, type_document, object, link } = value;
 
     // The template must exist.
     if (!Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
@@ -699,7 +701,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName, type_document },
+      params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName, type_document, object, link },
       cc,
     });
 
@@ -876,7 +878,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const keys = ["cohesionStayMedical", "autoTestPCR", "imageRight", "rules", "agreement"];
+    const keys = ["cohesionStayMedical", "autoTestPCR", "imageRight", "rules", "agreement", "convocation"];
     const { error: documentError, value: document } = Joi.string()
       .required()
       .valid(...keys)

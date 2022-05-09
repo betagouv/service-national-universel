@@ -1,20 +1,20 @@
+import { Field, Formik } from "formik";
 import React, { useState } from "react";
-import { Col, Button, Modal } from "reactstrap";
-import { useSelector, useDispatch } from "react-redux";
-import { Formik, Field } from "formik";
-import DndFileInput from "../../components/dndFileInput";
-import { HeroContainer, Hero } from "../../components/Content";
-import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
-import { ModalContainer } from "../../components/modals/Modal";
-import api from "../../services/api";
+import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { setYoung } from "../../redux/auth/actions";
-import { translate, colors } from "../../utils";
-import { SuccessMessage, RadioLabel, Footer, FormRow, Title, Logo, BackButton, Content } from "./components/printable";
-import LoadingButton from "../../components/buttons/LoadingButton";
+import { Button, Col, Modal } from "reactstrap";
 import styled from "styled-components";
 import CloseSvg from "../../assets/Close";
+import LoadingButton from "../../components/buttons/LoadingButton";
+import { Hero, HeroContainer } from "../../components/Content";
+import DndFileInput from "../../components/dndFileInput";
+import { ModalContainer } from "../../components/modals/Modal";
 import { environment } from "../../config";
+import { setYoung } from "../../redux/auth/actions";
+import api from "../../services/api";
+import { colors, translate } from "../../utils";
+import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
+import { BackButton, Content, Footer, FormRow, Logo, RadioLabel, SuccessMessage, Title } from "./components/printable";
 import RulesDetail from "./components/RulesDetail";
 
 export default function Rules({ isOpen, onCancel, correction }) {
@@ -45,9 +45,8 @@ export default function Rules({ isOpen, onCancel, correction }) {
                     Vous avez accepté le réglement intérieur.
                   </SuccessMessage>
                 </>
-              ) : (
-                <RulesDetail young={young} />
-              )}
+              ) : null}
+              <RulesDetail young={young} />
             </div>
           </ModalContainer>
         </Modal>

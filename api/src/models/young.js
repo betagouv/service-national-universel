@@ -342,6 +342,15 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  convocationFileDownload: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La convacation a été telechargée",
+    },
+  },
+
   sessionPhase1Id: {
     type: String,
     documentation: {
@@ -1171,22 +1180,6 @@ const Schema = new mongoose.Schema({
     default: [],
     documentation: {
       description: "Fichiers : règlement intérieur",
-    },
-  },
-
-  rulesFilesStatus: {
-    type: String,
-    enum: ["TO_UPLOAD", "WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED"],
-    default: "TO_UPLOAD",
-    documentation: {
-      description: "Status du fichier règlement intérieur",
-    },
-  },
-
-  rulesFilesComment: {
-    type: String,
-    documentation: {
-      description: "Commentaire du status WAITING_CORRECTION règlement intérieur",
     },
   },
 

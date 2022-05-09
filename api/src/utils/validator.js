@@ -655,6 +655,10 @@ function validatePhase1Document(phase1document, key) {
       return Joi.object({
         cohesionStayMedicalFileDownload: Joi.string().trim().required().valid("true"),
       }).validate(phase1document);
+    case "convocation":
+      return Joi.object({
+        convocationFileDownload: Joi.string().trim().required().valid("true"),
+      }).validate(phase1document);
   }
 }
 

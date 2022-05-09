@@ -7,7 +7,7 @@ import styled from "styled-components";
 
 import { useSelector } from "react-redux";
 import { HeroContainer, Hero } from "../../components/Content";
-import { FILE_STATUS_PHASE1, translateFileStatusPhase1 } from "../../utils";
+import { FILE_STATUS_PHASE1, translateFileStatusPhase1, YOUNG_STATUS_PHASE1 } from "../../utils";
 import { environment } from "../../config";
 import FileCard from "./components/FileCard";
 
@@ -21,40 +21,57 @@ export default function DocumentsPhase1({ young }) {
   useEffect(() => {
     if (young) {
       let nb = 0;
-      if (young.imageRightFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
-      if (young.cohesionStayMedicalFileReceived === "true") nb++;
-      if (young.rulesYoung === "true") nb++;
-      if (young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
+      if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) {
+        if (young.imageRightFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
+        if (young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
+      } else {
+        if (young.imageRightFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
+        if (young.cohesionStayMedicalFileReceived === "true") nb++;
+        if (young.rulesYoung === "true") nb++;
+        if (young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
+      }
+
       setDocuments(nb);
     }
-  }, []);
+  }, [young]);
 
   return (
     <>
       {environment !== "production" ? (
         <>
           <h3>
-            Mes documents justificatifs <strong>({documents}/4)</strong>
+            Mes documents justificatifs{" "}
+            <strong>
+              ({documents}/{young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? "2" : "4"})
+            </strong>
           </h3>
-          <ScrollSection className="flex justify-between overflow-x-auto scrollbar-x pt-4">
-            <FileCard
-              name="Règlement intérieur"
-              icon="reglement"
-              filled={young.rulesYoung === "true"}
-              color={young.rulesYoung !== "true" ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
-              status={young.rulesYoung === "true" ? "Accepté" : "À renseigner"}
-              onClick={() => setIsOpenReg(true)}
-            />
-            <FileCard
-              name="Fiche sanitaire"
-              icon="sanitaire"
-              filled={young.cohesionStayMedicalFileDownload === "true"}
-              color={young.cohesionStayMedicalFileDownload === "true" ? "bg-white text-indigo-700" : "bg-indigo-700 text-white"}
-              status={
-                young.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : young.cohesionStayMedicalFileDownload === "true" ? "Télécharger de nouveau" : "Non Téléchargée"
-              }
-              onClick={() => setIsOpenMed(true)}
-            />
+          <ScrollSection className={`flex ${young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && "justify-between"} overflow-x-auto scrollbar-x pt-4`}>
+            {young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED ? (
+              <>
+                <FileCard
+                  name="Règlement intérieur"
+                  icon="reglement"
+                  filled={young.rulesYoung === "true"}
+                  color={young.rulesYoung !== "true" ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
+                  status={young.rulesYoung === "true" ? "Accepté" : "À renseigner"}
+                  onClick={() => setIsOpenReg(true)}
+                />
+                <FileCard
+                  name="Fiche sanitaire"
+                  icon="sanitaire"
+                  filled={young.cohesionStayMedicalFileDownload === "true"}
+                  color={young.cohesionStayMedicalFileDownload === "true" ? "bg-white text-indigo-700" : "bg-indigo-700 text-white"}
+                  status={
+                    young.cohesionStayMedicalFileReceived === "true"
+                      ? "Réceptionnée"
+                      : young.cohesionStayMedicalFileDownload === "true"
+                      ? "Télécharger de nouveau"
+                      : "Non Téléchargée"
+                  }
+                  onClick={() => setIsOpenMed(true)}
+                />
+              </>
+            ) : null}
             <FileCard
               name="Droit à l'image"
               icon="image"
