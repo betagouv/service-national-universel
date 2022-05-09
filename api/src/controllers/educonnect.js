@@ -16,6 +16,7 @@ const {
   EDUCONNECT_SP_CERT,
   EDUCONNECT_SP_KEY,
   EDUCONNECT_IDP_CERT,
+  EDUCONNECT_IDP_KEY,
 } = require("../config.js");
 
 const sp_options = {
@@ -30,7 +31,7 @@ const sp = new saml2.ServiceProvider(sp_options);
 const idp_options = {
   sso_login_url: EDUCONNECT_ENTRY_POINT,
   sso_logout_url: EDUCONNECT_LOGOUT_POINT,
-  certificates: [EDUCONNECT_IDP_CERT],
+  certificates: [EDUCONNECT_IDP_CERT, EDUCONNECT_IDP_KEY],
 };
 const idp = new saml2.IdentityProvider(idp_options);
 
@@ -52,7 +53,7 @@ router.get("/signup", async (req, res) => {
 // Assert endpoint for when login completes
 router.post("/callback", function (req, res) {
   const options = { request_body: req.body };
-  sp.redirect_assert(idp, options, function (err, saml_response) {
+  sp.post_assert(idp, options, function (err, saml_response) {
     if (err != null) return res.send(500);
 
     // Save name_id and session_index for logout
