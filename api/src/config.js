@@ -40,6 +40,14 @@ const SLACK_BOT_CHANNEL = process.env.SLACK_BOT_CHANNEL || "";
 const JVA_TOKEN = process.env.JVA_TOKEN || "";
 const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
+const EDUCONNECT_ENTRY_POINT = process.env.EDUCONNECT_ENTRY_POINT || "";
+const EDUCONNECT_LOGOUT_POINT = process.env.EDUCONNECT_LOGOUT_POINT || "";
+const EDUCONNECT_ISSUER = process.env.EDUCONNECT_ISSUER || "";
+const EDUCONNECT_CALLBACK_URL = process.env.EDUCONNECT_CALLBACK_URL || "";
+const EDUCONNECT_SP_CERT = process.env.EDUCONNECT_SP_CERT || "";
+const EDUCONNECT_SP_KEY = process.env.EDUCONNECT_SP_KEY || "";
+const EDUCONNECT_IDP_CERT = process.env.EDUCONNECT_IDP_CERT || "";
+
 module.exports = {
   PORT,
   MONGO_URL,
@@ -74,6 +82,13 @@ module.exports = {
   SLACK_BOT_CHANNEL,
   JVA_TOKEN,
   JVA_API_KEY,
+  EDUCONNECT_ENTRY_POINT,
+  EDUCONNECT_LOGOUT_POINT,
+  EDUCONNECT_ISSUER,
+  EDUCONNECT_CALLBACK_URL,
+  EDUCONNECT_SP_CERT,
+  EDUCONNECT_SP_KEY,
+  EDUCONNECT_IDP_CERT,
 };
 
 function getEnvironment() {
