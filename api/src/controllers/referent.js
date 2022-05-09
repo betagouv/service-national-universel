@@ -298,6 +298,12 @@ router.post("/signup_invite", async (req, res) => {
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
 
+    if (referent.role === ROLES.REFERENT_DEPARTMENT) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.WELCOME, {
+        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+      });
+    }
+
     return res.status(200).send({ data: serializeReferent(referent, referent), token, ok: true });
   } catch (error) {
     capture(error);
