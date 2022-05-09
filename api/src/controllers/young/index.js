@@ -916,6 +916,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
 
 router.use("/:id/documents", require("./documents"));
 router.use("/:id/meeting-point", require("./meeting-point"));
+router.use("/:id/phase1", require("./phase1"));
 router.use("/inscription", require("./inscription"));
 
 module.exports = router;

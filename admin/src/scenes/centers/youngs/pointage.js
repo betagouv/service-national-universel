@@ -185,11 +185,10 @@ const Line = ({ hit, onClick, selected }) => {
   const presenceJDMBgColor = value.presenceJDM === "false" && "bg-gray-100";
   const presenceJDMTextColor = !value.presenceJDM && "text-gray-400";
 
-  const onSubmit = async (v) => {
-    // todo route api expres pour changer les présences de phase1
-    const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
-    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
-    setValue(data);
+  const onSubmit = async (newValue) => {
+    setValue(newValue);
+
+    // on ferme les modales
     setModalPointagePresenceArrivee({ isOpen: false, value: null });
     setModalPointagePresenceJDM({ isOpen: false, value: null });
   };

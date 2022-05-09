@@ -178,11 +178,10 @@ const Line = ({ hit, onClick, selected }) => {
   const ficheSanitaireBgColor = value.cohesionStayMedicalFileReceived === "false" && "bg-gray-100";
   const ficheSanitaireTextColor = !value.cohesionStayMedicalFileReceived && "text-gray-400";
 
-  const onSubmit = async (v) => {
-    // todo route api expres pour changer les présences de phase1
-    const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
-    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
-    setValue(data);
+  const onSubmit = async (newValue) => {
+    setValue(newValue);
+
+    // on ferme la modale
     setModalPointageFicheSanitaire({ isOpen: false, value: null });
   };
 

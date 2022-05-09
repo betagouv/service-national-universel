@@ -1,6 +1,9 @@
 import React from "react";
 import ModalForm from "../../../../components/modals/ModalForm";
 import SpeakerPhone from "../../../../assets/icons/SpeakerPhone";
+import api from "../../../../services/api";
+import { toastr } from "react-redux-toastr";
+import { translate } from "../../../../utils";
 
 export default function ModalPointagePresenceArrivee({ isOpen, onSubmit, onCancel, value, young }) {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -11,7 +14,13 @@ export default function ModalPointagePresenceArrivee({ isOpen, onSubmit, onCance
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    await onSubmit({ cohesionStayPresence: value });
+    const { data, ok, code } = await api.post(`/young/${young._id}/phase1/presence-sejour`, { value });
+    if (!ok) {
+      toastr.error("Oups, une erreur s'est produite", translate(code));
+      setIsLoading(false);
+      return;
+    }
+    await onSubmit(data);
     setIsLoading(false);
   };
 

@@ -1,6 +1,9 @@
 import React from "react";
 import ModalForm from "../../../../components/modals/ModalForm";
 import ShieldCheck from "../../../../assets/icons/ShieldCheck";
+import api from "../../../../services/api";
+import { toastr } from "react-redux-toastr";
+import { translate } from "../../../../utils";
 
 export default function ModalPointageFicheSanitaire({ isOpen, onSubmit, onCancel, value, young }) {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -11,7 +14,13 @@ export default function ModalPointageFicheSanitaire({ isOpen, onSubmit, onCancel
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    await onSubmit({ cohesionStayMedicalFileReceived: value });
+    const { data, ok, code } = await api.post(`/young/${young._id}/phase1/fiche-sanitaire`, { value });
+    if (!ok) {
+      toastr.error("Oups, une erreur s'est produite", translate(code));
+      setIsLoading(false);
+      return;
+    }
+    await onSubmit(data);
     setIsLoading(false);
   };
 
