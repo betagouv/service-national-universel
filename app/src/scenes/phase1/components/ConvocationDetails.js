@@ -20,16 +20,16 @@ import { translate } from "../../../utils";
 import Convocation from "./Convocation";
 
 const departureMeetingDate = {
-  2021: "le lundi 20 février, 14:00",
-  "Février 2022": "le dimanche 13 février, 16:00",
-  "Juin 2022": "le dimanche 12 juin, 16:00",
-  "Juillet 2022": "le dimanche 03 juillet, 16:00",
+  2021: "lundi 20 février, 14:00",
+  "Février 2022": "dimanche 13 février, 16:00",
+  "Juin 2022": "dimanche 12 juin, 16:00",
+  "Juillet 2022": "dimanche 03 juillet, 16:00",
 };
 const returnMeetingDate = {
-  2021: "le mardi 02 juillet, 14:00",
-  "Février 2022": "le vendredi 25 février, 11:00",
-  "Juin 2022": "le vendredi 24 juin, 11:00",
-  "Juillet 2022": "le vendredi 15 juillet, 11:00",
+  2021: "mardi 02 juillet, 14:00",
+  "Février 2022": "vendredi 25 février, 11:00",
+  "Juin 2022": "vendredi 24 juin, 11:00",
+  "Juillet 2022": "vendredi 15 juillet, 11:00",
 };
 
 const cohortToMonth = {
@@ -66,6 +66,21 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
     });
   };
 
+  const getDepartureMeetingDate = () => {
+    if (isAutonomous || !meetingPoint) return departureMeetingDate[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
+    return meetingPoint.departureAtString;
+  };
+  const getReturnMeetingDate = () => {
+    if (isAutonomous || !meetingPoint) return returnMeetingDate[young.cohort]; // new Date("2021-07-02T12:00:00.000+00:00");
+    return meetingPoint.returnAtString;
+  };
+  const getMeetingAddress = () => {
+    if (isAutonomous || !meetingPoint) return [center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ");
+    return [meetingPoint?.departureAddress, meetingPoint?.departureZip, meetingPoint?.departureCity, meetingPoint?.departureDepartment, meetingPoint?.departureRegion]
+      .filter((e) => e)
+      .join(", ");
+  };
+
   async function confirmAutonomous() {
     setIsLoading(true);
     const { data, code, ok } = await api.post(`/young/${young._id}/deplacementPhase1Autonomous`);
@@ -89,61 +104,29 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
                 <LinearMap className="w-16 h-16 mr-3" />
                 <div className="flex flex-col">
                   <div className="text-sm leading-7 font-bold">Lieu de rassemblement</div>
-                  <div className="text-sm text-gray-800 leading-5 max-w-sm">
-                    {meetingPoint && !isAutonomous ? (
-                      <p style={{ margin: 0 }}>
-                        {[meetingPoint?.departureAddress, meetingPoint?.departureZip, meetingPoint?.departureCity, meetingPoint?.departureDepartment, meetingPoint?.departureRegion]
-                          .filter((e) => e)
-                          .join(", ")}
-                      </p>
-                    ) : (
-                      <p style={{ margin: 0 }}>{[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}</p>
-                    )}
-                  </div>
+                  <div className="text-sm text-gray-800 leading-5 max-w-sm">{getMeetingAddress()}</div>
                 </div>
               </div>
               <div className="flex flex-row items-center flex-1 md:!justify-center pb-3 md:!pb-0 my-3">
-                <Calendar
-                  date={meetingPoint && !isAutonomous ? meetingPoint?.returnAtString.split(" ")[1] : departureMeetingDate[young.cohort].split(" ")[2]}
-                  month={cohortToMonth[young.cohort]}
-                  className="shadow-sm mr-3 w-7 h-10 md:w-11 md:h-12 md:mx-3"
-                />
+                <Calendar date={getDepartureMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mr-3 w-7 h-10 md:w-11 md:h-12 md:mx-3" />
 
                 <div className="flex flex-col">
-                  <div className="font-bold text-sm whitespace-nowrap">
-                    Aller à{meetingPoint && !isAutonomous ? meetingPoint?.returnAtString.split(",")[1] : departureMeetingDate[young.cohort].split(",")[1]}
-                  </div>
+                  <div className="font-bold text-sm whitespace-nowrap">Aller à{getDepartureMeetingDate().split(",")[1]}</div>
                   <div className="text-sm text-gray-600 whitespace-nowrap">
-                    {meetingPoint && !isAutonomous
-                      ? meetingPoint?.returnAtString
-                          .split(/[,\s]+/)
-                          .slice(0, 3)
-                          .join(" ")
-                      : departureMeetingDate[young.cohort]
-                          .split(/[,\s]+/)
-                          .slice(1, 4)
-                          .join(" ")}
+                    {getDepartureMeetingDate()
+                      .split(/[,\s]+/)
+                      .slice(0, 3)
+                      .join(" ")}
                   </div>
                 </div>
-                <Calendar
-                  date={meetingPoint && !isAutonomous ? meetingPoint?.returnAtString.split(" ")[1] : returnMeetingDate[young.cohort].split(" ")[2]}
-                  month={cohortToMonth[young.cohort]}
-                  className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12"
-                />
+                <Calendar date={getReturnMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12" />
                 <div className="flex flex-col">
-                  <div className="font-bold text-sm whitespace-nowrap">
-                    Retour à{meetingPoint && !isAutonomous ? meetingPoint?.returnAtString.split(",")[1] : returnMeetingDate[young.cohort].split(",")[1]}
-                  </div>
+                  <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
                   <div className="text-sm text-gray-600 whitespace-nowrap">
-                    {meetingPoint && !isAutonomous
-                      ? meetingPoint?.returnAtString
-                          .split(/[,\s]+/)
-                          .slice(0, 3)
-                          .join(" ")
-                      : returnMeetingDate[young.cohort]
-                          .split(/[,\s]+/)
-                          .slice(1, 4)
-                          .join(" ")}
+                    {getReturnMeetingDate()
+                      .split(/[,\s]+/)
+                      .slice(0, 3)
+                      .join(" ")}
                   </div>
                 </div>
               </div>
