@@ -15,6 +15,7 @@ const { sendTemplate } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { getAge } = require("snu-lib/date");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
@@ -83,11 +84,7 @@ async function updateContract(id, data, fromUser) {
     contract.parent1Token = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendParent1ContractEmail(contract, previous.parent1Status === "VALIDATED");
   }
-  if (
-    !isYoungAdult &&
-    contract.parent2Email &&
-    (previous.invitationSent !== "true" || previous.parent2Status === "VALIDATED" || previous.parent2Email !== contract.parent2Email)
-  ) {
+  if (!isYoungAdult && contract.parent2Email && (previous.invitationSent !== "true" || previous.parent2Status === "VALIDATED" || previous.parent2Email !== contract.parent2Email)) {
     contract.parent2Status = "WAITING_VALIDATION";
     contract.parent2Token = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendParent2ContractEmail(contract, previous.parent2Status === "VALIDATED");

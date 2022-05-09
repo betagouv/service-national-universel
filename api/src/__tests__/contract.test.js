@@ -44,7 +44,7 @@ describe("Structure", () => {
     describe("when it works", () => {
       async function createContract(options, initialYoung) {
         const young = initialYoung || (await createYoungHelper(getNewYoungFixture()));
-        const application = await createApplication({ ...getNewApplicationFixture(), status:"VALIDATED", youngId: young._id });
+        const application = await createApplication({ ...getNewApplicationFixture(), status: "VALIDATED", youngId: young._id });
         const contractFixture = getNewContractFixture();
         contractFixture.youngId = young._id;
         contractFixture.applicationId = application._id;
@@ -91,16 +91,16 @@ describe("Structure", () => {
         expect(res.body.data.projectManagerToken).toBeTruthy();
         expect(res.body.data.structureManagerToken).toBeTruthy();
         expect(res.body.data.parent2Token).toBeTruthy();
-        expect(res.body.data.youngContractToken).toBeUndefined();
+        expect(res.body.data.youngContractToken).toBeTruthy();
       });
 
       it("should create tokens for young (adult)", async () => {
         const { res } = await createContract({ sendMessage: true, isYoungAdult: "true" });
         expect(res.status).toBe(200);
-        expect(res.body.data.parent1Token).toBeUndefined();
+        expect(res.body.data.parent1Token).toBeTruthy();
         expect(res.body.data.projectManagerToken).toBeTruthy();
         expect(res.body.data.structureManagerToken).toBeTruthy();
-        expect(res.body.data.parent2Token).toBeUndefined();
+        expect(res.body.data.parent2Token).toBeTruthy();
         expect(res.body.data.youngContractToken).toBeTruthy();
       });
 
