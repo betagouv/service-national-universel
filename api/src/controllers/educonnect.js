@@ -8,23 +8,31 @@ const path = require("path");
 const fetch = require("node-fetch");
 const { ERRORS } = require("../utils");
 
-const { EDUCONNECT_SP_CERT, EDUCONNECT_SP_KEY, EDUCONNECT_IDP_CERT } = require("../config.js");
+const {
+  EDUCONNECT_ENTRY_POINT,
+  EDUCONNECT_LOGOUT_POINT,
+  EDUCONNECT_ISSUER,
+  EDUCONNECT_CALLBACK_URL,
+  EDUCONNECT_SP_CERT,
+  EDUCONNECT_SP_KEY,
+  EDUCONNECT_IDP_CERT,
+} = require("../config.js");
 
-let sp_options = {
-  entity_id: "SNU",
+const sp_options = {
+  entity_id: EDUCONNECT_ISSUER,
   certificate: EDUCONNECT_SP_CERT,
   private_key: EDUCONNECT_SP_KEY,
-  assert_endpoint: "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io/educonnect/callback",
+  assert_endpoint: EDUCONNECT_CALLBACK_URL,
 };
-let sp = new saml2.ServiceProvider(sp_options);
+const sp = new saml2.ServiceProvider(sp_options);
 
 // Create identity provider
-var idp_options = {
-  sso_login_url: "https://pr4.educonnect.phm.education.gouv.fr/idp/profile/SAML2/Redirect/SSO",
-  sso_logout_url: "https://pr4.educonnect.phm.education.gouv.fr/idp/profile/SAML2/POST/SLO",
+const idp_options = {
+  sso_login_url: EDUCONNECT_ENTRY_POINT,
+  sso_logout_url: EDUCONNECT_LOGOUT_POINT,
   certificates: [EDUCONNECT_IDP_CERT],
 };
-var idp = new saml2.IdentityProvider(idp_options);
+const idp = new saml2.IdentityProvider(idp_options);
 
 router.get("/login", passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }));
 
@@ -43,7 +51,7 @@ router.get("/signup", async (req, res) => {
 
 // Assert endpoint for when login completes
 router.post("/callback", function (req, res) {
-  var options = { request_body: req.body };
+  const options = { request_body: req.body };
   sp.post_assert(idp, options, function (err, saml_response) {
     if (err != null) return res.send(500);
 
