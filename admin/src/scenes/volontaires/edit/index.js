@@ -12,7 +12,7 @@ import plausibleEvent from "../../../services/pausible";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 import LoadingButton from "../../../components/buttons/LoadingButton";
-import { translate, ROLES } from "../../../utils";
+import { translate, ROLES, getAge } from "../../../utils";
 import api from "../../../services/api";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { appURL } from "../../../config";
@@ -29,6 +29,7 @@ import Representant2 from "./representant-legal2";
 import Preferences from "./preferences";
 import Consentement from "./consentement";
 import ConsentementImage from "./consentement-image";
+import TraitementDonneesPersonnelles from "./traitement-donnees-personnelles";
 import ConsentementPCR from "./consentement-pcr";
 import Rules from "./rules";
 import InformationsSupplementaires from "./informations-supplementaires";
@@ -147,6 +148,7 @@ export default function VolontaireEdit(props) {
             <Row>
               <Consentement values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <ConsentementImage values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
+              {getAge(young?.birthdateAt) < 15 ? <TraitementDonneesPersonnelles values={values} handleChange={handleChange} handleSubmit={handleSubmit} /> : null}
               <ConsentementPCR values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <Rules values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>

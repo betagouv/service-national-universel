@@ -156,7 +156,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   ))}
                   {isFromFranceConnect(young) && (
                     <div style={{ marginTop: "1rem" }}>
-                      <img src={require("../../../assets/fc_logo_v2.png")} height={60} />
+                      <img src={require("../../../assets/fc_logo_v2.png")} height={60} width={200} />
                       <br />
                       <b>Consentement parental validé via FranceConnect.</b>
                       <br />
