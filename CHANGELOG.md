@@ -1,3 +1,13 @@
+## [1.81.1](https://github.com/betagouv/service-national-universel/compare/v1.81.0...v1.81.1) (2022-05-09)
+
+
+### Bug Fixes
+
+* empty env var necessary ([0abbac0](https://github.com/betagouv/service-national-universel/commit/0abbac054f38acabf8b5fb8b946b127b4df0a9fe))
+* **admin:** add edit `TraitementDonneesPersonnelles` ([120ac93](https://github.com/betagouv/service-national-universel/commit/120ac93d6872af4b1f2143839d50983fe16ce3f9))
+* **admin:** view structure réseau ([28428c3](https://github.com/betagouv/service-national-universel/commit/28428c372c9f5c61f23e2ad2a204b0970a2878ad))
+* **api,admin:** droit phase 1 ([bdc9676](https://github.com/betagouv/service-national-universel/commit/bdc9676891eccc7cee2d8aed9fa7d8af01f21e62))
+
 # [1.81.0](https://github.com/betagouv/service-national-universel/compare/v1.80.1...v1.81.0) (2022-05-06)
 
 
