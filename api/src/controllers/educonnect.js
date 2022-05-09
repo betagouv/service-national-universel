@@ -52,7 +52,7 @@ router.get("/signup", async (req, res) => {
 // Assert endpoint for when login completes
 router.post("/callback", function (req, res) {
   const options = { request_body: req.body };
-  sp.post_assert(idp, options, function (err, saml_response) {
+  sp.redirect_assert(idp, options, function (err, saml_response) {
     if (err != null) return res.send(500);
 
     // Save name_id and session_index for logout
