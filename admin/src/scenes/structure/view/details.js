@@ -66,7 +66,14 @@ export default function DetailsView({ structure }) {
                   <Details title="GPS" value={`${structure.location?.lat} , ${structure.location?.lon}`} copy />
                 ) : null}
                 <Details title="Siret" value={structure.siret} />
-                {parentStructure ? <Details title="Réseau national" value={<Badge text={parentStructure.name} color="#5245cc" />} /> : null}
+                {parentStructure ? (
+                  <div className="detail">
+                    <div className="detail-title">Réseau national&nbsp;:</div>
+                    <div className="detail-text">
+                      <Badge text={parentStructure.name} color="#5245cc" />
+                    </div>
+                  </div>
+                ) : null}
                 <Details
                   title="Tête de réseau"
                   value={structure.isNetwork === "true" ? "Cette structure est une tête de réseau" : "Cette structure n'est pas une tête de réseau"}
