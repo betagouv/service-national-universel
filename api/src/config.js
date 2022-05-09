@@ -40,7 +40,9 @@ const SLACK_BOT_CHANNEL = process.env.SLACK_BOT_CHANNEL || "";
 const JVA_TOKEN = process.env.JVA_TOKEN || "";
 const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
-const EDUCONNECT_CERT = process.env.EDUCONNECT_CERT || "";
+const EDUCONNECT_SP_CERT = process.env.EDUCONNECT_SP_CERT || "";
+const EDUCONNECT_SP_KEY = process.env.EDUCONNECT_SP_KEY || "";
+const EDUCONNECT_IDP_CERT = process.env.EDUCONNECT_IDP_CERT || "";
 
 module.exports = {
   PORT,
@@ -76,7 +78,9 @@ module.exports = {
   SLACK_BOT_CHANNEL,
   JVA_TOKEN,
   JVA_API_KEY,
-  EDUCONNECT_CERT,
+  EDUCONNECT_SP_CERT,
+  EDUCONNECT_SP_KEY,
+  EDUCONNECT_IDP_CERT,
 };
 
 function getEnvironment() {
