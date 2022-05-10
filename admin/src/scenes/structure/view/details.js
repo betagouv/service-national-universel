@@ -112,8 +112,8 @@ export default function DetailsView({ structure }) {
                   <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
                   {referents.length ? null : <i>Aucun compte n&apos;est associé à cette structure.</i>}
                   {referents.map((referent) => (
-                    <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={referent._id}>
-                      <Link to={`/user/${referent._id}`} key={referent._id}>
+                    <div className="flex items-center justify-between mt-4" key={referent._id}>
+                      <Link to={`/user/${referent._id}`} className="flex items-center">
                         <Avatar name={`${referent.firstName} ${referent.lastName}`} />
                         <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
                       </Link>

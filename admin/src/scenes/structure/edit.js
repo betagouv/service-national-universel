@@ -47,7 +47,7 @@ export default function Edit(props) {
       if (!ok && code === "LINKED_OBJECT") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");
-      return history.push(`/user`);
+      return true;
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la suppression du profil :", translate(e.code));
@@ -363,16 +363,16 @@ export default function Edit(props) {
               </Col>
               <Col md={6}>
                 <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
-                  <Wrapper>
+                  <Wrapper classname="border-b-2 border-solid border-[#f4f5f7]">
                     <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
                     {referents.length ? null : <i>Aucun compte n&apos;est associé à cette structure.</i>}
                     {referents.map((referent) => (
-                      <div key={referent._id} style={{ display: "flex", alignItems: "center", marginTop: "1rem" }}>
-                        <Link to={`/user/${referent._id}`}>
+                      <div className="flex items-center justify-between mt-4" key={referent._id}>
+                        <Link to={`/user/${referent._id}`} className="flex items-center">
                           <Avatar name={`${referent.firstName} ${referent.lastName}`} />
-                          <div>{`${referent.firstName} ${referent.lastName}`}</div>
+                          <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
                         </Link>
-                        {referents.length > 1 && canDeleteReferent({ actor: user, originalTarget: referent, defaultValue }) && (
+                        {referents.length > 1 && canDeleteReferent({ actor: user, originalTarget: referent, structure: defaultValue }) && (
                           <DeleteBtnComponent onClick={() => onClickDelete(referent)}></DeleteBtnComponent>
                         )}
                       </div>
