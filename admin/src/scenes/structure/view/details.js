@@ -22,8 +22,6 @@ export default function DetailsView({ structure }) {
   const [parentStructure, setParentStructure] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
-  const userIsSupervisor = user.role === ROLES.SUPERVISOR;
-
   const onClickDelete = (target) => {
     setModal({
       isOpen: true,
@@ -119,7 +117,7 @@ export default function DetailsView({ structure }) {
                         <Avatar name={`${referent.firstName} ${referent.lastName}`} />
                         <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
                       </Link>
-                      {referents.length > 1 && (userIsSupervisor || canDeleteReferent({ actor: user, originalTarget: referent })) && (
+                      {referents.length > 1 && canDeleteReferent({ actor: user, originalTarget: referent, structure }) && (
                         <DeleteBtnComponent onClick={() => onClickDelete(referent)}></DeleteBtnComponent>
                       )}
                     </div>

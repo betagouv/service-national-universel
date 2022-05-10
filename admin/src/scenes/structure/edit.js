@@ -31,8 +31,6 @@ export default function Edit(props) {
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
-  const userIsSupervisor = user.role === ROLES.SUPERVISOR;
-
   const onClickDelete = (target) => {
     setModal({
       isOpen: true,
@@ -374,7 +372,7 @@ export default function Edit(props) {
                           <Avatar name={`${referent.firstName} ${referent.lastName}`} />
                           <div>{`${referent.firstName} ${referent.lastName}`}</div>
                         </Link>
-                        {referents.length > 1 && (userIsSupervisor || canDeleteReferent({ actor: user, originalTarget: referent })) && (
+                        {referents.length > 1 && canDeleteReferent({ actor: user, originalTarget: referent, defaultValue }) && (
                           <DeleteBtnComponent onClick={() => onClickDelete(referent)}></DeleteBtnComponent>
                         )}
                       </div>
