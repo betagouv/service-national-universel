@@ -60,7 +60,7 @@ router.get("/signup", async (req, res) => {
 
 // Assert endpoint for when login completes
 router.post(
-  "/login/callback",
+  "/callback",
   function (req, res, next) {
     console.log("-----------------------------");
     console.log("/Start login callback ");
