@@ -1,3 +1,19 @@
+# [1.82.0](https://github.com/betagouv/service-national-universel/compare/v1.81.1...v1.82.0) (2022-05-10)
+
+
+### Bug Fixes
+
+* add depart sejour ([ad22682](https://github.com/betagouv/service-national-universel/commit/ad22682c4d20d3ce9b19bf464423f394bde7b3a0))
+* **api,admin:** simplification routes pointage ([a634a78](https://github.com/betagouv/service-national-universel/commit/a634a78b1781c3ee46c0be8520a9ce058f339e7e))
+* add filter `code2022` ([046debf](https://github.com/betagouv/service-national-universel/commit/046debf1d50d2b3d51465172776211653e86f421))
+* add view `code2022` ([248abd6](https://github.com/betagouv/service-national-universel/commit/248abd6a0a1ce93893d39e8a0f4081b840471ea1))
+* **api:** limit query size ([#1542](https://github.com/betagouv/service-national-universel/issues/1542)) ([02f2495](https://github.com/betagouv/service-national-universel/commit/02f24954df4697bf6c0aeec0c448d0955ee37955))
+
+
+### Features
+
+* **admin:** multi select et multi actions pointage ([379f8f0](https://github.com/betagouv/service-national-universel/commit/379f8f0c124d7d1d81b18f69793484d62c8c660a))
+
 ## [1.81.1](https://github.com/betagouv/service-national-universel/compare/v1.81.0...v1.81.1) (2022-05-09)
 
 
