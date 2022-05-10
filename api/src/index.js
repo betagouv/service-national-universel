@@ -3,6 +3,7 @@ require("dotenv").config({ path: "./.env-staging" });
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
+const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
@@ -52,7 +53,10 @@ app.use(fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true,
 
 app.use(express.static(__dirname + "/../public"));
 
+app.use(session({ secret: "secret", resave: false, saveUninitialized: true }));
+
 app.use(passport.initialize());
+app.use(passport.session({}));
 
 app.use("/es", require("./controllers/es"));
 app.use("/mission", require("./controllers/mission"));

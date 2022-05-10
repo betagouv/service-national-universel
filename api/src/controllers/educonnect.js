@@ -35,7 +35,15 @@ const idp_options = {
 };
 const idp = new saml2.IdentityProvider(idp_options);
 
-router.get("/login", passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }));
+router.get(
+  "/login",
+  function (req, res, next) {
+    console.log("-----------------------------");
+    console.log("/Start login handler");
+    next();
+  },
+  passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }),
+);
 
 // router.get("/callback", async (req, res) => {
 //   res.status(200).send("SNU ");
@@ -51,18 +59,21 @@ router.get("/signup", async (req, res) => {
 });
 
 // Assert endpoint for when login completes
-router.post("/callback", function (req, res) {
-  const options = { request_body: req.body };
-  sp.post_assert(idp, options, function (err, saml_response) {
-    if (err != null) return res.send(500);
-
-    // Save name_id and session_index for logout
-    // Note:  In practice these should be saved in the user session, not globally.
-    name_id = saml_response.user.name_id;
-    session_index = saml_response.user.session_index;
-
-    res.send("Hello #{saml_response.user.name_id}!");
-  });
-});
+router.post(
+  "/login/callback",
+  function (req, res, next) {
+    console.log("-----------------------------");
+    console.log("/Start login callback ");
+    next();
+  },
+  passport.authenticate("educonnect"),
+  function (req, res) {
+    console.log("-----------------------------");
+    console.log("login call back dumps");
+    console.log(req.user);
+    console.log("-----------------------------");
+    res.send("Log in Callback Success");
+  },
+);
 
 module.exports = router;
