@@ -22,6 +22,8 @@ export default function DetailsView({ structure }) {
   const [parentStructure, setParentStructure] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
+  const userIsSupervisor = user.role === ROLES.SUPERVISOR;
+
   const onClickDelete = (target) => {
     setModal({
       isOpen: true,
@@ -112,15 +114,15 @@ export default function DetailsView({ structure }) {
                   <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
                   {referents.length ? null : <i>Aucun compte n&apos;est associé à cette structure.</i>}
                   {referents.map((referent) => (
-                    <>
-                      <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={referent._id}>
-                        <Link to={`/user/${referent._id}`} key={referent._id}>
-                          <Avatar name={`${referent.firstName} ${referent.lastName}`} />
-                          <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
-                        </Link>
-                        {canDeleteReferent({ actor: user, originalTarget: referent }) && <DeleteBtnComponent onClick={() => onClickDelete(referent)}></DeleteBtnComponent>}
-                      </div>
-                    </>
+                    <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={referent._id}>
+                      <Link to={`/user/${referent._id}`} key={referent._id}>
+                        <Avatar name={`${referent.firstName} ${referent.lastName}`} />
+                        <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
+                      </Link>
+                      {referents.length > 1 && (userIsSupervisor || canDeleteReferent({ actor: user, originalTarget: referent })) && (
+                        <DeleteBtnComponent onClick={() => onClickDelete(referent)}></DeleteBtnComponent>
+                      )}
+                    </div>
                   ))}
                   <ModalConfirm
                     isOpen={modal?.isOpen}

@@ -19,15 +19,19 @@ import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import { canDeleteReferent } from "snu-lib/roles";
 import DeleteBtnComponent from "./components/DeleteBtnComponent";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Structures");
   const [defaultValue, setDefaultValue] = useState();
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [networks, setNetworks] = useState([]);
   const [referents, setReferents] = useState([]);
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
+
+  const userIsSupervisor = user.role === ROLES.SUPERVISOR;
 
   const onClickDelete = (target) => {
     setModal({
@@ -370,9 +374,21 @@ export default function Edit(props) {
                           <Avatar name={`${referent.firstName} ${referent.lastName}`} />
                           <div>{`${referent.firstName} ${referent.lastName}`}</div>
                         </Link>
-                        {canDeleteReferent({ actor: user, originalTarget: referent }) && <DeleteBtnComponent onClick={() => onClickDelete(referent)}></DeleteBtnComponent>}
+                        {referents.length > 1 && (userIsSupervisor || canDeleteReferent({ actor: user, originalTarget: referent })) && (
+                          <DeleteBtnComponent onClick={() => onClickDelete(referent)}></DeleteBtnComponent>
+                        )}
                       </div>
                     ))}
+                    <ModalConfirm
+                      isOpen={modal?.isOpen}
+                      title={modal?.title}
+                      message={modal?.message}
+                      onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+                      onConfirm={() => {
+                        modal?.onConfirm();
+                        setModal({ isOpen: false, onConfirm: null });
+                      }}
+                    />
                   </Wrapper>
                 </Row>
                 <Invite structure={values} />
