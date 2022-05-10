@@ -74,7 +74,7 @@ export const ResultTable = styled.div`
   ${({ hide }) => (hide ? "display: none;" : "")}
   background-color: ${({ backgroundColor }) => backgroundColor || "#fff"};
   position: relative;
-  margin: 20px 0;
+  margin: 20px 10px;
   padding-bottom: 10px;
   .pagination {
     display: flex;
