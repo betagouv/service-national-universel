@@ -46,8 +46,8 @@ const EDUCONNECT_ISSUER = process.env.EDUCONNECT_ISSUER || "";
 const EDUCONNECT_CALLBACK_URL = process.env.EDUCONNECT_CALLBACK_URL || "";
 const EDUCONNECT_SP_CERT = process.env.EDUCONNECT_SP_CERT || "";
 const EDUCONNECT_SP_KEY = process.env.EDUCONNECT_SP_KEY || "";
-const EDUCONNECT_IDP_CERT = process.env.EDUCONNECT_IDP_CERT || " ";
-const EDUCONNECT_IDP_KEY = process.env.EDUCONNECT_IDP_KEY || " ";
+const EDUCONNECT_IDP_SIGN_CERT = process.env.EDUCONNECT_IDP_SIGN_CERT || " ";
+const EDUCONNECT_IDP_ENCR_CERT = process.env.EDUCONNECT_IDP_ENCR_CERT || " ";
 
 module.exports = {
   PORT,
@@ -89,8 +89,8 @@ module.exports = {
   EDUCONNECT_CALLBACK_URL,
   EDUCONNECT_SP_CERT,
   EDUCONNECT_SP_KEY,
-  EDUCONNECT_IDP_CERT,
-  EDUCONNECT_IDP_KEY,
+  EDUCONNECT_IDP_SIGN_CERT,
+  EDUCONNECT_IDP_ENCR_CERT,
 };
 
 function getEnvironment() {

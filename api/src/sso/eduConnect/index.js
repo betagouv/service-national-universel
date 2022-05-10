@@ -7,8 +7,8 @@ const {
   EDUCONNECT_CALLBACK_URL,
   EDUCONNECT_SP_CERT,
   EDUCONNECT_SP_KEY,
-  EDUCONNECT_IDP_CERT,
-  EDUCONNECT_IDP_KEY,
+  EDUCONNECT_IDP_SIGN_CERT,
+  EDUCONNECT_IDP_ENCR_CERT,
 } = require("../../config");
 const { fetch, toPassportConfig, claimsToCamelCase } = require("passport-saml-metadata");
 const path = require("path");
@@ -38,13 +38,13 @@ function sso(passport) {
       entryPoint: EDUCONNECT_ENTRY_POINT,
       issuer: EDUCONNECT_ISSUER,
       callbackUrl: EDUCONNECT_CALLBACK_URL,
-      cert: EDUCONNECT_IDP_CERT,
+      cert: [EDUCONNECT_IDP_SIGN_CERT, EDUCONNECT_IDP_ENCR_CERT],
       privateKey: EDUCONNECT_SP_KEY,
       decryptionPvk: EDUCONNECT_SP_KEY,
       // privateKey: fs.readFileSync(path.resolve(__dirname, "./metadata/sp-privatekey.pem"), "utf-8").toString(),
       // protocol: "https://",
       identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
-      // signatureAlgorithm: "sha256",
+      signatureAlgorithm: "sha256",
       // digestAlgorithm: "sha256",
       // attributeConsumingServiceIndex: 1,
       // xmlSignatureTransforms: ['http://www.w3.org/2000/09/xmldsig#enveloped-signature', 'http://www.w3.org/2001/10/xml-exc-c14n#' ]

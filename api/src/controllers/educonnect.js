@@ -15,8 +15,8 @@ const {
   EDUCONNECT_CALLBACK_URL,
   EDUCONNECT_SP_CERT,
   EDUCONNECT_SP_KEY,
-  EDUCONNECT_IDP_CERT,
-  EDUCONNECT_IDP_KEY,
+  EDUCONNECT_IDP_SIGN_CERT,
+  EDUCONNECT_IDP_ENCR_CERT,
 } = require("../config.js");
 
 const sp_options = {
@@ -31,7 +31,7 @@ const sp = new saml2.ServiceProvider(sp_options);
 const idp_options = {
   sso_login_url: EDUCONNECT_ENTRY_POINT,
   sso_logout_url: EDUCONNECT_LOGOUT_POINT,
-  certificates: [EDUCONNECT_IDP_CERT, EDUCONNECT_IDP_KEY],
+  certificates: [EDUCONNECT_IDP_SIGN_CERT, EDUCONNECT_IDP_ENCR_CERT],
 };
 const idp = new saml2.IdentityProvider(idp_options);
 
