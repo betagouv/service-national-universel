@@ -42,7 +42,7 @@ export default function Wrapper({ children, young, tab, onChange }) {
       return history.push(`/volontaire`);
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la suppression du volontaire :", translate(e.code));
+      return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", translate(e.code));
     }
   };
 

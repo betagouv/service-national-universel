@@ -100,7 +100,7 @@ const Actions = ({ program, onDelete }) => {
       return onDelete();
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la suppression de la mission :", translate(e.code));
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la mission :", translate(e.code));
     }
   };
 

@@ -28,7 +28,7 @@ export default function PanelCenter({ onChange, center }) {
       return history.go(0);
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la suppression du centre :", translate(e.code));
+      return toastr.error("Oups, une erreur est survenue pendant la supression du centre :", translate(e.code));
     }
   };
   if (!center) return <div />;

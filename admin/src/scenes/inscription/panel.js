@@ -49,7 +49,7 @@ export default function InscriptionPanel({ onChange, value }) {
       history.go(0);
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la suppression du volontaire :", t(e.code));
+      return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", t(e.code));
     }
   };
 
