@@ -569,10 +569,11 @@ router.post("/team/:action(_msearch|export)", passport.authenticate(["referent"]
 
 // Add filter to all lines of the body.
 function withFilterForMSearch(body, filter) {
+  const lines = body.split(`\n`).filter((e) => e);
+  if (lines.length % 2 === 1) throw new Error("Invalid body");
+  if (lines.length > 100) throw new Error("Too many lines");
   return (
-    body
-      .split(`\n`)
-      .filter((e) => e)
+    lines
       .map((item, key) => {
         // Declaration line are skipped.
         if (key % 2 === 0) return item;
@@ -596,7 +597,7 @@ function applyFilterOnQuery(query, filter) {
     }
   }
 
-  if (query.bool.filter) query.bool.filter = [...query.bool.filter, ...filter];
+  if (query.bool.filter && query.bool.filter.length < 100) query.bool.filter = [...query.bool.filter, ...filter];
   else query.bool.filter = filter;
 
   return query;
