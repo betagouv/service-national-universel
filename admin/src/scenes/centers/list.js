@@ -18,7 +18,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 
-const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS"];
+const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
 
 export default function List() {
   const [center, setCenter] = useState(null);
@@ -150,6 +150,24 @@ export default function List() {
                 <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
               </FilterRow>
               <FilterRow visible={filterVisible}>
+                {user.role === ROLES.ADMIN ? (
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    placeholder="Code 2022"
+                    componentId="CODE2022"
+                    dataField="code2022.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "CODE2022") }}
+                    title=""
+                    URLParams={true}
+                    sortBy="asc"
+                    showSearch={true}
+                    searchPlaceholder="Rechercher..."
+                    renderLabel={(items) => getFilterLabel(items, "Code 2022", "Code 2022")}
+                    showMissing
+                    missingLabel="Non renseigné"
+                  />
+                ) : null}
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
