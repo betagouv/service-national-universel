@@ -5,10 +5,12 @@ import { useParams } from "react-router";
 import { apiURL } from "../../../config";
 import Badge from "../../../components/Badge";
 import FilterSvg from "../../../assets/icons/Filter";
+import None from "../../../assets/icons/None";
+import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import api from "../../../services/api";
 import Panel from "../../volontaires/panel";
 import { RegionFilter, DepartmentFilter } from "../../../components/filters";
-import { getFilterLabel, translate, translatePhase1, getAge, YOUNG_STATUS_COLORS } from "../../../utils";
+import { getFilterLabel, translate, translatePhase1, getAge, YOUNG_STATUS_COLORS, formatDateFR } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
@@ -202,7 +204,16 @@ const Line = ({ hit, onClick, selected }) => {
         </div>
       </td>
       <td className={`${bgColor}`}>
-        <div className={`font-normal text-xs ${mainTextColor}`}>ø</div>
+        <div className={`font-normal text-xs ${mainTextColor}`}>
+          {value.departSejourAt ? (
+            <div className="flex gap-1 items-center cursor-pointer">
+              <ArrowCircleRight className="text-gray-400" />
+              <div>{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
+            </div>
+          ) : (
+            <None className="text-gray-500" />
+          )}
+        </div>
       </td>
       <td className={`${bgColor}`}>
         <div className={`font-normal text-xs ${mainTextColor}`}>

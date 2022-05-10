@@ -9,6 +9,37 @@ const YoungModel = require("../../models/young");
 const { ERRORS } = require("../../utils");
 const { serializeYoung } = require("../../utils/serializer");
 
+router.post("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      departSejourMotif: Joi.string().required(),
+      departSejourAt: Joi.string().required(),
+      departSejourMotifComment: Joi.string().optional().allow(null, ""),
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
+    const { departSejourMotif, departSejourAt, departSejourMotifComment, id } = value;
+
+    const young = await YoungModel.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    if (!canEditPresenceYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    young.set({ departSejourAt, departSejourMotif, departSejourMotifComment });
+    await young.save({ fromUser: req.user });
+
+    res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived"];
@@ -23,7 +54,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
 
     const { value: newValue, key, id } = value;
 
-    const young = await YoungModel.findById(value.id);
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditPresenceYoung(req.user, young)) {
@@ -40,5 +71,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+
 
 module.exports = router;

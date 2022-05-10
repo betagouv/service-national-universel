@@ -5,12 +5,14 @@ import { toastr } from "react-redux-toastr";
 
 import { apiURL } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
+import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import api from "../../../services/api";
 import Panel from "../../volontaires/panel";
 import { RegionFilter, DepartmentFilter } from "../../../components/filters";
 import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
-import { getFilterLabel, translate, translatePhase1, getAge } from "../../../utils";
+import ModalPointageDepart from "../components/modals/ModalPointageDepart";
+import { getFilterLabel, translate, translatePhase1, getAge, formatDateFR } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
@@ -168,6 +170,7 @@ const Line = ({ hit, onClick, selected }) => {
   const [value, setValue] = useState(null);
   const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
   const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
+  const [modalPointageDepart, setModalPointageDepart] = useState({ isOpen: false });
 
   useEffect(() => {
     setValue(hit);
@@ -191,6 +194,7 @@ const Line = ({ hit, onClick, selected }) => {
     // on ferme les modales
     setModalPointagePresenceArrivee({ isOpen: false, value: null });
     setModalPointagePresenceJDM({ isOpen: false, value: null });
+    setModalPointageDepart({ isOpen: false, value: null });
   };
 
   return (
@@ -259,9 +263,18 @@ const Line = ({ hit, onClick, selected }) => {
           </div>
         </td>
         <td className={`${bgColor}`}>
-          <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
-            {/* //todo */}
-            <input className="border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer" value={value.phase1DepartAt} type="date" />
+          <div className={`font-normal text-xs  ${mainTextColor}`} onClick={(e) => e.stopPropagation()}>
+            <div
+              className="flex gap-1 items-center group cursor-pointer"
+              onClick={(e) => {
+                setModalPointageDepart({
+                  isOpen: true,
+                  value: e.target.value,
+                });
+              }}>
+              <ArrowCircleRight className="text-gray-400 group-hover:scale-105" />
+              <div className="group-hover:underline">{!value.departSejourAt ? "Renseigner un départ" : formatDateFR(value.departSejourAt)}</div>
+            </div>
           </div>
         </td>
       </tr>
@@ -277,6 +290,13 @@ const Line = ({ hit, onClick, selected }) => {
         onCancel={() => setModalPointagePresenceJDM({ isOpen: false, value: null })}
         onSubmit={onSubmit}
         value={modalPointagePresenceJDM?.value}
+        young={value}
+      />
+      <ModalPointageDepart
+        isOpen={modalPointageDepart?.isOpen}
+        onCancel={() => setModalPointageDepart({ isOpen: false, value: null })}
+        onSubmit={onSubmit}
+        value={modalPointageDepart?.value}
         young={value}
       />
     </>

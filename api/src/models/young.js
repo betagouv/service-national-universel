@@ -332,7 +332,24 @@ const Schema = new mongoose.Schema({
       description: "La fiche sanitaire a été reçu par le SNU",
     },
   },
-
+  departSejourAt: {
+    type: Date,
+    documentation: {
+      description: "Date à laquelle volontaire a quitté le centre de cohésion",
+    },
+  },
+  departSejourMotif: {
+    type: String,
+    documentation: {
+      description: "Motif de départ du centre de cohésion",
+    },
+  },
+  departSejourMotifComment: {
+    type: String,
+    documentation: {
+      description: "Commentaires sur le départ du centre de cohésion (facultatif)",
+    },
+  },
   cohesionStayMedicalFileDownload: {
     type: String,
     enum: ["true", "false"],
