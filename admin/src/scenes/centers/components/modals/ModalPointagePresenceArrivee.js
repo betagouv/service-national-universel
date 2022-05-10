@@ -14,7 +14,7 @@ export default function ModalPointagePresenceArrivee({ isOpen, onSubmit, onCance
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    const { data, ok, code } = await api.post(`/young/${young._id}/phase1/presence-sejour`, { value });
+    const { data, ok, code } = await api.post(`/young/${young._id}/phase1/cohesionStayPresence`, { value });
     if (!ok) {
       toastr.error("Oups, une erreur s'est produite", translate(code));
       setIsLoading(false);

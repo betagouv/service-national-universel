@@ -14,7 +14,7 @@ export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, v
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    const { data, ok, code } = await api.post(`/young/${young._id}/phase1/presence-jdm`, { value });
+    const { data, ok, code } = await api.post(`/young/${young._id}/phase1/presenceJDM`, { value });
     if (!ok) {
       toastr.error("Oups, une erreur s'est produite", translate(code));
       setIsLoading(false);
