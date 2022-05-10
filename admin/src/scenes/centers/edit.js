@@ -9,12 +9,13 @@ import styled from "styled-components";
 import AddressInput from "../../components/addressInputVCenter";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import Badge from "../../components/Badge";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import Loader from "../../components/Loader";
 
 import MultiSelectComponent from "./components/Multiselect";
 import api from "../../services/api";
-import { SESSION_STATUS, translate, translateSessionStatus } from "../../utils";
+import { SESSION_STATUS, translate, translateSessionStatus, colors, ROLES } from "../../utils";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -100,6 +101,22 @@ export default function Edit(props) {
                     <div className="ml-1 font-bold text-lg">Informations générales</div>
                     <div className="ml-1 mt-8"> Nom </div>
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    {user.role === ROLES.ADMIN ? (
+                      <>
+                        <div className="ml-1 mt-8">
+                          Code (2022) <Badge text="modérateur" color={colors.purple} />
+                        </div>
+                        <Item
+                          title="Identifiant du centre - version 2022"
+                          values={values}
+                          name={"code2022"}
+                          handleChange={handleChange}
+                          required
+                          errors={errors}
+                          touched={touched}
+                        />
+                      </>
+                    ) : null}
                     <div className="ml-1 mt-8"> Adresse </div>
                     <AddressInput
                       keys={{

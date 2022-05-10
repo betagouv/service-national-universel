@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { BiHandicap } from "react-icons/bi";
 
-import { getDepartmentNumber, canCreateOrUpdateCohesionCenter } from "../../../utils";
+import { getDepartmentNumber, canCreateOrUpdateCohesionCenter, ROLES } from "../../../utils";
 import { Box } from "../../../components/box";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
@@ -36,6 +36,7 @@ export default function Details({ center }) {
               ) : null}
             </div>
             <div>
+              {user.role === ROLES.ADMIN ? <Donnee title={"Code 2022 (modérateur)"} value={center.code2022} number={""} /> : null}
               <Donnee title={"Région"} value={center.region} number={""} />
               <Donnee title={"Département"} value={center.department} number={`(${getDepartmentNumber(center.department)})`} />
               <Donnee title={"Ville"} value={center.city} number={`(${center.zip})`} />
