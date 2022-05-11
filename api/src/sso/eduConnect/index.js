@@ -40,7 +40,7 @@ function sso(passport) {
       callbackUrl: EDUCONNECT_CALLBACK_URL,
       cert: [EDUCONNECT_IDP_SIGN_CERT, EDUCONNECT_IDP_ENCR_CERT],
       privateKey: EDUCONNECT_SP_KEY,
-      // decryptionPvk: EDUCONNECT_SP_KEY,
+      decryptionPvk: `-----BEGIN PRIVATE KEY-----\n${EDUCONNECT_SP_KEY}\n-----END PRIVATE KEY-----`,
       // privateKey: fs.readFileSync(path.resolve(__dirname, "./metadata/sp-privatekey.pem"), "utf-8").toString(),
       // protocol: "https://",
       identifierFormat: null,
