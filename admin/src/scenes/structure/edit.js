@@ -47,6 +47,7 @@ export default function Edit(props) {
       if (!ok && code === "LINKED_OBJECT") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");
+      setReferents(referents.filter((referent) => referent._id !== target._id));
       return true;
     } catch (e) {
       console.log(e);
@@ -363,7 +364,7 @@ export default function Edit(props) {
               </Col>
               <Col md={6}>
                 <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
-                  <Wrapper classname="border-b-2 border-solid border-[#f4f5f7]">
+                  <Wrapper>
                     <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
                     {referents.length ? null : <i>Aucun compte n&apos;est associé à cette structure.</i>}
                     {referents.map((referent) => (

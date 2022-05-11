@@ -38,6 +38,7 @@ export default function DetailsView({ structure }) {
       if (!ok && code === "LINKED_OBJECT") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");
+      setReferents(referents.filter((referent) => referent._id !== target._id));
       return true;
     } catch (e) {
       console.log(e);
