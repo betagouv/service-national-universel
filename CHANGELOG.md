@@ -1,3 +1,19 @@
+# [1.83.0](https://github.com/betagouv/service-national-universel/compare/v1.82.0...v1.83.0) (2022-05-11)
+
+
+### Bug Fixes
+
+* **admin,app:** supression colonne `contact` support ([8749424](https://github.com/betagouv/service-national-universel/commit/87494241ab9049832e0c9f7984c12922a271c855))
+* **api:** contract-token-young-adult ([#1547](https://github.com/betagouv/service-national-universel/issues/1547)) ([7d73e6e](https://github.com/betagouv/service-national-universel/commit/7d73e6e862fbdf68e6a859f11dd802b4ff2e0181))
+
+
+### Features
+
+* **admin:** suppression des membres d’équipe ([#1553](https://github.com/betagouv/service-national-universel/issues/1553)) ([244851b](https://github.com/betagouv/service-national-universel/commit/244851be2ff3f18731ab031753f8bd39c1d2c28d))
+* **admin,api:** multi action pointage ([7ea4502](https://github.com/betagouv/service-national-universel/commit/7ea45023ee99df845baebe6c9238a898fb972a19))
+* **api:** welcome mail referents ([#1552](https://github.com/betagouv/service-national-universel/issues/1552)) ([644c04c](https://github.com/betagouv/service-national-universel/commit/644c04c74c3112436c64816af7a00f0e7ace9b5c))
+* **app:** modif validated phase 1 ([#1554](https://github.com/betagouv/service-national-universel/issues/1554)) ([1fb9c4b](https://github.com/betagouv/service-national-universel/commit/1fb9c4b439303602122ef6bc54fa87207354e1a4))
+
 # [1.82.0](https://github.com/betagouv/service-national-universel/compare/v1.81.1...v1.82.0) (2022-05-10)
 
 
