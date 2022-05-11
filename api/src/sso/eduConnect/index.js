@@ -43,7 +43,7 @@ function sso(passport) {
       decryptionPvk: EDUCONNECT_SP_KEY,
       // privateKey: fs.readFileSync(path.resolve(__dirname, "./metadata/sp-privatekey.pem"), "utf-8").toString(),
       // protocol: "https://",
-      identifierFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+      identifierFormat: null,
       signatureAlgorithm: "sha256",
       // digestAlgorithm: "sha256",
       // attributeConsumingServiceIndex: 1,
