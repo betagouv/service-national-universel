@@ -59,6 +59,7 @@
     "password-validator": "^5.1.0",
     "puppeteer": "^10.2.0",
     "saml2-js": "^3.0.1",
+    "saml2js": "^0.1.2",
     "sanitize-html": "^2.7.0",
     "slugify": "^1.6.2",
     "snu-lib": "file:../lib",

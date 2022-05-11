@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const saml2 = require("saml2-js");
+const Saml2js = require("saml2js");
 const fs = require("fs");
 const { capture } = require("../sentry");
 const path = require("path");
@@ -72,7 +73,12 @@ router.post(
     console.log("login call back dumps");
     console.log(req.user);
     console.log("-----------------------------");
-    res.send("Log in Callback Success");
+
+    const xmlResponse = req.body.SAMLResponse;
+    const parser = new Saml2js(xmlResponse);
+    req.samlUserObject = parser.toObject();
+
+    res.send(req.samlUserObject);
   },
 );
 
