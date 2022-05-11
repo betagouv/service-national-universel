@@ -24,6 +24,7 @@ import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import SelectAction from "../components/SelectAction";
+import CursorClick from "../../../assets/icons/CursorClick";
 
 export default function Pointage() {
   const history = useHistory();
@@ -37,6 +38,8 @@ export default function Pointage() {
 
   const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
   const [modalMultiPointagePresenceJDM, setModalMultiPointagePresenceJDM] = useState({ isOpen: false });
+
+  //todo
   const [modalPointageDepart, setModalPointageDepart] = useState({ isOpen: false });
 
   const getDefaultQuery = () => ({
@@ -122,7 +125,9 @@ export default function Pointage() {
                     </div>
                     <div>
                       <SelectAction
+                        Icon={<CursorClick className="text-gray-400" />}
                         title="Actions"
+                        alignItems="right"
                         optionsGroup={[
                           {
                             title: "L'arrivée au séjour",

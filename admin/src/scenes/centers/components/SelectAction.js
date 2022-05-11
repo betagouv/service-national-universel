@@ -1,8 +1,7 @@
 import React from "react";
 import ChevronDown from "../../../assets/icons/ChevronDown";
-import CursorClick from "../../../assets/icons/CursorClick";
 
-export default function SelectAction({ optionsGroup, title }) {
+export default function SelectAction({ optionsGroup, title, Icon, alignItems = "left" }) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [loadingLabel, setLoadingLabel] = React.useState("Chargement...");
@@ -30,7 +29,7 @@ export default function SelectAction({ optionsGroup, title }) {
 
   return (
     <div style={{ fontFamily: "Marianne" }} ref={ref}>
-      <div className="py-2 pl-3 relative">
+      <div className="py-2 relative">
         {/* select item */}
         <button
           disabled={loading}
@@ -38,7 +37,8 @@ export default function SelectAction({ optionsGroup, title }) {
           style={{ fontFamily: "Marianne" }}
           onClick={() => setOpen((e) => !e)}>
           <div className="flex items-center gap-2">
-            <CursorClick className="text-gray-400" />
+            {Icon ? Icon : null}
+
             {loading ? <span className="text-gray-700 font-medium text-sm">{loadingLabel}</span> : <span className="text-gray-700 font-medium text-sm">{title}</span>}
           </div>
           <ChevronDown className="text-gray-400" />
@@ -46,7 +46,9 @@ export default function SelectAction({ optionsGroup, title }) {
 
         {/* display options */}
         <div
-          className={`${open ? "block" : "hidden"} min-w-[250px] rounded-lg bg-white transition absolute top-[55px] right-0 border-3 border-red-600 shadow overflow-hidden z-50`}>
+          className={`${open ? "block" : "hidden"} min-w-[250px] rounded-lg bg-white transition absolute top-[55px] ${
+            alignItems === "right" ? "right-0" : "left-0"
+          } border-3 border-red-600 shadow overflow-hidden z-50`}>
           {optionsGroup.map((group, i) => (
             <div key={group.key || i} className="text-xs text-coolGray-600 border-b-[1px] border-gray-100 py-1">
               {group.title ? <p className="font-medium text-xs text-gray-500 px-3 py-2">{group.title}</p> : null}
