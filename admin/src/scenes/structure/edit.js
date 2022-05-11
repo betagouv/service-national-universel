@@ -17,15 +17,43 @@ import { translate, ROLES, ENABLE_PM, legalStatus, typesStructure, sousTypesStru
 import api from "../../services/api";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import { canDeleteReferent } from "snu-lib/roles";
+import DeleteBtnComponent from "./components/DeleteBtnComponent";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Structures");
   const [defaultValue, setDefaultValue] = useState();
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [networks, setNetworks] = useState([]);
   const [referents, setReferents] = useState([]);
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
+
+  const onClickDelete = (target) => {
+    setModal({
+      isOpen: true,
+      onConfirm: () => onConfirmDelete(target),
+      title: `Êtes-vous sûr(e) de vouloir supprimer le profil de ${target.firstName} ${target.lastName} ?`,
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async (target) => {
+    try {
+      const { ok, code } = await api.remove(`/referent/${target._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && code === "LINKED_OBJECT") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Ce profil a été supprimé.");
+      setReferents(referents.filter((referent) => referent._id !== target._id));
+      return true;
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la suppression du profil :", translate(e.code));
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -340,13 +368,26 @@ export default function Edit(props) {
                     <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
                     {referents.length ? null : <i>Aucun compte n&apos;est associé à cette structure.</i>}
                     {referents.map((referent) => (
-                      <Link to={`/user/${referent._id}`} key={referent._id}>
-                        <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }}>
+                      <div className="flex items-center justify-between mt-4" key={referent._id}>
+                        <Link to={`/user/${referent._id}`} className="flex items-center">
                           <Avatar name={`${referent.firstName} ${referent.lastName}`} />
-                          <div>{`${referent.firstName} ${referent.lastName}`}</div>
-                        </div>
-                      </Link>
+                          <div className="pr-10">{`${referent.firstName} ${referent.lastName}`}</div>
+                        </Link>
+                        {referents.length > 1 && canDeleteReferent({ actor: user, originalTarget: referent, structure: defaultValue }) && (
+                          <DeleteBtnComponent onClick={() => onClickDelete(referent)}></DeleteBtnComponent>
+                        )}
+                      </div>
                     ))}
+                    <ModalConfirm
+                      isOpen={modal?.isOpen}
+                      title={modal?.title}
+                      message={modal?.message}
+                      onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+                      onConfirm={() => {
+                        modal?.onConfirm();
+                        setModal({ isOpen: false, onConfirm: null });
+                      }}
+                    />
                   </Wrapper>
                 </Row>
                 <Invite structure={values} />
