@@ -15,6 +15,7 @@ const { sendTemplate } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { getAge } = require("snu-lib/date");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
@@ -24,31 +25,38 @@ const patches = require("./patches");
 async function createContract(data, fromUser) {
   const { sendMessage } = data;
   const contract = await ContractObject.create(data);
+  const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
 
   contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
   contract.projectManagerStatus = "WAITING_VALIDATION";
-  if (sendMessage) await sendProjectManagerContractEmail(contract);
 
   contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
   contract.structureManagerStatus = "WAITING_VALIDATION";
-  if (sendMessage) await sendStructureManagerContractEmail(contract);
 
-  if (contract.isYoungAdult !== "true") {
-    contract.parent1Token = crypto.randomBytes(40).toString("hex");
-    contract.parent1Status = "WAITING_VALIDATION";
-    if (sendMessage) await sendParent1ContractEmail(contract);
-    if (contract.parent2Email) {
-      contract.parent2Token = crypto.randomBytes(40).toString("hex");
-      contract.parent2Status = "WAITING_VALIDATION";
-      if (sendMessage) await sendParent2ContractEmail(contract);
-    }
-  } else {
-    contract.youngContractToken = crypto.randomBytes(40).toString("hex");
-    contract.youngContractStatus = "WAITING_VALIDATION";
-    if (sendMessage) await sendYoungContractEmail(contract);
+  contract.parent1Token = crypto.randomBytes(40).toString("hex");
+  contract.parent1Status = "WAITING_VALIDATION";
+  if (contract.parent2Email) {
+    contract.parent2Token = crypto.randomBytes(40).toString("hex");
+    contract.parent2Status = "WAITING_VALIDATION";
   }
 
-  if (sendMessage) contract.invitationSent = "true";
+  contract.youngContractToken = crypto.randomBytes(40).toString("hex");
+  contract.youngContractStatus = "WAITING_VALIDATION";
+
+  if (sendMessage) {
+    await sendProjectManagerContractEmail(contract);
+    await sendStructureManagerContractEmail(contract);
+    if (isYoungAdult) {
+      await sendYoungContractEmail(contract);
+    } else {
+      await sendParent1ContractEmail(contract);
+      if (contract.parent2Email) {
+        await sendParent2ContractEmail(contract);
+      }
+    }
+    contract.invitationSent = "true";
+  }
+
   await contract.save({ fromUser });
   return contract;
 }
@@ -59,6 +67,8 @@ async function updateContract(id, data, fromUser) {
   const contract = await ContractObject.findById(id);
   contract.set(data);
   await contract.save({ fromUser });
+
+  const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
 
   // When we update, we have to send mail again to validated.
   if (previous.invitationSent !== "true" || previous.projectManagerStatus === "VALIDATED" || previous.projectManagerEmail !== contract.projectManagerEmail) {
@@ -71,21 +81,17 @@ async function updateContract(id, data, fromUser) {
     contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendStructureManagerContractEmail(contract, previous.structureManagerStatus === "VALIDATED");
   }
-  if (contract.isYoungAdult !== "true" && (previous.invitationSent !== "true" || previous.parent1Status === "VALIDATED" || previous.parent1Email !== contract.parent1Email)) {
+  if (!isYoungAdult && (previous.invitationSent !== "true" || previous.parent1Status === "VALIDATED" || previous.parent1Email !== contract.parent1Email)) {
     contract.parent1Status = "WAITING_VALIDATION";
     contract.parent1Token = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendParent1ContractEmail(contract, previous.parent1Status === "VALIDATED");
   }
-  if (
-    contract.isYoungAdult !== "true" &&
-    contract.parent2Email &&
-    (previous.invitationSent !== "true" || previous.parent2Status === "VALIDATED" || previous.parent2Email !== contract.parent2Email)
-  ) {
+  if (!isYoungAdult && contract.parent2Email && (previous.invitationSent !== "true" || previous.parent2Status === "VALIDATED" || previous.parent2Email !== contract.parent2Email)) {
     contract.parent2Status = "WAITING_VALIDATION";
     contract.parent2Token = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendParent2ContractEmail(contract, previous.parent2Status === "VALIDATED");
   }
-  if (contract.isYoungAdult === "true" && (previous.invitationSent !== "true" || previous.youngContractStatus === "VALIDATED" || previous.youngEmail !== contract.youngEmail)) {
+  if (isYoungAdult && (previous.invitationSent !== "true" || previous.youngContractStatus === "VALIDATED" || previous.youngEmail !== contract.youngEmail)) {
     contract.youngContractStatus = "WAITING_VALIDATION";
     contract.youngContractToken = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendYoungContractEmail(contract, previous.youngContractStatus === "VALIDATED");
