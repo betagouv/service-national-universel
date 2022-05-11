@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { ticketStateNameById, colors, translateState, urlWithScheme } from "../../utils";
+import { colors, translateState, urlWithScheme } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
@@ -125,7 +125,6 @@ const Dashboard = () => {
         <section className="ticket titles">
           <p>Nº demande</p>
           <p>Sujet</p>
-          <p>Contact</p>
           <p>Etat</p>
           <p className="ticket-date">Dernière mise à jour</p>
         </section>
@@ -137,7 +136,6 @@ const Dashboard = () => {
             <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="ticket">
               <p>{ticket.number}</p>
               <p>{ticket.subject}</p>
-              <p>{ticket.agentEmail}</p>
               <p>{displayState(ticket.status)}</p>
               <div className="ticket-date">{dayjs(new Date(ticket.updatedAt)).fromNow()}</div>
             </NavLink>
@@ -307,7 +305,7 @@ const List = styled.div`
     color: black;
     padding: 1rem 1.5rem;
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr 1fr;
     grid-template-rows: 1fr;
     :not(:first-child):hover {
       background-color: #f1f1f1 !important;

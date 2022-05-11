@@ -4,12 +4,11 @@ import styled from "styled-components";
 import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
-import { useSelector } from "react-redux";
 
 import { HeroContainer } from "../../components/Content";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { ticketStateNameById, colors, translateState, urlWithScheme } from "../../utils";
+import { colors, translateState, urlWithScheme } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
@@ -38,7 +37,6 @@ const articles = [
 
 export default function Dashboard() {
   const [userTickets, setUserTickets] = useState(null);
-  const young = useSelector((state) => state.Auth.young);
 
   dayjs.extend(relativeTime).locale("fr");
 
@@ -54,7 +52,6 @@ export default function Dashboard() {
     };
     fetchTickets();
   }, []);
-
 
   const displayState = (state) => {
     if (state === "OPEN")
@@ -160,7 +157,6 @@ export default function Dashboard() {
         <section className="ticket titles">
           <p>Nº demande</p>
           <p>Sujet</p>
-          <p>Contact</p>
           <p>État</p>
           <p className="ticket-date">Dernière mise à jour</p>
         </section>
@@ -172,7 +168,6 @@ export default function Dashboard() {
             <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="ticket">
               <p>{ticket.number}</p>
               <p>{ticket.subject}</p>
-              <p>{ticket.agentEmail}</p>
               <p>{displayState(ticket.status)}</p>
               <p className="ticket-date">{dayjs(new Date(ticket.updatedAt)).fromNow()}</p>
             </NavLink>
@@ -206,7 +201,8 @@ const Container = styled.div`
     grid-template-rows: 2fr 1fr;
     text-align: center;
   }
-  ${"" /* .help-section-text {
+  ${
+    "" /* .help-section-text {
     flex: 3;
   } */
   }
@@ -313,7 +309,7 @@ const List = styled.div`
     color: black;
     padding: 1rem 1.5rem;
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr 1fr;
     grid-template-rows: 1fr;
     :not(:first-child):hover {
       background-color: #f1f1f1 !important;
