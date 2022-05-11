@@ -24,6 +24,9 @@ const sp_options = {
   certificate: EDUCONNECT_SP_CERT,
   private_key: EDUCONNECT_SP_KEY,
   assert_endpoint: EDUCONNECT_CALLBACK_URL,
+  nameid_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+  allow_unencrypted_assertion: false,
+  sign_get_request: false,
 };
 const sp = new saml2.ServiceProvider(sp_options);
 
@@ -31,6 +34,7 @@ const sp = new saml2.ServiceProvider(sp_options);
 const idp_options = {
   sso_login_url: EDUCONNECT_ENTRY_POINT,
   sso_logout_url: EDUCONNECT_LOGOUT_POINT,
+<<<<<<< Updated upstream
   certificates: [EDUCONNECT_IDP_CERT, EDUCONNECT_IDP_KEY],
 };
 const idp = new saml2.IdentityProvider(idp_options);
@@ -44,14 +48,38 @@ router.get(
   },
   passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }),
 );
+=======
+  certificates: [EDUCONNECT_IDP_CERT],
+  allow_unencrypted_assertion: false,
+  relay_state: true,
+  sign_get_request: false,
+};
+const idp = new saml2.IdentityProvider(idp_options);
+
+// const sp_options = {
+//   entity_id: "SNU",
+//   certificate: EDUCONNECT_SP_CERT,
+//   private_key: EDUCONNECT_SP_KEY,
+//   assert_endpoint: "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io/educonnect/callback",
+// };
+// const sp = new saml2.ServiceProvider(sp_options);
+
+// // Create identity provider
+// const idp_options = {
+//   sso_login_url: "https://pr4.educonnect.phm.education.gouv.fr/idp/profile/SAML2/Redirect/SSO",
+//   sso_logout_url: "https://pr4.educonnect.phm.education.gouv.fr/idp/profile/SAML2/POST/SLO",
+//   certificates: [EDUCONNECT_IDP_CERT],
+// };
+// const idp = new saml2.IdentityProvider(idp_options);
+
+router.get("/login", passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }));
+>>>>>>> Stashed changes
 
 // router.get("/callback", async (req, res) => {
 //   res.status(200).send("SNU ");
 // });
 
 router.get("/signup", async (req, res) => {
-  // Create service provider
-
   sp.create_login_request_url(idp, {}, function (err, login_url, request_id) {
     if (err != null) return res.send(500);
     res.redirect(login_url);
