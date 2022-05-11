@@ -12,6 +12,7 @@ import trophy from "../../assets/trophy.svg";
 import DownloadButton from "./components/DownloadButton";
 import phase1done from "../../assets/phase1done.png";
 import Container from "./components/Container";
+import Bus from "../../assets/Bus.js";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -21,19 +22,19 @@ export default function Done() {
       {environment !== "production" ? (
         <Container>
           <div className="content">
-            <article className="flex items-center">
-              <img className="mr-4" src={trophy} alt="trophy" />
+            <article className="lg:flex lg:items-center">
+              <img className="mr-4 hidden lg:block" src={trophy} alt="trophy" />
               <div>
-                <h1 className="text-3xl md:text-5xl mb-4">
+                <h1 className="text-2xl md:text-5xl mb-4">
                   <strong>{young.firstName}, vous avez validé votre Phase 1 !</strong>
                 </h1>
-                <p className="text-[#738297]">Bravo pour votre engagement !</p>
+                <p className="text-[#738297]">Bravo pour votre engagement.</p>
               </div>
               <img src={phase1done} />
             </article>
             {young.statusPhase1 === "DONE" ? (
               <section>
-                <p className="text-2xl font-bold mb-4">Avez-vous fait votre recensement ?</p>
+                <p className="text-2xl font-bold mb-4">Avez-vous effectué votre recensement citoyen ?</p>
                 <div className="lg:flex lg:flex-row">
                   <article className="bg-gray-50 px-4 py-8 rounded md:mr-4">
                     <p className="text-2xl font-bold mb-2">Oui</p>
@@ -63,7 +64,7 @@ export default function Done() {
                   </article>
                   <article className="bg-gray-50 px-4 py-8 rounded md:mr-4">
                     <p className="text-2xl font-bold mb-2">Non</p>
-                    <p className="text-base text-[#738297]">Dans ce cas, il faut attendre que ce dernier soit effectué auprès de votre mairie à partir de vos 16 ans.</p>
+                    <p className="text-base text-[#738297]">Vous devez effectuer vos démarches auprès de votre mairie ou en ligne à partir de vos 16 ans.</p>
                     <a
                       className="text-sm text-indigo-600 underline hover:text-indigo-700"
                       href="https://www.service-public.fr/particuliers/vosdroits/F870"
@@ -73,6 +74,21 @@ export default function Done() {
                     </a>
                   </article>
                 </div>
+                <article className="mt-4 rounded-md shadow-sm p-6 max-w-[50%]">
+                  <a
+                    href="https://support.snu.gouv.fr/base-de-connaissance/permis-et-code-de-la-route"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="flex justify-between items-center">
+                    <Bus className="w-24" />
+                    <section>
+                      <p className="font-bold text-gray-900">Envie de gagner en mobilité ?</p>
+                      <p className="text-gray-500 text-sm">
+                        Découvrez comment accéder à la prise en charge du <strong>code de la route</strong>.
+                      </p>
+                    </section>
+                  </a>
+                </article>
               </section>
             ) : null}
           </div>
@@ -85,7 +101,7 @@ export default function Done() {
               <h1>
                 <strong>{young.firstName}, vous avez validé votre Phase 1 !</strong>
               </h1>
-              <p>Bravo pour votre engagement !</p>
+              <p>Bravo pour votre engagement.</p>
               {young.statusPhase1 === "DONE" ? (
                 <>
                   <Separator />
