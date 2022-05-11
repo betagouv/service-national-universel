@@ -29,7 +29,6 @@ import Badge from "../../../components/Badge";
 import Select from "../components/Select";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import DocumentPhase1 from "../components/DocumentPhase1";
-import { environment } from "../../../config";
 import Download from "../../../assets/Download.js";
 import Envelop from "../../../assets/Envelop.js";
 
