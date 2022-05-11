@@ -74,11 +74,20 @@ router.post(
     console.log(req.user);
     console.log("-----------------------------");
 
+    console.log("-----------------------------");
+    console.log(req);
+    console.log("-----------------------------");
     const xmlResponse = req.body.SAMLResponse;
+    console.log("-----------------------------");
+    console.log(xmlResponse);
+    console.log("-----------------------------");
     const parser = new Saml2js(xmlResponse);
+    console.log("-----------------------------");
+    console.log(parser);
+    console.log("-----------------------------");
     req.samlUserObject = parser.toObject();
 
-    res.send(req.samlUserObject);
+    res.send("Callback sucess");
   },
 );
 
