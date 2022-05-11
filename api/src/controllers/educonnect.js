@@ -70,22 +70,19 @@ router.post(
   passport.authenticate("educonnect"),
   function (req, res) {
     console.log("-----------------------------");
+    console.log("Requete entiere");
+    console.log(req);
+    console.log("-----------------------------");
+
+    console.log("-----------------------------");
     console.log("login call back dumps");
     console.log(req.user);
     console.log("-----------------------------");
 
     console.log("-----------------------------");
-    console.log(req);
+    console.log("Attributes");
+    console.log(req.user.attributes);
     console.log("-----------------------------");
-    const xmlResponse = req.body.SAMLResponse;
-    console.log("-----------------------------");
-    console.log(xmlResponse);
-    console.log("-----------------------------");
-    const parser = new Saml2js(xmlResponse);
-    console.log("-----------------------------");
-    console.log(parser);
-    console.log("-----------------------------");
-    req.samlUserObject = parser.toObject();
 
     res.send("Callback sucess");
   },
