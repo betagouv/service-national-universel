@@ -876,7 +876,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const referent = await ReferentModel.findById(req.params.id);
     if (!referent) return res.status(404).send({ ok: false });
     let structure;
-    if (referent.role.includes(ROLES.RESPONSIBLE, ROLES.SUPERVISOR)) {
+    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(referent.role)) {
       structure = await StructureModel.findById(referent.structureId);
     }
 
