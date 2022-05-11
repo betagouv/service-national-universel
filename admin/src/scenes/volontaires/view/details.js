@@ -125,26 +125,6 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   />
                 ))}
               </Bloc>
-              <Bloc title="Droit à l'image">
-                <Details title="Autorisation" value={t(young.imageRight)} />
-                {(young.imageRightFiles || []).map((e, i) => (
-                  <DownloadButton
-                    key={i}
-                    source={() => api.get(`/referent/youngFile/${young._id}/imageRightFiles/${e}`)}
-                    title={`Télécharger le formulaire (${i + 1}/${young.imageRightFiles.length})`}
-                  />
-                ))}
-              </Bloc>
-              <Bloc title="Règlement intérieur">
-                <Details title="Validation" value={t(young.rulesYoung)} />
-                {(young.rulesFiles || []).map((e, i) => (
-                  <DownloadButton
-                    key={i}
-                    source={() => api.get(`/referent/youngFile/${young._id}/rulesFiles/${e}`)}
-                    title={`Télécharger le formulaire (${i + 1}/${young.rulesFiles.length})`}
-                  />
-                ))}
-              </Bloc>
               {getAge(young?.birthdateAt) < 15 ? (
                 <Bloc title="Traitement des données personnelles">
                   {(young.dataProcessingConsentmentFiles || []).map((e, i) => (
@@ -165,16 +145,6 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   )}
                 </Bloc>
               ) : null}
-              <Bloc title="Autotest PCR">
-                <Details title="Autorisation" value={t(young.autoTestPCR)} />
-                {(young.autoTestPCRFiles || []).map((e, i) => (
-                  <DownloadButton
-                    key={i}
-                    source={() => api.get(`/referent/youngFile/${young._id}/autoTestPCRFiles/${e}`)}
-                    title={`Télécharger le formulaire (${i + 1}/${young.autoTestPCRFiles.length})`}
-                  />
-                ))}
-              </Bloc>
               {young.motivations && (
                 <Bloc title="Motivations">
                   <div className="quote">{`« ${young.motivations} »`}</div>
