@@ -7,13 +7,16 @@ import { SWRConfig } from "swr";
 
 import swrConfigOptions from "../services/swrConfigOptions";
 import { SeeAsProvider } from "../contexts/seeAs";
+import PlausibleProvider from "next-plausible";
 
 function MyApp({ Component, pageProps }) {
   return (
     <SWRConfig value={swrConfigOptions}>
-      <SeeAsProvider>
-        <Component {...pageProps} />
-      </SeeAsProvider>
+      <PlausibleProvider domain="support.snu.gouv.fr">
+        <SeeAsProvider>
+          <Component {...pageProps} />
+        </SeeAsProvider>
+      </PlausibleProvider>
     </SWRConfig>
   );
 }
