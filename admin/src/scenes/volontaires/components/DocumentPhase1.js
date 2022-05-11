@@ -19,7 +19,6 @@ export default function DocumentPhase1(props) {
   const [dataAutoTestPCR, setDataAutoTestPCR] = useState();
   const [isOpenImg, setIsOpenImg] = useState(false);
   const [isOpenAut, setIsOpenAut] = useState(false);
-  console.log("young", young);
   const options = [FILE_STATUS_PHASE1.TO_UPLOAD, FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED];
   const medicalFileOptions = [
     { value: "RECEIVED", label: "Réceptionné" },
