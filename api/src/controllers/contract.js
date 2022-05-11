@@ -29,11 +29,9 @@ async function createContract(data, fromUser) {
 
   contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
   contract.projectManagerStatus = "WAITING_VALIDATION";
-  if (sendMessage) await sendProjectManagerContractEmail(contract);
 
   contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
   contract.structureManagerStatus = "WAITING_VALIDATION";
-  if (sendMessage) await sendStructureManagerContractEmail(contract);
 
   contract.parent1Token = crypto.randomBytes(40).toString("hex");
   contract.parent1Status = "WAITING_VALIDATION";
@@ -45,16 +43,20 @@ async function createContract(data, fromUser) {
   contract.youngContractToken = crypto.randomBytes(40).toString("hex");
   contract.youngContractStatus = "WAITING_VALIDATION";
 
-  if (isYoungAdult) {
-    if (sendMessage) await sendParent1ContractEmail(contract);
-    if (contract.parent2Email) {
-      if (sendMessage) await sendParent2ContractEmail(contract);
+  if (sendMessage) {
+    await sendProjectManagerContractEmail(contract);
+    await sendStructureManagerContractEmail(contract);
+    if (isYoungAdult) {
+      await sendYoungContractEmail(contract);
+    } else {
+      await sendParent1ContractEmail(contract);
+      if (contract.parent2Email) {
+        await sendParent2ContractEmail(contract);
+      }
     }
-  } else {
-    if (sendMessage) await sendYoungContractEmail(contract);
+    contract.invitationSent = "true";
   }
 
-  if (sendMessage) contract.invitationSent = "true";
   await contract.save({ fromUser });
   return contract;
 }
@@ -79,7 +81,7 @@ async function updateContract(id, data, fromUser) {
     contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendStructureManagerContractEmail(contract, previous.structureManagerStatus === "VALIDATED");
   }
-  if (isYoungAdult && (previous.invitationSent !== "true" || previous.parent1Status === "VALIDATED" || previous.parent1Email !== contract.parent1Email)) {
+  if (!isYoungAdult && (previous.invitationSent !== "true" || previous.parent1Status === "VALIDATED" || previous.parent1Email !== contract.parent1Email)) {
     contract.parent1Status = "WAITING_VALIDATION";
     contract.parent1Token = crypto.randomBytes(40).toString("hex");
     if (sendMessage) await sendParent1ContractEmail(contract, previous.parent1Status === "VALIDATED");
