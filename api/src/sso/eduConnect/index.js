@@ -45,7 +45,7 @@ function sso(passport) {
       // protocol: "https://",
       identifierFormat: null,
       // signatureAlgorithm: "sha256",
-      digestAlgorithm: "sha256",
+      // digestAlgorithm: "sha256",
       // attributeConsumingServiceIndex: 1,
       // xmlSignatureTransforms: ['http://www.w3.org/2000/09/xmldsig#enveloped-signature', 'http://www.w3.org/2001/10/xml-exc-c14n#' ]
       // authnRequestBinding: "HTTP-POST",
