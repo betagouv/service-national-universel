@@ -45,7 +45,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
   };
 
   return (
-    <ModalForm isOpen={isOpen} onCancel={onCancel}>
+    <ModalForm isOpen={isOpen} onCancel={onCancel} showCloseIcon={false}>
       <form className="w-full" onSubmit={handleSubmit}>
         <div className="flex items-center justify-center text-gray-300">
           <ArrowCircleRight width={36} height={36} />

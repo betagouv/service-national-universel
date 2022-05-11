@@ -30,7 +30,7 @@ export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, v
   };
 
   return (
-    <ModalForm isOpen={isOpen} onCancel={onCancel}>
+    <ModalForm isOpen={isOpen} onCancel={onCancel} showCloseIcon={false}>
       <form className="w-full" onSubmit={handleSubmit}>
         <div className="flex items-center justify-center text-gray-300">
           <SpeakerPhone width={36} height={36} />

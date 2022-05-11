@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useParams } from "react-router";
+import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { apiURL } from "../../../config";
@@ -14,6 +15,8 @@ import Panel from "../../volontaires/panel";
 import { RegionFilter, DepartmentFilter } from "../../../components/filters";
 import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
+import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointagePresenceJDM";
+import ModalMultiPointagePresenceArrivee from "../components/modals/ModalMultiPointagePresenceArrivee";
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
 import { getFilterLabel, translate, translatePhase1, getAge, formatDateFR } from "../../../utils";
 import Loader from "../../../components/Loader";
@@ -23,12 +26,18 @@ import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import SelectAction from "../components/SelectAction";
 
 export default function Pointage() {
+  const history = useHistory();
   const [young, setYoung] = useState();
   const [focusedSession, setFocusedSession] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
-  const [idsSelected, setIdsSelected] = useState([]);
-  const [youngIdInPage, setYoungIdInPage] = useState([]);
+  const [youngSelected, setYoungSelected] = useState([]);
+  const [youngsInPage, setYoungsInPage] = useState([]);
+  const checkboxRef = React.useRef();
   const { sessionId } = useParams();
+
+  const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
+  const [modalMultiPointagePresenceJDM, setModalMultiPointagePresenceJDM] = useState({ isOpen: false });
+  const [modalPointageDepart, setModalPointageDepart] = useState({ isOpen: false });
 
   const getDefaultQuery = () => ({
     query: {
@@ -46,16 +55,30 @@ export default function Pointage() {
     })();
   }, [sessionId]);
 
+  useEffect(() => {
+    if (!checkboxRef.current) return;
+    if (youngSelected?.length === 0) {
+      checkboxRef.current.checked = false;
+      checkboxRef.current.indeterminate = false;
+    } else if (youngSelected?.length < youngsInPage?.length) {
+      checkboxRef.current.checked = false;
+      checkboxRef.current.indeterminate = true;
+    } else if (youngSelected?.length === youngsInPage?.length) {
+      checkboxRef.current.checked = true;
+      checkboxRef.current.indeterminate = false;
+    }
+  }, [youngSelected]);
+
   const handleClick = async (young) => {
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
     if (ok) setYoung(data);
   };
 
   const onClickMainCheckBox = () => {
-    if (idsSelected.length === 0) {
-      setIdsSelected(youngIdInPage);
+    if (youngSelected.length === 0) {
+      setYoungSelected(youngsInPage);
     } else {
-      setIdsSelected([]);
+      setYoungSelected([]);
     }
   };
 
@@ -90,9 +113,9 @@ export default function Pointage() {
                         Filtres
                       </div>
                       <div>
-                        {idsSelected?.length > 0 ? (
+                        {youngSelected?.length > 0 ? (
                           <div className="text-gray-600 font-normal text-sm">
-                            <span className="font-bold">{idsSelected?.length}</span>&nbsp;sélectionné{idsSelected?.length > 1 ? "s" : ""}
+                            <span className="font-bold">{youngSelected?.length}</span>&nbsp;sélectionné{youngSelected?.length > 1 ? "s" : ""}
                           </div>
                         ) : null}
                       </div>
@@ -102,37 +125,28 @@ export default function Pointage() {
                         title="Actions"
                         optionsGroup={[
                           {
-                            title: "La JDM",
-                            items: [
-                              {
-                                action: () => console.log("ajouter liste attente"),
-                                render: (
-                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                    <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                                    <div>
-                                      Marquer <span className="font-bold">présent</span>
-                                    </div>
-                                  </div>
-                                ),
-                              },
-                              {
-                                action: () => console.log("ajouter liste attente"),
-                                render: (
-                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                    <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
-                                    <div>
-                                      Marquer <span className="font-bold">absent</span>
-                                    </div>
-                                  </div>
-                                ),
-                              },
-                            ],
-                          },
-                          {
                             title: "L'arrivée au séjour",
                             items: [
                               {
-                                action: () => console.log("ajouter liste attente"),
+                                action: async () => {
+                                  if (youngSelected.length === 0) return;
+                                  setModalPointagePresenceArrivee({
+                                    isOpen: true,
+                                    values: youngSelected,
+                                    value: "true",
+                                    onSubmit: async () => {
+                                      const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
+                                        value: "true",
+                                        ids: youngSelected.map((y) => y._id),
+                                      });
+                                      if (!ok) {
+                                        toastr.error("Oups, une erreur s'est produite", translate(code));
+                                        return;
+                                      }
+                                      history.go(0);
+                                    },
+                                  });
+                                },
                                 render: (
                                   <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
                                     <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
@@ -143,10 +157,85 @@ export default function Pointage() {
                                 ),
                               },
                               {
-                                action: () => console.log("ajouter liste attente"),
+                                action: async () => {
+                                  if (youngSelected.length === 0) return;
+                                  setModalPointagePresenceArrivee({
+                                    isOpen: true,
+                                    values: youngSelected,
+                                    value: "false",
+                                    onSubmit: async () => {
+                                      const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
+                                        value: "false",
+                                        ids: youngSelected.map((y) => y._id),
+                                      });
+                                      if (!ok) {
+                                        toastr.error("Oups, une erreur s'est produite", translate(code));
+                                        return;
+                                      }
+                                      history.go(0);
+                                    },
+                                  });
+                                },
                                 render: (
                                   <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
                                     <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
+                                    <div>
+                                      Marquer <span className="font-bold">absent</span>
+                                    </div>
+                                  </div>
+                                ),
+                              },
+                            ],
+                          },
+                          {
+                            title: "La JDM",
+                            items: [
+                              {
+                                action: async () => {
+                                  if (youngSelected.length === 0) return;
+                                  setModalMultiPointagePresenceJDM({
+                                    isOpen: true,
+                                    values: youngSelected,
+                                    value: "true",
+                                    onSubmit: async () => {
+                                      const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "true", ids: youngSelected.map((y) => y._id) });
+                                      if (!ok) {
+                                        toastr.error("Oups, une erreur s'est produite", translate(code));
+                                        return;
+                                      }
+                                      history.go(0);
+                                    },
+                                  });
+                                },
+                                render: (
+                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                    <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+                                    <div>
+                                      Marquer <span className="font-bold">présent</span>
+                                    </div>
+                                  </div>
+                                ),
+                              },
+                              {
+                                action: async () => {
+                                  if (youngSelected.length === 0) return;
+                                  setModalMultiPointagePresenceJDM({
+                                    isOpen: true,
+                                    values: youngSelected,
+                                    value: "false",
+                                    onSubmit: async () => {
+                                      const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "false", ids: youngSelected.map((y) => y._id) });
+                                      if (!ok) {
+                                        toastr.error("Oups, une erreur s'est produite", translate(code));
+                                        return;
+                                      }
+                                      history.go(0);
+                                    },
+                                  });
+                                },
+                                render: (
+                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                    <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
                                     <div>
                                       Marquer <span className="font-bold">absent</span>
                                     </div>
@@ -257,14 +346,14 @@ export default function Pointage() {
                     paginationAt="bottom"
                     showTopResultStats={false}
                     onData={async ({ rawData }) => {
-                      if (rawData?.hits?.hits) setYoungIdInPage(rawData.hits.hits.map((h) => h._id.toString()));
+                      if (rawData?.hits?.hits) setYoungsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, firstName: h._source.firstName, lastName: h._source.lastName })));
                     }}
                     render={({ data }) => (
                       <table className="w-full">
                         <thead className="">
                           <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
-                            <th className="py-3 pl-4" onClick={onClickMainCheckBox}>
-                              X
+                            <th className="py-3 pl-4">
+                              <input ref={checkboxRef} className="cursor-pointer" type="checkbox" onChange={onClickMainCheckBox} />
                             </th>
                             <th className="">Volontaire</th>
                             <th className="">Présence à l&apos;arrivée</th>
@@ -279,15 +368,15 @@ export default function Pointage() {
                               hit={hit}
                               onClick={() => handleClick(hit)}
                               opened={young?._id === hit._id}
-                              onSelect={(id) =>
-                                setIdsSelected((prev) => {
-                                  if (prev.includes(id)) {
-                                    return prev.filter((e) => e !== id);
+                              onSelect={(newItem) =>
+                                setYoungSelected((prev) => {
+                                  if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
+                                    return prev.filter((e) => e._id.toString() !== newItem._id.toString());
                                   }
-                                  return [...prev, id];
+                                  return [...prev, { _id: newItem._id, firstName: newItem.firstName, lastName: newItem.lastName }];
                                 })
                               }
-                              selected={idsSelected.includes(hit._id)}
+                              selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
                             />
                           ))}
                         </tbody>
@@ -305,6 +394,20 @@ export default function Pointage() {
         onChange={() => {
           setYoung(null);
         }}
+      />
+      <ModalMultiPointagePresenceJDM
+        isOpen={modalMultiPointagePresenceJDM?.isOpen}
+        onCancel={() => setModalMultiPointagePresenceJDM({ isOpen: false, value: null })}
+        onSubmit={modalMultiPointagePresenceJDM?.onSubmit}
+        values={modalMultiPointagePresenceJDM?.values}
+        value={modalMultiPointagePresenceJDM?.value}
+      />
+      <ModalMultiPointagePresenceArrivee
+        isOpen={modalPointagePresenceArrivee?.isOpen}
+        onCancel={() => setModalPointagePresenceArrivee({ isOpen: false, value: null })}
+        onSubmit={modalPointagePresenceArrivee?.onSubmit}
+        values={modalPointagePresenceArrivee?.values}
+        value={modalPointagePresenceArrivee?.value}
       />
     </div>
   );
@@ -346,7 +449,7 @@ const Line = ({ hit, onClick, opened, onSelect, selected }) => {
       <tr className={`${!opened && "hover:!bg-gray-100"}`} onClick={onClick}>
         <td className={`${bgColor} pl-4 ml-2 rounded-l-lg`}>
           <div onClick={(e) => e.stopPropagation()}>
-            <input className="cursor-pointer" type="checkbox" checked={selected} onChange={() => onSelect(value._id)} />
+            <input className="cursor-pointer" type="checkbox" checked={selected} onChange={() => onSelect(value)} />
           </div>
         </td>
         <td className={`${bgColor} py-3 `}>

@@ -45,7 +45,10 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived"];
     const { error, value } = Joi.object({
       value: Joi.string().trim().valid("true", "false").required(),
-      key: Joi.string().trim().required().valid(...allowedKeys),
+      key: Joi.string()
+        .trim()
+        .required()
+        .valid(...allowedKeys),
       id: Joi.string().required(),
     })
       .unknown()
@@ -61,7 +64,6 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-
     young.set({ [key]: newValue });
     await young.save({ fromUser: req.user });
 
@@ -71,7 +73,5 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-
 
 module.exports = router;

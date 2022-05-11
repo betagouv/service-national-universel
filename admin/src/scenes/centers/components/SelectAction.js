@@ -5,25 +5,44 @@ import CursorClick from "../../../assets/icons/CursorClick";
 export default function SelectAction({ optionsGroup, title }) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [loadingLabel, setLoadingLabel] = React.useState("Chargement...");
+  const ref = React.useRef(null);
 
   const onClickItem = async (item) => {
     setLoading(true);
     setOpen(false);
+    item.loadingLabel && setLoadingLabel(item.loadingLabel);
     await item.action?.();
     setLoading(false);
   };
 
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
   return (
-    <div style={{ fontFamily: "Marianne" }}>
+    <div style={{ fontFamily: "Marianne" }} ref={ref}>
       <div className="py-2 pl-3 relative">
         {/* select item */}
-        <div className="flex justify-between items-center gap-3 border-[1px] border-gray-300 px-3 py-2 rounded-lg cursor-pointer" onClick={() => setOpen((e) => !e)}>
+        <button
+          disabled={loading}
+          className="flex justify-between items-center gap-3 border-[1px] border-gray-300 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+          style={{ fontFamily: "Marianne" }}
+          onClick={() => setOpen((e) => !e)}>
           <div className="flex items-center gap-2">
             <CursorClick className="text-gray-400" />
-            <span className="text-gray-700 font-medium text-sm">{title}</span>
+            {loading ? <span className="text-gray-700 font-medium text-sm">{loadingLabel}</span> : <span className="text-gray-700 font-medium text-sm">{title}</span>}
           </div>
           <ChevronDown className="text-gray-400" />
-        </div>
+        </button>
 
         {/* display options */}
         <div
