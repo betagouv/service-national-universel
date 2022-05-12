@@ -81,7 +81,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
         firstName: req.user.firstName,
         lastName: req.user.lastName,
         source: "PLATFORM",
-        attributes: [...userAttributes, { name: "page", value: value.fromPage }],
+        attributes: [...userAttributes, { name: "page précédente", value: value.fromPage }],
       }),
     });
     if (!response.ok) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
@@ -134,7 +134,7 @@ router.post("/ticket/form", async (req, res) => {
       { name: "departement", value: department },
       { name: "region", value: region },
       { name: "role", value: role },
-      { name: "page", value: fromPage },
+      { name: "page précédente", value: fromPage },
     ];
     const response = await zammood.api("/v0/message", {
       method: "POST",
@@ -192,7 +192,7 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
         email: req.user.email,
         message: req.body.message,
         ticketId: req.params.id,
-        attributes: [...userAttributes, { name: "page", value: req.body.fromPage }],
+        attributes: userAttributes,
       }),
     });
     if (!response.ok) slack.error({ title: "Create message Zammood", text: JSON.stringify(response.code) });
