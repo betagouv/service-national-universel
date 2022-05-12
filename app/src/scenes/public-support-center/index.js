@@ -68,6 +68,7 @@ export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const [open, setOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const fromPage = decodeURIComponent(window.location.search).split("?from=")[1];
 
   return (
     <HeroContainer style={{ paddingBottom: "5rem" }}>
@@ -138,7 +139,7 @@ export default function Index() {
             </div>
           </div>
         </div>
-        {open && <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} />}
+        {open && <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
         {successMessage && <p style={{ color: "#6B7280" }}>{successMessage}</p>}
       </Container>
     </HeroContainer>

@@ -60,7 +60,7 @@ export default function TicketView(props) {
     setSending(true);
     if (!message) return setSending(false);
     const id = props.match?.params?.id;
-    const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message });
+    const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage });
     if (!ok) toastr.error("Oups, une erreur est survenue", translate(code));
     setMessage("");
     updateHeightElement(inputRef?.current);
