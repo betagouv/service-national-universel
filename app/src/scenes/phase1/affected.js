@@ -113,43 +113,7 @@ export default function Affected() {
                     <span className="py-3 font-bold text-base pr-4 whitespace-nowrap">J'ai des questions sur le séjour</span>
                     <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
                   </a>
-                  <a
-                    className="flex lg:hidden"
-                    href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_a_l_utilisation_d_autotest_COVID.pdf"
-                    target="_blank"
-                    rel="noreferrer">
-                    <div className="flex flex-row justify-between items-start  border-[1px] border-gray-200 rounded-lg pl-4 cursor-pointer ml-4 ">
-                      <div className="flex flex-row items-center py-3">
-                        <HiOutlineShieldCheck className="text-gray-400 h-8 w-8 mr-4" />
-                        <div className="flex flex-col">
-                          <div className="text-base font-bold whitespace-nowrap">Protocole sanitaire</div>
-                          <div className="text-sm text-gray-500 whitespace-nowrap">
-                            Il est recommandé de réaliser un test PCR, antigénique ou autotest moins de 24h avant le départ en séjour
-                          </div>
-                        </div>
-                      </div>
-                      <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
-                    </div>
-                  </a>
                 </div>
-                <a
-                  className="w-full"
-                  href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_a_l_utilisation_d_autotest_COVID.pdf"
-                  target="_blank"
-                  rel="noreferrer">
-                  <div className="hidden lg:flex flex-row justify-between items-start  border-[1px] border-gray-200 rounded-lg pl-4 cursor-pointer full-width">
-                    <div className="flex flex-row items-center py-3">
-                      <HiOutlineShieldCheck className="text-gray-400 h-8 w-8 mr-4" />
-                      <div className="flex flex-col">
-                        <span className="text-base font-bold whitespace-nowrap">Protocole sanitaire</span>
-                        <span className="text-sm text-gray-500 whitespace-nowrap">
-                          Il est recommandé de réaliser un test PCR, antigénique ou autotest moins de 24h avant le départ en séjour
-                        </span>
-                      </div>
-                    </div>
-                    <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
-                  </div>
-                </a>
               </div>
               {/* Files */}
               <div className="bg-white py-6 -mx-6 px-4 rounded-lg">
