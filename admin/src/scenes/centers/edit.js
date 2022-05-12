@@ -106,15 +106,7 @@ export default function Edit(props) {
                         <div className="ml-1 mt-8">
                           Code (2022) <Badge text="modérateur" color={colors.purple} />
                         </div>
-                        <Item
-                          title="Identifiant du centre - version 2022"
-                          values={values}
-                          name={"code2022"}
-                          handleChange={handleChange}
-                          required
-                          errors={errors}
-                          touched={touched}
-                        />
+                        <Item title="Identifiant du centre - version 2022" values={values} name={"code2022"} handleChange={handleChange} errors={errors} touched={touched} />
                       </>
                     ) : null}
                     <div className="ml-1 mt-8"> Adresse </div>
