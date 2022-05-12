@@ -63,7 +63,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     const { error, value } = Joi.object({
       subject: Joi.string().required(),
       message: Joi.string().required(),
-      fromPage: Joi.string().required(),
+      fromPage: Joi.string(),
     })
       .unknown()
       .validate(obj);
@@ -124,7 +124,7 @@ router.post("/ticket/form", async (req, res) => {
       formSubjectStep1: Joi.string().required(),
       formSubjectStep2: Joi.string().required(),
       role: Joi.string().required(),
-      fromPage: Joi.string().required(),
+      fromPage: Joi.string(),
     })
       .unknown()
       .validate(obj);

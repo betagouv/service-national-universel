@@ -86,7 +86,7 @@ export default function App() {
           <Route path="/validate" component={Validate} />
           <Route path="/conditions-generales-utilisation" component={CGU} />
           <Route path="/auth" component={Auth} />
-          <Route path="/public-besoin-d-aide" component={PublicSupport} />
+          <Route path={`/public-besoin-d-aide?from=${window.location.pathname}`} component={PublicSupport} />
           <Route path="/" component={Home} />
         </Switch>
         <Footer />
