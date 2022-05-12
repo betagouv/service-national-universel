@@ -1,91 +1,26 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const saml2 = require("saml2-js");
-const Saml2js = require("saml2js");
-const fs = require("fs");
-const { capture } = require("../sentry");
-const path = require("path");
-const fetch = require("node-fetch");
-const { ERRORS } = require("../utils");
 
-const {
-  EDUCONNECT_ENTRY_POINT,
-  EDUCONNECT_LOGOUT_POINT,
-  EDUCONNECT_ISSUER,
-  EDUCONNECT_CALLBACK_URL,
-  EDUCONNECT_SP_CERT,
-  EDUCONNECT_SP_KEY,
-  EDUCONNECT_IDP_SIGN_CERT,
-  EDUCONNECT_IDP_ENCR_CERT,
-} = require("../config.js");
-
-const sp_options = {
-  entity_id: EDUCONNECT_ISSUER,
-  certificate: EDUCONNECT_SP_CERT,
-  private_key: EDUCONNECT_SP_KEY,
-  assert_endpoint: EDUCONNECT_CALLBACK_URL,
-};
-const sp = new saml2.ServiceProvider(sp_options);
-
-// Create identity provider
-const idp_options = {
-  sso_login_url: EDUCONNECT_ENTRY_POINT,
-  sso_logout_url: EDUCONNECT_LOGOUT_POINT,
-  certificates: [EDUCONNECT_IDP_SIGN_CERT, EDUCONNECT_IDP_ENCR_CERT],
-};
-const idp = new saml2.IdentityProvider(idp_options);
-
-router.get(
-  "/login",
-  function (req, res, next) {
-    console.log("-----------------------------");
-    console.log("/Start login handler");
-    next();
-  },
-  passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }),
-);
-
-// router.get("/callback", async (req, res) => {
-//   res.status(200).send("SNU ");
-// });
-
-router.get("/signup", async (req, res) => {
-  // Create service provider
-
-  sp.create_login_request_url(idp, {}, function (err, login_url, request_id) {
-    if (err != null) return res.send(500);
-    res.redirect(login_url);
-  });
-});
+router.get("/login", passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }));
 
 // Assert endpoint for when login completes
-router.post(
-  "/callback",
-  function (req, res, next) {
-    console.log("-----------------------------");
-    console.log("/Start login callback ");
-    next();
-  },
-  passport.authenticate("educonnect"),
-  function (req, res) {
-    console.log("-----------------------------");
-    console.log("Requete entiere");
-    console.log(req);
-    console.log("-----------------------------");
+router.post("/callback", passport.authenticate("educonnect"), function (req, res) {
+  const attributes = req.user.attributes;
 
-    console.log("-----------------------------");
-    console.log("login call back dumps");
-    console.log(req.user);
-    console.log("-----------------------------");
-
-    console.log("-----------------------------");
-    console.log("Attributes");
-    console.log(req.user.attributes);
-    console.log("-----------------------------");
-
-    res.send("Callback sucess");
-  },
-);
+  const educonnect_data = {
+    FrEduCtDateConnexion: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.6"],
+    FrEduCtld: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.57"],
+    FrEduCtPersonAffiliation: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.7"],
+    FrEduCtEleveUAI: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.72"],
+    sn: attributes["urn:oid:2.5.4.4"],
+    givenName: attributes["urn:oid:2.5.4.42"],
+    FrEduCtEleveINEHash: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.64"],
+    FrEduCtEleveNiveau: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.73"],
+    FrEduCtDateNaissance: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.67"],
+    FrEduUrlRetour: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.5"],
+  };
+  res.status(200).send({ ok: true, data: educonnect_data });
+});
 
 module.exports = router;
