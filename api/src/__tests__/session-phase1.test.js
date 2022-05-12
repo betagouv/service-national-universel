@@ -4,7 +4,7 @@ const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 const getAppHelper = require("./helpers/app");
 const { createSessionPhase1, notExistingSessionPhase1Id } = require("./helpers/sessionPhase1");
 const { dbConnect, dbClose } = require("./helpers/db");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),

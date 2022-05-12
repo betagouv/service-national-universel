@@ -22,7 +22,7 @@ const {
   sanitizeAll,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
-const { ROLES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter } = require("snu-lib/roles");
+const { ROLES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter } = require("snu-lib");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateNewCohesionCenter, validateUpdateCohesionCenter, validateId } = require("../utils/validator");

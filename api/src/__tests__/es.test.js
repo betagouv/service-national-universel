@@ -1,5 +1,5 @@
 require("dotenv").config({ path: "./.env-testing" });
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 const request = require("supertest");
 
 // This part should be done at the beginning (before require models or anything else.).

@@ -60,7 +60,7 @@
     "puppeteer": "^10.2.0",
     "sanitize-html": "^2.7.0",
     "slugify": "^1.6.2",
-    "snu-lib": "file:../lib",
+    "snu-lib": "file:../lib2",
     "validator": "^13.5.2"
   },
   "devDependencies": {

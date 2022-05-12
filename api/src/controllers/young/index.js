@@ -42,9 +42,9 @@ const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 const { validateYoung, validateId, validateFirstName, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
-const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSendTemplateToYoung, canViewYoungApplications, canEditPresenceYoung } = require("snu-lib/roles");
-const { translateCohort } = require("snu-lib/translation");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
+const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSendTemplateToYoung, canViewYoungApplications, canEditPresenceYoung } = require("snu-lib");
+const { translateCohort } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
 
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));

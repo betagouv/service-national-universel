@@ -11,7 +11,7 @@ const StructureModel = require("../models/structure");
 const YoungModel = require("../models/young");
 const ContractModel = require("../models/contract");
 const config = require("../config");
-const { ROLES, APPLICATION_STATUS, MISSION_STATUS, CONTRACT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
+const { ROLES, APPLICATION_STATUS, MISSION_STATUS, CONTRACT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE2 } = require("snu-lib");
 const { JWT_MAX_AGE, cookieOptions } = require("../cookie-options");
 const { ERRORS, checkStatusContract } = require("../utils");
 

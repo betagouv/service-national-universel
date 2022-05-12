@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
 
 const { ZAMMAD_TOKEN, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
-const { translate } = require("snu-lib/translation");
+const { translate } = require("snu-lib");
 
 const ROLE = {
   ADMIN: 1,
@@ -49,9 +49,8 @@ async function sync(doc, { force } = { force: false }) {
     let note = "";
     if (doc.role === "referent" || doc.role === "referent_department" || doc.role === "referent_region") {
       role = ROLE.REFERENT;
-      note = `<a href=${`https://admin.snu.gouv.fr/user/${doc._id}`}>Profil référent</a><br/><br/><p><b>Rôle :</b> ${translate(doc.role)}</p><br/>${
-        doc.subRole && `<p><b>Fonction :</b> ${translate(doc.subRole)}</p><br/>`
-      }${doc.role === "referent_department" && `<p><b>Département :</b> ${doc.department}</p>`}
+      note = `<a href=${`https://admin.snu.gouv.fr/user/${doc._id}`}>Profil référent</a><br/><br/><p><b>Rôle :</b> ${translate(doc.role)}</p><br/>${doc.subRole && `<p><b>Fonction :</b> ${translate(doc.subRole)}</p><br/>`
+        }${doc.role === "referent_department" && `<p><b>Département :</b> ${doc.department}</p>`}
       ${doc.role === "referent_region" && `<p><b>Région :</b> ${doc.region}</p>`}`;
     } else if (doc.role === "responsible" || doc.role === "supervisor") {
       role = ROLE.STRUCTURE;

@@ -1,9 +1,9 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchAssociation, canSearchSessionPhase1, canSearchMeetingPoints, canSearchInElasticSearch } = require("snu-lib/roles");
-const { PHASE1_HEADCENTER_ACCESS_LIMIT, COHORTS } = require("snu-lib/constants");
-const { region2department } = require("snu-lib/region-and-departments");
+const { ROLES, canSearchAssociation, canSearchSessionPhase1, canSearchMeetingPoints, canSearchInElasticSearch } = require("snu-lib");
+const { PHASE1_HEADCENTER_ACCESS_LIMIT, COHORTS } = require("snu-lib");
+const { region2department } = require("snu-lib");
 const { capture } = require("../sentry");
 const esClient = require("../es");
 const { ERRORS, isYoung, getSignedUrlForApiAssociation, isReferent } = require("../utils");
