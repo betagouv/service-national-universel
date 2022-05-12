@@ -1,7 +1,15 @@
 import React from "react";
-import ChevronDown from "../../../assets/icons/ChevronDown";
+import ChevronDown from "../assets/icons/ChevronDown";
 
-export default function SelectAction({ optionsGroup, title, Icon, alignItems = "left" }) {
+export default function SelectAction({
+  optionsGroup,
+  title,
+  Icon,
+  alignItems = "left",
+  buttonClassNames = "border-[1px] border-gray-300",
+  textClassNames = "text-gray-700 font-medium text-sm",
+  rightIconClassNames = "text-gray-400",
+}) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [loadingLabel, setLoadingLabel] = React.useState("Chargement...");
@@ -33,15 +41,15 @@ export default function SelectAction({ optionsGroup, title, Icon, alignItems = "
         {/* select item */}
         <button
           disabled={loading}
-          className="flex justify-between items-center gap-3 border-[1px] border-gray-300 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+          className={`flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait ${buttonClassNames}`}
           style={{ fontFamily: "Marianne" }}
           onClick={() => setOpen((e) => !e)}>
           <div className="flex items-center gap-2">
             {Icon ? Icon : null}
 
-            {loading ? <span className="text-gray-700 font-medium text-sm">{loadingLabel}</span> : <span className="text-gray-700 font-medium text-sm">{title}</span>}
+            {loading ? <span className="text-gray-700 font-medium text-sm">{loadingLabel}</span> : <span className={`${textClassNames}`}>{title}</span>}
           </div>
-          <ChevronDown className="text-gray-400" />
+          <ChevronDown className={`${rightIconClassNames}`} />
         </button>
 
         {/* display options */}

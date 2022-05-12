@@ -23,7 +23,7 @@ import Loader from "../../../components/Loader";
 import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
-import SelectAction from "../components/SelectAction";
+import SelectAction from "../../../components/SelectAction";
 import CursorClick from "../../../assets/icons/CursorClick";
 
 export default function Pointage() {
