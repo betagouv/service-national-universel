@@ -18,9 +18,11 @@ on:
       - main
     paths:
       - api/**
+      - lib/**
   pull_request:
     paths:
       - api/**
+      - lib/**
 
 jobs:
   test:

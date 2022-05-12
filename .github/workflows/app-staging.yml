@@ -19,6 +19,7 @@ on:
       - refactor(app)--webpack-5
     paths:
       - app/**
+      - lib/**
   workflow_dispatch:
 
 jobs:
