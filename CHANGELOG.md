@@ -1,3 +1,15 @@
+# [1.84.0](https://github.com/betagouv/service-national-universel/compare/v1.83.0...v1.84.0) (2022-05-12)
+
+
+### Bug Fixes
+
+* add select components ([6072589](https://github.com/betagouv/service-national-universel/commit/607258912ebeaf5d19803d969de7554680dee66f))
+
+
+### Features
+
+* **admin:** add correction and ready for prod ([#1555](https://github.com/betagouv/service-national-universel/issues/1555)) ([30f4a87](https://github.com/betagouv/service-national-universel/commit/30f4a87df8f01dce87beb54cc71ab484939fcea5))
+
 # [1.83.0](https://github.com/betagouv/service-national-universel/compare/v1.82.0...v1.83.0) (2022-05-11)
 
 
