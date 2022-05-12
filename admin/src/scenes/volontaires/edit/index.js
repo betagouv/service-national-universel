@@ -28,10 +28,7 @@ import Representant1 from "./representant-legal1";
 import Representant2 from "./representant-legal2";
 import Preferences from "./preferences";
 import Consentement from "./consentement";
-import ConsentementImage from "./consentement-image";
 import TraitementDonneesPersonnelles from "./traitement-donnees-personnelles";
-import ConsentementPCR from "./consentement-pcr";
-import Rules from "./rules";
 import InformationsSupplementaires from "./informations-supplementaires";
 import MilitaryPreparation from "./military-preparation";
 import JDC from "./JDC";
@@ -147,10 +144,7 @@ export default function VolontaireEdit(props) {
             </Row>
             <Row>
               <Consentement values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
-              <ConsentementImage values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               {getAge(young?.birthdateAt) < 15 ? <TraitementDonneesPersonnelles values={values} handleChange={handleChange} handleSubmit={handleSubmit} /> : null}
-              <ConsentementPCR values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
-              <Rules values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>
             <Row>
               <InterTitle>Séjour de cohésion</InterTitle>

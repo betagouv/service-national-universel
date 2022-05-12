@@ -221,7 +221,9 @@ export default function DocumentPhase1(props) {
             </div>
             <FileIcon icon="image" filled={young.imageRightFilesStatus !== "TO_UPLOAD"} />
             <p className="text-base font-bold mt-2">Droit à l&apos;image</p>
-            <p className="text-gray-500">Accord : {dataImageRight.imageRight ? translate(dataImageRight.imageRight) : "Non renseigné"}</p>
+            <p className="text-gray-500">
+              Accord : {dataImageRight.imageRight && young.imageRightFilesStatus !== "TO_UPLOAD" ? translate(dataImageRight.imageRight) : "Non renseigné"}
+            </p>
             <ButtonPlain onClick={() => setIsOpenImg(true)}>Gérer le document</ButtonPlain>
           </section>
           <ModalDocument
@@ -258,7 +260,9 @@ export default function DocumentPhase1(props) {
             </div>
             <FileIcon icon="autotest" filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"} />
             <p className="text-base font-bold mt-2">Autotest PCR</p>
-            <p className="text-gray-500">Accord : {dataAutoTestPCR.autoTestPCR ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}</p>
+            <p className="text-gray-500">
+              Accord : {dataAutoTestPCR.autoTestPCR && young.autoTestPCRFilesStatus !== "TO_UPLOAD" ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}
+            </p>
             <ButtonPlain onClick={() => setIsOpenAut(true)}>Gérer le document</ButtonPlain>
           </section>
           <ModalDocument
