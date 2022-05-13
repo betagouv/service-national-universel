@@ -17,22 +17,28 @@ const isFromDOMTOM = (young) => {
 
 function getBg(template = "default") {
   if (template === "domtom") return getSignedUrl("convocation/convocationCohesionTemplate-DOMTOM.png");
-  return getSignedUrl("convocation/convocation_phase1_v2.png");
+  return getSignedUrl("convocation/convocation_template_base.png");
 }
 
 // ! WARNING : Change date also in app/src/scenes/phase1/components/Convocation.js
 const departureMeetingDate = {
   2021: "lundi 20 février, 14:00",
   "Février 2022": "dimanche 13 février, 16:00",
+  "Juin 2022": "dimanche 12 juin, 16:00",
+  "Juillet 2022": "dimanche 03 juillet, 16:00",
 };
 const returnMeetingDate = {
-  2021: "2 juillet, 14:00",
+  2021: "mardi 02 juillet, 14:00",
   "Février 2022": "vendredi 25 février, 11:00",
+  "Juin 2022": "vendredi 24 juin, 11:00",
+  "Juillet 2022": "vendredi 15 juillet, 11:00",
 };
 
 const COHESION_STAY_DATE_STRING = {
-  2021: "20 février 2021",
-  "Février 2022": "13 février 2022",
+  2021: "20 février au 02 juillet 2021  ",
+  "Février 2022": "13 février au 25 février 2022",
+  "Juin 2022": "12 juin au 24 juin 2022",
+  "Juillet 2022": "03 juillet au 15 juillet 2022",
 };
 
 const render = async (young) => {
@@ -48,6 +54,7 @@ const render = async (young) => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
     return meetingPoint.departureAddress;
   };
+
   try {
     if (young.statusPhase1 !== "AFFECTED") throw `young ${young.id} not affected`;
     if (!young.sessionPhase1Id || (!young.meetingPointId && young.deplacementPhase1Autonomous !== "true")) throw `young ${young.id} unauthorized`;
@@ -85,11 +92,29 @@ const render = async (young) => {
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
       .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
       .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
-      .replace(/{{MEETING_DATE}}/g, sanitizeAll(getDepartureMeetingDate(meetingPoint)))
-      .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(getMeetingAddress(meetingPoint, center)))
-      .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(getReturnMeetingDate(meetingPoint)))
-      .replace(/{{MEETING_ADDRESS_RETURN}}/g, sanitizeAll("au même lieu de rassemblement qu'à l'aller"))
+      .replace(
+        /{{MEETING_DATE}}/g,
+        sanitizeAll(
+          `<b>Le</b> ${getDepartureMeetingDate(meetingPoint)
+            .split(/[,\s]+/)
+            .slice(0, 3)
+            .join(" ")}`,
+        ),
+      )
+      .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${getDepartureMeetingDate(meetingPoint).split(",")[1]}`))
+      .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
       .replace(/{{TRANPORT}}/g, sanitizeAll(bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : ""))
+      .replace(
+        /{{MEETING_DATE_RETURN}}/g,
+        sanitizeAll(
+          getReturnMeetingDate(meetingPoint)
+            .split(/[,\s]+/)
+            .slice(0, 3)
+            .join(" "),
+        ),
+      )
+      .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(getReturnMeetingDate(meetingPoint).split(",")[1]))
+
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
       .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()));
   } catch (e) {

@@ -29,7 +29,7 @@ const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { getQPV, getDensity } = require("../geo");
 
 function sanitizeAll(text) {
-  return sanitizeHtml(text || "", { allowedTags: ["li", "br"], allowedAttributes: {} });
+  return sanitizeHtml(text || "", { allowedTags: ["li", "br", "b"], allowedAttributes: {} });
 }
 
 function getReq(url, cb) {
