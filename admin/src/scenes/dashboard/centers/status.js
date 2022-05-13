@@ -45,9 +45,8 @@ export default function Status({ filter }) {
       if (responsesSession.length) {
         setPlacesTotal(responsesSession[0].aggregations.placesTotal.value);
         setPlacesLeft(responsesSession[0].aggregations.placesLeft.value);
-        setFilterStatus(responsesSession[0].aggregations.filterStatus.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}))
+        setFilterStatus(responsesSession[0].aggregations.filterStatus.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       }
-
     }
     initStatus();
     const optionSessionStatus = [];
@@ -70,18 +69,16 @@ export default function Status({ filter }) {
           </Link>
         </Col>
         <Col>
-          {sessionStatus?.map((status) =>
+          {sessionStatus?.map((status) => (
             <div key={status.value} className="w-1/3 mb-1">
               <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"${status.value}"%5D`] })}>
                 <div className="flex justify-between bg-white px-3 py-2 rounded-md shadow-sm cursor-pointer hover:scale-105">
                   <div className="font-bold">{status.label}</div>
-                  <div className="text-base text-coolGray-400">
-                    {filterStatus[status.value] || 0}
-                  </div>
+                  <div className="text-base text-coolGray-400">{filterStatus[status.value] || 0}</div>
                 </div>
               </Link>
             </div>
-          )}
+          ))}
         </Col>
       </Row>
       <Row>

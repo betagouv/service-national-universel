@@ -60,7 +60,7 @@ const Container = styled.div`
 `;
 const Label = styled.div`
   font-size: 0.8rem;
-  color: ${colors.darkPurple};
+  color: #6b7280;
 `;
 
 export default MultiSelect;
