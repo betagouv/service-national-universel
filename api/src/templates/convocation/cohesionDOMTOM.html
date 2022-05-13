@@ -1,25 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Formulaire Autotest PCR - SNU</title>
-    <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
-  </head>
 
-  <body id="convocation-cohesion">
-    <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="recto" />
-    <div class="referent">
-      <div class="referent-name">Affaire suivie par : {{REFERENT_NAME}}</div>
-      <div class="referent-phone">{{REFERENT_PHONE}}</div>
-      <div class="referent-mail">{{REFERENT_MAIL}}</div>
+<head>
+  <meta charset="UTF-8" />
+  <title>Formulaire Autotest PCR - SNU</title>
+  <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
+</head>
+
+<body id="convocation-cohesion">
+  <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="recto" />
+  <div class="referent">
+    <div class="title">Affaire suivie par :</div>
+    <div class="info">{{CONTACTS}}</div>
+  </div>
+  <div class="infos-young">
+    Paris, le {{DATE}}<br />
+    {{FIRST_NAME}} {{LAST_NAME}}<br />
+    Né(e) le {{BIRTHDATE}}<br />
+    {{ADDRESS}}<br />
+    {{ZIP}} {{CITY}}
+  </div>
+  <div class="title-container">
+    <div class="title">CONVOCATION</div>
+    <div class="title">au séjour de cohésion dans le cadre du service national universel (SNU)</div>
+    <div class="text">Décret n• 2020-922 du 29 juillet 2020 portant diverses dispositions relatives au service national
+      universel</div>
+  </div>
+  <div class="infos-center">
+    Je suis heureuse de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service
+    national universel, du {{COHESION_STAY_DATE_STRING}}, a été
+    retenue. </br>
+    Votre séjour se déroulera au: {{COHESION_CENTER_NAME}}, {{COHESION_CENTER_ADDRESS}} {{COHESION_CENTER_ZIP}}
+    {{COHESION_CENTER_CITY}}.
+  </div>
+  <!-- <div class="center">{{COHESION_CENTER_NAME}}, {{COHESION_CENTER_ADDRESS}} {{COHESION_CENTER_ZIP}}
+    {{COHESION_CENTER_CITY}}</div> -->
+  <div class="meeting-point-DOM">
+    Les informations sur les modalités d'acheminement vers le centre et de retour vous seront transmises par e-mail par les
+services académiques.
+  </div>
+  <div class="warning-DOM">
+    Attention ! votre représentant légal doit rester jusqu'à votre prise en charge par l'équipe encadrant le séjour de cohé-
+    sion.
+  </div>
+  <div class="stuff-DOM">
+    <div>II vous est demandé de vous présenter au point de rassemblement avec : </div>
+    <div class="list">
+      <li>votre convocation,</li>
+      <li>une pièce d'identité,</li>
+      <li>la fiche sanitaire complétée sous pli,</li>
+      <li>2 masques jetables à usage médical (pour le transport en commun),</li>
+      
     </div>
-    <div class="infos-young">
-      Paris, le {{DATE}}<br />
-      {{FIRST_NAME}} {{LAST_NAME}}<br />
-      Né(e) le {{BIRTHDATE}}<br />
-      {{ADDRESS}}<br />
-      {{ZIP}} {{CITY}}
-    </div>
-    <div class="center-domtom">{{COHESION_CENTER_NAME}}, {{COHESION_CENTER_ADDRESS}} {{COHESION_CENTER_ZIP}} {{COHESION_CENTER_CITY}}</div>
-  </body>
+    <div class="info">Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</div>
+  </div>
+
+  <div class="meeting-point-date-return">
+    <b>Votre représentant légal veillera à bien respecter ces modalités de retour (horaire, lieu de prise en charge).
+      Vous ne pourrez repartir seul, sauf si vous présentez une autorisation de votre représentant légal.</b>
+    <br /> <br />
+    Afin que votre séjour se déroule dans les meilleures conditions, nous vous rappelons que chaque volontaire, lors de
+    son inscription s'est engagé à respecter le <b>règlement intérieur</b>  du centre.
+    <br /> <br /><br />
+    Nous vous félicitons pour votre engagement et vous souhaitons un excellent séjour de cohésion.
+  </div>
+</body>
+
 </html>

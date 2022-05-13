@@ -181,13 +181,6 @@ img.bg {
   top: 360px;
   width: 85%;
 }
-#convocation-cohesion > .center-domtom {
-  font-size: 0.75rem;
-  position: absolute;
-  left: 295px;
-  top: 436px;
-  width: 85%;
-}
 
 #convocation-cohesion > .meeting-point {
   /* border: 1px solid rgb(47, 0, 255) ; */
@@ -198,6 +191,18 @@ img.bg {
   width: 85%;
   line-height: 1.4;
 }
+
+#convocation-cohesion > .meeting-point-DOM {
+  /* border: 1px solid rgb(47, 0, 255) ; */
+  font-size: 0.8rem;
+  position: absolute;
+  left: 50px;
+  top: 430px;
+  width: 85%;
+  line-height: 1.4;
+  font-style: italic;
+}
+
 #convocation-cohesion > .meeting-point > .info {
   /* border: 1px solid rgb(47, 0, 255) ; */
   text-align: center;
@@ -217,6 +222,20 @@ img.bg {
   padding-right: 15px;
 }
 
+#convocation-cohesion > .warning-DOM {
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+  position: absolute;
+  text-align: left;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  left: 50px;
+  top: 490px;
+  width: 85%;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
 #convocation-cohesion > .stuff {
   position: absolute;
   text-align: left;
@@ -224,6 +243,16 @@ img.bg {
   line-height: 1.3;
   left: 50px;
   top: 555px;
+  width: 85%;
+}
+
+#convocation-cohesion > .stuff-DOM {
+  position: absolute;
+  text-align: left;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  left: 50px;
+  top: 568px;
   width: 85%;
 }
 #convocation-cohesion > .stuff > .list {
@@ -234,6 +263,16 @@ img.bg {
 #convocation-cohesion > .stuff > .info {
   position: absolute;
   top : 130px;
+}
+
+#convocation-cohesion > .stuff-DOM > .list {
+  position: absolute;
+  left: 15px;
+}
+
+#convocation-cohesion > .stuff-DOM > .info {
+  position: absolute;
+  top : 100px;
 }
 
 #convocation-cohesion > .meeting-point-date-return {
