@@ -8,7 +8,6 @@ export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, v
   const [isLoading, setIsLoading] = React.useState(false);
   const [viewList, setViewList] = React.useState(false);
   const isPlural = values?.length > 1;
-  console.log("✍️ ~ values", values);
 
   const getTitle = () => `Marquer ${value === "true" ? "présent" : "absent"}${isPlural ? "s" : ""} ${values?.length} volontaire${isPlural ? "s" : ""}`;
   const getMessage = () =>

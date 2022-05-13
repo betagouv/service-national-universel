@@ -916,6 +916,39 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
   }
 });
 
+router.post("/phase1/multiaction/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      departSejourMotif: Joi.string().required(),
+      departSejourAt: Joi.string().required(),
+      departSejourMotifComment: Joi.string().optional().allow(null, ""),
+      ids: Joi.array().items(Joi.string().required()).required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
+    const { departSejourMotif, departSejourAt, departSejourMotifComment, ids } = value;
+
+    const youngs = await YoungObject.find({ _id: { $in: ids } });
+    if (!youngs || youngs?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    if (youngs.some((young) => !canEditPresenceYoung(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    for (let young of youngs) {
+      young.set({ departSejourAt, departSejourMotif, departSejourMotifComment });
+      await young.save({ fromUser: req.user });
+    }
+
+    res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/phase1/multiaction/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived"];

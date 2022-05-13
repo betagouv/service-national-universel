@@ -16,6 +16,7 @@ import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePres
 import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
 import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointagePresenceJDM";
 import ModalMultiPointagePresenceArrivee from "../components/modals/ModalMultiPointagePresenceArrivee";
+import ModalMultiPointageDepart from "../components/modals/ModalMultiPointageDepart";
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
 import { getFilterLabel, translate, translatePhase1, getAge, formatDateFR } from "../../../utils";
 import Loader from "../../../components/Loader";
@@ -255,7 +256,17 @@ export default function Pointage() {
                           {
                             items: [
                               {
-                                action: () => console.log("ajouter liste attente"),
+                                action: async () => {
+                                  if (youngSelected.length === 0) return;
+                                  setModalPointageDepart({
+                                    isOpen: true,
+                                    values: youngSelected,
+                                    value: "false",
+                                    onSubmit: () => {
+                                      history.go(0);
+                                    },
+                                  });
+                                },
                                 render: (
                                   <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
                                     <ArrowCircleRight className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
@@ -390,6 +401,13 @@ export default function Pointage() {
         onSubmit={modalPointagePresenceArrivee?.onSubmit}
         values={modalPointagePresenceArrivee?.values}
         value={modalPointagePresenceArrivee?.value}
+      />
+      <ModalMultiPointageDepart
+        isOpen={modalPointageDepart?.isOpen}
+        onCancel={() => setModalPointageDepart({ isOpen: false, value: null })}
+        onSubmit={modalPointageDepart?.onSubmit}
+        values={modalPointageDepart?.values}
+        value={modalPointageDepart?.value}
       />
     </div>
   );
