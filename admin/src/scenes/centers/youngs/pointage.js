@@ -155,8 +155,9 @@ export default function Pointage() {
                                 render: (
                                   <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
                                     <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                                    <div>
+                                    <div className="font-normal">
                                       Marquer <span className="font-bold">présent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                     </div>
                                   </div>
                                 ),
@@ -186,6 +187,7 @@ export default function Pointage() {
                                     <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
                                     <div>
                                       Marquer <span className="font-bold">absent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                     </div>
                                   </div>
                                 ),
@@ -217,6 +219,7 @@ export default function Pointage() {
                                     <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
                                     <div>
                                       Marquer <span className="font-bold">présent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                     </div>
                                   </div>
                                 ),
@@ -243,6 +246,7 @@ export default function Pointage() {
                                     <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
                                     <div>
                                       Marquer <span className="font-bold">absent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                     </div>
                                   </div>
                                 ),
@@ -257,6 +261,7 @@ export default function Pointage() {
                                   <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
                                     <ArrowCircleRight className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
                                     Renseigner un départ
+                                    {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                   </div>
                                 ),
                               },

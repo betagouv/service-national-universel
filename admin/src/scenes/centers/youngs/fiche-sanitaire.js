@@ -146,6 +146,7 @@ export default function FicheSanitaire() {
                                     <ShieldCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
                                     <div>
                                       Marquer <span className="font-bold">renseignée</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                     </div>
                                   </div>
                                 ),
@@ -175,6 +176,7 @@ export default function FicheSanitaire() {
                                     <ShieldCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
                                     <div>
                                       Marquer <span className="font-bold">non renseignée</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                     </div>
                                   </div>
                                 ),
