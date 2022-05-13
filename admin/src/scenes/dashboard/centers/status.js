@@ -57,40 +57,47 @@ export default function Status({ filter }) {
   return (
     <>
       <Row className=" flex items-center">
-        <Col md={6} xl={6}>
+        <Col md={4}>
           <Link to={getLink({ base: `/centre`, filter })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>Centres</CardTitle>
               <CardValueWrapper>
                 <CardValue>{total}</CardValue>
-                <CardArrow />
               </CardValueWrapper>
             </Card>
           </Link>
         </Col>
-        <Col>
-          {sessionStatus?.map((status) => (
-            <div key={status.value} className="w-1/3 mb-1">
-              <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"${status.value}"%5D`] })}>
-                <div className="flex justify-between bg-white px-3 py-2 rounded-md shadow-sm cursor-pointer hover:scale-105">
-                  <div className="font-bold">{status.label}</div>
-                  <div className="text-base text-coolGray-400">{filterStatus[status.value] || 0}</div>
-                </div>
-              </Link>
-            </div>
-          ))}
+        <Col md={4}>
+          <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"DRAFT"%5D`] })}>
+            <Card borderBottomColor="#8CA1A4">
+              <CardTitle>Brouillon</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{filterStatus["DRAFT"] || 0}</CardValue>
+              </CardValueWrapper>
+            </Card>
+          </Link>
+        </Col>
+        <Col md={4}>
+          <Link to={getLink({ base: `/centre`, filter, filtersUrl: [`STATUS=%5B"VALIDATED"%5D`] })}>
+            <Card borderBottomColor="#6C9269">
+              <CardTitle>Validés</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{filterStatus["VALIDATED"] || 0}</CardValue>
+              </CardValueWrapper>
+            </Card>
+          </Link>
         </Col>
       </Row>
       <Row>
-        <Col md={6} xl={3}>
-          <Card borderBottomColor={colors.yellow}>
+        <Col md={4}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
             <CardTitle>Places proposées</CardTitle>
             <CardValueWrapper>
               <CardValue>{placesTotal}</CardValue>
             </CardValueWrapper>
           </Card>
         </Col>
-        <Col md={6} xl={3}>
+        <Col md={4}>
           <Card borderBottomColor={colors.green}>
             <CardTitle>Places disponibles</CardTitle>
             <CardValueWrapper>
@@ -98,8 +105,8 @@ export default function Status({ filter }) {
             </CardValueWrapper>
           </Card>
         </Col>
-        <Col md={6} xl={3}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+        <Col md={4}>
+          <Card borderBottomColor={colors.yellow}>
             <CardTitle>Taux d&apos;occupation</CardTitle>
             <CardValueWrapper>
               <CardValue>{placesTotal ? `${(((placesTotal - placesLeft || 0) * 100) / placesTotal).toFixed(2)}%` : `0%`}</CardValue>
