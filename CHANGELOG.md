@@ -1,3 +1,19 @@
+# [1.85.0](https://github.com/betagouv/service-national-universel/compare/v1.84.0...v1.85.0) (2022-05-13)
+
+
+### Bug Fixes
+
+* **admin:** cacher onglet historique pour les superivseur ([cb5cf40](https://github.com/betagouv/service-national-universel/commit/cb5cf40d659fd73be10ca540f6f6eed2bb1c98ed))
+* **admin:** enlever changement vers juin ([11832d9](https://github.com/betagouv/service-national-universel/commit/11832d9489bb6e9ed1482caaa36a3f8ccd99fffe))
+* add count in select ([394b08f](https://github.com/betagouv/service-national-universel/commit/394b08fd8454d8da8a691ea53a89abfa50ff9891))
+* dashboard center ([c63b28e](https://github.com/betagouv/service-national-universel/commit/c63b28e53cb4dcc83ae890371838bcf3414e891e))
+* multi action pointage ([7123b3c](https://github.com/betagouv/service-national-universel/commit/7123b3cad3f43d434972c19bc5346df3949f189f))
+
+
+### Features
+
+* multi action depart ([fad23a4](https://github.com/betagouv/service-national-universel/commit/fad23a4da56e172169e8bec34f0343342649a4cf))
+
 # [1.84.0](https://github.com/betagouv/service-national-universel/compare/v1.83.0...v1.84.0) (2022-05-12)
 
 
