@@ -262,33 +262,6 @@ export default function Pointage() {
                               },
                             ],
                           },
-                          {
-                            title: "Fiche sanitaire",
-                            items: [
-                              {
-                                action: () => console.log("ajouter liste attente"),
-                                render: (
-                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                    <ShieldCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                                    <div>
-                                      Marquer <span className="font-bold">renseignée</span>
-                                    </div>
-                                  </div>
-                                ),
-                              },
-                              {
-                                action: () => console.log("ajouter liste attente"),
-                                render: (
-                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                    <ShieldCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
-                                    <div>
-                                      Marquer <span className="font-bold">non renseignée</span>
-                                    </div>
-                                  </div>
-                                ),
-                              },
-                            ],
-                          },
                         ]}
                       />
                     </div>
@@ -430,7 +403,7 @@ const Line = ({ hit, onClick, opened, onSelect, selected }) => {
 
   if (!value) return <></>;
 
-  const bgColor = selected ? "bg-blue-500" : opened ? "bg-blue-100" : "bg-white";
+  const bgColor = selected ? "bg-blue-500" : opened ? "bg-blue-100" : "";
   const mainTextColor = selected ? "text-white" : "text-[#242526]";
   const secondTextColor = selected ? "text-blue-100" : "text-[#738297]";
 
