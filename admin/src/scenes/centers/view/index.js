@@ -124,6 +124,7 @@ export default function Index({ ...props }) {
       let { data: referent } = await api.get(`/referent?email=${teamate.email}`);
 
       if (!referent) {
+        // todo : create chef de centre
         toastr.error("Erreur !", "Aucun utilisateur trouvé avec cette adresse email");
         return {};
       }

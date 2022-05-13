@@ -7,7 +7,6 @@ import { toastr } from "react-redux-toastr";
 import { apiURL } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
 import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
-import ShieldCheck from "../../../assets/icons/ShieldCheck";
 import SpeakerPhone from "../../../assets/icons/SpeakerPhone";
 import BadgeCheck from "../../../assets/icons/BadgeCheck";
 import api from "../../../services/api";
