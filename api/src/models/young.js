@@ -1466,5 +1466,7 @@ Schema.plugin(patchHistory, {
 });
 Schema.plugin(mongooseElastic(esClient, { ignore: ["historic"] }), MODELNAME);
 
+Schema.index({ sessionPhase1Id: 1 });
+
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
