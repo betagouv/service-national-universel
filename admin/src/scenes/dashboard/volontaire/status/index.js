@@ -31,6 +31,7 @@ export default function StatusIndex({ filter }) {
   const [youngWhoChangedCohortIn, setYoungWhoChangedCohortIn] = useState({});
   const [youngWhoChangedCohortOut, setYoungWhoChangedCohortOut] = useState({});
   const [cohesionStayPresence, setCohesionStayPresence] = useState({});
+  const [youngPhase1Agreement, setYoungPhase1Agreement] = useState({});
   const [statusApplication, setStatusApplication] = useState({});
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export default function StatusIndex({ filter }) {
           statusPhase2Contract: { terms: { field: "statusPhase2Contract.keyword" } },
           statusPhase3: { terms: { field: "statusPhase3.keyword" } },
           cohesionStayPresence: { terms: { field: "cohesionStayPresence.keyword" } },
+          youngPhase1Agreement: { terms: { field: "youngPhase1Agreement.keyword" } },
         },
         size: 0,
       };
@@ -78,6 +80,7 @@ export default function StatusIndex({ filter }) {
         setStatusPhase2Contract(responses[0].aggregations.statusPhase2Contract.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setStatusPhase3(responses[0].aggregations.statusPhase3.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setYoungPhase1Agreement(responses[0].aggregations.youngPhase1Agreement.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       }
     })();
 
@@ -208,7 +211,7 @@ export default function StatusIndex({ filter }) {
               filter={filter}
               getLink={getLink}
             />
-            <Participation data={cohesionStayPresence} filter={filter} getLink={getLink} />
+            <Participation cohesionStayPresence={cohesionStayPresence} youngPhase1Agreement={youngPhase1Agreement} filter={filter} getLink={getLink} />
           </>
         )}
         {currentSubtab === "phase2" && (
