@@ -11,8 +11,6 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import { VISITOR_SUBROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate, getPasswordErrorMessage } from "../../utils";
-// eslint-disable-next-line import/namespace
-// import { VISITOR_SUBROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate, getPasswordErrorMessage } from "snu-lib";
 
 export default function Profil() {
   useDocumentTitle("Mon profil");
