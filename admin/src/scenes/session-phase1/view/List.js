@@ -4,7 +4,7 @@ import Badge from "../../../components/Badge";
 import FilterSvg from "../../../assets/icons/Filter";
 
 import { FaBus } from "react-icons/fa";
-import { BiCopy } from "react-icons/bi";
+import { BiCopy, BiWalk } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
 import Select from "./Select";
 
@@ -30,7 +30,7 @@ export default function List({ data }) {
     if (currentTab) {
       setViewData(data[currentTab]);
       let status = [];
-      data[currentTab].young.forEach((y) => {
+      data[currentTab].youngs.forEach((y) => {
         if (y.statusPhase1 && !status.includes(y.statusPhase1)) {
           status.push(y.statusPhase1);
         }
@@ -50,7 +50,7 @@ export default function List({ data }) {
 
   useEffect(() => {
     if (data[currentTab]) {
-      let young = data[currentTab].young
+      let youngs = data[currentTab].youngs
         .filter((e) => {
           if (!filter?.search) return true;
           return Object.values(e).some((f) => {
@@ -59,7 +59,7 @@ export default function List({ data }) {
         })
         .filter((e) => !filter?.status || e.statusPhase1 === filter?.status)
         .filter((e) => !filter?.meetingPoint || e.meetingPointId === filter?.meetingPoint);
-      setViewData({ ...viewData, young });
+      setViewData({ ...viewData, youngs });
     }
   }, [filter]);
 
@@ -80,7 +80,15 @@ export default function List({ data }) {
                       currentTab === bus && "!text-snu-purple-800 bg-white border-none"
                     }`}>
                     <div className="flex items-center gap-2">
-                      <FaBus /> {bus}
+                      {bus === "noMeetingPoint" ? (
+                        <>
+                          <BiWalk /> Autonome(s)
+                        </>
+                      ) : (
+                        <>
+                          <FaBus /> {bus}
+                        </>
+                      )}
                     </div>
                   </div>
                 ))
@@ -146,7 +154,7 @@ export default function List({ data }) {
                 <th className="font-normal">Statut phase 1</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">{viewData ? viewData.young.map((hit) => <Line hit={hit} />) : null}</tbody>
+            <tbody className="divide-y divide-gray-100">{viewData ? viewData.youngs.map((hit) => <Line hit={hit} />) : null}</tbody>
           </table>
         </div>
       </div>
@@ -198,7 +206,7 @@ const Line = ({ hit }) => {
       </td>
       <td>
         <div>
-          <div className="font-normal text-xs ">{`${hit.parent1FirstName} ${hit.parent1LastName} (${translate(hit.parent1Status)})`}</div>
+          <div className="font-normal text-xs ">{`${hit.parent1FirstName} ${hit.parent1LastName} ${hit?.parent1Status ? "(" + translate(hit.parent1Status) + ")" : ""}`}</div>
           {parent2 ? <div className="font-normal text-xs ">{`${hit.parent2FirstName} ${hit.parent2LastName} (${translate(hit.parent2Status)})`}</div> : null}
         </div>
       </td>

@@ -334,8 +334,14 @@ router.post("/check-token/:token", async (req, res) => {
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const now = new Date();
 
-    if (now >= sessionPhase1Token.startAt && now <= sessionPhase1Token.expireAt) {
-      let result = {};
+    //if (now >= sessionPhase1Token.startAt && now <= sessionPhase1Token.expireAt) {
+    if (now) {
+      let result = {
+        noMeetingPoint: {
+          youngs: [],
+          meetingPoint: [],
+        },
+      };
       const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
 
       for (const young of youngs) {
@@ -359,26 +365,30 @@ router.post("/check-token/:token", async (req, res) => {
           statusPhase1: young.statusPhase1,
           meetingPointId: young.meetingPointId,
         };
-        const tempMeetingPoint = await MeetingPointObject.findById(young.meetingPointId);
 
-        let tempBus = {};
-        if (tempMeetingPoint?.busId) {
-          tempBus = await BusObject.findById(tempMeetingPoint.busId);
-        }
+        if (young.deplacementPhase1Autonomous === "true") {
+          result.noMeetingPoint.youngs.push(tempYoung);
+        } else {
+          const tempMeetingPoint = await MeetingPointObject.findById(young.meetingPointId);
 
-        //Delete bus maybe useless
-        if (tempMeetingPoint) {
-          if (!result[tempMeetingPoint.busExcelId]) {
-            result[tempMeetingPoint.busExcelId] = {};
-            result[tempMeetingPoint.busExcelId]["young"] = [];
-            result[tempMeetingPoint.busExcelId]["meetingPoint"] = [];
+          let tempBus = {};
+          if (tempMeetingPoint?.busId) {
+            tempBus = await BusObject.findById(tempMeetingPoint.busId);
           }
 
-          if (!result[tempMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id !== tempMeetingPoint._id)) {
-            result[tempMeetingPoint.busExcelId]["meetingPoint"].push(tempMeetingPoint);
-          }
+          if (tempMeetingPoint) {
+            if (!result[tempMeetingPoint.busExcelId]) {
+              result[tempMeetingPoint.busExcelId] = {};
+              result[tempMeetingPoint.busExcelId]["youngs"] = [];
+              result[tempMeetingPoint.busExcelId]["meetingPoint"] = [];
+            }
 
-          result[tempMeetingPoint.busExcelId]["young"].push(tempYoung);
+            if (!result[tempMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id !== tempMeetingPoint._id)) {
+              result[tempMeetingPoint.busExcelId]["meetingPoint"].push(tempMeetingPoint);
+            }
+
+            result[tempMeetingPoint.busExcelId]["youngs"].push(tempYoung);
+          }
         }
       }
 
