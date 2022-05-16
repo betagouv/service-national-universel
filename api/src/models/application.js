@@ -67,6 +67,16 @@ const Schema = new mongoose.Schema({
       description: "Identifiant de la mission",
     },
   },
+
+  isJvaMission: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "Mission proposée par JVA",
+    },
+  },
+
   missionName: {
     type: String,
     documentation: {
