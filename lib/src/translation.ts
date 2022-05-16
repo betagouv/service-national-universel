@@ -1,4 +1,4 @@
-const translate = (value) => {
+export const translate = (value) => {
   switch (value) {
     case "NONE":
       return "Aucun";
@@ -246,8 +246,6 @@ const translate = (value) => {
       return "Transport en commun";
     case "IN_COMING":
       return "À venir";
-    case "OTHER":
-      return "Autre";
     case "other":
       return "Autre";
     case "SENT":
@@ -281,7 +279,7 @@ const translate = (value) => {
   }
 };
 
-const translateState = (state) => {
+export const translateState = (state) => {
   switch (state) {
     case "open":
     case "OPEN":
@@ -306,7 +304,7 @@ const translateState = (state) => {
   }
 };
 
-const translateCohort = (cohort) => {
+export const translateCohort = (cohort) => {
   switch (cohort) {
     case "Février 2022":
       return "du 13 au 25 Février 2022";
@@ -319,7 +317,7 @@ const translateCohort = (cohort) => {
   }
 };
 
-const translateSessionStatus = (statut) => {
+export const translateSessionStatus = (statut) => {
   switch (statut) {
     case "VALIDATED":
       return "Validé";
@@ -330,7 +328,7 @@ const translateSessionStatus = (statut) => {
   }
 };
 
-const translatePhase1 = (phase1) => {
+export const translatePhase1 = (phase1) => {
   switch (phase1) {
     case "WAITING_AFFECTATION":
       return "En attente d'affectation";
@@ -355,7 +353,7 @@ const translatePhase1 = (phase1) => {
   }
 };
 
-const translatePhase2 = (phase2) => {
+export const translatePhase2 = (phase2) => {
   switch (phase2) {
     case "WAITING_REALISATION":
       return "Inactif";
@@ -372,7 +370,7 @@ const translatePhase2 = (phase2) => {
   }
 };
 
-const translateApplication = (candidature) => {
+export const translateApplication = (candidature) => {
   switch (candidature) {
     case "WAITING_VALIDATION":
       return "Candidature en attente de validation";
@@ -397,7 +395,7 @@ const translateApplication = (candidature) => {
   }
 };
 
-const translateEngagement = (engagement) => {
+export const translateEngagement = (engagement) => {
   switch (engagement) {
     case "DRAFT":
       return "Brouillon";
@@ -410,7 +408,7 @@ const translateEngagement = (engagement) => {
   }
 };
 
-const translateFileStatusPhase1 = (status) => {
+export const translateFileStatusPhase1 = (status) => {
   switch (status) {
     case "TO_UPLOAD":
       return "À renseigner";
@@ -431,16 +429,4 @@ const translateFileStatusPhase1 = (status) => {
     default:
       return status;
   }
-};
-
-module.exports = {
-  translate,
-  translateState,
-  translateCohort,
-  translateSessionStatus,
-  translatePhase1,
-  translatePhase2,
-  translateApplication,
-  translateEngagement,
-  translateFileStatusPhase1,
 };

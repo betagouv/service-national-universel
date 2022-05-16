@@ -13,8 +13,8 @@ const ReferentObject = require("../models/referent");
 // eslint-disable-next-line no-unused-vars
 const { ERRORS, isYoung, updateApplicationsWithYoungOrMission, updateApplication } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
-const { canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib/roles");
-const { MISSION_STATUS } = require("snu-lib/constants");
+const { canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib");
+const { MISSION_STATUS } = require("snu-lib");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");

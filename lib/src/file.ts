@@ -1,7 +1,8 @@
-function download(file, fileName) {
-  if (window.navigator.msSaveOrOpenBlob) {
+/* eslint-disable no-undef */
+export function download(file, fileName) {
+  if ((window.navigator as any).msSaveOrOpenBlob) {
     //IE11 & Edge
-    window.navigator.msSaveOrOpenBlob(file, fileName);
+    (window.navigator as any).msSaveOrOpenBlob(file, fileName);
   } else {
     //Other browsers
     const a = document.createElement("a");
@@ -11,7 +12,3 @@ function download(file, fileName) {
     a.click();
   }
 }
-
-module.exports = {
-  download,
-};

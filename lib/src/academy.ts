@@ -1,4 +1,4 @@
-const departmentToAcademy = {
+export const departmentToAcademy = {
   Allier: "Clermont-Ferrand",
   Cantal: "Clermont-Ferrand",
   "Haute-Loire": "Clermont-Ferrand",
@@ -105,21 +105,14 @@ const departmentToAcademy = {
   "Wallis-et-Futuna": "Wallis-et-Futuna",
   "Saint-Pierre-et-Miquelon": "Saint-Pierre-et-Miquelon",
 };
-const academyToDepartments = {
+export const academyToDepartments = {
   "Clermont-Ferrand": ["Allier", "Cantal", "Haute-Loire", "Puy-de-Dôme"],
   Grenoble: ["Ardèche", "Drôme", "Isère", "Savoie", "Haute-Savoie"],
   Lyon: ["Ain", "Loire", "Rhône"],
   Besançon: ["Doubs", "Jura", "Haute-Saône", "Territoire de Belfort"],
   Dijon: ["Côte-d'Or", "Nièvre", "Saône-et-Loire", "Yonne"],
   Rennes: ["Côtes-d'Armor", "Finistère", "Ille-et-Vilaine", "Morbihan"],
-  "Orléans-Tours": [
-    "Cher",
-    "Eure-et-Loir",
-    "Indre",
-    "Indre-et-Loire",
-    "Loir-et-Cher",
-    "Loiret",
-  ],
+  "Orléans-Tours": ["Cher", "Eure-et-Loir", "Indre", "Indre-et-Loire", "Loir-et-Cher", "Loiret"],
   Corse: ["Corse-du-Sud", "Haute-Corse"],
   "Nancy-Metz": ["Meurthe-et-Moselle", "Meuse", "Moselle", "Vosges"],
   Reims: ["Ardennes", "Aube", "Marne", "Haute-Marne"],
@@ -130,33 +123,13 @@ const academyToDepartments = {
   Paris: ["Paris"],
   Versailles: ["Yvelines", "Essonne", "Hauts-de-Seine", "Val-d'Oise"],
   Normandie: ["Calvados", "Eure", "Manche", "Orne", "Seine-Maritime"],
-  Bordeaux: [
-    "Dordogne",
-    "Gironde",
-    "Landes",
-    "Lot-et-Garonne",
-    "Pyrénées-Atlantiques",
-  ],
+  Bordeaux: ["Dordogne", "Gironde", "Landes", "Lot-et-Garonne", "Pyrénées-Atlantiques"],
   Limoges: ["Corrèze", "Creuse", "Haute-Vienne"],
   Poitiers: ["Charente", "Charente-Maritime", "Deux-Sèvres", "Vienne"],
   Montpellier: ["Aude", "Gard", "Hérault", "Lozère", "Pyrénées-Orientales"],
-  Toulouse: [
-    "Ariège",
-    "Aveyron",
-    "Haute-Garonne",
-    "Gers",
-    "Lot",
-    "Hautes-Pyrénées",
-    "Tarn",
-    "Tarn-et-Garonne",
-  ],
+  Toulouse: ["Ariège", "Aveyron", "Haute-Garonne", "Gers", "Lot", "Hautes-Pyrénées", "Tarn", "Tarn-et-Garonne"],
   Nantes: ["Loire-Atlantique", "Maine-et-Loire", "Mayenne", "Sarthe", "Vendée"],
-  "Aix-Marseille": [
-    "Alpes-de-Haute-Provence",
-    "Hautes-Alpes",
-    "Bouches-du-Rhône",
-    "Vaucluse",
-  ],
+  "Aix-Marseille": ["Alpes-de-Haute-Provence", "Hautes-Alpes", "Bouches-du-Rhône", "Vaucluse"],
   Nice: ["Alpes-Maritimes", "Var"],
   Guadeloupe: "Guadeloupe",
   Martinique: "Martinique",
@@ -169,6 +142,4 @@ const academyToDepartments = {
   "Saint-Pierre-et-Miquelon": "Saint-Pierre-et-Miquelon",
 };
 
-const academyList = [...new Set(Object.values(departmentToAcademy))];
-
-module.exports = { departmentToAcademy, academyList, academyToDepartments };
+export const academyList = [...new Set((Object as any).values(departmentToAcademy))];

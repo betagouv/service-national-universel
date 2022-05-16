@@ -1,15 +1,10 @@
-const putLocation = async (city, zip) => {
+export const putLocation = async (city, zip) => {
   // try with municipality = city + zip
-  const responseMunicipality = await fetch(
-    `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(
-      city + " " + zip
-    )}&type=municipality`,
-    {
-      mode: "cors",
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    }
-  );
+  const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
+    mode: "cors",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
   const resMunicipality = await responseMunicipality.json();
   if (resMunicipality.features.length > 0) {
     return {
@@ -18,16 +13,11 @@ const putLocation = async (city, zip) => {
     };
   }
   // try with locality = city + zip
-  const responseLocality = await fetch(
-    `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(
-      zip + " " + city
-    )}&type=locality`,
-    {
-      mode: "cors",
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    }
-  );
+  const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&type=locality`, {
+    mode: "cors",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
   const resLocality = await responseLocality.json();
   if (resLocality.features.length > 0) {
     return {
@@ -56,7 +46,7 @@ const putLocation = async (city, zip) => {
   };
 };
 
-const departmentLookUp = {
+export const departmentLookUp = {
   "01": "Ain",
   "02": "Aisne",
   "03": "Allier",
@@ -155,7 +145,7 @@ const departmentLookUp = {
   94: "Val-de-Marne",
   95: "Val-d'Oise",
   971: "Guadeloupe",
-  '971b': "Saint-Barthélemy",
+  "971b": "Saint-Barthélemy",
   972: "Martinique",
   973: "Guyane",
   974: "La Réunion",
@@ -168,19 +158,18 @@ const departmentLookUp = {
   988: "Nouvelle-Calédonie",
 };
 
-const departmentList = Object.values(departmentLookUp);
+export const departmentList = Object.values(departmentLookUp);
 
-const getDepartmentNumber = (d) =>
-  Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === d);
+export const getDepartmentNumber = (d) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === d);
 
-const getDepartmentByZip = (zip) => {
+export const getDepartmentByZip = (zip) => {
   if (!zip) return;
   if (zip.length !== 5) return;
   const departmentCode = zip.substr(0, 2);
   return departmentLookUp[departmentCode];
 };
 
-const getRegionByZip = (zip) => {
+export const getRegionByZip = (zip) => {
   if (!zip) return;
   if (zip.length !== 5) return;
   const departmentCode = zip.substr(0, 2);
@@ -188,7 +177,7 @@ const getRegionByZip = (zip) => {
   return department2region[department];
 };
 
-const regionList = [
+export const regionList = [
   "Auvergne-Rhône-Alpes",
   "Bourgogne-Franche-Comté",
   "Bretagne",
@@ -214,7 +203,7 @@ const regionList = [
   "Nouvelle-Calédonie",
 ];
 
-const department2region = {
+export const department2region = {
   Ain: "Auvergne-Rhône-Alpes",
   Aisne: "Hauts-de-France",
   Allier: "Auvergne-Rhône-Alpes",
@@ -319,71 +308,21 @@ const department2region = {
   Mayotte: "Mayotte",
   "Saint-Barthélemy": "Guadeloupe",
   "Saint-Martin": "Guadeloupe",
-  "Terres australes et antarctiques françaises":
-    "Terres australes et antarctiques françaises",
+  "Terres australes et antarctiques françaises": "Terres australes et antarctiques françaises",
   "Wallis-et-Futuna": "Wallis-et-Futuna",
   "Polynésie française": "Polynésie française",
   "Nouvelle-Calédonie": "Nouvelle-Calédonie",
 };
 
-const region2department = {
-  "Auvergne-Rhône-Alpes": [
-    "Ain",
-    "Allier",
-    "Ardèche",
-    "Cantal",
-    "Drôme",
-    "Isère",
-    "Loire",
-    "Haute-Loire",
-    "Puy-de-Dôme",
-    "Rhône",
-    "Savoie",
-    "Haute-Savoie",
-  ],
-  "Bourgogne-Franche-Comté": [
-    "Côte-d'Or",
-    "Doubs",
-    "Jura",
-    "Nièvre",
-    "Haute-Saône",
-    "Saône-et-Loire",
-    "Yonne",
-    "Territoire de Belfort",
-  ],
+export const region2department = {
+  "Auvergne-Rhône-Alpes": ["Ain", "Allier", "Ardèche", "Cantal", "Drôme", "Isère", "Loire", "Haute-Loire", "Puy-de-Dôme", "Rhône", "Savoie", "Haute-Savoie"],
+  "Bourgogne-Franche-Comté": ["Côte-d'Or", "Doubs", "Jura", "Nièvre", "Haute-Saône", "Saône-et-Loire", "Yonne", "Territoire de Belfort"],
   Bretagne: ["Côtes-d'Armor", "Finistère", "Ille-et-Vilaine", "Morbihan"],
-  "Centre-Val de Loire": [
-    "Cher",
-    "Eure-et-Loir",
-    "Indre",
-    "Indre-et-Loire",
-    "Loir-et-Cher",
-    "Loiret",
-  ],
+  "Centre-Val de Loire": ["Cher", "Eure-et-Loir", "Indre", "Indre-et-Loire", "Loir-et-Cher", "Loiret"],
   Corse: ["Corse-du-Sud", "Haute-Corse"],
-  "Grand Est": [
-    "Ardennes",
-    "Aube",
-    "Marne",
-    "Haute-Marne",
-    "Meurthe-et-Moselle",
-    "Meuse",
-    "Moselle",
-    "Bas-Rhin",
-    "Haut-Rhin",
-    "Vosges",
-  ],
+  "Grand Est": ["Ardennes", "Aube", "Marne", "Haute-Marne", "Meurthe-et-Moselle", "Meuse", "Moselle", "Bas-Rhin", "Haut-Rhin", "Vosges"],
   "Hauts-de-France": ["Aisne", "Nord", "Oise", "Pas-de-Calais", "Somme"],
-  "Île-de-France": [
-    "Paris",
-    "Seine-et-Marne",
-    "Yvelines",
-    "Essonne",
-    "Hauts-de-Seine",
-    "Seine-Saint-Denis",
-    "Val-de-Marne",
-    "Val-d'Oise",
-  ],
+  "Île-de-France": ["Paris", "Seine-et-Marne", "Yvelines", "Essonne", "Hauts-de-Seine", "Seine-Saint-Denis", "Val-de-Marne", "Val-d'Oise"],
   Normandie: ["Calvados", "Eure", "Manche", "Orne", "Seine-Maritime"],
   "Nouvelle-Aquitaine": [
     "Charente",
@@ -399,58 +338,17 @@ const region2department = {
     "Vienne",
     "Haute-Vienne",
   ],
-  Occitanie: [
-    "Ariège",
-    "Aude",
-    "Aveyron",
-    "Gard",
-    "Haute-Garonne",
-    "Gers",
-    "Hérault",
-    "Lot",
-    "Lozère",
-    "Hautes-Pyrénées",
-    "Pyrénées-Orientales",
-    "Tarn",
-    "Tarn-et-Garonne",
-  ],
-  "Pays de la Loire": [
-    "Loire-Atlantique",
-    "Maine-et-Loire",
-    "Mayenne",
-    "Sarthe",
-    "Vendée",
-  ],
-  "Provence-Alpes-Côte d'Azur": [
-    "Alpes-de-Haute-Provence",
-    "Hautes-Alpes",
-    "Alpes-Maritimes",
-    "Bouches-du-Rhône",
-    "Var",
-    "Vaucluse",
-  ],
+  Occitanie: ["Ariège", "Aude", "Aveyron", "Gard", "Haute-Garonne", "Gers", "Hérault", "Lot", "Lozère", "Hautes-Pyrénées", "Pyrénées-Orientales", "Tarn", "Tarn-et-Garonne"],
+  "Pays de la Loire": ["Loire-Atlantique", "Maine-et-Loire", "Mayenne", "Sarthe", "Vendée"],
+  "Provence-Alpes-Côte d'Azur": ["Alpes-de-Haute-Provence", "Hautes-Alpes", "Alpes-Maritimes", "Bouches-du-Rhône", "Var", "Vaucluse"],
   Guadeloupe: ["Guadeloupe", "Saint-Martin", "Saint-Barthélemy"],
   Martinique: ["Martinique"],
   Guyane: ["Guyane"],
   "La Réunion": ["La Réunion"],
   "Saint-Pierre-et-Miquelon": ["Saint-Pierre-et-Miquelon"],
   Mayotte: ["Mayotte"],
-  "Terres australes et antarctiques françaises": [
-    "Terres australes et antarctiques françaises",
-  ],
+  "Terres australes et antarctiques françaises": ["Terres australes et antarctiques françaises"],
   "Wallis-et-Futuna": ["Wallis-et-Futuna"],
   "Polynésie française": ["Polynésie française"],
   "Nouvelle-Calédonie": ["Nouvelle-Calédonie"],
-};
-
-module.exports = {
-  departmentLookUp,
-  departmentList,
-  getDepartmentNumber,
-  regionList,
-  department2region,
-  region2department,
-  putLocation,
-  getDepartmentByZip,
-  getRegionByZip,
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ModalContacts from "../modal/ModalContacts";
-import { COHORTS } from "snu-lib/constants";
+import { COHORTS } from "snu-lib";
 
 export default function CardContacts({ contacts, idServiceDep, getService }) {
   const [isOpen, setIsOpen] = useState(false);

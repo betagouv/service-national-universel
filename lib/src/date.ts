@@ -1,14 +1,14 @@
-const formatDay = (date) => {
+export const formatDay = (date) => {
   if (!date) return "-";
   return new Date(date).toISOString().split("T")[0];
 };
 
-const formatDateFR = (d) => {
+export const formatDateFR = (d) => {
   if (!d) return "-";
   const date = new Date(d);
   return date.toLocaleDateString("fr-FR");
 };
-const formatLongDateFR = (d) => {
+export const formatLongDateFR = (d) => {
   if (!d) return "-";
   const date = new Date(d);
   return date.toLocaleDateString("fr-FR", {
@@ -16,14 +16,14 @@ const formatLongDateFR = (d) => {
     minute: "2-digit",
   });
 };
-const formatDateFRTimezoneUTC = (d) => {
+export const formatDateFRTimezoneUTC = (d) => {
   if (!d) return "-";
   const date = new Date(d);
   return date.toLocaleDateString("fr-FR", {
     timeZone: "UTC",
   });
 };
-const formatLongDateUTC = (d) => {
+export const formatLongDateUTC = (d) => {
   if (!d) return "-";
   const date = new Date(d);
   return date.toLocaleDateString("fr-FR", {
@@ -32,7 +32,7 @@ const formatLongDateUTC = (d) => {
     timeZone: "UTC",
   });
 };
-const formatLongDateUTCWithoutTime = (d) => {
+export const formatLongDateUTCWithoutTime = (d) => {
   if (!d) return "-";
   const date = new Date(d);
   return date.toLocaleDateString("fr-FR", {
@@ -40,7 +40,7 @@ const formatLongDateUTCWithoutTime = (d) => {
   });
 };
 
-const formatStringLongDate = (date) => {
+export const formatStringLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
   return d.toLocaleDateString("fr-FR", {
@@ -52,7 +52,7 @@ const formatStringLongDate = (date) => {
   });
 };
 
-const formatStringDate = (date) => {
+export const formatStringDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
   return d.toLocaleDateString("fr-FR", {
@@ -62,7 +62,7 @@ const formatStringDate = (date) => {
   });
 };
 
-const formatStringDateTimezoneUTC = (date) => {
+export const formatStringDateTimezoneUTC = (date) => {
   if (!date) return "-";
   const d = new Date(date);
   return d.toLocaleDateString("fr-FR", {
@@ -73,38 +73,23 @@ const formatStringDateTimezoneUTC = (date) => {
   });
 };
 
-function dateForDatePicker(d) {
+export function dateForDatePicker(d) {
   return new Date(d).toISOString().split("T")[0];
 }
 
-function getAge(d) {
+export function getAge(d) {
   const now = new Date();
-  now.setHours(0,0,0,0);
+  now.setHours(0, 0, 0, 0);
   const date = new Date(d);
-  date.setHours(0,0,0,0);
-  const diffTime = Math.abs(date - now);
+  date.setHours(0, 0, 0, 0);
+  const diffTime = Math.abs((date as any) - (now as any));
   const age = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365.25));
   if (!age || isNaN(age)) return "?";
   return age;
 }
 
-const getLimitDateForPhase2 = (cohort) => {
+export const getLimitDateForPhase2 = (cohort) => {
   if (cohort === "2019") return "23 mars 2021";
   if (cohort === "2020") return "31 décembre 2021 ";
   return "30 juin 2022";
-};
-
-module.exports = {
-  formatDay,
-  formatDateFR,
-  formatLongDateFR,
-  formatDateFRTimezoneUTC,
-  formatLongDateUTC,
-  formatStringLongDate,
-  formatStringDate,
-  formatStringDateTimezoneUTC,
-  dateForDatePicker,
-  getAge,
-  getLimitDateForPhase2,
-  formatLongDateUTCWithoutTime,
 };

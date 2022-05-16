@@ -9,12 +9,12 @@ const slack = require("../slack");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
 const { ERRORS, isYoung } = require("../utils");
-const { ZAMMAD_GROUP } = require("snu-lib/constants");
-const { ticketStateIdByName } = require("snu-lib/zammad");
+const { ZAMMAD_GROUP } = require("snu-lib");
+const { ticketStateIdByName } = require("snu-lib");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { APP_URL, ADMIN_URL, ZAMMAD_PLATEFORME_USER, ZAMMAD_PLATEFORME_USER_ID } = require("../config");
-const { ROLES, canViewTicketTags } = require("snu-lib/roles");
+const { ROLES, canViewTicketTags } = require("snu-lib");
 const zammadAuth = require("../middlewares/zammadAuth");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {

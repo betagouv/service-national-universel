@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { canViewMeetingPoints } = require("snu-lib/roles");
+const { canViewMeetingPoints } = require("snu-lib");
 const { capture } = require("../sentry");
 const { validateId } = require("../utils/validator");
 const MeetingPointModel = require("../models/meetingPoint");

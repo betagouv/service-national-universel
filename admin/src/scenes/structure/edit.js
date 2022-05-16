@@ -17,7 +17,7 @@ import { translate, ROLES, ENABLE_PM, legalStatus, typesStructure, sousTypesStru
 import api from "../../services/api";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import { canDeleteReferent } from "snu-lib/roles";
+import { canDeleteReferent } from "snu-lib";
 import DeleteBtnComponent from "./components/DeleteBtnComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 

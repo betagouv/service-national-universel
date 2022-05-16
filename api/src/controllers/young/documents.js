@@ -12,8 +12,8 @@ const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
 const contractPhase2 = require("../../templates/contractPhase2");
 const { sendTemplate } = require("../../sendinblue");
-const { canSendFileByMail, canDownloadYoungDocuments } = require("snu-lib/roles");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { canSendFileByMail, canDownloadYoungDocuments } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 async function getHtmlTemplate(type, template, young, contract) {
   if (type === "certificate" && template === "1") return await certificate.phase1(young);

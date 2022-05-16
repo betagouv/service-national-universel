@@ -10,7 +10,7 @@ const { dbConnect, dbClose } = require("./helpers/db");
 const { notExisitingMissionId, createMissionHelper, getMissionByIdHelper } = require("./helpers/mission");
 const { createReferentHelper } = require("./helpers/referent");
 const { notExistingYoungId, createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),

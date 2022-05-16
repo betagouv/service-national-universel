@@ -3,7 +3,6 @@ import passwordValidator from "password-validator";
 import api from "../services/api";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
-import { environment } from "../config";
 import sanitizeHtml from "sanitize-html";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];

@@ -3,7 +3,6 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { VISITOR_SUBROLES } from "snu-lib/roles";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import { requiredMessage } from "../../components/errorMessage";
 import Loader from "../../components/Loader";
@@ -11,7 +10,9 @@ import PasswordEye from "../../components/PasswordEye";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import { getPasswordErrorMessage, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate } from "../../utils";
+import { VISITOR_SUBROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate, getPasswordErrorMessage } from "../../utils";
+// eslint-disable-next-line import/namespace
+// import { VISITOR_SUBROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES, translate, getPasswordErrorMessage } from "snu-lib";
 
 export default function Profil() {
   useDocumentTitle("Mon profil");

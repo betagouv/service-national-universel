@@ -24,8 +24,8 @@ const {
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
-const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1 } = require("snu-lib/constants");
-const { translateFileStatusPhase1 } = require("snu-lib/translation");
+const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1 } = require("snu-lib");
+const { translateFileStatusPhase1 } = require("snu-lib");
 const { getQPV, getDensity } = require("../geo");
 
 function sanitizeAll(text) {
