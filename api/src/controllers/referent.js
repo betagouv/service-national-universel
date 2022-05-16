@@ -39,6 +39,7 @@ const {
   FILE_STATUS_PHASE1,
   translateFileStatusPhase1,
   getCcOfYoung,
+  notifDepartmentChange,
   //  updateApplicationsWithYoungOrMission,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
@@ -81,20 +82,6 @@ async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
         }
       }
     }
-  }
-}
-
-async function notifDepartmentChange(department, template, young) {
-  const referents = await ReferentModel.find({ department: department, role: ROLES.REFERENT_DEPARTMENT });
-  for (let referent of referents) {
-    await sendTemplate(template, {
-      emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-      params: {
-        youngFirstName: young.firstName,
-        youngLastName: young.lastName,
-        cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-      },
-    });
   }
 }
 

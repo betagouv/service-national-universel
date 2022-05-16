@@ -36,6 +36,7 @@ const {
   updatePlacesSessionPhase1,
   translateFileStatusPhase1,
   getCcOfYoung,
+  notifDepartmentChange
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -433,20 +434,6 @@ router.post("/:id/deplacementPhase1Autonomous", passport.authenticate(["referent
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-async function notifDepartmentChange(department, template, young) {
-  const referents = await ReferentModel.find({ department: department, role: ROLES.REFERENT_DEPARTMENT });
-  for (let referent of referents) {
-    await sendTemplate(template, {
-      emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-      params: {
-        youngFirstName: young.firstName,
-        youngLastName: young.lastName,
-        cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-      },
-    });
-  }
-}
 
 router.put("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
