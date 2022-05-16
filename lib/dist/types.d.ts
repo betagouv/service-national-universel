@@ -962,5 +962,3 @@ export const youngCanChangeSession: ({ cohort, status }: {
     status: any;
 }) => boolean;
 export const formatPhoneNumberFR: (tel: any) => any;
-
-//# sourceMappingURL=types.d.ts.map

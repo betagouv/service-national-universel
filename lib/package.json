@@ -8,7 +8,7 @@
   "types": "dist/types.d.ts",
   "scripts": {
     "watch": "parcel watch",
-    "build": "parcel build",
+    "build": "parcel build --no-source-maps",
     "lint": "eslint src --ext .js ",
     "lint:fix": "eslint --ext .js --fix src"
   },
