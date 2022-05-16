@@ -1,3 +1,15 @@
+# [1.86.0](https://github.com/betagouv/service-national-universel/compare/v1.85.0...v1.86.0) (2022-05-16)
+
+
+### Bug Fixes
+
+* **admin:** margin boutons ([38508ec](https://github.com/betagouv/service-national-universel/commit/38508eceedb2e86afb310379764296a8ef1b73d3))
+
+
+### Features
+
+* multi centers ([#1539](https://github.com/betagouv/service-national-universel/issues/1539)) ([bfdb797](https://github.com/betagouv/service-national-universel/commit/bfdb797557853a57b29c29c9fe1719db12e52ad4))
+
 # [1.85.0](https://github.com/betagouv/service-national-universel/compare/v1.84.0...v1.85.0) (2022-05-13)
 
 
