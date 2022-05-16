@@ -1,0 +1,4 @@
+paths-ignore:
+  - 'lib/dist/main.js'
+  - 'lib/dist/module.js'
+verbose: true
