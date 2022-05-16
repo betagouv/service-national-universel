@@ -64,7 +64,6 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
     );
   };
 
-  console.log(isFromDOMTOM());
 
   const getDepartureMeetingDate = () => {
     if (isAutonomous || !meetingPoint) return departureMeetingDate[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
