@@ -44,9 +44,7 @@ const {
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } = require("snu-lib");
-const { department2region } = require("snu-lib");
-const { translateCohort } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, department2region, translateCohort } = require("snu-lib");
 const {
   ROLES_LIST,
   canInviteUser,
