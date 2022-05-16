@@ -5,7 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
 
-import { setUser } from "./redux/auth/actions";
+import { setUser, setSessionPhase1 } from "./redux/auth/actions";
 import Auth from "./scenes/auth";
 import Validate from "./scenes/validate";
 import Profil from "./scenes/profil";
@@ -96,6 +96,7 @@ export default function App() {
 }
 
 const Home = () => {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
@@ -103,7 +104,6 @@ const Home = () => {
 
   // pour les chefs de centre, il faut afficher une seul session à la fois si il y en a plusieurs (peu importe le centre de cohésion)
   const [sessionPhase1List, setSessionPhase1List] = useState(null);
-  const [activeSession, setActiveSession] = useState(null);
 
   const renderDashboard = () => {
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsible />;
@@ -147,21 +147,15 @@ const Home = () => {
       const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1`);
       if (!ok) return console.log(`Error: ${code}`);
       setSessionPhase1List(data);
-      setActiveSession(data[0]);
+      dispatch(setSessionPhase1(data[0]));
     })();
   }, [user]);
 
   return (
     <div>
-      <Header
-        onClickBurger={() => setDrawerVisible((e) => !e)}
-        drawerVisible={drawerVisible}
-        sessionsList={sessionPhase1List}
-        activeSession={activeSession}
-        setActiveSession={setActiveSession}
-      />
+      <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} sessionsList={sessionPhase1List} />
       <div className="flex">
-        <Drawer open={drawerVisible} onOpen={setDrawerVisible} activeSession={activeSession} />
+        <Drawer open={drawerVisible} onOpen={setDrawerVisible} />
         <div className={drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`}>
           <Switch>
             <Route path="/auth" component={Auth} />

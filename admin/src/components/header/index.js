@@ -1,7 +1,8 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 
+import { setSessionPhase1 } from "../../redux/auth/actions";
 import { ROLES } from "../../utils";
 import { environment } from "../../config";
 import User from "./user";
@@ -10,14 +11,15 @@ import Selector from "../../assets/icons/Selector";
 import Check from "../../assets/icons/Check";
 import SwitchHorizontal from "../../assets/icons/SwitchHorizontal";
 
-export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList, activeSession, setActiveSession }) {
-  const { user } = useSelector((state) => state.Auth);
+export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList }) {
+  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
+  const dispatch = useDispatch();
   const history = useHistory();
   const [environmentBannerVisible, setEnvironmentBannerVisible] = React.useState(true);
   const [selectSessionOpen, setSelectSessionOpen] = React.useState(false);
 
   if (!user) return <div />;
-  if (user.role === ROLES.HEAD_CENTER && !activeSession) return <div />;
+  if (user.role === ROLES.HEAD_CENTER && !sessionPhase1) return <div />;
 
   function getName() {
     if (user.role === ROLES.ADMIN) return "Espace modérateur";
@@ -36,7 +38,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
   }
 
   const renderBanner = () => {
-    if (user.role === ROLES.HEAD_CENTER && activeSession) {
+    if (user.role === ROLES.HEAD_CENTER && sessionPhase1) {
       return (
         <>
           <div className="flex items-center gap-2 mx-3 ">
@@ -46,7 +48,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
             <div className="flex items-center group hover:text-black gap-2 mx-3 cursor-pointer" onClick={() => setSelectSessionOpen((e) => !e)}>
               <div>
                 <div className="text-gray-500 text-xs uppercase font-medium">mon espace chef de centre</div>
-                <div className="text-sm font-normal">{activeSession.cohort}</div>
+                <div className="text-sm font-normal">{sessionPhase1.cohort}</div>
               </div>
               <div className="ml-4">
                 <Selector className="text-gray-500 group-hover:scale-105" />
@@ -62,17 +64,17 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
                 key={session.cohort}
                 className="flex items-center group hover:text-black gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100"
                 onClick={() => {
-                  setActiveSession(session);
+                  dispatch(setSessionPhase1(session));
                   setSelectSessionOpen(false);
                   // on retourne au dashboard !
-                  history.push("/");
+                  // history.push("/");
                 }}>
                 <div>
                   <div className="text-gray-500 text-xs uppercase font-medium">mon espace chef de centre</div>
                   <div className="text-sm font-normal">{session.cohort}</div>
                 </div>
                 <div className="ml-4">
-                  {activeSession.cohort === session.cohort ? (
+                  {sessionPhase1.cohort === session.cohort ? (
                     <Check className="text-green-500 group-hover:scale-105" />
                   ) : (
                     <SwitchHorizontal className="text-gray-500 group-hover:scale-105" />
