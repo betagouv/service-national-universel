@@ -67,7 +67,7 @@ function responsible({ user, onClick }) {
       <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -79,7 +79,7 @@ function supervisor({ onClick }) {
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -117,7 +117,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           </>
         )}
       </DrawerTabWithIcons>
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -154,7 +154,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           </>
         )}
       </DrawerTabWithIcons>
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -167,7 +167,7 @@ function headCenter({ onClick, user }) {
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <BlankSeparator />
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -176,7 +176,7 @@ function visitor({ onClick }) {
   return (
     <>
       <BlankSeparator />
-      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }

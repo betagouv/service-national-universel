@@ -1,17 +1,20 @@
 import React from "react";
 import ModalForm from "../../../../components/modals/ModalForm";
-import SpeakerPhone from "../../../../assets/icons/SpeakerPhone";
-import ArrowNarrowLeft from "../../../../assets/icons/ArrowNarrowLeft";
+import ShieldCheck from "../../../../assets/icons/ShieldCheck";
 import ViewList from "../../../../assets/icons/ViewList";
+import ArrowNarrowLeft from "../../../../assets/icons/ArrowNarrowLeft";
 
 export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, values, value }) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [viewList, setViewList] = React.useState(false);
   const isPlural = values?.length > 1;
 
-  const getTitle = () => `Marquer ${value === "true" ? "présent" : "absent"}${isPlural ? "s" : ""} ${values?.length} volontaire${isPlural ? "s" : ""}`;
+  const getTitle = () =>
+    `Fiche${isPlural ? "s" : ""} sanitaire${isPlural ? "s" : ""} de ${values?.length} volontaire${isPlural ? "s" : ""} ${value === "true" ? "réceptionnée" : "non réceptionnée"}${
+      isPlural ? "s" : ""
+    } `;
   const getMessage = () =>
-    `Vous êtes sur le point de marquer ${value === "true" ? "présent" : "absent"}${isPlural ? "s" : ""} ${values?.length} volontaire${isPlural ? "s" : ""} au séjour de cohésion.`;
+    `Vous êtes sur le point d'indiquer que vous ${value === "true" ? "avez reçu" : "n'avez pas reçu"} la fiche sanitaire de ${values?.length} volontaire${isPlural ? "s" : ""}.`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +37,7 @@ export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, v
               <div onClick={() => setViewList(false)} className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 cursor-pointer">
                 <ArrowNarrowLeft className="text-gray-700" />
               </div>
-              <div className="flex items-center justify-center text-gray-900 text-xl font-medium">{getTitle()}</div>
+              <div className="flex flex-1 items-center justify-center text-gray-900 text-xl font-medium text-center">{getTitle()}</div>
             </div>
             <div className="m-4">
               {values.map((volontaire) => (
@@ -53,10 +56,10 @@ export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, v
               </div>
             </div>
             <div className="flex items-center justify-center text-gray-300">
-              <SpeakerPhone width={36} height={36} />
+              <ShieldCheck width={36} height={36} />
             </div>
             <div className="m-4">
-              <div className="flex items-center justify-center text-gray-900 text-xl font-medium">{getTitle()}</div>
+              <div className="flex items-center justify-center text-gray-900 text-xl font-medium text-center">{getTitle()}</div>
               <div className="flex items-center justify-center text-gray-500 text-base font-normal text-center">{getMessage()}</div>
             </div>
           </>

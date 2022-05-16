@@ -74,6 +74,8 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const mission = await MissionObject.findById(value.missionId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    value.isJvaMission = mission.isJvaMission;
+
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 

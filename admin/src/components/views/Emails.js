@@ -24,7 +24,10 @@ export default function Emails({ email }) {
   const getEmails = async () => {
     if (!email) return;
     const { ok, data, code } = await api.get(`/email?email=${encodeURIComponent(email)}`);
-    if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+    if (!ok) {
+      setEmails([]);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
     if (user.role === ROLES.ADMIN) return setEmails(data);
     else {
       const emails = data.filter((e) => e.event === "delivered");

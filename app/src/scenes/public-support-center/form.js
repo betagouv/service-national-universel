@@ -11,7 +11,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
 import { SelectTag, step1Public, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/worflow";
 
-export default function FormComponent({ setOpen, setSuccessMessage }) {
+export default function FormComponent({ setOpen, setSuccessMessage, fromPage }) {
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
   const [loading, setLoading] = useState(false);
   return (
@@ -36,10 +36,11 @@ export default function FormComponent({ setOpen, setSuccessMessage }) {
               subjectStep2: step2.id,
               region: department2region[department],
               role: "young exterior",
+              fromPage,
             });
             setLoading(false);
             setOpen(false);
-            if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
+            if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
             toastr.success("Ticket créé");
             setSuccessMessage("Votre demande a bien été envoyée ! Nous vous répondrons par mail.");
           } catch (e) {

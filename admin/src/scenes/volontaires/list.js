@@ -34,6 +34,7 @@ import {
   translateApplication,
   translateEngagement,
   department2region,
+  translateFileStatusPhase1,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -66,11 +67,14 @@ const FILTERS = [
   "GRADE",
   "PMR",
   "IMAGE_RIGHT",
+  "IMAGE_RIGHT_STATUS",
   "RULES",
   "AUTOTEST",
+  "AUTOTEST_STATUS",
   "SPECIFIC_AMENAGEMENT",
   "SAME_DEPARTMENT",
   "ALLERGIES",
+  "COHESION_PARTICIPATION",
 ];
 
 export default function VolontaireList() {
@@ -206,8 +210,10 @@ export default function VolontaireList() {
                         "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
                         "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
                         "Consentement des représentants légaux": translate(data.parentConsentment),
-                        "Droit à l'image": translate(data.imageRight),
-                        "Autotest PCR": translate(data.autoTestPCR),
+                        "Droit à l'image - Accord": translate(data.imageRight),
+                        "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",
+                        "Autotest PCR - Accord": translate(data.autoTestPCR),
+                        "Autotest PCR - Statut": translateFileStatusPhase1(data.autoTestPCRFilesStatus) || "Non Renseigné",
                         "Règlement intérieur": translate(data.rulesYoung),
                         "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
                         "Présent au séjour de cohésion": translate(data.cohesionStayPresence) || "Non Renseigné",
@@ -561,6 +567,22 @@ export default function VolontaireList() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
+                  placeholder="Droit à l'image - Statut"
+                  componentId="IMAGE_RIGHT_STATUS"
+                  dataField="imageRightFilesStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "IMAGE_RIGHT_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translateFileStatusPhase1(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Droit à l'image - Statut", "Statut fichier phase 1")}
+                  showMissing
+                  missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
                   placeholder="Règlement intérieur"
                   componentId="RULES"
                   dataField="rulesYoung.keyword"
@@ -587,6 +609,22 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Utilisation d’autotest", "Utilisation d’autotest")}
+                  showMissing
+                  missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Utilisation d’autotest - Statut"
+                  componentId="AUTOTEST_STATUS"
+                  dataField="autoTestPCRFilesStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "AUTOTEST_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translateFileStatusPhase1(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Utilisation d’autotest - Statut", "Statut fichier phase 1")}
                   showMissing
                   missingLabel="Non renseigné"
                 />
@@ -636,6 +674,22 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   renderLabel={(items) => getFilterLabel(items, "Affectation dans son département", "Affectation dans son département")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="COHESION_PARTICIPATION"
+                  dataField="youngPhase1Agreement.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHESION_PARTICIPATION") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Confirmation de participations au séjour de cohésion", "Confirmation de participations au séjour de cohésion")}
+                  showMissing
+                  missingLabel="Non renseigné"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}

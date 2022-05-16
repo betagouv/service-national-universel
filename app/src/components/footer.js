@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { appURL } from "../config";
@@ -31,9 +32,7 @@ export default function Footer() {
             </a>
           </li>
           <li>
-            <a href={young ? `${appURL}/besoin-d-aide` : `${appURL}/public-besoin-d-aide`} target="_blank" rel="noreferrer">
-              Besoin d&apos;aide
-            </a>
+            <NavLink to={young ? `/besoin-d-aide?from=${window.location.pathname}` : `/public-besoin-d-aide?from=${window.location.pathname}`}>Besoin d&apos;aide</NavLink>
           </li>
         </ul>
         <p>Tous droits réservés - Ministère de l&apos;éducation nationale, de la jeunesse et des sports - {new Date().getFullYear()}</p>

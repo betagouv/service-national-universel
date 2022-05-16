@@ -7,7 +7,6 @@ import { toastr } from "react-redux-toastr";
 import { apiURL } from "../../../config";
 import FilterSvg from "../../../assets/icons/Filter";
 import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
-import ShieldCheck from "../../../assets/icons/ShieldCheck";
 import SpeakerPhone from "../../../assets/icons/SpeakerPhone";
 import BadgeCheck from "../../../assets/icons/BadgeCheck";
 import api from "../../../services/api";
@@ -17,6 +16,7 @@ import ModalPointagePresenceArrivee from "../components/modals/ModalPointagePres
 import ModalPointagePresenceJDM from "../components/modals/ModalPointagePresenceJDM";
 import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointagePresenceJDM";
 import ModalMultiPointagePresenceArrivee from "../components/modals/ModalMultiPointagePresenceArrivee";
+import ModalMultiPointageDepart from "../components/modals/ModalMultiPointageDepart";
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
 import { getFilterLabel, translate, translatePhase1, getAge, formatDateFR } from "../../../utils";
 import Loader from "../../../components/Loader";
@@ -155,8 +155,9 @@ export default function Pointage() {
                                 render: (
                                   <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
                                     <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                                    <div>
+                                    <div className="font-normal">
                                       Marquer <span className="font-bold">présent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                     </div>
                                   </div>
                                 ),
@@ -186,6 +187,7 @@ export default function Pointage() {
                                     <SpeakerPhone className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
                                     <div>
                                       Marquer <span className="font-bold">absent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                     </div>
                                   </div>
                                 ),
@@ -217,6 +219,7 @@ export default function Pointage() {
                                     <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
                                     <div>
                                       Marquer <span className="font-bold">présent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                     </div>
                                   </div>
                                 ),
@@ -243,6 +246,7 @@ export default function Pointage() {
                                     <BadgeCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
                                     <div>
                                       Marquer <span className="font-bold">absent</span>
+                                      {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                     </div>
                                   </div>
                                 ),
@@ -252,38 +256,22 @@ export default function Pointage() {
                           {
                             items: [
                               {
-                                action: () => console.log("ajouter liste attente"),
+                                action: async () => {
+                                  if (youngSelected.length === 0) return;
+                                  setModalPointageDepart({
+                                    isOpen: true,
+                                    values: youngSelected,
+                                    value: "false",
+                                    onSubmit: () => {
+                                      history.go(0);
+                                    },
+                                  });
+                                },
                                 render: (
                                   <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
                                     <ArrowCircleRight className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
                                     Renseigner un départ
-                                  </div>
-                                ),
-                              },
-                            ],
-                          },
-                          {
-                            title: "Fiche sanitaire",
-                            items: [
-                              {
-                                action: () => console.log("ajouter liste attente"),
-                                render: (
-                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                    <ShieldCheck className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                                    <div>
-                                      Marquer <span className="font-bold">renseignée</span>
-                                    </div>
-                                  </div>
-                                ),
-                              },
-                              {
-                                action: () => console.log("ajouter liste attente"),
-                                render: (
-                                  <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                    <ShieldCheck className="text-gray-400 group-hover:scale-105 group-hover:text-orange-600" />
-                                    <div>
-                                      Marquer <span className="font-bold">non renseignée</span>
-                                    </div>
+                                    {youngSelected.length > 0 ? ` (${youngSelected.length})` : ""}
                                   </div>
                                 ),
                               },
@@ -414,6 +402,13 @@ export default function Pointage() {
         values={modalPointagePresenceArrivee?.values}
         value={modalPointagePresenceArrivee?.value}
       />
+      <ModalMultiPointageDepart
+        isOpen={modalPointageDepart?.isOpen}
+        onCancel={() => setModalPointageDepart({ isOpen: false, value: null })}
+        onSubmit={modalPointageDepart?.onSubmit}
+        values={modalPointageDepart?.values}
+        value={modalPointageDepart?.value}
+      />
     </div>
   );
 }
@@ -430,7 +425,7 @@ const Line = ({ hit, onClick, opened, onSelect, selected }) => {
 
   if (!value) return <></>;
 
-  const bgColor = selected ? "bg-blue-500" : opened ? "bg-blue-100" : "bg-white";
+  const bgColor = selected ? "bg-blue-500" : opened ? "bg-blue-100" : "";
   const mainTextColor = selected ? "text-white" : "text-[#242526]";
   const secondTextColor = selected ? "text-blue-100" : "text-[#738297]";
 

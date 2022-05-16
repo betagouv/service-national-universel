@@ -62,58 +62,60 @@ export default function List() {
               <div style={{ flex: 1 }}>
                 <Title>Centres</Title>
               </div>
-              <ExportComponent
-                handleClick={() => plausibleEvent("Centres/CTA - Exporter centres")}
-                title="Exporter les centres"
-                defaultQuery={getExportQuery}
-                exportTitle="Centres_de_cohesion"
-                index="cohesioncenter"
-                react={{ and: FILTERS }}
-                transform={(all) => {
-                  return all.map((data) => {
-                    let statutExport = {};
-                    COHORTS.forEach((cohort) => {
-                      statutExport[`${cohort} statut`] = "";
-                      data.cohorts.map((e, index) => {
-                        if (e === cohort) {
-                          if (data.sessionStatus !== undefined) {
-                            statutExport[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
+              <div className="flex gap-2">
+                {canCreateOrUpdateCohesionCenter(user) ? (
+                  <Link to={`/centre/nouveau`} onClick={() => plausibleEvent("Centres/CTA - Créer centre")}>
+                    <VioletButton>
+                      <p>Créer un nouveau centre</p>
+                    </VioletButton>
+                  </Link>
+                ) : null}
+                <ExportComponent
+                  handleClick={() => plausibleEvent("Centres/CTA - Exporter centres")}
+                  title="Exporter les centres"
+                  defaultQuery={getExportQuery}
+                  exportTitle="Centres_de_cohesion"
+                  index="cohesioncenter"
+                  react={{ and: FILTERS }}
+                  transform={(all) => {
+                    return all.map((data) => {
+                      let statutExport = {};
+                      COHORTS.forEach((cohort) => {
+                        statutExport[`${cohort} statut`] = "";
+                        data.cohorts.map((e, index) => {
+                          if (e === cohort) {
+                            if (data.sessionStatus !== undefined) {
+                              statutExport[`${cohort} statut`] = translateSessionStatus(data.sessionStatus[index]) || "";
+                            }
                           }
-                        }
+                        });
                       });
+                      return {
+                        Nom: data.name,
+                        id: data._id,
+                        "Code (2021)": data.code,
+                        "Code (2022)": data.code2022,
+                        "Cohorte(s)": data.cohorts?.join(", "),
+                        COR: data.COR,
+                        "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
+                        Adresse: data.address,
+                        Ville: data.city,
+                        "Code Postal": data.zip,
+                        "N˚ Département": data.departmentCode,
+                        Département: data.department,
+                        Région: data.region,
+                        "Places total": data.placesTotal,
+                        "Places disponibles": data.placesLeft,
+                        "Tenues livrées": data.outfitDelivered,
+                        Observations: data.observations,
+                        "Créé lé": formatLongDateFR(data.createdAt),
+                        "Mis à jour le": formatLongDateFR(data.updatedAt),
+                        ...statutExport,
+                      };
                     });
-                    return {
-                      Nom: data.name,
-                      id: data._id,
-                      "Code (2021)": data.code,
-                      "Code (2022)": data.code2022,
-                      "Cohorte(s)": data.cohorts?.join(", "),
-                      COR: data.COR,
-                      "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
-                      Adresse: data.address,
-                      Ville: data.city,
-                      "Code Postal": data.zip,
-                      "N˚ Département": data.departmentCode,
-                      Département: data.department,
-                      Région: data.region,
-                      "Places total": data.placesTotal,
-                      "Places disponibles": data.placesLeft,
-                      "Tenues livrées": data.outfitDelivered,
-                      Observations: data.observations,
-                      "Créé lé": formatLongDateFR(data.createdAt),
-                      "Mis à jour le": formatLongDateFR(data.updatedAt),
-                      ...statutExport,
-                    };
-                  });
-                }}
-              />
-              {canCreateOrUpdateCohesionCenter(user) ? (
-                <Link to={`/centre/nouveau`} onClick={() => plausibleEvent("Centres/CTA - Créer centre")}>
-                  <VioletButton>
-                    <p>Créer un nouveau centre</p>
-                  </VioletButton>
-                </Link>
-              ) : null}
+                  }}
+                />
+              </div>
             </Header>
             <Filter>
               <FilterRow visible>

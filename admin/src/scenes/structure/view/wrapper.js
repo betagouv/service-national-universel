@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { translate, ROLES, colors } from "../../../utils";
+import { translate, ROLES, canViewPatchesHistory } from "../../../utils";
 import api from "../../../services/api";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
@@ -53,9 +53,11 @@ export default function Wrapper({ children, structure, tab }) {
                 <Tab isActive={tab === "missions"} onClick={() => history.push(`/structure/${structure._id}/missions`)}>
                   Missions
                 </Tab>
-                <Tab isActive={tab === "historique"} onClick={() => history.push(`/structure/${structure._id}/historique`)}>
-                  Historique
-                </Tab>
+                {canViewPatchesHistory(user) ? (
+                  <Tab isActive={tab === "historique"} onClick={() => history.push(`/structure/${structure._id}/historique`)}>
+                    Historique
+                  </Tab>
+                ) : null}
               </>
             )}
           </TabList>
