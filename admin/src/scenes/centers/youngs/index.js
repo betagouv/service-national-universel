@@ -13,12 +13,23 @@ import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
 import Pointage from "./pointage";
+import { ES_NO_LIMIT } from "snu-lib";
+import { formatDateFRTimezoneUTC, translate } from "../../../utils";
+import dayjs from "dayjs";
+import * as FileSaver from "file-saver";
+import * as XLSX from "xlsx";
 
 export default function CenterYoungIndex() {
   if (environment === "production") return null;
 
   const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
+  const [filter, setFilter] = React.useState();
 
+  function updateFilter(n) {
+    setFilter({ ...filter, ...n });
+  }
+
+  console.log(filter);
   const history = useHistory();
   const { id, sessionId, currentTab } = useParams();
 
@@ -26,6 +37,67 @@ export default function CenterYoungIndex() {
     const listTab = ["general", "tableau-de-pointage", "fiche-sanitaire"];
     if (!listTab.includes(currentTab)) history.push(`/centre/${id}/${sessionId}/general`);
   }, [currentTab]);
+
+  const exportData = async () => {
+    let body = {
+      query: {
+        bool: {
+          must: [],
+          filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { term: { "sessionPhase1Id.keyword": sessionId } }],
+        },
+      },
+      sort: [
+        {
+          "lastName.keyword": "asc",
+        },
+      ],
+      track_total_hits: true,
+      size: ES_NO_LIMIT,
+    };
+
+    if (filter?.search) {
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            {
+              multi_match: {
+                query: filter?.search,
+                fields: ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"],
+                type: "cross_fields",
+                operator: "and",
+              },
+            },
+            {
+              multi_match: {
+                query: filter?.search,
+                fields: ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"],
+                type: "phrase",
+                operator: "and",
+              },
+            },
+            {
+              multi_match: {
+                query: filter?.search,
+                fields: ["firstName.folded", "lastName.folded", "city.folded", "zip"],
+                type: "phrase_prefix",
+                operator: "and",
+              },
+            },
+          ],
+          minimum_should_match: "1",
+        },
+      });
+    }
+    if (filter?.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+    if (filter?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+    if (filter?.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
+    if (filter?.statusPhase1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filter.statusPhase1 } });
+    if (filter?.cohesionStayPresence?.length) body.query.bool.filter.push({ terms: { "cohesionStayPresence.keyword": filter.cohesionStayPresence } });
+
+    const data = await getAllResults("young", body);
+    const csv = await toArrayOfArray(data, transformData);
+    await toXLSX(`young_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}.xlsx`, csv);
+  };
 
   return (
     <>
@@ -43,11 +115,15 @@ export default function CenterYoungIndex() {
                 title: "Télécharger",
                 items: [
                   {
-                    action: async () => {},
+                    action: async () => {
+                      await exportData();
+                    },
                     render: (
                       <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
                         <ClipboardList className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                        <div>Informations complètes</div>
+                        <div style={{ fontFamily: "Marianne" }} className="text-sm text-gray-700">
+                          Informations complètes
+                        </div>
                       </div>
                     ),
                   },
@@ -71,7 +147,7 @@ export default function CenterYoungIndex() {
                     render: (
                       <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
                         <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                        <div>Informations transports</div>
+                        <div className="text-sm text-gray-700">Informations transports</div>
                       </div>
                     ),
                   },
@@ -88,7 +164,7 @@ export default function CenterYoungIndex() {
           </nav>
         </div>
         <div className="bg-white pt-4">
-          {currentTab === "general" && <General />}
+          {currentTab === "general" && <General filter={filter} updateFilter={updateFilter} />}
           {currentTab === "tableau-de-pointage" && <Pointage />}
           {currentTab === "fiche-sanitaire" && <FicheSanitaire />}
         </div>
@@ -108,3 +184,42 @@ const TabItem = ({ to, title, icon }) => (
     </div>
   </NavLink>
 );
+
+const transformData = (data) => {
+  return data.map((value) => {
+    return {
+      Prénom: value.firstName,
+      Nom: value.lastName,
+      "Date de naissance": formatDateFRTimezoneUTC(value.birthdateAt),
+      Ville: value.city,
+      Département: value.department,
+      "Présence à l'arrivée": !value.cohesionStayPresence ? "Non renseignée" : value.cohesionStayPresence === "true" ? "Présent" : "Absent",
+      "Présence JDM": !value.presenceJDM ? "Non renseignée" : value.presenceJDM === "true" ? "Présent" : "Absent",
+      Départ: !value.departSejourAt ? "Non renseignée" : formatDateFRTimezoneUTC(value.departSejourAt),
+      " Fiche Sanitaire": !value.cohesionStayMedicalFileReceived ? "Non renseignée" : value.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : "Non réceptionnée",
+      "Statut phase 1": translate(value.statusPhase1),
+    };
+  });
+};
+
+async function toArrayOfArray(results, transform) {
+  const data = transform ? await transform(results) : results;
+  let columns = Object.keys(data[0] ?? []);
+  return [columns, ...data.map((item) => Object.values(item))];
+}
+
+async function getAllResults(index, query) {
+  const result = await api.post(`/es/${index}/export`, query);
+  if (!result.data.length) return [];
+  return result.data;
+}
+
+async function toXLSX(fileName, csv) {
+  const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  const fileExtension = ".xlsx";
+  const ws = XLSX.utils.aoa_to_sheet(csv);
+  const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+  const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const resultData = new Blob([excelBuffer], { type: fileType });
+  FileSaver.saveAs(resultData, fileName + fileExtension);
+}

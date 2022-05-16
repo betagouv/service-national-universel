@@ -16,7 +16,7 @@ import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
-export default function General() {
+export default function General({ updateFilter }) {
   const [young, setYoung] = useState();
   const [focusedSession, setFocusedSession] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
@@ -65,6 +65,7 @@ export default function General() {
                       innerClass={{ input: "searchbox" }}
                       autosuggest={false}
                       queryFormat="and"
+                      onValueChange={(e) => updateFilter({ search: e })}
                     />
                     <div
                       className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
@@ -74,8 +75,8 @@ export default function General() {
                     </div>
                   </div>
                   <FilterRow visible={filterVisible}>
-                    <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                    <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                    <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} onValueChange={(e) => updateFilter({ region: e })} />
+                    <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} onValueChange={(e) => updateFilter({ department: e })} />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -89,6 +90,7 @@ export default function General() {
                       URLParams={true}
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut")}
+                      onValueChange={(e) => updateFilter({ status: e })}
                     />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
@@ -103,6 +105,7 @@ export default function General() {
                       URLParams={true}
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                      onValueChange={(e) => updateFilter({ statusPhase1: e })}
                     />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
@@ -119,6 +122,7 @@ export default function General() {
                       renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
                       showMissing
                       missingLabel="Non renseigné"
+                      onValueChange={(e) => updateFilter({ cohesionStayPresence: e })}
                     />
                   </FilterRow>
                 </Filter2>

@@ -47,7 +47,7 @@ export default function SelectAction({
           <div className="flex items-center gap-2">
             {Icon ? Icon : null}
 
-            {loading ? <span className="text-gray-700 font-medium text-sm">{loadingLabel}</span> : <span className={`${textClassNames}`}>{title}</span>}
+            {loading ? <span className={`${textClassNames} font-medium text-sm`}>{loadingLabel}</span> : <span className={`${textClassNames}`}>{title}</span>}
           </div>
           <ChevronDown className={`${rightIconClassNames}`} />
         </button>
