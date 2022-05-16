@@ -31,7 +31,10 @@ export default function FooterComponent() {
             </a>
           </li>
           <li>
-            <a href={user ? `${adminURL}/besoin-d-aide` : `${adminURL}/public-besoin-d-aide`} target="_blank" rel="noreferrer">
+            <a
+              href={user ? `${adminURL}/besoin-d-aide?from=${window.location.pathname}` : `${adminURL}/public-besoin-d-aide?from=${window.location.pathname}`}
+              target="_blank"
+              rel="noreferrer">
               Besoin d&apos;aide
             </a>
           </li>

@@ -12,7 +12,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
 
-export default function Create() {
+export default function Create({ fromPage }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
 
@@ -66,6 +66,7 @@ export default function Create() {
               const response = await api.post("/zammood/ticket", {
                 message,
                 subject: title,
+                fromPage,
               });
               if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
               toastr.success("Demande envoyée");

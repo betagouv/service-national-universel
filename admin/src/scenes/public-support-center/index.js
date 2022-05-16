@@ -62,6 +62,7 @@ export default function PublicSupportCenter() {
   const user = useSelector((state) => state.Auth.user);
   const [open, setOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const fromPage = decodeURIComponent(window.location.search).split("?from=")[1];
 
   return (
     <div style={{ paddingBottom: "5rem", paddingTop: "1rem" }}>
@@ -127,7 +128,7 @@ export default function PublicSupportCenter() {
             </div>
           </div>
         </div>
-        {open && <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} />}
+        {open && <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
         {successMessage && <p style={{ color: "#6B7280" }}>{successMessage}</p>}
       </Container>
     </div>
