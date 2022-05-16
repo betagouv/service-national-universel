@@ -82,7 +82,7 @@ export default function Inscription() {
           <div style={{ flex: 1, position: "relative" }}>
             <Header>
               <Title>Inscriptions</Title>
-              <div style={{ display: "flex" }}>
+              <div className="flex gap-2">
                 <Link to="/volontaire/create">
                   <VioletButton onClick={() => plausibleEvent("Inscriptions/CTA - Nouvelle inscription")}>
                     <p>Nouvelle inscription</p>
