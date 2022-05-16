@@ -16,6 +16,7 @@ export default function StepAgreement({ young }) {
   const [stateMobil, setStateMobil] = useState(false);
   const [valid, setValid] = useState(false);
   const [enabled, setEnabled] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (young) {
@@ -24,7 +25,6 @@ export default function StepAgreement({ young }) {
     }
   }, [young]);
 
-  const dispatch = useDispatch();
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { data, ok } = await api.put(`/young/phase1/agreement`, { youngPhase1Agreement: "true" });
@@ -105,6 +105,13 @@ export default function StepAgreement({ young }) {
 }
 
 const content = ({ handleSubmit, young }) => {
+  const isFromDOMTOM = () => {
+    return (
+      ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
+        young.department,
+      ) && young.grade !== "Terminale"
+    );
+  };
   return (
     <div className="flex flex-col lg:flex-row flex-shrink flex-wrap mb-2 p-2 gap-6 justify-center md:justify-start">
       <div className="flex flex-col border-[1px] border-blue-600 shadow-sm rounded-2xl py-5 px-5 lg:w-1/3 md:max-w-screen-1/2">
@@ -116,9 +123,11 @@ const content = ({ handleSubmit, young }) => {
           <p className="pb-2">
             • Avoir pris connaissance de mon <strong>affectation</strong>
           </p>
-          <p className="pb-2">
-            • Avoir pris connaissance de mon <strong>point de rassemblement </strong>
-          </p>
+          {!isFromDOMTOM ? (
+            <p className="pb-2">
+              • Avoir pris connaissance de mon <strong>point de rassemblement </strong>
+            </p>
+          ) : null}
         </div>
         <button className="bg-indigo-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-white hover:scale-105 hover:shadow-md" onClick={handleSubmit}>
           Valider

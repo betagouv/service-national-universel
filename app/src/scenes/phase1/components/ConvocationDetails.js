@@ -56,6 +56,15 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
     });
   };
 
+  const isFromDOMTOM = () => {
+    return (
+      ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
+        young.department,
+      ) && young.grade !== "Terminale"
+    );
+  };
+
+
   const getDepartureMeetingDate = () => {
     if (isAutonomous || !meetingPoint) return departureMeetingDate[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
     return meetingPoint.departureAtString;
@@ -88,58 +97,78 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
     <>
       <div className="bg-white md:!bg-gray-50 rounded-xl px-4 mt-6">
         <div className="flex flex-col lg:flex-row items-center">
-          <div className="flex flex-row items-center my-3 lg:border-r-[1px] md:pr-4">
-            <LinearMap className="w-16 h-16 mr-3" />
-            <div className="flex flex-col">
-              <div className="text-sm leading-7 font-bold">Lieu de rassemblement</div>
-              <div className="text-sm text-gray-800 leading-5 max-w-sm">{getMeetingAddress()}</div>
-            </div>
-          </div>
-          <div className="flex flex-row items-center flex-1 md:!justify-center pb-3 md:!pb-0 my-3">
-            <Calendar date={getDepartureMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mr-3 w-7 h-10 md:w-11 md:h-12 md:mx-3" />
-
-            <div className="flex flex-col">
-              <div className="font-bold text-sm whitespace-nowrap">Aller à{getDepartureMeetingDate().split(",")[1]}</div>
-              <div className="text-sm text-gray-600 whitespace-nowrap">
-                {getDepartureMeetingDate()
-                  .split(/[,\s]+/)
-                  .slice(0, 3)
-                  .join(" ")}
+          {isFromDOMTOM() ? (
+            <div className="flex flex-row items-center my-3 w-full md:pr-4">
+              <LinearMap className="w-16 h-16 mr-3" />
+              <div className="flex flex-col flex-1">
+                <div className="text-sm leading-7 font-bold">Lieu de rassemblement</div>
+                <div className="text-sm text-gray-800 leading-5 italic">
+                  Les informations sur les modalités d'acheminement vers le centre et de retour vous seront transmises par e-mail par les services académiques.
+                </div>
               </div>
             </div>
-            <Calendar date={getReturnMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12" />
-            <div className="flex flex-col">
-              <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
-              <div className="text-sm text-gray-600 whitespace-nowrap">
-                {getReturnMeetingDate()
-                  .split(/[,\s]+/)
-                  .slice(0, 3)
-                  .join(" ")}
+          ) : (
+            <>
+              <div className="flex flex-row items-center my-3 lg:border-r-[1px] md:pr-4">
+                <LinearMap className="w-16 h-16 mr-3" />
+                <div className="flex flex-col">
+                  <div className="text-sm leading-7 font-bold">Lieu de rassemblement</div>
+                  <div className="text-sm text-gray-800 leading-5 max-w-sm">{getMeetingAddress()}</div>
+                </div>
               </div>
-            </div>
-          </div>
+              <div className="flex flex-row items-center flex-1 md:!justify-center pb-3 md:!pb-0 my-3">
+                <Calendar date={getDepartureMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mr-3 w-7 h-10 md:w-11 md:h-12 md:mx-3" />
+                <div className="flex flex-col">
+                  <div className="font-bold text-sm whitespace-nowrap">Aller à{getDepartureMeetingDate().split(",")[1]}</div>
+                  <div className="text-sm text-gray-600 whitespace-nowrap">
+                    {getDepartureMeetingDate()
+                      .split(/[,\s]+/)
+                      .slice(0, 3)
+                      .join(" ")}
+                  </div>
+                </div>
+                <Calendar date={getReturnMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12" />
+                <div className="flex flex-col">
+                  <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
+                  <div className="text-sm text-gray-600 whitespace-nowrap">
+                    {getReturnMeetingDate()
+                      .split(/[,\s]+/)
+                      .slice(0, 3)
+                      .join(" ")}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
-        <hr className="flex md:hidden text-gray-200 -mx-6" />
-        {!isAutonomous ? (
-          <p className="flex md:hidden text-gray-700 py-3 text-center" onClick={() => setOpen(!open)}>
-            Je souhaite me rendre au centre et en revenir par mes propres moyens mobile
-          </p>
-        ) : (
-          <p className="flex md:hidden text-gray-700 py-3 text-center">Vous vous rendez au centre et en revenez par vos propres moyens.</p>
-        )}
-        {/* Mobile */}
-        {open ? <div className="flex md:hidden flex-col pb-4">{changeAffectation({ center, young, isLoading, handleAutonomousClick })}</div> : null}
+        {!isFromDOMTOM() ? (
+          <>
+            <hr className="flex md:hidden text-gray-200 -mx-6" />
+            {!isAutonomous ? (
+              <p className="flex md:hidden text-gray-700 py-3 text-center" onClick={() => setOpen(!open)}>
+                Je souhaite me rendre au centre et en revenir par mes propres moyens mobile
+              </p>
+            ) : (
+              <p className="flex md:hidden text-gray-700 py-3 text-center">Vous vous rendez au centre et en revenez par vos propres moyens.</p>
+            )}
+            {/* Mobile */}
+            {open ? <div className="flex md:hidden flex-col pb-4">{changeAffectation({ center, young, isLoading, handleAutonomousClick })}</div> : null}
+          </>
+        ) : null}
       </div>
-      {!isAutonomous ? (
-        <div className="hidden md:flex flex-row items-center hover:underline cursor-pointer" onClick={() => setOpen(!open)}>
-          <p className="text-gray-800 py-3 text-sm pr-1">Je souhaite me rendre au centre et en revenir par mes propres moyens</p>
-          {open ? <HiChevronUp className="text-gray-800" /> : <HiChevronDown className="text-gray-800" />}
-        </div>
-      ) : (
-        <p className="hidden md:flex text-gray-800 py-3 text-sm pr-1">Vous vous rendez au centre et en revenez par vos propres moyens.</p>
-      )}
+      {!isFromDOMTOM() ? (
+        !isAutonomous ? (
+          <div className="hidden md:flex flex-row items-center hover:underline cursor-pointer" onClick={() => setOpen(!open)}>
+            <p className="text-gray-800 py-3 text-sm pr-1">Je souhaite me rendre au centre et en revenir par mes propres moyens</p>
+            {open ? <HiChevronUp className="text-gray-800" /> : <HiChevronDown className="text-gray-800" />}
+          </div>
+        ) : (
+          <p className="hidden md:flex text-gray-800 py-3 text-sm pr-1">Vous vous rendez au centre et en revenez par vos propres moyens.</p>
+        )
+      ) : null}
       {/* Desktop */}
       {open ? <div className="hidden md:flex flex-col pb-4">{changeAffectation({ center, young, isLoading, handleAutonomousClick })}</div> : null}
+
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
