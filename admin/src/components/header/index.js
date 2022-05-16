@@ -67,7 +67,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
                   dispatch(setSessionPhase1(session));
                   setSelectSessionOpen(false);
                   // on retourne au dashboard !
-                  // history.push("/");
+                  history.push("/");
                 }}>
                 <div>
                   <div className="text-gray-500 text-xs uppercase font-medium">mon espace chef de centre</div>
