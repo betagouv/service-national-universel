@@ -42,7 +42,7 @@ const {
   //  updateApplicationsWithYoungOrMission,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
-const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
+const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } = require("snu-lib/constants");
 const { department2region } = require("snu-lib/region-and-departments");
