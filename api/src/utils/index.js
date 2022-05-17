@@ -184,7 +184,7 @@ const updatePlacesSessionPhase1 = async (sessionPhase1) => {
   try {
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
     const placesTaken = youngs.filter(
-      (young) => (["AFFECTED", "WAITING_AFFECTATION", "DONE"].includes(young.statusPhase1) || ["AFFECTED", "DONE"].includes(young.statusPhase1Tmp)) && young.status === "VALIDATED",
+      (young) => (["AFFECTED", "DONE"].includes(young.statusPhase1) || ["AFFECTED", "DONE"].includes(young.statusPhase1Tmp)) && young.status === "VALIDATED",
     ).length;
     const placesLeft = Math.max(0, sessionPhase1.placesTotal - placesTaken);
     if (sessionPhase1.placesLeft !== placesLeft) {
@@ -255,7 +255,7 @@ const updatePlacesBus = async (bus) => {
     // console.log(`idsMeetingPoints for bus ${bus.id}`, idsMeetingPoints);
     const youngs = await YoungModel.find({
       status: "VALIDATED",
-      statusPhase1: { $in: ["AFFECTED", "WAITING_AFFECTATION", "DONE"] },
+      statusPhase1: { $in: ["AFFECTED", "DONE"] },
       meetingPointId: {
         $in: idsMeetingPoints,
       },
