@@ -334,8 +334,7 @@ router.post("/check-token/:token", async (req, res) => {
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const now = new Date();
 
-    //if (now >= sessionPhase1Token.startAt && now <= sessionPhase1Token.expireAt) {
-    if (now) {
+    if (now >= sessionPhase1Token.startAt && now <= sessionPhase1Token.expireAt) {
       let result = {
         noMeetingPoint: {
           youngs: [],
