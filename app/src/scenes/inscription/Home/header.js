@@ -34,7 +34,7 @@ export default function HeaderComponent({ location }) {
         </a>
       </div>
       <div className="flex flex-col	self-stretch justify-between items-end">
-        {young ? (
+        {young?.email ? (
           <Link className="text-gray-400 uppercase cursor-pointer text-xs md:text-sm hover:text-purple-700" onClick={logout} to={{ pathname: "/", search: location?.search }}>
             Se deconnecter
           </Link>

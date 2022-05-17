@@ -98,7 +98,7 @@ export default function Nav({ step }) {
         <h1>
           Mon inscription <span className="mobileHide">au Service National Universel</span>
         </h1>
-        {young ? (
+        {young?.email ? (
           <div onClick={logout}>
             <Button>SE DÉCONNECTER</Button>
           </div>

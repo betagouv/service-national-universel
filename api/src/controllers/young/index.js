@@ -69,6 +69,7 @@ router.post("/signup", async (req, res) => {
       rulesYoung: Joi.string().trim().required().valid("true"),
       acceptCGU: Joi.string().trim().required().valid("true"),
       frenchNationality: Joi.string().trim().required().valid("true"),
+      INEHash: Joi.string().length(32).allow(""),
     }).validate(req.body);
 
     if (error) {
@@ -77,13 +78,29 @@ router.post("/signup", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung } = value;
+    const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung, INEHash } = value;
     if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
-    const countDocuments = await YoungObject.countDocuments({ lastName, firstName, birthdateAt });
+    let countDocuments = await YoungObject.countDocuments({ lastName, firstName, birthdateAt });
     if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-    const user = await YoungObject.create({ email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung });
+    countDocuments = await YoungObject.countDocuments({ INEHash });
+    if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.EDUCONNECT_USER_ALREADY_REGISTERED });
+
+    const user = await YoungObject.create({
+      email,
+      firstName,
+      lastName,
+      password,
+      birthdateAt,
+      birthCountry,
+      birthCity,
+      birthCityZip,
+      frenchNationality,
+      acceptCGU,
+      rulesYoung,
+      INEHash,
+    });
     const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
 

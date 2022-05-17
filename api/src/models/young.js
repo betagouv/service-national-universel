@@ -81,6 +81,13 @@ const Schema = new mongoose.Schema({
       description: "Date de naissance du volontaire",
     },
   },
+  INEHash: {
+    type: String,
+    documentation: {
+      description: "Hash INE du jeune connecte via Educonnect",
+    },
+  },
+
   cohort: {
     type: String,
     default: "2022",
