@@ -1,24 +1,21 @@
 import { Field, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { BiHandicap } from "react-icons/bi";
+import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
+import Plus from "../../assets/icons/Plus.js";
 import AddressInput from "../../components/addressInputVCenter";
+import Badge from "../../components/Badge";
 import { Box, BoxContent } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import Badge from "../../components/Badge";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import Loader from "../../components/Loader";
-
-import MultiSelectComponent from "./components/Multiselect";
 import api from "../../services/api";
-import { SESSION_STATUS, translate, translateSessionStatus, colors, ROLES } from "../../utils";
-import Plus from "../../assets/icons/Plus.js";
-import { BsCheck2 } from "react-icons/bs";
-import { MdCheckBoxOutlineBlank, MdCheckBox } from "react-icons/md";
+import { colors, ROLES, SESSION_STATUS, translate, translateSessionStatus } from "../../utils";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -294,20 +291,6 @@ export default function Edit(props) {
     </Formik>
   );
 }
-const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder, required, errors, touched, setsessionShow }) => {
-  return (
-    <Row className="detail">
-      <Col md={4}>
-        <label>{title}</label>
-      </Col>
-      <Col md={8}>
-        <Field hidden value={value} name={name} onChange={onChange} validate={(v) => required && !v?.length && requiredMessage} />
-        <MultiSelectComponent value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} setsessionShow={setsessionShow} />
-        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
-      </Col>
-    </Row>
-  );
-};
 
 const PlaceCapacity = ({ title, values, name, handleChange, disabled = false, validate }) => {
   return (
