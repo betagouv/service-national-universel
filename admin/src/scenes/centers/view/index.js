@@ -10,7 +10,7 @@ import Youngs from "./youngs";
 import Affectation from "./affectation";
 import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
-import { translate, CENTER_ROLES, ROLES } from "../../../utils";
+import { translate, ROLES } from "../../../utils";
 import { environment } from "../../../config";
 
 export default function Index({ ...props }) {
@@ -82,63 +82,6 @@ export default function Index({ ...props }) {
   const updateCenter = async () => {
     const { data, ok } = await api.get(`/cohesion-center/${center._id}`);
     if (ok) setCenter(data);
-  };
-
-  const deleteTeamate = async (user) => {
-    const index = focusedSession.team.findIndex((e) => JSON.stringify(e) === JSON.stringify(user));
-    focusedSession.team.splice(index, 1);
-
-    try {
-      const r = await api.put(`/session-phase1/${focusedSession._id}`, { team: focusedSession.team });
-      const { ok, data } = r;
-      if (!ok) toastr.error("Oups, une erreur est survenue lors de la suppression du membre", translate(data.code));
-      setFocusedSession(data);
-      toastr.success("Succès", "Le membre a été supprimé de l'équipe");
-    } catch (e) {
-      console.log(e);
-      toastr.error("Erreur !", translate(e.code));
-    }
-  };
-
-  const addTeamate = async (teamate) => {
-    let obj = {};
-
-    if (teamate.role === CENTER_ROLES.chef) obj = await setChefCenter(teamate);
-    else obj = await setTeamate(teamate);
-
-    if (!Object.keys(obj).length) return;
-
-    try {
-      const { ok, data } = await api.put(`/session-phase1/${focusedSession._id}`, obj);
-      if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du membre", translate(data.code));
-      setFocusedSession(data);
-      toastr.success("Succès", "Le membre a été ajouté à l'équipe");
-    } catch (e) {
-      console.log(e);
-      toastr.error("Erreur !", translate(e.code));
-    }
-  };
-
-  const setChefCenter = async (teamate) => {
-    try {
-      let { data: referent } = await api.get(`/referent?email=${encodeURIComponent(teamate.email)}`);
-
-      if (!referent) {
-        // todo : create chef de centre
-        toastr.error("Erreur !", "Aucun utilisateur trouvé avec cette adresse email");
-        return {};
-      }
-
-      return { headCenterId: referent._id };
-    } catch (e) {
-      toastr.error("Erreur !", translate(e));
-    }
-  };
-
-  const setTeamate = async (teamate) => {
-    const obj = { team: focusedSession.team };
-    obj.team.push(teamate);
-    return obj;
   };
 
   const OccupationCard = ({ occupationPercentage, placesLeft, placesTotal }) => {
@@ -273,7 +216,7 @@ export default function Index({ ...props }) {
                 path="/centre/:id"
                 component={() => (
                   <>
-                    <Team center={center} focusedSession={focusedSession} deleteTeamate={deleteTeamate} addTeamate={addTeamate} />
+                    <Team center={center} focusedSession={focusedSession} />
                   </>
                 )}
               />
