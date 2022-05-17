@@ -32,6 +32,7 @@ import ModalPointagePresenceArrivee from "../../centers/components/modals/ModalP
 import ModalPointagePresenceJDM from "../../centers/components/modals/ModalPointagePresenceJDM";
 import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
 import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
+import { ImQuotesLeft } from "react-icons/im";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -249,6 +250,12 @@ export default function Phase1(props) {
                     <div className="group-hover:underline">{!young.departSejourAt ? "Renseigner un départ" : formatDateFR(young.departSejourAt)}</div>
                   </div>
                 </div>
+                {young.departSejourMotifComment ? (
+                  <div className="flex gap-2 bg-blue-50 rounded-lg p-2 text-blue-700">
+                    <ImQuotesLeft />
+                    <div className="flex-1">{young.departSejourMotifComment}</div>
+                  </div>
+                ) : null}
                 <div className="mt-4">
                   {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (
                     <>
