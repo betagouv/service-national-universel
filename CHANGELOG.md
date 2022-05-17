@@ -1,3 +1,23 @@
+# [1.87.0](https://github.com/betagouv/service-national-universel/compare/v1.86.0...v1.87.0) (2022-05-17)
+
+
+### Bug Fixes
+
+* hide bouton créer nouveau séjour ([1035bc2](https://github.com/betagouv/service-national-universel/commit/1035bc28ad17f1ae687b11c931c0490a78a33113))
+* QW ajout session ([050a36a](https://github.com/betagouv/service-national-universel/commit/050a36af882422204946563107d17dde08e1d38b))
+* style liste point de rassemblement ([68e0576](https://github.com/betagouv/service-national-universel/commit/68e0576e0d58c19276498a9e5626aa27478b0f0b))
+* style point de rassemblement ([b57f10b](https://github.com/betagouv/service-national-universel/commit/b57f10b590362cdabbaebce34eba3ab123f7d2db))
+* up ([61e4b00](https://github.com/betagouv/service-national-universel/commit/61e4b006422aac6f0cda8e6701ceff339e4f9d07))
+* **admin:** click-outside-select-session ([50d1f90](https://github.com/betagouv/service-national-universel/commit/50d1f90dfb8bb37112d5ea7f0eeb59b1dfe564c2))
+
+
+### Features
+
+* **admin:** add statusPhase1Tmp ([a57cbd5](https://github.com/betagouv/service-national-universel/commit/a57cbd51b71990ad0d34f24b9027c597fb634801))
+* **admin:** equipe centre tw ([3d9caae](https://github.com/betagouv/service-national-universel/commit/3d9caae5b850b39a7ccaafe465b1f6d1a548c8fa))
+* **admin:** Evolution fiche volontaire phase 1 ([#1565](https://github.com/betagouv/service-national-universel/issues/1565)) ([b2b95f4](https://github.com/betagouv/service-national-universel/commit/b2b95f47c978c217423225878532de66918bb051))
+* **api:** tmp affectation phase 1 ([aa62045](https://github.com/betagouv/service-national-universel/commit/aa6204527229701e7c46fceabec1e6b9126539f8))
+
 # [1.86.0](https://github.com/betagouv/service-national-universel/compare/v1.85.0...v1.86.0) (2022-05-16)
 
 
