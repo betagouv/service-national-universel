@@ -55,21 +55,15 @@ const FILTERS = [
 ];
 
 export default function List() {
-  const user = useSelector((state) => state.Auth.user);
+  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
   const [volontaire, setVolontaire] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
-  // eslint-disable-next-line no-unused-vars
-  const [center, setCenter] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   useEffect(() => {
     (async () => {
       const { data } = await api.get("/meeting-point/all");
       setMeetingPoints(data);
-    })();
-    (async () => {
-      const { data } = await api.get(`/cohesion-center/${user.cohesionCenterId}`);
-      setCenter(data);
     })();
   }, []);
   const getDefaultQuery = () => ({
@@ -80,7 +74,7 @@ export default function List() {
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   return (
     <div>
-      <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+      <ReactiveBase url={`${apiURL}/es`} app={`sessionphase1young/${sessionPhase1._id}`} headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
           <div style={{ flex: 1, position: "relative" }}>
             <Header>

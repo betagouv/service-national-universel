@@ -11,7 +11,17 @@ import MultiSelect from "../../../components/Multiselect";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import AddressInput from "../../../components/addressInputV2";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES, SENDINBLUE_TEMPLATES, PERIOD } from "../../../utils";
+import {
+  translate,
+  MISSION_PERIOD_DURING_HOLIDAYS,
+  MISSION_PERIOD_DURING_SCHOOL,
+  MISSION_DOMAINS,
+  dateForDatePicker,
+  ROLES,
+  SENDINBLUE_TEMPLATES,
+  PERIOD,
+  translateApplication,
+} from "../../../utils";
 import api from "../../../services/api";
 import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
@@ -501,9 +511,9 @@ export default function CreateMission({ young, onSend }) {
                   <Legend>Statut de la candidature</Legend>
                   <FormGroup>
                     <Field validate={(v) => !v && requiredMessage} component="select" name="applicationStatus" value={values.applicationStatus} onChange={handleChange}>
-                      <option value="DONE">{translate("DONE")}</option>
-                      <option value="VALIDATED">{translate("VALIDATED")}</option>
-                      <option value="IN_PROGRESS">{translate("IN_PROGRESS")}</option>
+                      <option value="DONE">{translateApplication("DONE")}</option>
+                      <option value="VALIDATED">{translateApplication("VALIDATED")}</option>
+                      <option value="IN_PROGRESS">{translateApplication("IN_PROGRESS")}</option>
                     </Field>
                     <ErrorMessage errors={errors} touched={touched} name="applicationStatus" />
                   </FormGroup>

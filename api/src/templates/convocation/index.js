@@ -10,13 +10,14 @@ const DepartmentServiceModel = require("../../models/departmentService");
 const { formatStringDate, formatStringDateTimezoneUTC } = require("snu-lib");
 
 const isFromDOMTOM = (young) => {
-  return ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
-    young.department,
+  return (
+    ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
+      young.department,
+    ) && young.grade !== "Terminale"
   );
 };
 
-function getBg(template = "default") {
-  if (template === "domtom") return getSignedUrl("convocation/convocationCohesionTemplate-DOMTOM.png");
+function getBg() {
   return getSignedUrl("convocation/convocation_template_base.png");
 }
 
@@ -125,17 +126,26 @@ const render = async (young) => {
 // todo ⚠️ not updates because no Février 2022 ⚠️
 const renderDOMTOM = async (young) => {
   try {
-    if (young.cohort !== "Février 2022") throw `young ${young.id} unauthorized`;
+    if (!["Février 2022", "Juin 2022", "Juillet 2022"].includes(young.cohort)) throw `young ${young.id} unauthorized`;
     if (!young.cohesionCenterId && young.deplacementPhase1Autonomous !== "true") throw `unauthorized`;
     const center = await CohesionCenterModel.findById(young.cohesionCenterId);
     if (!center) throw `center ${young.cohesionCenterId} not found for young ${young._id}`;
     const service = await DepartmentServiceModel.findOne({ department: young?.department });
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
+    const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
 
     const html = fs.readFileSync(path.resolve(__dirname, "./cohesionDOMTOM.html"), "utf8");
     return html
-      .replace(/{{REFERENT_NAME}}/g, sanitizeAll(service?.contactName))
-      .replace(/{{REFERENT_PHONE}}/g, sanitizeAll(service?.contactPhone))
+      .replace(
+        /{{CONTACTS}}/g,
+        sanitizeAll(
+          contacts
+            .map((contact) => {
+              return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
+            })
+            .join(""),
+        ),
+      )
       .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
       .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
       .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
@@ -143,16 +153,13 @@ const renderDOMTOM = async (young) => {
       .replace(/{{ADDRESS}}/g, sanitizeAll(young.address))
       .replace(/{{ZIP}}/g, sanitizeAll(young.zip))
       .replace(/{{CITY}}/g, sanitizeAll(young.city))
+      .replace(/{{COHESION_STAY_DATE_STRING}}/g, sanitizeAll(COHESION_STAY_DATE_STRING[young.cohort]))
       .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
       .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
       .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
-      .replace(
-        /{{MEETING_ADDRESS_DOMTOM}}/g,
-        sanitizeAll("Merci de vous présenter impérativement à la date, à l'heure et au lieu qui vous auront été indiqués par votre service régional."),
-      )
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-      .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg("domtom")));
+      .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()));
   } catch (e) {
     throw e;
   }

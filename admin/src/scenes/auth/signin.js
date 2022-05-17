@@ -110,7 +110,11 @@ export default function Signin() {
             </p>
             <p className="text-center text-sm text-brand-grey ">
               Vous avez besoin d&apos;aide ?{" "}
-              <Link rel="noreferrer" to="/public-besoin-d-aide" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline" target="_blank">
+              <Link
+                rel="noreferrer"
+                to={`/public-besoin-d-aide?from=${window.location.pathname}`}
+                className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline"
+                target="_blank">
                 Cliquez ici
               </Link>
             </p>

@@ -43,7 +43,7 @@ const Step = ({ step }) => {
         <Nav step={step} />
         <Wrapper>{renderStep(step)}</Wrapper>
         <div className="help-button-container">
-          <HelpButton to="/public-besoin-d-aide" color="#362f78" />
+          <HelpButton to={`/public-besoin-d-aide?from=${window.location.pathname}`} color="#362f78" />
         </div>
         {young && ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young?.status) ? (
           <a className="back-button" onClick={() => history.push("/")}>

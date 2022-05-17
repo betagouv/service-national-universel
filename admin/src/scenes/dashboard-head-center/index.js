@@ -21,13 +21,13 @@ export default function Index() {
           <TabItem onClick={() => history.push(`/dashboard/volontaires`)} isActive={currentTab === "volontaires"}>
             Volontaires
           </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/centre`)} isActive={currentTab === "centre"}>
+          {/* <TabItem onClick={() => history.push(`/dashboard/centre`)} isActive={currentTab === "centre"}>
             Centre
-          </TabItem>
+          </TabItem> */}
         </TabNavigationList>
       </TabNavigation>
       <Wrapper>{currentTab === "volontaires" && <Volontaires />}</Wrapper>
-      <Wrapper>{currentTab === "centre" && <Center />}</Wrapper>
+      {/* <Wrapper>{currentTab === "centre" && <Center />}</Wrapper> */}
     </>
   );
 }

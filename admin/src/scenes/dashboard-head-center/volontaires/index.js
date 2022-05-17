@@ -9,11 +9,16 @@ import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
 
 export default function Index() {
   const [filter, setFilter] = useState();
-  const user = useSelector((state) => state.Auth.user);
+  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
 
   function updateFilter(n) {
-    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: [], department: [], cohort: ["Février 2022"] }), ...n });
+    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: [], department: [], cohort: [sessionPhase1?.cohort] }), ...n });
   }
+
+  useEffect(() => {
+    if (!sessionPhase1) return;
+    updateFilter({ cohort: [sessionPhase1.cohort] });
+  }, [sessionPhase1]);
 
   useEffect(() => {
     const status = Object.keys(YOUNG_STATUS).filter((e) => !["IN_PROGRESS", "NOT_ELIGIBLE"].includes(e));

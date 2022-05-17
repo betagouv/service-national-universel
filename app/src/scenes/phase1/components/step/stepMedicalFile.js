@@ -37,7 +37,7 @@ export default function StepMedicalField({ young }) {
     const { ok } = await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`, {
       object: `Fiche sanitaire à compléter`,
       message: "Vous trouverez téléchargeable ci-dessous la fiche sanitaire à compléter.",
-      link: "https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/fiche_sanitaire_2022.pdf",
+      link: "https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/fiche_sanitaire_2022.pdf?utm_campaign=transactionnel+télécharger+docum&utm_source=notifauto&utm_medium=mail+410+télécharger",
     });
     if (ok) toastr.success(`Document envoyé à ${young.email}`);
     else toastr.error("Erreur lors de l'envoie du document", translate(code));

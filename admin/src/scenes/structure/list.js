@@ -70,7 +70,7 @@ export default function List() {
               <div>
                 <Title>Structures</Title>
               </div>
-              <div style={{ display: "flex" }}>
+              <div className="flex gap-2">
                 <Link to="/structure/create" onClick={() => plausibleEvent("Structure/CTA - Inviter nouvelle structure")}>
                   <VioletButton>
                     <p>Inviter une nouvelle structure</p>

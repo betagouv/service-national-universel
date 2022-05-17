@@ -14,7 +14,6 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
 
-
 router.get("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { ok, data } = await zammood.api(`/v0/ticket?email=${req.user.email}`, { method: "GET", credentials: "include" });
@@ -26,13 +25,12 @@ router.get("/tickets", passport.authenticate(["referent", "young"], { session: f
   }
 });
 
-
 router.post("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { ok, data } = await zammood.api(`/v0/ticket/search`, {
       method: "POST",
       credentials: "include",
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(req.body),
     });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
@@ -60,10 +58,12 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     const obj = {
       subject: req.body.subject,
       message: req.body.message,
+      fromPage: req.body.fromPage,
     };
     const { error, value } = Joi.object({
       subject: Joi.string().required(),
       message: Joi.string().required(),
+      fromPage: Joi.string(),
     })
       .unknown()
       .validate(obj);
@@ -81,7 +81,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
         firstName: req.user.firstName,
         lastName: req.user.lastName,
         source: "PLATFORM",
-        attributes: userAttributes,
+        attributes: [...userAttributes, { name: "page précédente", value: value.fromPage }],
       }),
     });
     if (!response.ok) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
@@ -111,6 +111,7 @@ router.post("/ticket/form", async (req, res) => {
       formSubjectStep1: req.body.subjectStep1,
       formSubjectStep2: req.body.subjectStep2,
       role: req.body.role,
+      fromPage: req.body.fromPage,
     };
     const { error, value } = Joi.object({
       email: Joi.string().email().required(),
@@ -123,15 +124,17 @@ router.post("/ticket/form", async (req, res) => {
       formSubjectStep1: Joi.string().required(),
       formSubjectStep2: Joi.string().required(),
       role: Joi.string().required(),
+      fromPage: Joi.string(),
     })
       .unknown()
       .validate(obj);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role } = value;
+    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage } = value;
     const userAttributes = [
       { name: "departement", value: department },
       { name: "region", value: region },
       { name: "role", value: role },
+      { name: "page précédente", value: fromPage },
     ];
     const response = await zammood.api("/v0/message", {
       method: "POST",
@@ -177,7 +180,6 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
   }
 });
 
-
 router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const userAttributes = await getUserAttributes(req.user);
@@ -222,7 +224,6 @@ const getUserAttributes = async (user) => {
     { name: "role", value: role },
   ];
 
-
   if (isYoung(user)) {
     userAttributes.push({ name: "cohorte", value: user.cohort });
     userAttributes.push({ name: "statut général", value: user.status });
@@ -259,7 +260,7 @@ const getUserAttributes = async (user) => {
     }
   }
   return userAttributes;
-}
+};
 
 const notifyReferent = async (ticket, message) => {
   if (!ticket) return false;
@@ -283,5 +284,5 @@ const notifyReferent = async (ticket, message) => {
     });
   }
   return true;
-}
+};
 module.exports = router;
