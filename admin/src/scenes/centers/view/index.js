@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Switch, Route, useHistory } from "react-router-dom";
+import { Switch, Route, useHistory, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
@@ -12,6 +12,7 @@ import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
 import { translate, ROLES } from "../../../utils";
 import { environment } from "../../../config";
+import Plus from "../../../assets/icons/Plus.js";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -137,7 +138,7 @@ export default function Index({ ...props }) {
         {(availableCohorts || []).map((cohort, index) => (
           <div
             key={index}
-            className={`pb-2 px-4 flex align-items cursor-pointer  ${focusedCohort === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
+            className={`pb-2 px-4 flex items-center cursor-pointer  ${focusedCohort === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
             onClick={() => {
               setFocusedCohort(cohort);
             }}>
@@ -145,6 +146,12 @@ export default function Index({ ...props }) {
             {center.sessionStatus[index] === "DRAFT" ? <div className="border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] border text-xs rounded-full p-1 ml-1">Brouillon</div> : null}
           </div>
         ))}
+        <Link to={`/centre/${center._id}/edit`}>
+          <div className={`group pb-2 px-4 flex items-center cursor-pointer gap-1 text-sm`}>
+            <Plus className="text-gray-600 group-hover:text-blue-700" />
+            <div className="text-gray-600 group-hover:text-blue-700">Ajouter un séjour</div>
+          </div>
+        </Link>
       </div>
       <div className="px-12 my-8">
         {environment !== "production" ? (

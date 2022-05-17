@@ -108,7 +108,6 @@ export default function Edit(props) {
         };
         return (
           <div>
-            {console.log(values.cohorts)}
             <Header>
               <Title>{defaultValue ? values.name : "Création d'un centre"}</Title>
               <LoadingButton onClick={handleSubmit} loading={loading}>
@@ -177,10 +176,10 @@ export default function Edit(props) {
                     <div className="flex flex-row items-center justify-between p-6">
                       <div className="text-lg font-bold">Par séjour</div>
                       <div className="relative" ref={ref}>
-                        <button className="border-[1px] border-blue-700 rounded-lg hover:scale-105 hover:shadow-sm" onClick={() => setOpen((e) => !e)}>
+                        <button className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700" onClick={() => setOpen((e) => !e)}>
                           <div className="flex flex-row items-center p-2">
-                            <Plus className="text-blue-500" />
-                            <div className="ml-2 text-sm text-blue-700 leading-5">Ajouter un séjour</div>
+                            <Plus className="text-blue-700 group-hover:text-white" />
+                            <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Ajouter un séjour</div>
                           </div>
                         </button>
                         {/* display options */}
@@ -216,12 +215,14 @@ export default function Edit(props) {
                     {values.cohorts?.length ? (
                       <>
                         <div className="">
-                          <div className="flex border-bottom mb-2 pl-5">
+                          <div className="flex border-bottom mb-2 pl-2 gap-2">
                             {(values.cohorts || []).map((cohort, index) => (
                               <>
                                 <div
                                   key={index}
-                                  className={`pb-2 mr-5 cursor-pointer ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
+                                  className={`pb-2 px-2 cursor-pointer hover:text-snu-purple-300 hover:border-b-2 hover:border-snu-purple-300 ${
+                                    sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300" : null
+                                  }`}
                                   onClick={() => {
                                     setsessionShow(cohort);
                                   }}>
@@ -311,7 +312,7 @@ const SelectStatus = ({ title, name, values, handleChange, disabled, options, va
       <div className="text-gray-500 text-xs"> {title} </div>
 
       <Field hidden value={values} name={name} onChange={handleChange} validate={validate} />
-      <select disabled={disabled} name={name} value={values} required onChange={handleChange} className="w-full bg-inherit">
+      <select disabled={disabled} name={name} value={values} required onChange={handleChange} className="w-full bg-inherit cursor-pointer">
         <option disabled value="">
           Sélectionner un statut
         </option>
@@ -334,7 +335,7 @@ const SelectPMR = ({ title, name, values, handleChange, disabled, options, valid
       <div className="items-start ml-2 w-full">
         <div className="ml-1 text-xs"> {title} </div>
         <Field hidden value={values} name={name} onChange={handleChange} validate={validate} />
-        <select disabled={disabled} className="w-full bg-inherit" name={name} value={values} onChange={handleChange}>
+        <select disabled={disabled} className="w-full bg-inherit cursor-pointer" name={name} value={values} onChange={handleChange}>
           <option key={-1} value="" label=""></option>
           {options.map((o, i) => (
             <option key={i} value={o.value} label={o.label}>
