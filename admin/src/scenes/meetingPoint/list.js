@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 
+import Panel from "./panel";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
@@ -12,6 +13,7 @@ import DeleteFilters from "../../components/buttons/DeleteFilters";
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT"];
 
 export default function MeetingPoint() {
+  const [meetingPoint, setMeetingPoint] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
@@ -129,6 +131,7 @@ export default function MeetingPoint() {
               />
             </ResultTable>
           </div>
+          <Panel meetingPoint={meetingPoint} onChange={() => setMeetingPoint(null)} />
         </div>
       </ReactiveBase>
     </div>
