@@ -17,6 +17,20 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
   const history = useHistory();
   const [environmentBannerVisible, setEnvironmentBannerVisible] = React.useState(true);
   const [selectSessionOpen, setSelectSessionOpen] = React.useState(false);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!ref) return;
+    const handleClickOutside = (event) => {
+      if (ref?.current && !ref.current.contains(event.target)) {
+        setSelectSessionOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
 
   if (!user) return <div />;
   if (user.role === ROLES.HEAD_CENTER && !sessionPhase1) return <div />;
@@ -97,7 +111,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
   return (
     <div className="w-full px-2 bg-white h-14 flex items-center justify-between shadow-sm sticky top-0 left-0 z-20 p-1">
       <h1 className="flex items-center gap-2">
-        <div className="flex items-center">
+        <div className="flex items-center" ref={ref}>
           <div className="lg:hidden">
             {drawerVisible ? (
               <RiMenuFoldLine className="w-7 h-7 cursor-pointer" onClick={onClickBurger} />
