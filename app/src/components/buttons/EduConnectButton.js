@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import IconFrance from "../../../assets/IconFrance";
-import { apiURL } from "../../../config";
+import IconFrance from "../../assets/IconFrance";
+import { apiURL } from "../../config";
 
 export default function EduConnectButton() {
   const [redirection, setRedirection] = useState(null);

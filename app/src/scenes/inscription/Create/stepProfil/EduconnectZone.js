@@ -3,7 +3,7 @@ import { Col } from "reactstrap";
 import InfoIcon from "../../../../assets/InfoIcon2";
 import NouveauBadge from "../../../../assets/NouveauBadge";
 import FormRow from "../../../../components/form/FormRow";
-import EduConnectButton from "../../components/EduConnectButton";
+import EduConnectButton from "../../../../components/buttons/EduConnectButton";
 
 export function EduconnectZone({ connected }) {
   return (
