@@ -7,11 +7,11 @@ import EduConnectButton from "../../components/EduConnectButton";
 
 export function EduconnectZone({ connected }) {
   return (
-    <div className="pl-4">
+    <div className="px-4">
       <FormRow>
         <Col>
           {!connected ? (
-            <div className="flex justify-between flex-wrap">
+            <div className="flex justify-between flex-wrap gap-y-2">
               <div className="flex items-center gap-4">
                 <NouveauBadge />
                 <div>
@@ -24,7 +24,7 @@ export function EduconnectZone({ connected }) {
                   <p className="text-gray-500 text-xs font-weight-light">Un compte unique pour les services numériques des écoles et des établissements.</p>
                 </div>
               </div>
-              <EduConnectButton className="flex items-center" />
+              <EduConnectButton />
             </div>
           ) : (
             <i>Les information en provenance de ÉduConnect ont bien été enregistrées.</i>

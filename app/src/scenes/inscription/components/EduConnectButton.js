@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import EduconnectButton from "../../../assets/educonnectButton";
+import IconFrance from "../../../assets/IconFrance";
 import { apiURL } from "../../../config";
 
 export default function EduConnectButton() {
@@ -10,10 +10,13 @@ export default function EduConnectButton() {
   }, [redirection]);
 
   return (
-    <div className="flex items-center flex-wrap">
-      <button className="mb-2" onClick={() => setRedirection(`${apiURL}/educonnect/test-input`)}>
-        <EduconnectButton />
-      </button>
-    </div>
+    <button
+      className="flex justify-center items-center transition-all w-[315px] h-12 gap-2 px-4 py-2 rounded-xl border-2 border-blue-600 shadow-md hover:border-4"
+      onClick={() => setRedirection(`${apiURL}/educonnect/test-input`)}>
+      <IconFrance />
+      <span className=" text-sm text-left text-gray-800 ">
+        S’identifier avec <b>Éduconnect</b>
+      </span>
+    </button>
   );
 }
