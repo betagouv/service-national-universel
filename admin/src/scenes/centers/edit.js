@@ -232,7 +232,7 @@ export default function Edit(props) {
                           </div>
                           {sessionShow
                             ? values.cohorts.map((cohort) => (
-                                <div className="ml-5 mt-4" hidden={cohort !== sessionShow}>
+                                <div key={cohort} className="ml-5 mt-4" hidden={cohort !== sessionShow}>
                                   <div className="flex">
                                     <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
                                       <PlaceCapacity
