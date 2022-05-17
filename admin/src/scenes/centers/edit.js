@@ -100,7 +100,7 @@ export default function Edit(props) {
       }}>
       {({ values, handleChange, handleSubmit, errors, touched, validateField, setFieldValue }) => {
         const handleChangeCohort = (cohort) => {
-          let tempCohorts = values.cohorts;
+          let tempCohorts = values.cohorts ? values.cohorts : [];
           if (tempCohorts.includes(cohort)) tempCohorts = tempCohorts.filter((c) => c !== cohort);
           else tempCohorts.push(cohort);
           setFieldValue("cohorts", tempCohorts);
@@ -191,7 +191,11 @@ export default function Edit(props) {
                           {["Juillet 2022", "Juin 2022", "Février 2022", "2021"].map((option, index) => (
                             <div key={index} onClick={() => handleChangeCohort(option)}>
                               <div className="group flex items-center justify-beetween gap-2 py-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                {values.cohorts.includes(option) ? <MdCheckBox className="text-blue-500 h-5 w-5" /> : <MdCheckBoxOutlineBlank className="text-gray-400 h-5 w-5" />}
+                                {values.cohorts && values.cohorts.includes(option) ? (
+                                  <MdCheckBox className="text-blue-500 h-5 w-5" />
+                                ) : (
+                                  <MdCheckBoxOutlineBlank className="text-gray-400 h-5 w-5" />
+                                )}
                                 <div className="text-base whitespace-nowrap">{option}</div>
                               </div>
                             </div>
@@ -207,7 +211,7 @@ export default function Edit(props) {
                         onChange={handleChange}
                         validate={(v) => v && !v?.length && "Vous devez sélectionner au moins un séjour"}
                       />
-                      {!values.cohorts.length ? <Error errors={errors} touched={touched} name={"cohorts"} /> : null}
+                      {!values?.cohorts?.length ? <Error errors={errors} touched={touched} name={"cohorts"} /> : null}
                     </div>
                     {values.cohorts?.length ? (
                       <>
