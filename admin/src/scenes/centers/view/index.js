@@ -10,7 +10,7 @@ import Youngs from "./youngs";
 import Affectation from "./affectation";
 import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
-import { translate, ROLES } from "../../../utils";
+import { translate, ROLES, canCreateOrUpdateCohesionCenter } from "../../../utils";
 import { environment } from "../../../config";
 import Plus from "../../../assets/icons/Plus.js";
 
@@ -146,12 +146,14 @@ export default function Index({ ...props }) {
             {center.sessionStatus[index] === "DRAFT" ? <div className="border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] border text-xs rounded-full p-1 ml-1">Brouillon</div> : null}
           </div>
         ))}
-        <Link to={`/centre/${center._id}/edit`}>
-          <div className={`group pb-2 px-4 flex items-center cursor-pointer gap-1 text-sm`}>
-            <Plus className="text-gray-600 group-hover:text-blue-700" />
-            <div className="text-gray-600 group-hover:text-blue-700">Ajouter un séjour</div>
-          </div>
-        </Link>
+        {canCreateOrUpdateCohesionCenter(user) ? (
+          <Link to={`/centre/${center._id}/edit`}>
+            <div className={`group pb-2 px-4 flex items-center cursor-pointer gap-1 text-sm`}>
+              <Plus className="text-gray-600 group-hover:text-blue-700" />
+              <div className="text-gray-600 group-hover:text-blue-700">Ajouter un séjour</div>
+            </div>
+          </Link>
+        ) : null}
       </div>
       <div className="px-12 my-8">
         {environment !== "production" ? (
