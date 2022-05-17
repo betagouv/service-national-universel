@@ -1006,5 +1006,6 @@ router.use("/:id/documents", require("./documents"));
 router.use("/:id/meeting-point", require("./meeting-point"));
 router.use("/:id/phase1", require("./phase1"));
 router.use("/inscription", require("./inscription"));
+router.use("/educonnect", require("./educonnect"));
 
 module.exports = router;

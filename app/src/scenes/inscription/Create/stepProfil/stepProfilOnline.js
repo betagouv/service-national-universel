@@ -185,7 +185,6 @@ export default function StepProfilOnline() {
                     }}
                     name="birthdateAt"
                     value={values.birthdateAt}
-                    // disabled={isYoungFromEduConnect}
                   />
                   <DateInput
                     disabled={isYoungFromEduConnect}
