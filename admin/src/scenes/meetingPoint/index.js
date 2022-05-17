@@ -6,6 +6,8 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import { Filter2, FilterRow, ResultTable } from "../../components/list";
 import FilterSvg from "../../assets/icons/Filter";
+import BusSvg from "../../assets/icons/Bus";
+import ArrowCircleRightSvg from "../../assets/icons/ArrowCircleRight";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
@@ -117,11 +119,10 @@ export default function MeetingPoint() {
                     <table className="w-full">
                       <thead>
                         <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
-                          <th className="py-3 pl-4">Département départ</th>
-                          <th>Adresse</th>
-                          <th>Centre</th>
-                          <th>Transport</th>
-                          <th>places dispo</th>
+                          <th className="py-3 pl-4">Transport</th>
+                          <th>Adresse de départ</th>
+                          <th>déstination</th>
+                          <th>places disponibles</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -141,7 +142,7 @@ export default function MeetingPoint() {
   );
 }
 
-const Hit = ({ hit, selected }) => {
+const Hit = ({ hit }) => {
   let mounted = useRef(true);
   const [bus, setBus] = useState();
 
@@ -154,29 +155,39 @@ const Hit = ({ hit, selected }) => {
     return () => (mounted = false);
   }, [hit]);
 
-  const bgColor = selected && "bg-snu-purple-300";
-
   return (
-    <tr className={`${!selected && "hover:!bg-gray-100"}`}>
-      <td className={`${bgColor} py-3 pl-4 ml-2 rounded-l-lg`}>
-        <div>{hit.departureDepartment}</div>
+    <tr className="hover:!bg-gray-100">
+      <td className={` py-3 pl-4 ml-2 rounded-l-lg`}>
+        <div className="flex gap-2 items-center text-sm">
+          <BusSvg />
+          {hit.busExcelId}
+        </div>
       </td>
-      <td>{hit.departureAddress}</td>
-      <td className={`${bgColor}`}>
-        <a href={`/centre/${hit.centerId}`} target="_blank" rel="noreferrer">
-          {hit.centerCode}
+      <td className="">
+        <div className="text-[#242526] text-[15px]">{hit.departureAddress}</div>
+        <div className="font-normal text-xs text-[#738297]">{hit.departureDepartment}</div>
+      </td>
+      <td className="">
+        <a className="flex gap-2 items-center text-sm" href={`/centre/${hit.centerId}`} target="_blank" rel="noreferrer">
+          <ArrowCircleRightSvg className="text-[#9CA3AF]" />
+          <div>{hit.centerCode}</div>
         </a>
       </td>
-      <td className={`${bgColor}`}>{hit.busExcelId}</td>
       {bus && mounted ? (
-        <td className={`${bgColor} rounded-r-lg`}>
+        <td className={` rounded-r-lg`}>
           <div>
-            {bus.placesLeft === 0 ? <Badge text="Complet" /> : <span className="font-bold text-black">{bus.placesLeft} places disponibles</span>}
-            <div className="text-xs text-gray-500">sur {bus.capacity} places proposées</div>
+            {bus.placesLeft === 0 ? (
+              <Badge text="Complet" />
+            ) : (
+              <span className="text-[#242526] text-xs">
+                <span className="font-bold text-[15px]">{bus.placesLeft} </span>places disponibles
+              </span>
+            )}
+            <div className="font-normal text-xs text-[#738297]">sur {bus.capacity} places proposées</div>
           </div>
         </td>
       ) : (
-        <td className={`${bgColor} rounded-r-lg`}>chargement...</td>
+        <td className={`rounded-r-lg`}>chargement...</td>
       )}
     </tr>
   );
