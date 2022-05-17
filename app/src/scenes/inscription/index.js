@@ -21,6 +21,7 @@ import Closed from "./Home/closed.js";
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
 import HelpButton from "../../components/buttons/HelpButton";
+import { educonnectAllowed } from "../../config";
 
 const Step = ({ step }) => {
   const young = useSelector((state) => state.Auth.young);
@@ -59,7 +60,7 @@ export default function Index() {
   const young = useSelector((state) => state.Auth.young);
 
   const allowedCohorts = COHORTS.filter((c) => inscriptionModificationOpenForYoungs(c));
-  if (young?.cohort && !allowedCohorts.includes(young?.cohort)) {
+  if (young?.cohort && !allowedCohorts.includes(young?.cohort) && !educonnectAllowed) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
@@ -70,7 +71,7 @@ export default function Index() {
 
   return (
     <Switch>
-      {inscriptionCreationOpenForYoungs(young?.cohort) ||
+      {inscriptionCreationOpenForYoungs(young?.cohort, educonnectAllowed) ||
       (inscriptionModificationOpenForYoungs(young?.cohort) && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young?.status)) ? (
         <>
           <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
