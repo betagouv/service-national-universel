@@ -48,13 +48,7 @@ router.post("/callback", passport.authenticate("educonnect"), async (req, res) =
       .unknown()
       .validate(educonnect_data, { stripUnknown: true });
 
-    if (error) {
-      const query = {
-        errorCode: ERRORS.EDUCONNECT_LOGIN_ERROR,
-      };
-      const url_error = `${config.APP_URL}/inscription/profil?${queryString.stringify(query)}`;
-      return res.redirect(url_error);
-    }
+    if (error) throw error;
 
     if (value.FrEduCtPersonAffiliation.includes("resp")) {
       const query = {
@@ -89,7 +83,12 @@ router.post("/callback", passport.authenticate("educonnect"), async (req, res) =
     return res.redirect(url_signup);
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false });
+    console.log(error);
+    const query = {
+      errorCode: ERRORS.EDUCONNECT_LOGIN_ERROR,
+    };
+    const url_error = `${config.APP_URL}/inscription/profil?${queryString.stringify(query)}`;
+    return res.redirect(url_error);
   }
 });
 
