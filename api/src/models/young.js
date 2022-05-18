@@ -90,8 +90,7 @@ const Schema = new mongoose.Schema({
   codeUAI: {
     type: String,
     documentation: {
-      // description: "UAI de(s) établissement(s) de rattachement administratif de l'élève (dans la plupart des cas, il sera monovalué)",
-      description: "test",
+      description: "UAI de(s) établissement(s) de rattachement administratif de l'élève (dans la plupart des cas, il sera monovalué)",
     },
   },
   niveau: {
