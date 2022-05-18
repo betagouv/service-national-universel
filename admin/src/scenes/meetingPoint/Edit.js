@@ -60,13 +60,13 @@ export default function Edit(props) {
             setModal({
               isOpen: true,
               values: {
-                departureAddress: meetingPoint.departureAddress || "",
-                departureAtString: meetingPoint.departureAtString || "",
-                returnAtString: meetingPoint.returnAtString || "",
-                capacity: bus.capacity || 0,
-                placesLeft: bus.placesLeft || 0,
-                department: meetingPoint.departureDepartment,
-                cohort: bus.cohort,
+                departureAddress: meetingPoint?.departureAddress || "",
+                departureAtString: meetingPoint?.departureAtString || "",
+                returnAtString: meetingPoint?.returnAtString || "",
+                capacity: bus?.capacity || 0,
+                placesLeft: bus?.placesLeft || 0,
+                department: meetingPoint?.departureDepartment,
+                cohort: bus?.cohort,
               },
               onSubmit: async (values) => {
                 const { data: busResult, ok: okBus } = await api.put(`/bus/${bus._id}/capacity`, { capacity: values.capacity });

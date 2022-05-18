@@ -29,8 +29,6 @@ import General from "./general";
 import Pointage from "./pointage";
 
 export default function CenterYoungIndex() {
-  if (environment === "production") return null;
-
   const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
   const [filter, setFilter] = React.useState();
 
