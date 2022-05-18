@@ -17,7 +17,7 @@ const MONTH = {
   11: "dec.",
 };
 
-export default function DateInput({ value, onChange }) {
+export default function DateInput({ value, onChange, disabled }) {
   const [y, m, d] = value ? value.substring(0, 10).split("-") : ["", "", ""];
   const [day, setDay] = useState(d ? parseInt(d) : "");
   const [month, setMonth] = useState(m ? parseInt(m - 1) : "");
@@ -47,7 +47,7 @@ export default function DateInput({ value, onChange }) {
   };
   return (
     <Wrapper>
-      <Input id="day" name="day" value={day} onChange={handleDay} type="select">
+      <Input id="day" name="day" value={day} onChange={handleDay} type="select" disabled={disabled}>
         <option value="">jour</option>
         {range(1, 31).map((d) => (
           <option key={d} value={d}>
@@ -56,7 +56,7 @@ export default function DateInput({ value, onChange }) {
         ))}
       </Input>
       <Separator />
-      <Input id="month" name="month" value={month} onChange={handleMonth} type="select">
+      <Input id="month" name="month" value={month} onChange={handleMonth} type="select" disabled={disabled}>
         <option value="">mois</option>
         {range(0, 11).map((m) => (
           <option key={m} value={m}>
@@ -65,7 +65,7 @@ export default function DateInput({ value, onChange }) {
         ))}
       </Input>
       <Separator />
-      <Input id="year" name="year" value={year} onChange={handleYear} type="select">
+      <Input id="year" name="year" value={year} onChange={handleYear} type="select" disabled={disabled}>
         <option value="">année</option>
         {range(1990, 2020).map((y) => (
           <option key={y} value={y}>

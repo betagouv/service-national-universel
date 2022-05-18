@@ -37,7 +37,7 @@ import Desistement from "./scenes/desistement";
 import changeSejour from "./scenes/phase1/changeSejour";
 
 import api from "./services/api";
-import { SENTRY_URL, environment, appURL } from "./config";
+import { SENTRY_URL, environment, appURL, educonnectAllowed } from "./config";
 import ModalCGU from "./components/modals/ModalCGU";
 
 import "./index.css";
@@ -142,7 +142,7 @@ const Espace = () => {
   }
   const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status);
 
-  if (!inscriptionCreationOpenForYoungs(young?.cohort) && youngInProcessInscription) return <Redirect to="/inscription" />;
+  if (!inscriptionCreationOpenForYoungs(young?.cohort, educonnectAllowed) && youngInProcessInscription) return <Redirect to="/inscription" />;
   if (youngInProcessInscription) return <Redirect to="/inscription/coordonnees" />;
 
   return (

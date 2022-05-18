@@ -25,6 +25,8 @@ export default function StepProfilOnline() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
+  const isYoungFromEduConnect = young?.INEHash;
+
   useEffect(() => {
     if (young !== undefined) {
       setData({
@@ -106,6 +108,7 @@ export default function StepProfilOnline() {
                     name="firstName"
                     value={values.firstName}
                     onChange={handleChange}
+                    disabled={isYoungFromEduConnect}
                   />
                   <ErrorMessage errors={errors} touched={touched} name="firstName" />
                 </Col>
@@ -123,6 +126,7 @@ export default function StepProfilOnline() {
                     name="lastName"
                     value={values.lastName}
                     onChange={handleChange}
+                    disabled={isYoungFromEduConnect}
                   />
                   <ErrorMessage errors={errors} touched={touched} name="lastName" />
                 </Col>
@@ -183,6 +187,7 @@ export default function StepProfilOnline() {
                     value={values.birthdateAt}
                   />
                   <DateInput
+                    disabled={isYoungFromEduConnect}
                     value={values.birthdateAt}
                     onChange={(date) => {
                       handleChange({ target: { value: date, name: "birthdateAt" } });

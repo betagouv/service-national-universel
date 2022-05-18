@@ -81,6 +81,36 @@ const Schema = new mongoose.Schema({
       description: "Date de naissance du volontaire",
     },
   },
+  INEHash: {
+    type: String,
+    documentation: {
+      description: "Hash INE du jeune connecte via Educonnect",
+    },
+  },
+  codeUAI: {
+    type: String,
+    documentation: {
+      description: "UAI de(s) établissement(s) de rattachement administratif de l'élève (dans la plupart des cas, il sera monovalué)",
+    },
+  },
+  niveau: {
+    type: String,
+    documentation: {
+      description: "Code de la nomenclature BCN N MEF STAT 4Code de la nomenclature BCN N MEF STAT 4",
+    },
+  },
+  urlLogOut: {
+    type: String,
+    documentation: {
+      description: "Url de deconnexion Educonnect",
+    },
+  },
+  affiliation: {
+    type: String,
+    documentation: {
+      description: "Type d'utilisateur (1d, 2d, les 2)",
+    },
+  },
   cohort: {
     type: String,
     default: "2022",

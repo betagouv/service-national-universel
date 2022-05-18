@@ -7,7 +7,5 @@ import StepProfilOffline from "./stepProfilOffline";
 export default function StepProfil() {
   const young = useSelector((state) => state.Auth.young);
 
-  if (young?.email) return <StepProfilOnline />;
-
-  return <StepProfilOffline />;
+  return young?.email ? <StepProfilOnline /> : <StepProfilOffline />;
 }
