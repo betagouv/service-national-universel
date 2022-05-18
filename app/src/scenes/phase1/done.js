@@ -34,7 +34,11 @@ export default function Done() {
                   <p className="text-base text-[#738297]">
                     Vous pouvez dès à présent transmettre votre attestation de réalisation de Phase 1 au CSNJ afin qu&apos;il valide votre JDC.
                   </p>
-                  <a className="text-sm text-indigo-600 underline hover:text-indigo-700" href="https://presaje.sga.defense.gouv.fr/" target="_blank" rel="noreferrer">
+                  <a
+                    className="text-sm text-indigo-600 underline hover:text-indigo-700"
+                    href="https://support.snu.gouv.fr/base-de-connaissance/journee-defense-et-citoyennete"
+                    target="_blank"
+                    rel="noreferrer">
                     J&apos;ai une question sur la JDC ›
                   </a>
                   <div className="flex items-center">

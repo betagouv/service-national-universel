@@ -1,7 +1,7 @@
 import * as React from "react";
 
 const Bus = (props) => (
-  <svg width={20} height={19} fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+  <svg width={20} height={19} viewBox="0 0 20 19" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
     <path d="M4.697 10.455a.885.885 0 1 1-1.71-.459.885.885 0 0 1 1.71.459ZM13.875 13.83a.885.885 0 1 0 .459-1.71.885.885 0 0 0-.459 1.71Z" fill="#9CA3AF" />
     <path
       fillRule="evenodd"

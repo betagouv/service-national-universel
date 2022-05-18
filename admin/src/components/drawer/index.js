@@ -159,10 +159,10 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
   );
 }
 
-function headCenter({ onClick, user }) {
+function headCenter({ onClick, sessionPhase1 }) {
   return (
     <>
-      {user.cohesionCenterId && <DrawerTab to={`/centre/${user.cohesionCenterId}`} title="Mon Centre" onClick={onClick} />}
+      {sessionPhase1 && <DrawerTab to={`/centre/${sessionPhase1.cohesionCenterId}`} title="Mon Centre" onClick={onClick} />}
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
@@ -183,12 +183,13 @@ function visitor({ onClick }) {
 
 const Drawer = (props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const user = useSelector((state) => state.Auth.user);
+  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
   const newTickets = useSelector((state) => state.Tickets.new);
   const openedTickets = useSelector((state) => state.Tickets.open);
   const closedTickets = useSelector((state) => state.Tickets.closed);
   const tickets = useSelector((state) => state.Tickets.tickets);
   const [open, setOpen] = useState();
+
   useEffect(() => {
     setOpen(props.open);
     setIsOpen(props.open);
@@ -226,7 +227,7 @@ const Drawer = (props) => {
           <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
             <ul className="divide-y divide-slate-700">
               <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1 })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
               {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
@@ -240,7 +241,7 @@ const Drawer = (props) => {
           <div>
             <ul className="divide-y divide-slate-700">
               <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1 })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
               {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}

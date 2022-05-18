@@ -4,7 +4,7 @@
 api/.env
 api/.env-prod
 api/.env-staging
-api/scripts
+api/*scripts*
 api/.env-testing
 api/.env*
 api/coverage

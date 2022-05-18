@@ -1,13 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { canViewMeetingPoints } = require("snu-lib/roles");
+const { canViewMeetingPoints, canUpdateMeetingPoint } = require("snu-lib/roles");
 const { capture } = require("../sentry");
 const { validateId } = require("../utils/validator");
 const MeetingPointModel = require("../models/meetingPoint");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const BusModel = require("../models/bus");
 const { ERRORS, isYoung, isReferent } = require("../utils");
+const Joi = require("joi");
 
 router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -84,6 +85,32 @@ router.get("/", passport.authenticate("young", { session: false, failWithError: 
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
+});
+
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  const { error, value } = Joi.object({
+    id: Joi.string().required(),
+    departureAddress: Joi.string().required(),
+    departureAtString: Joi.string().required(),
+    returnAtString: Joi.string().required(),
+  }).validate({ ...req.params, ...req.body });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  if (!canUpdateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+  const meetingPoint = await MeetingPointModel.findById(value.id);
+  if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  meetingPoint.set({
+    departureAddress: value.departureAddress,
+    departureAt: value.departureAt,
+    returnAt: value.returnAt,
+    departureAtString: value.departureAtString,
+    returnAtString: value.returnAtString,
+  });
+
+  meetingPoint.save({ fromUser: req.user });
+
+  return res.status(200).send({ ok: true, data: meetingPoint });
 });
 
 module.exports = router;

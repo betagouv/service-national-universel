@@ -1,21 +1,21 @@
 import { Field, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { BiHandicap } from "react-icons/bi";
+import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
+import Plus from "../../assets/icons/Plus.js";
 import AddressInput from "../../components/addressInputVCenter";
-import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
-import LoadingButton from "../../components/buttons/LoadingButton";
 import Badge from "../../components/Badge";
+import { Box, BoxContent } from "../../components/box";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import Loader from "../../components/Loader";
-
-import MultiSelectComponent from "./components/Multiselect";
 import api from "../../services/api";
-import { SESSION_STATUS, translate, translateSessionStatus, colors, ROLES } from "../../utils";
+import { colors, ROLES, SESSION_STATUS, translate, translateSessionStatus } from "../../utils";
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -25,6 +25,20 @@ export default function Edit(props) {
   const user = useSelector((state) => state.Auth.user);
   const [sessionShow, setsessionShow] = useState(null);
   const [sessionStatus, setSessionStatus] = useState(null);
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
 
   async function init() {
     if (isNew) return setDefaultValue(null);
@@ -84,183 +98,204 @@ export default function Edit(props) {
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre", e?.error?.message);
         }
       }}>
-      {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
-        <div>
-          <Header>
-            <Title>{defaultValue ? values.name : "Création d'un centre"}</Title>
-            <LoadingButton onClick={handleSubmit} loading={loading}>
-              {defaultValue ? "Enregistrer les modifications" : "Créer le centre"}
-            </LoadingButton>
-          </Header>
-          <Wrapper>
-            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas enregistrer ce centre car tous les champs ne sont pas correctement renseignés.</h3> : null}
-            <Row>
-              <Col className="mb-10 w-1/2">
-                <Box>
-                  <BoxContent direction="column">
-                    <div className="ml-1 font-bold text-lg">Informations générales</div>
-                    <div className="ml-1 mt-8"> Nom </div>
-                    <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    {user.role === ROLES.ADMIN ? (
-                      <>
-                        <div className="ml-1 mt-8">
-                          Code (2022) <Badge text="modérateur" color={colors.purple} />
-                        </div>
-                        <Item title="Identifiant du centre - version 2022" values={values} name={"code2022"} handleChange={handleChange} errors={errors} touched={touched} />
-                      </>
-                    ) : null}
-                    <div className="ml-1 mt-8"> Adresse </div>
-                    <AddressInput
-                      keys={{
-                        country: "country",
-                        city: "city",
-                        zip: "zip",
-                        address: "address",
-                        location: "location",
-                        department: "department",
-                        region: "region",
-                        addressVerified: "addressVerified",
-                      }}
-                      values={values}
-                      departAndRegionVisible={true}
-                      handleChange={handleChange}
-                      errors={errors}
-                      touched={touched}
-                      validateField={validateField}
-                      required
-                    />
-                    <div className="ml-1 mt-8"> Accessibilité PMR </div>
-                    <SelectPMR
-                      name="pmr"
-                      values={values["pmr"]}
-                      handleChange={handleChange}
-                      title="Accessibilité aux personnes à mobilité réduite"
-                      options={[
-                        { value: "true", label: "Oui" },
-                        { value: "false", label: "Non" },
-                      ]}
-                      validate={(e) => !e && "L'Accessibilité PMR doit être renseignée"}
-                      errors={errors}
-                      touched={touched}
-                    />
-                    <div className="flex flex-col items-center ">
-                      <Error errors={errors} name={"pmr"} />
-                    </div>
-                  </BoxContent>
-                </Box>
-              </Col>
-              <Col className="mb-10 w-1/2">
-                <Box>
-                  <BoxHeadTitle>Par séjour</BoxHeadTitle>
-                  <BoxContent direction="column">
-                    <MultiSelectWithTitle
-                      required
-                      errors={errors}
-                      touched={touched}
-                      title="Séjour(s) de cohésion concerné(s)"
-                      value={values.cohorts}
-                      onChange={handleChange}
-                      name="cohorts"
-                      options={["Juillet 2022", "Juin 2022", "Février 2022", "2021"]}
-                      placeholder="Sélectionner un ou plusieurs séjour de cohésion"
-                      setsessionShow={setsessionShow}
-                    />
-                  </BoxContent>
-                  {values.cohorts?.length ? (
-                    <>
-                      <div className="">
-                        <div className="flex border-bottom mb-2 pl-5">
-                          {(values.cohorts || []).map((cohort, index) => (
-                            <>
-                              <div
-                                key={index}
-                                className={`pb-2 mr-5 cursor-pointer ${sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
-                                onClick={() => {
-                                  setsessionShow(cohort);
-                                }}>
-                                {cohort}
-                              </div>
-                            </>
-                          ))}
-                        </div>
-                        {sessionShow
-                          ? values.cohorts.map((cohort) => (
-                              <div className="ml-5 mt-4" hidden={cohort !== sessionShow}>
-                                <div className="flex">
-                                  <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
-                                    <PlaceCapacity
-                                      key={`${cohort}.Places`}
-                                      title={"Capacite d'accueil"}
-                                      values={values[cohort]?.placesTotal || ""}
-                                      name={`${cohort}.placesTotal`}
-                                      handleChange={handleChange}
-                                      required
-                                      errors={errors}
-                                      touched={touched}
-                                      validate={(e) => !e && `La capacité d'accueil de ${cohort} doit être renseignée`}
-                                    />
-                                  </div>
-                                  <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
-                                    <SelectStatus
-                                      name={`${cohort}.status`}
-                                      values={values[cohort]?.status || ""}
-                                      handleChange={handleChange}
-                                      title="Statut"
-                                      options={sessionStatus}
-                                      required
-                                      errors={errors}
-                                      touched={touched}
-                                      validate={(e) => !e && `Le status pour la session de ${cohort} est obligatoire`}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            ))
-                          : null}
-                        <div className="ml-5 mt-2 flex flex-col items-center w-3/4">
-                          {values.cohorts.map((cohort) => (
-                            <>
-                              <div>
-                                <Error errors={errors} name={`${cohort}.status`} />
-                              </div>
-                              <div>
-                                <Error errors={errors} name={`${cohort}.placesTotal`} />
-                              </div>
-                            </>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  ) : null}
-                </Box>
-              </Col>
-            </Row>
-            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas enregistrer ce centre car tous les champs ne sont pas correctement renseignés.</h3> : null}
-            <Header style={{ justifyContent: "flex-end" }}>
+      {({ values, handleChange, handleSubmit, errors, touched, validateField, setFieldValue }) => {
+        const handleChangeCohort = (cohort) => {
+          let tempCohorts = values.cohorts ? values.cohorts : [];
+          if (tempCohorts.includes(cohort)) tempCohorts = tempCohorts.filter((c) => c !== cohort);
+          else tempCohorts.push(cohort);
+          setFieldValue("cohorts", tempCohorts);
+          tempCohorts.length > 0 ? setsessionShow(tempCohorts[tempCohorts.length - 1]) : setsessionShow(null);
+        };
+        return (
+          <div>
+            <Header>
+              <Title>{defaultValue ? values.name : "Création d'un centre"}</Title>
               <LoadingButton onClick={handleSubmit} loading={loading}>
                 {defaultValue ? "Enregistrer les modifications" : "Créer le centre"}
               </LoadingButton>
             </Header>
-          </Wrapper>
-        </div>
-      )}
+            <Wrapper>
+              {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas enregistrer ce centre car tous les champs ne sont pas correctement renseignés.</h3> : null}
+              <Row>
+                <Col className="mb-10 w-1/2">
+                  <Box>
+                    <BoxContent direction="column">
+                      <div className="ml-1 font-bold text-lg">Informations générales</div>
+                      <div className="ml-1 mt-8"> Nom </div>
+                      <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
+                      {user.role === ROLES.ADMIN ? (
+                        <>
+                          <div className="ml-1 mt-8">
+                            Code (2022) <Badge text="modérateur" color={colors.purple} />
+                          </div>
+                          <Item title="Identifiant du centre - version 2022" values={values} name={"code2022"} handleChange={handleChange} errors={errors} touched={touched} />
+                        </>
+                      ) : null}
+                      <div className="ml-1 mt-8"> Adresse </div>
+                      <AddressInput
+                        keys={{
+                          country: "country",
+                          city: "city",
+                          zip: "zip",
+                          address: "address",
+                          location: "location",
+                          department: "department",
+                          region: "region",
+                          addressVerified: "addressVerified",
+                        }}
+                        values={values}
+                        departAndRegionVisible={true}
+                        handleChange={handleChange}
+                        errors={errors}
+                        touched={touched}
+                        validateField={validateField}
+                        required
+                      />
+                      <div className="ml-1 mt-8"> Accessibilité PMR </div>
+                      <SelectPMR
+                        name="pmr"
+                        values={values["pmr"]}
+                        handleChange={handleChange}
+                        title="Accessibilité aux personnes à mobilité réduite"
+                        options={[
+                          { value: "true", label: "Oui" },
+                          { value: "false", label: "Non" },
+                        ]}
+                        validate={(e) => !e && "L'Accessibilité PMR doit être renseignée"}
+                        errors={errors}
+                        touched={touched}
+                      />
+                      <div className="flex flex-col items-center ">
+                        <Error errors={errors} name={"pmr"} />
+                      </div>
+                    </BoxContent>
+                  </Box>
+                </Col>
+                <Col className="mb-10 w-1/2">
+                  <Box>
+                    <div className="flex flex-row items-center justify-between p-6">
+                      <div className="text-lg font-bold">Par séjour</div>
+                      <div className="relative" ref={ref}>
+                        <button className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700" onClick={() => setOpen((e) => !e)}>
+                          <div className="flex flex-row items-center p-2">
+                            <Plus className="text-blue-700 group-hover:text-white" />
+                            <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Ajouter un séjour</div>
+                          </div>
+                        </button>
+                        {/* display options */}
+                        <div
+                          className={`${
+                            open ? "block" : "hidden"
+                          } rounded-lg min-w-full bg-white transition absolute right-0 border-3 border-red-600 shadow overflow-hidden z-50 top-[40px]`}>
+                          {["Juillet 2022", "Juin 2022", "Février 2022", "2021"].map((option, index) => (
+                            <div key={index} onClick={() => handleChangeCohort(option)}>
+                              <div className="group flex items-center justify-beetween gap-2 py-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                {values.cohorts && values.cohorts.includes(option) ? (
+                                  <MdCheckBox className="text-blue-500 h-5 w-5" />
+                                ) : (
+                                  <MdCheckBoxOutlineBlank className="text-gray-400 h-5 w-5" />
+                                )}
+                                <div className="text-base whitespace-nowrap">{option}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-center">
+                      <Field
+                        hidden
+                        value={values.cohorts}
+                        name={"cohorts"}
+                        onChange={handleChange}
+                        validate={(v) => v && !v?.length && "Vous devez sélectionner au moins un séjour"}
+                      />
+                      {!values?.cohorts?.length ? <Error errors={errors} touched={touched} name={"cohorts"} /> : null}
+                    </div>
+                    {values.cohorts?.length ? (
+                      <>
+                        <div className="">
+                          <div className="flex border-bottom mb-2 pl-2 gap-2">
+                            {(values.cohorts || []).map((cohort, index) => (
+                              <>
+                                <div
+                                  key={index}
+                                  className={`pb-2 px-2 cursor-pointer hover:text-snu-purple-300 hover:border-b-2 hover:border-snu-purple-300 ${
+                                    sessionShow === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300" : null
+                                  }`}
+                                  onClick={() => {
+                                    setsessionShow(cohort);
+                                  }}>
+                                  {cohort}
+                                </div>
+                              </>
+                            ))}
+                          </div>
+                          {sessionShow
+                            ? values.cohorts.map((cohort) => (
+                                <div key={cohort} className="ml-5 mt-4" hidden={cohort !== sessionShow}>
+                                  <div className="flex">
+                                    <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
+                                      <PlaceCapacity
+                                        key={`${cohort}.Places`}
+                                        title={"Capacite d'accueil"}
+                                        values={values[cohort]?.placesTotal || ""}
+                                        name={`${cohort}.placesTotal`}
+                                        handleChange={handleChange}
+                                        required
+                                        errors={errors}
+                                        touched={touched}
+                                        validate={(e) => !e && `La capacité d'accueil de ${cohort} doit être renseignée`}
+                                      />
+                                    </div>
+                                    <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
+                                      <SelectStatus
+                                        name={`${cohort}.status`}
+                                        values={values[cohort]?.status || ""}
+                                        handleChange={handleChange}
+                                        title="Statut"
+                                        options={sessionStatus}
+                                        required
+                                        errors={errors}
+                                        touched={touched}
+                                        validate={(e) => !e && `Le status pour la session de ${cohort} est obligatoire`}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                            : null}
+                          <div className="ml-5 mt-2 flex flex-col items-center w-3/4">
+                            {values.cohorts.map((cohort) => (
+                              <>
+                                <div>
+                                  <Error errors={errors} name={`${cohort}.status`} />
+                                </div>
+                                <div>
+                                  <Error errors={errors} name={`${cohort}.placesTotal`} />
+                                </div>
+                              </>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    ) : null}
+                  </Box>
+                </Col>
+              </Row>
+              {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas enregistrer ce centre car tous les champs ne sont pas correctement renseignés.</h3> : null}
+              <Header style={{ justifyContent: "flex-end" }}>
+                <LoadingButton onClick={handleSubmit} loading={loading}>
+                  {defaultValue ? "Enregistrer les modifications" : "Créer le centre"}
+                </LoadingButton>
+              </Header>
+            </Wrapper>
+          </div>
+        );
+      }}
     </Formik>
   );
 }
-const MultiSelectWithTitle = ({ title, value, onChange, name, options, placeholder, required, errors, touched, setsessionShow }) => {
-  return (
-    <Row className="detail">
-      <Col md={4}>
-        <label>{title}</label>
-      </Col>
-      <Col md={8}>
-        <Field hidden value={value} name={name} onChange={onChange} validate={(v) => required && !v?.length && requiredMessage} />
-        <MultiSelectComponent value={value} onChange={onChange} name={name} options={options} placeholder={placeholder} setsessionShow={setsessionShow} />
-        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
-      </Col>
-    </Row>
-  );
-};
 
 const PlaceCapacity = ({ title, values, name, handleChange, disabled = false, validate }) => {
   return (
@@ -277,7 +312,7 @@ const SelectStatus = ({ title, name, values, handleChange, disabled, options, va
       <div className="text-gray-500 text-xs"> {title} </div>
 
       <Field hidden value={values} name={name} onChange={handleChange} validate={validate} />
-      <select disabled={disabled} name={name} value={values} required onChange={handleChange} className="w-full bg-inherit">
+      <select disabled={disabled} name={name} value={values} required onChange={handleChange} className="w-full bg-inherit cursor-pointer">
         <option disabled value="">
           Sélectionner un statut
         </option>
@@ -300,7 +335,7 @@ const SelectPMR = ({ title, name, values, handleChange, disabled, options, valid
       <div className="items-start ml-2 w-full">
         <div className="ml-1 text-xs"> {title} </div>
         <Field hidden value={values} name={name} onChange={handleChange} validate={validate} />
-        <select disabled={disabled} className="w-full bg-inherit" name={name} value={values} onChange={handleChange}>
+        <select disabled={disabled} className="w-full bg-inherit cursor-pointer" name={name} value={values} onChange={handleChange}>
           <option key={-1} value="" label=""></option>
           {options.map((o, i) => (
             <option key={i} value={o.value} label={o.label}>

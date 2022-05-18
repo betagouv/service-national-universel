@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Switch, Route, useHistory } from "react-router-dom";
+import { Switch, Route, useHistory, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
@@ -10,8 +10,9 @@ import Youngs from "./youngs";
 import Affectation from "./affectation";
 import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
-import { translate, CENTER_ROLES, ROLES } from "../../../utils";
+import { translate, ROLES, canCreateOrUpdateCohesionCenter } from "../../../utils";
 import { environment } from "../../../config";
+import Plus from "../../../assets/icons/Plus.js";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -84,63 +85,6 @@ export default function Index({ ...props }) {
     if (ok) setCenter(data);
   };
 
-  const deleteTeamate = async (user) => {
-    const index = focusedSession.team.findIndex((e) => JSON.stringify(e) === JSON.stringify(user));
-    focusedSession.team.splice(index, 1);
-
-    try {
-      const r = await api.put(`/session-phase1/${focusedSession._id}`, { team: focusedSession.team });
-      const { ok, data } = r;
-      if (!ok) toastr.error("Oups, une erreur est survenue lors de la suppression du membre", translate(data.code));
-      setFocusedSession(data);
-      toastr.success("Succès", "Le membre a été supprimé de l'équipe");
-    } catch (e) {
-      console.log(e);
-      toastr.error("Erreur !", translate(e.code));
-    }
-  };
-
-  const addTeamate = async (teamate) => {
-    let obj = {};
-
-    if (teamate.role === CENTER_ROLES.chef) obj = await setChefCenter(teamate);
-    else obj = await setTeamate(teamate);
-
-    if (!Object.keys(obj).length) return;
-
-    try {
-      const { ok, data } = await api.put(`/session-phase1/${focusedSession._id}`, obj);
-      if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du membre", translate(data.code));
-      setFocusedSession(data);
-      toastr.success("Succès", "Le membre a été ajouté à l'équipe");
-    } catch (e) {
-      console.log(e);
-      toastr.error("Erreur !", translate(e.code));
-    }
-  };
-
-  const setChefCenter = async (teamate) => {
-    try {
-      let { data: referent } = await api.get(`/referent?email=${teamate.email}`);
-
-      if (!referent) {
-        // todo : create chef de centre
-        toastr.error("Erreur !", "Aucun utilisateur trouvé avec cette adresse email");
-        return {};
-      }
-
-      return { headCenterId: referent._id };
-    } catch (e) {
-      toastr.error("Erreur !", translate(e));
-    }
-  };
-
-  const setTeamate = async (teamate) => {
-    const obj = { team: focusedSession.team };
-    obj.team.push(teamate);
-    return obj;
-  };
-
   const OccupationCard = ({ occupationPercentage, placesLeft, placesTotal }) => {
     let height = `h-0`;
     if (occupationPercentage < 20) height = "h-[20%]";
@@ -194,7 +138,7 @@ export default function Index({ ...props }) {
         {(availableCohorts || []).map((cohort, index) => (
           <div
             key={index}
-            className={`pb-2 px-4 flex align-items cursor-pointer  ${focusedCohort === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
+            className={`pb-2 px-4 flex items-center cursor-pointer  ${focusedCohort === cohort ? "text-snu-purple-300 border-b-2  border-snu-purple-300 " : null}`}
             onClick={() => {
               setFocusedCohort(cohort);
             }}>
@@ -202,84 +146,67 @@ export default function Index({ ...props }) {
             {center.sessionStatus[index] === "DRAFT" ? <div className="border-[#CECECE] bg-[#F6F6F6] text-[#9A9A9A] border text-xs rounded-full p-1 ml-1">Brouillon</div> : null}
           </div>
         ))}
+        {canCreateOrUpdateCohesionCenter(user) ? (
+          <Link to={`/centre/${center._id}/edit`}>
+            <div className={`group pb-2 px-4 flex items-center cursor-pointer gap-1 text-sm`}>
+              <Plus className="text-gray-600 group-hover:text-blue-700" />
+              <div className="text-gray-600 group-hover:text-blue-700">Ajouter un séjour</div>
+            </div>
+          </Link>
+        ) : null}
       </div>
       <div className="px-12 my-8">
-        {environment !== "production" ? (
-          center?._id && focusedSession?._id ? (
-            <div className="flex gap-3">
-              {/* // liste des volontaires */}
-              <div className="flex flex-col justify-between items-start bg-white rounded-lg shadow-sm p-4 max-w-xl">
-                <div>
-                  <div className="text-lg font-medium mb-1 text-gray-900">Liste des volontaires</div>
-                  <div className="text-sm font-normal text-gray-400 mb-3">Accès à la liste des volontaires affectés, au tableau de pointage...</div>
-                </div>
-                <button
-                  className="px-4 py-2 rounded-md bg-snu-purple-300 text-sm text-white hover:shadow-lg"
-                  onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
-                  Voir les volontaires
-                </button>
+        {center?._id && focusedSession?._id ? (
+          <div className="flex gap-3">
+            {/* // liste des volontaires */}
+            <div className="flex flex-col justify-between items-start bg-white rounded-lg shadow-sm p-4 max-w-xl">
+              <div>
+                <div className="text-lg font-medium mb-1 text-gray-900">Liste des volontaires</div>
+                <div className="text-sm font-normal text-gray-400 mb-3">Accès à la liste des volontaires affectés, au tableau de pointage...</div>
               </div>
-
-              {/* // Taux doccupation */}
-              <OccupationCard occupationPercentage={occupationPercentage} placesTotal={focusedSession.placesTotal} placesLeft={focusedSession.placesLeft} />
-
-              {/* // équipe */}
-              <div className="flex flex-col justify-between items-start bg-white rounded-lg shadow-sm p-4 max-w-xl">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <div className="text-lg font-medium text-gray-900">L&apos;équipe</div>
-                    <div className="flex flex-row -space-x-2">
-                      {(focusedSession?.team || []).map((member, index) => {
-                        const getInitials = (word) =>
-                          (word || "")
-                            .match(/\b(\w)/g)
-                            .join("")
-                            .substring(0, 2)
-                            .toUpperCase();
-                        if (index < 6)
-                          return (
-                            <div key={index} className={`h-8 w-8 flex justify-center items-center rounded-full bg-gray-100 text-indigo-600 text-xs border-2 border-white`}>
-                              {getInitials(`${member.firstName} ${member.lastName}`)}
-                            </div>
-                          );
-                      })}
-                    </div>
-                  </div>
-                  <div className="text-sm font-normal text-gray-400 mb-3">Les coordonnées du chef de centre, du cadre spécialisé, de compagnie...</div>
-                </div>
-                <button
-                  className="px-4 py-2 rounded-md border-[1px] border-snu-purple-300 text-sm text-snu-purple-300 hover:shadow-lg hover:text-white hover:bg-snu-purple-300"
-                  // todo screen equipe
-                  onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/equipe`)}>
-                  Voir l&apos;équipe
-                </button>
-              </div>
+              <button
+                className="px-4 py-2 rounded-md bg-snu-purple-300 text-sm text-white hover:shadow-lg"
+                onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
+                Voir les volontaires
+              </button>
             </div>
-          ) : null
-        ) : (
-          <>
-            <Nav tab={focusedTab} center={center} user={user} cohorts={availableCohorts} onChangeTab={setFocusedTab} focusedSession={focusedSession} />
-            <Switch>
-              {/* liste-attente reliquat ? */}
-              <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
-              {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
-                <Route
-                  path="/centre/:id/volontaires"
-                  component={() => <Youngs center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} focusedSession={focusedSession} />}
-                />
-              ) : null}
-              <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} focusedCohort={focusedCohort} />} />
-              <Route
-                path="/centre/:id"
-                component={() => (
-                  <>
-                    <Team center={center} focusedSession={focusedSession} deleteTeamate={deleteTeamate} addTeamate={addTeamate} />
-                  </>
-                )}
-              />
-            </Switch>
-          </>
-        )}
+
+            {/* // Taux doccupation */}
+            <OccupationCard occupationPercentage={occupationPercentage} placesTotal={focusedSession.placesTotal} placesLeft={focusedSession.placesLeft} />
+
+            {/* // équipe */}
+            <div className="flex flex-col justify-between items-start bg-white rounded-lg shadow-sm p-4 max-w-xl">
+              <div>
+                <div className="flex justify-between mb-1">
+                  <div className="text-lg font-medium text-gray-900">L&apos;équipe</div>
+                  <div className="flex flex-row -space-x-2">
+                    {(focusedSession?.team || []).map((member, index) => {
+                      const getInitials = (word) =>
+                        (word || "")
+                          .match(/\b(\w)/g)
+                          .join("")
+                          .substring(0, 2)
+                          .toUpperCase();
+                      if (index < 6)
+                        return (
+                          <div key={index} className={`h-8 w-8 flex justify-center items-center rounded-full bg-gray-100 text-indigo-600 text-xs border-2 border-white`}>
+                            {getInitials(`${member.firstName} ${member.lastName}`)}
+                          </div>
+                        );
+                    })}
+                  </div>
+                </div>
+                <div className="text-sm font-normal text-gray-400 mb-3">Les coordonnées du chef de centre, du cadre spécialisé, de compagnie...</div>
+              </div>
+              <button
+                className="px-4 py-2 rounded-md border-[1px] border-snu-purple-300 text-sm text-snu-purple-300 hover:shadow-lg hover:text-white hover:bg-snu-purple-300"
+                // todo screen equipe
+                onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/equipe`)}>
+                Voir l&apos;équipe
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </>
   );

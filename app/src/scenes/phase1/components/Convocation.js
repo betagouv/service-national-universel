@@ -120,10 +120,14 @@ export default function Convocation() {
           <b>du {COHESION_STAY_DATE_STRING[young.cohort]}</b>, a été retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
         </ConvocText>
         {isFromDOMTOM() ? (
-          <ConvocText>
-            Merci de vous présenter <b>impérativement</b> à la <b>date</b>, à l&apos;<b>heure</b> et au <b>lieu</b> qui vous auront été indiqués par votre <b>service régional</b>{" "}
-            (pour l&apos;aller et le retour).
-          </ConvocText>
+          <>
+            <ConvocText className="italic">
+              Les informations sur les modalités d'acheminement vers le centre et de retour Vous seront transmises par e-mail par les services académiques.
+            </ConvocText>
+            <ConvocText style={{ border: "solid 1px #666", padding: "1rem", margin: "1rem" }}>
+              Attention ! votre représentant légal doit rester jusqu'à votre prise en charge par l'équipe encadrant le séjour de cohésion.
+            </ConvocText>
+          </>
         ) : (
           <>
             <ConvocText>
@@ -167,18 +171,22 @@ export default function Convocation() {
             <li>- Une pièce d&apos;identité</li>
             <li>- La fiche sanitaire complétée sous pli</li>
             <li>- 2 masques jetables à usage médical (pour le transport en commun),</li>
-            <li>- une collation plus ou moins conséquente en fonction de la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>
+            {!isFromDOMTOM() ? (
+              <li>- une collation plus ou moins conséquente en fonction de la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>
+            ) : null}
           </ul>
         </ConvocText>
         <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
-        <ConvocText>
-          Le <b>retour de votre séjour </b>est prévu le {getReturnMeetingDate().split(",")[1]} à{" "}
-          {getReturnMeetingDate()
-            .split(/[,\s]+/)
-            .slice(0, 3)
-            .join(" ")}
-          , au même endroit que le jour du départ en centre.
-        </ConvocText>
+        {!isFromDOMTOM() ? (
+          <ConvocText>
+            Le <b>retour de votre séjour </b>est prévu le {getReturnMeetingDate().split(",")[1]} à{" "}
+            {getReturnMeetingDate()
+              .split(/[,\s]+/)
+              .slice(0, 3)
+              .join(" ")}
+            , au même endroit que le jour du départ en centre.
+          </ConvocText>
+        ) : null}
         <ConvocText>
           <b>
             Votre représentant légal veillera à bien respecter ces modalités de retour (horaire, lieu de prise en charge). Vous ne pourrez repartir seul, sauf si vous présentez une

@@ -2,18 +2,74 @@ import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
 import { Formik, Field } from "formik";
 import { useParams } from "react-router";
 
-import { colors, CENTER_ROLES } from "../../../utils";
+import { CENTER_ROLES, translate } from "../../../utils";
 import { Box } from "../../../components/box";
 import api from "../../../services/api";
-import BinSVG from "../../../assets/bin.svg";
+import Trash from "../../../assets/icons/Trash";
 
-export default function Team({ focusedSession: focusedSessionfromProps, deleteTeamate, addTeamate }) {
+export default function Team({ focusedSession: focusedSessionfromProps }) {
   const { sessionId } = useParams();
   const [focusedSession, setFocusedSession] = useState(focusedSessionfromProps);
+
+  const addTeamate = async (teamate) => {
+    let obj = {};
+
+    if (teamate.role === CENTER_ROLES.chef) obj = await setChefCenter(teamate);
+    else obj = await setTeamate(teamate);
+
+    if (!Object.keys(obj).length) return;
+
+    try {
+      const { ok, data } = await api.put(`/session-phase1/${focusedSession._id}`, obj);
+      if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du membre", translate(data.code));
+      setFocusedSession(data);
+      toastr.success("Succès", "Le membre a été ajouté à l'équipe");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !", translate(e.code));
+    }
+  };
+
+  const setChefCenter = async (teamate) => {
+    try {
+      let { data: referent } = await api.get(`/referent?email=${encodeURIComponent(teamate.email)}`);
+
+      if (!referent) {
+        // todo : create chef de centre
+        toastr.error("Erreur !", "Aucun utilisateur trouvé avec cette adresse email");
+        return {};
+      }
+
+      return { headCenterId: referent._id };
+    } catch (e) {
+      toastr.error("Erreur !", translate(e));
+    }
+  };
+
+  const setTeamate = async (teamate) => {
+    const obj = { team: focusedSession.team };
+    obj.team.push(teamate);
+    return obj;
+  };
+
+  const deleteTeamate = async (user) => {
+    const index = focusedSession.team.findIndex((e) => JSON.stringify(e) === JSON.stringify(user));
+    focusedSession.team.splice(index, 1);
+
+    try {
+      const r = await api.put(`/session-phase1/${focusedSession._id}`, { team: focusedSession.team });
+      const { ok, data } = r;
+      if (!ok) toastr.error("Oups, une erreur est survenue lors de la suppression du membre", translate(data.code));
+      setFocusedSession(data);
+      toastr.success("Succès", "Le membre a été supprimé de l'équipe");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !", translate(e.code));
+    }
+  };
 
   useEffect(() => {
     if (!sessionId) return;
@@ -50,12 +106,12 @@ const ChefCenterBlock = ({ headCenterId }) => {
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
       setChefCenter(data);
     })();
-  }, []);
+  }, [headCenterId]);
 
   return (
-    <div style={{ padding: "3rem 3rem 0 3rem" }}>
-      <h4 style={{ marginBottom: 0 }}>Chef de centre</h4>
-      <a onClick={() => history.push(`/user/${headCenterId}`)} style={{ cursor: "pointer", color: "#5245CC" }}>
+    <div className="p-12 pb-0">
+      <h4 className="mb-0">Chef de centre</h4>
+      <a onClick={() => history.push(`/user/${headCenterId}`)} className="cursor-pointer text-snu-purple-300 hover:text-snu-purple-300 hover:underline">
         {chefCenter?.firstName} {chefCenter?.lastName}&nbsp;›
       </a>
       <Wrapper gridTemplateColumns="120px auto" style={{ marginBlock: "1rem" }}>
@@ -72,9 +128,9 @@ const TeamBlock = ({ team, deleteTeamate }) => {
   if (!team) return <></>;
 
   return (
-    <div style={{ padding: "3rem" }}>
+    <div className="p-12">
       <h4>Équipe ({team.length || 0})</h4>
-      {team.length === 0 && <p style={{ fontStyle: "italic" }}>Aucun membre</p>}
+      {team.length === 0 && <p className="italic">Aucun membre</p>}
 
       {Object.values(CENTER_ROLES)
         .filter((e) => e !== CENTER_ROLES.chef)
@@ -89,29 +145,31 @@ const Group = ({ team, role, deleteTeamate }) => {
   const teamFiltered = team.filter((member) => member.role === role);
 
   return (
-    <GroupContainer>
+    <div className="mt-2 mb-4">
       <h6>
         {role}&nbsp;({teamFiltered.length})
       </h6>
       {teamFiltered.map((user, index) => (
-        <FlexBox key={index} style={{ justifyContent: "space-between", marginBlock: "0.25rem" }}>
-          <FlexBox>
-            <Badge>
-              <p style={{ margin: 0, fontSize: "1rem", color: "#372F78", fontWeight: "bold" }}>
-                {user.firstName?.[0]?.toUpperCase()}
-                {user.lastName?.[0]?.toUpperCase()}
-              </p>
-            </Badge>
+        <div className="flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg" key={index}>
+          <div className="flex items-center">
+            <div key={index} className="h-8 w-8 flex justify-center items-center rounded-full bg-gray-100 text-indigo-600 text-xs border-2 border-white mr-2">
+              {user.firstName?.[0]?.toUpperCase()}
+              {user.lastName?.[0]?.toUpperCase()}
+            </div>
             <div>
-              <p style={{ fontSize: "1rem", fontWeight: "400", margin: 0 }}>
+              <p className="m-0">
                 {user.firstName} {user.lastName}
               </p>
             </div>
-          </FlexBox>
-          <ButtonIcon icon={BinSVG} onClick={() => deleteTeamate(user)} />
-        </FlexBox>
+          </div>
+          <div
+            className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105 cursor-pointer"
+            onClick={() => deleteTeamate(user)}>
+            <Trash width={16} height={16} />
+          </div>
+        </div>
       ))}
-    </GroupContainer>
+    </div>
   );
 };
 
@@ -119,11 +177,11 @@ const AddBlock = ({ addTeamate }) => {
   const listRoles = Object.values(CENTER_ROLES);
 
   return (
-    <div style={{ padding: "3rem" }}>
+    <div className="p-12">
       <h4>Ajouter un nouveau membre à l’équipe</h4>
-      <p style={{ color: "#9C9C9C" }}>Renseignez les membres de l’équipe d’encadrement du centre de séjour de cohésion.</p>
-      <h6 style={{ color: "#696974", textTransform: "uppercase" }}>
-        informations <span style={{ color: "#EF4036" }}>*</span>
+      <p className="text-gray-500">Renseignez les membres de l’équipe d’encadrement du centre de séjour de cohésion.</p>
+      <h6 className="text-gray-600 uppercase">
+        informations <span className="text-red-500">*</span>
       </h6>
       <Formik
         validateOnChange={false}
@@ -138,46 +196,39 @@ const AddBlock = ({ addTeamate }) => {
         onSubmit={(values) => addTeamate(values)}>
         {({ values, handleChange, handleSubmit, errors, isSubmitting }) => (
           <React.Fragment>
-            <Row>
-              <Col xs="12" md="6">
-                <CustomField placeholder="Prénom" validate={(v) => !v} name="firstName" value={values.firstName} onChange={handleChange} />
-              </Col>
-              <Col xs="12" md="6">
-                <CustomField placeholder="Nom" validate={(v) => !v} name="lastName" value={values.lastName} onChange={handleChange} />
-              </Col>
-            </Row>
-            <Row>
-              <Col xs="12">
-                <CustomField placeholder="Adresse e-mail" validate={(v) => !v} name="email" value={values.email} onChange={handleChange} />
-              </Col>
-            </Row>
-            <Row>
-              <Col xs="12">
-                <Field
-                  as="select"
-                  validate={(v) => !v}
-                  className="form-control"
-                  name="role"
-                  value={values.role}
-                  onChange={handleChange}
-                  style={{ width: "100%", height: "auto", padding: "1rem", marginTop: "1rem", border: "none", borderRadius: "7px", border: "solid 1px #ccc" }}>
-                  <option disabled value="" label="Rôle" />
-                  {listRoles.map((e) => (
-                    <option value={e} key={e} label={e} />
-                  ))}
-                </Field>
-              </Col>
-            </Row>
-            <Row>
-              <Col xs="12" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                <ButtonText type="submit" onClick={handleSubmit} disabled={isSubmitting}>
-                  Ajouter le membre
-                </ButtonText>
-              </Col>
-            </Row>
-            {!!Object.keys(errors).length && (
-              <p style={{ fontSize: 12, color: colors.red, textAlign: "center", marginTop: "10px", marginBottom: "0px" }}>Merci de remplir tous les champs</p>
-            )}
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <CustomField disabled={isSubmitting} placeholder="Prénom" validate={(v) => !v} name="firstName" value={values.firstName} onChange={handleChange} />
+              </div>
+              <div className="flex-1">
+                <CustomField disabled={isSubmitting} placeholder="Nom" validate={(v) => !v} name="lastName" value={values.lastName} onChange={handleChange} />
+              </div>
+            </div>
+            <CustomField disabled={isSubmitting} placeholder="Adresse e-mail" validate={(v) => !v} name="email" value={values.email} onChange={handleChange} />
+            <Field
+              disabled={isSubmitting}
+              as="select"
+              validate={(v) => !v}
+              className="form-control"
+              name="role"
+              value={values.role}
+              onChange={handleChange}
+              style={{ width: "100%", height: "auto", padding: "1rem", marginTop: "1rem", border: "none", borderRadius: "7px", border: "solid 1px #ccc" }}>
+              <option disabled value="" label="Rôle" />
+              {listRoles.map((e) => (
+                <option value={e} key={e} label={e} />
+              ))}
+            </Field>
+            <div className="flex justify-center items-center">
+              <button
+                className="mt-4 py-2 px-8 bg-white border-[1px] border-gray-400 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed "
+                type="submit"
+                onClick={handleSubmit}
+                disabled={isSubmitting}>
+                Ajouter le membre
+              </button>
+            </div>
+            {!!Object.keys(errors).length && <p className="text-red-500 text-center mt-2 text-xs">Merci de remplir tous les champs</p>}
           </React.Fragment>
         )}
       </Formik>
@@ -191,44 +242,6 @@ const Wrapper = styled.div`
   grid-gap: 10px;
 `;
 
-const Badge = styled.div`
-  border: solid 4px #ce2027;
-  border-radius: 100%;
-  width: 40px;
-  height: 40px;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 1rem;
-`;
-
-const GroupContainer = styled.div`
-  margin: 1rem 0 2rem 0;
-`;
-
-const FlexBox = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const ButtonIcon = styled.button`
-  color: #555 !important;
-  width: 40px;
-  height: 40px;
-  background: ${({ icon }) => icon && `url(${icon})`};
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: #fff;
-  :hover {
-    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
-  }
-  border: 1px solid #eee;
-  outline: 0;
-  border-radius: 7px;
-  cursor: pointer;
-`;
-
 const CustomField = styled(Field)`
   width: 100%;
   height: auto;
@@ -240,18 +253,5 @@ const CustomField = styled(Field)`
   ::placeholder {
     color: #cbcbcb;
     opacity: 1;
-  }
-`;
-
-const ButtonText = styled.button`
-  padding: 1rem 2rem;
-  background-color: white;
-  border: none;
-  border: solid 1px #ccc;
-  border-radius: 7px;
-  margin-top: 1rem;
-
-  :hover {
-    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
   }
 `;
