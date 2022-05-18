@@ -255,12 +255,13 @@ const updatePlacesBus = async (bus) => {
     // console.log(`idsMeetingPoints for bus ${bus.id}`, idsMeetingPoints);
     const youngs = await YoungModel.find({
       status: "VALIDATED",
-      statusPhase1: { $in: ["AFFECTED", "DONE"] },
       meetingPointId: {
         $in: idsMeetingPoints,
       },
     });
-    const placesTaken = youngs.length;
+    const placesTaken = youngs.filter(
+      (young) => (["AFFECTED", "DONE"].includes(young.statusPhase1) || ["AFFECTED", "DONE"].includes(young.statusPhase1Tmp)) && young.status === "VALIDATED",
+    ).length;
     const placesLeft = Math.max(0, bus.capacity - placesTaken);
     if (bus.placesLeft !== placesLeft) {
       console.log(`Bus ${bus.id}: total ${bus.capacity}, left from ${bus.placesLeft} to ${placesLeft}`);
