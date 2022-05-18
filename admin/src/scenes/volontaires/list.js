@@ -287,6 +287,7 @@ export default function VolontaireList() {
                         "Adresse point de rassemblement": meetingPoint?.departureAddress,
                         "Date aller": meetingPoint?.departureAtString,
                         "Date retour": meetingPoint?.returnAtString,
+                        "TMP statusPhase1Tmp": data.statusPhase1Tmp,
                       };
                     });
                   }}

@@ -32,7 +32,6 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Cohesion Center", () => {
-
   describe("POST /cohesion-center", () => {
     it("should return 200", async () => {
       const res = await request(getAppHelper()).post("/cohesion-center").send(getNewCohesionCenterFixture());
@@ -176,7 +175,7 @@ describe("Cohesion Center", () => {
       expect(res.status).toBe(200);
     });
   });
-  
+
   describe("GET /cohesion-center", () => {
     it("should return 200", async () => {
       const res = await request(getAppHelper()).get("/cohesion-center/").send();
@@ -273,7 +272,7 @@ describe("Cohesion Center", () => {
         .put("/cohesion-center/" + cohesionCenter._id)
         .send({
           name: "new name",
-          code: "new code",
+          code2022: "new code",
         });
 
       const updatedReferent = await getReferentByIdHelper(referent._id);
