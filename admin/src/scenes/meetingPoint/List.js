@@ -168,15 +168,16 @@ const Hit = ({ hit }) => {
 
   return (
     <tr className="hover:!bg-gray-100">
-      <td className={` py-3 pl-4 ml-2 rounded-l-lg`}>
+      <td className={`pl-4 ml-2 rounded-l-lg`}>
         <div className="flex gap-2 items-center text-sm">
           <BusSvg />
           {hit.busExcelId}
         </div>
       </td>
-      <td className="">
+      <td className="py-2">
         <div className="text-[#242526] text-[15px]">{hit.departureAddress}</div>
         <div className="font-normal text-xs text-[#738297]">{hit.departureDepartment}</div>
+        <div className="font-normal text-xs text-[#738297] mt-2">{hit.departureAtString}</div>
       </td>
       <td className="">
         <a className="flex gap-2 items-center text-sm" href={`/centre/${hit.centerId}`} target="_blank" rel="noreferrer">
