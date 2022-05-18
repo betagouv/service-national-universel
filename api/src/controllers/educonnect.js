@@ -72,7 +72,7 @@ router.post("/callback", passport.authenticate("educonnect"), async (req, res) =
     const query = {
       prenom: value.givenName,
       nom: value.sn,
-      dateNaissance: value.FrEduCtDateNaissance,
+      dateNaissance: "2005-11-05",
       INEHash: value.FrEduCtEleveINEHash,
       codeUAI: value.FrEduCtEleveUAI,
       niveau: value.FrEduCtEleveNiveau,
