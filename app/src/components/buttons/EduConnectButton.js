@@ -12,7 +12,7 @@ export default function EduConnectButton() {
   return (
     <button
       className="flex justify-center items-center transition-all w-[315px] h-12 gap-2 px-4 py-2 rounded-xl border-2 border-blue-600 shadow-md hover:border-4"
-      onClick={() => setRedirection(`${apiURL}/young/educonnect/login`)}>
+      onClick={() => setRedirection(`${apiURL}/educonnect/login`)}>
       <IconFrance />
       <span className=" text-sm text-left text-gray-800 ">
         S’identifier avec <b>Éduconnect</b>
