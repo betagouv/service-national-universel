@@ -122,7 +122,7 @@ export default function StepProfil() {
                 rulesYoung,
                 acceptCGU,
               } = values;
-              const route = isYoungFromEduConnect ? "/young/educonnect/signup" : "/young/signup";
+              const route = isYoungFromEduConnect ? "/educonnect/signup" : "/young/signup";
               const { user, token, code, ok } = await api.post(route, {
                 email,
                 firstName,

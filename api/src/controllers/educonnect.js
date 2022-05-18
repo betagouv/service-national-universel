@@ -5,14 +5,14 @@ const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 
-const { capture } = require("../../sentry");
-const { ERRORS } = require("../../utils");
-const config = require("../../config");
-const Young = require("../../models/young");
-const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
+const { capture } = require("../sentry");
+const { ERRORS } = require("../utils");
+const config = require("../config");
+const Young = require("../models/young");
+const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 
-const YoungObject = require("../../models/young");
-const AuthObject = require("../../auth");
+const YoungObject = require("../models/young");
+const AuthObject = require("../auth");
 const YoungAuth = new AuthObject(YoungObject);
 
 router.get("/login", passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }));
@@ -83,7 +83,6 @@ router.post("/callback", passport.authenticate("educonnect"), async (req, res) =
     return res.redirect(url_signup);
   } catch (error) {
     capture(error);
-    console.log(error);
     const query = {
       errorCode: ERRORS.EDUCONNECT_LOGIN_ERROR,
     };
