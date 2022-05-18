@@ -1,5 +1,6 @@
 import queryString from "query-string";
 import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import Loader from "../../components/Loader";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import api from "../../services/api";
@@ -12,9 +13,12 @@ export default function SessionShareIndex() {
   const [code, setCode] = useState(null);
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const history = useHistory();
 
   const params = queryString.parse(location.search);
   const { token } = params;
+
+  if (!token) history.push("/");
 
   useEffect(() => {
     (async () => {

@@ -25,7 +25,7 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel }) {
   const handleEmail = (e = null) => {
     if (e) e.preventDefault();
     if (validator.isEmail(value)) {
-      setEmails((prev)=> [...prev, value]);
+      setEmails((prev) => [...prev, value]);
       setValue("");
       setError(false);
     } else {
@@ -47,8 +47,8 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel }) {
               <div className="flex flex-col justify-center items-center mt-4">
                 <div className="border-[1px] border-gray-300 rounded-lg w-full  p-2">
                   <div className="text-xs leading-4 font-normal text-gray-500 pb-2">Destinataire(s)</div>
-                  {emails.map((email) => (
-                    <div className="flex flex-row items-center">
+                  {emails.map((email, index) => (
+                    <div key={index} className="flex flex-row items-center">
                       <IoMdClose onClick={() => setEmails((prev) => prev.filter((e) => e !== email))} className="text-gray-400 font-bold hover:scale-125 cursor-pointer" />
                       <div className="text-sm leading-5 font-normal text-gray-800 pl-2">{email}</div>
                     </div>
@@ -82,7 +82,7 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel }) {
             Annuler
           </button>
           <button
-            className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 cursor-pointer disabled:opacity-50"
             disabled={isLoading || !emails.length}
             onClick={handleSubmit}>
             Confirmer

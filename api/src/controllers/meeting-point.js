@@ -70,23 +70,6 @@ router.get("/", passport.authenticate("young", { session: false, failWithError: 
   }
 });
 
-router.get("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const center = await CohesionCenterModel.findById(req.user.cohesionCenterId);
-    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    let data = [];
-    if (req.user.department) data = await MeetingPointModel.find({ departureDepartment: req.user.department, centerCode: center.code });
-    for (let i = 0; i < data.length; i++) {
-      const bus = await BusModel.findById(data[i].busId);
-      data[i] = { ...data[i]._doc, bus };
-    }
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   const { error, value } = Joi.object({
     id: Joi.string().required(),
