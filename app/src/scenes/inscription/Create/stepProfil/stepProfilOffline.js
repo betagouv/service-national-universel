@@ -264,8 +264,7 @@ export default function StepProfil() {
                       hidden
                       validate={(v) => {
                         if (!v) return requiredMessage;
-                        const yearBegin = isYoungFromEduConnect ? 2000 : 2004;
-                        const from = new Date(yearBegin, 1, 26, 0, 0, 0); // -1 because months are from 0 to 11
+                        const from = new Date(2004, 1, 26, 0, 0, 0); // -1 because months are from 0 to 11
                         const to = new Date(2007, 6, 2, 0, 0, 0);
                         const [y, m, d] = v.substring(0, 10).split("-");
                         const check = new Date(parseInt(y), parseInt(m - 1), parseInt(d), 0, 0, 0);
