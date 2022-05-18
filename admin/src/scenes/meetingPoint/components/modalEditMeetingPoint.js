@@ -10,23 +10,33 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
   const [error, setError] = React.useState(null);
 
   const splitDate = (dateString) => {
-    let temp = dateString.split(",");
-    const [day, date, month] = temp[0].split(" ");
-    const [hour, minute] = temp[1].split(" ")[1].split(":");
-    return {
-      day,
-      date,
-      month,
-      hour,
-      minute,
-    };
+    if (dateString) {
+      let temp = dateString.split(",");
+      const [day, date, month] = temp[0].split(" ");
+      const [hour, minute] = temp[1].split(" ")[1].split(":");
+      return {
+        day,
+        date,
+        month,
+        hour,
+        minute,
+      };
+    } else {
+      return {
+        day: "lundi",
+        date: "1",
+        month: "janvier",
+        hour: "00",
+        minute: "00",
+      };
+    }
   };
 
   useEffect(() => {
     setData({
       departureAddress: values?.departureAddress || "",
-      departureAt: values?.departureAtString ? splitDate(values?.departureAtString) : {},
-      returnAt: values?.returnAtString ? splitDate(values?.returnAtString) : {},
+      departureAt: splitDate(values?.departureAtString),
+      returnAt: splitDate(values?.returnAtString),
       capacity: values?.capacity || 0,
       placesLeft: values?.placesLeft || 0,
     });
