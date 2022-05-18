@@ -36,6 +36,10 @@ const youngInit = {
   rulesYoung: "false",
   acceptCGU: "false",
   INEHash: "",
+  niveau: "",
+  urlLogOut: "",
+  affiliation: "",
+  codeUAI: "",
 };
 
 export default function StepProfil() {
@@ -50,21 +54,37 @@ export default function StepProfil() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const prenom = urlParams.get("prenom");
-    const nom = urlParams.get("nom");
-    const dateNaissance = urlParams.get("dateNaissance");
-    const INEHash = urlParams.get("INEHash");
 
-    if (!young)
-      dispatch(
-        setYoung({
-          ...youngInit,
-          firstName: prenom ?? youngInit.firstName,
-          lastName: nom ?? youngInit.lastName,
-          birthdateAt: dateNaissance ? dateNaissance + " T00:00:00.000Z" : youngInit.birthdateAt,
-          INEHash: INEHash ?? youngInit.INEHash,
-        }),
-      );
+    const errorCode = urlParams.get("errorCode");
+    if (errorCode) {
+      if (errorCode === "EDUCONNECT_LOGIN_ERROR") toastr.error("Erreur pendant la connection a ÉduConnect");
+      if (errorCode === "EDUCONNECT_RESP_AUTH") toastr.error("Échec de l'identification ÉduConnect. Vous devez vous connecter avec un compte élève");
+      dispatch(setYoung(youngInit));
+    } else {
+      const prenom = urlParams.get("prenom");
+      const nom = urlParams.get("nom");
+      const dateNaissance = urlParams.get("dateNaissance");
+      const INEHash = urlParams.get("INEHash");
+      const niveau = urlParams.get("niveau");
+      const urlLogOut = urlParams.get("urlLogOut");
+      const affiliation = urlParams.get("affiliation");
+      const codeUAI = urlParams.get("codeUAI");
+
+      if (!young)
+        dispatch(
+          setYoung({
+            ...youngInit,
+            firstName: prenom ?? youngInit.firstName,
+            lastName: nom ?? youngInit.lastName,
+            birthdateAt: dateNaissance ? dateNaissance + " T00:00:00.000Z" : youngInit.birthdateAt,
+            INEHash: INEHash ?? youngInit.INEHash,
+            codeUAI: codeUAI ?? youngInit.codeUAI,
+            niveau: niveau ?? youngInit.niveau,
+            urlLogOut: urlLogOut ?? youngInit.urlLogOut,
+            affiliation: affiliation ?? youngInit.affiliation,
+          }),
+        );
+    }
   }, []);
 
   if (!young) return null;
@@ -84,7 +104,24 @@ export default function StepProfil() {
           onSubmit={async (values) => {
             setLoading(true);
             try {
-              const { INEHash, email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, rulesYoung, acceptCGU } = values;
+              const {
+                INEHash,
+                niveau,
+                urlLogOut,
+                affiliation,
+                codeUAI,
+                email,
+                firstName,
+                lastName,
+                password,
+                birthdateAt,
+                birthCountry,
+                birthCity,
+                birthCityZip,
+                frenchNationality,
+                rulesYoung,
+                acceptCGU,
+              } = values;
               const { user, token, code, ok } = await api.post(`/young/signup`, {
                 email,
                 firstName,
@@ -98,6 +135,10 @@ export default function StepProfil() {
                 rulesYoung,
                 acceptCGU,
                 INEHash,
+                codeUAI,
+                niveau,
+                urlLogOut,
+                affiliation,
               });
               if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
               if (token) api.setToken(token);

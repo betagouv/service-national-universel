@@ -69,7 +69,11 @@ router.post("/signup", async (req, res) => {
       rulesYoung: Joi.string().trim().required().valid("true"),
       acceptCGU: Joi.string().trim().required().valid("true"),
       frenchNationality: Joi.string().trim().required().valid("true"),
-      INEHash: Joi.string().length(32).allow(""),
+      INEHash: Joi.string().trim().length(32).allow(""),
+      codeUAI: Joi.string().trim().allow(""),
+      niveau: Joi.string().trim().allow(""),
+      urlLogOut: Joi.string().trim().allow(""),
+      affiliation: Joi.string().trim().allow(""),
     }).validate(req.body);
 
     if (error) {
@@ -78,7 +82,24 @@ router.post("/signup", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung, INEHash } = value;
+    const {
+      email,
+      firstName,
+      lastName,
+      password,
+      birthdateAt,
+      birthCountry,
+      birthCity,
+      birthCityZip,
+      frenchNationality,
+      acceptCGU,
+      rulesYoung,
+      INEHash,
+      codeUAI,
+      niveau,
+      urlLogOut,
+      affiliation,
+    } = value;
     if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
     let countDocuments = await YoungObject.countDocuments({ lastName, firstName, birthdateAt });
@@ -100,6 +121,10 @@ router.post("/signup", async (req, res) => {
       acceptCGU,
       rulesYoung,
       INEHash,
+      codeUAI,
+      niveau,
+      urlLogOut,
+      affiliation,
     });
     const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());

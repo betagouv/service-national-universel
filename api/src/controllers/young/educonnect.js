@@ -63,8 +63,8 @@ router.get("/test-output", async (req, res) => {
       "urn:oid:1.3.6.1.4.1.20326.10.999.1.7": "eleve2d",
       "urn:oid:1.3.6.1.4.1.20326.10.999.1.67": "2005-11-13",
       "urn:oid:2.5.4.4": "LECOMTE02545",
-      "urn:oid:1.3.6.1.4.1.20326.10.999.1.64": "0278dd38a2de195c7f0598fca359033e",
-      "urn:oid:2.5.4.42": "Tiago",
+      "urn:oid:1.3.6.1.4.1.20326.10.999.1.64": "0278dd38a2de195c7f0598fca359033a",
+      "urn:oid:2.5.4.42": "Tiagorio",
       "urn:oid:1.3.6.1.4.1.20326.10.999.1.5":
         "https://pr4.educonnect.phm.education.gouv.fr/Shibboleth.sso/Logout?return=https://moncompte-pr4.educonnect.phm.education.gouv.fr/Shibboleth.sso/Logout?return=https://pr4.educonnect.phm.education.gouv.fr/idp/profile/Logout",
       "urn:oid:1.3.6.1.4.1.20326.10.999.1.6": "2022-05-11 11:42:25.475",
@@ -85,22 +85,36 @@ router.get("/test-output", async (req, res) => {
       FrEduUrlRetour: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.5"],
     };
 
-    // const { error, value } = Joi.object({
-    //   invitationToken: Joi.string().required(),
-    //   email: Joi.string().lowercase().trim().email().required(),
-    //   password: Joi.string().required(),
-    // })
-    //   .unknown()
-    //   .validate(educonnect_data, { stripUnknown: true });
-    // if (error) return res.redirect(`${config.APP_URL}`);
+    const { error, value } = Joi.object({
+      FrEduCtPersonAffiliation: Joi.string().trim().valid("eleve1d", "eleve2d", "resp1d", "resp2d").required(),
+      sn: Joi.string().trim().required(),
+      givenName: Joi.string().trim().required(),
+      FrEduCtEleveINEHash: Joi.string().trim().length(32).allow().required(),
+      FrEduCtEleveUAI: Joi.string().trim().required(),
+      FrEduCtDateNaissance: Joi.string().trim().required(),
+      FrEduCtEleveNiveau: Joi.string().trim().required(),
+      FrEduUrlRetour: Joi.string().trim().required(),
+    })
+      .unknown()
+      .validate(educonnect_data, { stripUnknown: true });
 
-    if (educonnect_data.FrEduCtPersonAffiliation === "resp2d") {
-      // Afficher erreur si responsable est un adulte
-      return res.redirect(`${config.APP_URL}`);
+    if (error) {
+      const query = {
+        errorCode: ERRORS.EDUCONNECT_LOGIN_ERROR,
+      };
+      const url_error = `${config.APP_URL}/inscription/profil?${queryString.stringify(query)}`;
+      return res.redirect(url_error);
     }
 
-    // If find a user with the same INEHash, get _id and redirect to connect
-    const user = await Young.findOne({ INEHash: educonnect_data.FrEduCtEleveINEHash });
+    if (value.FrEduCtPersonAffiliation.includes("resp")) {
+      const query = {
+        errorCode: ERRORS.EDUCONNECT_RESP_AUTH,
+      };
+      const url_error = `${config.APP_URL}/inscription/profil?${queryString.stringify(query)}`;
+      return res.redirect(url_error);
+    }
+
+    const user = await Young.findOne({ INEHash: value.FrEduCtEleveINEHash });
     if (user) {
       user.set({ lastLoginAt: Date.now() });
       await user.save();
@@ -112,10 +126,14 @@ router.get("/test-output", async (req, res) => {
     }
 
     const query = {
-      prenom: educonnect_data.givenName,
-      nom: educonnect_data.sn,
-      dateNaissance: educonnect_data.FrEduCtDateNaissance,
-      INEHash: educonnect_data.FrEduCtEleveINEHash,
+      prenom: value.givenName,
+      nom: value.sn,
+      dateNaissance: value.FrEduCtDateNaissance,
+      INEHash: value.FrEduCtEleveINEHash,
+      codeUAI: value.FrEduCtEleveUAI,
+      niveau: value.FrEduCtEleveNiveau,
+      urlLogOut: value.FrEduUrlRetour,
+      affiliation: value.FrEduCtPersonAffiliation,
     };
     const url_signup = `${config.APP_URL}/inscription/profil?${queryString.stringify(query)}`;
     return res.redirect(url_signup);
