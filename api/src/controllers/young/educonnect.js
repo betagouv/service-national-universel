@@ -2,12 +2,13 @@ const express = require("express");
 const queryString = require("querystring");
 const router = express.Router();
 const passport = require("passport");
+const jwt = require("jsonwebtoken");
+const Joi = require("joi");
+
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const config = require("../../config");
 const Young = require("../../models/young");
-
-const jwt = require("jsonwebtoken");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 
 router.get("/login", passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }));
@@ -84,8 +85,14 @@ router.get("/test-output", async (req, res) => {
       FrEduUrlRetour: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.5"],
     };
 
-    // const { error, value } = Joi.object({ callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
-    // if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    // const { error, value } = Joi.object({
+    //   invitationToken: Joi.string().required(),
+    //   email: Joi.string().lowercase().trim().email().required(),
+    //   password: Joi.string().required(),
+    // })
+    //   .unknown()
+    //   .validate(educonnect_data, { stripUnknown: true });
+    // if (error) return res.redirect(`${config.APP_URL}`);
 
     if (educonnect_data.FrEduCtPersonAffiliation === "resp2d") {
       // Afficher erreur si responsable est un adulte
