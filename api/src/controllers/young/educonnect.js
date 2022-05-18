@@ -11,6 +11,10 @@ const config = require("../../config");
 const Young = require("../../models/young");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 
+const YoungObject = require("../../models/young");
+const AuthObject = require("../../auth");
+const YoungAuth = new AuthObject(YoungObject);
+
 router.get("/login", passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }));
 
 // Assert endpoint for when login completes
@@ -61,9 +65,9 @@ router.get("/test-output", async (req, res) => {
   try {
     const attributes = {
       "urn:oid:1.3.6.1.4.1.20326.10.999.1.7": "eleve2d",
-      "urn:oid:1.3.6.1.4.1.20326.10.999.1.67": "2005-11-13",
+      "urn:oid:1.3.6.1.4.1.20326.10.999.1.67": "2005-11-10",
       "urn:oid:2.5.4.4": "LECOMTE02545",
-      "urn:oid:1.3.6.1.4.1.20326.10.999.1.64": "0278dd38a2de195c7f0598fca359033a",
+      "urn:oid:1.3.6.1.4.1.20326.10.999.1.64": "0278dd38a2de195c7f0598fca359033c",
       "urn:oid:2.5.4.42": "Tiagorio",
       "urn:oid:1.3.6.1.4.1.20326.10.999.1.5":
         "https://pr4.educonnect.phm.education.gouv.fr/Shibboleth.sso/Logout?return=https://moncompte-pr4.educonnect.phm.education.gouv.fr/Shibboleth.sso/Logout?return=https://pr4.educonnect.phm.education.gouv.fr/idp/profile/Logout",
@@ -142,5 +146,7 @@ router.get("/test-output", async (req, res) => {
     res.status(500).send({ ok: false });
   }
 });
+
+router.post("/signup", passport.authenticate(["educonnect"]), (req, res) => YoungAuth.signUp(req, res));
 
 module.exports = router;

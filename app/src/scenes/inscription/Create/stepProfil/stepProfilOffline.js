@@ -122,7 +122,8 @@ export default function StepProfil() {
                 rulesYoung,
                 acceptCGU,
               } = values;
-              const { user, token, code, ok } = await api.post(`/young/signup`, {
+              const route = isYoungFromEduConnect ? "/young/educonnect/signup" : "/young/signup";
+              const { user, token, code, ok } = await api.post(route, {
                 email,
                 firstName,
                 lastName,
