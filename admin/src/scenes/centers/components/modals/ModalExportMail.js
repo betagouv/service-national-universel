@@ -25,7 +25,7 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel }) {
   const handleEmail = (e = null) => {
     if (e) e.preventDefault();
     if (validator.isEmail(value)) {
-      setEmails([...emails, value]);
+      setEmails((prev)=> [...prev, value]);
       setValue("");
       setError(false);
     } else {
