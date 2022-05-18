@@ -10,8 +10,6 @@ import PencilAlt from "../../../assets/icons/PencilAlt";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
 
 export default function CenterYoungIndex() {
-  if (environment === "production") return null;
-
   const history = useHistory();
   const { id, sessionId, currentTab } = useParams();
 
