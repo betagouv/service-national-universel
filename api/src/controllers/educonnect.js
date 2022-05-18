@@ -91,7 +91,7 @@ router.post("/callback", passport.authenticate("educonnect"), async (req, res) =
   }
 });
 
-router.post("/signup", passport.authenticate(["educonnect"]), (req, res) => YoungAuth.signUp(req, res));
+router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 
 router.get("/test-input", async (req, res) => {
   return res.redirect("./test-output");
