@@ -146,21 +146,21 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
 const SelectDate = ({ date, handleChange, year }) => {
   return (
     <div className="flex flex-row">
-      <select className="bg-inherit" name="day" value={date?.day} onChange={handleChange}>
+      <select className="bg-inherit cursor-pointer" name="day" value={date?.day} onChange={handleChange}>
         {days.map((day, index) => (
           <option key={index} value={day}>
             {day}
           </option>
         ))}
       </select>
-      <select className="bg-inherit pl-1" name="date" value={date?.date} onChange={handleChange}>
+      <select className="bg-inherit pl-1 cursor-pointer" name="date" value={date?.date} onChange={handleChange}>
         {Array.from({ length: 31 }, (_, i) => i + 1).map((date, index) => (
           <option key={index} value={date}>
             {date}
           </option>
         ))}
       </select>
-      <select className="bg-inherit pl-1" name="month" value={date?.month} onChange={handleChange}>
+      <select className="bg-inherit pl-1 cursor-pointer" name="month" value={date?.month} onChange={handleChange}>
         {months.map((month, index) => (
           <option key={index} value={month}>
             {month}
@@ -168,7 +168,7 @@ const SelectDate = ({ date, handleChange, year }) => {
         ))}
       </select>
       <div className="px-2 text-center">{year} à : </div>
-      <select className="bg-inherit pl-1" name="hour" value={date?.hour} onChange={handleChange}>
+      <select className="bg-inherit pl-1 cursor-pointer" name="hour" value={date?.hour} onChange={handleChange}>
         {Array.from(Array(24).keys()).map((hour, index) => (
           <option key={index} value={hour.toString().length === 1 ? `0${hour}` : `${hour}`}>
             {hour.toString().length === 1 ? `0${hour}` : `${hour}`}
@@ -176,7 +176,7 @@ const SelectDate = ({ date, handleChange, year }) => {
         ))}
       </select>
       <div className="pl-1 text-center">h</div>
-      <select className="bg-inherit pl-1" name="minute" value={date?.minute} onChange={handleChange}>
+      <select className="bg-inherit pl-1 cursor-pointer" name="minute" value={date?.minute} onChange={handleChange}>
         {Array.from(Array(60).keys()).map((min, index) => (
           <option key={index} value={min.toString().length === 1 ? `0${min}` : `${min}`}>
             {min.toString().length === 1 ? `0${min}` : `${min}`}

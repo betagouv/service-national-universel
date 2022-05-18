@@ -6,7 +6,7 @@ import BusSvg from "../../assets/icons/Bus";
 import Plus from "../../assets/icons/Plus";
 import api from "../../services/api";
 import { getDepartmentNumber } from "../../utils";
-import ModalEditMeetingPoint from "./components/ModalEditMeetingPoint";
+import ModalEditMeetingPoint from "./components/modalEditMeetingPoint";
 
 export default function Edit(props) {
   const [meetingPoint, setMeetingPoint] = useState();
@@ -110,8 +110,8 @@ export default function Edit(props) {
           <div>
             <Donnee title={"Adresse"} value={meetingPoint.departureAddress} number={""} />
             <Donnee title={"Département"} value={meetingPoint.departureDepartment} number={`(${getDepartmentNumber(center.department)})`} />
-            <Donnee title={"Date aller"} value={meetingPoint.departureAtString} />
-            <Donnee title={"Date retour"} value={meetingPoint.returnAtString} />
+            <Donnee title={"Date et heure de rendez-vous aller"} value={meetingPoint.departureAtString} />
+            <Donnee title={"Date et heure de rendez-vous retour"} value={meetingPoint.returnAtString} />
             <Donnee title={"Place total"} value={bus.capacity} />
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function Edit(props) {
           </div>
           <div>
             <Donnee title={"Nom du centre"} value={center.name} number={""} />
-            {center.code2022 ? <Donnee title={"Code 2022 (modérateur)"} value={center.code2022} number={""} /> : null}
+            <Donnee title={"Code 2022"} value={center.code2022 || <span className="italic text-gray-500">Non renseigné</span>} number={""} />
             <Donnee title={"Région"} value={center.region} number={""} />
             <Donnee title={"Département"} value={center.department} number={`(${getDepartmentNumber(center.department)})`} />
             <Donnee title={"Ville"} value={center.city} number={`(${center.zip})`} />

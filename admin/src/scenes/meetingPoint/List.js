@@ -188,7 +188,7 @@ const Hit = ({ hit }) => {
         </a>
       </td>
       {bus && mounted ? (
-        <td className={` rounded-r-lg`}>
+        <td>
           <div>
             {bus.placesLeft === 0 ? (
               <Badge text="Complet" />
@@ -201,9 +201,9 @@ const Hit = ({ hit }) => {
           </div>
         </td>
       ) : (
-        <td className={`rounded-r-lg`}>chargement...</td>
+        <td>chargement...</td>
       )}
-      <td>
+      <td className={`rounded-r-lg`}>
         <div className="flex justify-center items-center">
           <Link to={`/point-de-rassemblement/${hit._id}/edit`}>
             <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
