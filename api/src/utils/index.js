@@ -218,7 +218,7 @@ const updateCenterDependencies = async (center) => {
   });
   const meetingPoints = await MeetingPointModel.find({ centerId: center._id });
   meetingPoints.forEach(async (meetingPoint) => {
-    meetingPoint.set({ centerCode: center.code });
+    meetingPoint.set({ centerCode: center.code2022 });
     await meetingPoint.save();
   });
 };
