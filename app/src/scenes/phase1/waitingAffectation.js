@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { youngCanChangeSession } from "snu-lib";
-import styled from "styled-components";
 import clock from "../../assets/clock.svg";
 import edit from "../../assets/editIcon.svg";
 import hero from "../../assets/hero.png";
@@ -36,7 +35,7 @@ export default function WaitingAffectation({ young }) {
           <img src={hero} />
         </section>
         <Files young={young} />
-        <Divider />
+        <hr className="max-w-[95%] my-8 mx-auto" />
         <section className="flex items-center">
           <img src={clock} />
           <article className="ml-4">
@@ -57,8 +56,3 @@ export default function WaitingAffectation({ young }) {
     </>
   );
 }
-
-const Divider = styled.hr`
-  max-width: 95%;
-  margin: 2rem auto;
-`;
