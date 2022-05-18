@@ -41,7 +41,7 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
       capacity: values?.capacity || 0,
       placesLeft: values?.placesLeft || 0,
     });
-    if (["Juillet 2022", "Juin 2022", "Février 2022", "à venir"].includes(values?.cohort)) setYear(values?.cohort);
+    if (["Juillet 2022", "Juin 2022", "Février 2022", "à venir"].includes(values?.cohort)) setYear("2022");
     else setYear(values?.cohort);
   }, [values]);
 
