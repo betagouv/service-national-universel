@@ -8,6 +8,7 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
   const [isLoading, setIsLoading] = React.useState(false);
   const [data, setData] = React.useState({});
   const [error, setError] = React.useState(null);
+  const [year, setYear] = React.useState("2022");
 
   const splitDate = (dateString) => {
     if (dateString) {
@@ -40,6 +41,8 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
       capacity: values?.capacity || 0,
       placesLeft: values?.placesLeft || 0,
     });
+    if (["Juillet 2022", "Juin 2022", "Février 2022", "à venir"].includes(values?.cohort)) setYear(values?.cohort);
+    else setYear(values?.cohort);
   }, [values]);
 
   const handleSubmit = async (e) => {
@@ -51,12 +54,8 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
       setIsLoading(false);
       return;
     }
-    data.departureAtString = `${data.departureAt.day} ${data.departureAt.date} ${data.departureAt.month} ${values.cohort ? values.cohort : 2022}, ${data.departureAt.hour}:${
-      data.departureAt.minute
-    }`;
-    data.returnAtString = `${data.returnAt.day} ${data.returnAt.date} ${data.returnAt.month} ${values.cohort ? values.cohort : 2022}, ${data.returnAt.hour}:${
-      data.returnAt.minute
-    }`;
+    data.departureAtString = `${data.departureAt.day} ${data.departureAt.date} ${data.departureAt.month} ${year}, ${data.departureAt.hour}:${data.departureAt.minute}`;
+    data.returnAtString = `${data.returnAt.day} ${data.returnAt.date} ${data.returnAt.month} ${year}, ${data.returnAt.hour}:${data.returnAt.minute}`;
     setError(null);
     await onSubmit(data);
     setIsLoading(false);
@@ -100,7 +99,7 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
               </label>
               {SelectDate({
                 date: data.departureAt,
-                year: values?.cohort || "2022",
+                year,
                 handleChange: (e) => setData({ ...data, departureAt: { ...data.departureAt, [e.target.name]: e.target.value } }),
               })}
             </div>
@@ -110,7 +109,7 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
               </label>
               {SelectDate({
                 date: data.returnAt,
-                year: values?.cohort || "2022",
+                year,
                 handleChange: (e) => setData({ ...data, returnAt: { ...data.returnAt, [e.target.name]: e.target.value } }),
               })}
             </div>
