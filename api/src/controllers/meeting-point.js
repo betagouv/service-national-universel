@@ -21,6 +21,19 @@ router.get("/all", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
+router.get("/center/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const data = await MeetingPointModel.find({ centerId: checkedId });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/:id", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);

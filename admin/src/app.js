@@ -30,6 +30,7 @@ import Association from "./scenes/association";
 import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
+import SessionShareIndex from "./scenes/session-phase1/index";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -86,6 +87,7 @@ export default function App() {
           <Route path="/validate" component={Validate} />
           <Route path="/conditions-generales-utilisation" component={CGU} />
           <Route path="/auth" component={Auth} />
+          <Route path="/session-phase1-partage" component={SessionShareIndex} />
           <Route path={`/public-besoin-d-aide?from=${window.location.pathname}`} component={PublicSupport} />
           <Route path="/" component={Home} />
         </Switch>

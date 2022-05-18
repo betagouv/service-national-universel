@@ -2,18 +2,32 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-
+const crypto = require("crypto");
 const { capture } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
+const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, isReferent } = require("../utils");
-const { canCreateOrUpdateSessionPhase1, canViewCohesionCenter, canSearchSessionPhase1, canViewSessionPhase1, canDownloadYoungDocuments, canAssignCohesionCenter } = require("snu-lib/roles");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+
+const {
+  canCreateOrUpdateSessionPhase1,
+  canViewCohesionCenter,
+  canSearchSessionPhase1,
+  canViewSessionPhase1,
+  canDownloadYoungDocuments,
+  canAssignCohesionCenter,
+  canShareSessionPhase1,
+} = require("snu-lib/roles");
+const { START_DATE_PHASE1_TOKEN, END_DATE_PHASE1_TOKEN } = require("snu-lib/constants");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
+const { sendTemplate } = require("../sendinblue");
+const { ADMIN_URL } = require("../config");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -44,7 +58,7 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
     if (isYoung(req.user)) {
       if (session._id.toString() !== req.user.sessionPhase1Id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else if (!canViewCohesionCenter(req.user, cohesionCenter)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED })
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
@@ -63,7 +77,7 @@ router.get("/:id", passport.authenticate(["referent"], { session: false, failWit
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!canViewSessionPhase1(req.user, session)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED })
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     return res.status(200).send({ ok: true, data: serializeSessionPhase1(session) });
@@ -263,6 +277,124 @@ router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent
       young: serializeYoung(young, req.user),
       ok: true,
     });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/:sessionId/share", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      sessionId: Joi.string().required(),
+      emails: Joi.array().items(Joi.string().lowercase().trim().email().required()).required().min(1),
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const sessionPhase1 = await SessionPhase1Model.findById(value.sessionId);
+    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canShareSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const sessionToken = await sessionPhase1TokenModel.create({
+      token: crypto.randomBytes(50).toString("hex"),
+      startAt: START_DATE_PHASE1_TOKEN[sessionPhase1.cohort],
+      expireAt: END_DATE_PHASE1_TOKEN[sessionPhase1.cohort],
+      sessionId: sessionPhase1._id,
+    });
+
+    //Send emails to share session
+    for (const email of value.emails) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.SHARE_SESSION_PHASE1, {
+        emailTo: [{ email: email }],
+        params: { link: `${ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`, session: sessionPhase1.cohort.toLowerCase() },
+      });
+    }
+
+    res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/check-token/:token", async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      token: Joi.string().required(),
+    }).validate({ ...req.params }, { stripUnknown: true });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const sessionPhase1Token = await sessionPhase1TokenModel.findOne({ token: value.token });
+    if (!sessionPhase1Token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const sessionPhase1 = await SessionPhase1Model.findById(sessionPhase1Token.sessionId);
+    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const now = new Date();
+
+    if (now >= sessionPhase1Token.startAt && now <= sessionPhase1Token.expireAt) {
+      let result = {
+        noMeetingPoint: {
+          youngs: [],
+          meetingPoint: [],
+        },
+      };
+      const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
+
+      for (const young of youngs) {
+        const tempYoung = {
+          firstName: young.firstName,
+          lastName: young.lastName,
+          email: young.email,
+          phone: young.phone,
+          city: young.city,
+          department: young.department,
+          parent1FirstName: young.parent1FirstName,
+          parent1LastName: young.parent1LastName,
+          parent1Email: young.parent1Email,
+          parent1Phone: young.parent1Phone,
+          parent1Status: young.parent1Status,
+          parent2FirstName: young.parent2FirstName,
+          parent2LastName: young.parent2LastName,
+          parent2Email: young.parent2Email,
+          parent2Phone: young.parent2Phone,
+          parent2Status: young.parent2Status,
+          statusPhase1: young.statusPhase1,
+          meetingPointId: young.meetingPointId,
+        };
+
+        if (young.deplacementPhase1Autonomous === "true") {
+          result.noMeetingPoint.youngs.push(tempYoung);
+        } else {
+          const tempMeetingPoint = await MeetingPointObject.findById(young.meetingPointId);
+
+          let tempBus = {};
+          if (tempMeetingPoint?.busId) {
+            tempBus = await BusObject.findById(tempMeetingPoint.busId);
+          }
+
+          if (tempMeetingPoint) {
+            if (!result[tempMeetingPoint.busExcelId]) {
+              result[tempMeetingPoint.busExcelId] = {};
+              result[tempMeetingPoint.busExcelId]["youngs"] = [];
+              result[tempMeetingPoint.busExcelId]["meetingPoint"] = [];
+            }
+
+            if (!result[tempMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id !== tempMeetingPoint._id)) {
+              result[tempMeetingPoint.busExcelId]["meetingPoint"].push(tempMeetingPoint);
+            }
+
+            result[tempMeetingPoint.busExcelId]["youngs"].push(tempYoung);
+          }
+        }
+      }
+
+      res.status(200).send({ ok: true, data: result });
+    } else {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
