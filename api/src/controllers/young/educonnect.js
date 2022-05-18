@@ -5,6 +5,10 @@ const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const config = require("../../config");
+const Young = require("../../models/young");
+
+const jwt = require("jsonwebtoken");
+const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 
 router.get("/login", passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }));
 
@@ -26,6 +30,14 @@ router.post("/callback", passport.authenticate("educonnect"), function (req, res
       FrEduCtDateNaissance: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.67"],
       FrEduUrlRetour: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.5"],
     };
+
+    // if (educonnect_data.FrEduCtPersonAffiliation === "resp2d") {
+    //   // Afficher erreur si responsable est un adulte
+    //   return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    // }
+
+    // const url = `${appURL}/auth/connect?token=${api.getToken()}&young_id=${user._id}`;
+
     const query = {
       prenom: educonnect_data.givenName,
       nom: educonnect_data.sn,
@@ -59,7 +71,7 @@ router.get("/test-output", async (req, res) => {
       "urn:oid:1.3.6.1.4.1.20326.10.999.1.73": "2382",
       "urn:oid:1.3.6.1.4.1.20326.10.999.1.57": "16c1f69261c389bdf4b8c09d5aaba904008e0d503b30dea551d18aae04a6224354dec1a65c461d59de42412d51473b4e",
     };
-    const educonnect = {
+    const educonnect_data = {
       FrEduCtDateConnexion: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.6"],
       FrEduCtld: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.57"],
       FrEduCtPersonAffiliation: attributes["urn:oid:1.3.6.1.4.1.20326.10.999.1.7"],
@@ -75,14 +87,31 @@ router.get("/test-output", async (req, res) => {
     // const { error, value } = Joi.object({ callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
     // if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    if (educonnect_data.FrEduCtPersonAffiliation === "resp2d") {
+      // Afficher erreur si responsable est un adulte
+      return res.redirect(`${config.APP_URL}`);
+    }
+
+    // If find a user with the same INEHash, get _id and redirect to connect
+    const user = await Young.findOne({ INEHash: educonnect_data.FrEduCtEleveINEHash });
+    if (user) {
+      user.set({ lastLoginAt: Date.now() });
+      await user.save();
+
+      const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
+      res.cookie("jwt", token, cookieOptions());
+      const url_signin = `${config.APP_URL}`;
+      return res.redirect(url_signin);
+    }
+
     const query = {
-      prenom: educonnect.givenName,
-      nom: educonnect.sn,
-      dateNaissance: educonnect.FrEduCtDateNaissance,
-      INEHash: educonnect.FrEduCtEleveINEHash,
+      prenom: educonnect_data.givenName,
+      nom: educonnect_data.sn,
+      dateNaissance: educonnect_data.FrEduCtDateNaissance,
+      INEHash: educonnect_data.FrEduCtEleveINEHash,
     };
-    const url = `${config.APP_URL}/inscription/profil?${queryString.stringify(query)}`;
-    return res.redirect(url);
+    const url_signup = `${config.APP_URL}/inscription/profil?${queryString.stringify(query)}`;
+    return res.redirect(url_signup);
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false });
