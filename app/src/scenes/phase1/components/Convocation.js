@@ -138,14 +138,14 @@ export default function Convocation() {
               Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
               <div className="text-center">
                 <div>
-                  <b>A </b>{" "}
+                  <b>Le </b>{" "}
                   {getDepartureMeetingDate()
                     .split(/[,\s]+/)
                     .slice(0, 3)
                     .join(" ")}
                 </div>
                 <div>
-                  <b>Le </b> {getDepartureMeetingDate().split(",")[1]}
+                  <b>A </b> {getDepartureMeetingDate().split(",")[1]}
                 </div>
                 <div>
                   <b>Au </b>
