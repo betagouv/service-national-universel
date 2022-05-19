@@ -33,6 +33,7 @@ import ModalPointagePresenceJDM from "../../centers/components/modals/ModalPoint
 import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
 import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import { ImQuotesLeft } from "react-icons/im";
+import { MdOutlineOpenInNew } from "react-icons/md";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -68,7 +69,7 @@ export default function Phase1(props) {
           <Details title="Adresse" value={meetingPoint?.departureAddress} />
           <Details title="Heure&nbsp;de&nbsp;départ" value={meetingPoint?.departureAtString} />
           <Details title="Heure&nbsp;de&nbsp;retour" value={meetingPoint?.returnAtString} />
-          <Details title="N˚&nbsp;transport" value={meetingPoint?.busExcelId} />
+          <Details title="N˚&nbsp;transport" to={`/point-de-rassemblement/${meetingPoint?._id}/edit`} value={meetingPoint?.busExcelId} />
         </>
       );
     if (young.deplacementPhase1Autonomous === "true")
@@ -90,6 +91,7 @@ export default function Phase1(props) {
       return (
         <>
           <p>{young.firstName} a réalisé son séjour de cohésion.</p>
+          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
           <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
           <Details title="Ville" value={cohesionCenter.city} />
           <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
@@ -99,6 +101,7 @@ export default function Phase1(props) {
       return (
         <>
           <p>{young.firstName} n&apos;a pas réalisé son séjour de cohésion.</p>
+          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
           <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
           <Details title="Ville" value={cohesionCenter.city} />
           <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
@@ -121,7 +124,7 @@ export default function Phase1(props) {
       return (
         <>
           <p className="text-base mb-1">{young.firstName} a été affecté(e) au centre :</p>
-          <Details title="Code centre" value={cohesionCenter.code2022} />
+          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
           <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
           <Details title="Ville" value={cohesionCenter.city} />
           <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
@@ -138,6 +141,7 @@ export default function Phase1(props) {
       return (
         <>
           <p className="text-base mb-1">{young.firstName} est sur liste d&apos;attente au centre :</p>
+          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
           <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
           <Details title="Ville" value={cohesionCenter.city} />
           <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
@@ -149,6 +153,7 @@ export default function Phase1(props) {
           <p>
             {young.firstName} doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringLongDate(young.autoAffectationPhase1ExpiresAt)}</b>.
           </p>
+          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
           <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
           <Details title="Ville" value={cohesionCenter.city} />
           <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
@@ -158,6 +163,7 @@ export default function Phase1(props) {
       return (
         <>
           <p>{young.firstName} s&apos;est désisté(e) du séjour de cohésion.</p>
+          <Details title="Code centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.code2022} />
           <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
           <Details title="Ville" value={cohesionCenter.city} />
           <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
@@ -296,8 +302,8 @@ export default function Phase1(props) {
             </Bloc>
           </article>
           {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
-          young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
-          young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
+            young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
+            young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
             <Row>
               <Bloc title="Documents" disabled={disabled}>
                 <DocumentPhase1 young={young} />
@@ -364,7 +370,16 @@ const Details = ({ title, value, to }) => {
   return (
     <section className="detail grid grid-cols-2 mb-2">
       <p className="detail-title text-[#738297]">{title}&nbsp;:</p>
-      <p className="detail-text">{to ? <Link to={to}>{value}</Link> : value}</p>
+      {to ? (
+        <p className="group detail-text">
+          <a href={to} target="_blank" rel="noreferrer" className="flex items-center gap-1 group-hover:underline">
+            {value}
+            <MdOutlineOpenInNew />
+          </a>
+        </p>
+      ) : (
+        <p className="detail-text">{value}</p>
+      )}
     </section>
   );
 };
