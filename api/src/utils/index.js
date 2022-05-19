@@ -12,7 +12,7 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
-const { APP_URL } = require("../config");
+const { APP_URL, ADMIN_URL } = require("../config");
 const {
   CELLAR_ENDPOINT,
   CELLAR_KEYID,
@@ -24,7 +24,8 @@ const {
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
-const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1 } = require("snu-lib/constants");
+const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES } = require("snu-lib/constants");
+
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { getQPV, getDensity } = require("../geo");
 
@@ -563,6 +564,20 @@ const getCcOfYoung = ({ template, young }) => {
   return cc;
 };
 
+async function notifDepartmentChange(department, template, young) {
+  const referents = await ReferentModel.find({ department: department, role: ROLES.REFERENT_DEPARTMENT });
+  for (let referent of referents) {
+    await sendTemplate(template, {
+      emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+      params: {
+        youngFirstName: young.firstName,
+        youngLastName: young.lastName,
+        cta: `${ADMIN_URL}/volontaire/${young._id}`,
+      },
+    });
+  }
+}
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -570,6 +585,9 @@ const ERRORS = {
   OPERATION_UNAUTHORIZED: "OPERATION_UNAUTHORIZED",
   OPERATION_NOT_ALLOWED: "OPERATION_NOT_ALLOWED",
   USER_ALREADY_REGISTERED: "USER_ALREADY_REGISTERED",
+  EDUCONNECT_LOGIN_ERROR: "EDUCONNECT_LOGIN_ERROR",
+  EDUCONNECT_RESP_AUTH: "EDUCONNECT_RESP_AUTH",
+  EDUCONNECT_USER_ALREADY_REGISTERED: "EDUCONNECT_USER_ALREADY_REGISTERED",
   PASSWORD_NOT_VALIDATED: "PASSWORD_NOT_VALIDATED",
   INVITATION_TOKEN_EXPIRED_OR_INVALID: "INVITATION_TOKEN_EXPIRED_OR_INVALID",
   FILE_CORRUPTED: "FILE_CORRUPTED",
@@ -654,4 +672,5 @@ module.exports = {
   FILE_STATUS_PHASE1,
   translateFileStatusPhase1,
   getCcOfYoung,
+  notifDepartmentChange,
 };

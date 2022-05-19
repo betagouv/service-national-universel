@@ -36,10 +36,11 @@ const {
   updatePlacesSessionPhase1,
   translateFileStatusPhase1,
   getCcOfYoung,
+  notifDepartmentChange
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
-const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
-const { validateYoung, validateId, validateFirstName, validatePhase1Document } = require("../../utils/validator");
+const { cookieOptions } = require("../../cookie-options");
+const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
 const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSendTemplateToYoung, canViewYoungApplications, canEditPresenceYoung } = require("snu-lib/roles");
@@ -47,57 +48,13 @@ const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
 
+router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => YoungAuth.resetPassword(req, res));
-
-router.post("/signup", async (req, res) => {
-  try {
-    // TODO: Check adress + date
-    const { error, value } = Joi.object({
-      email: Joi.string().lowercase().trim().email().required(),
-      firstName: validateFirstName().trim().required(),
-      lastName: Joi.string().uppercase().trim().required(),
-      password: Joi.string().required(),
-      birthdateAt: Joi.string().trim().required(),
-      birthCountry: Joi.string().trim().required(),
-      birthCity: Joi.string().trim().required(),
-      birthCityZip: Joi.string().trim().allow(null, ""),
-      rulesYoung: Joi.string().trim().required().valid("true"),
-      acceptCGU: Joi.string().trim().required().valid("true"),
-      frenchNationality: Joi.string().trim().required().valid("true"),
-    }).validate(req.body);
-
-    if (error) {
-      if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
-      if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung } = value;
-    if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
-
-    const countDocuments = await YoungObject.countDocuments({ lastName, firstName, birthdateAt });
-    if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-
-    const user = await YoungObject.create({ email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung });
-    const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
-    res.cookie("jwt", token, cookieOptions());
-
-    return res.status(200).send({
-      ok: true,
-      token,
-      user: serializeYoung(user, user),
-    });
-  } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
 
 router.post("/signup_verify", async (req, res) => {
   try {
@@ -446,17 +403,8 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (value?.department && young?.department && value?.department !== young?.department) {
-      const referents = await ReferentModel.find({ department: value.department, role: ROLES.REFERENT_DEPARTMENT });
-      for (let referent of referents) {
-        await sendTemplate(SENDINBLUE_TEMPLATES.young.DEPARTMENT_CHANGE, {
-          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-          params: {
-            youngFirstName: young.firstName,
-            youngLastName: young.lastName,
-            cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-          },
-        });
-      }
+      await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young);
+      await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young);
     }
 
     young.set(value);
@@ -484,10 +432,20 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       // await assignNextYoungFromWaitingList(young);
     }
 
+
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.sessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+    }
+
+    // if they had a meeting point, we check if we need to update the places taken / left in the bus
+    if (young.meetingPointId) {
+      const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
+      if (meetingPoint) {
+        const bus = await BusModel.findById(meetingPoint.busId);
+        if (bus) await updatePlacesBus(bus);
+      }
     }
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {

@@ -8,7 +8,6 @@ function getFranceConnectCallback(idRepresentant) {
 }
 
 export default function FranceConnectCallback() {
-  const young = useSelector((state) => state.Auth.young);
   // Update from France Connect.
   async function fetchData(code, id) {
     const { data, tokenId } = await api.post("/young/france-connect/user-info", { code, callback: getFranceConnectCallback(id) });

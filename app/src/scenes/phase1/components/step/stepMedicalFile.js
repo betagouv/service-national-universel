@@ -11,6 +11,7 @@ import api from "../../../../services/api";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import { SENDINBLUE_TEMPLATES } from "../../../../utils";
 import { toastr } from "react-redux-toastr";
+import plausibleEvent from "../../../../services/plausible";
 
 export default function StepMedicalField({ young }) {
   const [stateMobil, setStateMobil] = useState(false);
@@ -29,6 +30,7 @@ export default function StepMedicalField({ young }) {
 
   const handleDownload = async () => {
     const { data } = await api.put(`/young/phase1/cohesionStayMedical`, { cohesionStayMedicalFileDownload: "true" });
+    plausibleEvent("affecté_step2");
     dispatch(setYoung(data));
   };
 
@@ -113,7 +115,7 @@ export default function StepMedicalField({ young }) {
             <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
               Vous devez renseigner votre fiche sanitaire et la remettre à votre arrivée au centre de séjour.
             </div>
-            <div className={` text-sm text-right leading-5 ${valid ? "text-green-500" : "text-blue-600"}`}>Téléchargez</div>
+            {enabled ? <div className={` text-sm text-right leading-5 ${valid ? "text-green-500" : "text-blue-600"}`}>Télécharger</div> : null}
           </div>
         </div>
       </div>

@@ -13,7 +13,7 @@ import RoundWarning from "../../assets/RoundWarning";
 export default function Desistement() {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
-  const [confirm, setConfirm] = useState({ state: false, onConfirm: () => {} });
+  const [confirm, setConfirm] = useState({ state: false, onConfirm: () => { } });
   const [status, setStatus] = useState(YOUNG_STATUS.WITHDRAWN);
   const [stopSNU, setStopSNU] = useState("désistement");
   const [title, setTitle] = useState("Vous souhaitez vous désister ?");
@@ -66,16 +66,16 @@ export default function Desistement() {
         <ComponentConfirm
           title="Suppression du compte SNU"
           message="Vous êtes sur le point de supprimer votre compte. Vous serez immédiatement déconnecté(e). Souhaitez-vous réellement supprimer votre compte ?"
-          onConfirm={() => {
-            onConfirm(YOUNG_STATUS.DELETED);
+          onConfirm={async () => {
+            await onConfirm(YOUNG_STATUS.DELETED);
           }}
         />
       ) : confirm.state ? (
         <ComponentConfirm
           title="Êtes-vous sûr ?"
           message={<p>Vous vous apprêtez à quitter votre parcours SNU. Cette action est irréversible, souhaitez-vous confirmer cette action ?</p>}
-          onConfirm={() => {
-            confirm.onConfirm();
+          onConfirm={async () => {
+            await confirm.onConfirm();
           }}
         />
       ) : (
@@ -106,7 +106,7 @@ function ComponentConfirm({ title, message, onConfirm, confirmText = "Confirmer"
 
   const submit = async () => {
     setSending(true);
-    onConfirm();
+    await onConfirm();
     setSending(false);
   };
 
@@ -122,11 +122,11 @@ function ComponentConfirm({ title, message, onConfirm, confirmText = "Confirmer"
           <ModalButton loading={sending} disabled={sending} onClick={submit} primary>
             {confirmText}
           </ModalButton>
-          <ModalButton>
+          {!sending ? <ModalButton>
             <Link to="/" style={{ color: "rgb(81, 69, 205)", width: "100%" }}>
               {cancelText}
             </Link>
-          </ModalButton>
+          </ModalButton> : null}
         </footer>
       </Container>
     </div>

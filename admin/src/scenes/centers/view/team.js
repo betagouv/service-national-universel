@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { useParams } from "react-router";
@@ -9,9 +9,11 @@ import { CENTER_ROLES, translate } from "../../../utils";
 import { Box } from "../../../components/box";
 import api from "../../../services/api";
 import Trash from "../../../assets/icons/Trash";
+import ChevronRight from "../../../assets/icons/ChevronRight.js";
+import Template from "../../../assets/icons/Template.js";
 
 export default function Team({ focusedSession: focusedSessionfromProps }) {
-  const { sessionId } = useParams();
+  const { id, sessionId } = useParams();
   const [focusedSession, setFocusedSession] = useState(focusedSessionfromProps);
 
   const addTeamate = async (teamate) => {
@@ -82,15 +84,28 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
   if (!focusedSession) return null;
 
   return (
-    <Box>
-      <Wrapper gridTemplateColumns="repeat(2,1fr)" style={{ background: "linear-gradient(#E5E4E8,#E5E4E8) center/1px 100% no-repeat" }}>
-        <div>
-          <ChefCenterBlock headCenterId={focusedSession?.headCenterId} />
-          <TeamBlock team={focusedSession?.team} deleteTeamate={deleteTeamate} />
-        </div>
-        <AddBlock addTeamate={addTeamate} />
-      </Wrapper>
-    </Box>
+    <>
+      <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
+        <Template className="" />
+        <ChevronRight className="" />
+        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre`}>Centres</Link>
+        <ChevronRight className="" />
+        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre/${id}`}>Fiche du centre</Link>
+        <ChevronRight className="" />
+        <div className="text-xs">Équipe</div>
+      </div>
+      <div className="p-4">
+        <Box >
+          <Wrapper gridTemplateColumns="repeat(2,1fr)" style={{ background: "linear-gradient(#E5E4E8,#E5E4E8) center/1px 100% no-repeat" }}>
+            <div>
+              <ChefCenterBlock headCenterId={focusedSession?.headCenterId} />
+              <TeamBlock team={focusedSession?.team} deleteTeamate={deleteTeamate} />
+            </div>
+            <AddBlock addTeamate={addTeamate} />
+          </Wrapper>
+        </Box>
+      </div>
+    </>
   );
 }
 

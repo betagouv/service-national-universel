@@ -88,30 +88,36 @@ export default function Affected() {
 
               {/* Good to Know */}
               <div className="flex flex-col items-center gap-4 pb-4 overflow-x-auto ">
-                <div className="flex flex-row w-full justify-between items-center gap-4">
+                <div className="flex flex-col lg:flex-row w-full justify-between items-stretch gap-4">
                   <a
                     href={`${supportURL}/base-de-connaissance/le-transport`}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-start border-[1px] border-gray-200 rounded-lg pl-4 mr-4 ">
-                    <span className="py-3 font-bold text-base pr-4 whitespace-nowrap">Comment se passe le transport ?</span>
-                    <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
+                    className="flex w-full justify-between items-start border-[1px] border-gray-200 rounded-lg pl-4">
+                    <div className="py-3 font-bold text-base pr-4 flex-1">Comment se passe le transport&nbsp;?</div>
+                    <div>
+                      <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
+                    </div>
                   </a>
                   <a
                     href={`${supportURL}/base-de-connaissance/dans-ma-valise-materiel-trousseau`}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex justify-start items-start border-[1px] border-gray-200 rounded-lg pl-4 mr-4">
-                    <span className="py-3 font-bold text-base pr-4 whitespace-nowrap">Que prendre dans ma valise ?</span>
-                    <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
+                    className="flex w-full justify-between items-start border-[1px] border-gray-200 rounded-lg pl-4">
+                    <div className="py-3 font-bold text-base pr-4 flex-1">Que prendre dans ma valise&nbsp;?</div>
+                    <div>
+                      <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
+                    </div>
                   </a>
                   <a
                     href={`${supportURL}/base-de-connaissance/phase-1-le-sejour-de-cohesion`}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex justify-start items-start border-[1px] border-gray-200 rounded-lg pl-4">
-                    <span className="py-3 font-bold text-base pr-4 whitespace-nowrap">J'ai des questions sur le séjour</span>
-                    <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
+                    className="flex w-full justify-between items-start border-[1px] border-gray-200 rounded-lg pl-4">
+                    <span className="py-3 font-bold text-base pr-4 flex-1">J'ai des questions sur le séjour</span>
+                    <div>
+                      <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
+                    </div>
                   </a>
                 </div>
               </div>

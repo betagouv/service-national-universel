@@ -12,6 +12,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import { Link } from "react-router-dom";
 import Pencil from "../../assets/icons/Pencil";
+import { MdOutlineOpenInNew } from "react-icons/md";
 
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT"];
 
@@ -77,6 +78,7 @@ export default function MeetingPoint() {
                     title=""
                     URLParams={true}
                     showSearch={false}
+                    defaultValue={["Juin 2022", "Juillet 2022"]}
                   />
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
@@ -180,10 +182,10 @@ const Hit = ({ hit }) => {
         <div className="font-normal text-xs text-[#738297] mt-2">{hit.departureAtString}</div>
       </td>
       <td className="">
-        <a className="flex gap-2 items-center text-sm" href={`/centre/${hit.centerId}`} target="_blank" rel="noreferrer">
-          <ArrowCircleRightSvg className="text-[#9CA3AF]" />
+        <a className="group flex gap-2 items-center text-sm" href={`/centre/${hit.centerId}`} target="_blank" rel="noreferrer">
+          <ArrowCircleRightSvg className="text-[#9CA3AF] group-hover:scale-105" />
           <div>
-            <div className="text-[#242526] text-[15px]">{hit.centerCode}</div>
+            <div className="text-[#242526] text-[15px] flex items-center gap-1 group-hover:underline">{hit.centerCode}<MdOutlineOpenInNew /></div>
             <div className="font-normal text-xs text-[#738297]">{center?.department}</div>
           </div>
         </a>

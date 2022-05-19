@@ -40,6 +40,7 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
       returnAt: splitDate(values?.returnAtString),
       capacity: values?.capacity || 0,
       placesLeft: values?.placesLeft || 0,
+      hideDepartmentInConvocation: values?.hideDepartmentInConvocation,
     });
     if (["Juillet 2022", "Juin 2022", "Février 2022", "à venir"].includes(values?.cohort)) setYear("2022");
     else setYear(values?.cohort);
@@ -92,7 +93,24 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
               </label>
               <input type="text" disabled className="w-full disabled:bg-gray-200" value={values?.department} />
             </div>
-
+            <div className="flex flex-1 py-1 px-2 justify-start items-center gap-2">
+              <input
+                type="checkbox"
+                id="hideDepartmentInConvocation"
+                name="hideDepartmentInConvocation"
+                className="cursor-pointer"
+                checked={data.hideDepartmentInConvocation==="true"}
+                value={data?.hideDepartmentInConvocation}
+                onChange={(e) => setData({ ...data, hideDepartmentInConvocation: e.target.checked ? "true" : "false" })}
+              />
+              <label className="flex-1 mb-0 cursor-pointer" htmlFor="hideDepartmentInConvocation">Ne pas afficher le département sur le compte volontaire</label>
+            </div>
+            {data?.hideDepartmentInConvocation === "true" ?
+              <div className="flex gap-2 bg-blue-50 rounded-lg p-2 text-blue-700">
+                Le département ne sera pas visible sur le compte des volontaires.<br />
+                Merci de rendre l'adresse postale la plus explicite possible.
+              </div> : null
+            }
             <div className={`flex flex-1 flex-col border-[1px] rounded-lg py-1 px-2 ${isLoading && "bg-gray-200"}`}>
               <label htmlFor="departureAt" className="w-full m-0 text-left text-gray-500">
                 Date et heure de rendez-vous aller

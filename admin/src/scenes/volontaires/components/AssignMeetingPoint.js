@@ -6,17 +6,32 @@ import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../../components/list";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { getResultLabel } from "../../../utils";
+import { getResultLabel, translate } from "../../../utils";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 export default function AssignMeetingPoint({ young, onAffect, onClick }) {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
+  const [cohesionCenter, setCohesionCenter] = useState();
+
+  React.useEffect(() => {
+    if (young.sessionPhase1Id) {
+      try {
+        (async () => {
+          const { data, code, ok } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
+          if (!ok) return toastr.error(`Erreur`, translate(code));
+          setCohesionCenter(data);
+        })();
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }, [young])
 
   const getDefaultQuery = () => ({
     query: {
       bool: {
-        filter: [{ term: { "cohort.keyword": young.cohort } }],
+        filter: [{ term: { "cohort.keyword": young.cohort } }, { term: { "centerCode.keyword": cohesionCenter?.code2022 || "" } }],
       },
     },
     track_total_hits: true,

@@ -1,3 +1,20 @@
+## [1.87.1](https://github.com/betagouv/service-national-universel/compare/v1.87.0...v1.87.1) (2022-05-18)
+
+
+### Bug Fixes
+
+* **app:** écran phase1 - liste d'attente ([856ba9a](https://github.com/betagouv/service-national-universel/commit/856ba9a444c6ff40a177f1042f0bfac674c9c1bf))
+* `codeCenter` + `pageSize` point de rassemblement ([f5e1730](https://github.com/betagouv/service-national-universel/commit/f5e1730ccc14fc9c5a9641fc8b735f996bfbb701))
+* add horaire de départ ([cfbebae](https://github.com/betagouv/service-national-universel/commit/cfbebaed24c461138b232977281cbe935668ec76))
+* open new style center ([e37d325](https://github.com/betagouv/service-national-universel/commit/e37d32565b5d24826e6b3fc5d036682a8b11e2fd))
+* open onglet général ([2d729bc](https://github.com/betagouv/service-national-universel/commit/2d729bca594557f957a1e2fc494cf1b8a3a5a200))
+* **api:** `updatePlacesBus` ([b49e46d](https://github.com/betagouv/service-national-universel/commit/b49e46de1ec3d6ad1f55b8969e1928f3c2ea8517))
+
+
+### Reverts
+
+* Revert "(educonnect) allow Inscription for test" ([022d3cf](https://github.com/betagouv/service-national-universel/commit/022d3cf82a9ddcf945a8c7f9684e5ea788bb4811))
+
 # [1.87.0](https://github.com/betagouv/service-national-universel/compare/v1.86.0...v1.87.0) (2022-05-17)
 
 
