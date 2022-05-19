@@ -19,8 +19,12 @@ export default function Convocation() {
   const [service, setService] = useState();
 
   const isFromDOMTOM = () => {
-    return ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
-      young.department,
+    return (
+      (["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
+        young.department,
+      ) ||
+        young.region === "Corse") &&
+      young.grade !== "Terminale"
     );
   };
 

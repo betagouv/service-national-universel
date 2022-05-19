@@ -107,9 +107,11 @@ export default function StepAgreement({ young }) {
 const content = ({ handleSubmit, young }) => {
   const isFromDOMTOM = () => {
     return (
-      ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
+      (["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
         young.department,
-      ) && young.grade !== "Terminale"
+      ) ||
+        young.region === "Corse") &&
+      young.grade !== "Terminale"
     );
   };
   return (
@@ -123,7 +125,7 @@ const content = ({ handleSubmit, young }) => {
           <p className="pb-2">
             • Avoir pris connaissance de mon <strong>affectation</strong>
           </p>
-          {!isFromDOMTOM() ? (
+          {!isFromDOMTOM ? (
             <p className="pb-2">
               • Avoir pris connaissance de mon <strong>point de rassemblement </strong>
             </p>
