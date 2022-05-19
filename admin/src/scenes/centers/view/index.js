@@ -10,7 +10,7 @@ import Youngs from "./youngs";
 import Affectation from "./affectation";
 import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
-import { translate, ROLES, canCreateOrUpdateCohesionCenter } from "../../../utils";
+import { translate, ROLES, canCreateOrUpdateCohesionCenter , canSearchInElasticSearch} from "../../../utils";
 import { environment } from "../../../config";
 import Plus from "../../../assets/icons/Plus.js";
 import ChevronRight from "../../../assets/icons/ChevronRight.js";
@@ -138,7 +138,11 @@ export default function Index({ ...props }) {
       <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
         <Template className=""/>
         <ChevronRight className=""/>
-        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre`}>Centres</Link>
+        {canSearchInElasticSearch(user, "cohesioncenter") ?
+          <Link className="text-xs hover:underline hover:text-snu-purple-300" to="/centre">Centres</Link>
+          :
+          <div className="text-xs">Centres</div>
+        }
         <ChevronRight className=""/>
         <div className="text-xs">Fiche du centre</div>
       </div>

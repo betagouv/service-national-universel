@@ -11,11 +11,11 @@ import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
 import { environment } from "../../config";
 
-const DrawerTab = ({ title, to, onClick, beta }) => {
+const DrawerTab = ({ title, to, onClick, beta,exact }) => {
   if (environment === "production" && beta) return null;
   return (
     <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block">
-      <NavLink to={to} className="block py-3 pl-3 text-base hover:!text-white" activeClassName="block bg-snu-purple-300 py-3 pl-3 font-bold">
+      <NavLink to={to} exact={exact} className="block py-3 pl-3 text-base hover:!text-white" activeClassName="block bg-snu-purple-300 py-3 pl-3 font-bold">
         {title}
         {beta ? <Badge className="ml-2" text="bêta" color={colors.yellow} /> : null}
       </NavLink>
@@ -162,9 +162,9 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
 function headCenter({ onClick, sessionPhase1 }) {
   return (
     <>
-      {sessionPhase1 && <DrawerTab to={`/centre/${sessionPhase1.cohesionCenterId}`} title="Mon Centre" onClick={onClick} />}
+      {sessionPhase1 && <DrawerTab to={`/centre/${sessionPhase1.cohesionCenterId}`} title="Mon Centre" onClick={onClick} exact/>}
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      {sessionPhase1 && <DrawerTab to={`/centre/${sessionPhase1.cohesionCenterId}/${sessionPhase1._id}/general`} title="Volontaires" onClick={onClick}  />}
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <BlankSeparator />
       <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />

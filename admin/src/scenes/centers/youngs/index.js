@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
 import * as FileSaver from "file-saver";
 import React from "react";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { NavLink, useHistory, useParams,Link } from "react-router-dom";
+import { NavLink, useHistory, useParams, Link } from "react-router-dom";
 import { ES_NO_LIMIT } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
@@ -21,6 +22,7 @@ import {
   translate,
   translateFileStatusPhase1,
   translatePhase1,
+  canSearchInElasticSearch,
 } from "../../../utils";
 import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
@@ -32,6 +34,7 @@ import Template from "../../../assets/icons/Template.js";
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
   const [filter, setFilter] = React.useState();
+  const user = useSelector((state) => state.Auth.user);
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
@@ -112,7 +115,11 @@ export default function CenterYoungIndex() {
       <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
         <Template className="" />
         <ChevronRight className="" />
-        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre`}>Centres</Link>
+        {canSearchInElasticSearch(user, "cohesioncenter") ?
+          <Link className="text-xs hover:underline hover:text-snu-purple-300" to="/centre">Centres</Link>
+          :
+          <div className="text-xs">Centres</div>
+        }
         <ChevronRight className="" />
         <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre/${id}`}>Fiche du centre</Link>
         <ChevronRight className="" />
