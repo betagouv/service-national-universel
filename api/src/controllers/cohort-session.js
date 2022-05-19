@@ -66,7 +66,7 @@ router.post("/eligibility/2022", async (req, res) => {
       excludedGrade: [],
       excludedZip: [],
       includedBirthdate: { begin: "2004-07-16", end: "2007-07-02" },
-      inscriptionLimitDate: "2022-05-02, 00:00:01",
+      inscriptionLimitDate: "2022-06-16, 00:00:01",
       stringDate: "3 au 15 juillet 2022",
       buffer: 1.25,
       id: "Juillet 2022",
