@@ -1,33 +1,75 @@
-import React, { useState, useEffect, useRef } from "react";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-
-import api from "../../services/api";
-import { apiURL } from "../../config";
-import { Filter2, FilterRow, ResultTable } from "../../components/list";
-import FilterSvg from "../../assets/icons/Filter";
-import BusSvg from "../../assets/icons/Bus";
-import ArrowCircleRightSvg from "../../assets/icons/ArrowCircleRight";
-import Badge from "../../components/Badge";
-import ReactiveListComponent from "../../components/ReactiveListComponent";
-import DeleteFilters from "../../components/buttons/DeleteFilters";
-import { Link } from "react-router-dom";
-import Pencil from "../../assets/icons/Pencil";
+import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
+import React, { useEffect, useRef, useState } from "react";
 import { MdOutlineOpenInNew } from "react-icons/md";
+import { Link } from "react-router-dom";
+import ArrowCircleRightSvg from "../../assets/icons/ArrowCircleRight";
+import BusSvg from "../../assets/icons/Bus";
+import FilterSvg from "../../assets/icons/Filter";
+import Pencil from "../../assets/icons/Pencil";
+import Badge from "../../components/Badge";
+import DeleteFilters from "../../components/buttons/DeleteFilters";
+import ExportComponent from "../../components/ExportXlsx";
+import { Filter2, FilterRow, ResultTable } from "../../components/list";
+import ReactiveListComponent from "../../components/ReactiveListComponent";
+import { apiURL } from "../../config";
+import api from "../../services/api";
+import { ES_NO_LIMIT, getDepartmentNumber } from "../../utils";
 
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT"];
 
 export default function MeetingPoint() {
   const [filterVisible, setFilterVisible] = useState(false);
-  const handleShowFilter = () => setFilterVisible(!filterVisible);
+
   const getDefaultQuery = () => {
     return { query: { match_all: {} }, track_total_hits: true };
   };
 
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
+
   return (
     <div className="m-4">
-      <div className="font-bold text-2xl mb-4">Points de rassemblements</div>
-      <div className="bg-white pt-4 rounded-lg">
-        <ReactiveBase url={`${apiURL}/es`} app="meetingpoint" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+      <ReactiveBase url={`${apiURL}/es`} app="meetingpoint" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+        <div className="flex flex-row justify-between items-center">
+          <div className="font-bold text-2xl mb-4" style={{ fontFamily: "Marianne" }}>
+            Points de rassemblements
+          </div>
+          <ExportComponent
+            title="Exporter les points de rassemblements"
+            defaultQuery={getExportQuery}
+            exportTitle="point_de_rassemblement"
+            index="meetingpoint"
+            react={{ and: FILTERS }}
+            transform={async (data) => {
+              let res = [];
+              for (const item of data) {
+                let bus = {};
+                if (item.busId) {
+                  const { data: busResult } = await api.get(`/bus/${item.busId}`);
+                  if (!busResult) bus = {};
+                  else bus = busResult;
+                }
+
+                res.push({
+                  Cohorte: item?.cohort,
+                  "ID de transport": item?.busExcelId,
+                  [`N° du département de départ`]: getDepartmentNumber(item?.departureDepartment),
+                  "Centre de destination": item?.centerCode,
+                  "Département de départ / du point de rassemblement": item?.departureDepartment,
+                  "Code postal du point de rassemblement": item?.departureZip,
+                  "Adresse du point de rassemblement": item?.departureAddress,
+                  "ID du point de rassemblement": item?._id,
+                  "Nombre de place proposées": bus?.capacity || 0,
+                  "Nombre de places occupées": bus?.capacity && bus?.placesLeft ? bus?.capacity - bus.placesLeft : 0,
+                  "Date/heure aller": item?.departureAtString,
+                  "Date/heure retour": item?.returnAtString,
+                });
+              }
+              console.log(res);
+              return res;
+            }}
+          />
+        </div>
+        <div className="bg-white pt-4 rounded-lg">
           <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
             <div style={{ flex: 2, position: "relative" }}>
               <Filter2>
@@ -140,8 +182,8 @@ export default function MeetingPoint() {
               </ResultTable>
             </div>
           </div>
-        </ReactiveBase>
-      </div>
+        </div>
+      </ReactiveBase>
     </div>
   );
 }
@@ -185,7 +227,10 @@ const Hit = ({ hit }) => {
         <a className="group flex gap-2 items-center text-sm" href={`/centre/${hit.centerId}`} target="_blank" rel="noreferrer">
           <ArrowCircleRightSvg className="text-[#9CA3AF] group-hover:scale-105" />
           <div>
-            <div className="text-[#242526] text-[15px] flex items-center gap-1 group-hover:underline">{hit.centerCode}<MdOutlineOpenInNew /></div>
+            <div className="text-[#242526] text-[15px] flex items-center gap-1 group-hover:underline">
+              {hit.centerCode}
+              <MdOutlineOpenInNew />
+            </div>
             <div className="font-normal text-xs text-[#738297]">{center?.department}</div>
           </div>
         </a>
@@ -206,7 +251,7 @@ const Hit = ({ hit }) => {
       ) : (
         <td>chargement...</td>
       )}
-      <td className={`rounded-r-lg`}>
+      <td className="rounded-r-lg">
         <div className="flex justify-center items-center">
           <Link to={`/point-de-rassemblement/${hit._id}/edit`}>
             <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
