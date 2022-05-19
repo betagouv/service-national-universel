@@ -9,8 +9,10 @@ const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils");
 const { ROLES, canModifyStructure, canDeleteStructure, canCreateStructure, canViewMission, canViewStructures, canViewStructureChildren } = require("snu-lib/roles");
 const patches = require("./patches");
+const { sendTemplate } = require("../sendinblue");
 const { validateId, validateStructure } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 const setAndSave = async (data, keys) => {
   data.set({ ...keys });
@@ -63,6 +65,9 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const data = await StructureObject.create(checkedStructure);
     await updateNetworkName(data);
     await updateResponsibleAndSupervisorRole(data);
+    sendTemplate(SENDINBLUE_TEMPLATES.referent.STRUCTURE_REGISTERED, {
+      emailTo: [{ name: `${req.user.firstName} ${req.user.lastName}`, email: `${req.user.email}` }],
+    });
     return res.status(200).send({ ok: true, data: serializeStructure(data, req.user) });
   } catch (error) {
     capture(error);
