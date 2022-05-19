@@ -76,9 +76,11 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
   };
   const getMeetingAddress = () => {
     if (isAutonomous || !meetingPoint) return [center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ");
-    return [meetingPoint?.departureAddress, meetingPoint?.departureZip, meetingPoint?.departureCity, meetingPoint?.departureDepartment, meetingPoint?.departureRegion]
-      .filter((e) => e)
-      .join(", ");
+    const address = [meetingPoint?.departureAddress];
+    if (meetingPoint?.hideDepartmentInConvocation !== "true") {
+      address.push(meetingPoint?.departureDepartment);
+    }
+    return address.filter((e) => e).join(", ");
   };
 
   async function confirmAutonomous() {
