@@ -115,7 +115,7 @@ export default function StepMedicalField({ young }) {
             <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
               Vous devez renseigner votre fiche sanitaire et la remettre à votre arrivée au centre de séjour.
             </div>
-            <div className={` text-sm text-right leading-5 ${valid ? "text-green-500" : "text-blue-600"}`}>Téléchargez</div>
+            {enabled ? <div className={` text-sm text-right leading-5 ${valid ? "text-green-500" : "text-blue-600"}`}>Télécharger</div> : null}
           </div>
         </div>
       </div>
