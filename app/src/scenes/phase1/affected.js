@@ -88,7 +88,7 @@ export default function Affected() {
 
               {/* Good to Know */}
               <div className="flex flex-col items-center gap-4 pb-4 overflow-x-auto ">
-                <div className="flex flex-col lg:flex-row w-full justify-between items-center gap-4">
+                <div className="flex flex-col lg:flex-row w-full justify-between items-stretch gap-4">
                   <a
                     href={`${supportURL}/base-de-connaissance/le-transport`}
                     target="_blank"
