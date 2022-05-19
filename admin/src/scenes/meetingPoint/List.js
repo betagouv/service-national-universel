@@ -12,7 +12,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import { Link } from "react-router-dom";
 import Pencil from "../../assets/icons/Pencil";
-import {MdOutlineOpenInNew} from "react-icons/md";
+import { MdOutlineOpenInNew } from "react-icons/md";
 
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT"];
 
@@ -78,6 +78,7 @@ export default function MeetingPoint() {
                     title=""
                     URLParams={true}
                     showSearch={false}
+                    defaultValue={["Juin 2022", "Juillet 2022"]}
                   />
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
