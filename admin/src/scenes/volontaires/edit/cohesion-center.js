@@ -63,6 +63,7 @@ export default function CohesionCenter({ values, handleChange }) {
             )}
             {cohesionCenter ? (
               <>
+                <Item disabled title="Code centre 2022" values={cohesionCenter} name="code2022" handleChange={handleChange} />
                 <Item disabled title="Centre de cohésion" values={cohesionCenter} name="name" handleChange={handleChange} />
                 <Item disabled title="Code postal centre de cohésion" values={cohesionCenter} name="zip" handleChange={handleChange} />
                 <Item disabled title="Ville centre de cohésion" values={cohesionCenter} name="city" handleChange={handleChange} />

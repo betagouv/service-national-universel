@@ -121,6 +121,7 @@ export default function Phase1(props) {
       return (
         <>
           <p className="text-base mb-1">{young.firstName} a été affecté(e) au centre :</p>
+          <Details title="Code centre" value={cohesionCenter.code2022} />
           <Details title="Centre" to={`/centre/${cohesionCenter._id}`} value={cohesionCenter.name} />
           <Details title="Ville" value={cohesionCenter.city} />
           <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />

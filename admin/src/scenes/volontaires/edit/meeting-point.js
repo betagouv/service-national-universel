@@ -83,7 +83,8 @@ export default function MeetingPointView({ values, handleChange, handleSubmit })
               <Loader />
             ) : (
               <>
-                {canAssignMeetingPoint(user) ? <AssignMeetingPoint young={values} onAffect={getData} /> : null}
+                {/* a ouvrir aux referents des que c'est ok */}
+                {canAssignMeetingPoint(user) && user.role === "admin" ? <AssignMeetingPoint young={values} onAffect={getData} /> : null}
                 {values.deplacementPhase1Autonomous === "true" ? <i>{`${values.firstName} se rend au centre par ses propres moyens.`}</i> : <MeetingPoint value={meetingPoint} />}
                 {canAssignMeetingPoint(user) && (meetingPoint || values.deplacementPhase1Autonomous === "true") ? (
                   <CancelButton color={colors.red} onClick={onClickCancel}>
