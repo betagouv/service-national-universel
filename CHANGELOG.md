@@ -1,3 +1,35 @@
+# [1.88.0](https://github.com/betagouv/service-national-universel/compare/v1.87.1...v1.88.0) (2022-05-19)
+
+
+### Bug Fixes
+
+* **admin:** ajout redirection vers centre et point de rassemblement depuis fiche jeune ([75c302b](https://github.com/betagouv/service-national-universel/commit/75c302b3a1b1d0e24f7b3a7c9ff1946dd5141750))
+* **admin:** masquage depart dans edit point de rassemblement ([f2013cc](https://github.com/betagouv/service-national-universel/commit/f2013ccfe30bfd5cd58d70c381fd72b5c9d554ca))
+* **admin:** n'afficher que les points de rassemblements qui vont au centre du jeune ([055d24c](https://github.com/betagouv/service-national-universel/commit/055d24c039363db30f25d8abcbfbba8583682577))
+* **admin:** ouvrir meetingPoint pour les référents ([9e7f716](https://github.com/betagouv/service-national-universel/commit/9e7f7166d38f3dda3f904c41ae40e5b79f9cfa72))
+* **admin:** vue pointage sur espace chef de centre ([6409d0f](https://github.com/betagouv/service-national-universel/commit/6409d0f6a325e4b143bb7e59cc4ae012b127e9c5))
+* **api:** add patches meetingPoint ([5d12c1c](https://github.com/betagouv/service-national-universel/commit/5d12c1ced1649eb7cfaff5bf2d3ff4bbe19d124d))
+* **api:** ouvrir changement de cohorte vers juillet jusqu'au 16 juin ([24c375d](https://github.com/betagouv/service-national-universel/commit/24c375d95b5144a8d314a78344bb664b1b9bbadb))
+* add crumbs centres ([e0f51bb](https://github.com/betagouv/service-national-universel/commit/e0f51bbd4cb5ff5062c44b045c3644ef781120d8))
+* convoc ([68d3360](https://github.com/betagouv/service-national-universel/commit/68d33609e109e14b3c0602252594c656d780389d))
+* convoc dom tom ([556d001](https://github.com/betagouv/service-national-universel/commit/556d001fa512a2ba349ca4e2dfbaca69e19b7707))
+* convoc plateforme ([6f76868](https://github.com/betagouv/service-national-universel/commit/6f76868e67edbbc3f1df041c6a31516f9e2f2e51))
+* **api:** `updatePlacesBus` quand le jeune se désiste ([fd6c5d0](https://github.com/betagouv/service-national-universel/commit/fd6c5d0a00322cb4c0db4fd1ac12a438d4c54db8))
+* **app:** cacher department si besoin ([05d258a](https://github.com/betagouv/service-national-universel/commit/05d258a40e5c67b81a33936c5bc577ff0155b893))
+* **app:** loader sur le désistement ([d6ee577](https://github.com/betagouv/service-national-universel/commit/d6ee57742b7ffa65c5013245601ceab58ac4fac2))
+* **app:** responsive again ([22908af](https://github.com/betagouv/service-national-universel/commit/22908af3a8b9741676075750818e5e95034f620c))
+* **app:** responsive phase1 ([86c1131](https://github.com/betagouv/service-national-universel/commit/86c1131f9c6753aec7543986f10bbb5f25fecd9d))
+* **app:** responsive phase1 files ([ce465f2](https://github.com/betagouv/service-national-universel/commit/ce465f26a71b5b46bb8db58b121d6b738567e45a))
+* filtre par défaut point de rassemblement ([214578f](https://github.com/betagouv/service-national-universel/commit/214578fd8669383fad03313924b6fa7a86ddb856))
+* redirect centre ([2587a44](https://github.com/betagouv/service-national-universel/commit/2587a44f4e3f7e078a5a151d01abdb10bdf3c92a))
+
+
+### Features
+
+* **admin:** breadcrumbs :sparkles: ([8d1032c](https://github.com/betagouv/service-national-universel/commit/8d1032c051f292cb07d4d5aca6b50318aa68dd24))
+* **api:** add checkbox hide department in convoc ([1d30eac](https://github.com/betagouv/service-national-universel/commit/1d30eace5e68500815246273df41fec71eb9a858))
+* **api:** batch3 mails ([#1540](https://github.com/betagouv/service-national-universel/issues/1540)) ([385e93f](https://github.com/betagouv/service-national-universel/commit/385e93f2f6ac3041e688eb371c227cb8b9e8808f))
+
 ## [1.87.1](https://github.com/betagouv/service-national-universel/compare/v1.87.0...v1.87.1) (2022-05-18)
 
 
