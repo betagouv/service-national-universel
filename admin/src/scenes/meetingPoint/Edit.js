@@ -63,6 +63,7 @@ export default function Edit(props) {
                 departureAddress: meetingPoint?.departureAddress || "",
                 departureAtString: meetingPoint?.departureAtString || "",
                 returnAtString: meetingPoint?.returnAtString || "",
+                hideDepartmentInConvocation: meetingPoint.hideDepartmentInConvocation,
                 capacity: bus?.capacity || 0,
                 placesLeft: bus?.placesLeft || 0,
                 department: meetingPoint?.departureDepartment,
@@ -81,6 +82,7 @@ export default function Edit(props) {
                   departureAddress: values.departureAddress,
                   departureAtString: values.departureAtString,
                   returnAtString: values.returnAtString,
+                  hideDepartmentInConvocation: values.hideDepartmentInConvocation,
                 });
                 if (!okMeeting) {
                   toastr.error("Une erreur est survenue lors de la mise à jours des informations");

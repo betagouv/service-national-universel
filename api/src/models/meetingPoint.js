@@ -50,6 +50,9 @@ const Schema = new mongoose.Schema({
   departureRegion: {
     type: String,
   },
+  hideDepartmentInConvocation:{
+    type: String,
+  },
 
   // date de départ
   departureAt: {
