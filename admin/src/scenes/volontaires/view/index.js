@@ -12,6 +12,7 @@ import Phase2Contract from "./phase2Contract";
 import History from "./history";
 import Notifications from "./notifications";
 import { YOUNG_STATUS } from "../../../utils";
+import Breadcrumbs from "../../../components/Breadcrumbs";
 
 export default function Index({ ...props }) {
   const [young, setYoung] = useState();
@@ -45,14 +46,17 @@ export default function Index({ ...props }) {
   if (!young) return <div />;
 
   return (
-    <Switch>
-      <Route path="/volontaire/:id/phase1" component={() => <Phase1 young={young} getYoung={getYoung} onChange={getYoung} />} />
-      <Route path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
-      <Route path="/volontaire/:id/phase2" component={() => <Phase2 young={young} onChange={getYoung} />} />
-      <Route path="/volontaire/:id/phase3" component={() => <Phase3 young={young} onChange={getYoung} />} />
-      <Route path="/volontaire/:id/historique" component={() => <History young={young} onChange={getYoung} />} />
-      <Route path="/volontaire/:id/notifications" component={() => <Notifications young={young} onChange={getYoung} />} />
-      <Route path="/volontaire/:id" component={getDetail} />
-    </Switch>
+    <>
+      <Breadcrumbs items={[{ label: "Volontaires", to: "/volontaire" }, { label: `${young.firstName} ${young.lastName}` }]} />
+      <Switch>
+        <Route path="/volontaire/:id/phase1" component={() => <Phase1 young={young} getYoung={getYoung} onChange={getYoung} />} />
+        <Route path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
+        <Route path="/volontaire/:id/phase2" component={() => <Phase2 young={young} onChange={getYoung} />} />
+        <Route path="/volontaire/:id/phase3" component={() => <Phase3 young={young} onChange={getYoung} />} />
+        <Route path="/volontaire/:id/historique" component={() => <History young={young} onChange={getYoung} />} />
+        <Route path="/volontaire/:id/notifications" component={() => <Notifications young={young} onChange={getYoung} />} />
+        <Route path="/volontaire/:id" component={getDetail} />
+      </Switch>
+    </>
   );
 }

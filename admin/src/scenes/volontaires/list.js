@@ -42,6 +42,7 @@ import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiL
 import plausibleEvent from "../../services/pausible";
 import DeletedVolontairePanel from "./deletedPanel";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
+import Breadcrumbs from "../../components/Breadcrumbs";
 
 const FILTERS = [
   "SEARCH",
@@ -116,6 +117,7 @@ export default function VolontaireList() {
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   return (
     <div>
+      <Breadcrumbs items={[{ label: "Volontaires" }]} />
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
           <div style={{ flex: 1, position: "relative" }}>
