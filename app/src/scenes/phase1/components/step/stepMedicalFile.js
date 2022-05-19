@@ -11,6 +11,7 @@ import api from "../../../../services/api";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
 import { SENDINBLUE_TEMPLATES } from "../../../../utils";
 import { toastr } from "react-redux-toastr";
+import plausibleEvent from "../../../../services/plausible";
 
 export default function StepMedicalField({ young }) {
   const [stateMobil, setStateMobil] = useState(false);
@@ -29,6 +30,7 @@ export default function StepMedicalField({ young }) {
 
   const handleDownload = async () => {
     const { data } = await api.put(`/young/phase1/cohesionStayMedical`, { cohesionStayMedicalFileDownload: "true" });
+    plausibleEvent("affecté_step2");
     dispatch(setYoung(data));
   };
 

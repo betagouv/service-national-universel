@@ -3,6 +3,8 @@ import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
+import plausibleEvent from "../../../services/plausible";
+import { YOUNG_STATUS_PHASE1 } from "snu-lib/constants";
 
 export default function RulesDetail({ young, setShowStep = null, show = null }) {
   const dispatch = useDispatch();
@@ -22,6 +24,7 @@ export default function RulesDetail({ young, setShowStep = null, show = null }) 
       const { data, ok } = await api.put(`/young/phase1/rules`, { rulesYoung: "true" });
       if (!ok) return toastr.error("Une erreur est survenue lors de la validation du réglement");
       toastr.success("Modification enregistrée");
+      if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) plausibleEvent("affecté_step1");
       dispatch(setYoung(data));
     } else {
       setError(true);
