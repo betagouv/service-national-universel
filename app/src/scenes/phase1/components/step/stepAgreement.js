@@ -123,7 +123,7 @@ const content = ({ handleSubmit, young }) => {
           <p className="pb-2">
             • Avoir pris connaissance de mon <strong>affectation</strong>
           </p>
-          {!isFromDOMTOM ? (
+          {!isFromDOMTOM() ? (
             <p className="pb-2">
               • Avoir pris connaissance de mon <strong>point de rassemblement </strong>
             </p>
