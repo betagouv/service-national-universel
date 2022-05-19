@@ -75,6 +75,10 @@ const FILTERS = [
   "SAME_DEPARTMENT",
   "ALLERGIES",
   "COHESION_PARTICIPATION",
+  "COHESION_JDM",
+  "COHESION_PRESENCE",
+  "DEPART",
+  "DEPART_MOTIF",
 ];
 
 export default function VolontaireList() {
@@ -288,6 +292,10 @@ export default function VolontaireList() {
                         "Date aller": meetingPoint?.departureAtString,
                         "Date retour": meetingPoint?.returnAtString,
                         "TMP statusPhase1Tmp": data.statusPhase1Tmp,
+                        "Présence à l'arrivée": !data.cohesionStayPresence ? "Non renseignée" : data.cohesionStayPresence === "true" ? "Présent" : "Absent",
+                        "Présence à la JDM": !data.presenceJDM ? "Non renseignée" : data.presenceJDM === "true" ? "Présent" : "Absent",
+                        "Date de départ": !data.departSejourAt ? "Non renseignée" : formatDateFRTimezoneUTC(data.departSejourAt),
+                        "Motif du départ": data?.departSejourMotif,
                       };
                     });
                   }}
@@ -705,6 +713,54 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion", "Participations au séjour de cohésion")}
+                  showMissing
+                  missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="COHESION_JDM"
+                  dataField="presenceJDM.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHESION_JDM") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Présence à la JDM")}
+                  showMissing
+                  missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="DEPART"
+                  dataField="departInform.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "DEPART") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Départ renseigné")}
+                  showMissing
+                  missingLabel="Non renseigné"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="DEPART_MOTIF"
+                  dataField="departSejourMotif.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "DEPART_MOTIF") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Motif du départ")}
                   showMissing
                   missingLabel="Non renseigné"
                 />

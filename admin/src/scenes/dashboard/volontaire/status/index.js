@@ -33,6 +33,10 @@ export default function StatusIndex({ filter }) {
   const [cohesionStayPresence, setCohesionStayPresence] = useState({});
   const [youngPhase1Agreement, setYoungPhase1Agreement] = useState({});
   const [statusApplication, setStatusApplication] = useState({});
+  const [departInform, setDepartInform] = useState({});
+  const [departSejourMotif, setDepartSejourMotif] = useState({});
+  const [presenceJDM, setPresenceJDM] = useState({});
+  const [totalHit, setTotalHit] = useState();
 
   useEffect(() => {
     const listTab = ["général", "phase1", "phase2", "phase3", "centres"];
@@ -51,7 +55,11 @@ export default function StatusIndex({ filter }) {
           statusPhase3: { terms: { field: "statusPhase3.keyword" } },
           cohesionStayPresence: { terms: { field: "cohesionStayPresence.keyword" } },
           youngPhase1Agreement: { terms: { field: "youngPhase1Agreement.keyword" } },
+          presenceJDM: { terms: { field: "presenceJDM.keyword" } },
+          departInform: { terms: { field: "departInform.keyword" } },
+          departSejourMotif: { terms: { field: "departSejourMotif.keyword" } },
         },
+        track_total_hits: true,
         size: 0,
       };
 
@@ -81,6 +89,10 @@ export default function StatusIndex({ filter }) {
         setStatusPhase3(responses[0].aggregations.statusPhase3.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setYoungPhase1Agreement(responses[0].aggregations.youngPhase1Agreement.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setPresenceJDM(responses[0].aggregations.presenceJDM.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setDepartInform(responses[0].aggregations.departInform.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setDepartSejourMotif(responses[0].aggregations.departSejourMotif.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setTotalHit(responses[0].hits.total.value);
       }
     })();
 
@@ -211,7 +223,16 @@ export default function StatusIndex({ filter }) {
               filter={filter}
               getLink={getLink}
             />
-            <Participation cohesionStayPresence={cohesionStayPresence} youngPhase1Agreement={youngPhase1Agreement} filter={filter} getLink={getLink} />
+            <Participation
+              cohesionStayPresence={cohesionStayPresence}
+              youngPhase1Agreement={youngPhase1Agreement}
+              filter={filter}
+              total={totalHit}
+              getLink={getLink}
+              presenceJDM={presenceJDM}
+              departInform={departInform}
+              departSejourMotif={departSejourMotif}
+            />
           </>
         )}
         {currentSubtab === "phase2" && (
