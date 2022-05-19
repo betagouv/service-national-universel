@@ -30,7 +30,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    young.set({ departSejourAt, departSejourMotif, departSejourMotifComment });
+    young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
     await young.save({ fromUser: req.user });
 
     res.status(200).send({ ok: true, data: serializeYoung(young) });

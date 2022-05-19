@@ -31,11 +31,11 @@ import Pointage from "./pointage";
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
   const [filter, setFilter] = React.useState();
+  const [urlParams, setUrlParams] = React.useState("");
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
   }
-
   const history = useHistory();
   const { id, sessionId, currentTab } = useParams();
 
@@ -44,6 +44,18 @@ export default function CenterYoungIndex() {
     if (!listTab.includes(currentTab)) history.push(`/centre/${id}/${sessionId}/general`);
   }, [currentTab]);
 
+  React.useEffect(() => {
+    if (filter) {
+      console.log("filter", filter);
+      const params = Object.keys(filter).reduce((acc, key) => {
+        if (filter[key] && key !== "SEARCH") {
+          return `${acc}&${key}=%5B${filter[key].map((c) => `"${c}"`)?.join("%2C")}%5D`;
+        }
+        return acc;
+      }, "");
+      setUrlParams(params.substring(1));
+    }
+  }, [filter]);
   const exportData = async () => {
     let body = {
       query: {
@@ -61,13 +73,13 @@ export default function CenterYoungIndex() {
       size: ES_NO_LIMIT,
     };
 
-    if (filter?.search) {
+    if (filter?.SEARCH) {
       body.query.bool.must.push({
         bool: {
           should: [
             {
               multi_match: {
-                query: filter?.search,
+                query: filter?.SEARCH,
                 fields: ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"],
                 type: "cross_fields",
                 operator: "and",
@@ -75,7 +87,7 @@ export default function CenterYoungIndex() {
             },
             {
               multi_match: {
-                query: filter?.search,
+                query: filter?.SEARCH,
                 fields: ["email.keyword", "firstName.folded", "lastName.folded", "city.folded", "zip"],
                 type: "phrase",
                 operator: "and",
@@ -83,7 +95,7 @@ export default function CenterYoungIndex() {
             },
             {
               multi_match: {
-                query: filter?.search,
+                query: filter?.SEARCH,
                 fields: ["firstName.folded", "lastName.folded", "city.folded", "zip"],
                 type: "phrase_prefix",
                 operator: "and",
@@ -94,11 +106,106 @@ export default function CenterYoungIndex() {
         },
       });
     }
-    if (filter?.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
-    if (filter?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
-    if (filter?.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
-    if (filter?.statusPhase1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filter.statusPhase1 } });
-    if (filter?.cohesionStayPresence?.length) body.query.bool.filter.push({ terms: { "cohesionStayPresence.keyword": filter.cohesionStayPresence } });
+
+    if (filter?.STATUS?.length) body.query.bool.filter.push({ terms: { "status.keyword": filter.STATUS } });
+    if (filter?.STATUS_PHASE_1?.length) body.query.bool.filter.push({ terms: { "statusPhase1.keyword": filter.STATUS_PHASE_1 } });
+    if (filter?.REGION?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.REGION } });
+    if (filter?.DEPARTMENT?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.DEPARTMENT } });
+    if (filter?.GRADE?.length) body.query.bool.filter.push({ terms: { "grade.keyword": filter.GRADE } });
+    if (filter?.HANDICAP?.length) body.query.bool.filter.push({ terms: { "handicap.keyword": filter.HANDICAP } });
+    if (filter?.PPS?.length) body.query.bool.filter.push({ terms: { "ppsBeneficiary.keyword": filter.PPS } });
+    if (filter?.PAI?.length) body.query.bool.filter.push({ terms: { "paiBeneficiary.keyword": filter.PAI } });
+    if (filter?.SPECIFIC_AMENAGEMENT?.length) body.query.bool.filter.push({ terms: { "specificAmenagment.keyword": filter.SPECIFIC_AMENAGEMENT } });
+    if (filter?.PMR?.length) body.query.bool.filter.push({ terms: { "reducedMobilityAccess.keyword": filter.PMR } });
+
+    //Field with non renseigné value
+    if (filter?.ALLERGIES?.length) {
+      if (filter.ALLERGIES.includes("Non renseigné")) {
+        const filterWithoutNR = filter.ALLERGIES.filter((f) => f !== "Non renseigné");
+        body.query.bool.filter.push({
+          bool: {
+            should: [{ bool: { must_not: { exists: { field: "allergies.keyword" } } } }, { terms: { "allergies.keyword": filterWithoutNR } }],
+          },
+        });
+      } else {
+        body.query.bool.filter.push({ terms: { "allergies.keyword": filter.ALLERGIES } });
+      }
+    }
+    if (filter?.MEDICAL_FILE_RECEIVED?.length) {
+      if (filter.MEDICAL_FILE_RECEIVED.includes("Non renseigné")) {
+        const filterWithoutNR = filter.MEDICAL_FILE_RECEIVED.filter((f) => f !== "Non renseigné");
+        body.query.bool.filter.push({
+          bool: {
+            should: [
+              { bool: { must_not: { exists: { field: "cohesionStayMedicalFileReceived.keyword" } } } },
+              { terms: { "cohesionStayMedicalFileReceived.keyword": filterWithoutNR } },
+            ],
+          },
+        });
+      } else {
+        body.query.bool.filter.push({ terms: { "cohesionStayMedicalFileReceived.keyword": filter.MEDICAL_FILE_RECEIVED } });
+      }
+    }
+    if (filter?.QPV?.length) {
+      if (filter.QPV.includes("Non renseigné")) {
+        const filterWithoutNR = filter.QPV.filter((f) => f !== "Non renseigné");
+        body.query.bool.filter.push({
+          bool: {
+            should: [{ bool: { must_not: { exists: { field: "qpv.keyword" } } } }, { terms: { "qpv.keyword": filterWithoutNR } }],
+          },
+        });
+      } else {
+        body.query.bool.filter.push({ terms: { "qpv.keyword": filter.QPV } });
+      }
+    }
+    if (filter?.COHESION_JDM?.length) {
+      if (filter.COHESION_JDM.includes("Non renseigné")) {
+        const filterWithoutNR = filter.COHESION_JDM.filter((f) => f !== "Non renseigné");
+        body.query.bool.filter.push({
+          bool: {
+            should: [{ bool: { must_not: { exists: { field: "presenceJDM.keyword" } } } }, { terms: { "presenceJDM.keyword": filterWithoutNR } }],
+          },
+        });
+      } else {
+        body.query.bool.filter.push({ terms: { "presenceJDM.keyword": filter.COHESION_JDM } });
+      }
+    }
+    if (filter?.COHESION_PRESENCE?.length) {
+      if (filter.COHESION_PRESENCE.includes("Non renseigné")) {
+        const filterWithoutNR = filter.COHESION_PRESENCE.filter((f) => f !== "Non renseigné");
+        body.query.bool.filter.push({
+          bool: {
+            should: [{ bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } }, { terms: { "cohesionStayPresence.keyword": filterWithoutNR } }],
+          },
+        });
+      } else {
+        body.query.bool.filter.push({ terms: { "cohesionStayPresence.keyword": filter.COHESION_PRESENCE } });
+      }
+    }
+    if (filter?.DEPART?.length) {
+      if (filter.DEPART.includes("Non renseigné")) {
+        const filterWithoutNR = filter.DEPART.filter((f) => f !== "Non renseigné");
+        body.query.bool.filter.push({
+          bool: {
+            should: [{ bool: { must_not: { exists: { field: "departInform.keyword" } } } }, { terms: { "departInform.keyword": filterWithoutNR } }],
+          },
+        });
+      } else {
+        body.query.bool.filter.push({ terms: { "departInform.keyword": filter.DEPART } });
+      }
+    }
+    if (filter?.DEPART_MOTIF?.length) {
+      if (filter.DEPART_MOTIF.includes("Non renseigné")) {
+        const filterWithoutNR = filter.DEPART_MOTIF.filter((f) => f !== "Non renseigné");
+        body.query.bool.filter.push({
+          bool: {
+            should: [{ bool: { must_not: { exists: { field: "departSejourMotif.keyword" } } } }, { terms: { "departSejourMotif.keyword": filterWithoutNR } }],
+          },
+        });
+      } else {
+        body.query.bool.filter.push({ terms: { "departSejourMotif.keyword": filter.DEPART_MOTIF } });
+      }
+    }
 
     const data = await getAllResults("young", body);
     const result = await transformData({ data, centerId: id });
@@ -165,15 +272,15 @@ export default function CenterYoungIndex() {
         </div>
         <div className=" flex flex-1 flex-col lg:flex-row">
           <nav className="flex flex-1 gap-1">
-            <TabItem icon={<Menu />} title="Général" to={`/centre/${id}/${sessionId}/general`} />
-            <TabItem icon={<PencilAlt />} title="Tableau de pointage" to={`/centre/${id}/${sessionId}/tableau-de-pointage`} />
-            <TabItem icon={<ShieldCheck />} title="Fiche sanitaire" to={`/centre/${id}/${sessionId}/fiche-sanitaire`} />
+            <TabItem icon={<Menu />} title="Général" to={`/centre/${id}/${sessionId}/general${urlParams && "?" + urlParams}`} />
+            <TabItem icon={<PencilAlt />} title="Tableau de pointage" to={`/centre/${id}/${sessionId}/tableau-de-pointage${urlParams && "?" + urlParams}`} />
+            <TabItem icon={<ShieldCheck />} title="Fiche sanitaire" to={`/centre/${id}/${sessionId}/fiche-sanitaire${urlParams && "?" + urlParams}`} />
           </nav>
         </div>
         <div className="bg-white pt-4">
           {currentTab === "general" && <General filter={filter} updateFilter={updateFilter} />}
-          {currentTab === "tableau-de-pointage" && <Pointage />}
-          {currentTab === "fiche-sanitaire" && <FicheSanitaire />}
+          {currentTab === "tableau-de-pointage" && <Pointage updateFilter={updateFilter} />}
+          {currentTab === "fiche-sanitaire" && <FicheSanitaire updateFilter={updateFilter} />}
         </div>
       </div>
       <ModalExportMail isOpen={modalExportMail?.isOpen} onCancel={() => setModalExportMail({ isOpen: false, value: null })} onSubmit={modalExportMail?.onSubmit} />

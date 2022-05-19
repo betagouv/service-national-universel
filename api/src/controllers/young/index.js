@@ -938,7 +938,7 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
     }
 
     for (let young of youngs) {
-      young.set({ departSejourAt, departSejourMotif, departSejourMotifComment });
+      young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
       await young.save({ fromUser: req.user });
     }
 
