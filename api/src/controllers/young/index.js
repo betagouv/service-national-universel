@@ -440,10 +440,20 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       // await assignNextYoungFromWaitingList(young);
     }
 
+
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.sessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+    }
+
+    // if they had a meeting point, we check if we need to update the places taken / left in the bus
+    if (young.meetingPointId) {
+      const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
+      if (meetingPoint) {
+        const bus = await BusModel.findById(meetingPoint.busId);
+        if (bus) await updatePlacesBus(bus);
+      }
     }
     return res.status(200).send({ ok: true, data: young });
   } catch (error) {
