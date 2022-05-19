@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import * as FileSaver from "file-saver";
 import React from "react";
 import { toastr } from "react-redux-toastr";
-import { NavLink, useHistory, useParams } from "react-router-dom";
+import { NavLink, useHistory, useParams,Link } from "react-router-dom";
 import { ES_NO_LIMIT } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
@@ -11,7 +11,6 @@ import Menu from "../../../assets/icons/Menu";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
 import SelectAction from "../../../components/SelectAction";
-import { environment } from "../../../config";
 import api from "../../../services/api";
 import {
   departmentLookUp,
@@ -27,6 +26,8 @@ import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
 import Pointage from "./pointage";
+import ChevronRight from "../../../assets/icons/ChevronRight.js";
+import Template from "../../../assets/icons/Template.js";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
@@ -108,6 +109,15 @@ export default function CenterYoungIndex() {
 
   return (
     <>
+      <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
+        <Template className="" />
+        <ChevronRight className="" />
+        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre`}>Centres</Link>
+        <ChevronRight className="" />
+        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre/${id}`}>Fiche du centre</Link>
+        <ChevronRight className="" />
+        <div className="text-xs">Liste des volontaires</div>
+      </div>
       <div className="m-4">
         <div className="flex items-center justify-between">
           <div className="font-bold text-2xl mb-4">Volontaires</div>

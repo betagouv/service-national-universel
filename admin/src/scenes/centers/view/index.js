@@ -13,6 +13,8 @@ import { toastr } from "react-redux-toastr";
 import { translate, ROLES, canCreateOrUpdateCohesionCenter } from "../../../utils";
 import { environment } from "../../../config";
 import Plus from "../../../assets/icons/Plus.js";
+import ChevronRight from "../../../assets/icons/ChevronRight.js";
+import Template from "../../../assets/icons/Template.js";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -133,6 +135,13 @@ export default function Index({ ...props }) {
   if (!center) return <div />;
   return (
     <>
+      <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
+        <Template className=""/>
+        <ChevronRight className=""/>
+        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre`}>Centres</Link>
+        <ChevronRight className=""/>
+        <div className="text-xs">Fiche du centre</div>
+      </div>
       <CenterInformations center={center} sessions={sessions} />
       <div className="flex justify-left border-bottom mb-2 pl-5">
         {(availableCohorts || []).map((cohort, index) => (
