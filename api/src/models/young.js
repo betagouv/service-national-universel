@@ -373,7 +373,6 @@ const Schema = new mongoose.Schema({
   departInform: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le volontaire a déjà informé son départ",
     },
