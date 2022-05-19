@@ -111,7 +111,7 @@ export default function Edit(props) {
           </div>
           <div>
             <Donnee title={"Adresse"} value={meetingPoint.departureAddress} number={""} />
-            <Donnee title={"Département"} value={meetingPoint.departureDepartment} number={`(${getDepartmentNumber(center.department)})`} />
+            <Donnee title={"Département"} value={meetingPoint.departureDepartment} number={`(${getDepartmentNumber(center.department)})`} showLabelHide={meetingPoint.hideDepartmentInConvocation === "true"} />
             <Donnee title={"Date et heure de rendez-vous aller"} value={meetingPoint.departureAtString} />
             <Donnee title={"Date et heure de rendez-vous retour"} value={meetingPoint.returnAtString} />
             <Donnee title={"Place total"} value={bus.capacity} />
@@ -149,12 +149,12 @@ export default function Edit(props) {
   );
 }
 
-const Donnee = ({ title, value, number }) => {
+const Donnee = ({ title, value, number, showLabelHide }) => {
   return (
     <div className="flex pt-4">
       <div className="w-1/2 text-brand-detail_title "> {title} : </div>
       <div className="w-1/2 font-medium">
-        {value} {number}
+        {value} {number} {showLabelHide ? <span className="italic text-gray-500 text-xs">masqué</span> : ""}
       </div>
     </div>
   );
