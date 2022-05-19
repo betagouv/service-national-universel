@@ -130,8 +130,10 @@ const renderDOMTOM = async (young) => {
   try {
     if (!["Février 2022", "Juin 2022", "Juillet 2022"].includes(young.cohort)) throw `young ${young.id} unauthorized`;
     if (!young.cohesionCenterId && young.deplacementPhase1Autonomous !== "true") throw `unauthorized`;
-    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
-    if (!center) throw `center ${young.cohesionCenterId} not found for young ${young._id}`;
+    const session = await SessionPhase1.findById(young.sessionPhase1Id);
+    if (!session) throw `session ${young.sessionPhase1Id} not found for young ${young._id}`;
+    const center = await CohesionCenterModel.findById(session.cohesionCenterId);
+    if (!center) throw `center ${session.cohesionCenterId} not found for young ${young._id} - session ${session._id}`;
     const service = await DepartmentServiceModel.findOne({ department: young?.department });
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
     const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
