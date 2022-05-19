@@ -40,6 +40,9 @@ export default function Validated() {
               {young.statusPhase1 === "AFFECTED" && (
                 <strong className="text-xl mb-4 text-[#242526]">Bonne nouvelle vous avez été affecté à un lieu pour votre séjour de cohésion !</strong>
               )}
+              {young.statusPhase1 === "WAITING_LIST" && (
+                <strong className="text-xl mb-4 text-[#242526]">Vous êtes actuellement sur liste complémentaire pour votre séjour de cohésion.</strong>
+              )}
             </section>
             <Link to="/phase1">
               <DownloadButton text={young.statusPhase1 === "AFFECTED" ? "Réaliser mes démarches pour partir" : "Fournir mes documents justificatifs"} />
