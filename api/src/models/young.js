@@ -370,6 +370,14 @@ const Schema = new mongoose.Schema({
       description: "La fiche sanitaire a été reçu par le SNU",
     },
   },
+  departInform: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "Le volontaire a déjà informé son départ",
+    },
+  },
   departSejourAt: {
     type: Date,
     documentation: {

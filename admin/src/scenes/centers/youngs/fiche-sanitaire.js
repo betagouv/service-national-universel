@@ -12,14 +12,33 @@ import ModalPointageFicheSanitaire from "../components/modals/ModalPointageFiche
 import { getFilterLabel, translate, translatePhase1, getAge } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Filter2, FilterRow, ResultTable } from "../../../components/list";
-const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "COHESION_PRESENCE"];
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
 import SelectAction from "../../../components/SelectAction";
 import CursorClick from "../../../assets/icons/CursorClick";
 import ModalMultiPointageFicheSanitaire from "../components/modals/ModalMultiPointageFicheSanitaire";
+const FILTERS = [
+  "SEARCH",
+  "STATUS",
+  "STATUS_PHASE_1",
+  "REGION",
+  "DEPARTMENT",
+  "GRADE",
+  "HANDICAP",
+  "PPS",
+  "PAI",
+  "QPV",
+  "ALLERGIES",
+  "SPECIFIC_AMENAGEMENT",
+  "PMR",
+  "MEDICAL_FILE_RECEIVED",
+  "COHESION_PRESENCE",
+  "COHESION_JDM",
+  "DEPART",
+  "DEPART_MOTIF",
+];
 
-export default function FicheSanitaire() {
+export default function FicheSanitaire({ updateFilter }) {
   const [young, setYoung] = useState();
   const [focusedSession, setFocusedSession] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
@@ -97,6 +116,7 @@ export default function FicheSanitaire() {
                         innerClass={{ input: "searchbox" }}
                         autosuggest={false}
                         queryFormat="and"
+                        onValueChange={(e) => updateFilter({ SEARCH: e })}
                       />
                       <div
                         className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
@@ -188,8 +208,7 @@ export default function FicheSanitaire() {
                     </div>
                   </div>
                   <FilterRow visible={filterVisible}>
-                    <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                    <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                    <div className="uppercase text-xs text-snu-purple-800">Général</div>
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -203,6 +222,7 @@ export default function FicheSanitaire() {
                       URLParams={true}
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut")}
+                      onValueChange={(e) => updateFilter({ STATUS: e })}
                     />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
@@ -217,7 +237,156 @@ export default function FicheSanitaire() {
                       URLParams={true}
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                      onValueChange={(e) => updateFilter({ STATUS_PHASE_1: e })}
                     />
+                    <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} onValueChange={(e) => updateFilter({ REGION: e })} />
+                    <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} onValueChange={(e) => updateFilter({ DEPARTMENT: e })} />
+                  </FilterRow>
+                  <FilterRow visible={filterVisible}>
+                    <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="Classe"
+                      componentId="GRADE"
+                      dataField="grade.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "GRADE") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Classe", "Classe")}
+                      onValueChange={(e) => updateFilter({ GRADE: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="HANDICAP"
+                      componentId="HANDICAP"
+                      dataField="handicap.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "HANDICAP") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
+                      onValueChange={(e) => updateFilter({ HANDICAP: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="PPS"
+                      componentId="PPS"
+                      dataField="ppsBeneficiary.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "PPS") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      renderLabel={(items) => getFilterLabel(items, "PPS", "PPS")}
+                      onValueChange={(e) => updateFilter({ PPS: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="PAI"
+                      componentId="PAI"
+                      dataField="paiBeneficiary.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "PAI") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      renderLabel={(items) => getFilterLabel(items, "PAI", "PAI")}
+                      onValueChange={(e) => updateFilter({ PAI: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="QPV"
+                      componentId="QPV"
+                      dataField="qpv.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "QPV") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      renderLabel={(items) => getFilterLabel(items, "QPV", "QPV")}
+                      onValueChange={(e) => updateFilter({ QPV: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder=""
+                      componentId="ALLERGIES"
+                      dataField="allergies.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "ALLERGIES") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      renderLabel={(items) => getFilterLabel(items, "Allergies ou intolérances", "Allergies ou intolérances")}
+                      showMissing
+                      missingLabel="Non renseigné"
+                      onValueChange={(e) => updateFilter({ ALLERGIES: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="Aménagement spécifique"
+                      componentId="SPECIFIC_AMENAGEMENT"
+                      dataField="specificAmenagment.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "SPECIFIC_AMENAGEMENT") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      renderLabel={(items) => getFilterLabel(items, "Aménagement spécifique", "Aménagement spécifique")}
+                      onValueChange={(e) => updateFilter({ SPECIFIC_AMENAGEMENT: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="PMR"
+                      componentId="PMR"
+                      dataField="reducedMobilityAccess.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "PMR") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      renderLabel={(items) => getFilterLabel(items, "Aménagement PMR", "Aménagement PMR")}
+                      onValueChange={(e) => updateFilter({ PMR: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      componentId="MEDICAL_FILE_RECEIVED"
+                      dataField="cohesionStayMedicalFileReceived.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "MEDICAL_FILE_RECEIVED") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires", "Fiches sanitaires")}
+                      showMissing
+                      missingLabel="Non renseigné"
+                      onValueChange={(e) => updateFilter({ MEDICAL_FILE_RECEIVED: e })}
+                    />
+                  </FilterRow>
+                  <FilterRow visible={filterVisible}>
+                    <div className="uppercase text-xs text-snu-purple-800">Pointage</div>
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -230,9 +399,61 @@ export default function FicheSanitaire() {
                       title=""
                       URLParams={true}
                       showSearch={false}
-                      renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                      renderLabel={(items) => getFilterLabel(items, "Présence à l'arrivée")}
                       showMissing
                       missingLabel="Non renseigné"
+                      onValueChange={(e) => updateFilter({ COHESION_PRESENCE: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      componentId="COHESION_JDM"
+                      dataField="presenceJDM.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "COHESION_JDM") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Présence à la JDM")}
+                      showMissing
+                      missingLabel="Non renseigné"
+                      onValueChange={(e) => updateFilter({ COHESION_JDM: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      componentId="DEPART"
+                      dataField="departInform.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "DEPART") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Départ renseigné")}
+                      showMissing
+                      missingLabel="Non renseigné"
+                      onValueChange={(e) => updateFilter({ DEPART: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      componentId="DEPART_MOTIF"
+                      dataField="departSejourMotif.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "DEPART_MOTIF") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Motif du départ")}
+                      showMissing
+                      missingLabel="Non renseigné"
+                      onValueChange={(e) => updateFilter({ DEPART_MOTIF: e })}
                     />
                   </FilterRow>
                 </Filter2>
