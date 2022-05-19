@@ -46,7 +46,6 @@ export default function CenterYoungIndex() {
 
   React.useEffect(() => {
     if (filter) {
-      console.log("filter", filter);
       const params = Object.keys(filter).reduce((acc, key) => {
         if (filter[key] && key !== "SEARCH") {
           return `${acc}&${key}=%5B${filter[key].map((c) => `"${c}"`)?.join("%2C")}%5D`;
