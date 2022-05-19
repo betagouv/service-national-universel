@@ -105,7 +105,7 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
               />
               <label className="flex-1 mb-0 cursor-pointer" htmlFor="hideDepartmentInConvocation">Ne pas afficher le département sur le compte volontaire</label>
             </div>
-            {data?.hideDepartmentInConvocation ?
+            {data?.hideDepartmentInConvocation === "true" ?
               <div className="flex gap-2 bg-blue-50 rounded-lg p-2 text-blue-700">
                 Le département ne sera pas visible sur le compte des volontaires.<br />
                 Merci de rendre l'adresse postale la plus explicite possible.
