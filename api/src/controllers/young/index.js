@@ -378,7 +378,7 @@ router.post("/:id/deplacementPhase1Autonomous", passport.authenticate(["referent
       deplacementPhase1Autonomous: "true",
       meetingPointId: null,
     });
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     // if there is a bus, we need to remove the young from it
     if (bus) await updatePlacesBus(bus);
