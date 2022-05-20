@@ -102,8 +102,9 @@ export default function AssignMeetingPoint({ young, onAffect, onClick }) {
   );
 }
 
-const HitMeetingPoint = async ({ hit, onSend }) => {
+const HitMeetingPoint = ({ hit, onSend }) => {
   const [bus, setBus] = useState();
+
   useEffect(() => {
     try {
       (async () => {
@@ -113,7 +114,7 @@ const HitMeetingPoint = async ({ hit, onSend }) => {
     } catch (e) {
       console.log(e);
     }
-  }, []);
+  }, [hit]);
 
   if (!bus || bus?.placesLeft <= 0) return null;
 
