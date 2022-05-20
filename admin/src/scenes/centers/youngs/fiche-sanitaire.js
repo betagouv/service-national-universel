@@ -63,6 +63,7 @@ export default function FicheSanitaire({ updateFilter }) {
     (async () => {
       const { data } = await api.get(`/session-phase1/${sessionId}`);
       setFocusedSession(data);
+      updateFilter({ SESSION: data._id.toString() });
     })();
   }, [sessionId]);
 

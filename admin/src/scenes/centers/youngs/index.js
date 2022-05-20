@@ -52,7 +52,7 @@ export default function CenterYoungIndex() {
   React.useEffect(() => {
     if (filter) {
       const params = Object.keys(filter).reduce((acc, key) => {
-        if (filter[key] && key !== "SEARCH") {
+        if (filter[key] && !["SEARCH", "SESSION"].includes(key)) {
           return `${acc}&${key}=%5B${filter[key].map((c) => `"${c}"`)?.join("%2C")}%5D`;
         }
         return acc;
@@ -211,7 +211,7 @@ export default function CenterYoungIndex() {
       }
     }
 
-    const data = await getAllResults("young", body);
+    const data = await getAllResults(`sessionphase1young/${filter.SESSION}`, body);
     const result = await transformData({ data, centerId: id });
     const csv = await toArrayOfArray(result);
     await toXLSX(`volontaires_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}.xlsx`, csv);
