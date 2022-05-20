@@ -1,3 +1,15 @@
+# [1.89.0](https://github.com/betagouv/service-national-universel/compare/v1.88.0...v1.89.0) (2022-05-20)
+
+
+### Bug Fixes
+
+* add `fromUser` ([168ecf4](https://github.com/betagouv/service-national-universel/commit/168ecf4c8dfa7ece2792e044808035d0cc213537))
+
+
+### Features
+
+* **admin:** inviter chef centre si besoin [#1579](https://github.com/betagouv/service-national-universel/issues/1579) ([97af790](https://github.com/betagouv/service-national-universel/commit/97af7909cde956135668d7895bca26db281f95c8))
+
 # [1.88.0](https://github.com/betagouv/service-national-universel/compare/v1.87.1...v1.88.0) (2022-05-19)
 
 
