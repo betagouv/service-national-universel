@@ -104,10 +104,12 @@ export default function AssignMeetingPoint({ young, onAffect, onClick }) {
 
 const HitMeetingPoint = async ({ hit, onSend }) => {
   const [bus, setBus] = useState();
-  useEffect(async () => {
+  useEffect(() => {
     try {
-      const { data } = await api.get(`/bus/${hit.busId}`);
-      setBus(data);
+      (async () => {
+        const { data } = await api.get(`/bus/${hit.busId}`);
+        setBus(data);
+      })();
     } catch (e) {
       console.log(e);
     }
