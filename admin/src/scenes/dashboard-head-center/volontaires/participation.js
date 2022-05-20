@@ -61,7 +61,7 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
         <Col md={6} xl={3} k="departInform_true">
           <CardComponentPercentage
             getLink={getLink}
-            to={`/centre/${centerId}/${sessionPhase1Id}/general?COHESION_JDM=%5B"DEPART"%5D`}
+            to={`/centre/${centerId}/${sessionPhase1Id}/general?DEPART=%5B"true"%5D`}
             color={colors.green}
             title="Départs renseignés"
             value={departInform["true"]}

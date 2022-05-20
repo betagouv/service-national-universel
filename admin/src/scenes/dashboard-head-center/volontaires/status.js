@@ -16,7 +16,6 @@ export default function Status({ filter }) {
   const [totalHit, setTotalHit] = useState();
 
   const { sessionPhase1 } = useSelector((state) => state.Auth);
-  console.log(sessionPhase1);
 
   useEffect(() => {
     (async () => {
