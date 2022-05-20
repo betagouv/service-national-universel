@@ -10,7 +10,7 @@ import { ModalContainer } from "../../../../components/modals/Modal";
 import { setYoung } from "../../../../redux/auth/actions";
 import api from "../../../../services/api";
 import { translateCohort } from "../../../../utils";
-import plausibleEvent from "../../../services/plausible";
+import plausibleEvent from "../../../../services/plausible";
 
 export default function StepAgreement({ young }) {
   const [stateDesktop, setStateDesktop] = useState(false);

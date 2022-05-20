@@ -13,7 +13,7 @@ import WithTooltip from "../../../../components/WithTooltip";
 import { setYoung } from "../../../../redux/auth/actions";
 import api from "../../../../services/api";
 import Convocation from "../Convocation";
-import plausibleEvent from "../../../services/plausible";
+import plausibleEvent from "../../../../services/plausible";
 
 export default function StepAgreement({ young }) {
   const [showConvocation, setShowConvocation] = useState(false);
