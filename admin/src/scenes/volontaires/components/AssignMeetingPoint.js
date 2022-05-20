@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
 
@@ -26,7 +26,7 @@ export default function AssignMeetingPoint({ young, onAffect, onClick }) {
         console.log(e);
       }
     }
-  }, [young])
+  }, [young]);
 
   const getDefaultQuery = () => ({
     query: {
@@ -102,7 +102,19 @@ export default function AssignMeetingPoint({ young, onAffect, onClick }) {
   );
 }
 
-const HitMeetingPoint = ({ hit, onSend }) => {
+const HitMeetingPoint = async ({ hit, onSend }) => {
+  const [bus, setBus] = useState();
+  useEffect(async () => {
+    try {
+      const { data } = await api.get(`/bus/${hit.busId}`);
+      setBus(data);
+    } catch (e) {
+      console.log(e);
+    }
+  }, []);
+
+  if (!bus || bus?.placesLeft <= 0) return null;
+
   return (
     <tr>
       <td>{hit.busExcelId}</td>
