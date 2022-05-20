@@ -14,7 +14,6 @@ import { colors, translate } from "../../utils";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
 import DownloadButton from "./components/DownloadButton";
 import { Footer, FormGroup, FormRow, Logo, SuccessMessage, Title } from "./components/printable";
-import plausibleEvent from "../../services/plausible";
 import { YOUNG_STATUS_PHASE1 } from "snu-lib/constants";
 
 export default function AutoTest({ isOpen, onCancel, correction }) {
@@ -94,7 +93,6 @@ export default function AutoTest({ isOpen, onCancel, correction }) {
                       if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
                       dispatch(setYoung(young));
                       toastr.success("Mis à jour !");
-                      if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) plausibleEvent("affecté_step3");
                       setShowFields(false);
                     } catch (e) {
                       setLoading(false);

@@ -10,6 +10,7 @@ import { ModalContainer } from "../../../../components/modals/Modal";
 import { setYoung } from "../../../../redux/auth/actions";
 import api from "../../../../services/api";
 import { translateCohort } from "../../../../utils";
+import plausibleEvent from "../../../services/plausible";
 
 export default function StepAgreement({ young }) {
   const [stateDesktop, setStateDesktop] = useState(false);
@@ -30,6 +31,7 @@ export default function StepAgreement({ young }) {
     const { data, ok } = await api.put(`/young/phase1/agreement`, { youngPhase1Agreement: "true" });
     if (!ok) return toastr.error("Une erreur est survenue lors de la validation de votre engagement");
     toastr.success("Votre engagement a bien été enregistré");
+    plausibleEvent("affecté_step2");
     dispatch(setYoung(data));
     setStateDesktop(false);
     setStateMobil(false);
