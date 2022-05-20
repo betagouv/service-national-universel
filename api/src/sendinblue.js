@@ -54,7 +54,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
 }
 
 // https://developers.sendinblue.com/reference#sendtransacemail
-async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}) {
+async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, { force } = { force: false }) {
   try {
     const body = { templateId: parseInt(id) };
     if (emailTo) body.to = emailTo;
@@ -62,7 +62,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}) {
     if (bcc?.length) body.bcc = bcc;
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
-    if (ENVIRONMENT !== "production") {
+    if (!force && ENVIRONMENT !== "production") {
       const regexp = /(selego\.co|beta\.gouv\.fr|fr\.ey\.com)/;
       body.to = body.to.filter((e) => e.email.match(regexp));
       if (body.cc) body.cc = body.cc.filter((e) => e.email.match(regexp));
