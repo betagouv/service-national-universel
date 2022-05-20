@@ -23,6 +23,7 @@ import {
   translateFileStatusPhase1,
   translatePhase1,
   canSearchInElasticSearch,
+  ROLES,
 } from "../../../utils";
 import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
@@ -218,23 +219,25 @@ export default function CenterYoungIndex() {
 
   return (
     <>
-      <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
-        <Template className="" />
-        <ChevronRight className="" />
-        {canSearchInElasticSearch(user, "cohesioncenter") ? (
-          <Link className="text-xs hover:underline hover:text-snu-purple-300" to="/centre">
-            Centres
+      {user.role !== ROLES.HEAD_CENTER ? (
+        <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
+          <Template className="" />
+          <ChevronRight className="" />
+          {canSearchInElasticSearch(user, "cohesioncenter") ? (
+            <Link className="text-xs hover:underline hover:text-snu-purple-300" to="/centre">
+              Centres
+            </Link>
+          ) : (
+            <div className="text-xs">Centres</div>
+          )}
+          <ChevronRight className="" />
+          <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre/${id}`}>
+            Fiche du centre
           </Link>
-        ) : (
-          <div className="text-xs">Centres</div>
-        )}
-        <ChevronRight className="" />
-        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre/${id}`}>
-          Fiche du centre
-        </Link>
-        <ChevronRight className="" />
-        <div className="text-xs">Liste des volontaires</div>
-      </div>
+          <ChevronRight className="" />
+          <div className="text-xs">Liste des volontaires</div>
+        </div>
+      ) : null}
       <div className="m-4">
         <div className="flex items-center justify-between">
           <div className="font-bold text-2xl mb-4">Volontaires</div>

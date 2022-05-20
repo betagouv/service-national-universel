@@ -154,9 +154,6 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
           </Link>
         </Col>
       </Row>
-
-      {/* ["Exclusion", "Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire", "Autre"] */}
-
       <Subtitle>Confirmation de participation au séjour de cohésion</Subtitle>
       <Row>
         <Col md={6} xl={4} k="cohesionStayPresence_true">
@@ -178,9 +175,9 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
             <Card borderBottomColor="#EF4036">
               <CardTitle>Participation non renseignée</CardTitle>
               <CardValueWrapper>
-                <CardValue>{total - youngPhase1Agreement["true"] + youngPhase1Agreement["false"] || 0}</CardValue>
+                <CardValue>{total - youngPhase1Agreement["true"] || 0}</CardValue>
                 <CardPercentage>
-                  {total ? `${(((total - youngPhase1Agreement["true"] + youngPhase1Agreement["false"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                  {total ? `${(((total - youngPhase1Agreement["true"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
                   <CardArrow />
                 </CardPercentage>
               </CardValueWrapper>

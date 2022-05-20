@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-
 import api from "../../../services/api";
-import Phase1 from "./phase1";
 import CohesionStayMedicalFileReceived from "./cohesionStayMedicalFileReceived";
-import CohesionStayPresence from "./cohesionStayPresence";
+import Participation from "./participation";
+import Phase1 from "./phase1";
+import { useSelector } from "react-redux";
 
 export default function Status({ filter }) {
   const [statusPhase1, setStatusPhase1] = useState({});
   const [cohesionStayMedicalFileReceived, setCohesionStayMedicalFileReceived] = useState({});
   const [cohesionStayPresence, setCohesionStayPresence] = useState({});
+  const [youngPhase1Agreement, setYoungPhase1Agreement] = useState({});
+  const [departInform, setDepartInform] = useState({});
+  const [departSejourMotif, setDepartSejourMotif] = useState({});
+  const [presenceJDM, setPresenceJDM] = useState({});
+  const [totalHit, setTotalHit] = useState();
 
-  const user = useSelector((state) => state.Auth.user);
+  const { sessionPhase1 } = useSelector((state) => state.Auth);
+  console.log(sessionPhase1);
 
   useEffect(() => {
     (async () => {
@@ -26,7 +31,12 @@ export default function Status({ filter }) {
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },
           cohesionStayMedicalFileReceived: { terms: { field: "cohesionStayMedicalFileReceived.keyword" } },
           cohesionStayPresence: { terms: { field: "cohesionStayPresence.keyword" } },
+          youngPhase1Agreement: { terms: { field: "youngPhase1Agreement.keyword" } },
+          presenceJDM: { terms: { field: "presenceJDM.keyword" } },
+          departInform: { terms: { field: "departInform.keyword" } },
+          departSejourMotif: { terms: { field: "departSejourMotif.keyword" } },
         },
+        track_total_hits: true,
         size: 0,
       };
 
@@ -41,6 +51,11 @@ export default function Status({ filter }) {
         setCohesionStayMedicalFileReceived(responses[0].aggregations.cohesionStayMedicalFileReceived.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         addNullAttributes(responses[0].hits.total.value, responses[0].aggregations.cohesionStayPresence.buckets);
         setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setYoungPhase1Agreement(responses[0].aggregations.youngPhase1Agreement.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setPresenceJDM(responses[0].aggregations.presenceJDM.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setDepartInform(responses[0].aggregations.departInform.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setDepartSejourMotif(responses[0].aggregations.departSejourMotif.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setTotalHit(responses[0].hits.total.value);
       }
     })();
   }, [JSON.stringify(filter)]);
@@ -56,18 +71,26 @@ export default function Status({ filter }) {
           }, 0);
   };
 
-  const replaceSpaces = (v) => v?.replace(/\s+/g, "+");
-
   const getLink = (link) => {
-    if (filter.cohort?.length) link += `&COHORT=%5B${replaceSpaces(filter?.cohort?.map((c) => `"${c}"`)?.join("%2C"))}%5D`;
     return link;
   };
 
   return (
     <>
-      <Phase1 data={statusPhase1} getLink={getLink} />
-      <CohesionStayMedicalFileReceived data={cohesionStayMedicalFileReceived} getLink={getLink} />
-      <CohesionStayPresence data={cohesionStayPresence} getLink={getLink} />
+      <Phase1 data={statusPhase1} getLink={getLink} sessionPhase1Id={sessionPhase1?._id} centerId={sessionPhase1?.cohesionCenterId} />
+      <CohesionStayMedicalFileReceived data={cohesionStayMedicalFileReceived} getLink={getLink} sessionPhase1Id={sessionPhase1?._id} centerId={sessionPhase1?.cohesionCenterId} />
+      <Participation
+        cohesionStayPresence={cohesionStayPresence}
+        youngPhase1Agreement={youngPhase1Agreement}
+        filter={filter}
+        total={totalHit}
+        getLink={getLink}
+        presenceJDM={presenceJDM}
+        departInform={departInform}
+        departSejourMotif={departSejourMotif}
+        sessionPhase1Id={sessionPhase1?._id}
+        centerId={sessionPhase1?.cohesionCenterId}
+      />
     </>
   );
 }
