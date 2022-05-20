@@ -13,7 +13,7 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
             getLink={getLink}
             to={`/centre/${centerId}/${sessionPhase1Id}/general?COHESION_PRESENCE=%5B"true"%5D`}
             color={colors.green}
-            title="Présent au séjour de cohésion"
+            title="Présent à l'arrivée"
             value={cohesionStayPresence["true"]}
             total={total}
           />
@@ -23,7 +23,7 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
             getLink={getLink}
             to={`/centre/${centerId}/${sessionPhase1Id}/general?COHESION_PRESENCE=%5B"false"%5D`}
             color={colors.yellow}
-            title="Absent au séjour de cohésion"
+            title="Absent à l'arrivée"
             value={cohesionStayPresence["false"]}
             total={total}
           />
