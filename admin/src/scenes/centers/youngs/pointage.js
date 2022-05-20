@@ -18,7 +18,7 @@ import ModalMultiPointagePresenceJDM from "../components/modals/ModalMultiPointa
 import ModalMultiPointagePresenceArrivee from "../components/modals/ModalMultiPointagePresenceArrivee";
 import ModalMultiPointageDepart from "../components/modals/ModalMultiPointageDepart";
 import ModalPointageDepart from "../components/modals/ModalPointageDepart";
-import { getFilterLabel, translate, translatePhase1, getAge, formatDateFR } from "../../../utils";
+import { getFilterLabel, translate, translatePhase1, getAge, formatDateFR, YOUNG_STATUS } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -319,6 +319,7 @@ export default function Pointage({ updateFilter }) {
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut")}
                       onValueChange={(e) => updateFilter({ STATUS: e })}
+                      defaultValue={[YOUNG_STATUS.VALIDATED]}
                     />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}

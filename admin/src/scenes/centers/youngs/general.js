@@ -10,7 +10,7 @@ import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import api from "../../../services/api";
 import Panel from "../../volontaires/panel";
 import { RegionFilter, DepartmentFilter } from "../../../components/filters";
-import { getFilterLabel, translate, translatePhase1, getAge, YOUNG_STATUS_COLORS, formatDateFR } from "../../../utils";
+import { getFilterLabel, translate, translatePhase1, getAge, YOUNG_STATUS_COLORS, formatDateFR, YOUNG_STATUS } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -109,6 +109,7 @@ export default function General({ updateFilter }) {
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut")}
                       onValueChange={(e) => updateFilter({ STATUS: e })}
+                      defaultValue={[YOUNG_STATUS.VALIDATED]}
                     />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
