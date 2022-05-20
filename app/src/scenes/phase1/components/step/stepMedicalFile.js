@@ -30,7 +30,7 @@ export default function StepMedicalField({ young }) {
 
   const handleDownload = async () => {
     const { data } = await api.put(`/young/phase1/cohesionStayMedical`, { cohesionStayMedicalFileDownload: "true" });
-    plausibleEvent("affecté_step2");
+    plausibleEvent("affecté_step4");
     dispatch(setYoung(data));
   };
 

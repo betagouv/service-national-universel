@@ -4,17 +4,20 @@ import { useHistory, Link } from "react-router-dom";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { useParams } from "react-router";
+import validator from "validator";
 
-import { CENTER_ROLES, translate } from "../../../utils";
+import { CENTER_ROLES, ROLES, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
 import { Box } from "../../../components/box";
 import api from "../../../services/api";
 import Trash from "../../../assets/icons/Trash";
 import ChevronRight from "../../../assets/icons/ChevronRight.js";
 import Template from "../../../assets/icons/Template.js";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default function Team({ focusedSession: focusedSessionfromProps }) {
   const { id, sessionId } = useParams();
   const [focusedSession, setFocusedSession] = useState(focusedSessionfromProps);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const addTeamate = async (teamate) => {
     let obj = {};
@@ -41,7 +44,20 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
 
       if (!referent) {
         // todo : create chef de centre
-        toastr.error("Erreur !", "Aucun utilisateur trouvé avec cette adresse email");
+        setModal({
+          title: `Inviter ${teamate.firstName} ${teamate.lastName}`,
+          message: (
+            <div>
+              Aucun compte n'a été trouvé pour l'email&nbsp;:
+              <br />
+              <span className="underline text-snu-purple-300">{teamate.email}</span>
+              <br />
+              Êtes-vous sûr de vouloir l&apos;inviter&nbsp;?
+            </div>
+          ),
+          isOpen: true,
+          onConfirm: () => inviteChefDeCentre(teamate)
+        })
         return {};
       }
 
@@ -50,6 +66,19 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
       toastr.error("Erreur !", translate(e));
     }
   };
+
+  const inviteChefDeCentre = async (user) => {
+    try {
+      const responseInvitation = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[ROLES.HEAD_CENTER]}`, { ...user, role: ROLES.HEAD_CENTER });
+      if (!responseInvitation?.ok) return toastr.error("Erreur !", translate(responseInvitation?.code));
+      const responseSession = await api.put(`/session-phase1/${focusedSession._id}`, { headCenterId: responseInvitation?.data?._id });
+      if (!responseSession?.ok) return toastr.error("Erreur !", translate(responseInvitation?.code));
+      setFocusedSession(responseSession?.data);
+      toastr.success("Succès", `${user.firstName} ${user.lastName} a reçu une invitation pour rejoindre l'équipe`);
+    } catch (e) {
+      toastr.error("Erreur !", translate(e));
+    }
+  }
 
   const setTeamate = async (teamate) => {
     const obj = { team: focusedSession.team };
@@ -105,6 +134,17 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
           </Wrapper>
         </Box>
       </div>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={async () => {
+          await modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+
     </>
   );
 }
@@ -219,7 +259,12 @@ const AddBlock = ({ addTeamate }) => {
                 <CustomField disabled={isSubmitting} placeholder="Nom" validate={(v) => !v} name="lastName" value={values.lastName} onChange={handleChange} />
               </div>
             </div>
-            <CustomField disabled={isSubmitting} placeholder="Adresse e-mail" validate={(v) => !v} name="email" value={values.email} onChange={handleChange} />
+            <CustomField
+              disabled={isSubmitting}
+              placeholder="Adresse e-mail"
+              validate={(v) => (!v && "Ce champ est obligatoire") || (!validator.isEmail(v) && "Format email incorrect")}
+              name="email" value={values.email} onChange={handleChange} />
+              <p className="text-red-500 text-center mt-2 text-xs">{errors.email}</p>
             <Field
               disabled={isSubmitting}
               as="select"

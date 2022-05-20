@@ -23,6 +23,7 @@ import {
   translateFileStatusPhase1,
   translatePhase1,
   canSearchInElasticSearch,
+  ROLES,
 } from "../../../utils";
 import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
@@ -51,7 +52,7 @@ export default function CenterYoungIndex() {
   React.useEffect(() => {
     if (filter) {
       const params = Object.keys(filter).reduce((acc, key) => {
-        if (filter[key] && key !== "SEARCH") {
+        if (filter[key] && !["SEARCH", "SESSION"].includes(key)) {
           return `${acc}&${key}=%5B${filter[key].map((c) => `"${c}"`)?.join("%2C")}%5D`;
         }
         return acc;
@@ -210,7 +211,7 @@ export default function CenterYoungIndex() {
       }
     }
 
-    const data = await getAllResults("young", body);
+    const data = await getAllResults(`sessionphase1young/${filter.SESSION}`, body);
     const result = await transformData({ data, centerId: id });
     const csv = await toArrayOfArray(result);
     await toXLSX(`volontaires_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}.xlsx`, csv);
@@ -218,23 +219,25 @@ export default function CenterYoungIndex() {
 
   return (
     <>
-      <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
-        <Template className="" />
-        <ChevronRight className="" />
-        {canSearchInElasticSearch(user, "cohesioncenter") ? (
-          <Link className="text-xs hover:underline hover:text-snu-purple-300" to="/centre">
-            Centres
+      {user.role !== ROLES.HEAD_CENTER ? (
+        <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
+          <Template className="" />
+          <ChevronRight className="" />
+          {canSearchInElasticSearch(user, "cohesioncenter") ? (
+            <Link className="text-xs hover:underline hover:text-snu-purple-300" to="/centre">
+              Centres
+            </Link>
+          ) : (
+            <div className="text-xs">Centres</div>
+          )}
+          <ChevronRight className="" />
+          <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre/${id}`}>
+            Fiche du centre
           </Link>
-        ) : (
-          <div className="text-xs">Centres</div>
-        )}
-        <ChevronRight className="" />
-        <Link className="text-xs hover:underline hover:text-snu-purple-300" to={`/centre/${id}`}>
-          Fiche du centre
-        </Link>
-        <ChevronRight className="" />
-        <div className="text-xs">Liste des volontaires</div>
-      </div>
+          <ChevronRight className="" />
+          <div className="text-xs">Liste des volontaires</div>
+        </div>
+      ) : null}
       <div className="m-4">
         <div className="flex items-center justify-between">
           <div className="font-bold text-2xl mb-4">Volontaires</div>

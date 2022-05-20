@@ -12,7 +12,7 @@ export default function Index() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
 
   function updateFilter(n) {
-    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: [], department: [], cohort: [sessionPhase1?.cohort] }), ...n });
+    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: [], department: [], cohort: sessionPhase1?.cohort ? [sessionPhase1?.cohort] : undefined }), ...n });
   }
 
   useEffect(() => {
