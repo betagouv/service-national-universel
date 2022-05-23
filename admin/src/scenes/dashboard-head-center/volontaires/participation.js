@@ -95,7 +95,7 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
             getLink={getLink}
             to={`/centre/${centerId}/${sessionPhase1Id}/general?DEPART_MOTIF=%5B"Annulation du séjour ou mesure d’éviction sanitaire"%5D`}
             color={colors.lightOrange}
-            title="Annulation séjour ou mesure d'éviction sanitaire"
+            title="Annulation séjour/ éviction sanitaire"
             value={departSejourMotif["Annulation du séjour ou mesure d’éviction sanitaire"]}
             total={total}
           />

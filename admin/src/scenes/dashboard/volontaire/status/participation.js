@@ -142,7 +142,7 @@ export default function Participation({ cohesionStayPresence, youngPhase1Agreeme
         <Col md={6} xl={3} k="departInform_cancel">
           <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D&DEPART_MOTIF=%5B"Annulation du séjour ou mesure d’éviction sanitaire"%5D'] })}>
             <Card borderBottomColor="#ffa987">
-              <CardTitle>Annulation séjour ou mesure d'éviction sanitaire</CardTitle>
+              <CardTitle>Annulation séjour/ éviction sanitaire</CardTitle>
               <CardValueWrapper>
                 <CardValue>{departSejourMotif["Annulation du séjour ou mesure d’éviction sanitaire"] || 0}</CardValue>
                 <CardPercentage>
