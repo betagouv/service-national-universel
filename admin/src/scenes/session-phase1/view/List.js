@@ -6,7 +6,7 @@ import FilterSvg from "../../../assets/icons/Filter";
 import { FaBus } from "react-icons/fa";
 import { BiCopy, BiWalk } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
-import Select from "./Select";
+import Select from "../components/SelectFilter";
 
 export default function List({ data }) {
   const [currentTab, setCurrentTab] = useState(null);
@@ -22,7 +22,6 @@ export default function List({ data }) {
   useEffect(() => {
     if (Object.keys(data).length) {
       setCurrentTab(Object.keys(data)[0]);
-      console.log("here");
     }
   }, [data]);
 
@@ -54,7 +53,7 @@ export default function List({ data }) {
         .filter((e) => {
           if (!filter?.search) return true;
           return Object.values(e).some((f) => {
-            return f.toString().toLowerCase().replaceAll(" ", "").includes(filter.search.toLowerCase().replaceAll(" ", ""));
+            return f?.toString().toLowerCase().replaceAll(" ", "").includes(filter?.search.toLowerCase().replaceAll(" ", ""));
           });
         })
         .filter((e) => !filter?.status || e.statusPhase1 === filter?.status)
@@ -121,14 +120,16 @@ export default function List({ data }) {
                 };
               })}
             />
-            <Select
-              Icon={<FilterSvg className="text-gray-400" />}
-              value={filter?.meetingPoint || ""}
-              onChange={(e) => updateFilter({ meetingPoint: e })}
-              placeholder="Filtrer par point de rassemblement"
-              alignItems="left"
-              options={activeMeetingPoint}
-            />
+            {currentTab !== "noMeetingPoint" ? (
+              <Select
+                Icon={<FilterSvg className="text-gray-400" />}
+                value={filter?.meetingPoint || ""}
+                onChange={(e) => updateFilter({ meetingPoint: e })}
+                placeholder="Filtrer par point de rassemblement"
+                alignItems="left"
+                options={activeMeetingPoint}
+              />
+            ) : null}
           </div>
           <table className="w-full bg-white">
             <thead className="">
@@ -181,7 +182,7 @@ const Line = ({ hit }) => {
   }, [copied, copied1, copied2]);
 
   return (
-    <tr className="hover:!bg-gray-100" o>
+    <tr className="hover:!bg-gray-100">
       <td className="py-3 pl-4 ml-2 rounded-l-lg">
         <div>
           <div className="font-bold text-[15px]">{`${hit.firstName} ${hit.lastName}`}</div>

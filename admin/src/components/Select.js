@@ -3,7 +3,17 @@ import { BsCheck2 } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import ChevronDown from "../assets/icons/ChevronDown";
 
-export default function SelectAction({ options, value, placeholder, Icon = null, alignItems = "left", onChange }) {
+export default function Select({
+  options,
+  value,
+  placeholder,
+  Icon = null,
+  alignItems = "left",
+  onChange,
+  // buttonClassNames = "border-[1px] border-gray-300",
+  // textClassNames = "text-gray-700 font-medium text-sm",
+  // rightIconClassNames = "text-gray-400",
+}) {
   const [open, setOpen] = React.useState(false);
   const [selected, setSelected] = React.useState("");
   const ref = React.useRef(null);
