@@ -1,3 +1,21 @@
+# [1.90.0](https://github.com/betagouv/service-national-universel/compare/v1.89.0...v1.90.0) (2022-05-23)
+
+
+### Bug Fixes
+
+* **admin:** add breadcrumbs in tabs ([be38fd1](https://github.com/betagouv/service-national-universel/commit/be38fd17ca17011d2f2c42bcfbc68c49a92090ff))
+* **admin:** meeting point department ([08aedba](https://github.com/betagouv/service-national-universel/commit/08aedba100d09b104e8fe177b4e8e797e7c5f41f))
+* **admin:** text dashboard admin/chef de centre ([6e6053a](https://github.com/betagouv/service-national-universel/commit/6e6053a822497170c70992cc24d22b1c63d29b32))
+* **knowledge-base:** eslint error ([9345fdd](https://github.com/betagouv/service-national-universel/commit/9345fddf3de47371c4cf963527415a8aa74cf1c3))
+* **knowledge-base:** Plausible event event ([ab49ac4](https://github.com/betagouv/service-national-universel/commit/ab49ac400e668b43e0863783eecb491ff7f411e0))
+* **knowledge-base:** remove plausible import ([eadfff9](https://github.com/betagouv/service-national-universel/commit/eadfff9479fc98621a74db6944e476f9b22e49df))
+
+
+### Features
+
+* **admin:** bus-complet-meeting-point [#1581](https://github.com/betagouv/service-national-universel/issues/1581) ([cf4b32d](https://github.com/betagouv/service-national-universel/commit/cf4b32d18e72d8105b225b2e511d633ad0e63e44))
+* **api,admin:** ajout historique point de rassemblement ([599ff11](https://github.com/betagouv/service-national-universel/commit/599ff114293398cada046e85bd114eb0453ffc56))
+
 # [1.89.0](https://github.com/betagouv/service-national-universel/compare/v1.88.0...v1.89.0) (2022-05-20)
 
 
