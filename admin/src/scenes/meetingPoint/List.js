@@ -14,6 +14,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import { apiURL } from "../../config";
 import api from "../../services/api";
 import { ES_NO_LIMIT, getDepartmentNumber } from "../../utils";
+import Breadcrumbs from "../../components/Breadcrumbs";
 
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT"];
 
@@ -27,164 +28,167 @@ export default function MeetingPoint() {
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   return (
-    <div className="m-4">
-      <ReactiveBase url={`${apiURL}/es`} app="meetingpoint" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div className="flex flex-row justify-between items-center">
-          <div className="font-bold text-2xl mb-4" style={{ fontFamily: "Marianne" }}>
-            Points de rassemblements
-          </div>
-          <ExportComponent
-            title="Exporter les points de rassemblements"
-            defaultQuery={getExportQuery}
-            exportTitle="point_de_rassemblement"
-            index="meetingpoint"
-            react={{ and: FILTERS }}
-            transform={async (data) => {
-              let res = [];
-              for (const item of data) {
-                let bus = {};
-                if (item.busId) {
-                  const { data: busResult } = await api.get(`/bus/${item.busId}`);
-                  if (!busResult) bus = {};
-                  else bus = busResult;
-                }
+    <>
+      <Breadcrumbs items={[{ label: "Points de rassemblement" }]} />
+      <div className="m-4">
+        <ReactiveBase url={`${apiURL}/es`} app="meetingpoint" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+          <div className="flex flex-row justify-between items-center">
+            <div className="font-bold text-2xl mb-4" style={{ fontFamily: "Marianne" }}>
+              Points de rassemblements
+            </div>
+            <ExportComponent
+              title="Exporter les points de rassemblements"
+              defaultQuery={getExportQuery}
+              exportTitle="point_de_rassemblement"
+              index="meetingpoint"
+              react={{ and: FILTERS }}
+              transform={async (data) => {
+                let res = [];
+                for (const item of data) {
+                  let bus = {};
+                  if (item.busId) {
+                    const { data: busResult } = await api.get(`/bus/${item.busId}`);
+                    if (!busResult) bus = {};
+                    else bus = busResult;
+                  }
 
-                res.push({
-                  Cohorte: item?.cohort,
-                  "ID de transport": item?.busExcelId,
-                  [`N° du département de départ`]: getDepartmentNumber(item?.departureDepartment),
-                  "Centre de destination": item?.centerCode,
-                  "Département de départ / du point de rassemblement": item?.departureDepartment,
-                  "Code postal du point de rassemblement": item?.departureZip,
-                  "Adresse du point de rassemblement": item?.departureAddress,
-                  "ID du point de rassemblement": item?._id,
-                  "Nombre de place proposées": bus?.capacity || 0,
-                  "Nombre de places occupées": bus?.capacity && bus?.placesLeft ? bus?.capacity - bus.placesLeft : 0,
-                  "Date/heure aller": item?.departureAtString,
-                  "Date/heure retour": item?.returnAtString,
-                });
-              }
-              console.log(res);
-              return res;
-            }}
-          />
-        </div>
-        <div className="bg-white pt-4 rounded-lg">
-          <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-            <div style={{ flex: 2, position: "relative" }}>
-              <Filter2>
-                <div className="flex items-center mb-2 gap-2 bg-white">
-                  <DataSearch
-                    defaultQuery={getDefaultQuery}
-                    showIcon={false}
-                    placeholder="Rechercher..."
-                    componentId="SEARCH"
-                    dataField={["centerCode", "departureAddress", "busExcelId"]}
-                    react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                    innerClass={{ input: "searchbox" }}
-                    URLParams={true}
-                    autosuggest={false}
-                  />
-                  <div
-                    className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-                    onClick={() => setFilterVisible((e) => !e)}>
-                    <FilterSvg className="text-gray-400" />
-                    Filtres
+                  res.push({
+                    Cohorte: item?.cohort,
+                    "ID de transport": item?.busExcelId,
+                    [`N° du département de départ`]: getDepartmentNumber(item?.departureDepartment),
+                    "Centre de destination": item?.centerCode,
+                    "Département de départ / du point de rassemblement": item?.departureDepartment,
+                    "Code postal du point de rassemblement": item?.departureZip,
+                    "Adresse du point de rassemblement": item?.departureAddress,
+                    "ID du point de rassemblement": item?._id,
+                    "Nombre de place proposées": bus?.capacity || 0,
+                    "Nombre de places occupées": bus?.capacity && bus?.placesLeft ? bus?.capacity - bus.placesLeft : 0,
+                    "Date/heure aller": item?.departureAtString,
+                    "Date/heure retour": item?.returnAtString,
+                  });
+                }
+                console.log(res);
+                return res;
+              }}
+            />
+          </div>
+          <div className="bg-white pt-4 rounded-lg">
+            <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+              <div style={{ flex: 2, position: "relative" }}>
+                <Filter2>
+                  <div className="flex items-center mb-2 gap-2 bg-white">
+                    <DataSearch
+                      defaultQuery={getDefaultQuery}
+                      showIcon={false}
+                      placeholder="Rechercher..."
+                      componentId="SEARCH"
+                      dataField={["centerCode", "departureAddress", "busExcelId"]}
+                      react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                      innerClass={{ input: "searchbox" }}
+                      URLParams={true}
+                      autosuggest={false}
+                    />
+                    <div
+                      className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
+                      onClick={() => setFilterVisible((e) => !e)}>
+                      <FilterSvg className="text-gray-400" />
+                      Filtres
+                    </div>
                   </div>
-                </div>
-                <FilterRow visible={filterVisible}>
-                  <MultiDropdownList
+                  <FilterRow visible={filterVisible}>
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="Département"
+                      componentId="DEPARTMENT"
+                      dataField="departureDepartment.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
+                      title=""
+                      URLParams={true}
+                      sortBy="asc"
+                      showSearch={true}
+                      searchPlaceholder="Rechercher..."
+                      size={1000}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="Cohorte"
+                      componentId="COHORT"
+                      dataField="cohort.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                      renderItem={(e, count) => {
+                        return `${e} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      defaultValue={["Juin 2022", "Juillet 2022"]}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="Centre"
+                      componentId="CENTER"
+                      dataField="centerCode.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "CENTER") }}
+                      title=""
+                      URLParams={true}
+                      sortBy="asc"
+                      showSearch={true}
+                      searchPlaceholder="Rechercher..."
+                      size={1000}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="Transport"
+                      componentId="BUS"
+                      dataField="busExcelId.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "BUS") }}
+                      title=""
+                      URLParams={true}
+                      sortBy="asc"
+                      showSearch={true}
+                      searchPlaceholder="Rechercher..."
+                      size={1000}
+                    />
+                    <DeleteFilters />
+                  </FilterRow>
+                </Filter2>
+                <ResultTable>
+                  <ReactiveListComponent
+                    pageSize={50}
                     defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    placeholder="Département"
-                    componentId="DEPARTMENT"
-                    dataField="departureDepartment.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
-                    title=""
-                    URLParams={true}
-                    sortBy="asc"
-                    showSearch={true}
-                    searchPlaceholder="Rechercher..."
-                    size={1000}
+                    react={{ and: FILTERS }}
+                    paginationAt="bottom"
+                    showTopResultStats={false}
+                    render={({ data }) => (
+                      <table className="w-full">
+                        <thead>
+                          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
+                            <th className="py-3 pl-4">Transport</th>
+                            <th>Adresse de départ</th>
+                            <th>déstination</th>
+                            <th>places disponibles</th>
+                            <th className="text-center">actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {data.map((hit) => {
+                            return <Hit key={hit._id} hit={hit} />;
+                          })}
+                        </tbody>
+                      </table>
+                    )}
                   />
-                  <MultiDropdownList
-                    defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    placeholder="Cohorte"
-                    componentId="COHORT"
-                    dataField="cohort.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-                    renderItem={(e, count) => {
-                      return `${e} (${count})`;
-                    }}
-                    title=""
-                    URLParams={true}
-                    showSearch={false}
-                    defaultValue={["Juin 2022", "Juillet 2022"]}
-                  />
-                  <MultiDropdownList
-                    defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    placeholder="Centre"
-                    componentId="CENTER"
-                    dataField="centerCode.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "CENTER") }}
-                    title=""
-                    URLParams={true}
-                    sortBy="asc"
-                    showSearch={true}
-                    searchPlaceholder="Rechercher..."
-                    size={1000}
-                  />
-                  <MultiDropdownList
-                    defaultQuery={getDefaultQuery}
-                    className="dropdown-filter"
-                    placeholder="Transport"
-                    componentId="BUS"
-                    dataField="busExcelId.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "BUS") }}
-                    title=""
-                    URLParams={true}
-                    sortBy="asc"
-                    showSearch={true}
-                    searchPlaceholder="Rechercher..."
-                    size={1000}
-                  />
-                  <DeleteFilters />
-                </FilterRow>
-              </Filter2>
-              <ResultTable>
-                <ReactiveListComponent
-                  pageSize={50}
-                  defaultQuery={getDefaultQuery}
-                  react={{ and: FILTERS }}
-                  paginationAt="bottom"
-                  showTopResultStats={false}
-                  render={({ data }) => (
-                    <table className="w-full">
-                      <thead>
-                        <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-100">
-                          <th className="py-3 pl-4">Transport</th>
-                          <th>Adresse de départ</th>
-                          <th>déstination</th>
-                          <th>places disponibles</th>
-                          <th className="text-center">actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {data.map((hit) => {
-                          return <Hit key={hit._id} hit={hit} />;
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-                />
-              </ResultTable>
+                </ResultTable>
+              </div>
             </div>
           </div>
-        </div>
-      </ReactiveBase>
-    </div>
+        </ReactiveBase>
+      </div>
+    </>
   );
 }
 

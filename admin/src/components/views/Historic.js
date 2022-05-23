@@ -28,7 +28,6 @@ export default function Historic({ model, value }) {
   return !data ? (
     <Loader />
   ) : (
-    <div>
       <div className="flex flex-col gap-3 w-full">
         {data.length === 0 ? <div className="italic p-1">Aucune données</div> : null}
         {user?.role === ROLES.ADMIN ? (
@@ -38,7 +37,6 @@ export default function Historic({ model, value }) {
           <Hit model={model} key={hit._id} hit={hit} filter={filter} />
         ))}
       </div>
-    </div>
   );
 }
 

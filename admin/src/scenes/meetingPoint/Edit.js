@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { BiHandicap } from "react-icons/bi";
+import { MdOutlineHistory } from "react-icons/md";
 import { toastr } from "react-redux-toastr";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 import ArrowCircleRight from "../../assets/icons/ArrowCircleRight";
 import BusSvg from "../../assets/icons/Bus";
 import Plus from "../../assets/icons/Plus";
 import api from "../../services/api";
 import { getDepartmentNumber } from "../../utils";
 import ModalEditMeetingPoint from "./components/modalEditMeetingPoint";
+import Breadcrumbs from "../../components/Breadcrumbs";
 
 export default function Edit(props) {
   const [meetingPoint, setMeetingPoint] = useState();
@@ -14,6 +19,7 @@ export default function Edit(props) {
   const [center, setCenter] = useState();
   const [modal, setModal] = React.useState({ isOpen: false });
   const [occupationPercentage, setOccupationPercentage] = React.useState();
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     const id = props.match && props.match.params && props.match.params.id;
@@ -48,109 +54,122 @@ export default function Edit(props) {
   if (!meetingPoint || !center || !bus) return null;
 
   return (
-    <div className="m-9">
-      <div className="flex flex-row items-center justify-between mb-4">
-        <div className="flex flex-row items-center">
-          <BusSvg className="h-10 w-10" />
-          <div className="font-bold text-2xl ml-4">{meetingPoint.busExcelId}</div>
-        </div>
-        <button
-          className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700"
-          onClick={() =>
-            setModal({
-              isOpen: true,
-              values: {
-                departureAddress: meetingPoint?.departureAddress || "",
-                departureAtString: meetingPoint?.departureAtString || "",
-                returnAtString: meetingPoint?.returnAtString || "",
-                hideDepartmentInConvocation: meetingPoint.hideDepartmentInConvocation,
-                capacity: bus?.capacity || 0,
-                placesLeft: bus?.placesLeft || 0,
-                department: meetingPoint?.departureDepartment,
-                cohort: bus?.cohort,
-              },
-              onSubmit: async (values) => {
-                const { data: busResult, ok: okBus } = await api.put(`/bus/${bus._id}/capacity`, { capacity: values.capacity });
-                if (!okBus) {
-                  toastr.error("Une erreur est survenue lors de la mise à jours des informations");
-                  setModal({ isOpen: false, values: {} });
-                  return;
-                }
-                setBus(busResult);
-
-                const { data: meeting, ok: okMeeting } = await api.put(`/meeting-point/${meetingPoint._id}`, {
-                  departureAddress: values.departureAddress,
-                  departureAtString: values.departureAtString,
-                  returnAtString: values.returnAtString,
-                  hideDepartmentInConvocation: values.hideDepartmentInConvocation,
-                });
-                if (!okMeeting) {
-                  toastr.error("Une erreur est survenue lors de la mise à jours des informations");
-                  setModal({ isOpen: false, values: {} });
-                  return;
-                }
-
-                setMeetingPoint(meeting);
-                toastr.success("Le informations ont été mis à jour ");
-                setModal({ isOpen: false, values: {} });
-              },
-            })
-          }>
-          <div className="flex flex-row items-center p-2">
-            <Plus className="text-blue-700 group-hover:text-white" />
-            <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Modifier</div>
+    <>
+      <Breadcrumbs items={[{ label: "Points de rassemblement", to: `/point-de-rassemblement` }, { label: "Fiche du point de rassemblement" }]} />
+      <div className="m-9">
+        <div className="flex flex-row items-center justify-between mb-4">
+          <div className="flex flex-row items-center">
+            <BusSvg className="h-10 w-10" />
+            <div className="font-bold text-2xl ml-4">{meetingPoint.busExcelId}</div>
           </div>
-        </button>
-      </div>
-      <div className="flex flex-row  justify-center gap-4 items-center">
-        <div className="flex flex-col w-2/5 bg-white rounded-xl p-9 self-stretch">
-          <div className="flex justify-between">
-            <h4>
-              <strong>Point de rassemblement</strong>
-            </h4>
-          </div>
-          <div>
-            <Donnee title={"Adresse"} value={meetingPoint.departureAddress} number={""} />
-            <Donnee
-              title={"Département"}
-              value={meetingPoint.departureDepartment}
-              number={`(${getDepartmentNumber(meetingPoint.departureDepartment)})`}
-              showLabelHide={meetingPoint.hideDepartmentInConvocation === "true"}
-            />
-            <Donnee title={"Date et heure de rendez-vous aller"} value={meetingPoint.departureAtString} />
-            <Donnee title={"Date et heure de rendez-vous retour"} value={meetingPoint.returnAtString} />
-            <Donnee title={"Place total"} value={bus.capacity} />
-          </div>
-        </div>
-        <ArrowCircleRight className="w-10 h-10 text-gray-500" />
-        <div className="flex flex-col w-2/5 bg-white rounded-xl p-9 self-stretch">
-          <div className="flex justify-between ">
-            <h4>
-              <strong>Informations du centre</strong>
-            </h4>
-            {center.pmr === "true" ? (
-              <div className="flex bg-[#14B8A6] rounded-full px-3 py-1 items-center text-[#F0FDFA] text-md gap-1">
-                <BiHandicap size={20} />
-                <div>Accessible&nbsp;PMR</div>
-              </div>
+          <div className="flex gap-2 items-center">
+            {user.role === "admin" ? (
+              <Link to={`/point-de-rassemblement/${props?.match?.params?.id}/historique`}>
+                <div className="flex flex-row items-center p-2 group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700 cursor-pointer">
+                  <MdOutlineHistory className="text-xl text-blue-700 group-hover:text-white" />
+                  <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Voir les changements</div>
+                </div>
+              </Link>
             ) : null}
-          </div>
-          <div>
-            <Donnee title={"Nom du centre"} value={center.name} number={""} />
-            <Donnee title={"Code 2022"} value={center.code2022 || <span className="italic text-gray-500">Non renseigné</span>} number={""} />
-            <Donnee title={"Région"} value={center.region} number={""} />
-            <Donnee title={"Département"} value={center.department} number={`(${getDepartmentNumber(center.department)})`} />
-            <Donnee title={"Ville"} value={center.city} number={`(${center.zip})`} />
-            <Donnee title={"Adresse"} value={center.address} number={""} />
+            <button
+              className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700"
+              onClick={() =>
+                setModal({
+                  isOpen: true,
+                  values: {
+                    departureAddress: meetingPoint?.departureAddress || "",
+                    departureAtString: meetingPoint?.departureAtString || "",
+                    returnAtString: meetingPoint?.returnAtString || "",
+                    hideDepartmentInConvocation: meetingPoint.hideDepartmentInConvocation,
+                    capacity: bus?.capacity || 0,
+                    placesLeft: bus?.placesLeft || 0,
+                    department: meetingPoint?.departureDepartment,
+                    cohort: bus?.cohort,
+                  },
+                  onSubmit: async (values) => {
+                    const { data: busResult, ok: okBus } = await api.put(`/bus/${bus._id}/capacity`, { capacity: values.capacity });
+                    if (!okBus) {
+                      toastr.error("Une erreur est survenue lors de la mise à jours des informations");
+                      setModal({ isOpen: false, values: {} });
+                      return;
+                    }
+                    setBus(busResult);
+
+                    const { data: meeting, ok: okMeeting } = await api.put(`/meeting-point/${meetingPoint._id}`, {
+                      departureAddress: values.departureAddress,
+                      departureAtString: values.departureAtString,
+                      returnAtString: values.returnAtString,
+                      hideDepartmentInConvocation: values.hideDepartmentInConvocation,
+                    });
+                    if (!okMeeting) {
+                      toastr.error("Une erreur est survenue lors de la mise à jours des informations");
+                      setModal({ isOpen: false, values: {} });
+                      return;
+                    }
+
+                    setMeetingPoint(meeting);
+                    toastr.success("Le informations ont été mis à jour ");
+                    setModal({ isOpen: false, values: {} });
+                  },
+                })
+              }>
+              <div className="flex flex-row items-center p-2">
+                <Plus className="text-blue-700 group-hover:text-white" />
+                <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Modifier</div>
+              </div>
+            </button>
           </div>
         </div>
+        <div className="flex flex-row  justify-center gap-4 items-center">
+          <div className="flex flex-col w-2/5 bg-white rounded-xl p-9 self-stretch">
+            <div className="flex justify-between">
+              <h4>
+                <strong>Point de rassemblement</strong>
+              </h4>
+            </div>
+            <div>
+              <Donnee title={"Adresse"} value={meetingPoint.departureAddress} number={""} />
+              <Donnee
+                title={"Département"}
+                value={meetingPoint.departureDepartment}
+                number={`(${getDepartmentNumber(meetingPoint.departureDepartment)})`}
+                showLabelHide={meetingPoint.hideDepartmentInConvocation === "true"}
+              />
+              <Donnee title={"Date et heure de rendez-vous aller"} value={meetingPoint.departureAtString} />
+              <Donnee title={"Date et heure de rendez-vous retour"} value={meetingPoint.returnAtString} />
+              <Donnee title={"Place total"} value={bus.capacity} />
+            </div>
+          </div>
+          <ArrowCircleRight className="w-10 h-10 text-gray-500" />
+          <div className="flex flex-col w-2/5 bg-white rounded-xl p-9 self-stretch">
+            <div className="flex justify-between ">
+              <h4>
+                <strong>Informations du centre</strong>
+              </h4>
+              {center.pmr === "true" ? (
+                <div className="flex bg-[#14B8A6] rounded-full px-3 py-1 items-center text-[#F0FDFA] text-md gap-1">
+                  <BiHandicap size={20} />
+                  <div>Accessible&nbsp;PMR</div>
+                </div>
+              ) : null}
+            </div>
+            <div>
+              <Donnee title={"Nom du centre"} value={center.name} number={""} />
+              <Donnee title={"Code 2022"} value={center.code2022 || <span className="italic text-gray-500">Non renseigné</span>} number={""} />
+              <Donnee title={"Région"} value={center.region} number={""} />
+              <Donnee title={"Département"} value={center.department} number={`(${getDepartmentNumber(center.department)})`} />
+              <Donnee title={"Ville"} value={center.city} number={`(${center.zip})`} />
+              <Donnee title={"Adresse"} value={center.address} number={""} />
+            </div>
+          </div>
+        </div>
+        {/* // Taux doccupation */}
+        <div className="flex items-center justify-center mt-4">
+          <OccupationCard occupationPercentage={occupationPercentage} placesTotal={bus.capacity} placesLeft={bus.placesLeft} />
+        </div>
+        <ModalEditMeetingPoint isOpen={modal?.isOpen} onCancel={() => setModal({ isOpen: false, value: null })} onSubmit={modal?.onSubmit} values={modal?.values} />
       </div>
-      {/* // Taux doccupation */}
-      <div className="flex items-center justify-center mt-4">
-        <OccupationCard occupationPercentage={occupationPercentage} placesTotal={bus.capacity} placesLeft={bus.placesLeft} />
-      </div>
-      <ModalEditMeetingPoint isOpen={modal?.isOpen} onCancel={() => setModal({ isOpen: false, value: null })} onSubmit={modal?.onSubmit} values={modal?.values} />
-    </div>
+    </>
   );
 }
 

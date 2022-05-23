@@ -9,6 +9,7 @@ const CohesionCenterModel = require("../models/cohesionCenter");
 const BusModel = require("../models/bus");
 const { ERRORS, isYoung, isReferent } = require("../utils");
 const Joi = require("joi");
+const patches = require("./patches");
 
 router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -33,6 +34,8 @@ router.get("/center/:id", passport.authenticate("referent", { session: false, fa
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, MeetingPointModel));
 
 router.get("/:id", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
