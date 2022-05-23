@@ -22,6 +22,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
+import Breadcrumbs from "../../components/Breadcrumbs";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
@@ -58,6 +59,7 @@ export default function List() {
 
   return (
     <div>
+      <Breadcrumbs items={[{ label: "Utilisateurs" }]} />
       <ReactiveBase url={`${apiURL}/es`} app="referent" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
           <div style={{ flex: 1, position: "relative" }}>

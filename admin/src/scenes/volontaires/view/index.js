@@ -47,7 +47,7 @@ export default function Index({ ...props }) {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Volontaires", to: "/volontaire" }, { label: `${young.firstName} ${young.lastName}` }]} />
+      <Breadcrumbs items={[{ label: "Volontaires", to: "/volontaire" }, { label: "Fiche du volontaire" }]} />
       <Switch>
         <Route path="/volontaire/:id/phase1" component={() => <Phase1 young={young} getYoung={getYoung} onChange={getYoung} />} />
         <Route path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />

@@ -13,7 +13,6 @@ import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine, Help, HelpText, LockIcon } from "../../components/list";
-import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
@@ -22,6 +21,7 @@ import { HiAdjustments } from "react-icons/hi";
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION", "DATE", "SOURCE"];
+import Breadcrumbs from "../../components/Breadcrumbs";
 
 export default function List() {
   const [mission, setMission] = useState(null);
@@ -62,6 +62,7 @@ export default function List() {
 
   return (
     <div>
+      <Breadcrumbs items={[{ label: "Missions" }]} />
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
           <div style={{ flex: 2, position: "relative" }}>

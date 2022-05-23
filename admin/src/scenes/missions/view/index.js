@@ -9,6 +9,7 @@ import ProposeMission from "./propose-mission";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
+import Breadcrumbs from "../../../components/Breadcrumbs";
 
 export default function Index({ ...props }) {
   const setDocumentTitle = useDocumentTitle("Missions");
@@ -63,11 +64,14 @@ export default function Index({ ...props }) {
 
   if (!mission) return <div />;
   return (
-    <Switch>
-      <Route path="/mission/:id/youngs" component={() => <Youngs mission={mission} applications={applications} updateApplications={fetchApplication} />} />
-      <Route path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
-      <Route path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} />} />
-      <Route path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />
-    </Switch>
+    <>
+      <Breadcrumbs items={[{ label: "Missions", to: "/mission" }, { label: "Fiche de la mission" }]} />
+      <Switch>
+        <Route path="/mission/:id/youngs" component={() => <Youngs mission={mission} applications={applications} updateApplications={fetchApplication} />} />
+        <Route path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
+        <Route path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} />} />
+        <Route path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />
+      </Switch>
+    </>
   );
 }

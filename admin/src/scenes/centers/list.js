@@ -17,6 +17,7 @@ import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
+import Breadcrumbs from "../../components/Breadcrumbs";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
 
@@ -55,6 +56,7 @@ export default function List() {
 
   return (
     <div>
+      <Breadcrumbs items={[{ label: "Centres" }]} />
       <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
           <div style={{ flex: 2, position: "relative" }}>

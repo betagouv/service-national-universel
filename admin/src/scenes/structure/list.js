@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
-import { apiURL, supportURL } from "../../config";
+import { apiURL } from "../../config";
 import Panel from "./panel";
 import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT, ROLES, getFilterLabel, colors } from "../../utils";
 import VioletButton from "../../components/buttons/VioletButton";
@@ -18,6 +18,7 @@ import { HiAdjustments } from "react-icons/hi";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import UnlockedSvg from "../../assets/lock-open.svg";
 import LockedSvg from "../../assets/lock.svg";
+import Breadcrumbs from "../../components/Breadcrumbs";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION", "TYPE", "SOUS-TYPE"];
 const formatLongDate = (date) => {
@@ -63,6 +64,7 @@ export default function List() {
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   return (
     <div>
+      <Breadcrumbs items={[{ label: "Structures" }]} />
       <ReactiveBase url={`${apiURL}/es`} app="structure" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
           <div style={{ flex: 1, position: "relative" }}>

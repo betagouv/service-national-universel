@@ -6,6 +6,7 @@ import api from "../../../services/api";
 import Details from "./details";
 import Missions from "./missions";
 import Historic from "./history";
+import Breadcrumbs from "../../../components/Breadcrumbs";
 
 export default function Index({ ...props }) {
   const setDocumentTitle = useDocumentTitle("Structures");
@@ -23,10 +24,13 @@ export default function Index({ ...props }) {
 
   if (!structure) return <div />;
   return (
-    <Switch>
-      <Route path="/structure/:id/missions" component={() => <Missions structure={structure} />} />
-      <Route path="/structure/:id/historique" component={() => <Historic structure={structure} />} />
-      <Route path="/structure/:id" component={() => <Details structure={structure} />} />
-    </Switch>
+    <>
+      <Breadcrumbs items={[{ label: "Structures", to: "/structure" }, { label: "Fiche de la structure" }]} />
+      <Switch>
+        <Route path="/structure/:id/missions" component={() => <Missions structure={structure} />} />
+        <Route path="/structure/:id/historique" component={() => <Historic structure={structure} />} />
+        <Route path="/structure/:id" component={() => <Details structure={structure} />} />
+      </Switch>
+    </>
   );
 }

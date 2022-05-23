@@ -35,6 +35,7 @@ import {
   translate,
   VISITOR_SUBROLES,
 } from "../../utils";
+import Breadcrumbs from "../../components/Breadcrumbs";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Utilisateurs");
@@ -152,133 +153,166 @@ export default function Edit(props) {
   };
 
   return (
-    <Wrapper>
-      <Formik
-        initialValues={user}
-        onSubmit={async (values) => {
-          try {
-            plausibleEvent("Utilisateur/Profil CTA - Enregistrer profil utilisateur");
-            // if structure has changed but no saved
-            if (
-              user.structureId !== structure?._id &&
-              !confirm(
-                'Attention, vous avez modifié la structure de cet utilisateur sans valider. Si vous continuez, ce changement de structure ne sera pas pris en compte. Pour valider ce changement, cliquez sur annuler et valider en cliquant sur "Modifier la structure".',
+    <>
+      <Breadcrumbs items={[{ label: "Utilisateurs", to: "/user" }, { label: "Fiche de l'utilisateur" }]} />
+      <div className="px-8">
+        <Formik
+          initialValues={user}
+          onSubmit={async (values) => {
+            try {
+              plausibleEvent("Utilisateur/Profil CTA - Enregistrer profil utilisateur");
+              // if structure has changed but no saved
+              if (
+                user.structureId !== structure?._id &&
+                !confirm(
+                  'Attention, vous avez modifié la structure de cet utilisateur sans valider. Si vous continuez, ce changement de structure ne sera pas pris en compte. Pour valider ce changement, cliquez sur annuler et valider en cliquant sur "Modifier la structure".',
+                )
               )
-            )
-              return;
-            const { ok, code, data } = await api.put(`/referent/${values._id}`, values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-            setUser(data);
-            toastr.success("Utilisateur mis à jour !");
-            history.go(0);
-          } catch (e) {
-            console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-          }
-        }}>
-        {({ values, handleChange, handleSubmit, isSubmitting }) => (
-          <>
-            <TitleWrapper>
-              <div>
-                <Title>{`Profil Utilisateur de ${values.firstName} ${values.lastName}`}</Title>
-                <SubTitle>{getSubtitle()}</SubTitle>
-              </div>
-              <div style={{ display: "flex" }}>
-                {values.structureId ? (
-                  <Link to={`/structure/${values.structureId}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
-                    <PanelActionButton icon="eye" title="Voir la structure" />
-                  </Link>
-                ) : null}
-                {currentUser.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
-                <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                  Enregistrer
-                </SaveBtn>
-              </div>
-            </TitleWrapper>
-            <Row>
-              <Col md={6} style={{ marginBottom: "20px" }}>
-                <Box>
-                  <BoxHeadTitle>Identité</BoxHeadTitle>
-                  <BoxContent direction="column">
-                    <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} />
-                    <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} />
-                  </BoxContent>
-                </Box>
-              </Col>
-              <Col md={6} style={{ marginBottom: "20px" }}>
-                <Box>
-                  <BoxHeadTitle>Coordonnées</BoxHeadTitle>
-                  <BoxContent direction="column">
-                    <Item title="E-mail" values={values} name="email" handleChange={handleChange} />
-                    <Item title="Tel. fixe" values={values} name="phone" handleChange={handleChange} />
-                    <Item title="Tel. mobile" values={values} name="mobile" handleChange={handleChange} />
-                  </BoxContent>
-                </Box>
-              </Col>
-              {canUpdateReferent({ actor: currentUser, originalTarget: values }) && (
+                return;
+              const { ok, code, data } = await api.put(`/referent/${values._id}`, values);
+              if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+              setUser(data);
+              toastr.success("Utilisateur mis à jour !");
+              history.go(0);
+            } catch (e) {
+              console.log(e);
+              toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+            }
+          }}>
+          {({ values, handleChange, handleSubmit, isSubmitting }) => (
+            <>
+              <TitleWrapper>
+                <div>
+                  <Title>{`Profil Utilisateur de ${values.firstName} ${values.lastName}`}</Title>
+                  <SubTitle>{getSubtitle()}</SubTitle>
+                </div>
+                <div style={{ display: "flex" }}>
+                  {values.structureId ? (
+                    <Link to={`/structure/${values.structureId}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
+                      <PanelActionButton icon="eye" title="Voir la structure" />
+                    </Link>
+                  ) : null}
+                  {currentUser.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
+                  <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                    Enregistrer
+                  </SaveBtn>
+                </div>
+              </TitleWrapper>
+              <Row>
                 <Col md={6} style={{ marginBottom: "20px" }}>
                   <Box>
-                    <BoxHeadTitle>Information</BoxHeadTitle>
+                    <BoxHeadTitle>Identité</BoxHeadTitle>
                     <BoxContent direction="column">
-                      <Select
-                        name="role"
-                        disabled={currentUser.role !== ROLES.ADMIN}
-                        values={values}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          clearDepartmentAndRegion(handleChange);
-                          handleChange({ target: { name: "role", value } });
-                        }}
-                        allowEmpty={false}
-                        title="Rôle"
-                        options={[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR].map(
-                          (key) => ({
-                            value: key,
-                            label: translate(key),
-                          }),
-                        )}
-                      />
-                      {values.role === ROLES.HEAD_CENTER ? (
-                        centers ? (
-                          <AutocompleteSelectCenter
-                            options={centers}
-                            defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
-                            onChange={(e) => {
-                              handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
-                              handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
-                            }}
-                          />
-                        ) : (
-                          <Loader />
-                        )
-                      ) : null}
-                      {values.role === ROLES.RESPONSIBLE ? (
-                        structures ? (
-                          <AutocompleteSelectStructure
-                            options={structures}
-                            structure={structure}
-                            setStructure={(e) => {
-                              setStructure(e);
-                            }}
-                            userId={user._id}
-                            onClick={modifyStructure}
-                            disabled={isSubmitting}
-                            loading={loadingChangeStructure}
-                          />
-                        ) : (
-                          <Loader />
-                        )
-                      ) : null}
-                      {values.role === ROLES.REFERENT_DEPARTMENT ? (
-                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
-                      ) : null}
-                      {values.role === ROLES.REFERENT_REGION ? (
-                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
-                      ) : null}
-                      {values.role === ROLES.VISITOR ? (
-                        <>
-                          <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(VISITOR_SUBROLES)} />
+                      <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} />
+                      <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} />
+                    </BoxContent>
+                  </Box>
+                </Col>
+                <Col md={6} style={{ marginBottom: "20px" }}>
+                  <Box>
+                    <BoxHeadTitle>Coordonnées</BoxHeadTitle>
+                    <BoxContent direction="column">
+                      <Item title="E-mail" values={values} name="email" handleChange={handleChange} />
+                      <Item title="Tel. fixe" values={values} name="phone" handleChange={handleChange} />
+                      <Item title="Tel. mobile" values={values} name="mobile" handleChange={handleChange} />
+                    </BoxContent>
+                  </Box>
+                </Col>
+                {canUpdateReferent({ actor: currentUser, originalTarget: values }) && (
+                  <Col md={6} style={{ marginBottom: "20px" }}>
+                    <Box>
+                      <BoxHeadTitle>Information</BoxHeadTitle>
+                      <BoxContent direction="column">
+                        <Select
+                          name="role"
+                          disabled={currentUser.role !== ROLES.ADMIN}
+                          values={values}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            clearDepartmentAndRegion(handleChange);
+                            handleChange({ target: { name: "role", value } });
+                          }}
+                          allowEmpty={false}
+                          title="Rôle"
+                          options={[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR].map(
+                            (key) => ({
+                              value: key,
+                              label: translate(key),
+                            }),
+                          )}
+                        />
+                        {values.role === ROLES.HEAD_CENTER ? (
+                          centers ? (
+                            <AutocompleteSelectCenter
+                              options={centers}
+                              defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
+                              onChange={(e) => {
+                                handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
+                                handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
+                              }}
+                            />
+                          ) : (
+                            <Loader />
+                          )
+                        ) : null}
+                        {values.role === ROLES.RESPONSIBLE ? (
+                          structures ? (
+                            <AutocompleteSelectStructure
+                              options={structures}
+                              structure={structure}
+                              setStructure={(e) => {
+                                setStructure(e);
+                              }}
+                              userId={user._id}
+                              onClick={modifyStructure}
+                              disabled={isSubmitting}
+                              loading={loadingChangeStructure}
+                            />
+                          ) : (
+                            <Loader />
+                          )
+                        ) : null}
+                        {values.role === ROLES.REFERENT_DEPARTMENT ? (
+                          <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
+                        ) : null}
+                        {values.role === ROLES.REFERENT_REGION ? (
+                          <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
+                        ) : null}
+                        {values.role === ROLES.VISITOR ? (
+                          <>
+                            <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(VISITOR_SUBROLES)} />
+                            <Select
+                              name="region"
+                              values={values}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                handleChange({ target: { name: "region", value } });
+                                handleChange({ target: { name: "department", value: "" } });
+                              }}
+                              title="Région"
+                              options={regionList.map((r) => ({ value: r, label: r }))}
+                            />
+                          </>
+                        ) : null}
+
+                        {values.role === ROLES.REFERENT_DEPARTMENT ? (
                           <Select
+                            disabled={currentUser.role !== ROLES.ADMIN}
+                            name="department"
+                            values={values}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              handleChange({ target: { name: "department", value } });
+                              const region = department2region[value];
+                              handleChange({ target: { name: "region", value: region } });
+                            }}
+                            title="Département"
+                            options={departmentList.map((d) => ({ value: d, label: d }))}
+                          />
+                        ) : null}
+                        {values.role === ROLES.REFERENT_REGION ? (
+                          <Select
+                            disabled={values.role === ROLES.REFERENT_DEPARTMENT}
                             name="region"
                             values={values}
                             onChange={(e) => {
@@ -289,76 +323,46 @@ export default function Edit(props) {
                             title="Région"
                             options={regionList.map((r) => ({ value: r, label: r }))}
                           />
-                        </>
-                      ) : null}
+                        ) : null}
+                        {values.role === ROLES.HEAD_CENTER ? (
+                          <Row className="detail">
+                            <Col md={4}>
+                              <label>Séjours </label>
+                            </Col>
+                            <Col md={8}>{sessionsWhereUserIsHeadCenter.map((session) => session.cohort).join(", ")}</Col>
+                          </Row>
+                        ) : null}
+                      </BoxContent>
+                    </Box>
+                  </Col>
+                )}
+              </Row>
+            </>
+          )}
+        </Formik>
+        <Emails email={user.email} />
+        {currentUser.role === ROLES.ADMIN ? (
+          <Box>
+            <div style={{ fontSize: ".9rem", padding: "1rem", color: colors.darkPurple }}>Historique</div>
+            <HistoricComponent model="referent" value={user} />
+          </Box>
+        ) : null}
+        {canDeleteReferent({ actor: currentUser, originalTarget: user }) ? (
+          <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn>
+        ) : null}
 
-                      {values.role === ROLES.REFERENT_DEPARTMENT ? (
-                        <Select
-                          disabled={currentUser.role !== ROLES.ADMIN}
-                          name="department"
-                          values={values}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            handleChange({ target: { name: "department", value } });
-                            const region = department2region[value];
-                            handleChange({ target: { name: "region", value: region } });
-                          }}
-                          title="Département"
-                          options={departmentList.map((d) => ({ value: d, label: d }))}
-                        />
-                      ) : null}
-                      {values.role === ROLES.REFERENT_REGION ? (
-                        <Select
-                          disabled={values.role === ROLES.REFERENT_DEPARTMENT}
-                          name="region"
-                          values={values}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            handleChange({ target: { name: "region", value } });
-                            handleChange({ target: { name: "department", value: "" } });
-                          }}
-                          title="Région"
-                          options={regionList.map((r) => ({ value: r, label: r }))}
-                        />
-                      ) : null}
-                      {values.role === ROLES.HEAD_CENTER ? (
-                        <Row className="detail">
-                          <Col md={4}>
-                            <label>Séjours </label>
-                          </Col>
-                          <Col md={8}>{sessionsWhereUserIsHeadCenter.map((session) => session.cohort).join(", ")}</Col>
-                        </Row>
-                      ) : null}
-                    </BoxContent>
-                  </Box>
-                </Col>
-              )}
-            </Row>
-          </>
-        )}
-      </Formik>
-      <Emails email={user.email} />
-      {currentUser.role === ROLES.ADMIN ? (
-        <Box>
-          <div style={{ fontSize: ".9rem", padding: "1rem", color: colors.darkPurple }}>Historique</div>
-          <HistoricComponent model="referent" value={user} />
-        </Box>
-      ) : null}
-      {canDeleteReferent({ actor: currentUser, originalTarget: user }) ? (
-        <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn>
-      ) : null}
-
-      <ModalConfirm
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={() => {
-          modal?.onConfirm();
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-      />
-    </Wrapper>
+        <ModalConfirm
+          isOpen={modal?.isOpen}
+          title={modal?.title}
+          message={modal?.message}
+          onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+          onConfirm={() => {
+            modal?.onConfirm();
+            setModal({ isOpen: false, onConfirm: null });
+          }}
+        />
+      </div>
+    </>
   );
 }
 
@@ -492,10 +496,6 @@ const AutocompleteSelectStructure = ({ options, structure, setStructure, onClick
     </>
   );
 };
-
-const Wrapper = styled.div`
-  padding: 20px 40px;
-`;
 
 // Title line with filters
 const TitleWrapper = styled.div`
