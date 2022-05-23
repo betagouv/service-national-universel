@@ -116,7 +116,7 @@ const HitMeetingPoint = ({ hit, onSend }) => {
     }
   }, [hit]);
 
-  if (!bus || bus?.placesLeft <= 0) return null;
+  if (!bus) return null;
 
   return (
     <tr>
@@ -132,9 +132,15 @@ const HitMeetingPoint = ({ hit, onSend }) => {
           <p>{hit.departureAtString}</p>
         </MultiLine>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <PanelActionButton onClick={onSend} title="choisir" />
-      </td>
+      {bus?.placesLeft <= 0 ? (
+        <td>
+          <div className="font-bold">Complet</div>
+        </td>
+      ) : (
+        <td onClick={(e) => e.stopPropagation()}>
+          <PanelActionButton onClick={onSend} title="choisir" />
+        </td>
+      )}
     </tr>
   );
 };
