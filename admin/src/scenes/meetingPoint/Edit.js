@@ -111,7 +111,12 @@ export default function Edit(props) {
           </div>
           <div>
             <Donnee title={"Adresse"} value={meetingPoint.departureAddress} number={""} />
-            <Donnee title={"Département"} value={meetingPoint.departureDepartment} number={`(${getDepartmentNumber(center.department)})`} showLabelHide={meetingPoint.hideDepartmentInConvocation === "true"} />
+            <Donnee
+              title={"Département"}
+              value={meetingPoint.departureDepartment}
+              number={`(${getDepartmentNumber(meetingPoint.departureDepartment)})`}
+              showLabelHide={meetingPoint.hideDepartmentInConvocation === "true"}
+            />
             <Donnee title={"Date et heure de rendez-vous aller"} value={meetingPoint.departureAtString} />
             <Donnee title={"Date et heure de rendez-vous retour"} value={meetingPoint.returnAtString} />
             <Donnee title={"Place total"} value={bus.capacity} />
