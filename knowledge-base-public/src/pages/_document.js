@@ -1,6 +1,5 @@
 import Document, { Html, Head, Main, NextScript } from "next/document";
 import { ToastContainer } from "react-toastify";
-import PlausibleProvider from "next-plausible";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
