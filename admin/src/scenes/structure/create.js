@@ -12,11 +12,13 @@ import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { Box, BoxTitle } from "../../components/box";
 import { translate, ROLES, SENDINBLUE_TEMPLATES, legalStatus, typesStructure, sousTypesStructure } from "../../utils";
 import api from "../../services/api";
+import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default function Create() {
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const [networks, setNetworks] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -51,6 +53,7 @@ export default function Create() {
       }}
       onSubmit={async (values) => {
         try {
+          setIsLoading(true);
           const { data } = await api.post("/structure", values);
           toastr.success("Structure créée");
 
@@ -67,7 +70,7 @@ export default function Create() {
           const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE}`, obj);
           if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
           toastr.success("Invitation envoyée");
-
+          setIsLoading(false);
           history.push(`/structure/${data._id}`);
         } catch (e) {
           console.log(e);
@@ -78,7 +81,9 @@ export default function Create() {
         <Wrapper>
           <Header>
             <Title>Inviter une nouvelle structure</Title>
-            <SaveButton handleChange={handleChange} handleSubmit={handleSubmit} values={values} />
+            <LoadingButton onClick={() => handleSubmit()} color={"#5245cc"} textColor={"#fff"} loading={isLoading}>
+              Enregistrer la structure
+            </LoadingButton>
           </Header>
           {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas continuer car tous les champs ne sont pas correctement renseignés.</h3> : null}
           <Box>
@@ -344,26 +349,15 @@ export default function Create() {
           </Box>
           {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas continuer car tous les champs ne sont pas correctement renseignés.</h3> : null}
           <Header style={{ justifyContent: "flex-end" }}>
-            <SaveButton handleChange={handleChange} handleSubmit={handleSubmit} values={values} />
+            <LoadingButton onClick={() => handleSubmit()} color={"#5245cc"} textColor={"#fff"} loading={isLoading}>
+              Enregistrer la structure
+            </LoadingButton>
           </Header>
         </Wrapper>
       )}
     </Formik>
   );
 }
-
-const SaveButton = ({ handleSubmit }) => {
-  const handleSave = async () => {
-    handleSubmit();
-  };
-  return (
-    <ButtonContainer>
-      <button type="submit" onClick={handleSave}>
-        Enregistrer la structure
-      </button>
-    </ButtonContainer>
-  );
-};
 
 const Wrapper = styled.div`
   padding: 3rem;
@@ -433,28 +427,4 @@ const Title = styled.div`
   font-size: 24px;
   margin-bottom: 10px;
   flex: 1;
-`;
-
-const ButtonContainer = styled.div`
-  button {
-    background-color: #5245cc;
-    color: #fff;
-    &.white-button {
-      color: #000;
-      background-color: #fff;
-      :hover {
-        background: #ddd;
-      }
-    }
-    margin-left: 1rem;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
 `;
