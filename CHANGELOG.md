@@ -1,3 +1,18 @@
+# [1.91.0](https://github.com/betagouv/service-national-universel/compare/v1.90.0...v1.91.0) (2022-05-24)
+
+
+### Bug Fixes
+
+* **admin:** dashboard centre - filtre session par cohorte ([6e4a7df](https://github.com/betagouv/service-national-universel/commit/6e4a7df1e0e1e14c35ca7c0dac05e33491cc116d))
+* **admin:** duplicate structure on spam click ([7f009a9](https://github.com/betagouv/service-national-universel/commit/7f009a91cc227ee965fc48590bcb82d46b2dd416))
+* **app:** vue candidatures ([f720eca](https://github.com/betagouv/service-national-universel/commit/f720ecabee0f2d5940fe992e2a8d33313fe14a35))
+
+
+### Features
+
+* **admin:** mobile - Export des volontaires par ligne de transport / lieu de rassemblement ([#1580](https://github.com/betagouv/service-national-universel/issues/1580)) ([b4c09c4](https://github.com/betagouv/service-national-universel/commit/b4c09c48955a188375cc90fff5f423cf496c055c))
+* **api,admin:** add stats centre [#1583](https://github.com/betagouv/service-national-universel/issues/1583) ([cb4046d](https://github.com/betagouv/service-national-universel/commit/cb4046d99aa2d2c3bd3e3cd4c335260131d273d9))
+
 # [1.90.0](https://github.com/betagouv/service-national-universel/compare/v1.89.0...v1.90.0) (2022-05-23)
 
 
