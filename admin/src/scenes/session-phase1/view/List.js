@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { translate, copyToClipboard, YOUNG_STATUS_COLORS, formatPhoneNumberFR, translatePhase1, YOUNG_STATUS_PHASE1 } from "../../../utils";
+import { translate, copyToClipboard, YOUNG_STATUS_COLORS, formatPhoneNumberFR, translatePhase1 } from "../../../utils";
 import Badge from "../../../components/Badge";
 import FilterSvg from "../../../assets/icons/Filter";
 
 import { FaBus } from "react-icons/fa";
 import { BiCopy, BiWalk } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
-import Select from "./Select";
+import Select from "../components/SelectFilter";
 
 export default function List({ data }) {
   const [currentTab, setCurrentTab] = useState(null);
@@ -22,7 +22,6 @@ export default function List({ data }) {
   useEffect(() => {
     if (Object.keys(data).length) {
       setCurrentTab(Object.keys(data)[0]);
-      console.log("here");
     }
   }, [data]);
 
@@ -54,7 +53,7 @@ export default function List({ data }) {
         .filter((e) => {
           if (!filter?.search) return true;
           return Object.values(e).some((f) => {
-            return f.toString().toLowerCase().replaceAll(" ", "").includes(filter.search.toLowerCase().replaceAll(" ", ""));
+            return f?.toString().toLowerCase().replaceAll(" ", "").includes(filter?.search.toLowerCase().replaceAll(" ", ""));
           });
         })
         .filter((e) => !filter?.status || e.statusPhase1 === filter?.status)
@@ -72,6 +71,7 @@ export default function List({ data }) {
             {viewData
               ? Object.keys(data).map((bus) => (
                   <div
+                    key={bus}
                     onClick={() => {
                       setCurrentTab(bus);
                       setFilter({ search: "", status: "", meetingPoint: "" });
@@ -121,14 +121,16 @@ export default function List({ data }) {
                 };
               })}
             />
-            <Select
-              Icon={<FilterSvg className="text-gray-400" />}
-              value={filter?.meetingPoint || ""}
-              onChange={(e) => updateFilter({ meetingPoint: e })}
-              placeholder="Filtrer par point de rassemblement"
-              alignItems="left"
-              options={activeMeetingPoint}
-            />
+            {currentTab !== "noMeetingPoint" ? (
+              <Select
+                Icon={<FilterSvg className="text-gray-400" />}
+                value={filter?.meetingPoint || ""}
+                onChange={(e) => updateFilter({ meetingPoint: e })}
+                placeholder="Filtrer par point de rassemblement"
+                alignItems="left"
+                options={activeMeetingPoint}
+              />
+            ) : null}
           </div>
           <table className="w-full bg-white">
             <thead className="">
@@ -154,7 +156,7 @@ export default function List({ data }) {
                 <th className="font-normal">Statut phase 1</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">{viewData ? viewData.youngs.map((hit) => <Line hit={hit} />) : null}</tbody>
+            <tbody className="divide-y divide-gray-100">{viewData ? viewData.youngs.map((hit) => <Line key={`${hit.firstName} ${hit.lastName}`} hit={hit} />) : null}</tbody>
           </table>
         </div>
       </div>
@@ -163,25 +165,17 @@ export default function List({ data }) {
 }
 
 const Line = ({ hit }) => {
-  const [copied, setCopied] = React.useState(false);
-  const [copied1, setCopied1] = React.useState(false);
-  const [copied2, setCopied2] = React.useState(false);
+  const [copiedElements, setCopiedElements] = React.useState({});
   const parent2 = hit.parent2FirstName && hit.parent2LastName && hit.parent2Status && hit.parent2Email && hit.parent2Phone;
 
   useEffect(() => {
-    if (copied) {
-      setTimeout(() => setCopied(false), 3000);
+    if (Object.values(copiedElements).some((e) => e)) {
+      setTimeout(() => setCopiedElements({}), 3000);
     }
-    if (copied1) {
-      setTimeout(() => setCopied1(false), 3000);
-    }
-    if (copied2) {
-      setTimeout(() => setCopied2(false), 3000);
-    }
-  }, [copied, copied1, copied2]);
+  }, [copiedElements]);
 
   return (
-    <tr className="hover:!bg-gray-100" o>
+    <tr className="hover:!bg-gray-100">
       <td className="py-3 pl-4 ml-2 rounded-l-lg">
         <div>
           <div className="font-bold text-[15px]">{`${hit.firstName} ${hit.lastName}`}</div>
@@ -195,14 +189,26 @@ const Line = ({ hit }) => {
             className="flex items-center justify-center cursor-pointer hover:scale-105"
             onClick={() => {
               copyToClipboard(hit.email);
-              setCopied(true);
+              setCopiedElements((prev) => ({ ...prev, email: true }));
             }}>
-            {copied ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
+            {copiedElements?.email ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
           </div>
         </div>
       </td>
       <td>
-        <div className="font-normal text-xs">{formatPhoneNumberFR(hit.phone)}</div>
+        {hit.phone ? (
+          <div className="flex gap-1 items-center">
+            <div className="flex items-center font-normal text-xs">{formatPhoneNumberFR(hit.phone)}</div>
+            <div
+              className="flex items-center justify-center cursor-pointer hover:scale-105"
+              onClick={() => {
+                copyToClipboard(hit.phone);
+                setCopiedElements((prev) => ({ ...prev, phone: true }));
+              }}>
+              {copiedElements?.phone ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
+            </div>
+          </div>
+        ) : null}
       </td>
       <td>
         <div>
@@ -218,9 +224,9 @@ const Line = ({ hit }) => {
               className="flex items-center justify-center cursor-pointer hover:scale-105"
               onClick={() => {
                 copyToClipboard(hit.parent1Email);
-                setCopied1(true);
+                setCopiedElements((prev) => ({ ...prev, parent1Email: true }));
               }}>
-              {copied1 ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
+              {copiedElements?.parent1Email ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
             </div>
           </div>
           {parent2 ? (
@@ -230,9 +236,9 @@ const Line = ({ hit }) => {
                 className="flex items-center justify-center cursor-pointer hover:scale-105"
                 onClick={() => {
                   copyToClipboard(hit.parent2Email);
-                  setCopied2(true);
+                  setCopiedElements((prev) => ({ ...prev, parent2Email: true }));
                 }}>
-                {copied2 ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
+                {copiedElements?.parent2Email ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
               </div>
             </div>
           ) : null}
@@ -240,8 +246,30 @@ const Line = ({ hit }) => {
       </td>
       <td>
         <div>
-          <div className="font-normal text-xs ">{formatPhoneNumberFR(hit.parent1Phone)}</div>
-          {parent2 ? <div className="font-normal text-xs ">{formatPhoneNumberFR(hit.parent2Phone)}</div> : null}
+          <div className="flex gap-1 items-center">
+            <div className="font-normal text-xs ">{formatPhoneNumberFR(hit.parent1Phone)}</div>
+            <div
+              className="flex items-center justify-center cursor-pointer hover:scale-105"
+              onClick={() => {
+                copyToClipboard(hit.parent1Phone);
+                setCopiedElements((prev) => ({ ...prev, parent1Phone: true }));
+              }}>
+              {copiedElements?.parent1Phone ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
+            </div>
+          </div>
+          {parent2 ? (
+            <div className="flex gap-1 items-center">
+              <div className="font-normal text-xs ">{formatPhoneNumberFR(hit.parent2Phone)}</div>
+              <div
+                className="flex items-center justify-center cursor-pointer hover:scale-105"
+                onClick={() => {
+                  copyToClipboard(hit.parent2Phone);
+                  setCopiedElements((prev) => ({ ...prev, parent2Phone: true }));
+                }}>
+                {copiedElements?.parent2Phone ? <HiCheckCircle className="text-green-500" /> : <BiCopy className="text-gray-400" />}
+              </div>
+            </div>
+          ) : null}
         </div>
       </td>
       <td className="rounded-r-lg">

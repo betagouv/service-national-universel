@@ -218,7 +218,7 @@ const Hit = ({ hit }) => {
     <tr className="hover:!bg-gray-100">
       <td className={`pl-4 ml-2 rounded-l-lg`}>
         <div className="flex gap-2 items-center text-sm">
-          <BusSvg />
+          <BusSvg className="text-gray-400" />
           {hit.busExcelId}
         </div>
       </td>

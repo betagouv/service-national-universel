@@ -342,9 +342,11 @@ router.post("/check-token/:token", async (req, res) => {
         },
       };
       const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
+      const meetingPoints = await MeetingPointObject.find({ centerId: sessionPhase1.cohesionCenterId });
 
       for (const young of youngs) {
         const tempYoung = {
+          _id: young._id,
           firstName: young.firstName,
           lastName: young.lastName,
           email: young.email,
@@ -368,12 +370,7 @@ router.post("/check-token/:token", async (req, res) => {
         if (young.deplacementPhase1Autonomous === "true") {
           result.noMeetingPoint.youngs.push(tempYoung);
         } else {
-          const tempMeetingPoint = await MeetingPointObject.findById(young.meetingPointId);
-
-          let tempBus = {};
-          if (tempMeetingPoint?.busId) {
-            tempBus = await BusObject.findById(tempMeetingPoint.busId);
-          }
+          const tempMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
 
           if (tempMeetingPoint) {
             if (!result[tempMeetingPoint.busExcelId]) {
@@ -382,7 +379,7 @@ router.post("/check-token/:token", async (req, res) => {
               result[tempMeetingPoint.busExcelId]["meetingPoint"] = [];
             }
 
-            if (!result[tempMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id !== tempMeetingPoint._id)) {
+            if (!result[tempMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id !== tempMeetingPoint._id.toString())) {
               result[tempMeetingPoint.busExcelId]["meetingPoint"].push(tempMeetingPoint);
             }
 

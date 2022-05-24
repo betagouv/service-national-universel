@@ -6,6 +6,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import api from "../../services/api";
 import List from "./view/List";
 import Unauthorized from "./view/Unauthorized";
+import MobileList from "./view/MobileList";
 
 export default function SessionShareIndex() {
   useDocumentTitle("Session/Bus");
@@ -42,9 +43,14 @@ export default function SessionShareIndex() {
   return isLoading ? (
     <Loader />
   ) : isAuthorized ? (
-    <div className="flex flex-1">
-      <List data={data} />{" "}
-    </div>
+    <>
+      <div className="md:flex hidden flex-1">
+        <List data={data} />
+      </div>
+      <div className="md:hidden flex flex-1">
+        <MobileList data={data} />
+      </div>
+    </>
   ) : (
     <Unauthorized code={code} />
   );
