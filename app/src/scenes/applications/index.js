@@ -38,7 +38,6 @@ export default function Index() {
   };
 
   const updatePriority = async (value) => {
-    console.log(value);
     for (let i = 0; i < value.length; i++) {
       await api.put("/application", { ...value[i], priority: i + 1 });
     }
@@ -50,7 +49,6 @@ export default function Index() {
       const { ok, data, code } = await api.get(`/young/${young._id}/application`);
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
       data.sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0));
-      console.log(data);
       return setApplications(data);
     })();
   }, []);
