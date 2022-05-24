@@ -33,6 +33,9 @@ const FILTERS = [
   "COHESION_JDM",
   "DEPART",
   "DEPART_MOTIF",
+  "SEXE",
+  "IMAGE_RIGHT",
+  "AUTOTEST",
 ];
 export default function General({ updateFilter }) {
   const [young, setYoung] = useState();
@@ -131,6 +134,22 @@ export default function General({ updateFilter }) {
                   </FilterRow>
                   <FilterRow visible={filterVisible}>
                     <div className="uppercase text-xs text-snu-purple-800">Dossier</div>
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="Sexe"
+                      componentId="SEXE"
+                      dataField="gender.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "SEXE") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Sexe", "Sexe")}
+                      onValueChange={(e) => updateFilter({ SEXE: e })}
+                    />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -270,6 +289,40 @@ export default function General({ updateFilter }) {
                       showMissing
                       missingLabel="Non renseigné"
                       onValueChange={(e) => updateFilter({ MEDICAL_FILE_RECEIVED: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="Droit à l'image"
+                      componentId="IMAGE_RIGHT"
+                      dataField="imageRight.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "IMAGE_RIGHT") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      renderLabel={(items) => getFilterLabel(items, "Droit à l'image", "Droit à l'image")}
+                      showMissing
+                      missingLabel="Non renseigné"
+                      onValueChange={(e) => updateFilter({ IMAGE_RIGHT: e })}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      placeholder="Utilisation d’autotest"
+                      componentId="AUTOTEST"
+                      dataField="autoTestPCR.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "AUTOTEST") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      renderLabel={(items) => getFilterLabel(items, "Utilisation d’autotest", "Utilisation d’autotest")}
+                      showMissing
+                      missingLabel="Non renseigné"
+                      onValueChange={(e) => updateFilter({ AUTOTEST: e })}
                     />
                   </FilterRow>
                   <FilterRow visible={filterVisible}>
