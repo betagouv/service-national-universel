@@ -59,7 +59,7 @@ export default function Edit(props) {
       <div className="m-9">
         <div className="flex flex-row items-center justify-between mb-4">
           <div className="flex flex-row items-center">
-            <BusSvg className="h-10 w-10" />
+            <BusSvg className="h-10 w-10 text-gray-400" />
             <div className="font-bold text-2xl ml-4">{meetingPoint.busExcelId}</div>
           </div>
           <div className="flex gap-2 items-center">
