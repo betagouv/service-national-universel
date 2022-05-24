@@ -22,7 +22,7 @@ const {
   sanitizeAll,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
-const { ROLES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter } = require("snu-lib/roles");
+const { ROLES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1 } = require("snu-lib/roles");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateNewCohesionCenter, validateUpdateCohesionCenter, validateId } = require("../utils/validator");
@@ -195,6 +195,29 @@ router.get("/:id/cohort/:cohort/session-phase1", passport.authenticate("referent
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.get("/:id/cohort/:cohort/stats", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  const { error, value } = Joi.object({ id: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params);
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+  if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+  try {
+    const center = await CohesionCenterModel.findById(value.id);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort: value.cohort });
+    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
+
+    return res.status(200).send({ ok: true, data: { youngs, sessionPhase1 } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params);

@@ -8,6 +8,7 @@ import FilterDepartment from "../components/FilterDepartment";
 import FilterCohorte from "../components/FilterCohorte";
 
 import Status from "./status";
+import Presence from "./presence";
 
 import { REFERENT_ROLES } from "../../../utils";
 
@@ -46,6 +47,7 @@ export default function Index() {
         </Col>
       </Row>
       {filter && <Status filter={filter} />}
+      <Presence />
     </>
   );
 }
