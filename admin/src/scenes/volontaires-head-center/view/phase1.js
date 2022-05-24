@@ -7,7 +7,10 @@ import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import Badge from "../../../components/Badge";
 import { Box, BoxTitle } from "../../../components/box";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
+import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
+import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import Download from "../../../assets/Download.js";
 import api from "../../../services/api";
 import {
   formatDateFR,
