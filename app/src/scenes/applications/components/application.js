@@ -347,6 +347,9 @@ const Footer = ({ application, tutor, onChange }) => {
 
 const ContractInfoContainer = styled.div`
   display: flex;
+`
+
+const MinBadge = styled.span`
   margin-right: 0.5rem;
   width: 1rem;
   height: 1rem;
