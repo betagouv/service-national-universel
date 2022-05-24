@@ -189,7 +189,9 @@ const Line = ({ hit, onClick, selected }) => {
               {hit.phone ? (
                 <div className="flex item-center gap-2">
                   <Phone className="text-gray-400" />
-                  <div className="font-normal text-xs">{formatPhoneNumberFR(hit.phone)}</div>
+                  <div className="font-normal text-xs">
+                    <a href={`tel:${hit.phone}`}>{formatPhoneNumberFR(hit.phone)}</a>
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -209,7 +211,9 @@ const Line = ({ hit, onClick, selected }) => {
               {hit.parent1Phone ? (
                 <div className="flex item-center gap-2">
                   <Phone className="text-gray-400" />
-                  <div className="font-normal text-xs">{formatPhoneNumberFR(hit.parent1Phone)}</div>
+                  <div className="font-normal text-xs">
+                    <a href={`tel:${hit.parent1Phone}`}>{formatPhoneNumberFR(hit.parent1Phone)}</a>
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -231,7 +235,9 @@ const Line = ({ hit, onClick, selected }) => {
                   {hit.parent2Phone ? (
                     <div className="flex item-center gap-2">
                       <Phone className="text-gray-400" />
-                      <div className="font-normal text-xs">{formatPhoneNumberFR(hit.parent2Phone)}</div>
+                      <div className="font-normal text-xs">
+                        <a href={`tel:${hit.parent2Phone}`}>{formatPhoneNumberFR(hit.parent2Phone)}</a>
+                      </div>
                     </div>
                   ) : null}
                 </div>
