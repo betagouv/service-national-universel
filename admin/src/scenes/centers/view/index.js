@@ -1,17 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Switch, Route, useHistory, Link } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import Team from "./team";
 import CenterInformations from "./CenterInformations";
-import Nav from "./Nav";
-import Youngs from "./youngs";
-import Affectation from "./affectation";
-import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
-import { translate, ROLES, canCreateOrUpdateCohesionCenter , canSearchInElasticSearch} from "../../../utils";
-import { environment } from "../../../config";
+import { translate, ROLES, canCreateOrUpdateCohesionCenter, canSearchInElasticSearch } from "../../../utils";
 import Plus from "../../../assets/icons/Plus.js";
 import ChevronRight from "../../../assets/icons/ChevronRight.js";
 import Template from "../../../assets/icons/Template.js";
@@ -24,7 +18,6 @@ export default function Index({ ...props }) {
   const [sessions, setSessions] = useState([]);
   const [focusedCohort, setFocusedCohort] = useState();
   const [focusedSession, setFocusedSession] = useState();
-  const [focusedTab, setFocusedTab] = useState("equipe");
   const [occupationPercentage, setOccupationPercentage] = useState();
   const [availableCohorts, setAvailableCohorts] = useState([]);
 
@@ -113,17 +106,17 @@ export default function Index({ ...props }) {
           {/* nombres */}
           <div className="flex flex-col justify-around">
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-snu-purple-300" />
-              <div>
-                <div className="text-xs font-normal">Place occupées</div>
-                <div className="text-base font-bold">{placesTotal - placesLeft}</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-gray-200" />
               <div>
                 <div className="text-xs font-normal">Place libres</div>
                 <div className="text-base font-bold">{placesLeft}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-snu-purple-300" />
+              <div>
+                <div className="text-xs font-normal">Place occupées</div>
+                <div className="text-base font-bold">{placesTotal - placesLeft}</div>
               </div>
             </div>
           </div>
@@ -136,14 +129,16 @@ export default function Index({ ...props }) {
   return (
     <>
       <div className="flex gap-3 text-gray-400 items-center ml-12 mt-8">
-        <Template className=""/>
-        <ChevronRight className=""/>
-        {canSearchInElasticSearch(user, "cohesioncenter") ?
-          <Link className="text-xs hover:underline hover:text-snu-purple-300" to="/centre">Centres</Link>
-          :
+        <Template className="" />
+        <ChevronRight className="" />
+        {canSearchInElasticSearch(user, "cohesioncenter") ? (
+          <Link className="text-xs hover:underline hover:text-snu-purple-300" to="/centre">
+            Centres
+          </Link>
+        ) : (
           <div className="text-xs">Centres</div>
-        }
-        <ChevronRight className=""/>
+        )}
+        <ChevronRight className="" />
         <div className="text-xs">Fiche du centre</div>
       </div>
       <CenterInformations center={center} sessions={sessions} />

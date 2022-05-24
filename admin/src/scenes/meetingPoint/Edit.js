@@ -210,17 +210,17 @@ const OccupationCard = ({ occupationPercentage, placesLeft, placesTotal }) => {
         {/* nombres */}
         <div className="flex flex-col justify-around">
           <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-snu-purple-300" />
-            <div>
-              <div className="text-xs font-normal">Place occupées</div>
-              <div className="text-base font-bold">{placesTotal - placesLeft}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-gray-200" />
             <div>
               <div className="text-xs font-normal">Place disponibles</div>
               <div className="text-base font-bold">{placesLeft}</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-snu-purple-300" />
+            <div>
+              <div className="text-xs font-normal">Place occupées</div>
+              <div className="text-base font-bold">{placesTotal - placesLeft}</div>
             </div>
           </div>
         </div>
