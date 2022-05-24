@@ -11,6 +11,7 @@ import DownloadConvocationButton from "../../../components/buttons/DownloadConvo
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import Download from "../../../assets/Download.js";
+import Envelop from "../../../assets/Envelop.js";
 import api from "../../../services/api";
 import {
   formatDateFR,
@@ -21,6 +22,7 @@ import {
   translatePhase1,
   YOUNG_STATUS_COLORS,
   YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE1_MOTIF,
 } from "../../../utils";
 import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../../centers/components/modals/ModalPointagePresenceArrivee";
@@ -54,13 +56,6 @@ export default function Phase1(props) {
     })();
   }, []);
 
-  const updateYoung = async (v) => {
-    const { data, ok, code } = await api.put(`/referent/young/${young._id}`, v);
-    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
-    setYoung(data);
-    toastr.success("Mis à jour !");
-  };
-
   const getMeetingPoint = (young) => {
     if (young.meetingPointId)
       return (
@@ -85,32 +80,33 @@ export default function Phase1(props) {
   };
 
   const getCohesionStay = (young) => {
+    if (!cohesionCenter) return <i>Aucun centre renseigné</i>;
     if (young.statusPhase1 === "DONE")
       return (
         <>
           <p>{young.firstName} a réalisé son séjour de cohésion.</p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "NOT_DONE")
       return (
         <>
           <p>{young.firstName} n&apos;a pas réalisé son séjour de cohésion.</p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if ((young.statusPhase1 === "CANCEL" || young.statusPhase1 === "EXEMPTED") && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;
     if (young.statusPhase1 === "AFFECTED")
       return (
         <>
-          <p>{young.firstName} a été affecté(e) dans votre centre :</p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <p className="text-base mb-1">{young.firstName} a été affecté(e) dans votre centre :</p>
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "WAITING_AFFECTATION")
@@ -122,10 +118,10 @@ export default function Phase1(props) {
     if (young.statusPhase1 === "WAITING_LIST")
       return (
         <>
-          <p>{young.firstName} est sur liste d&apos;attente au centre :</p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <p className="text-base mb-1">{young.firstName} est sur liste d&apos;attente dans votre centre :</p>
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "WAITING_ACCEPTATION")
@@ -134,18 +130,18 @@ export default function Phase1(props) {
           <p>
             {young.firstName} doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringLongDate(young.autoAffectationPhase1ExpiresAt)}</b>.
           </p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "WITHDRAWN")
       return (
         <>
-          <p>Details s&apos;est désisté(e) du séjour de cohésion.</p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <p>{young.firstName} s&apos;est désisté(e) du séjour de cohésion.</p>
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
   };
