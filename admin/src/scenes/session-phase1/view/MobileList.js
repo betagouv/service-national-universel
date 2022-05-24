@@ -67,7 +67,7 @@ export default function MobileList({ data }) {
   return (
     <div className="w-full">
       <div className="hidden border-[#FE7B52] border-[#FEB951] border-[#6CC763] border-[#F8A9AD] border-[#382F79] border-[#d7d7d7] border-[#FE7B52] border-[#382F79] border-[#FEB951] border-[#FEB951] border-[#FE7B52] border-[#FE7B52] border-[#FE7B52] border-[#6CC763] border-[#BE3B12] border-[#ffa987] border-[#d7d7d7] border-[#BE3B12]" />
-      <div className="flex flex-row !justify-between items-center mx-2 my-6">
+      <div className="flex flex-row !justify-between items-center mx-4 my-6">
         <div className="font-bold text-2xl">Volontaires</div>
         <Select
           alignItems="right"
