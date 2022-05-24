@@ -16,6 +16,7 @@ import ReactiveListComponent from "../../../components/ReactiveListComponent";
 export default function Presence() {
   const [young, setYoung] = useState();
   const [filterVisible, setFilterVisible] = useState(false);
+  const [filterCohort, setFilterCohort] = useState([]);
   const user = useSelector((state) => state.Auth.user);
 
   return (
@@ -59,6 +60,7 @@ export default function Presence() {
                         URLParams={true}
                         showSearch={false}
                         renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
+                        onValueChange={setFilterCohort}
                       />
                       <RegionFilter filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
                       <DepartmentFilter filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
@@ -101,7 +103,7 @@ export default function Presence() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {(data || []).map((centre) => (
-                            <Centre key={centre._id} centre={centre} />
+                            <Centre key={centre._id} centre={centre} filterCohort={filterCohort} />
                           ))}
                         </tbody>
                       </table>
@@ -123,8 +125,10 @@ export default function Presence() {
   );
 }
 
-const Centre = ({ centre }) => {
-  return (centre?.cohorts || []).map((cohort) => <Session key={centre.name + "-" + cohort} centre={centre} cohort={cohort} />);
+const Centre = ({ centre, filterCohort }) => {
+  return (centre?.cohorts || [])
+    .filter((cohort) => filterCohort.length === 0 || filterCohort.includes(cohort))
+    .map((cohort) => <Session key={centre.name + "-" + cohort} centre={centre} cohort={cohort} />);
 };
 
 const Session = ({ centre, cohort }) => {
