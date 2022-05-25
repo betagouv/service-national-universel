@@ -41,7 +41,7 @@ import Zammad from "./components/Zammad";
 import api from "./services/api";
 
 import { SENTRY_URL, environment, adminURL } from "./config";
-import { ROLES, ROLES_LIST, COHESION_STAY_START } from "./utils";
+import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 
 import "./index.css";
 import ModalCGU from "./components/modals/ModalCGU";
@@ -149,8 +149,8 @@ const Home = () => {
       const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1`);
       if (!ok) return console.log(`Error: ${code}`);
 
-      const sessions = data.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
-      const activeSession = sessions.find((s) => COHESION_STAY_START[s.cohort] >= Date.now());
+      const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);
+      const activeSession = sessions.find((s) => COHESION_STAY_END[s.cohort] >= Date.now());
 
       setSessionPhase1List(sessions.reverse());
       dispatch(setSessionPhase1(activeSession || sessions[0]));
