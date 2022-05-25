@@ -654,7 +654,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     let buttonCta = cta || config.APP_URL;
     if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
     if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) buttonCta = `${config.APP_URL}/inscription/coordonnees`;
-    if (template === SENDINBLUE_TEMPLATES.young.SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION)
+    if (template === SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION)
       buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+nouvelles+mig+proposées&utm_source=notifauto&utm_medium=mail+170+accéder`;
 
     let cc = getCcOfYoung({ template, young });
