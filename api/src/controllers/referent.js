@@ -645,18 +645,12 @@ router.post(
       const young = await YoungModel.findById(youngId);
       if (!young) return res.status(404).send({ ok: false });
 
-    if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    // Validate files with Joi
-    const { error: filesError, value: files } = Joi.array()
-      .items(
-        Joi.alternatives().try(
-          Joi.object({
-            name: Joi.string().required(),
-            data: Joi.binary().required(),
-            tempFilePath: Joi.string().allow("").optional(),
-          }).unknown(),
-          Joi.array().items(
+      // Validate files with Joi
+      const { error: filesError, value: files } = Joi.array()
+        .items(
+          Joi.alternatives().try(
             Joi.object({
               name: Joi.string().required(),
               data: Joi.binary().required(),
