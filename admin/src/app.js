@@ -153,7 +153,7 @@ const Home = () => {
       const activeSession = sessions.find((s) => COHESION_STAY_START[s.cohort] >= Date.now());
 
       setSessionPhase1List(sessions.reverse());
-      dispatch(setSessionPhase1(activeSession));
+      dispatch(setSessionPhase1(activeSession || sessions[0]));
     })();
   }, [user]);
 
