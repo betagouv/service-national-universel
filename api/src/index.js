@@ -5,7 +5,6 @@ const cors = require("cors");
 const express = require("express");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
-const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
 const logger = require("morgan");
 const passport = require("passport");
@@ -49,7 +48,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 require("./crons");
 app.use(cookieParser());
-app.use(fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }));
 
 app.use(express.static(__dirname + "/../public"));
 
