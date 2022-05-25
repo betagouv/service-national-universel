@@ -1,3 +1,18 @@
+# [1.92.0](https://github.com/betagouv/service-national-universel/compare/v1.91.0...v1.92.0) (2022-05-25)
+
+
+### Bug Fixes
+
+* **admin:** chef de centre - session la plus proche dans le future active par défaut ([2c1eb26](https://github.com/betagouv/service-national-universel/commit/2c1eb2699aef10c5f5a78ceb39b5752227a17c5d))
+* **app+admin:** from page for support ([#1586](https://github.com/betagouv/service-national-universel/issues/1586)) ([c3dc217](https://github.com/betagouv/service-national-universel/commit/c3dc2174c8e45c9f3378d7df5c063ec6b5de1062))
+* **security:** file upload only for a few routes ([#1537](https://github.com/betagouv/service-national-universel/issues/1537)) ([d79f61d](https://github.com/betagouv/service-national-universel/commit/d79f61d7d6012d9f1ed17719196ff0875256a825))
+
+
+### Features
+
+* **admin:** use-local-storage pour le selecteur de séjour [#1585](https://github.com/betagouv/service-national-universel/issues/1585) ([e4c8dba](https://github.com/betagouv/service-national-universel/commit/e4c8dbad8681a994d2810bb35a0ba7e6df4c4f6d))
+* **api:** utm batch 2 ([#1584](https://github.com/betagouv/service-national-universel/issues/1584)) ([508d41e](https://github.com/betagouv/service-national-universel/commit/508d41e3e69f423bfbc16ad36b5cabffb9171cd0))
+
 # [1.91.0](https://github.com/betagouv/service-national-universel/compare/v1.90.0...v1.91.0) (2022-05-24)
 
 
