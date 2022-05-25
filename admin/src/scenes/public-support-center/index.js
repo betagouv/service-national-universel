@@ -58,11 +58,11 @@ const articles = [
   },
 ];
 
-export default function PublicSupportCenter() {
+export default function PublicSupportCenter(props) {
   const user = useSelector((state) => state.Auth.user);
   const [open, setOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const fromPage = decodeURIComponent(window.location.search).split("?from=")[1];
+  const fromPage = new URLSearchParams(props.location.search).get("from");
 
   return (
     <div style={{ paddingBottom: "5rem", paddingTop: "1rem" }}>

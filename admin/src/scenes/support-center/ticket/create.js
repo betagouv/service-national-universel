@@ -12,9 +12,10 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
 
-export default function Create({ fromPage }) {
+export default function Create(props) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+  const fromPage = new URLSearchParams(props.location.search).get("from");
 
   const [typesList, setTypeList] = useState([]);
   const [subjectsList, setSubjectsList] = useState([]);
