@@ -1,65 +1,111 @@
-import React, { useState } from "react";
-import { Col, Row } from "reactstrap";
-import styled from "styled-components";
-import { Formik } from "formik";
-
-import {
-  translate,
-  translatePhase1,
-  YOUNG_STATUS_COLORS,
-  confirmMessageChangePhase1Presence,
-  formatStringLongDate,
-  PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE,
-  translateCohort,
-} from "../../../utils";
-import WrapperPhase1 from "./wrapper";
-import api from "../../../services/api";
+import React, { useEffect, useState } from "react";
+import { ImQuotesLeft } from "react-icons/im";
+import { MdOutlineOpenInNew } from "react-icons/md";
+import { toastr } from "react-redux-toastr";
+import { Row } from "reactstrap";
+import Download from "../../../assets/Download.js";
+import Envelop from "../../../assets/Envelop.js";
+import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
+import Badge from "../../../components/Badge";
 import { Box, BoxTitle } from "../../../components/box";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
-import { toastr } from "react-redux-toastr";
-import Badge from "../../../components/Badge";
-import Select from "../components/Select";
+import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
+import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import api from "../../../services/api";
+import {
+  formatDateFR,
+  formatStringLongDate,
+  PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE,
+  translate,
+  translateCohort,
+  translatePhase1,
+  YOUNG_STATUS_COLORS,
+  YOUNG_STATUS_PHASE1,
+} from "../../../utils";
+import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
+import ModalPointagePresenceArrivee from "../../centers/components/modals/ModalPointagePresenceArrivee";
+import ModalPointagePresenceJDM from "../../centers/components/modals/ModalPointagePresenceJDM";
+import DocumentPhase1 from "../components/DocumentPhase1";
+import WrapperPhase1 from "./wrapper";
 
 export default function Phase1(props) {
   const [young, setYoung] = useState(props.young);
+  const [meetingPoint, setMeetingPoint] = useState();
+  const [cohesionCenter, setCohesionCenter] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const disabled = PHASE1_HEADCENTER_OPEN_ACCESS_CHECK_PRESENCE[props.young?.cohort].getTime() > Date.now();
+  const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
+  const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
+  const [modalPointageDepart, setModalPointageDepart] = useState({ isOpen: false });
 
-  const updateYoung = async (v) => {
-    const { data, ok, code } = await api.put(`/referent/young/${young._id}`, v);
-    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
-    setYoung(data);
-    toastr.success("Mis à jour !");
+  useEffect(() => {
+    if (!young?.sessionPhase1Id) return;
+    (async () => {
+      const { data, code, ok } = await api.get(`/session-phase1/${young?.sessionPhase1Id}/cohesion-center`);
+      if (!ok) return toastr.error("Impossible de récupérer les informations du centre de cohésion", translate(code));
+      setCohesionCenter(data);
+    })();
+
+    if (!young.meetingPointId) return;
+    (async () => {
+      const { data, code, ok } = await api.get(`/meeting-point/${young?.meetingPointId}`);
+      if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
+      setMeetingPoint(data);
+    })();
+  }, []);
+
+  const getMeetingPoint = (young) => {
+    if (young.meetingPointId)
+      return (
+        <>
+          <Details title="Adresse" value={meetingPoint?.departureAddress} />
+          <Details title="Heure&nbsp;de&nbsp;départ" value={meetingPoint?.departureAtString} />
+          <Details title="Heure&nbsp;de&nbsp;retour" value={meetingPoint?.returnAtString} />
+          <Details title="N˚&nbsp;transport" value={meetingPoint?.busExcelId} />
+        </>
+      );
+    if (young.deplacementPhase1Autonomous === "true")
+      return (
+        <>
+          <i>{`${young.firstName} se rend au centre par ses propres moyens.`}</i>
+        </>
+      );
+    return (
+      <div>
+        <i>{`Aucun point de rassemblement n'a été confirmé pour ${young.firstName}`}</i>
+      </div>
+    );
   };
 
   const getCohesionStay = (young) => {
+    if (!cohesionCenter) return <i>Aucun centre renseigné</i>;
     if (young.statusPhase1 === "DONE")
       return (
         <>
           <p>{young.firstName} a réalisé son séjour de cohésion.</p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "NOT_DONE")
       return (
         <>
           <p>{young.firstName} n&apos;a pas réalisé son séjour de cohésion.</p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if ((young.statusPhase1 === "CANCEL" || young.statusPhase1 === "EXEMPTED") && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;
     if (young.statusPhase1 === "AFFECTED")
       return (
         <>
-          <p>{young.firstName} a été affecté(e) au centre :</p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <p className="text-base mb-1">{young.firstName} a été affecté(e) dans votre centre :</p>
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "WAITING_AFFECTATION")
@@ -71,10 +117,10 @@ export default function Phase1(props) {
     if (young.statusPhase1 === "WAITING_LIST")
       return (
         <>
-          <p>{young.firstName} est sur liste d&apos;attente au centre :</p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <p className="text-base mb-1">{young.firstName} est sur liste d&apos;attente dans votre centre :</p>
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "WAITING_ACCEPTATION")
@@ -83,102 +129,171 @@ export default function Phase1(props) {
           <p>
             {young.firstName} doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringLongDate(young.autoAffectationPhase1ExpiresAt)}</b>.
           </p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
     if (young.statusPhase1 === "WITHDRAWN")
       return (
         <>
-          <p>Details s&apos;est désisté(e) du séjour de cohésion.</p>
-          <Details title="Centre" value={young.cohesionCenterName} />
-          <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+          <p>{young.firstName} s&apos;est désisté(e) du séjour de cohésion.</p>
+          <Details title="Centre" value={cohesionCenter.name} />
+          <Details title="Ville" value={cohesionCenter.city} />
+          <Details title="Code&nbsp;Postal" value={cohesionCenter.zip} />
         </>
       );
   };
 
+  const onSubmit = async (newValue) => {
+    setYoung(newValue);
+
+    // on ferme les modales
+    setModalPointagePresenceArrivee({ isOpen: false, value: null });
+    setModalPointagePresenceJDM({ isOpen: false, value: null });
+    setModalPointageDepart({ isOpen: false, value: null });
+  };
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase1 young={young} tab="phase1">
+      <WrapperPhase1 young={young} tab="phase1" onChange={props.onChange}>
         <Box>
-          <Row>
-            <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-              <Bloc title="Séjour de cohésion" titleRight={<Badge text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}>
-                {getCohesionStay(young)}
+          <article className="flex">
+            <Bloc
+              title="Séjour de cohésion"
+              titleRight={<Badge text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}
+              borderRight
+              borderBottom>
+              <section className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <div className="text-gray-500">Présence à l&apos;arrivée</div>
+                  <select
+                    className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer min-w-1/4 disabled:bg-gray-300`}
+                    value={young.cohesionStayPresence || ""}
+                    onChange={(e) => {
+                      setModalPointagePresenceArrivee({
+                        isOpen: true,
+                        value: e.target.value,
+                      });
+                    }}
+                    disabled={disabled}
+                    style={{ fontFamily: "Marianne" }}>
+                    <option disabled label="Présence à l'arrivée">
+                      Présence à l&apos;arrivée
+                    </option>
+                    {[
+                      { label: "Non renseigné", value: "", disabled: true, hidden: true },
+                      { label: "Présent", value: "true" },
+                      { label: "Absent", value: "false" },
+                    ].map((option, i) => (
+                      <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-gray-500">Présence JDM</div>
+                  <select
+                    className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer min-w-1/4 disabled:bg-gray-300`}
+                    value={young.presenceJDM || ""}
+                    onChange={(e) => {
+                      setModalPointagePresenceJDM({
+                        isOpen: true,
+                        value: e.target.value,
+                      });
+                    }}
+                    disabled={disabled}
+                    style={{ fontFamily: "Marianne" }}>
+                    <option disabled label="Présence JDM">
+                      Présence JDM
+                    </option>
+                    {[
+                      { label: "Non renseigné", value: "", disabled: true, hidden: true },
+                      { label: "Présent", value: "true" },
+                      { label: "Absent", value: "false" },
+                    ].map((option, i) => (
+                      <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-gray-500">Départ {young.departSejourMotif ? `(${young.departSejourMotif})` : ""}</div>
+                  {!disabled ? (
+                    <div
+                      className="flex gap-1 items-center group cursor-pointer min-h-[37px]"
+                      onClick={(e) => {
+                        setModalPointageDepart({
+                          isOpen: true,
+                          value: e.target.value,
+                        });
+                      }}>
+                      <ArrowCircleRight className="text-gray-400 group-hover:scale-105" />
+                      <div className="group-hover:underline">{!young.departSejourAt ? "Renseigner un départ" : formatDateFR(young.departSejourAt)}</div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-1 items-center min-h-[37px]">
+                      <ArrowCircleRight className="text-gray-400 " />
+                      <div className="">{!young.departSejourAt ? "Pas de départ renseigné" : formatDateFR(young.departSejourAt)}</div>
+                    </div>
+                  )}
+                </div>
+                {young.departSejourMotifComment ? (
+                  <div className="flex gap-2 bg-blue-50 rounded-lg p-2 text-blue-700">
+                    <ImQuotesLeft />
+                    <div className="flex-1">{young.departSejourMotifComment}</div>
+                  </div>
+                ) : null}
+                <div className="mt-4">
+                  {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (
+                    <>
+                      <p className="text-gray-500">Attestation de réalisation phase 1 :</p>
+                      <section className="flex mt-3">
+                        <DownloadAttestationButton young={young} uri="1" className="mr-2">
+                          <Download color="#5145cd" className="mr-2" />
+                          Télécharger
+                        </DownloadAttestationButton>
+                        <MailAttestationButton young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
+                          <Envelop color="#5145cd" className="mr-2" />
+                          Envoyer par mail
+                        </MailAttestationButton>
+                      </section>
+                    </>
+                  ) : (
+                    <>
+                      {young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && (young.meetingPointId || young.deplacementPhase1Autonomous === "true") ? (
+                        <>
+                          <p className="text-gray-500 mb-[22px]">Convocation au séjour :</p>
+                          <DownloadConvocationButton young={young} uri="cohesion">
+                            <Download color="#5145cd" className="mr-2" />
+                            Télécharger
+                          </DownloadConvocationButton>
+                        </>
+                      ) : null}
+                    </>
+                  )}
+                </div>
+              </section>
+            </Bloc>
+            <Bloc title="Détails" borderBottom>
+              {getCohesionStay(young)}
+              <Details title="Dates" value={translateCohort(young.cohort)} className="flex" />
+              <p className="text-base my-1">Point de rassemblement :</p>
+              {getMeetingPoint(young)}
+            </Bloc>
+          </article>
+          {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
+          young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
+          young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
+            <Row>
+              <Bloc title="Documents">
+                <DocumentPhase1 young={young} />
               </Bloc>
-            </Col>
-            <Col md={6}>
-              <Formik
-                initialValues={young}
-                onSubmit={async (values) => {
-                  try {
-                    const { ok, code } = await api.put(`/referent/young/${values._id}`, values);
-                    if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-                    toastr.success("Mis à jour!");
-                  } catch (e) {
-                    console.log(e);
-                    toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-                  }
-                }}>
-                {({ handleChange }) => (
-                  <>
-                    <Bloc title="Date de séjour" borderBottom disabled={disabled}>
-                      <Details title="Date" value={translateCohort(young.cohort)} />
-                      <Select
-                        placeholder="Non renseigné"
-                        title="Présence"
-                        options={[
-                          { value: "true", label: "Présent" },
-                          { value: "false", label: "Absent" },
-                        ]}
-                        value={young.cohesionStayPresence}
-                        name="cohesionStayPresence"
-                        handleChange={(e) => {
-                          const value = e.target.value;
-                          setModal({
-                            isOpen: true,
-                            onConfirm: () => {
-                              handleChange({ target: { value, name: "cohesionStayPresence" } });
-                              updateYoung({ cohesionStayPresence: value });
-                            },
-                            title: "Changement de présence",
-                            message: confirmMessageChangePhase1Presence(value),
-                          });
-                        }}
-                        disabled={disabled}
-                      />
-                    </Bloc>
-                    <Bloc title="Fiche sanitaire" disabled={disabled}>
-                      <Select
-                        placeholder="Non renseigné"
-                        title="Document"
-                        options={[
-                          { value: "true", label: "Réceptionné" },
-                          { value: "false", label: "Non réceptionné" },
-                        ]}
-                        value={young.cohesionStayMedicalFileReceived}
-                        name="cohesionStayMedicalFileReceived"
-                        handleChange={(e) => {
-                          const value = e.target.value;
-                          handleChange({ target: { value, name: "cohesionStayMedicalFileReceived" } });
-                          updateYoung({ cohesionStayMedicalFileReceived: value });
-                        }}
-                        disabled={disabled}
-                      />
-                    </Bloc>
-                  </>
-                )}
-              </Formik>
-            </Col>
-          </Row>
+            </Row>
+          ) : null}
         </Box>
-        {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
-          <DownloadAttestationButton young={young} uri="1">
-            Télécharger l&apos;attestation de réalisation de la phase 1
-          </DownloadAttestationButton>
-        ) : null}
       </WrapperPhase1>
       <ModalConfirm
         isOpen={modal?.isOpen}
@@ -190,73 +305,64 @@ export default function Phase1(props) {
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
+      <ModalPointagePresenceArrivee
+        isOpen={modalPointagePresenceArrivee?.isOpen}
+        onCancel={() => setModalPointagePresenceArrivee({ isOpen: false, value: null })}
+        onSubmit={onSubmit}
+        value={modalPointagePresenceArrivee?.value}
+        young={young}
+      />
+      <ModalPointagePresenceJDM
+        isOpen={modalPointagePresenceJDM?.isOpen}
+        onCancel={() => setModalPointagePresenceJDM({ isOpen: false, value: null })}
+        onSubmit={onSubmit}
+        value={modalPointagePresenceJDM?.value}
+        young={young}
+      />
+      <ModalPointageDepart
+        isOpen={modalPointageDepart?.isOpen}
+        onCancel={() => setModalPointageDepart({ isOpen: false, value: null })}
+        onSubmit={onSubmit}
+        value={modalPointageDepart?.value}
+        young={young}
+      />
     </div>
   );
 }
 
-const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled }) => {
+const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled, tw }) => {
   return (
-    <Row
-      style={{
-        width: "100%",
-        borderTop: borderTop ? "2px solid #f4f5f7" : 0,
-        borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
-        borderRight: borderRight ? "2px solid #f4f5f7" : 0,
-        backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}>
-      <Wrapper
-        style={{
-          width: "100%",
-        }}>
-        <div style={{ display: "flex", width: "100%" }}>
-          <BoxTitle>
-            <div>{title}</div>
-            <div>{titleRight}</div>
-          </BoxTitle>
-        </div>
-        {children}
-      </Wrapper>
-    </Row>
+    <section
+      className={`w-full p-12 ${borderTop ? "border-t-2 border-[#f4f5f7]" : ""} ${borderBottom ? "border-b-2 border-[#f4f5f7]" : ""} ${
+        borderRight ? "border-r-2 border-[#f4f5f7]" : ""
+      } ${disabled ? "bg-[#f9f9f9]" : "bg-transparent"} ${tw}`}>
+      <div className="flex w-full">
+        <BoxTitle>
+          <div>{title}</div>
+          <div>{titleRight}</div>
+        </BoxTitle>
+      </div>
+      {children}
+    </section>
   );
 };
 
-const Details = ({ title, value }) => {
+const Details = ({ title, value, to }) => {
   if (!value) return <div />;
   if (typeof value === "function") value = value();
   return (
-    <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
-    </div>
+    <section className="detail grid grid-cols-2 mb-2">
+      <p className="detail-title text-[#738297]">{title}&nbsp;:</p>
+      {to ? (
+        <p className="group detail-text">
+          <a href={to} target="_blank" rel="noreferrer" className="flex items-center gap-1 group-hover:underline">
+            {value}
+            <MdOutlineOpenInNew />
+          </a>
+        </p>
+      ) : (
+        <p className="detail-text">{value}</p>
+      )}
+    </section>
   );
 };
-
-const Wrapper = styled.div`
-  padding: 3rem;
-  .detail {
-    display: flex;
-    align-items: flex-start;
-    font-size: 14px;
-    text-align: left;
-    margin-top: 1rem;
-    &-title {
-      min-width: 90px;
-      width: 90px;
-      margin-right: 1rem;
-      color: #798399;
-    }
-    &-text {
-      color: rgba(26, 32, 44);
-      a {
-        color: #5245cc;
-        :hover {
-          text-decoration: underline;
-        }
-      }
-    }
-  }
-  p {
-    font-size: 13px;
-    color: #798399;
-  }
-`;

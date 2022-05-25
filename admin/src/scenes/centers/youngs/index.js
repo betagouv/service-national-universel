@@ -121,6 +121,7 @@ export default function CenterYoungIndex() {
     if (filter?.PAI?.length) body.query.bool.filter.push({ terms: { "paiBeneficiary.keyword": filter.PAI } });
     if (filter?.SPECIFIC_AMENAGEMENT?.length) body.query.bool.filter.push({ terms: { "specificAmenagment.keyword": filter.SPECIFIC_AMENAGEMENT } });
     if (filter?.PMR?.length) body.query.bool.filter.push({ terms: { "reducedMobilityAccess.keyword": filter.PMR } });
+    if (filter?.SEXE?.length) body.query.bool.filter.push({ terms: { "gender.keyword": filter.SEXE } });
 
     //Field with non renseigné value
     if (filter?.ALLERGIES?.length) {
@@ -208,6 +209,30 @@ export default function CenterYoungIndex() {
         });
       } else {
         body.query.bool.filter.push({ terms: { "departSejourMotif.keyword": filter.DEPART_MOTIF } });
+      }
+    }
+    if (filter?.IMAGE_RIGHT?.length) {
+      if (filter.IMAGE_RIGHT.includes("Non renseigné")) {
+        const filterWithoutNR = filter.IMAGE_RIGHT.filter((f) => f !== "Non renseigné");
+        body.query.bool.filter.push({
+          bool: {
+            should: [{ bool: { must_not: { exists: { field: "imageRight.keyword" } } } }, { terms: { "imageRight.keyword": filterWithoutNR } }],
+          },
+        });
+      } else {
+        body.query.bool.filter.push({ terms: { "imageRight.keyword": filter.IMAGE_RIGHT } });
+      }
+    }
+    if (filter?.AUTOTEST?.length) {
+      if (filter.AUTOTEST.includes("Non renseigné")) {
+        const filterWithoutNR = filter.AUTOTEST.filter((f) => f !== "Non renseigné");
+        body.query.bool.filter.push({
+          bool: {
+            should: [{ bool: { must_not: { exists: { field: "autoTestPCR.keyword" } } } }, { terms: { "autoTestPCR.keyword": filterWithoutNR } }],
+          },
+        });
+      } else {
+        body.query.bool.filter.push({ terms: { "autoTestPCR.keyword": filter.AUTOTEST } });
       }
     }
 
