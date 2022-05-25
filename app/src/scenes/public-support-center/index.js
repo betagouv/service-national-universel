@@ -64,11 +64,11 @@ const articles = [
   },
 ];
 
-export default function Index() {
+export default function Index(props) {
   const young = useSelector((state) => state.Auth.young);
   const [open, setOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const fromPage = decodeURIComponent(window.location.search).split("?from=")[1];
+  const fromPage = new URLSearchParams(props.location.search).get("from");
 
   return (
     <HeroContainer style={{ paddingBottom: "5rem" }}>
