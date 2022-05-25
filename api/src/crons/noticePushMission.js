@@ -45,7 +45,7 @@ exports.handler = async () => {
           emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
           params: {
             missions,
-            cta: `${APP_URL}/mission`,
+            cta: `${APP_URL}/mission?utm_campaign=transactionnel+nouvelles+mig+publiées&utm_source=notifauto&utm_medium=mail+237+accéder`,
           },
           cc,
         });
