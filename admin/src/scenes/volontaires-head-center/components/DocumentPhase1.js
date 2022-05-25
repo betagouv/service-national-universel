@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import FileIcon from "../../../assets/FileIcon";
-import { FILE_STATUS_PHASE1, ROLES, translate, translateFileStatusPhase1 } from "../../../utils";
+import { FILE_STATUS_PHASE1, translate, translateFileStatusPhase1 } from "../../../utils";
 import ButtonPlain from "../../volontaires/components/ButtonPlain";
 import ModalDocument from "./ModalDocument";
 
 export default function DocumentPhase1(props) {
-  const [young, setYoung] = useState(props.young);
+  const young = props.young;
   const [statusCohesionStayMedical, setStatusCohesionStayMedical] = useState();
   const [statusAutoTestPCR, setStatusAutoTestPCR] = useState();
   const [statusImageRight, setStatusImageRight] = useState();
@@ -60,7 +59,7 @@ export default function DocumentPhase1(props) {
         <div className="flex flex-col justify-center items-center">
           <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
             <div className="flex row justify-center mx-2 mb-3">
-              <select disabled className="form-control text-sm" value={statusRules} name="rules" onChange={(e) => needModal(e)}>
+              <select disabled className="form-control text-sm" value={statusRules} name="rules">
                 {rulesFileOptions.map((o, i) => (
                   <option key={i} value={o.value} label={o.label}>
                     {o.label}
@@ -75,7 +74,7 @@ export default function DocumentPhase1(props) {
         <div className="flex flex-col justify-center items-center">
           <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
             <div className="flex row justify-center mx-2 mb-3">
-              <select disabled className="form-control text-sm" value={statusCohesionStayMedical} name="cohesionStayMedical" onChange={(e) => needModal(e)}>
+              <select disabled className="form-control text-sm" value={statusCohesionStayMedical} name="cohesionStayMedical">
                 {medicalFileOptions.map((o) => (
                   <option key={o.label} data-color="green" value={o.value} label={o.label}>
                     {o.label}
@@ -90,7 +89,7 @@ export default function DocumentPhase1(props) {
         <div className="flex flex-col justify-center items-center">
           <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
             <div className="flex row justify-center mx-2 mb-3">
-              <select disabled className="form-control text-sm" value={statusImageRight} name="imageRight" onChange={(e) => needModal(e)}>
+              <select disabled className="form-control text-sm" value={statusImageRight} name="imageRight">
                 {options.map((o, i) => (
                   <option key={i} value={o} label={translateFileStatusPhase1(o)}>
                     {translateFileStatusPhase1(o)}
@@ -117,7 +116,7 @@ export default function DocumentPhase1(props) {
         <div className="flex flex-col justify-center items-center">
           <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
             <div className="flex row justify-center mx-2 mb-3">
-              <select disabled className="form-control text-sm" value={statusAutoTestPCR} name="autoTestPCR" onChange={(e) => needModal(e)}>
+              <select disabled className="form-control text-sm" value={statusAutoTestPCR} name="autoTestPCR">
                 {options.map((o) => (
                   <option key={o} value={o} label={translateFileStatusPhase1(o)}>
                     {translateFileStatusPhase1(o)}
