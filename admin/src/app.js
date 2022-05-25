@@ -150,10 +150,19 @@ const Home = () => {
       if (!ok) return console.log(`Error: ${code}`);
 
       const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);
-      const activeSession = sessions.find((s) => COHESION_STAY_END[s.cohort] >= Date.now());
+
+      let activeSession;
+      let activeSessionLocalStorage = JSON.parse(localStorage.getItem("active_session_chef_de_centre"));
+
+      if (!activeSessionLocalStorage) {
+        activeSession = sessions.find((s) => COHESION_STAY_END[s.cohort] >= Date.now()) || sessions[0];
+        localStorage.setItem("active_session_chef_de_centre", JSON.stringify(activeSession));
+      } else {
+        activeSession = activeSessionLocalStorage;
+      }
 
       setSessionPhase1List(sessions.reverse());
-      dispatch(setSessionPhase1(activeSession || sessions[0]));
+      dispatch(setSessionPhase1(activeSession));
     })();
   }, [user]);
 
