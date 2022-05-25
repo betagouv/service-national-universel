@@ -32,7 +32,7 @@ export default function Presence() {
                     <div className="flex items-center mb-2 gap-2">
                       <DataSearch
                         showIcon={false}
-                        placeholder="Rechercher par prénom, nom, email, ville, code postal..."
+                        placeholder="Rechercher par nom de centre, ville, code postal..."
                         componentId="SEARCH"
                         dataField={["name", "city", "zip", "code", "code2022"]}
                         react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
