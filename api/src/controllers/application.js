@@ -269,7 +269,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       params = { ...params, cta: `${ADMIN_URL}/volontaire` };
     } else if (template === SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION) {
       emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
-      params = { ...params, cta: `${APP_URL}/candidature?utm_campaign=transactionel+mig+candidature+approuvée&utm_source=notifauto&utm_medium=mail+151+faire` };
+      params = { ...params, cta: `${APP_URL}/candidature?utm_campaign=transactionel+mig+candidature+approuvee&utm_source=notifauto&utm_medium=mail+151+faire` };
     } else if (template === SENDINBLUE_TEMPLATES.referent.VALIDATE_APPLICATION_TUTOR) {
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
       params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}` };

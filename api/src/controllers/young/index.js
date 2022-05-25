@@ -255,7 +255,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
     let cc = getCcOfYoung({ template, young: data });
     await sendTemplate(template, {
       emailTo: [{ name: `${data.firstName} ${data.lastName}`, email: data.email }],
-      params: { cta: `${config.APP_URL}/phase3?utm_campaign=transactionnel+phase3+terminée&utm_source=notifauto&utm_medium=mail+200+télécharger` },
+      params: { cta: `${config.APP_URL}/phase3?utm_campaign=transactionnel+phase3+terminee&utm_source=notifauto&utm_medium=mail+200+telecharger` },
       cc,
     });
 
@@ -655,7 +655,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
     if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) buttonCta = `${config.APP_URL}/inscription/coordonnees`;
     if (template === SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION)
-      buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+nouvelles+mig+proposées&utm_source=notifauto&utm_medium=mail+170+accéder`;
+      buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+170+acceder`;
 
     let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {

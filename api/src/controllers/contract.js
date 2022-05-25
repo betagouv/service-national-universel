@@ -381,7 +381,7 @@ router.post("/token/:token", async (req, res) => {
         emailTo,
         params: {
           missionName: data.missionName,
-          cta: `${APP_URL}/candidature?utm_campaign=transactionnel+contrat+engagement+signé&utm_source=notifauto&utm_medium=mail+183+télécharger`,
+          cta: `${APP_URL}/candidature?utm_campaign=transactionnel+contrat+engagement+signe&utm_source=notifauto&utm_medium=mail+183+telecharger`,
         },
       });
     }

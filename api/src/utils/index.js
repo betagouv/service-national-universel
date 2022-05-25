@@ -365,7 +365,7 @@ const updateStatusPhase2 = async (young) => {
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
-        cta: `${APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposées&utm_source=notifauto&utm_medium=mail+154+télécharger`,
+        cta: `${APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
       },
       cc,
     });
@@ -529,7 +529,7 @@ const updateApplication = async (mission, fromUser = null) => {
       case MISSION_STATUS.CANCEL:
         statusComment = "La mission a été annulée.";
         sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_CANCEL;
-        cta = `${APP_URL}/phase2?utm_campaign=transactionnel+mig+annulée&utm_source=notifauto&utm_medium=mail+261+accéder`;
+        cta = `${APP_URL}/phase2?utm_campaign=transactionnel+mig+annulee&utm_source=notifauto&utm_medium=mail+261+acceder`;
         break;
       case MISSION_STATUS.ARCHIVED:
         statusComment = "La mission a été archivée.";
