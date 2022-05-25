@@ -12,10 +12,11 @@ import ErrorMessage, { requiredMessage } from "../../inscription/components/erro
 import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
 import { translate } from "../../../utils";
 
-export default function TicketCreate({ fromPage }) {
+export default function TicketCreate(props) {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
+  const fromPage = new URLSearchParams(props.location.search).get("from");
 
   return (
     <Container>

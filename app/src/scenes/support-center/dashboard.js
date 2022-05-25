@@ -35,8 +35,9 @@ const articles = [
   },
 ];
 
-export default function Dashboard() {
+export default function Dashboard(props) {
   const [userTickets, setUserTickets] = useState(null);
+  const fromPage = new URLSearchParams(props.location.search).get("from");
 
   dayjs.extend(relativeTime).locale("fr");
 
@@ -129,7 +130,7 @@ export default function Dashboard() {
               .
             </div>
             <div className="buttons">
-              <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu&apos;un</InternalLink>
+              <InternalLink to={`/besoin-d-aide/ticket?from=${fromPage}`}>Contacter&nbsp;quelqu&apos;un</InternalLink>
             </div>
           </div>
         </div>

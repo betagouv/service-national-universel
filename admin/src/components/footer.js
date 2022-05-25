@@ -1,11 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { adminURL } from "../config";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 export default function FooterComponent() {
   const user = useSelector((state) => state.Auth.user);
+  const [from, setFrom] = useState();
+  const history = useHistory();
+
+  useEffect(() => {
+    if (history) {
+      return history.listen((location) => {
+        console.log(location.pathname);
+        setFrom(location.pathname);
+      });
+    }
+  }, [history]);
+
   return (
     <Footer>
       <Container>
@@ -31,10 +44,7 @@ export default function FooterComponent() {
             </a>
           </li>
           <li>
-            <a
-              href={user ? `${adminURL}/besoin-d-aide?from=${window.location.pathname}` : `${adminURL}/public-besoin-d-aide?from=${window.location.pathname}`}
-              target="_blank"
-              rel="noreferrer">
+            <a href={user ? `${adminURL}/besoin-d-aide?from=${from}` : `${adminURL}/public-besoin-d-aide?from=${window.location.pathname}`} target="_blank" rel="noreferrer">
               Besoin d&apos;aide
             </a>
           </li>

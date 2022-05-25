@@ -1,5 +1,5 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, useHistory } from "react-router-dom";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { appURL } from "../config";
@@ -7,6 +7,18 @@ import { useSelector } from "react-redux";
 
 export default function Footer() {
   const young = useSelector((state) => state.Auth.young);
+  const [from, setFrom] = useState();
+  const history = useHistory();
+
+  useEffect(() => {
+    if (history) {
+      return history.listen((location) => {
+        console.log(location.pathname);
+        setFrom(location.pathname);
+      });
+    }
+  }, [history]);
+
   return (
     <FooterContainer>
       <Container>
@@ -32,7 +44,7 @@ export default function Footer() {
             </a>
           </li>
           <li>
-            <NavLink to={young ? `/besoin-d-aide?from=${window.location.pathname}` : `/public-besoin-d-aide?from=${window.location.pathname}`}>Besoin d&apos;aide</NavLink>
+            <NavLink to={young ? `/besoin-d-aide?from=${from}` : `/public-besoin-d-aide?from=${window.location.pathname}`}>Besoin d&apos;aide</NavLink>
           </li>
         </ul>
         <p>Tous droits réservés - Ministère de l&apos;éducation nationale, de la jeunesse et des sports - {new Date().getFullYear()}</p>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 import { useSelector, connect } from "react-redux";
 import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
@@ -11,7 +11,7 @@ import Badge from "../Badge";
 import plausibleEvent from "../../services/pausible";
 import { environment } from "../../config";
 
-const DrawerTab = ({ title, to, onClick, beta,exact }) => {
+const DrawerTab = ({ title, to, onClick, beta, exact }) => {
   if (environment === "production" && beta) return null;
   return (
     <div onClick={onClick} className=" hover:bg-snu-purple-800 hover:shadow-lg block">
@@ -61,30 +61,30 @@ const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   );
 };
 
-function responsible({ user, onClick }) {
+function responsible({ user, onClick, from }) {
   return (
     <>
       <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
 
-function supervisor({ onClick }) {
+function supervisor({ onClick, from }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
 
-function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
+function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -117,12 +117,12 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
           </>
         )}
       </DrawerTabWithIcons>
-      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
 
-function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
+function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, from }) {
   return (
     <>
       <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} />
@@ -154,29 +154,29 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
           </>
         )}
       </DrawerTabWithIcons>
-      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
 
-function headCenter({ onClick, sessionPhase1 }) {
+function headCenter({ onClick, sessionPhase1, from }) {
   return (
     <>
-      {sessionPhase1 && <DrawerTab to={`/centre/${sessionPhase1.cohesionCenterId}`} title="Mon Centre" onClick={onClick} exact/>}
+      {sessionPhase1 && <DrawerTab to={`/centre/${sessionPhase1.cohesionCenterId}`} title="Mon Centre" onClick={onClick} exact />}
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
-      {sessionPhase1 && <DrawerTab to={`/centre/${sessionPhase1.cohesionCenterId}/${sessionPhase1._id}/general`} title="Volontaires" onClick={onClick}  />}
+      {sessionPhase1 && <DrawerTab to={`/centre/${sessionPhase1.cohesionCenterId}/${sessionPhase1._id}/general`} title="Volontaires" onClick={onClick} />}
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <BlankSeparator />
-      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
 
-function visitor({ onClick }) {
+function visitor({ onClick, from }) {
   return (
     <>
       <BlankSeparator />
-      <HelpButton to={`/besoin-d-aide?from=${window.location.pathname}`} title="Besoin d'aide" onClick={onClick} />
+      <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -189,11 +189,21 @@ const Drawer = (props) => {
   const closedTickets = useSelector((state) => state.Tickets.closed);
   const tickets = useSelector((state) => state.Tickets.tickets);
   const [open, setOpen] = useState();
+  const [from, setFrom] = useState();
+  const history = useHistory();
 
   useEffect(() => {
     setOpen(props.open);
     setIsOpen(props.open);
   }, [props.open]);
+
+  useEffect(() => {
+    if (history) {
+      return history.listen((location) => {
+        setFrom(location.pathname);
+      });
+    }
+  }, [history]);
 
   useEffect(() => {
     try {
@@ -227,12 +237,13 @@ const Drawer = (props) => {
           <div className="absolute inset-y-0 left-0 transform -translate-x-full lg:block lg:translate-x-0 lg:relative">
             <ul className="divide-y divide-slate-700">
               <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1 })}
-              {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
-              {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-              {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-              {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
+              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
+              {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
+              {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
+              {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
+                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
+              {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
             </ul>
           </div>
         </nav>
@@ -241,12 +252,13 @@ const Drawer = (props) => {
           <div>
             <ul className="divide-y divide-slate-700">
               <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1 })}
-              {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
-              {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-              {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
-              {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick })}
+              {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
+              {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
+              {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
+              {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
+                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
+              {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
             </ul>
           </div>
         </nav>

@@ -15,12 +15,13 @@ import SuccessIcon from "../../components/SuccessIcon";
 import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles } from "./articles";
 import { supportURL } from "../../config";
 
-const Dashboard = () => {
+const Dashboard = (props) => {
   const [userTickets, setUserTickets] = useState(null);
   const [articles, setArticles] = useState(null);
   const user = useSelector((state) => state.Auth.user);
-
   dayjs.extend(relativeTime).locale("fr");
+
+  const from = new URLSearchParams(props.location.search).get("from");
 
   useEffect(() => {
     if (user.role === "responsible" || user.role === "supervisor") {
@@ -105,14 +106,14 @@ const Dashboard = () => {
               Vous n&apos;avez pas trouvé de réponse à votre demande ?<br />
               Contactez notre{" "}
               <strong>
-                <NavLink className="link" to="/besoin-d-aide/ticket">
+                <NavLink className="link" to={`/besoin-d-aide/ticket?from=${from}`}>
                   service de support
                 </NavLink>
               </strong>
               .
             </div>
             <div className="buttons">
-              <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu&apos;un</InternalLink>
+              <InternalLink to={`/besoin-d-aide/ticket?from=${from}`}>Contacter&nbsp;quelqu&apos;un</InternalLink>
             </div>
           </div>
         </div>
