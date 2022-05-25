@@ -379,7 +379,10 @@ router.post("/token/:token", async (req, res) => {
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.CONTRACT_VALIDATED, {
         emailTo,
-        params: { missionName: data.missionName, cta: `${APP_URL}/candidature` },
+        params: {
+          missionName: data.missionName,
+          cta: `${APP_URL}/candidature?utm_campaign=transactionnel+contrat+engagement+signe&utm_source=notifauto&utm_medium=mail+183+telecharger`,
+        },
       });
     }
 
