@@ -7,7 +7,6 @@ import RoundDownloadButton from "./buttons/RoundDownloadButton";
 import IconButton from "./buttons/IconButton";
 import ModalConfirm from "./modals/ModalConfirm";
 import deleteIcon from "../assets/delete.svg";
-import { environment } from "../config";
 
 function getFileName(file) {
   return (file && file.name) || file;
@@ -38,17 +37,23 @@ export default function DndFileInput({ value, onChange, name, errorMessage = req
     <>
       <div className={tw}>
         {filesList.map((e, i) => (
-          <File key={e} className="mx-1">
+          <File key={e} className="mx-1 justify-between">
             <FileName className="mr-2">{getFileName(e)}</FileName>
-            <IconButton icon={deleteIcon} bgColor="bg-indigo-600" onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })} />
-            <RoundDownloadButton
-              bgColor="bg-indigo-600"
-              source={() => {
-                console.log(e);
-                return source(getFileName(e));
-              }}
-              title={`Télécharger`}
-            />
+            <div>
+              <IconButton
+                icon={deleteIcon}
+                bgColor="bg-indigo-600"
+                onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })}
+              />
+              <RoundDownloadButton
+                bgColor="bg-indigo-600"
+                source={() => {
+                  console.log(e);
+                  return source(getFileName(e));
+                }}
+                title={`Télécharger`}
+              />
+            </div>
           </File>
         ))}
         <ImageInput id="file-drop" className="mx-1">
