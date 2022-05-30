@@ -31,12 +31,15 @@ import General from "./general";
 import Pointage from "./pointage";
 import ChevronRight from "../../../assets/icons/ChevronRight.js";
 import Template from "../../../assets/icons/Template.js";
+import downloadPDF from "../../../utils/download-pdf";
+import { Spinner } from "reactstrap";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
   const [filter, setFilter] = React.useState();
   const [urlParams, setUrlParams] = React.useState("");
   const user = useSelector((state) => state.Auth.user);
+  const [loading, setLoading] = React.useState();
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
@@ -60,6 +63,17 @@ export default function CenterYoungIndex() {
       setUrlParams(params.substring(1));
     }
   }, [filter]);
+
+  const viewAttestation = async () => {
+    setLoading(true);
+    await downloadPDF({
+      url: `/session-phase1/${sessionId}/certificate`,
+      body: { options: { landscape: true } },
+      fileName: `attestations.pdf`,
+    });
+    setLoading(false);
+  };
+
   const exportData = async () => {
     let body = {
       query: {
@@ -266,57 +280,65 @@ export default function CenterYoungIndex() {
       <div className="m-4">
         <div className="flex items-center justify-between">
           <div className="font-bold text-2xl mb-4">Volontaires</div>
-          <SelectAction
-            title="Exporter les volontaires"
-            alignItems="right"
-            buttonClassNames="bg-blue-600"
-            textClassNames="text-white font-medium text-sm"
-            rightIconClassNames="text-blue-300"
-            optionsGroup={[
-              {
-                title: "Télécharger",
-                items: [
-                  {
-                    action: async () => {
-                      await exportData();
-                    },
-                    render: (
-                      <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                        <ClipboardList className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                        <div style={{ fontFamily: "Marianne" }} className="text-sm text-gray-700">
-                          Informations complètes
+          <div className="flex items-center gap-2">
+            <button
+              disabled={loading}
+              onClick={() => viewAttestation()}
+              className="flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait bg-blue-600 text-white font-medium text-sm">
+              Exporter les attestations
+            </button>
+            <SelectAction
+              title="Exporter les volontaires"
+              alignItems="right"
+              buttonClassNames="bg-blue-600"
+              textClassNames="text-white font-medium text-sm"
+              rightIconClassNames="text-blue-300"
+              optionsGroup={[
+                {
+                  title: "Télécharger",
+                  items: [
+                    {
+                      action: async () => {
+                        await exportData();
+                      },
+                      render: (
+                        <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                          <ClipboardList className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+                          <div style={{ fontFamily: "Marianne" }} className="text-sm text-gray-700">
+                            Informations complètes
+                          </div>
                         </div>
-                      </div>
-                    ),
-                  },
-                ],
-              },
-              {
-                title: "Envoyer par mail",
-                items: [
-                  {
-                    action: async () => {
-                      setModalExportMail({
-                        isOpen: true,
-                        onSubmit: async (emails) => {
-                          const { ok } = await api.post(`/session-phase1/${sessionId}/share`, { emails });
-                          if (!ok) toastr.error("Oups, une erreur s'est produite");
-                          toastr.success("Un mail a été envoyé à tous les destinataires renseignés");
-                          setModalExportMail({ isOpen: false });
-                        },
-                      });
+                      ),
                     },
-                    render: (
-                      <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                        <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                        <div className="text-sm text-gray-700">Informations transports</div>
-                      </div>
-                    ),
-                  },
-                ],
-              },
-            ]}
-          />
+                  ],
+                },
+                {
+                  title: "Envoyer par mail",
+                  items: [
+                    {
+                      action: async () => {
+                        setModalExportMail({
+                          isOpen: true,
+                          onSubmit: async (emails) => {
+                            const { ok } = await api.post(`/session-phase1/${sessionId}/share`, { emails });
+                            if (!ok) toastr.error("Oups, une erreur s'est produite");
+                            toastr.success("Un mail a été envoyé à tous les destinataires renseignés");
+                            setModalExportMail({ isOpen: false });
+                          },
+                        });
+                      },
+                      render: (
+                        <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+                          <div className="text-sm text-gray-700">Informations transports</div>
+                        </div>
+                      ),
+                    },
+                  ],
+                },
+              ]}
+            />
+          </div>
         </div>
         <div className=" flex flex-1 flex-col lg:flex-row">
           <nav className="flex flex-1 gap-1">
