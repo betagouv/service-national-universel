@@ -949,6 +949,17 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
     for (let young of youngs) {
       young.set({ [key]: newValue });
       await young.save({ fromUser: req.user });
+      if (key === "cohesionStayPresence" && newValue === "true") {
+        let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
+        if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+        await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
+          emailTo,
+          params: {
+            youngFirstName: young.firstName,
+            youngLastName: young.lastName,
+          },
+        });
+      }
     }
 
     res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });

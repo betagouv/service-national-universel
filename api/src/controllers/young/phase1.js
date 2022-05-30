@@ -3,11 +3,13 @@ const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const { canEditPresenceYoung } = require("snu-lib/roles");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
 const { ERRORS } = require("../../utils");
 const { serializeYoung } = require("../../utils/serializer");
+const { sendTemplate } = require("../../sendinblue");
 
 router.post("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -66,6 +68,17 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
 
     young.set({ [key]: newValue });
     await young.save({ fromUser: req.user });
+    if (key === "cohesionStayPresence" && newValue === "true") {
+      let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
+      if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+      await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
+        emailTo,
+        params: {
+          youngFirstName: young.firstName,
+          youngLastName: young.lastName,
+        },
+      });
+    }
 
     res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
