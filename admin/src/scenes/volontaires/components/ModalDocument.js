@@ -3,15 +3,16 @@ import { Modal } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import CloseSvg from "../../../assets/Close";
-import { ModalContainer } from "../../../components/modals/Modal";
+import { ModalContainer, Footer } from "../../../components/modals/Modal";
 import DndFileInput from "../../../components/dndFileInput";
 import { Formik } from "formik";
 import Select from "../components/Select";
 import { translate } from "../../../utils";
+import ModalButton from "../../../components//buttons/ModalButton";
 
 export default function ModalDocument({ isOpen, onCancel, initialValues, young, updateYoung, title, name, nameFiles, comment }) {
   return (
-    <Modal centered isOpen={isOpen} toggle={onCancel} size="xl">
+    <Modal centered isOpen={isOpen} toggle={onCancel} size="lg">
       <ModalContainer>
         <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={onCancel} />
         <Formik
@@ -59,9 +60,8 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
                     </div>
                   )}
                 </div>
-                <section className="flex flex-col items-center bg-gray-50 rounded-lg p-10 w-[90%] lg:w-[70%]">
+                <section className="flex flex-col items-center rounded-lg  w-[90%] lg:w-[70%]">
                   <DndFileInput
-                    tw="flex"
                     newDesign={true}
                     placeholder="un document justificatif"
                     errorMessage="Vous devez téléverser un document justificatif"
@@ -96,9 +96,9 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
             </>
           )}
         </Formik>
-        <button onClick={onCancel} className="w-[90%] border border-gray-300 rounded-md py-2.5 px-6 mt-3 shadow-sm hover:bg-slate-50">
-          Retour
-        </button>
+        <Footer>
+          <ModalButton onClick={onCancel}>Retour</ModalButton>
+        </Footer>
       </ModalContainer>
     </Modal>
   );
