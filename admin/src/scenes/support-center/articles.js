@@ -98,9 +98,9 @@ export const headCenterArticles = [
     url: `${supportURL}/base-de-connaissance/les-phases-du-snu-1`,
   },
   {
-    title: "Phase 1 : L'organisation du séjour de cohésion",
-    emoji: "🌲",
-    body: `Lorsque l'inscription du volontaire est validée, il entre dans la phase 1...`,
-    url: `${supportURL}/base-de-connaissance/phase-1-lorganisation-du-sejour-de-cohesion`,
+    title: "Chef de centre - Gestion de mon centre",
+    emoji: "📊",
+    body: `Tutoriel pour apprendre à gérer votre centre...`,
+    url: `${supportURL}/base-de-connaissance/chef-de-centre-mon-tableau-de-bord`,
   },
 ];
