@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
@@ -22,6 +22,7 @@ export default function AssignCenter({ young, onAffect }) {
 
   const handleAffectation = async (center) => {
     try {
+      console.log(center);
       const session = await api.get(`/cohesion-center/${center._id}/cohort/${center.session}/session-phase1`);
       const response = await api.post(`/session-phase1/${session.data._id}/assign-young/${young._id}`);
       if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
@@ -41,14 +42,14 @@ export default function AssignCenter({ young, onAffect }) {
 
   return (
     <>
-      <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+      <ReactiveBase url={`${apiURL}/es`} app="edit-cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ flex: 2, position: "relative" }}>
           <Filter>
             <DataSearch
               showIcon={false}
-              placeholder="Rechercher par nom de centre..."
+              placeholder="Rechercher par nom de centre, code postal, departement..."
               componentId="SEARCH"
-              dataField={["name", "city", "zip", "code"]}
+              dataField={["name", "city", "zip", "code", "department"]}
               react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
               style={{ flex: 2 }}
               innerClass={{ input: "searchbox" }}
@@ -117,9 +118,25 @@ export default function AssignCenter({ young, onAffect }) {
 }
 
 const HitCenter = ({ hit, onSend }) => {
-  const [session, setSession] = useState(hit.cohorts[0]);
+  const [selectedSession, setSelectedSession] = useState(hit.cohorts[0]);
+  const options = hit.cohorts.filter((cohort) => cohort !== selectedSession);
 
-  const options = hit.cohorts.filter((cohort) => cohort !== session);
+  const [sessions, setSessions] = useState();
+
+  useEffect(() => {
+    try {
+      (async () => {
+        const { data } = await api.get(`/cohesion-center/${hit._id}/session-phase1`);
+        setSessions(data);
+      })();
+    } catch (e) {
+      console.log(e);
+    }
+  }, [hit]);
+
+  if (!sessions) return null;
+
+  console.log(selectedSession);
 
   return (
     <tr>
@@ -133,13 +150,13 @@ const HitCenter = ({ hit, onSend }) => {
         <ActionBox>
           <UncontrolledDropdown disabled={!options.length} setActiveFromChild>
             <DropdownToggle tag="button">
-              {session}
+              {selectedSession}
               {!!options.length && <Chevron color={"#444"} />}
             </DropdownToggle>
             <DropdownMenu>
               {options.map((cohort) => {
                 return (
-                  <DropdownItem key={cohort} className="dropdown-item" onClick={() => setSession(cohort)}>
+                  <DropdownItem key={cohort} className="dropdown-item" onClick={() => setSelectedSession(cohort)}>
                     {cohort}
                   </DropdownItem>
                 );
@@ -148,9 +165,15 @@ const HitCenter = ({ hit, onSend }) => {
           </UncontrolledDropdown>
         </ActionBox>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <PanelActionButton onClick={() => onSend({ ...hit, session })} title="Affecter à ce centre" />
-      </td>
+      {sessions.find((session) => session.cohort === selectedSession)?.placesLeft <= 0 ? (
+        <td>
+          <div className="font-bold border-[1px] rounded-lg text-center p-1 bg-white text-[#555]">Complet</div>
+        </td>
+      ) : (
+        <td onClick={(e) => e.stopPropagation()}>
+          <PanelActionButton onClick={() => onSend({ ...hit, session: selectedSession })} title="Affecter à ce centre" />
+        </td>
+      )}
     </tr>
   );
 };
