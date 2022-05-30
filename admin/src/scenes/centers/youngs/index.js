@@ -32,7 +32,6 @@ import Pointage from "./pointage";
 import ChevronRight from "../../../assets/icons/ChevronRight.js";
 import Template from "../../../assets/icons/Template.js";
 import downloadPDF from "../../../utils/download-pdf";
-import { Spinner } from "reactstrap";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
