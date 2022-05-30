@@ -12,6 +12,7 @@ const applicationPending = require("./applicationPending");
 const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
 const jeVeuxAiderDaily = require("./JeVeuxAiderDaily");
 const loginAttempts = require("./loginAttempts");
+const autoValidationSessionPhase1Young = require("./autoValidationSessionPhase1Young");
 
 // doubt ? -> https://crontab.guru/
 
@@ -23,6 +24,7 @@ const EVERY_HOUR = "0 * * * *";
 const everySeconds = (x) => `*/${x} * * * * *`;
 const everyMinutes = (x) => `*/${x} * * * *`;
 const everyHours = (x) => `0 */${x} * * *`;
+const now = new Date();
 /* eslint-enable no-unused-vars */
 
 // See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)
@@ -89,4 +91,11 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   cron.schedule(everyHours(1), () => {
     loginAttempts.handler();
   });
+
+  //20 juin 2022 à 18h
+  if (now > new Date(2022, 5, 20, 18)) {
+    cron.schedule(everyHours(12), () => {
+      autoValidationSessionPhase1Young.handler();
+    });
+  }
 }
