@@ -22,6 +22,7 @@ export default function AssignCenter({ young, onAffect }) {
 
   const handleAffectation = async (center) => {
     try {
+      console.log(center);
       const session = await api.get(`/cohesion-center/${center._id}/cohort/${center.session}/session-phase1`);
       const response = await api.post(`/session-phase1/${session.data._id}/assign-young/${young._id}`);
       if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
@@ -135,6 +136,8 @@ const HitCenter = ({ hit, onSend }) => {
 
   if (!sessions) return null;
 
+  console.log(selectedSession);
+
   return (
     <tr>
       <td>
@@ -168,7 +171,7 @@ const HitCenter = ({ hit, onSend }) => {
         </td>
       ) : (
         <td onClick={(e) => e.stopPropagation()}>
-          <PanelActionButton onClick={() => onSend({ ...hit, selectedSession })} title="Affecter à ce centre" />
+          <PanelActionButton onClick={() => onSend({ ...hit, session: selectedSession })} title="Affecter à ce centre" />
         </td>
       )}
     </tr>
