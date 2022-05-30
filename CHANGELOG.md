@@ -1,3 +1,16 @@
+# [1.93.0](https://github.com/betagouv/service-national-universel/compare/v1.92.0...v1.93.0) (2022-05-30)
+
+
+### Bug Fixes
+
+* **admin:** article centre de support chef de centre ([#1588](https://github.com/betagouv/service-national-universel/issues/1588)) ([5951430](https://github.com/betagouv/service-national-universel/commit/59514300fc80d86edba03865d4c53df0af4e4bc6))
+* **app:** se désister, changer lien de redirection vers article BDC ([b2063f7](https://github.com/betagouv/service-national-universel/commit/b2063f707863fecf9a18edc3da2fc590f4096db8))
+
+
+### Features
+
+* **admin:**  ouvrir modification affectation référents régionaux ([#1589](https://github.com/betagouv/service-national-universel/issues/1589)) ([e89a66c](https://github.com/betagouv/service-national-universel/commit/e89a66c0cc00efc7ff06d34a57957a1e83b0a05e))
+
 # [1.92.0](https://github.com/betagouv/service-national-universel/compare/v1.91.0...v1.92.0) (2022-05-25)
 
 
