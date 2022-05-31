@@ -1,39 +1,41 @@
 import React, { useEffect, useState } from "react";
-import { Row } from "reactstrap";
-import { Link } from "react-router-dom";
+import { AiOutlinePlus } from "react-icons/ai";
+import { ImQuotesLeft } from "react-icons/im";
+import { MdOutlineOpenInNew } from "react-icons/md";
 import { useSelector } from "react-redux";
-
+import { toastr } from "react-redux-toastr";
+import { Row } from "reactstrap";
+import Download from "../../../assets/Download.js";
+import Envelop from "../../../assets/Envelop.js";
+import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
+import Badge from "../../../components/Badge";
+import { Box, BoxTitle } from "../../../components/box";
+import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
+import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
+import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
+import api from "../../../services/api";
 import {
+  FORCE_DISABLED_ASSIGN_COHESION_CENTER,
+  formatDateFR,
+  formatStringLongDate,
+  ROLES,
   translate,
+  translateCohort,
   translatePhase1,
   YOUNG_STATUS_COLORS,
   YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS,
   YOUNG_STATUS_PHASE1_MOTIF,
-  formatStringLongDate,
-  FORCE_DISABLED_ASSIGN_COHESION_CENTER,
-  ROLES,
-  translateCohort,
-  formatDateFR,
+  canAssignCohesionCenter,
 } from "../../../utils";
-import WrapperPhase1 from "./wrapper";
-import api from "../../../services/api";
-import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
-import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
-import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
-import AssignCenter from "../components/AssignCenter";
-import { Box, BoxTitle } from "../../../components/box";
-import { toastr } from "react-redux-toastr";
-import Badge from "../../../components/Badge";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
-import DocumentPhase1 from "../components/DocumentPhase1";
-import Download from "../../../assets/Download.js";
-import Envelop from "../../../assets/Envelop.js";
+import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../../centers/components/modals/ModalPointagePresenceArrivee";
 import ModalPointagePresenceJDM from "../../centers/components/modals/ModalPointagePresenceJDM";
-import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
-import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
-import { ImQuotesLeft } from "react-icons/im";
-import { MdOutlineOpenInNew } from "react-icons/md";
+import AssignCenter from "../components/AssignCenter";
+import DocumentPhase1 from "../components/DocumentPhase1";
+import ModalAffectations from "../components/ModalAffectation";
+import WrapperPhase1 from "./wrapper";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -45,6 +47,7 @@ export default function Phase1(props) {
   const [modalPointagePresenceArrivee, setModalPointagePresenceArrivee] = useState({ isOpen: false });
   const [modalPointagePresenceJDM, setModalPointagePresenceJDM] = useState({ isOpen: false });
   const [modalPointageDepart, setModalPointageDepart] = useState({ isOpen: false });
+  const [modalAffectations, setModalAffectation] = useState({ isOpen: false });
 
   useEffect(() => {
     if (!young?.sessionPhase1Id) return;
@@ -295,6 +298,14 @@ export default function Phase1(props) {
               </section>
             </Bloc>
             <Bloc title="Détails" borderBottom disabled={disabled}>
+              {canAssignCohesionCenter(user) &&
+              ((young.status === YOUNG_STATUS.WAITING_LIST && young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) ||
+                (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST)) ? (
+                <div className="flex items-center hover:underline hover:text-blue-600 cursor-pointer mb-4" onClick={() => setModalAffectation({ isOpen: true })}>
+                  <AiOutlinePlus className="text-blue-800 mr-2 border-[1px] border-blue-800 rounded-full h-4 w-4" />
+                  Affecter dans un centre
+                </div>
+              ) : null}
               {getCohesionStay(young)}
               <Details title="Dates" value={translateCohort(young.cohort)} className="flex" />
               <p className="text-base my-1">Point de rassemblement :</p>
@@ -302,8 +313,8 @@ export default function Phase1(props) {
             </Bloc>
           </article>
           {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
-            young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
-            young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
+          young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
+          young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
             <Row>
               <Bloc title="Documents" disabled={disabled}>
                 <DocumentPhase1 young={young} />
@@ -343,6 +354,7 @@ export default function Phase1(props) {
         value={modalPointageDepart?.value}
         young={young}
       />
+      <ModalAffectations isOpen={modalAffectations?.isOpen} onCancel={() => setModalAffectation({ isOpen: false })} young={young} />
     </div>
   );
 }
