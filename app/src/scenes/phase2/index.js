@@ -3,7 +3,8 @@ import NextStep from "./nextStep";
 import { YOUNG_STATUS_PHASE2, permissionPhase2 } from "../../utils";
 import { useSelector } from "react-redux";
 import WaitingRealisation from "./WaitingRealisation";
-import InProgress from "./InProgress";
+import InProgressDesktop from "./Desktop/InProgress";
+import InProgressMobile from "./Mobile/InProgress";
 import Validated from "./Validated";
 import { HeroContainer, Hero } from "../../components/Content";
 import { useHistory } from "react-router-dom";
@@ -15,7 +16,17 @@ export default () => {
   if (!young || !permissionPhase2(young)) history.push("/");
   const renderStep = () => {
     if (young.statusPhase2 === YOUNG_STATUS_PHASE2.WAITING_REALISATION) return <WaitingRealisation />;
-    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.IN_PROGRESS) return <InProgress />;
+    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.IN_PROGRESS)
+      return (
+        <>
+          <div className="md:flex hidden flex-1">
+            <InProgressDesktop />
+          </div>
+          <div className="md:hidden flex flex-1">
+            <InProgressMobile />
+          </div>
+        </>
+      );
     if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return <Validated />;
     return (
       <>
