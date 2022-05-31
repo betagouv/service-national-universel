@@ -18,9 +18,27 @@ import Representant1 from "./edit/representant-legal1";
 import Representant2 from "./edit/representant-legal2";
 import Consentement from "./edit/consentement";
 import ConsentementImage from "./edit/consentement-image";
+import ChevronDown from "../../assets/icons/ChevronDown";
+import { BsCheck2 } from "react-icons/bs";
 
 export default function Create() {
   const history = useHistory();
+  const options = ["Juillet 2022", "à venir"];
+  const [open, setOpen] = React.useState(false);
+
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
 
   return (
     <Wrapper>
@@ -41,6 +59,7 @@ export default function Create() {
           parentConsentmentFiles: [],
           highSkilledActivityProofFiles: [],
           imageRightFiles: [],
+          cohort: options[0],
         }}
         validateOnBlur={false}
         validateOnChange={false}
@@ -57,14 +76,47 @@ export default function Create() {
         }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched, setFieldValue, validateField }) => (
           <>
-            <TitleWrapper>
-              <div>
-                <Title>{`Création du profil ${values.firstName ? `de ${values.firstName}  ${values.lastName}` : ""}`}</Title>
+            <div className="flex items-center justify-between my-8">
+              <div className="flex items-center gap-4">
+                <div className="text-3xl font-bold">{`Création du profil ${values.firstName ? `de ${values.firstName}  ${values.lastName}` : ""}`}</div>
+                <div style={{ fontFamily: "Marianne" }} ref={ref}>
+                  <div className="relative">
+                    {/* select item */}
+                    <button
+                      className="flex items-center justify-between gap-3 px-4 py-2 rounded-full border-[1px] cursor-pointer disabled:opacity-50 disabled:cursor-wait min-w-[130px] border-blue-500 bg-blue-50/75"
+                      style={{ fontFamily: "Marianne" }}
+                      onClick={() => setOpen((e) => !e)}>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm whitespace-nowrap text-blue-600">{values.cohort}</span>
+                      </div>
+
+                      <ChevronDown className="text-blue-500" />
+                    </button>
+
+                    {/* display options */}
+                    <div className={`${open ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0  shadow overflow-hidden z-50`}>
+                      {options.map((option) => (
+                        <div
+                          key={option}
+                          onClick={() => {
+                            setFieldValue("cohort", option);
+                            setOpen(false);
+                          }}
+                          className={`${option === values.cohort && "font-bold bg-gray"}`}>
+                          <div className="group flex justify-between items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                            <div>{option}</div>
+                            {option === values.cohort ? <BsCheck2 /> : null}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
               <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
                 Valider cette candidature
               </SaveBtn>
-            </TitleWrapper>
+            </div>
             {Object.values(errors).filter((e) => !!e).length ? (
               <Alert>Vous ne pouvez pas enregistrer ce volontaires car tous les champs ne sont pas correctement renseignés.</Alert>
             ) : null}
