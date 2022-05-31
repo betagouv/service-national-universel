@@ -1,3 +1,10 @@
+# [1.94.0](https://github.com/betagouv/service-national-universel/compare/v1.93.0...v1.94.0) (2022-05-31)
+
+
+### Features
+
+* **admin:** rajouter choix de la cohorte création nouvelle inscription ([#1592](https://github.com/betagouv/service-national-universel/issues/1592)) ([de0d5f3](https://github.com/betagouv/service-national-universel/commit/de0d5f3f2fa78e4582d6354e843245b2e95a3335))
+
 # [1.93.0](https://github.com/betagouv/service-national-universel/compare/v1.92.0...v1.93.0) (2022-05-30)
 
 
