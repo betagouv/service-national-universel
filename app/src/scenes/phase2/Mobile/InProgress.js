@@ -27,6 +27,23 @@ export default () => {
       return (
         <div className="bg-white pb-5">
           <Header />
+          <div className="mx-10 ">
+            <div className=" flex">
+              <div className="border shadow-md rounded-lg -translate-y-4 bg-white p-3 w-300">
+                <div className="text-xs bg-indigo-600 text-white px-1 rounded-sm">Mission en cours</div>
+                <div className="text-gray-500 text-xs mt-2">CASC DU SDMIS</div>
+                <div className="font-bold text-sm mt-2">Je participe à l'accueil du public au Musée des sapeurs-pompiers...</div>
+                <div className="text-gray-500 text-xs mt-3">Voir ma candidature ></div>
+              </div>
+              <div className="border shadow-md rounded-lg -translate-y-4 bg-white p-3 ">
+                <div className="text-xs bg-indigo-600 text-white px-1 rounded-sm">Mission en cours</div>
+                <div className="text-gray-500 text-xs mt-2">CASC DU SDMIS</div>
+                <div className="font-bold text-sm mt-2">Je participe à l'accueil du public au Musée des sapeurs-pompiers...</div>
+                <div className="text-gray-500 text-xs mt-3">Voir ma candidature ></div>
+              </div>
+            </div>
+            <div className="text-gray-700 bg-gray-100 rounded-lg p-2 text-center"> Toutes mes candidatures (5)</div>
+          </div>
           <div className="mx-5 mt-10 ">
             <div>
               <div className="border border-gray-200 rounded-lg py-2 px-3">
