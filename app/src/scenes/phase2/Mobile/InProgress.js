@@ -27,20 +27,20 @@ export default () => {
       return (
         <div className="bg-white pb-5">
           <Header />
-          <div className="mx-10 mt-10 ">
-            <div className="flex ">
-              <div className="w-1/3 border border-gray-200 rounded-lg py-2 px-3">
+          <div className="mx-5 mt-10 ">
+            <div>
+              <div className="border border-gray-200 rounded-lg py-2 px-3">
                 <div className="flex items-center justify-between">
                   <div className="font-bold">Contacter mon référent </div>
                   <MdOutlineContentCopy className="text-gray-400" />
                 </div>
                 <div className="text-sm text-gray-600">André Dupont - andre.dupont@gmail.com</div>
               </div>
-              <div className="w-1/3 border border-gray-200 rounded-lg mx-3  py-2 px-3 flex items-start justify-between">
+              <div className="border border-gray-200 rounded-lg  mt-3 py-2 px-3 flex items-start justify-between">
                 <div className="font-bold ">J’ai des questions sur la mission d’intérêt général</div>
                 <BsArrowUpRight className="text-gray-400 m-0.5 text-2xl" />
               </div>
-              <div className="w-1/3 border border-gray-200 rounded-lg   py-2 px-3  flex items-start justify-between">
+              <div className="border border-gray-200 rounded-lg   mt-3 py-2 px-3  flex items-start justify-between">
                 <div className="font-bold">J’ai des questions sur la reconnaissance d’engagement</div>
                 <BsArrowUpRight className="text-gray-400 m-0.5 text-2xl" />
               </div>

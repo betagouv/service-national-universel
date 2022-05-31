@@ -22,7 +22,7 @@ export default () => {
           <div className="md:flex hidden flex-1">
             <InProgressDesktop />
           </div>
-          <div className="md:hidden flex flex-1">
+          <div className="md:hidden ">
             <InProgressMobile />
           </div>
         </>

@@ -18,7 +18,7 @@ const Header = () => {
           <div className="text-white text-sm">Trouver une mission</div>
         </div>
       </div>
-      <img className="rounded-t-lg w-full" src={require("../../../assets/phase2MobileHeader.png")} />
+      <img className="rounded-t-lg " src={require("../../../assets/phase2MobileHeader.png")} />
     </div>
   );
 };
