@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import InformationCircle from "../../../assets/icons/InformationCircle";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import AddImage from "../../../assets/icons/AddImage";
@@ -10,6 +10,7 @@ export default function Equivalence() {
   const optionsType = ["Service Civique", "BAFA", "Jeune Sapeur Pompier"];
   const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
   const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
+  const keyList = ["type", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
   const [data, setData] = useState({
     files: ["test1.pdf", "test2.pdf", "test3.pdf"],
   });
@@ -19,13 +20,14 @@ export default function Equivalence() {
   const [clickStartDate, setClickStartDate] = useState(false);
   const [clickEndDate, setClickEndDate] = useState(false);
   const [frequence, setFrequence] = useState(false);
+  const [error, setError] = useState(false);
   const refType = useRef(null);
   const refStartDate = useRef(null);
   const refEndDate = useRef(null);
   const refDuree = useRef(null);
   const refFrequence = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (refType.current && !refType.current.contains(event.target)) {
         setOpenType(false);
@@ -42,6 +44,31 @@ export default function Equivalence() {
       document.removeEventListener("click", handleClickOutside, true);
     };
   }, []);
+
+  const handleSubmit = () => {
+    let error = false;
+    for (const key of keyList) {
+      if (key === "files" && !data[key]?.length) {
+        error = true;
+      } else if (key === "frequency") {
+        if (
+          frequence &&
+          (data[key]?.nombre === "" ||
+            data[key]?.nombre === undefined ||
+            data[key]?.duree === "" ||
+            data[key]?.duree === undefined ||
+            data[key]?.frequence === "" ||
+            data[key]?.frequence === undefined)
+        ) {
+          error = true;
+        }
+      } else if (data[key] === undefined || data[key] === "") {
+        error = true;
+      }
+    }
+    setError(error);
+  };
+
   return (
     <div className="flex justify-center align-center my-4 ">
       <div className="lg:w-1/2 p-4">
@@ -52,6 +79,14 @@ export default function Equivalence() {
             <div className="flex-1 ml-4 text-blue-800 text-sm leading-5 font-medium">Pour être reconnu et validé, votre engagement doit être terminé.</div>
           </div>
         </div>
+        {error ? (
+          <div className="border-[1px] border-red-400 rounded-lg bg-red-50 mt-4">
+            <div className="flex items-center px-4 py-3">
+              <InformationCircle className="text-red-400" />
+              <div className="flex-1 ml-4 text-red-800 text-sm leading-5 font-medium">Vous devez remplir tous le formulaire pour pouvoir le soumettre</div>
+            </div>
+          </div>
+        ) : null}
         <div className="rounded-lg bg-white mt-4 p-6">
           <div className="text-lg leading-7 font-bold">Informations générales</div>
           <div className="text-sm leading-5 font-normal text-gray-500 mt-2">Veuillez compléter le formulaire ci-dessous.</div>
@@ -87,14 +122,15 @@ export default function Equivalence() {
                 ))}
               </div>
             </div>
+            {error?.type ? <div className="text-xs leading-4 font-normal text-red-500">{error.type}</div> : null}
           </div>
           <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-            {data?.structure ? <div className="text-xs leading-4 font-normal text-gray-500">Nom de la structure</div> : null}
+            {data?.structureName ? <div className="text-xs leading-4 font-normal text-gray-500">Nom de la structure</div> : null}
             <input
               className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
               placeholder="Nom de la structure d’accueil"
               type="text"
-              onChange={(e) => setData({ ...data, structure: e.target.value })}
+              onChange={(e) => setData({ ...data, structureName: e.target.value })}
             />
           </div>
           <div className="mt-4 text-xs leading-4 font-medium">Où ?</div>
@@ -171,21 +207,21 @@ export default function Equivalence() {
               <div className="flex items-stretch gap-2 mt-2 flex-wrap md:!flex-nowrap">
                 <div className="flex flex-1 gap-2 md:flex-none">
                   <div className="flex flex-col justify-center border-[1px] border-gray-300 px-3 py-2 rounded-lg mt-3 w-1/2">
-                    {data?.nombre ? <div className="text-xs leading-4 font-normal text-gray-500">Nombre</div> : null}
+                    {data?.frequency?.nombre ? <div className="text-xs leading-4 font-normal text-gray-500">Nombre</div> : null}
                     <input
                       className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                       placeholder="Nombre"
                       type="text"
-                      onChange={(e) => setData({ ...data, nombre: e.target.value })}
+                      onChange={(e) => setData({ ...data, frequency: { ...data.frequency, nombre: e.target.value } })}
                     />
                   </div>
                   <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-                    {data?.duree ? <div className="text-xs leading-4 font-normal text-gray-500">Durée</div> : null}
+                    {data?.frequency?.duree ? <div className="text-xs leading-4 font-normal text-gray-500">Durée</div> : null}
                     <div className="relative" ref={refDuree}>
                       <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenDuree((e) => !e)}>
                         <div className="flex items-center gap-2">
-                          {data?.duree ? (
-                            <span className="text-sm leading-5 font-normal">{data?.duree}</span>
+                          {data?.frequency?.duree ? (
+                            <span className="text-sm leading-5 font-normal">{data?.frequency?.duree}</span>
                           ) : (
                             <span className="text-gray-400 text-sm leading-5 font-normal">Durée</span>
                           )}
@@ -198,13 +234,13 @@ export default function Equivalence() {
                           <div
                             key={option}
                             onClick={() => {
-                              setData({ ...data, duree: option });
+                              setData({ ...data, frequency: { ...data.frequency, duree: option } });
                               setOpenDuree(false);
                             }}
-                            className={`${option === data.duree && "font-bold bg-gray"}`}>
+                            className={`${option === data.frequency?.duree && "font-bold bg-gray"}`}>
                             <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
                               <div>{option}</div>
-                              {option === data.duree ? <BsCheck2 /> : null}
+                              {option === data?.frequency?.duree ? <BsCheck2 /> : null}
                             </div>
                           </div>
                         ))}
@@ -213,14 +249,14 @@ export default function Equivalence() {
                   </div>
                 </div>
                 <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-                  {data?.frequence ? <div className="text-xs leading-4 font-normal text-gray-500">Fréquence</div> : null}
+                  {data?.frequency?.frequence ? <div className="text-xs leading-4 font-normal text-gray-500">Fréquence</div> : null}
                   <div className="relative" ref={refFrequence}>
                     <button
                       className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full"
                       onClick={() => setOpenFrequence((e) => !e)}>
                       <div className="flex items-center gap-2">
-                        {data?.frequence ? (
-                          <span className="text-sm leading-5 font-normal">{data?.frequence}</span>
+                        {data?.frequency?.frequence ? (
+                          <span className="text-sm leading-5 font-normal">{data?.frequency?.frequence}</span>
                         ) : (
                           <span className="text-gray-400 text-sm leading-5 font-normal">Fréquence</span>
                         )}
@@ -233,13 +269,13 @@ export default function Equivalence() {
                         <div
                           key={option}
                           onClick={() => {
-                            setData({ ...data, frequence: option });
+                            setData({ ...data, frequency: { ...data.frequency, frequence: option } });
                             setOpenFrequence(false);
                           }}
-                          className={`${option === data.frequence && "font-bold bg-gray"}`}>
+                          className={`${option === data?.frequency?.frequence && "font-bold bg-gray"}`}>
                           <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
                             <div>{option}</div>
-                            {option === data.frequence ? <BsCheck2 /> : null}
+                            {option === data?.frequency?.frequence ? <BsCheck2 /> : null}
                           </div>
                         </div>
                       ))}
@@ -251,7 +287,7 @@ export default function Equivalence() {
                 className="text-sm leading-5 font-normal text-indigo-600 mt-3 hover:underline text-center"
                 onClick={() => {
                   setFrequence(false);
-                  setData({ ...data, frequence: null, duree: null, nombre: null });
+                  setData({ ...data, frequency: { frequence: null, duree: null, nombre: null } });
                 }}>
                 Supprimer la fréquence
               </div>
@@ -271,21 +307,21 @@ export default function Equivalence() {
             Cette personne doit vous connaître et pourra être contactée par l’administration sur votre dossier.
           </div>
           <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-            {data?.name ? <div className="text-xs leading-4 font-normal text-gray-500">Prénom et Nom</div> : null}
+            {data?.contactFullName ? <div className="text-xs leading-4 font-normal text-gray-500">Prénom et Nom</div> : null}
             <input
               className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
               placeholder="Prénom et Nom"
               type="text"
-              onChange={(e) => setData({ ...data, name: e.target.value })}
+              onChange={(e) => setData({ ...data, contactFullName: e.target.value })}
             />
           </div>
           <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-            {data?.email ? <div className="text-xs leading-4 font-normal text-gray-500">Adresse email</div> : null}
+            {data?.contactEmail ? <div className="text-xs leading-4 font-normal text-gray-500">Adresse email</div> : null}
             <input
               className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
               placeholder="Adresse email"
               type="text"
-              onChange={(e) => setData({ ...data, email: e.target.value })}
+              onChange={(e) => setData({ ...data, contactEmail: e.target.value })}
             />
           </div>
         </div>
@@ -314,7 +350,17 @@ export default function Equivalence() {
             <div className="text-xs leading-4 font-normal text-gray-500 mt-1">PDF, PNG, JPG jusqu’à 5Mo</div>
           </div>
         </div>
-        <button className="rounded-lg w-full py-2 mt-4 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600">
+        {error ? (
+          <div className="border-[1px] border-red-400 rounded-lg bg-red-50 mt-4">
+            <div className="flex items-center px-4 py-3">
+              <InformationCircle className="text-red-400" />
+              <div className="flex-1 ml-4 text-red-800 text-sm leading-5 font-medium">Vous devez remplir tous le formulaire pour pouvoir le soumettre</div>
+            </div>
+          </div>
+        ) : null}
+        <button
+          className="rounded-lg w-full py-2 mt-4 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600"
+          onClick={() => handleSubmit()}>
           Valider ma demande
         </button>
       </div>
