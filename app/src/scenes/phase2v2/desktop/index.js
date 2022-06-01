@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import api from "../../../services/api";
 import { copyToClipboard } from "../../../utils";
 import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
+import Medaille from "../../../assets/icons/Medaille";
 
 export default function IndexDesktop() {
   const young = useSelector((state) => state.Auth.young);
@@ -38,7 +39,7 @@ export default function IndexDesktop() {
               </div>
             </Link>
             <Link to="/mission">
-              <div className="flex rounded-[10px] py-2.5 px-4 ml-4 bg-blue-600 items-center">
+              <div className="flex rounded-[10px] py-2.5 px-4 ml-4 bg-blue-600 items-center border-[1px] border-blue-600">
                 <HiOutlineSearch className="text-white mr-1" />
                 <div className="text-white text-sm">Trouver une mission</div>
               </div>
@@ -82,7 +83,7 @@ export default function IndexDesktop() {
               href={`https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1`}
               target="_blank"
               rel="noreferrer"
-              className="flex gap-1 items-start justify-between p-3 hover:text-gray-800">
+              className="flex gap-1 items-start justify-between p-3 hover:text-blue-600">
               <div className="font-bold flex-1">J’ai des questions sur la mission d’intérêt général</div>
               <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105 group-hover:text-blue-600" />
             </a>
@@ -92,24 +93,24 @@ export default function IndexDesktop() {
               href={`https://support.snu.gouv.fr/base-de-connaissance/`}
               target="_blank"
               rel="noreferrer"
-              className="flex gap-1 items-start justify-between p-3 hover:text-gray-800">
+              className="flex gap-1 items-start justify-between p-3 hover:text-blue-600">
               <div className="font-bold flex-1">J’ai des questions sur la reconnaissance d’engagement</div>
               <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105 group-hover:text-blue-600" />
             </a>
           </div>
         </div>
-        <div className="border border-gray-200 rounded-lg mt-3  py-2 px-3 flex items-center">
-          <div className="mr-3">
-            <img src={require("../../../assets/prépa.png")} height={96} />
-          </div>
-          <div className="w-full">
-            <div className="flex items-center justify-between">
-              <div className="font-bold"> Partez en préparation militaire</div>
-              <BsArrowUpRight className="text-gray-400 m-0.5 " />
+        <Link to='/mission?MILITARY_PREPARATION=%5B"true"%5D'>
+          <div className="group border-[1px] border-gray-200 rounded-lg mt-3 p-3 flex items-center gap-4">
+            <Medaille className="text-gray-400" />
+            <div className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="font-bold text-base group-hover:text-blue-600"> Partez en préparation militaire</div>
+                <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105 group-hover:text-blue-600" />
+              </div>
+              <div className="text-sm text-gray-500">Partez à la découverte des métiers de la Défense en réalisant une préparation militaire au sein d&apos;un corps d’armée</div>
             </div>
-            <div className="text-sm text-gray-600">Partez à la découverte des métiers de la Défense en réalisant une préparation militaire au sein d&apos;un corps d’armée</div>
           </div>
-        </div>
+        </Link>
         <div className="mt-4 mb-2">Vous avez déjà fait preuve de solidarité ?</div>
         <div className="border-0 flex rounded-lg shadow-lg w-1/2 items-center">
           <img src={require("../../../assets/phase2Reconnaissance.png")} className="rounded-lg" />
