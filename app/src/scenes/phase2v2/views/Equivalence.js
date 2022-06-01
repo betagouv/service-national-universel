@@ -44,12 +44,12 @@ export default function Equivalence() {
   }, []);
   return (
     <div className="flex justify-center align-center my-4 ">
-      <div className="md:w-1/2 p-4">
-        <div className="text-4xl text-center font-extrabold leading-10 tracking-tight ">Je demande la reconnaissance d’un engagement déjà réalisé</div>
+      <div className="lg:w-1/2 p-4">
+        <div className="text-2xl md:text-4xl text-center font-extrabold leading-10 tracking-tight ">Je demande la reconnaissance d’un engagement déjà réalisé</div>
         <div className="border-[1px] border-blue-400 rounded-lg bg-blue-50 mt-4">
           <div className="flex items-center px-4 py-3">
             <InformationCircle className="text-blue-400" />
-            <div className="ml-4 text-blue-800 text-sm leading-5 font-medium">Pour être reconnu et validé, votre engagement doit être terminé.</div>
+            <div className="flex-1 ml-4 text-blue-800 text-sm leading-5 font-medium">Pour être reconnu et validé, votre engagement doit être terminé.</div>
           </div>
         </div>
         <div className="rounded-lg bg-white mt-4 p-6">
@@ -168,45 +168,47 @@ export default function Equivalence() {
           </div>
           {frequence ? (
             <>
-              <div className="flex items-stretch gap-2">
-                <div className="flex flex-col justify-center border-[1px] border-gray-300 px-3 py-2 rounded-lg mt-3 w-1/2">
-                  {data?.nombre ? <div className="text-xs leading-4 font-normal text-gray-500">Nombre</div> : null}
-                  <input
-                    className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
-                    placeholder="Nombre"
-                    type="text"
-                    onChange={(e) => setData({ ...data, nombre: e.target.value })}
-                  />
-                </div>
-                <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
-                  {data?.duree ? <div className="text-xs leading-4 font-normal text-gray-500">Durée</div> : null}
-                  <div className="relative" ref={refDuree}>
-                    <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenDuree((e) => !e)}>
-                      <div className="flex items-center gap-2">
-                        {data?.duree ? (
-                          <span className="text-sm leading-5 font-normal">{data?.duree}</span>
-                        ) : (
-                          <span className="text-gray-400 text-sm leading-5 font-normal">Durée</span>
-                        )}
-                      </div>
-                      <ChevronDown className="text-gray-400" />
-                    </button>
-                    {/* display options */}
-                    <div className={`${openDuree ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
-                      {optionsDuree.map((option) => (
-                        <div
-                          key={option}
-                          onClick={() => {
-                            setData({ ...data, duree: option });
-                            setOpenDuree(false);
-                          }}
-                          className={`${option === data.duree && "font-bold bg-gray"}`}>
-                          <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                            <div>{option}</div>
-                            {option === data.duree ? <BsCheck2 /> : null}
-                          </div>
+              <div className="flex items-stretch gap-2 mt-2 flex-wrap md:!flex-nowrap">
+                <div className="flex flex-1 gap-2 md:flex-none">
+                  <div className="flex flex-col justify-center border-[1px] border-gray-300 px-3 py-2 rounded-lg mt-3 w-1/2">
+                    {data?.nombre ? <div className="text-xs leading-4 font-normal text-gray-500">Nombre</div> : null}
+                    <input
+                      className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+                      placeholder="Nombre"
+                      type="text"
+                      onChange={(e) => setData({ ...data, nombre: e.target.value })}
+                    />
+                  </div>
+                  <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full rounded-lg mt-3 px-3 py-2.5">
+                    {data?.duree ? <div className="text-xs leading-4 font-normal text-gray-500">Durée</div> : null}
+                    <div className="relative" ref={refDuree}>
+                      <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full" onClick={() => setOpenDuree((e) => !e)}>
+                        <div className="flex items-center gap-2">
+                          {data?.duree ? (
+                            <span className="text-sm leading-5 font-normal">{data?.duree}</span>
+                          ) : (
+                            <span className="text-gray-400 text-sm leading-5 font-normal">Durée</span>
+                          )}
                         </div>
-                      ))}
+                        <ChevronDown className="text-gray-400" />
+                      </button>
+                      {/* display options */}
+                      <div className={`${openDuree ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[30px]`}>
+                        {optionsDuree.map((option) => (
+                          <div
+                            key={option}
+                            onClick={() => {
+                              setData({ ...data, duree: option });
+                              setOpenDuree(false);
+                            }}
+                            className={`${option === data.duree && "font-bold bg-gray"}`}>
+                            <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                              <div>{option}</div>
+                              {option === data.duree ? <BsCheck2 /> : null}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -246,7 +248,7 @@ export default function Equivalence() {
                 </div>
               </div>
               <div
-                className="text-sm leading-5 font-normal text-indigo-600 mt-2 hover:underline text-center"
+                className="text-sm leading-5 font-normal text-indigo-600 mt-3 hover:underline text-center"
                 onClick={() => {
                   setFrequence(false);
                   setData({ ...data, frequence: null, duree: null, nombre: null });
@@ -256,7 +258,7 @@ export default function Equivalence() {
             </>
           ) : (
             <>
-              <div className="group flex items-center justify-center rounded-lg mt-3 bg-blue-50 py-3 cursor-pointer" onClick={() => setFrequence(true)}>
+              <div className="group flex items-center justify-center rounded-lg mt-4 bg-blue-50 py-3 cursor-pointer" onClick={() => setFrequence(true)}>
                 <AiOutlinePlus className="text-indigo-400 mr-2 h-5 w-5 group-hover:scale-110" />
                 <div className="text-sm leading-5 font-medium text-blue-700 group-hover:underline">Ajouter la fréquence (facultatif)</div>
               </div>
@@ -302,7 +304,7 @@ export default function Equivalence() {
                     <PaperClip className="text-gray-400 mr-2" />
                     <div className="text-sm leading-5 font-normal text-gray-800">{file}</div>
                   </div>
-                  <div className="text-sm leading-5 font-normal text-gray-800">Retirer</div>
+                  <div className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer">Retirer</div>
                 </div>
               ))
             : null}
