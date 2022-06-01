@@ -16,6 +16,7 @@ import Home from "./scenes/home";
 import Inscription from "./scenes/inscription";
 import Phase1 from "./scenes/phase1";
 import Phase2 from "./scenes/phase2";
+import v2Phase2 from "./scenes/phase2v2";
 import Phase3 from "./scenes/phase3";
 import Diagoriente from "./scenes/diagoriente";
 import SupportCenter from "./scenes/support-center";
@@ -158,7 +159,7 @@ const Espace = () => {
           <Switch>
             <Route path="/account" component={Account} />
             <Route path="/phase1" component={Phase1} />
-            <Route path="/phase2" component={Phase2} />
+            {environment === "production" ? <Route path="/phase2" component={Phase2} /> : <Route path="/phase2" component={v2Phase2} />}
             <Route path="/phase3" component={Phase3} />
             <Route path="/les-programmes" component={Engagement} />
             <Route path="/preferences" component={Preferences} />
