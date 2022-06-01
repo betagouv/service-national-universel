@@ -1,3 +1,24 @@
+# [1.95.0](https://github.com/betagouv/service-national-universel/compare/v1.94.0...v1.95.0) (2022-06-01)
+
+
+### Bug Fixes
+
+* start new screen missions ([242c9c2](https://github.com/betagouv/service-national-universel/commit/242c9c2bb664dab7593a37790d8f3fc1df1c32c4))
+* **admin:** affectation par ref regional ([df9867c](https://github.com/betagouv/service-national-universel/commit/df9867c599e08be9906ff7bf7ac7c5680faf0256))
+* **admin:** statut available for new affectation by referent ([a22f918](https://github.com/betagouv/service-national-universel/commit/a22f918e44259bfaa58dabec94b49f25a2212e15))
+* **app:** header in mobile home phase2 ([828164b](https://github.com/betagouv/service-national-universel/commit/828164b0ef242d7fce5c1cb6d4442074ad8dc4a0))
+* **app,admin:** font faces ([d22c9d7](https://github.com/betagouv/service-national-universel/commit/d22c9d7a6be6044f94dbb401dd3b47d7538a4854))
+* home phase 2 wip ([ada32c0](https://github.com/betagouv/service-national-universel/commit/ada32c0100fd83b248440d8513544430acfa7fbe))
+* **app:** phase2 home + add router ([8255a37](https://github.com/betagouv/service-national-universel/commit/8255a375ab4b0fa0f3fdc2c8b86d4b34f6e2acf5))
+* phase2 home ([9387f1b](https://github.com/betagouv/service-national-universel/commit/9387f1b3224cee28fd41f47fb316ed56517c7033))
+
+
+### Features
+
+* **app:** font Marianne ✨ ([78283f8](https://github.com/betagouv/service-national-universel/commit/78283f84a6373a8c59e2452ffeb62fc9edc82949))
+* setup phase2v2 ([#1593](https://github.com/betagouv/service-national-universel/issues/1593)) ([f8e3206](https://github.com/betagouv/service-national-universel/commit/f8e32063bbe0e6f7670cabe3b2059939e4bc2e59))
+* **admin:** Ouvrir l’affectation aux référents régionaux ([#1591](https://github.com/betagouv/service-national-universel/issues/1591)) ([396366e](https://github.com/betagouv/service-national-universel/commit/396366eacccdeeec980cc0cba22de1c86451fd5f))
+
 # [1.94.0](https://github.com/betagouv/service-national-universel/compare/v1.93.0...v1.94.0) (2022-05-31)
 
 
