@@ -4,6 +4,7 @@ import { MdOutlineContentCopy } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
+
 import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 import Medaille from "../../../assets/icons/Medaille";
 import api from "../../../services/api";
@@ -48,7 +49,7 @@ export default function IndexDesktop() {
                 <div className="text-[#ffffff] group-hover:text-gray-800 text-sm flex-1">Renseigner mes préférences</div>
               </div>
             </Link>
-            {applications.length < 0 ? (
+            {applications.length > 0 ? (
               <Link to="/mission">
                 <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center hover:bg-white hover:text-gray-800">
                   <HiOutlineSearch className="text-[#ffffff] group-hover:text-gray-800" />
