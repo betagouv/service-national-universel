@@ -41,20 +41,28 @@ export default function IndexDesktop() {
           <div className="text-gray-300 text-sm mt-2 mb-4">
             Mettez votre énergie au service d’une société plus solidaire et découvrez {"\n"} votre talent pour l’engagement en réalisant une mission d’intérêt général !
           </div>
-          <div className="flex">
+          <div className="flex gap-4">
             <Link to="/preferences">
-              <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center">
-                <HiOutlineAdjustments className="text-[#ffffff] group-hover:scale-105" />
-                <div className="text-[#ffffff] group-hover:underline text-sm flex-1">Renseigner mes préférences</div>
+              <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center hover:bg-white hover:text-gray-800">
+                <HiOutlineAdjustments className="text-[#ffffff] group-hover:text-gray-800" />
+                <div className="text-[#ffffff] group-hover:text-gray-800 text-sm flex-1">Renseigner mes préférences</div>
               </div>
             </Link>
-            <Link to="/mission">
-              <div
-                className={`group flex rounded-[10px] py-2.5 px-4 ml-4  items-center border-[1px] ${applications.length > 0 ? "border-[#ffffff]" : "border-blue-600 bg-blue-600"}`}>
-                <HiOutlineSearch className={`${applications.length > 0 ? "text-[#ffffff]" : "text-blue-300"} mr-1 group-hover:scale-105`} />
-                <div className={`${applications.length > 0 ? "text-[#ffffff]" : "text-blue-100"} text-sm group-hover:underline flex-1`}>Trouver une mission</div>
-              </div>
-            </Link>
+            {applications.length < 0 ? (
+              <Link to="/mission">
+                <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center hover:bg-white hover:text-gray-800">
+                  <HiOutlineSearch className="text-[#ffffff] group-hover:text-gray-800" />
+                  <div className="text-[#ffffff] group-hover:text-gray-800 text-sm flex-1">Trouver une mission</div>
+                </div>
+              </Link>
+            ) : (
+              <Link to="/mission">
+                <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center border-blue-600 hover:border-[#4881FF] bg-blue-600 hover:bg-[#4881FF]">
+                  <HiOutlineSearch className="text-blue-300" />
+                  <div className="text-blue-100 group-hover:text-white text-sm flex-1">Trouver une mission</div>
+                </div>
+              </Link>
+            )}
           </div>
         </div>
         <img className="rounded-t-lg" src={require("../../../assets/phase2Header.png")} />
@@ -150,7 +158,7 @@ export default function IndexDesktop() {
             <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
             <div className="flex justify-start">
               <Link to="phase2/equivalence">
-                <div className="rounded-lg text-blue-700 text-center py-1 px-16 border-blue-700 border-[1px] hover:bg-blue-700 hover:text-white transition duration-100 ease-in-out">
+                <div className="rounded-lg text-blue-600 text-center text-sm py-1.5 px-16 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out">
                   Faire ma demande
                 </div>
               </Link>

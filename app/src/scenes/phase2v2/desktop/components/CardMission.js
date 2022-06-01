@@ -11,7 +11,7 @@ export default function application({ application }) {
       VALIDATED: "bg-[#71C784]",
       DONE: "bg-[#5694CD]",
       REFUSED: "bg-[#0B508F]",
-      CANCEL: "bg-gray-50",
+      CANCEL: "bg-[#F4F4F4]",
       IN_PROGRESS: "bg-indigo-600",
       ABANDON: "bg-gray-50",
     },
@@ -22,7 +22,7 @@ export default function application({ application }) {
       VALIDATED: "text-white",
       DONE: "text-white",
       REFUSED: "text-white",
-      CANCEL: "text-gray-400",
+      CANCEL: "text-[#6B6B6B]",
       IN_PROGRESS: "text-white",
       ABANDON: "text-gray-400",
     },
@@ -30,7 +30,7 @@ export default function application({ application }) {
   return (
     <Link
       to="/candidature"
-      className="group flex flex-col basis-1/4 justify-start items-start border shadow-md rounded-lg bg-white p-3 hover:scale-105 transition duration-100 ease-in">
+      className="group flex flex-col basis-1/4 justify-start items-start border shadow-md rounded-lg bg-white p-3 hover:-translate-y-1 transition duration-100 ease-in">
       <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm mb-2`}>
         {translateApplication(application.status)}
       </div>
