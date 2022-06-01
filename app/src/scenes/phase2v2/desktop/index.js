@@ -81,7 +81,9 @@ export default function IndexDesktop() {
               <IoIosInformationCircleOutline className="text-2xl" />
             </div>
             <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
-            <div className=" rounded-lg text-blue-700 text-center py-1 mr-4 border-blue-700 border ">Faire ma demande</div>
+            <Link to="phase2/equivalence">
+              <div className=" rounded-lg text-blue-700 text-center py-1 mr-4 border-blue-700 border ">Faire ma demande</div>
+            </Link>
           </div>
         </div>
       </div>
