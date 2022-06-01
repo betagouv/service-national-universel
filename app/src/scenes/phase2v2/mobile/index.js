@@ -26,8 +26,7 @@ export default function IndexPhase2Mobile() {
   React.useEffect(() => {
     (async () => {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/application`);
-      // if (ok) return setApplications(data);
-      setApplications([]);
+      if (ok) return setApplications(data);
     })();
   }, []);
 
