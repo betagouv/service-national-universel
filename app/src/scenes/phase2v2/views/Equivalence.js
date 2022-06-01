@@ -1,12 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
-import InformationCircle from "../../../assets/icons/InformationCircle";
-import ChevronDown from "../../../assets/icons/ChevronDown";
-import AddImage from "../../../assets/icons/AddImage";
-import { BsCheck2 } from "react-icons/bs";
+import React, { useEffect, useRef, useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
+import { BsCheck2 } from "react-icons/bs";
+import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
+import AddImage from "../../../assets/icons/AddImage";
+import ChevronDown from "../../../assets/icons/ChevronDown";
+import InformationCircle from "../../../assets/icons/InformationCircle";
 import PaperClip from "../../../assets/icons/PaperClip";
+import api from "../../../services/api";
 
 export default function Equivalence() {
+  const young = useSelector((state) => state.Auth.young);
   const optionsType = ["Service Civique", "BAFA", "Jeune Sapeur Pompier"];
   const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
   const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
@@ -26,6 +31,7 @@ export default function Equivalence() {
   const refEndDate = useRef(null);
   const refDuree = useRef(null);
   const refFrequence = useRef(null);
+  const history = useHistory();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -45,7 +51,7 @@ export default function Equivalence() {
     };
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     let error = false;
     for (const key of keyList) {
       if (key === "files" && !data[key]?.length) {
@@ -67,6 +73,16 @@ export default function Equivalence() {
       }
     }
     setError(error);
+
+    if (!error) {
+      const { ok } = await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue");
+        return;
+      }
+      toastr.success("Votre demande d'équivalence a bien été envoyée");
+      history.push("/phase2");
+    }
   };
 
   return (
@@ -143,8 +159,8 @@ export default function Equivalence() {
               onChange={(e) => setData({ ...data, address: e.target.value })}
             />
           </div>
-          <div className="flex items-center gap-2">
-            <div className="border-[1px] border-gray-300 w-2/3 px-3 py-2 rounded-lg mt-3">
+          <div className="flex items-stretch gap-2">
+            <div className="flex flex-col justify-center border-[1px] border-gray-300 w-2/3 px-3 py-2 rounded-lg mt-3">
               {data?.zip ? <div className="text-xs leading-4 font-normal text-gray-500">Code postal</div> : null}
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
@@ -153,7 +169,7 @@ export default function Equivalence() {
                 onChange={(e) => setData({ ...data, zip: e.target.value })}
               />
             </div>
-            <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
+            <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
               {data?.city ? <div className="text-xs leading-4 font-normal text-gray-500">Ville</div> : null}
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
@@ -287,7 +303,7 @@ export default function Equivalence() {
                 className="text-sm leading-5 font-normal text-indigo-600 mt-3 hover:underline text-center"
                 onClick={() => {
                   setFrequence(false);
-                  setData({ ...data, frequency: { frequence: null, duree: null, nombre: null } });
+                  setData({ ...data, frequency: undefined });
                 }}>
                 Supprimer la fréquence
               </div>

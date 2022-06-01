@@ -66,7 +66,7 @@ const Schema = new mongoose.Schema({
     type: {
       nombre: String,
       duree: String,
-      frenquence: String,
+      frequence: String,
     },
     documentation: {
       description: "Fréquence de la mission",
