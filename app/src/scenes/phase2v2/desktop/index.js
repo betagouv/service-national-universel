@@ -41,13 +41,13 @@ export default function IndexDesktop() {
             <Link to="/preferences">
               <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center">
                 <HiOutlineAdjustments className="text-[#ffffff] group-hover:scale-105" />
-                <div className="text-[#ffffff] group-hover:underline text-sm">Renseigner mes préférences </div>
+                <div className="text-[#ffffff] group-hover:underline text-sm flex-1">Renseignermes préférences </div>
               </div>
             </Link>
             <Link to="/mission">
               <div className="group flex rounded-[10px] py-2.5 px-4 ml-4 bg-blue-600 items-center border-[1px] border-blue-600">
                 <HiOutlineSearch className="text-blue-300 mr-1 group-hover:scale-105" />
-                <div className="text-blue-100 text-sm group-hover:underline">Trouver une mission</div>
+                <div className="text-blue-100 text-sm group-hover:underline flex-1">Trouver une mission</div>
               </div>
             </Link>
           </div>
@@ -146,7 +146,9 @@ export default function IndexDesktop() {
             <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
             <div className="flex justify-start">
               <Link to="phase2/equivalence">
-                <div className="rounded-lg text-blue-700 text-center py-1 px-16 border-blue-700 border-[1px] hover:bg-blue-700 hover:text-white">Faire ma demande</div>
+                <div className="rounded-lg text-blue-700 text-center py-1 px-16 border-blue-700 border-[1px] hover:bg-blue-700 hover:text-white transition duration-100 ease-in-out">
+                  Faire ma demande
+                </div>
               </Link>
             </div>
           </div>
