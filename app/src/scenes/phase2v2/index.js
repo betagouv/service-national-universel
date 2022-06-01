@@ -1,13 +1,13 @@
 import React from "react";
-import NextStep from "./nextStep";
-import { YOUNG_STATUS_PHASE2, permissionPhase2 } from "../../utils";
 import { useSelector } from "react-redux";
-import WaitingRealisation from "./WaitingRealisation";
-import InProgressDesktop from "./Desktop/InProgress";
-import InProgressMobile from "./Mobile/InProgress";
-import Validated from "./Validated";
-import { HeroContainer, Hero } from "../../components/Content";
 import { useHistory } from "react-router-dom";
+import { Hero, HeroContainer } from "../../components/Content";
+import { permissionPhase2, YOUNG_STATUS_PHASE2 } from "../../utils";
+import InProgressDesktop from "./desktop";
+import InProgressMobile from "./mobile";
+import NextStep from "./nextStep";
+import Validated from "./Validated";
+import WaitingRealisation from "./WaitingRealisation";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -19,10 +19,10 @@ export default () => {
     if (young.statusPhase2 === YOUNG_STATUS_PHASE2.IN_PROGRESS)
       return (
         <>
-          <div className="md:flex hidden flex-1">
+          <div className="hidden md:flex flex-1">
             <InProgressDesktop />
           </div>
-          <div className="md:hidden ">
+          <div className="flex md:hidden ">
             <InProgressMobile />
           </div>
         </>
