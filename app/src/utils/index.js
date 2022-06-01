@@ -67,3 +67,21 @@ export function urlWithScheme(url) {
   if (!/^https?:\/\//i.test(url)) return `http://${url}`;
   return url;
 }
+
+export const copyToClipboard = (text) => {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  } else {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "absolute";
+    textArea.style.opacity = 0;
+    document.body.appendChild(textArea);
+    textArea.select();
+    return new Promise((res, rej) => {
+      // here the magic happens
+      document.execCommand("copy") ? res() : rej();
+      textArea.remove();
+    });
+  }
+};
