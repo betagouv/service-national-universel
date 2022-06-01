@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { translateApplication } from "../../../utils";
+import { translateApplication } from "../../../../utils";
 
 export default function application({ application }) {
   const theme = {

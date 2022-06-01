@@ -7,12 +7,14 @@ import { Link } from "react-router-dom";
 import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 import Medaille from "../../../assets/icons/Medaille";
 import api from "../../../services/api";
-import CardMission from "./CardMission";
+import CardMission from "./components/CardMission";
+import CardMissionEmpty from "./components/CardMissionEmpty";
 import { copyToClipboard } from "../../../utils";
+import Loader from "../../../components/Loader";
 
 export default function IndexDesktop() {
   const young = useSelector((state) => state.Auth.young);
-  const [applications, setApplications] = React.useState([]);
+  const [applications, setApplications] = React.useState();
 
   const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
   React.useEffect(() => {
@@ -28,6 +30,8 @@ export default function IndexDesktop() {
     })();
   }, []);
 
+  if (!applications) return <Loader />;
+
   return (
     <div className="bg-white mx-4 pb-12 my-3 rounded-lg">
       {/* BEGIN HEADER */}
@@ -41,13 +45,14 @@ export default function IndexDesktop() {
             <Link to="/preferences">
               <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center">
                 <HiOutlineAdjustments className="text-[#ffffff] group-hover:scale-105" />
-                <div className="text-[#ffffff] group-hover:underline text-sm flex-1">Renseignermes préférences </div>
+                <div className="text-[#ffffff] group-hover:underline text-sm flex-1">Renseigner mes préférences</div>
               </div>
             </Link>
             <Link to="/mission">
-              <div className="group flex rounded-[10px] py-2.5 px-4 ml-4 bg-blue-600 items-center border-[1px] border-blue-600">
-                <HiOutlineSearch className="text-blue-300 mr-1 group-hover:scale-105" />
-                <div className="text-blue-100 text-sm group-hover:underline flex-1">Trouver une mission</div>
+              <div
+                className={`group flex rounded-[10px] py-2.5 px-4 ml-4  items-center border-[1px] ${applications.length > 0 ? "border-[#ffffff]" : "border-blue-600 bg-blue-600"}`}>
+                <HiOutlineSearch className={`${applications.length > 0 ? "text-[#ffffff]" : "text-blue-300"} mr-1 group-hover:scale-105`} />
+                <div className={`${applications.length > 0 ? "text-[#ffffff]" : "text-blue-100"} text-sm group-hover:underline flex-1`}>Trouver une mission</div>
               </div>
             </Link>
           </div>
@@ -67,12 +72,15 @@ export default function IndexDesktop() {
                 .map((application) => (
                   <CardMission key={application._id} application={application} />
                 ))}
+              {applications.length < 4 ? <CardMissionEmpty /> : null}
             </div>
           </div>
-          {applications.length > 4 ? (
+          {applications.length >= 4 ? (
             <div className="flex justify-center">
               <Link to="/candidature">
-                <div className="text-gray-700 bg-gray-100 rounded-lg px-4 py-2 text-center hover:underline">Toutes mes candidatures ({applications.length})</div>
+                <div className="text-gray-700 bg-gray-100 rounded-lg px-4 py-2 text-center hover:underline">
+                  {applications.length === 4 ? "Gérer mes candidatures" : `Toutes mes candidatures (${applications.length})`}
+                </div>
               </Link>
             </div>
           ) : null}
@@ -101,34 +109,30 @@ export default function IndexDesktop() {
               </div>
             </div>
           ) : null}
-          <div className="group w-1/3 border-[1px] border-gray-200 rounded-lg">
+          <div className="flex w-1/3 border-[1px] border-gray-200 hover:border-gray-300 rounded-lg cursor-pointer">
             <a
               href={`https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1`}
               target="_blank"
               rel="noreferrer"
-              className="flex gap-1 items-start justify-between p-3 hover:text-blue-600">
-              <div className="font-bold flex-1">J’ai des questions sur la mission d’intérêt général</div>
-              <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105 group-hover:text-blue-600" />
+              className="flex flex-1 gap-1 items-start justify-between p-3">
+              <div className="font-bold flex-1 text-gray-800">J’ai des questions sur la mission d’intérêt général</div>
+              <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105" />
             </a>
           </div>
-          <div className="group w-1/3 border-[1px] border-gray-200 rounded-lg">
-            <a
-              href={`https://support.snu.gouv.fr/base-de-connaissance/`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex gap-1 items-start justify-between p-3 hover:text-blue-600">
-              <div className="font-bold flex-1">J’ai des questions sur la reconnaissance d’engagement</div>
-              <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105 group-hover:text-blue-600" />
+          <div className="group w-1/3 border-[1px] border-gray-200 hover:border-gray-300 rounded-lg">
+            <a href={`https://support.snu.gouv.fr/base-de-connaissance/`} target="_blank" rel="noreferrer" className="flex gap-1 items-start justify-between p-3">
+              <div className="font-bold flex-1 text-gray-800">J’ai des questions sur la reconnaissance d’engagement</div>
+              <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105" />
             </a>
           </div>
         </div>
         <Link to='/mission?MILITARY_PREPARATION=%5B"true"%5D'>
-          <div className="group border-[1px] border-gray-200 rounded-lg mt-3 p-3 flex items-center gap-4">
+          <div className="group border-[1px] border-gray-200 hover:border-gray-300 rounded-lg mt-3 p-3 flex items-center gap-4">
             <Medaille className="text-gray-400" />
             <div className="w-full">
               <div className="flex items-center justify-between">
-                <div className="font-bold text-base group-hover:text-blue-600"> Partez en préparation militaire</div>
-                <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105 group-hover:text-blue-600" />
+                <div className="font-bold text-base text-gray-800"> Partez en préparation militaire</div>
+                <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105" />
               </div>
               <div className="text-sm text-gray-500">Partez à la découverte des métiers de la Défense en réalisant une préparation militaire au sein d&apos;un corps d’armée</div>
             </div>
