@@ -1,14 +1,18 @@
 import React, { useState, useRef } from "react";
 import InformationCircle from "../../../assets/icons/InformationCircle";
 import ChevronDown from "../../../assets/icons/ChevronDown";
+import AddImage from "../../../assets/icons/AddImage";
 import { BsCheck2 } from "react-icons/bs";
 import { AiOutlinePlus } from "react-icons/ai";
+import PaperClip from "../../../assets/icons/PaperClip";
 
 export default function Equivalence() {
   const optionsType = ["Service Civique", "BAFA", "Jeune Sapeur Pompier"];
   const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
   const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
-  const [data, setData] = useState({});
+  const [data, setData] = useState({
+    files: ["test1.pdf", "test2.pdf", "test3.pdf"],
+  });
   const [openType, setOpenType] = useState(false);
   const [openDuree, setOpenDuree] = useState(false);
   const [openFrequence, setOpenFrequence] = useState(false);
@@ -259,6 +263,58 @@ export default function Equivalence() {
             </>
           )}
         </div>
+        <div className="rounded-lg bg-white mt-4 p-6">
+          <div className="text-lg leading-7 font-bold">Personne contact au sein de la structure d’accueil</div>
+          <div className="text-sm leading-5 font-normal text-gray-500 mt-2">
+            Cette personne doit vous connaître et pourra être contactée par l’administration sur votre dossier.
+          </div>
+          <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
+            {data?.name ? <div className="text-xs leading-4 font-normal text-gray-500">Prénom et Nom</div> : null}
+            <input
+              className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+              placeholder="Prénom et Nom"
+              type="text"
+              onChange={(e) => setData({ ...data, name: e.target.value })}
+            />
+          </div>
+          <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
+            {data?.email ? <div className="text-xs leading-4 font-normal text-gray-500">Adresse email</div> : null}
+            <input
+              className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+              placeholder="Adresse email"
+              type="text"
+              onChange={(e) => setData({ ...data, email: e.target.value })}
+            />
+          </div>
+        </div>
+        <div className="rounded-lg bg-white mt-4 p-6">
+          <div className="text-lg leading-7 font-bold">Document justificatif d’engagement</div>
+          <div className="flex flex-col items-center bg-gray-50 mt-4 py-10 rounded-lg mb-3">
+            <button className="rounded-lg px-3 py-2 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600">
+              Télécharger le modèle à remplir
+            </button>
+            <div className="text-xs leading-none font-normal text-gray-700 mt-2">puis téléversez le formulaire rempli ci-contre</div>
+          </div>
+          {data?.files?.length
+            ? data.files.map((file, index) => (
+                <div key={index} className="flex flex-row justify-between items-center border-[1px] border-gray-300 w-full rounded-lg py-2 px-3 mt-1">
+                  <div className="flex flex-row items-center">
+                    <PaperClip className="text-gray-400 mr-2" />
+                    <div className="text-sm leading-5 font-normal text-gray-800">{file}</div>
+                  </div>
+                  <div className="text-sm leading-5 font-normal text-gray-800">Retirer</div>
+                </div>
+              ))
+            : null}
+          <div className="flex flex-col items-center border-[1px] border-dashed border-gray-300 w-full rounded-lg py-4 mt-3">
+            <AddImage className="text-gray-400" />
+            <div className="text-sm leading-5 font-medium text-blue-600 hover:underline mt-2">Téléversez le formulaire</div>
+            <div className="text-xs leading-4 font-normal text-gray-500 mt-1">PDF, PNG, JPG jusqu’à 5Mo</div>
+          </div>
+        </div>
+        <button className="rounded-lg w-full py-2 mt-4 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600">
+          Valider ma demande
+        </button>
       </div>
     </div>
   );
