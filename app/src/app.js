@@ -22,6 +22,7 @@ import Diagoriente from "./scenes/diagoriente";
 import SupportCenter from "./scenes/support-center";
 import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
+import v2Missions from "./scenes/missionsv2";
 import Applications from "./scenes/applications";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
@@ -163,7 +164,7 @@ const Espace = () => {
             <Route path="/phase3" component={Phase3} />
             <Route path="/les-programmes" component={Engagement} />
             <Route path="/preferences" component={Preferences} />
-            <Route path="/mission" component={Missions} />
+            {environment === "production" ? <Route path="/mission" component={Missions} /> : <Route path="/mission" component={v2Missions} />}
             <Route path="/candidature" component={Applications} />
             <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
