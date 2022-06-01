@@ -299,8 +299,10 @@ export default function Phase1(props) {
             </Bloc>
             <Bloc title="Détails" borderBottom disabled={disabled}>
               {canAssignCohesionCenter(user) &&
-              ((young.status === YOUNG_STATUS.WAITING_LIST && young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) ||
-                (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST)) ? (
+              (young.status === YOUNG_STATUS.WAITING_LIST ||
+                young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
+                young.status === YOUNG_STATUS.VALIDATED ||
+                young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) ? (
                 <div className="flex items-center hover:underline hover:text-blue-600 cursor-pointer mb-4" onClick={() => setModalAffectation({ isOpen: true })}>
                   <AiOutlinePlus className="text-blue-800 mr-2 border-[1px] border-blue-800 rounded-full h-4 w-4" />
                   Affecter dans un centre
