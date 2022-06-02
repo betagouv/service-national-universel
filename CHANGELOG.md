@@ -1,3 +1,16 @@
+# [1.96.0](https://github.com/betagouv/service-national-universel/compare/v1.95.0...v1.96.0) (2022-06-02)
+
+
+### Bug Fixes
+
+* **admin:** referent can't edit meeting point ([d3270ef](https://github.com/betagouv/service-national-universel/commit/d3270ef50b7da0d27ade83674d4a62a28297625a))
+* continue v2 mission + home phase 2 ([8092fa0](https://github.com/betagouv/service-national-universel/commit/8092fa0c6d0d455df69b70e121cf5b8f438c3c08))
+
+
+### Features
+
+* **admin:** PR ouverture à la consultation pour les référents régionaux et départementaux ([#1594](https://github.com/betagouv/service-national-universel/issues/1594)) ([13f671a](https://github.com/betagouv/service-national-universel/commit/13f671add877ed2c549e6427ff9fbe08e5c59a9f))
+
 # [1.95.0](https://github.com/betagouv/service-national-universel/compare/v1.94.0...v1.95.0) (2022-06-01)
 
 
