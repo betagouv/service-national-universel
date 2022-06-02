@@ -31,20 +31,24 @@ const permissionApp = (y) => {
 
 export function permissionPhase1(y) {
   if (!permissionApp(y)) return false;
-  return ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(y.status) && y.statusPhase1 !== YOUNG_STATUS_PHASE1.WITHDRAWN;
+  return (
+    ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN].includes(y.status) ||
+    y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE
+  );
 }
 
 export function permissionPhase2(y) {
   if (!permissionApp(y)) return false;
   return (
-    y.statusPhase2 !== YOUNG_STATUS_PHASE2.WITHDRAWN &&
-    (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "DONE" || y.statusPhase1 === "EXEMPTED")
+    (y.status !== YOUNG_STATUS.WITHDRAWN &&
+      (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "DONE" || y.statusPhase1 === "EXEMPTED")) ||
+    y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED
   );
 }
 
 export function permissionPhase3(y) {
   if (!permissionApp(y)) return false;
-  return y.statusPhase3 !== YOUNG_STATUS_PHASE3.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
+  return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
 }
 
 export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
