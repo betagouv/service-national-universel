@@ -1,25 +1,27 @@
 import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React, { useEffect, useRef, useState } from "react";
 import { MdOutlineOpenInNew } from "react-icons/md";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import ArrowCircleRightSvg from "../../assets/icons/ArrowCircleRight";
 import BusSvg from "../../assets/icons/Bus";
 import FilterSvg from "../../assets/icons/Filter";
 import Pencil from "../../assets/icons/Pencil";
 import Badge from "../../components/Badge";
+import Breadcrumbs from "../../components/Breadcrumbs";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import ExportComponent from "../../components/ExportXlsx";
 import { Filter2, FilterRow, ResultTable } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import { apiURL } from "../../config";
 import api from "../../services/api";
-import { ES_NO_LIMIT, getDepartmentNumber } from "../../utils";
-import Breadcrumbs from "../../components/Breadcrumbs";
+import { ES_NO_LIMIT, getDepartmentNumber, ROLES } from "../../utils";
 
-const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT"];
+const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT", "REGION"];
 
 export default function MeetingPoint() {
   const [filterVisible, setFilterVisible] = useState(false);
+  const user = useSelector((state) => state.Auth.user);
 
   const getDefaultQuery = () => {
     return { query: { match_all: {} }, track_total_hits: true };
@@ -99,6 +101,21 @@ export default function MeetingPoint() {
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
+                      placeholder="Region"
+                      componentId="REGION"
+                      dataField="departureRegion.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "REGION") }}
+                      title=""
+                      URLParams={true}
+                      sortBy="asc"
+                      showSearch={true}
+                      searchPlaceholder="Rechercher..."
+                      size={1000}
+                      defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
                       placeholder="Département"
                       componentId="DEPARTMENT"
                       dataField="departureDepartment.keyword"
@@ -109,6 +126,7 @@ export default function MeetingPoint() {
                       showSearch={true}
                       searchPlaceholder="Rechercher..."
                       size={1000}
+                      defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
                     />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
