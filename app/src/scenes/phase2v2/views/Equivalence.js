@@ -393,7 +393,9 @@ export default function Equivalence() {
                     <PaperClip className="text-gray-400 mr-2" />
                     <div className="text-sm leading-5 font-normal text-gray-800">{file}</div>
                   </div>
-                  <div className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer">Retirer</div>
+                  <div className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer" onClick={() => data?.files.filter((f) => file === f)}>
+                    Retirer
+                  </div>
                 </div>
               ))
             : null}

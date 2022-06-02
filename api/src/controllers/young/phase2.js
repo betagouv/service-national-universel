@@ -45,4 +45,16 @@ router.post("/equivalence", passport.authenticate("young", { session: false, fai
   }
 });
 
+router.get("/equivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ id: Joi.string().required() }).validate({ ...req.params });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const equivalences = await MissionEquivalenceModel.findOne({ youngId: value.id });
+    res.status(200).send({ ok: true, data: equivalences });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;

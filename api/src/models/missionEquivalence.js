@@ -92,6 +92,8 @@ const Schema = new mongoose.Schema({
       description: "Liste des fichiers joints",
     },
   },
+
+  createdAt: { type: Date, default: Date.now },
 });
 
 Schema.virtual("fromUser").set(function (fromUser) {

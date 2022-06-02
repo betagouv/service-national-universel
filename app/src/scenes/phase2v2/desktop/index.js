@@ -12,10 +12,12 @@ import CardMission from "./components/CardMission";
 import CardMissionEmpty from "./components/CardMissionEmpty";
 import { copyToClipboard } from "../../../utils";
 import Loader from "../../../components/Loader";
+import CardEquivalence from "./components/CardEquivalence";
 
 export default function IndexDesktop() {
   const young = useSelector((state) => state.Auth.young);
   const [applications, setApplications] = React.useState();
+  const [equivalence, setEquivalence] = React.useState();
 
   const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
   React.useEffect(() => {
@@ -28,6 +30,10 @@ export default function IndexDesktop() {
     (async () => {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/application`);
       if (ok) return setApplications(data);
+    })();
+    (async () => {
+      const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence`);
+      if (ok) return setEquivalence(data);
     })();
   }, []);
 
@@ -70,11 +76,13 @@ export default function IndexDesktop() {
       </div>
       {/* END HEADER */}
 
-      {/* BEGIN CANDIDATURES */}
-      {applications.length > 0 ? (
-        <>
-          <div className="px-14 -translate-y-4">
-            <div className="flex gap-8">
+      <div className="flex flex-col items-center px-14 -translate-y-4">
+        {/* BEGIN EQUIVALENCE */}
+        {equivalence ? <CardEquivalence equivalence={equivalence} /> : null}
+        {/* BEGIN CANDIDATURES */}
+        {applications.length > 0 ? (
+          <>
+            <div className="flex gap-8 w-full">
               {applications
                 .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)) // afficher d'abord les candidatures mis a jour récemment
                 .slice(0, 4) // afficher uniquement 4 candidatures
@@ -83,19 +91,20 @@ export default function IndexDesktop() {
                 ))}
               {applications.length < 4 ? <CardMissionEmpty /> : null}
             </div>
-          </div>
-          {applications.length >= 4 ? (
-            <div className="flex justify-center">
-              <Link to="/candidature">
-                <div className="text-gray-700 bg-gray-100 rounded-lg px-4 py-2 text-center hover:underline">
-                  {applications.length === 4 ? "Gérer mes candidatures" : `Toutes mes candidatures (${applications.length})`}
-                </div>
-              </Link>
-            </div>
-          ) : null}
-        </>
-      ) : null}
-      {/* END CANDIDATURES */}
+
+            {applications.length >= 4 ? (
+              <div className="flex justify-center">
+                <Link to="/candidature">
+                  <div className="text-gray-700 bg-gray-100 rounded-lg px-4 py-2 text-center hover:underline">
+                    {applications.length === 4 ? "Gérer mes candidatures" : `Toutes mes candidatures (${applications.length})`}
+                  </div>
+                </Link>
+              </div>
+            ) : null}
+          </>
+        ) : null}
+        {/* END CANDIDATURES */}
+      </div>
 
       {/* BEGIN LINKS */}
       <div className="mx-10 mt-10">
