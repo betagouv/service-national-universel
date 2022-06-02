@@ -147,7 +147,8 @@ export default function IndexDesktop() {
             </div>
           </div>
         </Link>
-        <div className="mt-12 mb-4 text-lg">Vous avez déjà fait preuve de solidarité ?</div>
+        {/* TODO activer si plusieurs cartes 👇 */}
+        {/* <div className="mt-12 mb-4 text-lg">Vous avez déjà fait preuve de solidarité ?</div> */}
         <div className="border-0 flex rounded-lg shadow-lg w-1/2 items-center">
           <img src={require("../../../assets/phase2Reconnaissance.png")} className="rounded-lg" />
           <div className="pr-4 ml-3">

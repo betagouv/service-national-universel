@@ -13,10 +13,13 @@ import ApplyDoneModal from "./components/ApplyDoneModal";
 import Loader from "../../components/Loader";
 import Badge from "../../components/Badge";
 import DomainThumb from "../../components/DomainThumb";
+import DayTile from "../../components/DayTile";
+import DoubleDayTile from "../../components/DoubleDayTile";
 import plausibleEvent from "../../services/plausible";
 
 export default function View(props) {
   const [mission, setMission] = useState();
+  console.log("✍️ ~ mission", mission);
   const [modal, setModal] = useState(null);
   const [disabledApplication, setDisabledApplication] = useState(false);
   const young = useSelector((state) => state.Auth.young);
@@ -62,46 +65,52 @@ export default function View(props) {
   if (mission === undefined) return <Loader />;
 
   return (
-    <Container>
-      {modal === "APPLY" && (
-        <ApplyModal
-          value={mission}
-          onChange={() => setModal(null)}
-          onSend={async () => {
-            await getMission();
-            setModal("DONE");
-          }}
-        />
-      )}
-      {modal === "DONE" && <ApplyDoneModal young={young} value={mission} onChange={() => setModal(null)} />}
-      <Heading>
-        <div>
-          <p className="title">mission</p>
-          <h1>{mission.name}</h1>
-          <Tags>
-            {getTags().map((e, i) => (
-              <Badge key={i} text={e} textColor="#6b7280" backgroundColor="#ffffff" />
-            ))}
-            {mission?.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" color="#03224C" /> : null}
-          </Tags>
-        </div>
-        <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} setModal={setModal} disabledApplication={disabledApplication} />
-      </Heading>
-      <Box>
-        <Row>
-          <Col md={12}>
-            <HeadCard>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <DomainThumb domain={mission.domains[0]} style={{ transform: "translateY(-20%)" }} size="4rem" />
-                <p>
-                  Au sein de la structure <span>{mission.structureName}</span>
-                </p>
+    <div className="bg-white mx-4 pb-12 my-4 rounded-xl">
+      {/* BEGIN HEADER */}
+      <div className="flex justify-between p-8 border-b-[1px] border-gray-100">
+        <div className="flex">
+          {/* icon */}
+          <div className="flex items-center">
+            <DomainThumb domain={mission.domains[0]} size="3rem" />
+          </div>
+
+          {/* infos mission */}
+          <div className="flex flex-col">
+            <div className="space-y-2">
+              <div className="text-gray-500 text-xs uppercase">{mission.structureName}</div>
+              <div className="text-gray-900 font-bold text-base">{mission.name}</div>
+              <div className="flex space-x-2">
+                {getTags()?.map((e, i) => (
+                  <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">
+                    {e}
+                  </div>
+                ))}
+                {mission.isMilitaryPreparation === "true" ? (
+                  <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
+                ) : null}
               </div>
-              <SocialIcons structure={mission.structureId} />
-            </HeadCard>
-          </Col>
-        </Row>
-        <hr />
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center">
+          <div className="text-xs text-gray-700">
+            {mission.application ? (
+              <Link to={`/candidature`}>Voir la candidature</Link>
+            ) : (
+              <ApplyButton
+                applied={mission.application}
+                placesLeft={mission.placesLeft}
+                placesTotal={mission.placesTotal}
+                setModal={setModal}
+                disabledApplication={disabledApplication}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+      {/* END HEADER */}
+
+      <Box>
         <Row>
           <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
             <Wrapper>
@@ -116,6 +125,7 @@ export default function View(props) {
           <Col md={6}>
             <Wrapper>
               <Legend>
+                <DoubleDayTile date1={mission.startAt} date2={mission.endAt} />
                 {mission.startAt && mission.endAt
                   ? `Du ${formatStringDateTimezoneUTC(mission.startAt)} au ${formatStringDateTimezoneUTC(mission.endAt)}`
                   : "Aucune date renseignée"}
@@ -129,13 +139,19 @@ export default function View(props) {
         </Row>
       </Box>
       <Footer>
-        <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} setModal={setModal} disabledApplication={disabledApplication} />
+        <ApplyButton
+          applied={mission.application}
+          placesLeft={mission.placesLeft}
+          placesTotal={mission.placesTotal}
+          setModal={setModal}
+          disabledApplication={disabledApplication}
+        />
       </Footer>
-    </Container>
+    </div>
   );
 }
 
-const ApplyButton = ({ applied, placesLeft, setModal, disabledApplication }) => {
+const ApplyButton = ({ applied, placesLeft, placesTotal, setModal, disabledApplication }) => {
   if (applied)
     return (
       <div className="flex flex-col items-center">
@@ -165,16 +181,19 @@ const ApplyButton = ({ applied, placesLeft, setModal, disabledApplication }) => 
       </div>
     );
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center space-y-4">
       <div
-        className="px-5 py-2 bg-[#31c48d] text-white rounded-full shadow-md hover:cursor-pointer hover:scale-105 text-center"
+        className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-2 w-52 items-center border-blue-600 hover:border-[#4881FF] bg-blue-600 hover:bg-[#4881FF] cursor-pointer"
         onClick={() => {
           setModal("APPLY");
           plausibleEvent("Phase2/CTA missions - Candidater");
         }}>
-        Candidater
+        {/* <HiOutlineSearch className="text-blue-300" /> */}
+        <div className="text-white text-sm text-center flex-1">Candidater</div>
       </div>
-      <p className="button-subtitle">{`${placesLeft} volontaire${placesLeft > 1 ? "s" : ""} recherché${placesLeft > 1 ? "s" : ""}`}</p>
+      <div className="text-gray-500 text-xs">
+        Place(s) disponible(s)&nbsp;:&nbsp;{placesLeft}/{placesTotal}
+      </div>
     </div>
   );
 };

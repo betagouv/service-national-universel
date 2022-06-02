@@ -138,7 +138,8 @@ export default function IndexPhase2Mobile() {
             </div>
           </div>
         </Link>
-        <div className="mt-4 mb-2 text-base">Vous avez déjà fait preuve de solidarité ?</div>
+        {/* TODO activer si plusieurs cartes 👇 */}
+        {/* <div className="mt-4 mb-2 text-base">Vous avez déjà fait preuve de solidarité ?</div> */}
         <div className="border-0 rounded-lg shadow-lg items-center">
           <img src={require("../../../assets/phase2MobileReconnaissance.png")} className="rounded-lg w-full" />
           <div className="px-3 pb-4">

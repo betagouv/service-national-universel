@@ -13,6 +13,8 @@ import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
 import AlertBox from "../../components/AlertBox";
 import MilitaryPreparationCard from "./components/MilitaryPreparationCard";
+import MissionDomainSante from "../../assets/icons/MissionDomainSante";
+import MissionDomainSolidarite from "../../assets/icons/MissionDomainSolidarite";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
@@ -107,8 +109,24 @@ export default function List() {
       {/* END HEADER */}
 
       {/* BEGIN CONTROL */}
-      <div className="bg-gray-50 rounded-lg">CONTROL</div>
+      <div className="bg-gray-50 rounded-lg">
+        <div className="flex justify-around">
+          <div className="flex flex-col items-center space-y-2">
+            <div className="bg-[#212B44] w-9 h-9 flex justify-center items-center rounded-xl">
+              <MissionDomainSante className="text-white" />
+            </div>
+            <div className="text-xs text-gray-700">Santé</div>
+          </div>
+          <div className="flex flex-col items-center space-y-2">
+            <div className="bg-[#212B44] w-9 h-9 flex justify-center items-center rounded-xl">
+              <MissionDomainSolidarite className="text-white" />
+            </div>
+            <div className="text-xs text-gray-700">Solidarité</div>
+          </div>
+        </div>
+      </div>
       {/* END CONTROL */}
+
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <Missions>
           <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
