@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { BiHandicap } from "react-icons/bi";
 import { MdOutlineHistory } from "react-icons/md";
-import { toastr } from "react-redux-toastr";
-import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-
+import { toastr } from "react-redux-toastr";
+import { Link, useHistory } from "react-router-dom";
 import ArrowCircleRight from "../../assets/icons/ArrowCircleRight";
 import BusSvg from "../../assets/icons/Bus";
 import Plus from "../../assets/icons/Plus";
-import api from "../../services/api";
-import { getDepartmentNumber } from "../../utils";
-import ModalEditMeetingPoint from "./components/modalEditMeetingPoint";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import api from "../../services/api";
+import { getDepartmentNumber, ROLES } from "../../utils";
+import ModalEditMeetingPoint from "./components/modalEditMeetingPoint";
 
 export default function Edit(props) {
   const [meetingPoint, setMeetingPoint] = useState();
@@ -20,6 +19,7 @@ export default function Edit(props) {
   const [modal, setModal] = React.useState({ isOpen: false });
   const [occupationPercentage, setOccupationPercentage] = React.useState();
   const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
 
   useEffect(() => {
     const id = props.match && props.match.params && props.match.params.id;
@@ -52,6 +52,7 @@ export default function Edit(props) {
   }, [bus]);
 
   if (!meetingPoint || !center || !bus) return null;
+  if (user.role !== ROLES.ADMIN) history.push("/");
 
   return (
     <>

@@ -189,12 +189,12 @@ export default function MeetingPoint() {
                             <th>Adresse de départ</th>
                             <th>déstination</th>
                             <th>places disponibles</th>
-                            <th className="text-center">actions</th>
+                            {user.role === ROLES.ADMIN ? <th className="text-center">actions</th> : null}
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {data.map((hit) => {
-                            return <Hit key={hit._id} hit={hit} />;
+                            return <Hit key={hit._id} hit={hit} user={user} />;
                           })}
                         </tbody>
                       </table>
@@ -210,7 +210,7 @@ export default function MeetingPoint() {
   );
 }
 
-const Hit = ({ hit }) => {
+const Hit = ({ hit, user }) => {
   let mounted = useRef(true);
   const [bus, setBus] = useState();
   const [center, setCenter] = useState();
@@ -273,15 +273,17 @@ const Hit = ({ hit }) => {
       ) : (
         <td>chargement...</td>
       )}
-      <td className="rounded-r-lg">
-        <div className="flex justify-center items-center">
-          <Link to={`/point-de-rassemblement/${hit._id}/edit`}>
-            <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
-              <Pencil width={16} height={16} />
-            </div>
-          </Link>
-        </div>
-      </td>
+      {user.role === ROLES.ADMIN ? (
+        <td className="rounded-r-lg">
+          <div className="flex justify-center items-center">
+            <Link to={`/point-de-rassemblement/${hit._id}/edit`}>
+              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
+                <Pencil width={16} height={16} />
+              </div>
+            </Link>
+          </div>
+        </td>
+      ) : null}
     </tr>
   );
 };
