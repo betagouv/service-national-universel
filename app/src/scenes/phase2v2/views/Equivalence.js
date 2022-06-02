@@ -16,9 +16,7 @@ export default function Equivalence() {
   const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
   const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
   const keyList = ["type", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
-  const [data, setData] = useState({
-    files: ["test1.pdf", "test2.pdf", "test3.pdf"],
-  });
+  const [data, setData] = useState({});
   const [openType, setOpenType] = useState(false);
   const [openDuree, setOpenDuree] = useState(false);
   const [openFrequence, setOpenFrequence] = useState(false);
@@ -27,12 +25,47 @@ export default function Equivalence() {
   const [frequence, setFrequence] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [filesList, setFilesList] = useState([]);
+  const [uploading, setUploading] = useState(false);
   const refType = useRef(null);
   const refStartDate = useRef(null);
   const refEndDate = useRef(null);
   const refDuree = useRef(null);
   const refFrequence = useRef(null);
   const history = useHistory();
+
+  const hiddenFileInput = useRef(null);
+
+  const handleClickUpload = () => {
+    hiddenFileInput.current.click();
+  };
+
+  const handleUpload = (event) => {
+    const files = event.target.files;
+    for (let index = 0; index < Object.keys(files).length; index++) {
+      let i = Object.keys(files)[index];
+      if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
+      if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
+      const fileName = files[i].name.match(/(.*)(\..*)/);
+      const newName = `${fileName[1]}-${filesList.length + index}${fileName[2]}`;
+      Object.defineProperty(files[i], "name", {
+        writable: true,
+        value: newName,
+      });
+    }
+    uploadFiles([...filesList, ...files]);
+  };
+
+  const uploadFiles = async (files) => {
+    setFilesList(files);
+    setUploading(true);
+    const res = await api.uploadFile("/young/file/equivalenceFiles", files);
+    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+    // We update it instant ( because the bucket is updated instant )
+    setData({ ...data, files: res.data });
+    toastr.success("Fichier téléversé");
+    setUploading(false);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -103,7 +136,7 @@ export default function Equivalence() {
           <div className="border-[1px] border-red-400 rounded-lg bg-red-50 mt-4">
             <div className="flex items-center px-4 py-3">
               <InformationCircle className="text-red-400" />
-              <div className="flex-1 ml-4 text-red-800 text-sm leading-5 font-medium">Vous devez remplir tous le formulaire pour pouvoir le soumettre</div>
+              <div className="flex-1 ml-4 text-red-800 text-xs leading-5 font-medium">Vous devez remplir tous les champs du formulaire pour pouvoir le soumettre</div>
             </div>
           </div>
         ) : null}
@@ -133,10 +166,10 @@ export default function Equivalence() {
                       setData({ ...data, type: option });
                       setOpenType(false);
                     }}
-                    className={`${option === data.type && "font-bold bg-gray"}`}>
+                    className={`${option === data?.type && "font-bold bg-gray"}`}>
                     <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
                       <div>{option}</div>
-                      {option === data.type ? <BsCheck2 /> : null}
+                      {option === data?.type ? <BsCheck2 /> : null}
                     </div>
                   </div>
                 ))}
@@ -366,7 +399,10 @@ export default function Equivalence() {
             : null}
           <div className="flex flex-col items-center border-[1px] border-dashed border-gray-300 w-full rounded-lg py-4 mt-3">
             <AddImage className="text-gray-400" />
-            <div className="text-sm leading-5 font-medium text-blue-600 hover:underline mt-2">Téléversez le formulaire</div>
+            <div className="text-sm leading-5 font-medium text-blue-600 hover:underline mt-2 cursor-pointer" onClick={handleClickUpload}>
+              Téléversez le formulaire
+            </div>
+            <input type="file" ref={hiddenFileInput} onChange={handleUpload} className="hidden" accept=".jpg, .jpeg, .png, .pdf" multiple />
             <div className="text-xs leading-4 font-normal text-gray-500 mt-1">PDF, PNG, JPG jusqu’à 5Mo</div>
           </div>
         </div>
@@ -374,17 +410,25 @@ export default function Equivalence() {
           <div className="border-[1px] border-red-400 rounded-lg bg-red-50 mt-4">
             <div className="flex items-center px-4 py-3">
               <InformationCircle className="text-red-400" />
-              <div className="flex-1 ml-4 text-red-800 text-sm leading-5 font-medium">Vous devez remplir tous le formulaire pour pouvoir le soumettre</div>
+              <div className="flex-1 ml-4 text-red-800 text-xs leading-5 font-medium">Vous devez remplir tous les champs du formulaire pour pouvoir le soumettre</div>
             </div>
           </div>
         ) : null}
         <button
           className="rounded-lg w-full py-2 mt-4 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600 disabled:bg-blue-300 disabled:text-white disabled:border-blue-300"
-          disabled={loading}
+          disabled={loading || uploading}
           onClick={() => handleSubmit()}>
           {loading ? "Chargement" : "Valider ma demande"}
         </button>
       </div>
     </div>
   );
+}
+
+function isFileSupported(fileName) {
+  const allowTypes = ["jpg", "jpeg", "png", "pdf"];
+  const dotted = fileName.split(".");
+  const type = dotted[dotted.length - 1];
+  if (!allowTypes.includes(type.toLowerCase())) return false;
+  return true;
 }

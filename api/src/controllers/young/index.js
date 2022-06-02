@@ -124,6 +124,7 @@ router.post(
         "imageRightFiles",
         "dataProcessingConsentmentFiles",
         "rulesFiles",
+        "equivalenceFiles",
       ];
       const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
       const { error: keyError, value: key } = Joi.string()
