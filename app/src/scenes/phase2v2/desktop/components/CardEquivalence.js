@@ -5,10 +5,12 @@ import SimpleFileIcon from "../../../../assets/icons/SimpleFileIcon";
 import { formatDateFR, translateEquivalenceStatus, copyToClipboard } from "../../../../utils";
 import { HiCheckCircle } from "react-icons/hi";
 import { BiCopy } from "react-icons/bi";
+import ModalFiles from "./ModalFiles";
 
-export default function CardEquivalence({ equivalence }) {
+export default function CardEquivalence({ equivalence, young }) {
   const [open, setOpen] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
+  const [modalFiles, setModalFiles] = React.useState({ isOpen: false });
 
   React.useEffect(() => {
     if (copied) {
@@ -75,7 +77,7 @@ export default function CardEquivalence({ equivalence }) {
                 <span>Code postal :</span>
                 <span>Ville :</span>
               </div>
-              <div className="flex flex-col gap-y-4 text-sm leading-4 font-medium">
+              <div className="flex flex-col gap-y-4 text-sm leading-none font-medium">
                 <span>{equivalence.type}</span>
                 <span>{equivalence.structureName}</span>
                 <span>
@@ -99,8 +101,8 @@ export default function CardEquivalence({ equivalence }) {
                 </div>
               </div>
               <div className="flex flex-col justify-end items-end px-7">
-                <div className="flex rounded-full bg-blue-600 p-2 items-center justify-center">
-                  <Download className="text-indigo-100 bg-blue-600" />
+                <div className="transition duration-150 flex rounded-full bg-blue-600 p-2 items-center justify-center hover:scale-110 ease-out hover:ease-in cursor-pointer">
+                  <Download className=" text-indigo-100 bg-blue-600 " onClick={() => setModalFiles({ isOpen: true })} />
                 </div>
               </div>
             </div>
@@ -127,6 +129,13 @@ export default function CardEquivalence({ equivalence }) {
           </div>
         </>
       ) : null}
+      <ModalFiles
+        isOpen={modalFiles?.isOpen}
+        onCancel={() => setModalFiles({ isOpen: false })}
+        initialValues={equivalence?.files ? equivalence.files : []}
+        young={young}
+        nameFiles="equivalenceFiles"
+      />
     </div>
   );
 }

@@ -78,7 +78,7 @@ export default function IndexDesktop() {
 
       <div className="flex flex-col items-center px-14 -translate-y-4">
         {/* BEGIN EQUIVALENCE */}
-        {equivalence ? <CardEquivalence equivalence={equivalence} /> : null}
+        {equivalence ? <CardEquivalence equivalence={equivalence} young={young} /> : null}
         {/* BEGIN CANDIDATURES */}
         {applications.length > 0 ? (
           <>
