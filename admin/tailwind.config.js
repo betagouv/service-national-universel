@@ -96,6 +96,7 @@ module.exports = {
       },
       fontFamily: {
         ubuntu: ["Marianne", "Ubuntu", "ui-sans-serif", "system-ui"],
+        marianne: ["Marianne", "Ubuntu", "ui-sans-serif", "system-ui"],
       },
       width: {
         "screen-1/4": "25vw",

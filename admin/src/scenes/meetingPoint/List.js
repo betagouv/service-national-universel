@@ -14,9 +14,9 @@ import DeleteFilters from "../../components/buttons/DeleteFilters";
 import ExportComponent from "../../components/ExportXlsx";
 import { Filter2, FilterRow, ResultTable } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
-import { apiURL } from "../../config";
+import { apiURL, environment } from "../../config";
 import api from "../../services/api";
-import { ES_NO_LIMIT, getDepartmentNumber, ROLES } from "../../utils";
+import { canCreateMeetingPoint, ES_NO_LIMIT, getDepartmentNumber, ROLES } from "../../utils";
 
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT", "REGION"];
 
@@ -39,41 +39,49 @@ export default function MeetingPoint() {
             <div className="font-bold text-2xl mb-4" style={{ fontFamily: "Marianne" }}>
               Points de rassemblements
             </div>
-            <ExportComponent
-              title="Exporter les points de rassemblements"
-              defaultQuery={getExportQuery}
-              exportTitle="point_de_rassemblement"
-              index="meetingpoint"
-              react={{ and: FILTERS }}
-              transform={async (data) => {
-                let res = [];
-                for (const item of data) {
-                  let bus = {};
-                  if (item.busId) {
-                    const { data: busResult } = await api.get(`/bus/${item.busId}`);
-                    if (!busResult) bus = {};
-                    else bus = busResult;
-                  }
+            <div className="flex space-x-2">
+              {environment !== "production" && canCreateMeetingPoint(user) ? (
+                <Link to={`/point-de-rassemblement/nouveau`}>
+                  <div className="font-marianne bg-snu-purple-300 rounded-lg flex justify-center items-center px-6 py-2 text-white hover:bg-snu-purple-200">
+                    <div>Créer un nouveau point de rassemblement</div>
+                  </div>
+                </Link>
+              ) : null}
+              <ExportComponent
+                title="Exporter les points de rassemblements"
+                defaultQuery={getExportQuery}
+                exportTitle="point_de_rassemblement"
+                index="meetingpoint"
+                react={{ and: FILTERS }}
+                transform={async (data) => {
+                  let res = [];
+                  for (const item of data) {
+                    let bus = {};
+                    if (item.busId) {
+                      const { data: busResult } = await api.get(`/bus/${item.busId}`);
+                      if (!busResult) bus = {};
+                      else bus = busResult;
+                    }
 
-                  res.push({
-                    Cohorte: item?.cohort,
-                    "ID de transport": item?.busExcelId,
-                    [`N° du département de départ`]: getDepartmentNumber(item?.departureDepartment),
-                    "Centre de destination": item?.centerCode,
-                    "Département de départ / du point de rassemblement": item?.departureDepartment,
-                    "Code postal du point de rassemblement": item?.departureZip,
-                    "Adresse du point de rassemblement": item?.departureAddress,
-                    "ID du point de rassemblement": item?._id,
-                    "Nombre de place proposées": bus?.capacity || 0,
-                    "Nombre de places occupées": bus?.capacity && bus?.placesLeft ? bus?.capacity - bus.placesLeft : 0,
-                    "Date/heure aller": item?.departureAtString,
-                    "Date/heure retour": item?.returnAtString,
-                  });
-                }
-                console.log(res);
-                return res;
-              }}
-            />
+                    res.push({
+                      Cohorte: item?.cohort,
+                      "ID de transport": item?.busExcelId,
+                      [`N° du département de départ`]: getDepartmentNumber(item?.departureDepartment),
+                      "Centre de destination": item?.centerCode,
+                      "Département de départ / du point de rassemblement": item?.departureDepartment,
+                      "Code postal du point de rassemblement": item?.departureZip,
+                      "Adresse du point de rassemblement": item?.departureAddress,
+                      "ID du point de rassemblement": item?._id,
+                      "Nombre de place proposées": bus?.capacity || 0,
+                      "Nombre de places occupées": bus?.capacity && bus?.placesLeft ? bus?.capacity - bus.placesLeft : 0,
+                      "Date/heure aller": item?.departureAtString,
+                      "Date/heure retour": item?.returnAtString,
+                    });
+                  }
+                  return res;
+                }}
+              />
+            </div>
           </div>
           <div className="bg-white pt-4 rounded-lg">
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
