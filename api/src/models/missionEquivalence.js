@@ -93,6 +93,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  correctionMessage: {
+    type: String,
+    documentation: {
+      description: "Message de correction",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -49,10 +49,22 @@ export default function CardEquivalence({ equivalence }) {
       {open ? (
         <>
           <hr className="border-gray-200 mb-3" />
-          <div className="flex justify-end">
+          {/* <div className="flex justify-end">
             <button className="mr-8 mb-3 border-[1px] border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg">Modifier ma demande</button>
-          </div>
-          <div className="flex items-stretch mb-3 gap-4 justify-between">
+          </div> */}
+
+          {equivalence.status === "WAITING_CORRECTION" ? (
+            <>
+              <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mb-4 gap-6">
+                <div className="flex flex-col flex-1">
+                  <div className="text-base font-semibold">Corrections demandées</div>
+                  <div className="text-sm text-gray-500">{equivalence.correctionMessage}</div>
+                </div>
+                <button className="mr-4 border-[1px] border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg">Corriger ma demande</button>
+              </div>
+            </>
+          ) : null}
+          <div className="flex items-stretch mb-3 gap-4 justify-around">
             <div className="grid grid-cols-2 py-2">
               <div className="flex flex-col gap-y-4 text-sm leading-none font-normal text-gray-400">
                 <span>Type d’engagement :</span>
