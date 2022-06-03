@@ -3,10 +3,10 @@ import { BiHandicap } from "react-icons/bi";
 import { MdOutlineHistory } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import ArrowCircleRight from "../../assets/icons/ArrowCircleRight";
 import BusSvg from "../../assets/icons/Bus";
-import Plus from "../../assets/icons/Plus";
+import Pencil from "../../assets/icons/Pencil";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import api from "../../services/api";
 import { getDepartmentNumber, ROLES } from "../../utils";
@@ -19,7 +19,6 @@ export default function Edit(props) {
   const [modal, setModal] = React.useState({ isOpen: false });
   const [occupationPercentage, setOccupationPercentage] = React.useState();
   const user = useSelector((state) => state.Auth.user);
-  const history = useHistory();
 
   useEffect(() => {
     const id = props.match && props.match.params && props.match.params.id;
@@ -52,7 +51,6 @@ export default function Edit(props) {
   }, [bus]);
 
   if (!meetingPoint || !center || !bus) return null;
-  if (user.role !== ROLES.ADMIN) history.push("/");
 
   return (
     <>
@@ -64,7 +62,7 @@ export default function Edit(props) {
             <div className="font-bold text-2xl ml-4">{meetingPoint.busExcelId}</div>
           </div>
           <div className="flex gap-2 items-center">
-            {user.role === "admin" ? (
+            {user.role === ROLES.ADMIN ? (
               <Link to={`/point-de-rassemblement/${props?.match?.params?.id}/historique`}>
                 <div className="flex flex-row items-center p-2 group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700 cursor-pointer">
                   <MdOutlineHistory className="text-xl text-blue-700 group-hover:text-white" />
@@ -72,53 +70,55 @@ export default function Edit(props) {
                 </div>
               </Link>
             ) : null}
-            <button
-              className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700"
-              onClick={() =>
-                setModal({
-                  isOpen: true,
-                  values: {
-                    departureAddress: meetingPoint?.departureAddress || "",
-                    departureAtString: meetingPoint?.departureAtString || "",
-                    returnAtString: meetingPoint?.returnAtString || "",
-                    hideDepartmentInConvocation: meetingPoint.hideDepartmentInConvocation,
-                    capacity: bus?.capacity || 0,
-                    placesLeft: bus?.placesLeft || 0,
-                    department: meetingPoint?.departureDepartment,
-                    cohort: bus?.cohort,
-                  },
-                  onSubmit: async (values) => {
-                    const { data: busResult, ok: okBus } = await api.put(`/bus/${bus._id}/capacity`, { capacity: values.capacity });
-                    if (!okBus) {
-                      toastr.error("Une erreur est survenue lors de la mise à jours des informations");
-                      setModal({ isOpen: false, values: {} });
-                      return;
-                    }
-                    setBus(busResult);
+            {user.role === ROLES.ADMIN ? (
+              <button
+                className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700"
+                onClick={() =>
+                  setModal({
+                    isOpen: true,
+                    values: {
+                      departureAddress: meetingPoint?.departureAddress || "",
+                      departureAtString: meetingPoint?.departureAtString || "",
+                      returnAtString: meetingPoint?.returnAtString || "",
+                      hideDepartmentInConvocation: meetingPoint.hideDepartmentInConvocation,
+                      capacity: bus?.capacity || 0,
+                      placesLeft: bus?.placesLeft || 0,
+                      department: meetingPoint?.departureDepartment,
+                      cohort: bus?.cohort,
+                    },
+                    onSubmit: async (values) => {
+                      const { data: busResult, ok: okBus } = await api.put(`/bus/${bus._id}/capacity`, { capacity: values.capacity });
+                      if (!okBus) {
+                        toastr.error("Une erreur est survenue lors de la mise à jours des informations");
+                        setModal({ isOpen: false, values: {} });
+                        return;
+                      }
+                      setBus(busResult);
 
-                    const { data: meeting, ok: okMeeting } = await api.put(`/meeting-point/${meetingPoint._id}`, {
-                      departureAddress: values.departureAddress,
-                      departureAtString: values.departureAtString,
-                      returnAtString: values.returnAtString,
-                      hideDepartmentInConvocation: values.hideDepartmentInConvocation,
-                    });
-                    if (!okMeeting) {
-                      toastr.error("Une erreur est survenue lors de la mise à jours des informations");
-                      setModal({ isOpen: false, values: {} });
-                      return;
-                    }
+                      const { data: meeting, ok: okMeeting } = await api.put(`/meeting-point/${meetingPoint._id}`, {
+                        departureAddress: values.departureAddress,
+                        departureAtString: values.departureAtString,
+                        returnAtString: values.returnAtString,
+                        hideDepartmentInConvocation: values.hideDepartmentInConvocation,
+                      });
+                      if (!okMeeting) {
+                        toastr.error("Une erreur est survenue lors de la mise à jours des informations");
+                        setModal({ isOpen: false, values: {} });
+                        return;
+                      }
 
-                    setMeetingPoint(meeting);
-                    toastr.success("Le informations ont été mis à jour ");
-                    setModal({ isOpen: false, values: {} });
-                  },
-                })
-              }>
-              <div className="flex flex-row items-center p-2">
-                <Plus className="text-blue-700 group-hover:text-white" />
-                <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Modifier</div>
-              </div>
-            </button>
+                      setMeetingPoint(meeting);
+                      toastr.success("Le informations ont été mis à jour ");
+                      setModal({ isOpen: false, values: {} });
+                    },
+                  })
+                }>
+                <div className="flex flex-row items-center p-2">
+                  <Pencil className="text-blue-700 group-hover:text-white" width={16} height={16} />
+                  <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Modifier</div>
+                </div>
+              </button>
+            ) : null}
           </div>
         </div>
         <div className="flex flex-row  justify-center gap-4 items-center">

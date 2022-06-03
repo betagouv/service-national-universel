@@ -12,7 +12,7 @@ export default function Index() {
   return (
     <Switch>
       <Route path="/point-de-rassemblement/:id/historique" component={History} />
-      <Route path="/point-de-rassemblement/:id/edit" component={Edit} />
+      <Route path="/point-de-rassemblement/:id" component={Edit} />
       <Route path="/point-de-rassemblement" component={List} />
     </Switch>
   );

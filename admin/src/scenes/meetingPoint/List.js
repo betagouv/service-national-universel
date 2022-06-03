@@ -7,6 +7,7 @@ import ArrowCircleRightSvg from "../../assets/icons/ArrowCircleRight";
 import BusSvg from "../../assets/icons/Bus";
 import FilterSvg from "../../assets/icons/Filter";
 import Pencil from "../../assets/icons/Pencil";
+import Eye from "../../assets/icons/Eye";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
@@ -189,7 +190,7 @@ export default function MeetingPoint() {
                             <th>Adresse de départ</th>
                             <th>déstination</th>
                             <th>places disponibles</th>
-                            {user.role === ROLES.ADMIN ? <th className="text-center">actions</th> : null}
+                            <th className="text-center">actions</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -276,14 +277,24 @@ const Hit = ({ hit, user }) => {
       {user.role === ROLES.ADMIN ? (
         <td className="rounded-r-lg">
           <div className="flex justify-center items-center">
-            <Link to={`/point-de-rassemblement/${hit._id}/edit`}>
+            <Link to={`/point-de-rassemblement/${hit._id}`}>
               <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
                 <Pencil width={16} height={16} />
               </div>
             </Link>
           </div>
         </td>
-      ) : null}
+      ) : (
+        <td className="rounded-r-lg">
+          <div className="flex justify-center items-center">
+            <Link to={`/point-de-rassemblement/${hit._id}`}>
+              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
+                <Eye width={16} height={16} />
+              </div>
+            </Link>
+          </div>
+        </td>
+      )}
     </tr>
   );
 };
