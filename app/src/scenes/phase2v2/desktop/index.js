@@ -32,7 +32,7 @@ export default function IndexDesktop() {
       if (ok) return setApplications(data);
     })();
     (async () => {
-      const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence`);
+      const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalences`);
       if (ok) return setEquivalences(data);
     })();
   }, []);

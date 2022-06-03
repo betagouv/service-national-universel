@@ -1,16 +1,18 @@
 import React from "react";
+import { BiCopy } from "react-icons/bi";
 import { BsChevronDown } from "react-icons/bs";
+import { HiCheckCircle } from "react-icons/hi";
 import Download from "../../../../assets/icons/Download";
 import SimpleFileIcon from "../../../../assets/icons/SimpleFileIcon";
-import { formatDateFR, translateEquivalenceStatus, copyToClipboard } from "../../../../utils";
-import { HiCheckCircle } from "react-icons/hi";
-import { BiCopy } from "react-icons/bi";
+import { copyToClipboard, formatDateFR, translateEquivalenceStatus } from "../../../../utils";
 import ModalFiles from "./ModalFiles";
+import { useHistory } from "react-router-dom";
 
 export default function CardEquivalence({ equivalence, young }) {
   const [open, setOpen] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
   const [modalFiles, setModalFiles] = React.useState({ isOpen: false });
+  const history = useHistory();
 
   React.useEffect(() => {
     if (copied) {
@@ -51,11 +53,18 @@ export default function CardEquivalence({ equivalence, young }) {
       </div>
       {open ? (
         <>
-          <hr className="border-gray-200 mb-3" />
-          {/* <div className="flex justify-end">
-            <button className="mr-8 mb-3 border-[1px] border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg">Modifier ma demande</button>
-          </div> */}
-
+          {equivalence.status === "WAITING_VERIFICATION" ? (
+            <>
+              <hr className="border-gray-200 mb-3" />
+              <div className="flex justify-end">
+                <button
+                  className="mr-8 mb-3 border-[1px] border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg"
+                  onClick={() => history.push(`/phase2/equivalence/${equivalence._id}`)}>
+                  Modifier ma demande
+                </button>
+              </div>
+            </>
+          ) : null}
           {equivalence.status === "WAITING_CORRECTION" ? (
             <>
               <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mb-4 gap-6">
@@ -63,7 +72,11 @@ export default function CardEquivalence({ equivalence, young }) {
                   <div className="text-base font-semibold">Corrections demandées</div>
                   <div className="text-sm text-gray-500">{equivalence.correctionMessage}</div>
                 </div>
-                <button className="mr-4 border-[1px] border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg">Corriger ma demande</button>
+                <button
+                  className="mr-4 border-[1px] border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg"
+                  onClick={() => history.push(`/phase2/equivalence/${equivalence._id}`)}>
+                  Corriger ma demande
+                </button>
               </div>
             </>
           ) : null}
@@ -72,10 +85,7 @@ export default function CardEquivalence({ equivalence, young }) {
               <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mb-4 gap-6">
                 <div className="flex flex-col flex-1">
                   <div className="text-base font-semibold">Motif du refus</div>
-                  <div className="text-sm text-gray-500 w-3/4">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Enim nulla malesuada vitae, vel. Potenti posuere dictum turpis commodo quam sit ac sed nunc. Sagittis
-                    vel amet cras in eget eu.{equivalence.refusedMessage}
-                  </div>
+                  <div className="text-sm text-gray-500 w-3/4">{equivalence.refusedMessage}</div>
                 </div>
               </div>
             </>

@@ -3,36 +3,34 @@ import { AiOutlinePlus } from "react-icons/ai";
 import { BsCheck2 } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import AddImage from "../../../assets/icons/AddImage";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import InformationCircle from "../../../assets/icons/InformationCircle";
 import PaperClip from "../../../assets/icons/PaperClip";
 import api from "../../../services/api";
+import { RiErrorWarningLine } from "react-icons/ri";
 
-export default function Equivalence() {
+export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
   const optionsType = ["Service Civique", "BAFA", "Jeune Sapeur Pompier"];
   const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
   const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
   const keyList = ["type", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
-  const [data, setData] = useState({});
+  const [data, setData] = useState();
   const [openType, setOpenType] = useState(false);
   const [openDuree, setOpenDuree] = useState(false);
   const [openFrequence, setOpenFrequence] = useState(false);
-  const [clickStartDate, setClickStartDate] = useState(false);
-  const [clickEndDate, setClickEndDate] = useState(false);
   const [frequence, setFrequence] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [filesList, setFilesList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const refType = useRef(null);
-  const refStartDate = useRef(null);
-  const refEndDate = useRef(null);
   const refDuree = useRef(null);
   const refFrequence = useRef(null);
   const history = useHistory();
+  const { equivalenceId } = useParams();
 
   const hiddenFileInput = useRef(null);
 
@@ -85,6 +83,18 @@ export default function Equivalence() {
     };
   }, []);
 
+  useEffect(() => {
+    if (young && equivalenceId)
+      (async () => {
+        const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`);
+        if (ok) {
+          setData(data);
+          if (data?.frequency.nombre && data?.frequency.duree && data?.frequency.frequence) setFrequence(true);
+          return;
+        }
+      })();
+  }, [young, equivalenceId]);
+
   const handleSubmit = async () => {
     setLoading(true);
     let error = false;
@@ -111,13 +121,17 @@ export default function Equivalence() {
 
     try {
       if (!error) {
-        const { ok } = await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data);
+        delete data._id;
+        delete data.youngId;
+        delete data.createdAt;
+        delete data.__v;
+        const { ok } = await api.put(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`, data);
         if (!ok) {
           toastr.error("Oups, une erreur est survenue");
           setLoading(false);
           return;
         }
-        toastr.success("Votre demande d'équivalence a bien été envoyée");
+        toastr.success("Votre modification d'équivalence a bien été envoyée");
         history.push("/phase2");
       }
       setLoading(false);
@@ -127,17 +141,31 @@ export default function Equivalence() {
       return;
     }
   };
+  if (!data) return null;
+  if (data && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data.status)) history.push("/phase2");
 
   return (
     <div className="flex justify-center align-center my-4 ">
       <div className="lg:w-1/2 p-4">
-        <div className="text-2xl md:text-4xl text-center font-extrabold leading-10 tracking-tight ">Je demande la reconnaissance d’un engagement déjà réalisé</div>
+        <div className="text-2xl md:text-4xl text-center font-extrabold leading-10 tracking-tight ">Je modifie ma demande d&apos;équivalence</div>
         <div className="border-[1px] border-blue-400 rounded-lg bg-blue-50 mt-4">
           <div className="flex items-center px-4 py-3">
             <InformationCircle className="text-blue-400" />
             <div className="flex-1 ml-4 text-blue-800 text-sm leading-5 font-medium">Pour être reconnu et validé, votre engagement doit être terminé.</div>
           </div>
         </div>
+        {data.status === "WAITING_CORRECTION" ? (
+          <div className="border-[1px] border-[#FD7A02] rounded-lg bg-[#FD7A02]/10 mt-4">
+            <div className="flex items-center px-4 py-3">
+              <RiErrorWarningLine className="text-[#FD7A02]" />
+              <div className="flex flex-col flex-1">
+                <div className="ml-4 text-[#FD7A02] text-sm leading-5 font-medium">Corrections demandées</div>
+                <div className="ml-4 text-[#FD7A02] text-sm leading-5 font-medium">{data?.correctionMessage}</div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         {error ? (
           <div className="border-[1px] border-red-400 rounded-lg bg-red-50 mt-4">
             <div className="flex items-center px-4 py-3">
@@ -189,6 +217,7 @@ export default function Equivalence() {
               className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
               placeholder="Nom de la structure d’accueil"
               type="text"
+              value={data?.structureName}
               onChange={(e) => setData({ ...data, structureName: e.target.value })}
             />
           </div>
@@ -199,6 +228,7 @@ export default function Equivalence() {
               className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
               placeholder="Adresse du lieu"
               type="text"
+              value={data?.address}
               onChange={(e) => setData({ ...data, address: e.target.value })}
             />
           </div>
@@ -209,6 +239,7 @@ export default function Equivalence() {
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Code postal"
                 type="text"
+                value={data?.zip}
                 onChange={(e) => setData({ ...data, zip: e.target.value })}
               />
             </div>
@@ -218,6 +249,7 @@ export default function Equivalence() {
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Ville"
                 type="text"
+                value={data?.city}
                 onChange={(e) => setData({ ...data, city: e.target.value })}
               />
             </div>
@@ -225,38 +257,22 @@ export default function Equivalence() {
           <div className="mt-4 text-xs leading-4 font-medium">Quand ?</div>
           <div className="flex gap-2 items-stretch align-middle">
             <div className="flex justify-center flex-col border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-              {data?.startDate || clickStartDate ? <div className="text-xs leading-4 font-normal text-gray-500">Date de début</div> : null}
+              {data?.startDate ? <div className="text-xs leading-4 font-normal text-gray-500">Date de début</div> : null}
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Date de début"
-                type="text"
-                ref={refStartDate}
-                onFocus={(e) => {
-                  e.target.type = "date";
-                  setClickStartDate(true);
-                }}
-                onBlur={(e) => {
-                  data.startDate ? (e.target.type = "date") : (e.target.type = "text");
-                  setClickStartDate(false);
-                }}
+                type="date"
+                value={formatDate(data?.startDate)}
                 onChange={(e) => setData({ ...data, startDate: e.target.value })}
               />
             </div>
             <div className="flex justify-center flex-col border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
-              {data?.endDate || clickEndDate ? <div className="text-xs leading-4 font-normal text-gray-500">Date de fin</div> : null}
+              {data?.endDate ? <div className="text-xs leading-4 font-normal text-gray-500">Date de fin</div> : null}
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Date de fin"
-                type="text"
-                ref={refEndDate}
-                onFocus={(e) => {
-                  e.target.type = "date";
-                  setClickEndDate(true);
-                }}
-                onBlur={(e) => {
-                  data.endDate ? (e.target.type = "date") : (e.target.type = "text");
-                  setClickEndDate(false);
-                }}
+                type="date"
+                value={formatDate(data?.endDate)}
                 onChange={(e) => setData({ ...data, endDate: e.target.value })}
               />
             </div>
@@ -271,6 +287,7 @@ export default function Equivalence() {
                       className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                       placeholder="Nombre"
                       type="text"
+                      value={data?.frequency?.nombre}
                       onChange={(e) => setData({ ...data, frequency: { ...data.frequency, nombre: e.target.value } })}
                     />
                   </div>
@@ -371,6 +388,7 @@ export default function Equivalence() {
               className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
               placeholder="Prénom et Nom"
               type="text"
+              value={data?.contactFullName}
               onChange={(e) => setData({ ...data, contactFullName: e.target.value })}
             />
           </div>
@@ -380,6 +398,7 @@ export default function Equivalence() {
               className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
               placeholder="Adresse email"
               type="text"
+              value={data?.contactEmail}
               onChange={(e) => setData({ ...data, contactEmail: e.target.value })}
             />
           </div>
@@ -399,7 +418,9 @@ export default function Equivalence() {
                     <PaperClip className="text-gray-400 mr-2" />
                     <div className="text-sm leading-5 font-normal text-gray-800">{file}</div>
                   </div>
-                  <div className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer" onClick={() => data?.files.filter((f) => file === f)}>
+                  <div
+                    className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer"
+                    onClick={() => setData({ ...data, files: data?.files.filter((f) => file !== f) })}>
                     Retirer
                   </div>
                 </div>
@@ -440,3 +461,17 @@ function isFileSupported(fileName) {
   if (!allowTypes.includes(type.toLowerCase())) return false;
   return true;
 }
+
+const formatDate = (date) => {
+  let d = new Date(date);
+  let month = (d.getMonth() + 1).toString();
+  let day = d.getDate().toString();
+  let year = d.getFullYear();
+  if (month.length < 2) {
+    month = "0" + month;
+  }
+  if (day.length < 2) {
+    day = "0" + day;
+  }
+  return [year, month, day].join("-");
+};
