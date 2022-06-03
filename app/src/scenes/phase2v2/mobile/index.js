@@ -11,10 +11,12 @@ import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 import { copyToClipboard } from "../../../utils";
 import CardMission from "./components/CardMission";
+import CardEquivalence from "./components/CardEquivalence";
 
 export default function IndexPhase2Mobile() {
   const young = useSelector((state) => state.Auth.young);
   const [applications, setApplications] = React.useState();
+  const [equivalences, setEquivalences] = React.useState();
 
   const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
   React.useEffect(() => {
@@ -27,6 +29,10 @@ export default function IndexPhase2Mobile() {
     (async () => {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/application`);
       if (ok) return setApplications(data);
+    })();
+    (async () => {
+      const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalences`);
+      if (ok) return setEquivalences(data);
     })();
   }, []);
 
@@ -65,6 +71,9 @@ export default function IndexPhase2Mobile() {
       </div>
       {/* END HEADER */}
 
+      {equivalences.map((equivalence, index) => (
+        <CardEquivalence key={index} equivalence={equivalence} young={young} />
+      ))}
       {/* BEGIN CANDIDATURES */}
       {applications.length > 0 ? (
         <>
