@@ -2,17 +2,18 @@ import { DataSearch, ReactiveBase } from "@appbaseio/reactivesearch";
 import React, { useState } from "react";
 import { BiHandicap } from "react-icons/bi";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
+import { Link, useHistory } from "react-router-dom";
 import ArrowCircleRight from "../../assets/icons/ArrowCircleRight";
 import BusSvg from "../../assets/icons/Bus";
-import Plus from "../../assets/icons/Plus";
 import Pencil from "../../assets/icons/Pencil";
+import Plus from "../../assets/icons/Plus";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { BottomResultStats, Filter2, ResultTable, Table } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import { apiURL } from "../../config";
 import api from "../../services/api";
-import { canCreateMeetingPoint, getResultLabel, departmentList, department2region, getDepartmentNumber } from "../../utils";
+import { canCreateMeetingPoint, department2region, departmentList, getDepartmentNumber, getResultLabel } from "../../utils";
 import { SelectDate } from "./components/modalEditMeetingPoint";
 
 const FILTERS_BUS = ["SEARCH"];
@@ -28,6 +29,8 @@ export default function Create() {
   const [data, setData] = useState({});
   const [loading, setLoading] = React.useState(false);
   const [year, setYear] = React.useState("2022");
+  const [error, setError] = React.useState(false);
+  const history = useHistory();
 
   const urlParams = new URLSearchParams(window.location.search);
   const bus_id = urlParams.get("bus_id");
@@ -70,18 +73,27 @@ export default function Create() {
   }, [center_id]);
 
   React.useEffect(() => {
-    if (!bus) return;
+    if (!bus) {
+      setData({});
+      return setOccupationPercentage(null);
+    }
     const occupation = bus.capacity ? (((bus.capacity - bus.placesLeft) * 100) / bus.capacity).toFixed(2) : 0;
     setOccupationPercentage(occupation);
     if (!center?.cohorts?.includes(bus.cohort)) setCenter(null);
   }, [bus]);
 
   React.useEffect(() => {
+    if (!center) {
+      return setData((prev) => ({ ...prev, centerId: null, centerCode: null }));
+    }
+  }, [center]);
+
+  React.useEffect(() => {
     if (!data.departureDepartment) return setData((prev) => ({ ...prev, departureRegion: "" }));
     setData((prev) => ({ ...prev, departureRegion: department2region[data.departureDepartment] }));
   }, [data.departureDepartment]);
 
-  // todo: degage si t'as pas le droit
+  // todo: early return si le user n'a pas les droits
   if (!canCreateMeetingPoint(user)) return null;
 
   const handleClickCenter = (hit) => {
@@ -96,28 +108,44 @@ export default function Create() {
     setData((prev) => ({ ...prev, busId: hit._id.toString(), busExcelId: hit.idExcel }));
   };
 
-  const submit = () => {
-    // todo : post meetingPoint
+  const submit = async () => {
     setLoading(true);
-    console.log(data);
-    // wait 2 seconds
-    setTimeout(() => {
+    const keys = ["busId", "busExcelId", "centerId", "centerCode", "departureAddress", "departureDepartment", "departureAt", "returnAt"];
+    const err = keys.some((key) => data[key] === undefined || data[key] === "");
+    setError(err);
+
+    if (err) {
       setLoading(false);
-    }, 2000);
+      return toastr.info("Merci de compléter tous les champs du formulaire");
+    } else {
+      const { busId, busExcelId, centerId, centerCode, departureAddress, departureDepartment, departureRegion } = data;
+      const response = await api.post("/meeting-point", {
+        busId,
+        busExcelId,
+        centerId,
+        centerCode,
+        departureAddress,
+        departureDepartment,
+        departureRegion,
+        cohort: bus.cohort,
+        departureAtString: `${data.departureAt.day} ${data.departureAt.date} ${data.departureAt.month} ${year}, ${data.departureAt.hour}:${data.departureAt.minute}`,
+        returnAtString: `${data.returnAt.day} ${data.returnAt.date} ${data.returnAt.month} ${year}, ${data.returnAt.hour}:${data.returnAt.minute}`,
+      });
+      if (!response.ok) {
+        toastr.error("Oups, une erreur est survenue");
+        setLoading(false);
+        return;
+      }
+      toastr.success("Point de rassemblée créé", `${response.data.busExcelId} -> ${response.data.centerCode}`);
+      history.push(`/point-de-rassemblement/${response.data._id.toString()}`);
+    }
+    setLoading(false);
   };
 
-  const meetingPointIsComplete = () => {
-    console.log({
-      departureAddress: data.departureAddress,
-      departureDepartment: data.departureDepartment,
-      departureAt: data.departureAt,
-      returnAt: data.returnAt,
-      busId: data.busId,
-      busExcelId: data.busExcelId,
-      centerId: data.centerId,
-      centerCode: data.centerCode,
-    });
-    return data.departureAddress && data.departureDepartment && data.departureAt && data.returnAt && data.busId && data.busExcelId && data.centerId && data.centerCode;
+  const enableCreateMeetingPointButton = () => {
+    const keys = ["busId", "centerId"];
+    const ok = keys.every((key) => data[key]);
+    return ok;
   };
 
   return (
@@ -136,7 +164,7 @@ export default function Create() {
               </button>
             ) : (
               <button
-                disabled={!meetingPointIsComplete()}
+                disabled={!enableCreateMeetingPointButton()}
                 className="bg-blue-500 hover:bg-blue-700 text-[#ffffff] font-bold py-2 px-4 rounded disabled:bg-gray-300 disabled:text-gray-100 disabled:cursor-not-allowed"
                 onClick={submit}>
                 Créer le point de rassemblement
@@ -145,76 +173,78 @@ export default function Create() {
           </div>
         </div>
         <div className="space-y-8">
-          <div className="flex flex-row justify-center items-center">
-            <div className="flex flex-col w-3/5 bg-white rounded-xl p-9 self-stretch">
-              <div className="flex justify-between">
-                <h4>
-                  <strong>Choix du transport</strong>
-                </h4>
-                <Link to="/point-de-rassemblement/nouveau-transport">
-                  <div className="group flex gap-1 rounded-[10px] border-[1px] border-blue-600 py-2.5 px-3 items-center hover:bg-blue-600 hover:text-gray-800 cursor-pointer">
-                    <Plus className="text-blue-600 group-hover:text-white" />
-                    <div className="text-blue-600 group-hover:text-white text-sm flex-1 leading-4">Créer un transport</div>
-                  </div>
-                </Link>
-              </div>
-              <div className="flex mt-4">
-                <>
-                  <ReactiveBase url={`${apiURL}/es`} app="bus" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-                    <div style={{ flex: 2, position: "relative" }}>
-                      <Filter2>
-                        <DataSearch
-                          showIcon={false}
-                          placeholder="Rechercher..."
-                          componentId="SEARCH"
-                          dataField={["idExcel", "cohort"]}
-                          react={{ and: FILTERS_BUS.filter((e) => e !== "SEARCH") }}
-                          style={{ flex: 2 }}
-                          innerClass={{ input: "searchbox" }}
-                          autosuggest={false}
-                          queryFormat="and"
-                          onValueChange={setSearchedValueBus}
-                        />
-                      </Filter2>
-                      <ResultTable hide={!searchedValueBus}>
-                        <ReactiveListComponent
-                          URLParams={false}
-                          defaultQuery={getDefaultQueryBus}
-                          scrollOnChange={false}
-                          react={{ and: FILTERS_BUS }}
-                          paginationAt="bottom"
-                          size={10}
-                          renderResultStats={(e) => {
-                            return (
-                              <div>
-                                <BottomResultStats>{getResultLabel(e, 3)}</BottomResultStats>
-                              </div>
-                            );
-                          }}
-                          render={({ data }) => (
-                            <Table>
-                              <thead>
-                                <tr>
-                                  <th className="w-[38%]">Nº</th>
-                                  <th className="w-[38%]">capacité</th>
-                                  <th className="w-1/4">Action</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {data.map((hit, i) => (
-                                  <HitTransport key={i} hit={hit} onSend={() => handleClickTransport(hit)} />
-                                ))}
-                              </tbody>
-                            </Table>
-                          )}
-                        />
-                      </ResultTable>
+          {!bus ? (
+            <div className="flex flex-row justify-center items-center">
+              <div className="flex flex-col w-3/5 bg-white rounded-xl p-9 self-stretch">
+                <div className="flex justify-between">
+                  <h4>
+                    <strong>Choix du transport</strong>
+                  </h4>
+                  <Link to="/point-de-rassemblement/nouveau-transport">
+                    <div className="group flex gap-1 rounded-[10px] border-[1px] border-blue-600 py-2.5 px-3 items-center hover:bg-blue-600 hover:text-gray-800 cursor-pointer">
+                      <Plus className="text-blue-600 group-hover:text-white" />
+                      <div className="text-blue-600 group-hover:text-white text-sm flex-1 leading-4">Créer un transport</div>
                     </div>
-                  </ReactiveBase>
-                </>
+                  </Link>
+                </div>
+                <div className="flex mt-4">
+                  <>
+                    <ReactiveBase url={`${apiURL}/es`} app="bus" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+                      <div style={{ flex: 2, position: "relative" }}>
+                        <Filter2>
+                          <DataSearch
+                            showIcon={false}
+                            placeholder="Rechercher..."
+                            componentId="SEARCH"
+                            dataField={["idExcel", "cohort"]}
+                            react={{ and: FILTERS_BUS.filter((e) => e !== "SEARCH") }}
+                            style={{ flex: 2 }}
+                            innerClass={{ input: "searchbox" }}
+                            autosuggest={false}
+                            queryFormat="and"
+                            onValueChange={setSearchedValueBus}
+                          />
+                        </Filter2>
+                        <ResultTable hide={!searchedValueBus}>
+                          <ReactiveListComponent
+                            URLParams={false}
+                            defaultQuery={getDefaultQueryBus}
+                            scrollOnChange={false}
+                            react={{ and: FILTERS_BUS }}
+                            paginationAt="bottom"
+                            size={10}
+                            renderResultStats={(e) => {
+                              return (
+                                <div>
+                                  <BottomResultStats>{getResultLabel(e, 3)}</BottomResultStats>
+                                </div>
+                              );
+                            }}
+                            render={({ data }) => (
+                              <Table>
+                                <thead>
+                                  <tr>
+                                    <th className="w-[38%]">Nº</th>
+                                    <th className="w-[38%]">capacité</th>
+                                    <th className="w-1/4">Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {data.map((hit, i) => (
+                                    <HitTransport key={i} hit={hit} onSend={() => handleClickTransport(hit)} />
+                                  ))}
+                                </tbody>
+                              </Table>
+                            )}
+                          />
+                        </ResultTable>
+                      </div>
+                    </ReactiveBase>
+                  </>
+                </div>
               </div>
             </div>
-          </div>
+          ) : null}
           {!bus ? null : (
             <div className="flex flex-row  justify-center gap-4 items-center">
               <div className="flex flex-col w-2/5 bg-white rounded-xl p-9 self-stretch">
@@ -224,19 +254,25 @@ export default function Create() {
                   </h4>
                 </div>
                 <div className="flex flex-col space-y-4">
-                  <div className="flex flex-col justify-center border-[1px] border-gray-300 w-2/3 px-3 py-2 rounded-lg mt-3">
-                    {data?.departureAddress ? <div className="text-xs leading-4 font-normal text-gray-500">Adresse</div> : null}
-                    <input
-                      className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
-                      placeholder="Adresse"
-                      type="text"
-                      onChange={(e) => {
-                        e.persist();
-                        setData((prev) => ({ ...prev, departureAddress: e.target.value }));
-                      }}
-                    />
+                  <div>
+                    <div className="flex flex-col justify-center border-[1px] border-gray-300 w-2/3 px-3 py-2 rounded-lg mt-3">
+                      {data?.departureAddress ? <div className="text-xs leading-4 font-normal text-gray-500">Adresse</div> : null}
+                      <input
+                        className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
+                        placeholder="Adresse"
+                        type="text"
+                        onChange={(e) => {
+                          e.persist();
+                          setData((prev) => ({ ...prev, departureAddress: e.target.value }));
+                        }}
+                      />
+                    </div>
+                    {error && !data.departureAddress ? <div className="text-xs leading-4 font-normal text-red-500">Ce champs est obligatoire</div> : null}
                   </div>
-                  <Select value={data?.departureDepartment} options={departmentList.sort()} name="departureDepartment" onChange={setData} placeholder="Département" />
+                  <div>
+                    <Select value={data?.departureDepartment} options={departmentList.sort()} name="departureDepartment" onChange={setData} placeholder="Département" />
+                    {error && !data.departureDepartment ? <div className="text-xs leading-4 font-normal text-red-500">Ce champs est obligatoire</div> : null}
+                  </div>
                   {/* {data?.departureRegion ? (
                     <Select value={data?.departureRegion} options={regionList.sort()} name="departureRegion" onChange={setData} placeholder="Région" disabled />
                   ) : null} */}
@@ -261,25 +297,31 @@ export default function Create() {
                       Merci de rendre l&apos;adresse postale la plus explicite possible.
                     </div>
                   ) : null}
-                  <div className={`flex flex-1 flex-col border-[1px] rounded-lg py-1 px-2 ${loading && "bg-gray-200"}`}>
-                    <label htmlFor="departureAt" className="w-full m-0 text-left text-gray-500">
-                      Date et heure de rendez-vous aller
-                    </label>
-                    {SelectDate({
-                      date: data.departureAt,
-                      year,
-                      handleChange: (e) => setData({ ...data, departureAt: { ...data.departureAt, [e.target.name]: e.target.value } }),
-                    })}
+                  <div>
+                    <div className={`flex flex-1 flex-col border-[1px] rounded-lg py-1 px-2 ${loading && "bg-gray-200"}`}>
+                      <label htmlFor="departureAt" className="w-full m-0 text-left text-gray-500">
+                        Date et heure de rendez-vous aller
+                      </label>
+                      {SelectDate({
+                        date: data.departureAt,
+                        year,
+                        handleChange: (e) => setData({ ...data, departureAt: { ...data.departureAt, [e.target.name]: e.target.value } }),
+                      })}
+                    </div>
+                    {error && !data.departureAt ? <div className="text-xs leading-4 font-normal text-red-500">Ce champs est obligatoire</div> : null}
                   </div>
-                  <div className={`flex flex-1 flex-col border-[1px] rounded-lg py-1 px-2 ${loading && "bg-gray-200"}`}>
-                    <label htmlFor="returnAt" className="w-full m-0 text-left text-gray-500">
-                      Date et heure de rendez-vous retour
-                    </label>
-                    {SelectDate({
-                      date: data.returnAt,
-                      year,
-                      handleChange: (e) => setData({ ...data, returnAt: { ...data.returnAt, [e.target.name]: e.target.value } }),
-                    })}
+                  <div>
+                    <div className={`flex flex-1 flex-col border-[1px] rounded-lg py-1 px-2 ${loading && "bg-gray-200"}`}>
+                      <label htmlFor="returnAt" className="w-full m-0 text-left text-gray-500">
+                        Date et heure de rendez-vous retour
+                      </label>
+                      {SelectDate({
+                        date: data.returnAt,
+                        year,
+                        handleChange: (e) => setData({ ...data, returnAt: { ...data.returnAt, [e.target.name]: e.target.value } }),
+                      })}
+                    </div>
+                    {error && !data.returnAt ? <div className="text-xs leading-4 font-normal text-red-500">Ce champs est obligatoire</div> : null}
                   </div>
                   <div className="flex flex-col justify-center border-[1px] border-gray-300 bg-gray-100 w-2/3 px-3 py-2 rounded-lg mt-3">
                     {bus?.idExcel ? <div className="text-xs leading-4 font-normal text-gray-500">Nº du transport</div> : null}
@@ -294,6 +336,17 @@ export default function Create() {
                       type="text"
                       value={bus?.capacity}
                     />
+                  </div>
+                  <div className="flex flex-col items-center mt-8">
+                    <div
+                      className="group flex gap-1 rounded-[10px] border-[1px] border-blue-600 py-2.5 px-3 items-center hover:bg-blue-600 hover:text-gray-800 cursor-pointer"
+                      onClick={() => {
+                        setBus(null);
+                        setCenter(null);
+                      }}>
+                      <Pencil className="text-blue-600 group-hover:text-white text-sm" width={16} height={16} />
+                      <div className="text-blue-600 group-hover:text-white text-sm flex-1 leading-4">Changer de transport</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -323,7 +376,7 @@ export default function Create() {
                         <div
                           className="group flex gap-1 rounded-[10px] border-[1px] border-blue-600 py-2.5 px-3 items-center hover:bg-blue-600 hover:text-gray-800 cursor-pointer"
                           onClick={() => setCenter(null)}>
-                          <Pencil className="text-blue-600 group-hover:text-white text-sm" />
+                          <Pencil className="text-blue-600 group-hover:text-white text-sm" width={16} height={16} />
                           <div className="text-blue-600 group-hover:text-white text-sm flex-1 leading-4">Changer de centre</div>
                         </div>
                       </div>
@@ -524,7 +577,7 @@ const Select = ({ value, name, options, onChange, placeholder: defaultPlaceholde
   const [placeholder, setPlaceHolder] = useState(defaultPlaceholder);
 
   return (
-    <div className="flex flex-col justify-center border-[1px] border-gray-300 w-2/3 px-3 py-2 rounded-lg mt-3">
+    <div className="flex flex-col justify-center border-[1px] border-gray-300 w-2/3 px-3 py-2 rounded-lg">
       {showLabel || value ? <div className="text-xs leading-4 font-normal text-gray-500">{defaultPlaceholder}</div> : null}
       <select
         value={value}
