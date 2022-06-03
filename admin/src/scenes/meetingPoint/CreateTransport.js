@@ -25,7 +25,7 @@ export default function CreateTransport() {
       history.push("/point-de-rassemblement/nouveau?bus_id=" + response?.data?._id.toString());
     } catch (error) {
       console.error(error);
-      if (error.code !== "ALREADY_EXISTS") {
+      if (error.code === "ALREADY_EXISTS") {
         toastr.error(`Le transport ${data.idExcel} existe déjà pour le séjour ${data.cohort}`);
       } else {
         toastr.error("Erreur", "Une erreur est survenue");
