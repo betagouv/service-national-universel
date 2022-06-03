@@ -21,17 +21,18 @@ export default function CardEquivalence({ equivalence, young }) {
   const theme = {
     background: {
       WAITING_VERIFICATION: "bg-sky-100",
+      WAITING_CORRECTION: "bg-[#FD7A02]",
       VALIDATED: "bg-[#71C784]",
-      DONE: "bg-[#5694CD]",
-      REFUSED: "bg-[#0B508F]",
+      REFUSED: "bg-red-500",
     },
     text: {
       WAITING_VERIFICATION: "text-sky-600",
+      WAITING_CORRECTION: "text-white",
       VALIDATED: "text-white",
-      DONE: "text-white",
       REFUSED: "text-white",
     },
   };
+
   return (
     <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md ">
       <div className="mb-3 cursor-pointer   " onClick={() => setOpen(!open)}>
@@ -63,6 +64,19 @@ export default function CardEquivalence({ equivalence, young }) {
                   <div className="text-sm text-gray-500">{equivalence.correctionMessage}</div>
                 </div>
                 <button className="mr-4 border-[1px] border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg">Corriger ma demande</button>
+              </div>
+            </>
+          ) : null}
+          {equivalence.status === "REFUSED" ? (
+            <>
+              <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mb-4 gap-6">
+                <div className="flex flex-col flex-1">
+                  <div className="text-base font-semibold">Motif du refus</div>
+                  <div className="text-sm text-gray-500 w-3/4">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Enim nulla malesuada vitae, vel. Potenti posuere dictum turpis commodo quam sit ac sed nunc. Sagittis
+                    vel amet cras in eget eu.{equivalence.refusedMessage}
+                  </div>
+                </div>
               </div>
             </>
           ) : null}

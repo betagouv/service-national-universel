@@ -13,7 +13,7 @@ const Schema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["WAITING_VERIFICATION", "WAITING_CORRECTION", "DONE", "REJECTED"],
+    enum: ["WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED"],
     documentation: {
       description: "Statut de l'équivalence",
     },
@@ -97,6 +97,13 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Message de correction",
+    },
+  },
+
+  refusedMessage: {
+    type: String,
+    documentation: {
+      description: "Message de refus",
     },
   },
 
