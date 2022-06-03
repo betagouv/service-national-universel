@@ -1,3 +1,11 @@
+## [1.96.1](https://github.com/betagouv/service-national-universel/compare/v1.96.0...v1.96.1) (2022-06-03)
+
+
+### Bug Fixes
+
+* **admin:** referent peut voir details point de rassemblement ([3f43288](https://github.com/betagouv/service-national-universel/commit/3f4328815d52010d9540374260281fc0a165224b))
+* **app:** Bloquer onglets phase 1/2/3 aux volontaires désistés ([#1595](https://github.com/betagouv/service-national-universel/issues/1595)) ([2ecf773](https://github.com/betagouv/service-national-universel/commit/2ecf773868fdbc7f70538186acde5ea38776b26d))
+
 # [1.96.0](https://github.com/betagouv/service-national-universel/compare/v1.95.0...v1.96.0) (2022-06-02)
 
 
