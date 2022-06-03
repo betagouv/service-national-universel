@@ -109,17 +109,23 @@ export default function Equivalence() {
     }
     setError(error);
 
-    if (!error) {
-      const { ok } = await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data);
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue");
-        setLoading(false);
-        return;
+    try {
+      if (!error) {
+        const { ok } = await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data);
+        if (!ok) {
+          toastr.error("Oups, une erreur est survenue");
+          setLoading(false);
+          return;
+        }
+        toastr.success("Votre demande d'équivalence a bien été envoyée");
+        history.push("/phase2");
       }
-      toastr.success("Votre demande d'équivalence a bien été envoyée");
-      history.push("/phase2");
+      setLoading(false);
+    } catch (error) {
+      toastr.error("Oups, une erreur est survenue");
+      setLoading(false);
+      return;
     }
-    setLoading(false);
   };
 
   return (
@@ -417,7 +423,7 @@ export default function Equivalence() {
           </div>
         ) : null}
         <button
-          className="rounded-lg w-full py-2 mt-4 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600 disabled:bg-blue-300 disabled:text-white disabled:border-blue-300"
+          className="rounded-lg w-full py-2 mt-4 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600 disabled:bg-blue-300 disabled:!text-white disabled:border-blue-300"
           disabled={loading || uploading}
           onClick={() => handleSubmit()}>
           {loading ? "Chargement" : "Valider ma demande"}

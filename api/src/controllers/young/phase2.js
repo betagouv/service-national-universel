@@ -34,6 +34,12 @@ router.post("/equivalence", passport.authenticate("young", { session: false, fai
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
+    //Pas plus de 3 demandes d'équivalence + creation possible seulement si le statut des ancienne equiv est "REFUSED"
+    const equivalences = await MissionEquivalenceModel.find({ youngId: value.id });
+    if (equivalences.length >= 3) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    const filteredEquivalences = equivalences.filter((equivalence) => equivalence.status !== "REFUSED");
+    if (filteredEquivalences.length > 0) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
     const youngId = value.id;
     delete value.id;
     await MissionEquivalenceModel.create({ ...value, youngId, status: "WAITING_VERIFICATION" });
@@ -49,7 +55,7 @@ router.get("/equivalence", passport.authenticate("young", { session: false, fail
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() }).validate({ ...req.params });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-    const equivalences = await MissionEquivalenceModel.findOne({ youngId: value.id });
+    const equivalences = await MissionEquivalenceModel.find({ youngId: value.id }).sort({ createdAt: -1 });
     res.status(200).send({ ok: true, data: equivalences });
   } catch (error) {
     capture(error);

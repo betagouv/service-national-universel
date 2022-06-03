@@ -17,7 +17,7 @@ import CardEquivalence from "./components/CardEquivalence";
 export default function IndexDesktop() {
   const young = useSelector((state) => state.Auth.young);
   const [applications, setApplications] = React.useState();
-  const [equivalence, setEquivalence] = React.useState();
+  const [equivalences, setEquivalences] = React.useState();
 
   const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
   React.useEffect(() => {
@@ -33,7 +33,7 @@ export default function IndexDesktop() {
     })();
     (async () => {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence`);
-      if (ok) return setEquivalence(data);
+      if (ok) return setEquivalences(data);
     })();
   }, []);
 
@@ -78,7 +78,9 @@ export default function IndexDesktop() {
 
       <div className="flex flex-col items-center px-14 -translate-y-4">
         {/* BEGIN EQUIVALENCE */}
-        {equivalence ? <CardEquivalence equivalence={equivalence} young={young} /> : null}
+        {equivalences.map((equivalence, index) => (
+          <CardEquivalence key={index} equivalence={equivalence} young={young} />
+        ))}
         {/* BEGIN CANDIDATURES */}
         {applications.length > 0 ? (
           <>
@@ -158,24 +160,26 @@ export default function IndexDesktop() {
         </Link>
         {/* TODO activer si plusieurs cartes 👇 */}
         {/* <div className="mt-12 mb-4 text-lg">Vous avez déjà fait preuve de solidarité ?</div> */}
-        <div className="border-0 flex rounded-lg shadow-lg w-1/2 items-center">
-          <img src={require("../../../assets/phase2Reconnaissance.png")} className="rounded-lg" />
-          <div className="pr-4 ml-3">
-            <div className="flex items-end">
-              <div className="font-bold text-lg ">Demandez la reconnaissance d’un engagement déjà réalisé</div>
-              {/* TODO que fait le i ? */}
-              {/* <IoIosInformationCircleOutline className="text-2xl" /> */}
-            </div>
-            <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
-            <div className="flex justify-start">
-              <Link to="phase2/equivalence">
-                <div className="rounded-lg text-blue-600 text-center text-sm py-1.5 px-16 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out">
-                  Faire ma demande
-                </div>
-              </Link>
+        {equivalences.length < 3 && equivalences.filter((equivalence) => equivalence.status !== "REFUSED").length === 0 ? (
+          <div className="border-0 flex rounded-lg shadow-lg w-1/2 items-center">
+            <img src={require("../../../assets/phase2Reconnaissance.png")} className="rounded-lg" />
+            <div className="pr-4 ml-3">
+              <div className="flex items-end">
+                <div className="font-bold text-lg ">Demandez la reconnaissance d’un engagement déjà réalisé</div>
+                {/* TODO que fait le i ? */}
+                {/* <IoIosInformationCircleOutline className="text-2xl" /> */}
+              </div>
+              <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
+              <div className="flex justify-start">
+                <Link to="phase2/equivalence">
+                  <div className="rounded-lg text-blue-600 text-center text-sm py-1.5 px-16 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out">
+                    Faire ma demande
+                  </div>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
+        ) : null}
       </div>
       {/* END LINKS */}
     </div>
