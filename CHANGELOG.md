@@ -1,3 +1,19 @@
+# [1.97.0](https://github.com/betagouv/service-national-universel/compare/v1.96.1...v1.97.0) (2022-06-06)
+
+
+### Bug Fixes
+
+* ajout link écran phase 1 affecté ([ed7d8d5](https://github.com/betagouv/service-national-universel/commit/ed7d8d5fd19f0fbc8b0197bc1909de7d2e2e2747))
+* **admin:** create meeting point center ([af4c519](https://github.com/betagouv/service-national-universel/commit/af4c519d0fe97d714e09c59c78a3da01beda992d))
+* **admin:** remove `statusPhase1Tmp` from export ([d43a7e9](https://github.com/betagouv/service-national-universel/commit/d43a7e9b66be53b34e375159a08e715aeebd69b5))
+* **api,admin:** changer ou pas centre de destination point de rassemblement ([a8ba06b](https://github.com/betagouv/service-national-universel/commit/a8ba06b342c7a3cdbaac6998aa3a1929f73e13d7))
+
+
+### Features
+
+* **admin,api:** creation point de rassemblement ([#1596](https://github.com/betagouv/service-national-universel/issues/1596)) ([da4dc7b](https://github.com/betagouv/service-national-universel/commit/da4dc7bad69fa4524655fd33bd4ceb8236266159))
+* **admin,api:** ouverture création point de rassemblement en prod ([dab3518](https://github.com/betagouv/service-national-universel/commit/dab35180402cb0589179dd59b42b4bf944b14395))
+
 ## [1.96.1](https://github.com/betagouv/service-national-universel/compare/v1.96.0...v1.96.1) (2022-06-03)
 
 
