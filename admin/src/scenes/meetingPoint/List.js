@@ -40,7 +40,7 @@ export default function MeetingPoint() {
               Points de rassemblements
             </div>
             <div className="flex space-x-2">
-              {environment !== "production" && canCreateMeetingPoint(user) ? (
+              {canCreateMeetingPoint(user) ? (
                 <Link to={`/point-de-rassemblement/nouveau`}>
                   <div className="font-marianne bg-snu-purple-300 rounded-lg flex justify-center items-center px-6 py-2 text-white hover:bg-snu-purple-200">
                     <div>Créer un nouveau point de rassemblement</div>
