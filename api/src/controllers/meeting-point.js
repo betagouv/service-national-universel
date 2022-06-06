@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { canViewMeetingPoints, canUpdateMeetingPoint } = require("snu-lib/roles");
+const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint } = require("snu-lib/roles");
 const { capture } = require("../sentry");
 const { validateId } = require("../utils/validator");
 const MeetingPointModel = require("../models/meetingPoint");
@@ -98,6 +98,26 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
   meetingPoint.save({ fromUser: req.user });
 
+  return res.status(200).send({ ok: true, data: meetingPoint });
+});
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  const { error, value } = Joi.object({
+    cohort: Joi.string().required(),
+    centerId: Joi.string().required(),
+    centerCode: Joi.string().required(),
+    busId: Joi.string().required(),
+    busExcelId: Joi.string().required(),
+    departureAddress: Joi.string().required(),
+    departureDepartment: Joi.string().required(),
+    departureRegion: Joi.string().required(),
+    departureAtString: Joi.string().required(),
+    returnAtString: Joi.string().required(),
+    hideDepartmentInConvocation: Joi.string(),
+  }).validate({ ...req.params, ...req.body });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  if (!canCreateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+  const meetingPoint = await MeetingPointModel.create(value);
   return res.status(200).send({ ok: true, data: meetingPoint });
 });
 

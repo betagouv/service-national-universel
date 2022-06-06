@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-const { canViewBus, canUpdateBus } = require("snu-lib/roles");
+const { canViewBus, canUpdateBus, canCreateBus } = require("snu-lib/roles");
 const { capture } = require("../sentry");
 const BusModel = require("../models/bus");
 const { ERRORS } = require("../utils");
@@ -22,6 +22,26 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
+});
+
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  const { error, value } = Joi.object({
+    idExcel: Joi.string().required(),
+    cohort: Joi.string().required(),
+    capacity: Joi.number().required(),
+  }).validate({ ...req.params, ...req.body });
+
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  if (!canCreateBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+  const { idExcel, cohort, capacity } = value;
+
+  const busExist = await BusModel.findOne({ idExcel, cohort });
+  if (busExist) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
+  const bus = await BusModel.create({ idExcel, cohort, capacity, placesLeft: capacity });
+
+  return res.status(200).send({ ok: true, data: serializeBus(bus) });
 });
 
 router.put("/:id/capacity", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
