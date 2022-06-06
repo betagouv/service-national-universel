@@ -110,6 +110,8 @@ export default function Create() {
   React.useEffect(() => {
     if (!center) {
       return setData((prev) => ({ ...prev, centerId: null, centerCode: null }));
+    } else {
+      return setData((prev) => ({ ...prev, centerId: center._id.toString(), centerCode: center.code2022 }));
     }
   }, [center]);
 
