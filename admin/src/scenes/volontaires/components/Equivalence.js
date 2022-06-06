@@ -16,11 +16,10 @@ import { copyToClipboard, formatDateFR, translate } from "../../../utils";
 import ModalChangeStatus from "./ModalChangeStatus";
 import ModalFiles from "./ModalFiles";
 
-export default function CardEquivalence({ young }) {
+export default function CardEquivalence({ young, equivalence }) {
   const optionsStatus = ["WAITING_CORRECTION", "REFUSED", "VALIDATED"];
   const [copied, setCopied] = React.useState(false);
   const [modalFiles, setModalFiles] = React.useState({ isOpen: false });
-  const [equivalences, setEquivalences] = React.useState([]);
   const [modalStatus, setModalStatus] = React.useState({ isOpen: false });
 
   const ref = React.useRef(null);
@@ -50,13 +49,6 @@ export default function CardEquivalence({ young }) {
     REFUSED: "text-[#EF6737] h-4 w-4",
   };
 
-  React.useEffect(() => {
-    (async () => {
-      const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalences`);
-      if (ok) return setEquivalences(data);
-    })();
-  }, []);
-
   const onChangeFiles = async ({ data, equivalenceId }) => {
     try {
       const { ok } = await api.put(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`, { files: data });
@@ -71,9 +63,9 @@ export default function CardEquivalence({ young }) {
     }
   };
 
-  return equivalences.map((equivalence, index) => (
+  return (
     <>
-      <div key={index} className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md ">
+      <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md ">
         <div className="mb-3">
           <div className="flex items-center justify-between px-4">
             <div className="flex items-center">
@@ -122,10 +114,12 @@ export default function CardEquivalence({ young }) {
                     {optionsStatus.map((option) => (
                       <div
                         key={option}
-                        onClick={() => setOpen(false)}
                         className={`${option === equivalence?.status && "font-bold bg-gray"}`}
                         // eslint-disable-next-line react/jsx-no-duplicate-props
-                        onClick={() => setModalStatus({ isOpen: true, status: option, equivalenceId: equivalence._id })}>
+                        onClick={() => {
+                          setModalStatus({ isOpen: true, status: option, equivalenceId: equivalence._id });
+                          setOpen(false);
+                        }}>
                         <div className="group flex justify-between items-center gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
                           <div>{translate(option)}</div>
                           {option === equivalence?.type ? <BsCheck2 /> : null}
@@ -218,7 +212,7 @@ export default function CardEquivalence({ young }) {
         />
       </div>
     </>
-  ));
+  );
 }
 
 const getInitials = (word) =>
