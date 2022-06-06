@@ -99,18 +99,21 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
                 id="hideDepartmentInConvocation"
                 name="hideDepartmentInConvocation"
                 className="cursor-pointer"
-                checked={data.hideDepartmentInConvocation==="true"}
+                checked={data.hideDepartmentInConvocation === "true"}
                 value={data?.hideDepartmentInConvocation}
                 onChange={(e) => setData({ ...data, hideDepartmentInConvocation: e.target.checked ? "true" : "false" })}
               />
-              <label className="flex-1 mb-0 cursor-pointer" htmlFor="hideDepartmentInConvocation">Ne pas afficher le département sur le compte volontaire</label>
+              <label className="flex-1 mb-0 cursor-pointer" htmlFor="hideDepartmentInConvocation">
+                Ne pas afficher le département sur le compte volontaire
+              </label>
             </div>
-            {data?.hideDepartmentInConvocation === "true" ?
+            {data?.hideDepartmentInConvocation === "true" ? (
               <div className="flex gap-2 bg-blue-50 rounded-lg p-2 text-blue-700">
-                Le département ne sera pas visible sur le compte des volontaires.<br />
+                Le département ne sera pas visible sur le compte des volontaires.
+                <br />
                 Merci de rendre l'adresse postale la plus explicite possible.
-              </div> : null
-            }
+              </div>
+            ) : null}
             <div className={`flex flex-1 flex-col border-[1px] rounded-lg py-1 px-2 ${isLoading && "bg-gray-200"}`}>
               <label htmlFor="departureAt" className="w-full m-0 text-left text-gray-500">
                 Date et heure de rendez-vous aller
@@ -170,24 +173,33 @@ export default function ModalExportMail({ isOpen, onSubmit, onCancel, values }) 
   );
 }
 
-const SelectDate = ({ date, handleChange, year }) => {
+export const SelectDate = ({ date, handleChange, year }) => {
   return (
     <div className="flex flex-row">
-      <select className="bg-inherit cursor-pointer" name="day" value={date?.day} onChange={handleChange}>
+      <select className="bg-inherit cursor-pointer" name="day" value={date?.day || ""} onChange={handleChange}>
+        <option disabled label="jour" value="">
+          jour
+        </option>
         {days.map((day, index) => (
           <option key={index} value={day}>
             {day}
           </option>
         ))}
       </select>
-      <select className="bg-inherit pl-1 cursor-pointer" name="date" value={date?.date} onChange={handleChange}>
+      <select className="bg-inherit pl-1 cursor-pointer" name="date" value={date?.date || ""} onChange={handleChange}>
+        <option disabled label="0" value="">
+          0
+        </option>
         {Array.from({ length: 31 }, (_, i) => i + 1).map((date, index) => (
           <option key={index} value={date}>
             {date}
           </option>
         ))}
       </select>
-      <select className="bg-inherit pl-1 cursor-pointer" name="month" value={date?.month} onChange={handleChange}>
+      <select className="bg-inherit pl-1 cursor-pointer" name="month" value={date?.month || ""} onChange={handleChange}>
+        <option disabled label="mois" value="">
+          mois
+        </option>
         {months.map((month, index) => (
           <option key={index} value={month}>
             {month}
@@ -195,7 +207,10 @@ const SelectDate = ({ date, handleChange, year }) => {
         ))}
       </select>
       <div className="px-2 text-center">{year} à : </div>
-      <select className="bg-inherit pl-1 cursor-pointer" name="hour" value={date?.hour} onChange={handleChange}>
+      <select className="bg-inherit pl-1 cursor-pointer" name="hour" value={date?.hour || ""} onChange={handleChange}>
+        <option disabled label="hh" value="">
+          hh
+        </option>
         {Array.from(Array(24).keys()).map((hour, index) => (
           <option key={index} value={hour.toString().length === 1 ? `0${hour}` : `${hour}`}>
             {hour.toString().length === 1 ? `0${hour}` : `${hour}`}
@@ -203,7 +218,10 @@ const SelectDate = ({ date, handleChange, year }) => {
         ))}
       </select>
       <div className="pl-1 text-center">h</div>
-      <select className="bg-inherit pl-1 cursor-pointer" name="minute" value={date?.minute} onChange={handleChange}>
+      <select className="bg-inherit pl-1 cursor-pointer" name="minute" value={date?.minute || ""} onChange={handleChange}>
+        <option disabled label="mm" value="">
+          mm
+        </option>
         {Array.from(Array(60).keys()).map((min, index) => (
           <option key={index} value={min.toString().length === 1 ? `0${min}` : `${min}`}>
             {min.toString().length === 1 ? `0${min}` : `${min}`}

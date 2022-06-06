@@ -32,6 +32,7 @@ module.exports = {
         base: "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.06)",
         block: "0px 10px 20px rgba(0, 0, 0, 0.1)",
         button: "0px 1px 5px rgba(0, 0, 0, 0.5)",
+        ninaButton: "0px 4px 10px 3px rgba(0, 0, 0, 0.07);",
       },
       fontSize: {
         0: "0px",
@@ -96,6 +97,7 @@ module.exports = {
       },
       fontFamily: {
         ubuntu: ["Marianne", "Ubuntu", "ui-sans-serif", "system-ui"],
+        marianne: ["Marianne", "Ubuntu", "ui-sans-serif", "system-ui"],
       },
       width: {
         "screen-1/4": "25vw",
