@@ -11,6 +11,7 @@ import Badge from "../../../components/Badge";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
+import CardEquivalence from "../components/Equivalence";
 
 export default function Phase2({ young, onChange }) {
   return (
@@ -64,6 +65,7 @@ export default function Phase2({ young, onChange }) {
           </Row>
         </Box>
         {ENABLE_PM && <Phase2MilitaryPreparation young={young} />}
+        <CardEquivalence young={young} />
         <Box>
           <Row>
             <Col md={12}>

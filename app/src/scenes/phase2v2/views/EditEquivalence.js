@@ -125,6 +125,7 @@ export default function EditEquivalence() {
         delete data.youngId;
         delete data.createdAt;
         delete data.__v;
+        data.status = "WAITING_VERIFICATION";
         const { ok } = await api.put(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`, data);
         if (!ok) {
           toastr.error("Oups, une erreur est survenue");
@@ -160,7 +161,7 @@ export default function EditEquivalence() {
               <RiErrorWarningLine className="text-[#FD7A02]" />
               <div className="flex flex-col flex-1">
                 <div className="ml-4 text-[#FD7A02] text-sm leading-5 font-medium">Corrections demandées</div>
-                <div className="ml-4 text-[#FD7A02] text-sm leading-5 font-medium">{data?.correctionMessage}</div>
+                <div className="ml-4 text-[#FD7A02] text-sm leading-5 font-medium">{data?.message}</div>
               </div>
             </div>
           </div>

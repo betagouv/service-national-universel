@@ -51,27 +51,28 @@ router.post("/equivalence", passport.authenticate("young", { session: false, fai
   }
 });
 
-router.put("/equivalence/:idEquivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       idEquivalence: Joi.string().required(),
-      status: Joi.string().valid("WAITING_VERIFICATION", "WAITING_CORRECTION").required(),
-      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier").required(),
-      structureName: Joi.string().trim().required(),
-      address: Joi.string().trim().required(),
-      zip: Joi.string().trim().required(),
-      city: Joi.string().trim().required(),
-      startDate: Joi.string().trim().required(),
-      endDate: Joi.string().trim().required(),
+      status: Joi.string().valid("WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED"),
+      type: Joi.string().trim().valid("Service Civique", "BAFA", "Jeune Sapeur Pompier"),
+      structureName: Joi.string().trim(),
+      address: Joi.string().trim(),
+      zip: Joi.string().trim(),
+      city: Joi.string().trim(),
+      startDate: Joi.string().trim(),
+      endDate: Joi.string().trim(),
       frequency: Joi.object().keys({
         nombre: Joi.string().trim().required(),
         duree: Joi.string().trim().valid("Heure(s)", "Demi-journée(s)", "Jour(s)").required(),
         frequence: Joi.string().valid("Par semaine", "Par mois", "Par an").trim().required(),
       }),
-      contactFullName: Joi.string().trim().required(),
-      contactEmail: Joi.string().trim().required(),
-      files: Joi.array().items(Joi.string().required()).required().min(1),
+      contactFullName: Joi.string().trim(),
+      contactEmail: Joi.string().trim(),
+      files: Joi.array().items(Joi.string().required()).min(1),
+      message: Joi.string().trim(),
     }).validate({ ...req.params, ...req.body });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
@@ -79,7 +80,6 @@ router.put("/equivalence/:idEquivalence", passport.authenticate("young", { sessi
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    //Pas plus de 3 demandes d'équivalence + creation possible seulement si le statut des ancienne equiv est "REFUSED"
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -95,7 +95,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate("young", { sessi
   }
 });
 
-router.get("/equivalences", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.get("/equivalences", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() }).validate({ ...req.params });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });

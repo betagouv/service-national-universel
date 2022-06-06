@@ -93,17 +93,10 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  correctionMessage: {
+  message: {
     type: String,
     documentation: {
-      description: "Message de correction",
-    },
-  },
-
-  refusedMessage: {
-    type: String,
-    documentation: {
-      description: "Message de refus",
+      description: "Message de correction ou de refus",
     },
   },
 

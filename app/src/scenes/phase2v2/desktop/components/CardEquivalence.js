@@ -53,9 +53,9 @@ export default function CardEquivalence({ equivalence, young }) {
       </div>
       {open ? (
         <>
+          <hr className="mb-3 text-gray-200" />
           {equivalence.status === "WAITING_VERIFICATION" ? (
             <>
-              <hr className="border-gray-200 mb-3" />
               <div className="flex justify-end">
                 <button
                   className="mr-8 mb-3 border-[1px] border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg"
@@ -70,7 +70,7 @@ export default function CardEquivalence({ equivalence, young }) {
               <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mb-4 gap-6">
                 <div className="flex flex-col flex-1">
                   <div className="text-base font-semibold">Corrections demandées</div>
-                  <div className="text-sm text-gray-500">{equivalence.correctionMessage}</div>
+                  <div className="text-sm text-gray-500">{equivalence.message}</div>
                 </div>
                 <button
                   className="mr-4 border-[1px] border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg"
@@ -85,7 +85,7 @@ export default function CardEquivalence({ equivalence, young }) {
               <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mb-4 gap-6">
                 <div className="flex flex-col flex-1">
                   <div className="text-base font-semibold">Motif du refus</div>
-                  <div className="text-sm text-gray-500 w-3/4">{equivalence.refusedMessage}</div>
+                  <div className="text-sm text-gray-500 w-3/4">{equivalence.message}</div>
                 </div>
               </div>
             </>
