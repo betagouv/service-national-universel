@@ -5,8 +5,10 @@ const Joi = require("joi");
 const { canViewBus, canUpdateBus, canCreateBus } = require("snu-lib/roles");
 const { capture } = require("../sentry");
 const BusModel = require("../models/bus");
+const MeetingPointModel = require("../models/meetingPoint");
+const CohesionCenterModel = require("../models/cohesionCenter");
 const { ERRORS } = require("../utils");
-const { serializeBus } = require("../utils/serializer");
+const { serializeBus, serializeCohesionCenter } = require("../utils/serializer");
 
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -18,6 +20,22 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     const data = await BusModel.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: serializeBus(data) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+router.get("/:id/cohesion-center", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canViewBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const meetingPoints = await MeetingPointModel.find({ busId: id });
+    const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: meetingPoints.map((mp) => mp.centerId) } });
+
+    return res.status(200).send({ ok: true, data: cohesionCenters.map(serializeCohesionCenter) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

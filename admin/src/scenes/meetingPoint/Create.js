@@ -30,6 +30,7 @@ export default function Create() {
   const [loading, setLoading] = React.useState(false);
   const [year, setYear] = React.useState("2022");
   const [error, setError] = React.useState(false);
+  const [canChangeCenter, setCanChangeCenter] = React.useState(false);
   const history = useHistory();
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -80,6 +81,30 @@ export default function Create() {
     const occupation = bus.capacity ? (((bus.capacity - bus.placesLeft) * 100) / bus.capacity).toFixed(2) : 0;
     setOccupationPercentage(occupation);
     if (!center?.cohorts?.includes(bus.cohort)) setCenter(null);
+
+    (async () => {
+      const { data, ok } = await api.get(`/bus/${bus._id.toString()}/cohesion-center`);
+      if (!ok) return;
+      if (data?.length <= 0) {
+        // pas de point de rassemblement trouvé pour ce bus
+        // donc c'est le premier, on choisit le centre qu'on veut
+        setCanChangeCenter(true);
+        setCenter(null);
+      } else if (data?.length === 1) {
+        // un point de rassemblement trouvé pour ce bus
+        // on le selectionne par défaut et on ne peut pas le changer
+        setCanChangeCenter(false);
+        setCenter(data[0]);
+      } else if (data?.length > 1) {
+        // plusieurs points de rassemblement trouvés pour ce bus
+        // on ne peut pas le changer
+        setCanChangeCenter(false);
+        setCenter(null);
+        toastr.warning("Plusieurs points de rassemblement trouvés pour ce bus");
+      } else {
+        setCanChangeCenter(false);
+      }
+    })();
   }, [bus]);
 
   React.useEffect(() => {
@@ -372,16 +397,18 @@ export default function Create() {
                       <Donnee title={"Département"} value={center.department} number={`(${getDepartmentNumber(center.department)})`} />
                       <Donnee title={"Ville"} value={center.city} number={`(${center.zip})`} />
                       <Donnee title={"Adresse"} value={center.address} number={""} />
-                      <div className="flex flex-col items-center mt-8">
-                        <div
-                          className="group flex gap-1 rounded-[10px] border-[1px] border-blue-600 py-2.5 px-3 items-center hover:bg-blue-600 hover:text-gray-800 cursor-pointer"
-                          onClick={() => setCenter(null)}>
-                          <Pencil className="text-blue-600 group-hover:text-white text-sm" width={16} height={16} />
-                          <div className="text-blue-600 group-hover:text-white text-sm flex-1 leading-4">Changer de centre</div>
+                      {canChangeCenter ? (
+                        <div className="flex flex-col items-center mt-8">
+                          <div
+                            className="group flex gap-1 rounded-[10px] border-[1px] border-blue-600 py-2.5 px-3 items-center hover:bg-blue-600 hover:text-gray-800 cursor-pointer"
+                            onClick={() => setCenter(null)}>
+                            <Pencil className="text-blue-600 group-hover:text-white text-sm" width={16} height={16} />
+                            <div className="text-blue-600 group-hover:text-white text-sm flex-1 leading-4">Changer de centre</div>
+                          </div>
                         </div>
-                      </div>
+                      ) : null}
                     </div>
-                  ) : (
+                  ) : canChangeCenter ? (
                     <div className="flex mt-4">
                       <>
                         <ReactiveBase url={`${apiURL}/es`} app="edit-cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -437,7 +464,7 @@ export default function Create() {
                         </ReactiveBase>
                       </>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
