@@ -5,7 +5,7 @@ import { HiCheckCircle } from "react-icons/hi";
 import Download from "../../../../assets/icons/Download";
 import SimpleFileIcon from "../../../../assets/icons/SimpleFileIcon";
 import { copyToClipboard, formatDateFR, translateEquivalenceStatus } from "../../../../utils";
-// import ModalFiles from "./ModalFiles";
+import ModalFiles from "../../desktop/components/ModalFiles";
 import { useHistory } from "react-router-dom";
 import clock from "../../../../assets/clock.svg";
 import { Modal } from "reactstrap";
@@ -174,6 +174,13 @@ export default function CardEquivalence({ equivalence, young }) {
               </div>
             </div>
           </div>
+          <ModalFiles
+            isOpen={modalFiles?.isOpen}
+            onCancel={() => setModalFiles({ isOpen: false })}
+            initialValues={equivalence?.files ? equivalence.files : []}
+            young={young}
+            nameFiles="equivalenceFiles"
+          />
         </Modal>
       )}
     </>
