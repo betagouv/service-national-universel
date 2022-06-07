@@ -74,7 +74,7 @@ export default function Phase2({ young, onChange }) {
           </Row>
         </Box>
         {ENABLE_PM && <Phase2MilitaryPreparation young={young} />}
-        {environment !== "production" ? equivalences.map((equivalence, index) => <CardEquivalence key={index} equivalence={equivalence} />) : null}
+        {environment !== "production" ? equivalences.map((equivalence, index) => <CardEquivalence key={index} equivalence={equivalence} young={young} />) : null}
         <Box>
           <Row>
             <Col md={12}>
