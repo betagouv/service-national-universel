@@ -8,6 +8,7 @@ import CloseSvg from "../../assets/Close";
 
 import { toastr } from "react-redux-toastr";
 import { SENDINBLUE_TEMPLATES } from "../../utils";
+import { adminURL } from "../../config";
 
 export default function ModalRefused({ isOpen, value, onChange, onSend, topTitle = "alerte" }) {
   const [message, setMessage] = useState();
@@ -27,7 +28,13 @@ En vous souhaitant une excellente continuation.`);
 
   const send = async () => {
     setSending(true);
-    await api.post(`/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message });
+    await api.post(
+      `/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`,
+      { message },
+      {
+        cta: `support.snu.gouv.fr/base-de-connaissance/les-autres-formes-d-engagement?utm_campaign=transactionnel+inscription+refusée&utm_source=notifauto&utm_medium=mail+172+découvrez`,
+      },
+    );
     toastr.success("Email envoyé !");
     setSending(false);
     onSend(message);

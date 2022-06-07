@@ -213,7 +213,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     const fromName = `${req.user.firstName} ${req.user.lastName}`;
     await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_YOUNG, {
       emailTo: [{ name: toName, email: young.email }],
-      params: { toName, cta, fromName },
+      params: { toName, cta: `${config.APP_URL}/utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+166+activer`, fromName },
     });
 
     return res.status(200).send({ young, ok: true });
@@ -669,7 +669,8 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
 
     let buttonCta = cta || config.APP_URL;
     if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
-    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) buttonCta = `${config.APP_URL}/inscription/coordonnees`;
+    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED)
+      buttonCta = `${config.APP_URL}/inscription/coordonnees/utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`;
     if (template === SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION)
       buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+170+acceder`;
 

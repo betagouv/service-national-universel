@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-
+import { adminURL, appURL } from "../config";
 import api from "../services/api";
 
 import {
@@ -147,8 +147,11 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-        if (prevStatus === "WITHDRAWN") await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED}`);
-        else await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);
+        if (prevStatus === "WITHDRAWN") await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED}`,cta: `${adminURL}/utm_campaign=transactionnel+compte+réactivé&utm_source=notifauto&utm_medium=mail+168+seconnecter`);
+        else
+          await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`, {
+            cta: `?/https://my.sendinblue.com/camp/template/167/message-setup`,
+          });
       }
       if (status === YOUNG_STATUS.WAITING_LIST) {
         await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);

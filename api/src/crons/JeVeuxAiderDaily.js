@@ -287,6 +287,7 @@ const cleanData = async () => {
         params: {
           missionName: mission.name,
         },
+        cta: {"?utm_campaign=transactionnel+dossier+supprimé&utm_source=notifauto&utm_medium=mail+269+accéder"},
       });
     }
     await slack.success({ title: "sync with JVA missions" });

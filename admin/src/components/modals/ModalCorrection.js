@@ -7,6 +7,7 @@ import { SENDINBLUE_TEMPLATES } from "../../utils";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 import CloseSvg from "../../assets/Close";
+import { adminURL } from "../../config";
 
 export default function ModalCorrection({ isOpen, value, onChange, onSend, topTitle = "alerte" }) {
   const [message, setMessage] = useState();
@@ -20,7 +21,11 @@ export default function ModalCorrection({ isOpen, value, onChange, onSend, topTi
 
   const send = async () => {
     setSending(true);
-    await api.post(`/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION}`, { message });
+    await api.post(
+      `/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION}`,
+      { message },
+      { cta: `?utm_campaign=transactionnel+dossier+attente+correction&utm_source=notifauto&utm_medium=mail+169+corriger` },
+    );
     toastr.success("Email envoyé !");
     setSending(false);
     onSend(message);
