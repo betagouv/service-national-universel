@@ -89,7 +89,7 @@ export default function EditEquivalence() {
         const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`);
         if (ok) {
           setData(data);
-          if (data?.frequency.nombre && data?.frequency.duree && data?.frequency.frequence) setFrequence(true);
+          if (data?.frequency?.nombre && data?.frequency?.duree && data?.frequency?.frequence) setFrequence(true);
           return;
         }
       })();
