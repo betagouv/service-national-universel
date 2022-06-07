@@ -1,3 +1,10 @@
+# [1.98.0](https://github.com/betagouv/service-national-universel/compare/v1.97.0...v1.98.0) (2022-06-07)
+
+
+### Features
+
+* **api:** send step1form connected young ([#1597](https://github.com/betagouv/service-national-universel/issues/1597)) ([43d67ee](https://github.com/betagouv/service-national-universel/commit/43d67ee77067eca0161a8924da0d60a3362ea361))
+
 # [1.97.0](https://github.com/betagouv/service-national-universel/compare/v1.96.1...v1.97.0) (2022-06-06)
 
 
