@@ -38,6 +38,8 @@ export default function TicketCreate(props) {
                 message,
                 subject: title,
                 fromPage,
+                subjectStep1: step1?.id,
+                subjectStep2: step2?.id,
               });
               if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
               toastr.success("Demande envoyée");
