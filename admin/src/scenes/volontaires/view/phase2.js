@@ -6,6 +6,7 @@ import { Box, BoxTitle } from "../../../components/box";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import SelectStatus from "../../../components/selectStatus";
+import { environment } from "../../../config";
 import api from "../../../services/api";
 import { colors, ENABLE_PM, translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../utils";
 import CardEquivalence from "../components/Equivalence";
@@ -73,9 +74,7 @@ export default function Phase2({ young, onChange }) {
           </Row>
         </Box>
         {ENABLE_PM && <Phase2MilitaryPreparation young={young} />}
-        {equivalences.map((equivalence, index) => (
-          <CardEquivalence key={index} equivalence={equivalence} />
-        ))}
+        {environment !== "production" ? equivalences.map((equivalence, index) => <CardEquivalence key={index} equivalence={equivalence} />) : null}
         <Box>
           <Row>
             <Col md={12}>
