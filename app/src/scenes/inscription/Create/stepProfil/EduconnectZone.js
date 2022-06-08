@@ -2,8 +2,8 @@ import React from "react";
 import { Col } from "reactstrap";
 import InfoIcon from "../../../../assets/InfoIcon2";
 import NouveauBadge from "../../../../assets/NouveauBadge";
-import FormRow from "../../../../components/form/FormRow";
 import EduConnectButton from "../../../../components/buttons/EduConnectButton";
+import FormRow from "../../../../components/form/FormRow";
 
 export function EduconnectZone({ connected }) {
   return (
@@ -16,7 +16,7 @@ export function EduconnectZone({ connected }) {
                 <NouveauBadge />
                 <div>
                   <span className="inline-flex">
-                    Inscription avec Inscription avec ÉduConnect
+                    Inscription avec ÉduConnect
                     <a className="pl-1 flex items-center" href="https://educonnect.education.gouv.fr/educt-aide/informations/">
                       <InfoIcon />
                     </a>
@@ -27,7 +27,7 @@ export function EduconnectZone({ connected }) {
               <EduConnectButton />
             </div>
           ) : (
-            <i>Les information en provenance de ÉduConnect ont bien été enregistrées.</i>
+            <i>Les informations en provenance de ÉduConnect ont bien été enregistrées.</i>
           )}
         </Col>
       </FormRow>
