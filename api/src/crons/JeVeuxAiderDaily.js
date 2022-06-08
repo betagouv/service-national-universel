@@ -286,8 +286,8 @@ const cleanData = async () => {
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
         params: {
           missionName: mission.name,
+          cta: `?utm_campaign=transactionnel+dossier+supprimé&utm_source=notifauto&utm_medium=mail+269+accéder`,
         },
-        cta: {"?utm_campaign=transactionnel+dossier+supprimé&utm_source=notifauto&utm_medium=mail+269+accéder"},
       });
     }
     await slack.success({ title: "sync with JVA missions" });
