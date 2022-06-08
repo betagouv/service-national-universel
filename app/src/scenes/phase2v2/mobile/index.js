@@ -149,16 +149,18 @@ export default function IndexPhase2Mobile() {
         </Link>
         {/* TODO activer si plusieurs cartes 👇 */}
         {/* <div className="mt-4 mb-2 text-base">Vous avez déjà fait preuve de solidarité ?</div> */}
-        <div className="border-0 rounded-lg shadow-lg items-center">
-          <img src={require("../../../assets/phase2MobileReconnaissance.png")} className="rounded-lg w-full" />
-          <div className="px-3 pb-4">
-            <div className="font-bold text-lg text-gray-900 ">Demandez la reconnaissance d’un engagement déjà réalisé</div>
-            <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
-            <Link to="phase2/equivalence">
-              <div className="rounded-lg text-blue-600 text-center text-sm py-1 border-[1px] border-blue-600">Faire ma demande</div>
-            </Link>
+        {equivalences.length < 3 && equivalences.filter((equivalence) => equivalence.status !== "REFUSED").length === 0 ? (
+          <div className="border-0 rounded-lg shadow-lg items-center">
+            <img src={require("../../../assets/phase2MobileReconnaissance.png")} className="rounded-lg w-full" />
+            <div className="px-3 pb-4">
+              <div className="font-bold text-lg text-gray-900 ">Demandez la reconnaissance d’un engagement déjà réalisé</div>
+              <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
+              <Link to="phase2/equivalence">
+                <div className="rounded-lg text-blue-600 text-center text-sm py-1 border-[1px] border-blue-600">Faire ma demande</div>
+              </Link>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
       {/* END LINKS */}
     </div>
