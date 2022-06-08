@@ -5,11 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "master": "node ./src/cmd/master.js",
-    "raw": "node ./src/cmd/raw.js",
-    "exec": "node ./src/cmd/exec.js",
-    "index": "node ./src/cmd/index.js"
+    "dev": "nodemon src/index.js"
   },
   "prettier": {
     "printWidth": 2200
@@ -17,8 +13,6 @@
   "author": "Selego",
   "license": "ISC",
   "dependencies": {
-    "@elastic/elasticsearch": "^7.16.0",
-    "@selego/mongoose-elastic": "^3.0.0",
     "body-parser": "^1.19.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -26,12 +20,9 @@
     "express": "^4.17.2",
     "helmet": "^5.0.1",
     "minimist": "^1.2.5",
-    "mongodb": "^4.3.0",
-    "mongoose": "^6.1.6",
     "node-fetch": "^2.6.6",
     "nodemon": "^2.0.15",
     "pg": "^8.7.3",
-    "sequelize": "^6.19.2",
-    "string-similarity": "^4.0.4"
+    "sequelize": "^6.19.2"
   }
 }
