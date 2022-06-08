@@ -50,7 +50,7 @@ const Schema = new mongoose.Schema({
   departureRegion: {
     type: String,
   },
-  hideDepartmentInConvocation:{
+  hideDepartmentInConvocation: {
     type: String,
   },
 
@@ -77,6 +77,7 @@ const Schema = new mongoose.Schema({
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  deletedAt: { type: Date, default: null },
 });
 
 Schema.virtual("user").set(function (user) {

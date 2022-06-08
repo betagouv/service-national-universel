@@ -14,7 +14,7 @@ const patches = require("./patches");
 router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const data = await MeetingPointModel.find({});
+    const data = await MeetingPointModel.find({ deletedAt: { $exists: false } });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -27,7 +27,7 @@ router.get("/center/:id", passport.authenticate("referent", { session: false, fa
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const data = await MeetingPointModel.find({ centerId: checkedId });
+    const data = await MeetingPointModel.find({ centerId: checkedId, deletedAt: { $exists: false } });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -46,7 +46,7 @@ router.get("/:id", passport.authenticate(["young", "referent"], { session: false
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     if (isReferent(req.user) && !canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const data = await MeetingPointModel.findById(checkedId);
+    const data = await MeetingPointModel.findOne({ _id: checkedId, deletedAt: { $exists: false } });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const bus = await BusModel.findById(data.busId);
     return res.status(200).send({ ok: true, data: { ...data._doc, bus } });
@@ -61,7 +61,7 @@ router.get("/", passport.authenticate("young", { session: false, failWithError: 
     const center = await CohesionCenterModel.findById(req.user.cohesionCenterId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     let data = [];
-    if (req.user.department) data = await MeetingPointModel.find({ departureDepartment: req.user.department, centerCode: center.code });
+    if (req.user.department) data = await MeetingPointModel.find({ departureDepartment: req.user.department, centerCode: center.code, deletedAt: { $exists: false } });
     for (let i = 0; i < data.length; i++) {
       const bus = await BusModel.findById(data[i].busId);
       data[i] = { ...data[i]._doc, bus };
@@ -130,8 +130,9 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     const meetingPoint = await MeetingPointModel.findById(checkedId);
     if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    await meetingPoint.remove();
+    const now = new Date();
+    meetingPoint.set({ deletedAt: now });
+    await meetingPoint.save({ fromUser: req.user });
 
     console.log(`Mission ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
