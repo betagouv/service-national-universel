@@ -121,4 +121,24 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   return res.status(200).send({ ok: true, data: meetingPoint });
 });
 
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canUpdateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const meetingPoint = await MeetingPointModel.findById(checkedId);
+    if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    await meetingPoint.remove();
+
+    console.log(`Mission ${req.params.id} has been deleted`);
+    res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;
