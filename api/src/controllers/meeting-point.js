@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint } = require("snu-lib/roles");
+const { canViewMeetingPoints, canUpdateMeetingPoint, canCreateMeetingPoint, canDeleteMeetingPoint } = require("snu-lib/roles");
 const { capture } = require("../sentry");
 const { validateId } = require("../utils/validator");
 const MeetingPointModel = require("../models/meetingPoint");
@@ -126,7 +126,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canUpdateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const meetingPoint = await MeetingPointModel.findById(checkedId);
     if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
