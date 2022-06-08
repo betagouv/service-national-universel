@@ -11,17 +11,17 @@ export function EduconnectZone({ connected }) {
       <FormRow>
         <Col>
           {!connected ? (
-            <div className="flex justify-between flex-wrap gap-y-2">
-              <div className="flex items-center gap-4">
+            <div className="flex justify-center lg:justify-between flex-wrap gap-y-2">
+              <div className="flex flex-wrap items-center justify-center gap-x-4">
                 <NouveauBadge />
-                <div>
-                  <span className="inline-flex">
+                <div className="text-center">
+                  <span className="inline-flex items-center justify-center">
                     Inscription avec ÉduConnect
-                    <a className="pl-1 flex items-center" href="https://educonnect.education.gouv.fr/educt-aide/informations/">
+                    <a className="pl-1" href="https://educonnect.education.gouv.fr/educt-aide/informations/">
                       <InfoIcon />
                     </a>
                   </span>
-                  <p className="text-gray-500 text-xs font-weight-light">Un compte unique pour les services numériques des écoles et des établissements.</p>
+                  <p className="text-center text-gray-500 text-xs font-weight-light">Un compte unique pour les services numériques des écoles et des établissements.</p>
                 </div>
               </div>
               <EduConnectButton />
