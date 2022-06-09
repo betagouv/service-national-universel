@@ -90,7 +90,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       }
       if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
         const applications = await ApplicationModel.find({ youngId: young._id });
-        const activeApplications = applications.filter((application) => !["WAITING_ACCEPTATION", "REFUSED", "CANCEL"].includes(application.status));
+        const activeApplications = applications.filter((application) => ["WAITING_VERIFICATION", "WAITING_VALIDATION", "IN_PROGRESS", "VALIDATED"].includes(application.status));
 
         //Le status phase deux est set a In_Progress si on a des candidateure active
         if (activeApplications.length) {
