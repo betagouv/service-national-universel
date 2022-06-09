@@ -139,13 +139,13 @@ export default function Edit(props) {
                         onConfirm: async () => {
                           const { ok } = await api.remove(`/meeting-point/${meetingPoint._id}`);
                           if (!ok) {
-                            toastr.error("Une erreur est survenue lors de la mise à jours des informations");
+                            toastr.error("Une erreur est survenue lors de la suppression du point de rassemblement");
                             setModalConfirm({ isOpen: false });
                             return;
                           }
 
                           setModalConfirm({ isOpen: false });
-                          toastr.success("Le points de rassemblement a été supprimé !");
+                          toastr.success("Le point de rassemblement a été supprimé !");
                           history.push("/point-de-rassemblement");
                         },
                       })
