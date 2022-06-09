@@ -6,6 +6,7 @@ const Joi = require("joi");
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
+const ApplicationModel = require("../../models/application");
 const { ERRORS } = require("../../utils");
 
 router.post("/equivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
@@ -83,10 +84,28 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (["WAITING_CORRECTION", "VALIDATED", "REFUSED"].includes(value.status) && req.user?.role) {
+      if (young.statusPhase2 !== "VALIDATED" && value.status === "VALIDATED") {
+        young.set({ statusPhase2: "VALIDATED" });
+      }
+      if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
+        const applications = await ApplicationModel.find({ youngId: young._id });
+        const activeApplications = applications.filter((application) => !["WAITING_ACCEPTATION", "REFUSED", "CANCEL"].includes(application.status));
+
+        //Le status phase deux est set a In_Progress si on a des candidateure active
+        if (activeApplications.length) {
+          young.set({ statusPhase2: "IN_PROGRESS" });
+        } else {
+          young.set({ statusPhase2: "WAITING_REALISATION" });
+        }
+      }
+    }
+
     delete value.id;
     delete value.idEquivalence;
     equivalence.set(value);
     await equivalence.save({ fromUser: req.user });
+    await young.save({ fromUser: req.user });
 
     res.status(200).send({ ok: true });
   } catch (error) {

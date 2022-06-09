@@ -247,6 +247,7 @@ export default function CreateEquivalence() {
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Date de fin"
+                min={data?.startDate}
                 type="text"
                 ref={refEndDate}
                 onFocus={(e) => {

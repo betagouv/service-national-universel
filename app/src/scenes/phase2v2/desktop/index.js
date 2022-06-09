@@ -37,7 +37,7 @@ export default function IndexDesktop() {
     })();
   }, []);
 
-  if (!applications) return <Loader />;
+  if (!applications || !equivalences) return <Loader />;
 
   return (
     <div className="bg-white mx-4 pb-12 my-3 rounded-lg">

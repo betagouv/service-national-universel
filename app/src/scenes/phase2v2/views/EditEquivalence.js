@@ -268,6 +268,7 @@ export default function EditEquivalence() {
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Date de fin"
+                min={formatDate(data?.startDate)}
                 type="date"
                 value={formatDate(data?.endDate)}
                 onChange={(e) => setData({ ...data, endDate: e.target.value })}

@@ -36,7 +36,7 @@ export default function IndexPhase2Mobile() {
     })();
   }, []);
 
-  if (!applications) return <Loader />;
+  if (!applications || !equivalences) return <Loader />;
 
   return (
     <div className="bg-white pb-5">

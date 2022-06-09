@@ -1,14 +1,13 @@
 import React from "react";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
-import Download from "../../../../assets/icons/Download";
-import SimpleFileIcon from "../../../../assets/icons/SimpleFileIcon";
 import { useHistory } from "react-router-dom";
+import { Modal } from "reactstrap";
+import Download from "../../../../assets/icons/Download";
+import Pencil from "../../../../assets/icons/Pencil";
+import SimpleFileIcon from "../../../../assets/icons/SimpleFileIcon";
 import { copyToClipboard, formatDateFR, translateEquivalenceStatus } from "../../../../utils";
 import ModalFiles from "../../desktop/components/ModalFiles";
-import clock from "../../../../assets/clock.svg";
-import { Modal } from "reactstrap";
-import Pencil from "../../../../assets/icons/Pencil";
 
 export default function ModalEquivalenceInformations({ theme, equivalence, open, setOpen, young, copied, setCopied }) {
   const [modalFiles, setModalFiles] = React.useState({ isOpen: false });
