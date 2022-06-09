@@ -8,6 +8,7 @@ import { copyToClipboard, formatDateFR, translateEquivalenceStatus } from "../..
 import ModalFiles from "../../desktop/components/ModalFiles";
 import clock from "../../../../assets/clock.svg";
 import { Modal } from "reactstrap";
+import Pencil from "../../../../assets/icons/Pencil";
 
 export default function ModalEquivalenceInformations({ theme, equivalence, open, setOpen, young, copied, setCopied }) {
   const [modalFiles, setModalFiles] = React.useState({ isOpen: false });
@@ -31,26 +32,15 @@ export default function ModalEquivalenceInformations({ theme, equivalence, open,
             <div className="text-base leading-5 font-bold">Ma demande de reconnaissance d’engagement externe</div>
           </div>
         </div>
-        {equivalence.status === "WAITING_VERIFICATION" && (
-          <>
-            <div className="flex justify-end mt-3">
-              <button
-                className="mr-8 mb-3 border-[1px] border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg"
-                onClick={() => history.push(`/phase2/equivalence/${equivalence._id}`)}>
-                Modifier ma demande
-              </button>
-            </div>
-          </>
-        )}
         {equivalence.status === "WAITING_CORRECTION" && (
           <>
             <div className="flex flex-col justify-between px-2 py-3 rounded-lg bg-gray-50 mb-4 mt-3 gap-6">
               <div className="flex flex-col flex-1">
                 <div className="text-base font-semibold">Corrections demandées</div>
-                <div className="text-sm text-gray-500">{equivalence.correctionMessage}</div>
+                <div className="text-sm text-gray-500">{equivalence.message}</div>
               </div>
               <button
-                className="mr-4 border-[1px] border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg"
+                className="mr-4 border-[1px] w-full border-indigo-600 hover:bg-indigo-600 text-indigo-600 hover:text-white px-4 py-2 rounded-lg"
                 onClick={() => history.push(`/phase2/equivalence/${equivalence._id}`)}>
                 Corriger ma demande
               </button>
@@ -62,7 +52,7 @@ export default function ModalEquivalenceInformations({ theme, equivalence, open,
             <div className="flex justify-between items-center px-2 py-3 rounded-lg  mt-3 bg-gray-50 mb-4 gap-6">
               <div className="flex flex-col flex-1">
                 <div className="text-base font-semibold">Motif du refus</div>
-                <div className="text-sm text-gray-500 w-3/4">{equivalence.refusedMessage}</div>
+                <div className="text-sm text-gray-500 w-3/4">{equivalence.message}</div>
               </div>
             </div>
           </>
@@ -104,32 +94,39 @@ export default function ModalEquivalenceInformations({ theme, equivalence, open,
           </div>
         </div>
 
-        <div className="grid grid-cols-2 pt-5">
-          <div className="flex flex-col gap-y-4 text-sm leading-none font-normal text-gray-400">
-            <span>Type d’engagement :</span>
-            <span>Structure d’accueil :</span>
-            <span>Dates :</span>
-            {equivalence.frequency ? <span>Fréquence :</span> : null}
-            <span>Adresse :</span>
-            <span>Code postal :</span>
-            <span>Ville :</span>
+        <div className="grid grid-cols-2 grid-rows-7 pt-5 items-start gap-y-2">
+          <div className="text-sm leading-relaxed font-normal text-gray-400 ">Type d’engagement :</div>
+          <div className="text-sm leading-relaxed">{equivalence.type}</div>
+          <div className="text-sm leading-relaxed font-normal text-gray-400 ">Structure d’accueil :</div>
+          <div className="text-sm leading-relaxed">{equivalence.structureName}</div>
+          <div className="text-sm leading-relaxed font-normal text-gray-400 ">Dates :</div>
+          <div className="text-sm leading-relaxed">
+            Du {formatDateFR(equivalence.startDate)} au {formatDateFR(equivalence.endDate)}
           </div>
-          <div className="flex flex-col gap-y-4 text-sm leading-none  ">
-            <span>{equivalence.type}</span>
-            <span>{equivalence.structureName}</span>
-            <span>
-              Du {formatDateFR(equivalence.startDate)} au {formatDateFR(equivalence.endDate)}
-            </span>
-            {equivalence.frequency ? (
-              <span className="lowercase">
+          {equivalence.frequency ? (
+            <>
+              <div className="text-sm leading-relaxed font-normal text-gray-400 ">Fréquence :</div>
+              <div className="text-sm leading-relaxed lowercase">
                 {equivalence.frequency.nombre} {equivalence.frequency.duree} {equivalence.frequency.frequence}
-              </span>
-            ) : null}
-            <span>{equivalence.address}</span>
-            <span>{equivalence.zip}</span>
-            <span>{equivalence.city}</span>
-          </div>
+              </div>
+            </>
+          ) : null}
+          <div className="text-sm leading-relaxed font-normal text-gray-400 ">Adresse :</div>
+          <div className="text-sm leading-relaxed">{equivalence.address}</div>
+          <div className="text-sm leading-relaxed font-normal text-gray-400 ">Code postal :</div>
+          <div className="text-sm leading-relaxed">{equivalence.zip}</div>
+          <div className="text-sm leading-relaxed font-normal text-gray-400 ">Ville :</div>
+          <div className="text-sm leading-relaxed">{equivalence.city}</div>
         </div>
+        {equivalence.status === "WAITING_VERIFICATION" ? (
+          <div className="flex items-end justify-end -translate-y-4">
+            <button
+              className="flex items-center justify-center rounded-full bg-blue-100 p-2 hover:scale-105 cursor-pointer mb-2"
+              onClick={() => history.push(`/phase2/equivalence/${equivalence._id}`)}>
+              <Pencil className="text-blue-600" />
+            </button>
+          </div>
+        ) : null}
       </div>
       <ModalFiles
         isOpen={modalFiles?.isOpen}
