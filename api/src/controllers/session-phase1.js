@@ -10,7 +10,7 @@ const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
-const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, isReferent } = require("../utils");
+const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, isReferent, YOUNG_STATUS } = require("../utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 const {
@@ -341,7 +341,7 @@ router.post("/check-token/:token", async (req, res) => {
           meetingPoint: [],
         },
       };
-      const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
+      const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
       const meetingPoints = await MeetingPointObject.find({ centerId: sessionPhase1.cohesionCenterId });
 
       for (const young of youngs) {
