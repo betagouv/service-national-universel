@@ -139,7 +139,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     meetingPoint.set({ deletedAt: now });
     await meetingPoint.save({ fromUser: req.user });
 
-    console.log(`Mission ${req.params.id} has been deleted`);
+    console.log(`meetingPoint ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
