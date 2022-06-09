@@ -559,7 +559,7 @@ router.post("/bus/:action(_msearch|export)", passport.authenticate(["referent"],
       const response = await allRecords("meetingpoint", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "bus", body: withFilterForMSearch(body, filter) });
+      const response = await esClient.msearch({ index: "bus", body: body });
       return res.status(200).send(response.body);
     }
   } catch (error) {

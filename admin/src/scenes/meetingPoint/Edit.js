@@ -47,7 +47,7 @@ export default function Edit(props) {
         setCenter(data);
       })();
       (async () => {
-        const { data, ok } = await api.get(`/meeting-point/youngs/${meetingPoint._id}`);
+        const { data, ok } = await api.get(`/meeting-point/${meetingPoint._id}/youngs`);
         if (!ok) return;
         setYoungs(data);
       })();
@@ -213,8 +213,8 @@ export default function Edit(props) {
           title={modalConfirm?.title}
           message={modalConfirm?.message}
           onCancel={() => setModalConfirm({ isOpen: false, onConfirm: null })}
-          onConfirm={() => {
-            modalConfirm?.onConfirm();
+          onConfirm={async () => {
+            await modalConfirm?.onConfirm();
             setModal({ isOpen: false, onConfirm: null });
           }}
         />

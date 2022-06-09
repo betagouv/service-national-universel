@@ -147,9 +147,9 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.get("/youngs/:meetingId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/youngs", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error: error2, value: meetingId } = validateId(req.params.meetingId);
+    const { error: error2, value: meetingId } = validateId(req.params.id);
     if (error2) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
