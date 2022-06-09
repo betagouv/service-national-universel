@@ -12,7 +12,7 @@ import Template from "../../../assets/icons/Template.js";
 
 export default function Index({ ...props }) {
   const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
+  const { user, sessionPhase1: sessionPhase1Redux } = useSelector((state) => state.Auth);
 
   const [center, setCenter] = useState();
   const [sessions, setSessions] = useState([]);
@@ -47,7 +47,9 @@ export default function Index({ ...props }) {
 
   useEffect(() => {
     if (!center) return;
-    setFocusedCohort(center.cohorts[0]);
+    // si on a une session dans le redux, on la selectionne directement
+    // sinon on prend la première session du centre
+    setFocusedCohort(sessionPhase1Redux?.cohort || center.cohorts[0]);
   }, [center]);
 
   useEffect(() => {
