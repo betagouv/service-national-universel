@@ -1,3 +1,15 @@
+## [1.98.1](https://github.com/betagouv/service-national-universel/compare/v1.98.0...v1.98.1) (2022-06-09)
+
+
+### Bug Fixes
+
+* **admin,app,support:** Ministère de l’éducation nationale et de la jeunesse ([fe5cf0c](https://github.com/betagouv/service-national-universel/commit/fe5cf0c26673769f8c7d02c167f035cf1668aed2))
+* add count sessionPhase1 share ([528ac9c](https://github.com/betagouv/service-national-universel/commit/528ac9ccafa0fc5033b6533b56713ad743fdab40))
+* **admin:** list of user's sessions ([e2ea76a](https://github.com/betagouv/service-national-universel/commit/e2ea76a39d16441eaccc4204db78796afebe814c))
+* **admin:** séjour sélectionné par défaut ([14fe339](https://github.com/betagouv/service-national-universel/commit/14fe3396d9b9b9f5953e80caa53ede332e653a33))
+* **admin:** selection du séjour initiale - vue centre ([734d639](https://github.com/betagouv/service-national-universel/commit/734d639302f7c5128aca3a930380d89d229827dd))
+* **api:** afficher uniquement volontaires validés - partage données sessionPhase1 ([336a3c9](https://github.com/betagouv/service-national-universel/commit/336a3c9f71295e81a0d3e003d0863b9dca8f3a6d))
+
 # [1.98.0](https://github.com/betagouv/service-national-universel/compare/v1.97.0...v1.98.0) (2022-06-07)
 
 
