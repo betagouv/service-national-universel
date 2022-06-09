@@ -7,6 +7,7 @@ const { validateId } = require("../utils/validator");
 const MeetingPointModel = require("../models/meetingPoint");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const BusModel = require("../models/bus");
+const YoungModel = require("../models/young");
 const { ERRORS, isYoung, isReferent } = require("../utils");
 const Joi = require("joi");
 const patches = require("./patches");
@@ -130,12 +131,35 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     const meetingPoint = await MeetingPointModel.findById(checkedId);
     if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const youngs = await YoungModel.find({ meetingPointId: checkedId });
+    if (youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const now = new Date();
     meetingPoint.set({ deletedAt: now });
     await meetingPoint.save({ fromUser: req.user });
 
     console.log(`Mission ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/youngs/:meetingId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: error2, value: meetingId } = validateId(req.params.meetingId);
+    if (error2) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const meetingPoint = await MeetingPointModel.findOne({ _id: meetingId, deletedAt: { $exists: false } });
+    if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const youngs = await YoungModel.find({ meetingPointId: meetingId });
+
+    return res.status(200).send({ ok: true, data: youngs });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -18,9 +18,10 @@ export default function Edit(props) {
   const [meetingPoint, setMeetingPoint] = useState();
   const [bus, setBus] = useState();
   const [center, setCenter] = useState();
-  const [modal, setModal] = React.useState({ isOpen: false });
-  const [modalConfirm, setModalConfirm] = React.useState({ isOpen: false });
-  const [occupationPercentage, setOccupationPercentage] = React.useState();
+  const [youngs, setYoungs] = useState();
+  const [modal, setModal] = useState({ isOpen: false });
+  const [modalConfirm, setModalConfirm] = useState({ isOpen: false });
+  const [occupationPercentage, setOccupationPercentage] = useState();
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
@@ -45,6 +46,11 @@ export default function Edit(props) {
         if (!ok) return;
         setCenter(data);
       })();
+      (async () => {
+        const { data, ok } = await api.get(`/meeting-point/youngs/${meetingPoint._id}`);
+        if (!ok) return;
+        setYoungs(data);
+      })();
     }
   }, [meetingPoint]);
 
@@ -54,7 +60,7 @@ export default function Edit(props) {
     setOccupationPercentage(occupation);
   }, [bus]);
 
-  if (!meetingPoint || !center || !bus) return null;
+  if (!meetingPoint || !center || !bus || !youngs) return null;
 
   return (
     <>
@@ -122,32 +128,34 @@ export default function Edit(props) {
                     <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Modifier</div>
                   </div>
                 </button>
-                <button
-                  className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700"
-                  onClick={() =>
-                    setModalConfirm({
-                      isOpen: true,
-                      title: "Suppresion du point de rassemblement",
-                      message: "Êtes-vous sûr de vouloir supprimer ce point de rassemblement ?",
-                      onConfirm: async () => {
-                        const { ok } = await api.remove(`/meeting-point/${meetingPoint._id}`);
-                        if (!ok) {
-                          toastr.error("Une erreur est survenue lors de la mise à jours des informations");
-                          setModalConfirm({ isOpen: false });
-                          return;
-                        }
+                {!youngs.length ? (
+                  <button
+                    className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700"
+                    onClick={() =>
+                      setModalConfirm({
+                        isOpen: true,
+                        title: "Suppresion du point de rassemblement",
+                        message: "Êtes-vous sûr de vouloir supprimer ce point de rassemblement ?",
+                        onConfirm: async () => {
+                          const { ok } = await api.remove(`/meeting-point/${meetingPoint._id}`);
+                          if (!ok) {
+                            toastr.error("Une erreur est survenue lors de la mise à jours des informations");
+                            setModalConfirm({ isOpen: false });
+                            return;
+                          }
 
-                        setModalConfirm({ isOpen: false });
-                        toastr.success("Le points de rassemblement a été supprimé !");
-                        history.push("/point-de-rassemblement");
-                      },
-                    })
-                  }>
-                  <div className="flex flex-row items-center p-2">
-                    <Trash className="text-blue-700 group-hover:text-white" width={16} height={16} />
-                    <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Supprimer</div>
-                  </div>
-                </button>
+                          setModalConfirm({ isOpen: false });
+                          toastr.success("Le points de rassemblement a été supprimé !");
+                          history.push("/point-de-rassemblement");
+                        },
+                      })
+                    }>
+                    <div className="flex flex-row items-center p-2">
+                      <Trash className="text-blue-700 group-hover:text-white" width={16} height={16} />
+                      <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Supprimer</div>
+                    </div>
+                  </button>
+                ) : null}
               </>
             ) : null}
           </div>
