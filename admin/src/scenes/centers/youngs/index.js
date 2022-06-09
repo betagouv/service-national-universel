@@ -3,36 +3,35 @@ import * as FileSaver from "file-saver";
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { NavLink, useHistory, useParams, Link } from "react-router-dom";
+import { Link, NavLink, useHistory, useParams } from "react-router-dom";
 import { ES_NO_LIMIT } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
+import ChevronRight from "../../../assets/icons/ChevronRight.js";
 import ClipboardList from "../../../assets/icons/ClipboardList";
 import Menu from "../../../assets/icons/Menu";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
+import Template from "../../../assets/icons/Template.js";
 import SelectAction from "../../../components/SelectAction";
 import api from "../../../services/api";
 import {
+  canSearchInElasticSearch,
   departmentLookUp,
   formatDateFRTimezoneUTC,
   formatLongDateFR,
   getLabelWithdrawnReason,
   isInRuralArea,
+  ROLES,
   translate,
   translateFileStatusPhase1,
   translatePhase1,
-  canSearchInElasticSearch,
-  ROLES,
 } from "../../../utils";
+import downloadPDF from "../../../utils/download-pdf";
 import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
 import Pointage from "./pointage";
-import ChevronRight from "../../../assets/icons/ChevronRight.js";
-import Template from "../../../assets/icons/Template.js";
-import downloadPDF from "../../../utils/download-pdf";
-import { Spinner } from "reactstrap";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
