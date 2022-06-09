@@ -183,7 +183,7 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                         </FormRow>
                         <ErrorMessage errors={errors} touched={touched} name="imageRight" />
                         <p className="text-gray-500">
-                          le Ministère de l&apos;Education Nationale, de la Jeunesse et des Sports, ses partenaires et les journalistes à enregistrer,{" "}
+                          le Ministère de l&apos;Education Nationale et de la Jeunesse, ses partenaires et les journalistes à enregistrer,{" "}
                           <strong>reproduire et représenter l&apos;image et/ou la voix du volontaire</strong> représenté en partie ou en intégralité, ensemble ou séparément, sur
                           leurs publications respectives.
                         </p>

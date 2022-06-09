@@ -140,7 +140,7 @@ const Wrapper = ({ children }) => {
           </div>
           <div className="flex max-w-full flex-wrap items-center justify-center  gap-4">
             <span className="cursor-pointer text-center text-xs text-[#6A6A6A]">
-              Tous droits réservés - Ministère de l'éducation nationale, de la jeunesse et des sports - 2022
+              Tous droits réservés - Ministère de l'éducation nationale et de la jeunesse - 2022
             </span>
           </div>
           <div className="flex max-w-full flex-wrap items-center justify-center  gap-4">
