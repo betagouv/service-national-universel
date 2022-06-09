@@ -461,9 +461,9 @@ router.post("/:sessionId/transport-data", async (req, res) => {
             result[youngMeetingPoint.busExcelId]["meetingPoint"] = [];
           }
           // console.log({ youngMeetingPoint, met: result[youngMeetingPoint.busExcelId]["meetingPoint"] });
-          console.log({ id1: youngMeetingPoint?._id.toString(), id2: result[youngMeetingPoint.busExcelId]["meetingPoint"] });
+          // console.log({ id1: youngMeetingPoint?._id.toString(), id2: result[youngMeetingPoint.busExcelId]["meetingPoint"] });
 
-          if (!result[youngMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id !== youngMeetingPoint._id.toString())) {
+          if (!result[youngMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id === youngMeetingPoint._id.toString())) {
             result[youngMeetingPoint.busExcelId]["meetingPoint"].push(youngMeetingPoint);
           }
 
