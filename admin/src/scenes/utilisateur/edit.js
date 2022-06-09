@@ -332,7 +332,11 @@ export default function Edit(props) {
                                 {(sessionsWhereUserIsHeadCenter || [])
                                   .map((session) => (
                                     <div className="py-1" key={session._id.toString()}>
-                                      <a href={`/centre/${session?.center?._id}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 group-hover:underline">
+                                      <a
+                                        href={`/centre/${session?.center?._id}?cohorte=${session.cohort}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-1 group-hover:underline">
                                         {session?.center?.name}
                                         <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={session.cohort} style={{ cursor: "default" }} />
                                         <MdOutlineOpenInNew />
