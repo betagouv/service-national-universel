@@ -130,7 +130,7 @@ export default function Edit(props) {
                 </button>
                 {!youngs.length ? (
                   <button
-                    className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700"
+                    className="group border-[1px] border-red-700 rounded-lg hover:bg-red-700"
                     onClick={() =>
                       setModalConfirm({
                         isOpen: true,
@@ -151,8 +151,8 @@ export default function Edit(props) {
                       })
                     }>
                     <div className="flex flex-row items-center p-2">
-                      <Trash className="text-blue-700 group-hover:text-white" width={16} height={16} />
-                      <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Supprimer</div>
+                      <Trash className="text-red-700 group-hover:text-white" width={16} height={16} />
+                      <div className="ml-2 text-sm text-red-700 leading-5 group-hover:text-white">Supprimer</div>
                     </div>
                   </button>
                 ) : null}
