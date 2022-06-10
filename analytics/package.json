@@ -20,6 +20,7 @@
     "express": "^4.17.2",
     "helmet": "^5.0.1",
     "minimist": "^1.2.5",
+    "mongodb": "^4.7.0",
     "node-fetch": "^2.6.6",
     "nodemon": "^2.0.15",
     "pg": "^8.7.3",

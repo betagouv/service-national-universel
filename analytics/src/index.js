@@ -1,6 +1,8 @@
+require("dotenv").config();
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const express = require("express");
+const cors = require("cors");
 
 const { PORT } = require("./config.js");
 
@@ -9,8 +11,8 @@ const app = express();
 app.use(helmet());
 app.use(helmet.hsts({ maxAge: 5184000 }));
 
-// const origin = ["http://localhost:8083", "http://localhost:3000", ASSOCIATION_URL, APP_URL, MISSION_URL];
-// app.use(cors({ credentials: true, origin }));
+const origin = ["http://localhost:8085"];
+app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.text({ type: "application/x-ndjson" }));
 app.use(bodyParser.urlencoded({ extended: true }));
