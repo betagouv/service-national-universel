@@ -29,7 +29,6 @@ export default function Status({ filter }) {
         },
         aggs: {
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },
-          status: { terms: { field: "status.keyword" } },
           cohesionStayMedicalFileReceived: { terms: { field: "cohesionStayMedicalFileReceived.keyword" } },
           cohesionStayPresence: { terms: { field: "cohesionStayPresence.keyword" } },
           youngPhase1Agreement: { terms: { field: "youngPhase1Agreement.keyword" } },
