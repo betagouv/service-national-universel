@@ -262,7 +262,7 @@ export default function CenterYoungIndex() {
         toastr.error("Erreur !", translate(code));
       }
       // Transform data into array of objects before excel converts
-      const test = Object.keys(data).map((key) => {
+      const formatedRep = Object.keys(data).map((key) => {
         return {
           name: key != "noMeetingPoint" ? key : "Autonome",
           data: data[key].youngs.map((young) => {
@@ -302,28 +302,19 @@ export default function CenterYoungIndex() {
         };
       });
 
-      console.log({ data, test });
-      // const test = [
-      //   { name: "A tester", data: [{ id: 3, test: "lol" }] },
-      //   { name: "A tester 2", data: [{ id: 4, test: "lole" }] },
-      // ];
+      console.log({ data });
 
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
       const fileExtension = ".xlsx";
 
       const wb = XLSX.utils.book_new();
-      test.forEach((sheet) => {
+      formatedRep.forEach((sheet) => {
         let ws = XLSX.utils.json_to_sheet(sheet.data);
         XLSX.utils.book_append_sheet(wb, ws, sheet.name);
       });
       const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
       const resultData = new Blob([excelBuffer], { type: fileType });
-      FileSaver.saveAs(resultData, "test" + fileExtension);
-
-      // const data = await getAllResults(`sessionphase1young/${filter.SESSION}`, body);
-      // const result = await transformData({ data, centerId: id });
-      // const csv = await toArrayOfArray(result);
-      // await toXLSX(`volontaires_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`, csv);
+      FileSaver.saveAs(resultData, `transport_information_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}` + fileExtension);
     } catch (e) {
       console.log(e);
       toastr.error("Erreur !", translate(e.code));
