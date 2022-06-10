@@ -20,7 +20,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const data = await MeetingPointModel.findById(young.meetingPointId);
+    const data = await MeetingPointModel.findOne({ _id: young.meetingPointId, deletedAt: { $exists: false } });
 
     return res.status(200).send({ ok: true, data: data ? serializeMeetingPoint(data) : null });
   } catch (error) {
