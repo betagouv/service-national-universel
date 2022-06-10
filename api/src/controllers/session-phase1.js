@@ -379,7 +379,7 @@ router.post("/check-token/:token", async (req, res) => {
               result[tempMeetingPoint.busExcelId]["meetingPoint"] = [];
             }
 
-            if (!result[tempMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id !== tempMeetingPoint._id.toString())) {
+            if (!result[tempMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === tempMeetingPoint._id.toString())) {
               result[tempMeetingPoint.busExcelId]["meetingPoint"].push(tempMeetingPoint);
             }
 
