@@ -13,6 +13,7 @@ export default function Status({ filter }) {
   const [departInform, setDepartInform] = useState({});
   const [departSejourMotif, setDepartSejourMotif] = useState({});
   const [presenceJDM, setPresenceJDM] = useState({});
+  const [status, setStatus] = useState({});
   const [totalHit, setTotalHit] = useState();
 
   const { sessionPhase1 } = useSelector((state) => state.Auth);
@@ -28,6 +29,7 @@ export default function Status({ filter }) {
         },
         aggs: {
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },
+          status: { terms: { field: "status.keyword" } },
           cohesionStayMedicalFileReceived: { terms: { field: "cohesionStayMedicalFileReceived.keyword" } },
           cohesionStayPresence: { terms: { field: "cohesionStayPresence.keyword" } },
           youngPhase1Agreement: { terms: { field: "youngPhase1Agreement.keyword" } },
@@ -45,6 +47,7 @@ export default function Status({ filter }) {
 
       const { responses } = await api.esQuery("young", body);
       if (responses?.length) {
+        setStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         addNullAttributes(responses[0].hits.total.value, responses[0].aggregations.cohesionStayMedicalFileReceived.buckets);
         setCohesionStayMedicalFileReceived(responses[0].aggregations.cohesionStayMedicalFileReceived.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
@@ -74,9 +77,11 @@ export default function Status({ filter }) {
     return link;
   };
 
+  console.log(status);
+
   return (
     <>
-      <Phase1 data={statusPhase1} getLink={getLink} sessionPhase1Id={sessionPhase1?._id} centerId={sessionPhase1?.cohesionCenterId} />
+      <Phase1 data={statusPhase1} status={status} getLink={getLink} sessionPhase1Id={sessionPhase1?._id} centerId={sessionPhase1?.cohesionCenterId} />
       <CohesionStayMedicalFileReceived data={cohesionStayMedicalFileReceived} getLink={getLink} sessionPhase1Id={sessionPhase1?._id} centerId={sessionPhase1?.cohesionCenterId} />
       <Participation
         cohesionStayPresence={cohesionStayPresence}
