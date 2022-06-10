@@ -68,7 +68,7 @@ export default function Status({ filter }) {
       }
 
       const { responses } = await api.esQuery("young", body);
-      const { responses2 } = await api.esQuery("young", body2);
+      const { responses: responses2 } = await api.esQuery("young", body2);
 
       if (responses?.length) {
         setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
