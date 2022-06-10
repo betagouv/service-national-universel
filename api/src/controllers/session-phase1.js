@@ -406,8 +406,6 @@ router.post("/:sessionId/transport-data", passport.authenticate("referent", { se
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    // Verif droits du referent
-
     const sessionPhase1 = await SessionPhase1Model.findById(value.sessionId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -461,7 +459,7 @@ router.post("/:sessionId/transport-data", passport.authenticate("referent", { se
             result[youngMeetingPoint.busExcelId]["meetingPoint"] = [];
           }
 
-          if (!result[youngMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id !== youngMeetingPoint._id.toString())) {
+          if (!result[youngMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
             result[youngMeetingPoint.busExcelId]["meetingPoint"].push(youngMeetingPoint);
           }
 
