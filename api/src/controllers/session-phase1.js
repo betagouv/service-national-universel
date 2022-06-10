@@ -398,7 +398,7 @@ router.post("/check-token/:token", async (req, res) => {
   }
 });
 
-router.post("/:sessionId/transport-data", async (req, res) => {
+router.post("/:sessionId/transport-data", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       sessionId: Joi.string().required(),
