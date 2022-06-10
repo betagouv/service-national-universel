@@ -4,7 +4,7 @@ import { Col, Row } from "reactstrap";
 import { YOUNG_STATUS_COLORS } from "../../../utils";
 import { CardSection, Subtitle, CardComponent } from "../../../components/dashboard";
 
-export default function Phase1({ data, getLink, centerId, sessionPhase1Id }) {
+export default function Phase1({ data, getLink, centerId, sessionPhase1Id, status }) {
   return (
     <>
       <Row>
@@ -62,10 +62,10 @@ export default function Phase1({ data, getLink, centerId, sessionPhase1Id }) {
         <Col md={6} xl={2}>
           <CardComponent
             getLink={getLink}
-            to={`/centre/${centerId}/${sessionPhase1Id}/general?STATUS_PHASE_1=%5B"WITHDRAWN"%5D`}
+            to={`/centre/${centerId}/${sessionPhase1Id}/general?STATUS=%5B"WITHDRAWN"%5D`}
             color={YOUNG_STATUS_COLORS.WITHDRAWN}
             title="Désistée"
-            value={data.WITHDRAWN}
+            value={status?.WITHDRAWN}
           />
         </Col>
       </Row>
