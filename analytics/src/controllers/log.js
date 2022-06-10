@@ -3,11 +3,10 @@ const router = express.Router();
 
 const LogModel = require("../models/log");
 
-const esClient = require("../es");
-
-router.post("/", async (req, res) => {
+router.get("/", async (req, res) => {
   const { query } = req.body;
-  return res.send(result.body);
+  const logs = await LogModel.findAll();
+  return res.status(200).send({ ok: false, data: logs });
 });
 
 module.exports = router;
