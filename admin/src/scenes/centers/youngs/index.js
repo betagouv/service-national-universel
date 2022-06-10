@@ -302,8 +302,6 @@ export default function CenterYoungIndex() {
         };
       });
 
-      console.log({ data });
-
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
       const fileExtension = ".xlsx";
 
