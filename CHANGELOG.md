@@ -1,3 +1,17 @@
+# [1.99.0](https://github.com/betagouv/service-national-universel/compare/v1.98.1...v1.99.0) (2022-06-10)
+
+
+### Bug Fixes
+
+* **admin:** head center dashboard ([5b493ec](https://github.com/betagouv/service-national-universel/commit/5b493ec4a96e4243e7b31b9112227526d4d6bc2e))
+* **admin:** PDR session share ([0fbc925](https://github.com/betagouv/service-national-universel/commit/0fbc925ed98b77a21ed6133794ebb11293b2f097))
+* **api:** ne pas supprimer session si ya des jeunes ([ec2e4d3](https://github.com/betagouv/service-national-universel/commit/ec2e4d3868ff227a12f00ed0152794e1409e6a92))
+
+
+### Features
+
+* **admin:** delete meeting point ([#1600](https://github.com/betagouv/service-national-universel/issues/1600)) ([9544f57](https://github.com/betagouv/service-national-universel/commit/9544f57cd890c73098fb39ac88e855f2ecd2ec3d))
+
 ## [1.98.1](https://github.com/betagouv/service-national-universel/compare/v1.98.0...v1.98.1) (2022-06-09)
 
 
