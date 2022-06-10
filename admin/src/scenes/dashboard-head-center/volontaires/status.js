@@ -40,10 +40,6 @@ export default function Status({ filter }) {
         size: 0,
       };
 
-      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
-      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
-      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
-
       const body2 = {
         query: {
           bool: {
@@ -57,9 +53,19 @@ export default function Status({ filter }) {
         track_total_hits: true,
         size: 0,
       };
-      if (filter.cohort?.length) body2.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
-      if (filter.region?.length) body2.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
-      if (filter.department?.length) body2.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+
+      if (filter.cohort?.length) {
+        body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
+        body2.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
+      }
+      if (filter.region?.length) {
+        body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+        body2.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      }
+      if (filter.department?.length) {
+        body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+        body2.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      }
 
       const { responses } = await api.esQuery("young", body);
       const { responses2 } = await api.esQuery("young", body2);
