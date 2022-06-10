@@ -12,7 +12,8 @@ module.exports = {
     ecmaVersion: 2020,
   },
   rules: {
-    "react/jsx-no-duplicate-props": 1,
-    "react/prop-types": 0,
+    "react/jsx-no-duplicate-props": "warn",
+    "react/prop-types": "off",
+    "no-unreachable": "warn",
   },
 };
