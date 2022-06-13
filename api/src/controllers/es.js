@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES, canSearchAssociation, canSearchSessionPhase1, canSearchMeetingPoints, canSearchInElasticSearch, canViewBus } = require("snu-lib/roles");
 const { PHASE1_HEADCENTER_ACCESS_LIMIT, COHORTS } = require("snu-lib/constants");
-const { region2department } = require("snu-lib/region-and-departments");
+const { region2department, department2region } = require("snu-lib/region-and-departments");
 const { capture } = require("../sentry");
 const esClient = require("../es");
 const { ERRORS, isYoung, getSignedUrlForApiAssociation, isReferent } = require("../utils");
@@ -610,11 +610,19 @@ router.post("/team/:action(_msearch|export)", passport.authenticate(["referent"]
 
     if (!canSearchInElasticSearch(user, "team")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    filter.push({
-      bool: {
-        filter: [{ bool: { must: [{ term: { "region.keyword": user.region } }] } }],
-      },
-    });
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      filter.push({
+        bool: {
+          filter: [{ bool: { must: [{ terms: { "region.keyword": user.department.map((depart) => department2region[depart]) } }] } }],
+        },
+      });
+    } else {
+      filter.push({
+        bool: {
+          filter: [{ bool: { must: [{ term: { "region.keyword": user.region } }] } }],
+        },
+      });
+    }
 
     if (req.params.action === "export") {
       const response = await allRecords("referent", applyFilterOnQuery(req.body.query, filter));

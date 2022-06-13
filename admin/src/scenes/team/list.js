@@ -38,6 +38,7 @@ export default function List() {
       query: { bool: { must: { match_all: {} }, filter: [] } },
       track_total_hits: true,
     };
+    if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
     if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
     if (filter.role?.length) body.query.bool.filter.push({ terms: { "role.keyword": filter.role } });
     return body;
