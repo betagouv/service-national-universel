@@ -21,10 +21,10 @@ router.get("/logout", async (req, res) => {
   console.log("logout");
   console.log("Req", req);
   console.log("User", req.user);
-  console.log("SAML", req.user.saml);
+  // console.log("SAML", req.user.saml);
 
-  req.user.nameID = req.user.saml.nameID;
-  req.user.nameIDFormat = req.user.saml.nameIDFormat;
+  // req.user.nameID = req.user.saml.nameID;
+  // req.user.nameIDFormat = req.user.saml.nameIDFormat;
   passport._strategy("educonnect").logout(req, (err, request) => {
     console.log(err);
 
