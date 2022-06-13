@@ -47,7 +47,7 @@ export default function Footer() {
             <NavLink to={young ? `/besoin-d-aide?from=${from}` : `/public-besoin-d-aide?from=${window.location.pathname}`}>Besoin d&apos;aide</NavLink>
           </li>
         </ul>
-        <p>Tous droits réservés - Ministère de l&apos;éducation nationale, de la jeunesse et des sports - {new Date().getFullYear()}</p>
+        <p>Tous droits réservés - Ministère de l&apos;éducation nationale et de la jeunesse - {new Date().getFullYear()}</p>
         <ul>
           <li>
             <a href="https://www.gouvernement.fr/" target="_blank" rel="noreferrer">

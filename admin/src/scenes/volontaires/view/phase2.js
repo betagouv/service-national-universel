@@ -1,18 +1,28 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-
-import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, getLimitDateForPhase2, ENABLE_PM, colors } from "../../../utils";
-import WrapperPhase2 from "./wrapper";
-import ApplicationList from "./applicationList.js";
-import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
-import SelectStatus from "../../../components/selectStatus";
 import Badge from "../../../components/Badge";
+import { Box, BoxTitle } from "../../../components/box";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
-import { Box, BoxTitle } from "../../../components/box";
+import SelectStatus from "../../../components/selectStatus";
+import { environment } from "../../../config";
+import api from "../../../services/api";
+import { colors, ENABLE_PM, translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../utils";
+import CardEquivalence from "../components/Equivalence";
+import ApplicationList from "./applicationList.js";
+import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
+import WrapperPhase2 from "./wrapper";
 
 export default function Phase2({ young, onChange }) {
+  const [equivalences, setEquivalences] = React.useState([]);
+  React.useEffect(() => {
+    (async () => {
+      const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalences`);
+      if (ok) return setEquivalences(data);
+    })();
+  }, []);
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2" onChange={onChange}>
@@ -64,6 +74,7 @@ export default function Phase2({ young, onChange }) {
           </Row>
         </Box>
         {ENABLE_PM && <Phase2MilitaryPreparation young={young} />}
+        {environment !== "production" ? equivalences.map((equivalence, index) => <CardEquivalence key={index} equivalence={equivalence} young={young} />) : null}
         <Box>
           <Row>
             <Col md={12}>

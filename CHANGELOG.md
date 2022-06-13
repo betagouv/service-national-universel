@@ -1,3 +1,52 @@
+# [1.99.0](https://github.com/betagouv/service-national-universel/compare/v1.98.1...v1.99.0) (2022-06-10)
+
+
+### Bug Fixes
+
+* **admin:** head center dashboard ([5b493ec](https://github.com/betagouv/service-national-universel/commit/5b493ec4a96e4243e7b31b9112227526d4d6bc2e))
+* **admin:** PDR session share ([0fbc925](https://github.com/betagouv/service-national-universel/commit/0fbc925ed98b77a21ed6133794ebb11293b2f097))
+* **api:** ne pas supprimer session si ya des jeunes ([ec2e4d3](https://github.com/betagouv/service-national-universel/commit/ec2e4d3868ff227a12f00ed0152794e1409e6a92))
+
+
+### Features
+
+* **admin:** delete meeting point ([#1600](https://github.com/betagouv/service-national-universel/issues/1600)) ([9544f57](https://github.com/betagouv/service-national-universel/commit/9544f57cd890c73098fb39ac88e855f2ecd2ec3d))
+
+## [1.98.1](https://github.com/betagouv/service-national-universel/compare/v1.98.0...v1.98.1) (2022-06-09)
+
+
+### Bug Fixes
+
+* **admin,app,support:** Ministère de l’éducation nationale et de la jeunesse ([fe5cf0c](https://github.com/betagouv/service-national-universel/commit/fe5cf0c26673769f8c7d02c167f035cf1668aed2))
+* add count sessionPhase1 share ([528ac9c](https://github.com/betagouv/service-national-universel/commit/528ac9ccafa0fc5033b6533b56713ad743fdab40))
+* **admin:** list of user's sessions ([e2ea76a](https://github.com/betagouv/service-national-universel/commit/e2ea76a39d16441eaccc4204db78796afebe814c))
+* **admin:** séjour sélectionné par défaut ([14fe339](https://github.com/betagouv/service-national-universel/commit/14fe3396d9b9b9f5953e80caa53ede332e653a33))
+* **admin:** selection du séjour initiale - vue centre ([734d639](https://github.com/betagouv/service-national-universel/commit/734d639302f7c5128aca3a930380d89d229827dd))
+* **api:** afficher uniquement volontaires validés - partage données sessionPhase1 ([336a3c9](https://github.com/betagouv/service-national-universel/commit/336a3c9f71295e81a0d3e003d0863b9dca8f3a6d))
+
+# [1.98.0](https://github.com/betagouv/service-national-universel/compare/v1.97.0...v1.98.0) (2022-06-07)
+
+
+### Features
+
+* **api:** send step1form connected young ([#1597](https://github.com/betagouv/service-national-universel/issues/1597)) ([43d67ee](https://github.com/betagouv/service-national-universel/commit/43d67ee77067eca0161a8924da0d60a3362ea361))
+
+# [1.97.0](https://github.com/betagouv/service-national-universel/compare/v1.96.1...v1.97.0) (2022-06-06)
+
+
+### Bug Fixes
+
+* ajout link écran phase 1 affecté ([ed7d8d5](https://github.com/betagouv/service-national-universel/commit/ed7d8d5fd19f0fbc8b0197bc1909de7d2e2e2747))
+* **admin:** create meeting point center ([af4c519](https://github.com/betagouv/service-national-universel/commit/af4c519d0fe97d714e09c59c78a3da01beda992d))
+* **admin:** remove `statusPhase1Tmp` from export ([d43a7e9](https://github.com/betagouv/service-national-universel/commit/d43a7e9b66be53b34e375159a08e715aeebd69b5))
+* **api,admin:** changer ou pas centre de destination point de rassemblement ([a8ba06b](https://github.com/betagouv/service-national-universel/commit/a8ba06b342c7a3cdbaac6998aa3a1929f73e13d7))
+
+
+### Features
+
+* **admin,api:** creation point de rassemblement ([#1596](https://github.com/betagouv/service-national-universel/issues/1596)) ([da4dc7b](https://github.com/betagouv/service-national-universel/commit/da4dc7bad69fa4524655fd33bd4ceb8236266159))
+* **admin,api:** ouverture création point de rassemblement en prod ([dab3518](https://github.com/betagouv/service-national-universel/commit/dab35180402cb0589179dd59b42b4bf944b14395))
+
 ## [1.96.1](https://github.com/betagouv/service-national-universel/compare/v1.96.0...v1.96.1) (2022-06-03)
 
 

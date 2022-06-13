@@ -98,6 +98,7 @@ export default function InscriptionPanel({ onChange, value }) {
           </a>
           <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
         </div>
+        {value.status === YOUNG_STATUS.WITHDRAWN && <div className="mt-3">⚠️ Désistement : &quot;{value.withdrawnMessage}&quot;</div>}
       </div>
       {[YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(value.status) && value.inscriptionCorrectionMessage ? (
         <Info title="Demande(s) de correction :" id={value._id}>

@@ -82,11 +82,12 @@ export default function List({ data }) {
                     <div className="flex items-center gap-2">
                       {bus === "noMeetingPoint" ? (
                         <>
-                          <BiWalk /> Autonome(s)
+                          <BiWalk /> Autonome(s)<span className="text-xs">({data[bus]?.youngs?.length})</span>
                         </>
                       ) : (
                         <>
                           <FaBus /> {bus}
+                          <span className="text-xs">({data[bus]?.youngs?.length})</span>
                         </>
                       )}
                     </div>

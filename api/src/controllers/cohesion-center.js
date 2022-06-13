@@ -313,7 +313,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       if (deletedCohorts?.length > 0) {
         for (let cohort of deletedCohorts) {
           const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort });
-          await sessionPhase1?.remove();
+          const youngsInSessions = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id.toString() });
+          if (youngsInSessions.length === 0) {
+            await sessionPhase1?.remove();
+          }
         }
       }
     }

@@ -3,36 +3,35 @@ import * as FileSaver from "file-saver";
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { NavLink, useHistory, useParams, Link } from "react-router-dom";
+import { Link, NavLink, useHistory, useParams } from "react-router-dom";
 import { ES_NO_LIMIT } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
+import ChevronRight from "../../../assets/icons/ChevronRight.js";
 import ClipboardList from "../../../assets/icons/ClipboardList";
 import Menu from "../../../assets/icons/Menu";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
+import Template from "../../../assets/icons/Template.js";
 import SelectAction from "../../../components/SelectAction";
 import api from "../../../services/api";
 import {
+  canSearchInElasticSearch,
   departmentLookUp,
   formatDateFRTimezoneUTC,
   formatLongDateFR,
   getLabelWithdrawnReason,
   isInRuralArea,
+  ROLES,
   translate,
   translateFileStatusPhase1,
   translatePhase1,
-  canSearchInElasticSearch,
-  ROLES,
 } from "../../../utils";
+import downloadPDF from "../../../utils/download-pdf";
 import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
 import Pointage from "./pointage";
-import ChevronRight from "../../../assets/icons/ChevronRight.js";
-import Template from "../../../assets/icons/Template.js";
-import downloadPDF from "../../../utils/download-pdf";
-import { Spinner } from "reactstrap";
 
 export default function CenterYoungIndex() {
   const [modalExportMail, setModalExportMail] = React.useState({ isOpen: false });
@@ -253,7 +252,71 @@ export default function CenterYoungIndex() {
     const data = await getAllResults(`sessionphase1young/${filter.SESSION}`, body);
     const result = await transformData({ data, centerId: id });
     const csv = await toArrayOfArray(result);
-    await toXLSX(`volontaires_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}.xlsx`, csv);
+    await toXLSX(`volontaires_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`, csv);
+  };
+
+  const exportDataTransport = async () => {
+    try {
+      const { ok, data, code } = await api.post(`/session-phase1/${sessionId}/transport-data`);
+      if (!ok) {
+        toastr.error("Erreur !", translate(code));
+      }
+      // Transform data into array of objects before excel converts
+      const formatedRep = Object.keys(data).map((key) => {
+        return {
+          name: key != "noMeetingPoint" ? key : "Autonome",
+          data: data[key].youngs.map((young) => {
+            const meetingPoint = young.meetingPointId && data[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
+
+            return {
+              _id: young._id,
+              Cohorte: young.cohort,
+              Prénom: young.firstName,
+              Nom: young.lastName,
+              "Date de naissance": formatDateFRTimezoneUTC(young.birthdateAt),
+              Sexe: translate(young.gender),
+              Email: young.email,
+              Téléphone: young.phone,
+              "Adresse postale": young.address,
+              "Code postal": young.zip,
+              Ville: young.city,
+              Département: young.department,
+              Région: young.region,
+              Statut: translate(young.statusPhase1),
+              "Prénom représentant légal 1": young.parent1FirstName,
+              "Nom représentant légal 1": young.parent1LastName,
+              "Email représentant légal 1": young.parent1Email,
+              "Téléphone représentant légal 1": young.parent1Phone,
+              "Statut représentant légal 1": translate(young.parent1Status),
+              "Prénom représentant légal 2": young.parent2FirstName,
+              "Nom représentant légal 2": young.parent2LastName,
+              "Email représentant légal 2": young.parent2Email,
+              "Téléphone représentant légal 2": young.parent2Phone,
+              "Statut représentant légal 2": translate(young.parent2Status),
+              "Id du point de rassemblement": young.meetingPointId,
+              "Adresse point de rassemblement": meetingPoint?.departureAddress,
+              "Date aller": meetingPoint?.departureAtString,
+              "Date retour": meetingPoint?.returnAtString,
+            };
+          }),
+        };
+      });
+
+      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+      const fileExtension = ".xlsx";
+
+      const wb = XLSX.utils.book_new();
+      formatedRep.forEach((sheet) => {
+        let ws = XLSX.utils.json_to_sheet(sheet.data);
+        XLSX.utils.book_append_sheet(wb, ws, sheet.name);
+      });
+      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      const resultData = new Blob([excelBuffer], { type: fileType });
+      FileSaver.saveAs(resultData, `transport_information_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}` + fileExtension);
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !", translate(e.code));
+    }
   };
 
   return (
@@ -304,9 +367,18 @@ export default function CenterYoungIndex() {
                       render: (
                         <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
                           <ClipboardList className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                          <div style={{ fontFamily: "Marianne" }} className="text-sm text-gray-700">
-                            Informations complètes
-                          </div>
+                          <div className="text-sm text-gray-700">Informations complètes</div>
+                        </div>
+                      ),
+                    },
+                    {
+                      action: async () => {
+                        await exportDataTransport();
+                      },
+                      render: (
+                        <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
+                          <div className="text-sm text-gray-700">Informations transports</div>
                         </div>
                       ),
                     },

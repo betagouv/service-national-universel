@@ -47,7 +47,7 @@ router.post("/eligibility/2022", async (req, res) => {
       includedBirthdate: { begin: "2004-02-26", end: "2007-02-12" },
       stringDate: "13 au 25 février 2022",
       inscriptionLimitDate: "2021-12-31",
-      info: "Pour les élèves de 2nde scolarisés dans un établissement relevant du ministère de l’éducation nationale, de la jeunesse et des sports, l’inscription est possible y compris dans le cas où une semaine du séjour de cohésion se déroule sur le temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.",
+      info: "Pour les élèves de 2nde scolarisés dans un établissement relevant du ministère de l’éducation nationale et de la jeunesse, l’inscription est possible y compris dans le cas où une semaine du séjour de cohésion se déroule sur le temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.",
       buffer: 1.15,
       id: "Février 2022",
     },

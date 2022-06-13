@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
-const MODELNAME = "missionEquivalence";
+const MODELNAME = "missionequivalence";
 
 const Schema = new mongoose.Schema({
   youngId: {
@@ -93,17 +93,10 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  correctionMessage: {
+  message: {
     type: String,
     documentation: {
-      description: "Message de correction",
-    },
-  },
-
-  refusedMessage: {
-    type: String,
-    documentation: {
-      description: "Message de refus",
+      description: "Message de correction ou de refus",
     },
   },
 

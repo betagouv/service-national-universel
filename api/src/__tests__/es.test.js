@@ -4,7 +4,7 @@ const request = require("supertest");
 
 // This part should be done at the beginning (before require models or anything else.).
 process.env.ES_ENDPOINT = "http://localhost:9200";
-jest.mock("@selego/mongoose-elastic", () => () => () => { });
+jest.mock("@selego/mongoose-elastic", () => () => () => {});
 jest.mock("@elastic/elasticsearch", () => ({
   Client: jest.fn().mockImplementation(() => {
     return {
@@ -153,8 +153,26 @@ describe("Es", () => {
     it("Should call msearch with correct index", async () => {
       const body = buildMsearchQuery("meetingpoint", matchAll);
       const res = await msearch("meetingpoint", body);
+      const expectedBody = buildMsearchQuery("meetingpoint", {
+        query: {
+          bool: {
+            must: { match_all: {} },
+            filter: [
+              {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: "deletedAt",
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
       expect(res.statusCode).toEqual(200);
-      expect(esClient.msearch).toHaveBeenCalledWith({ body, index: "meetingpoint" });
+      expect(esClient.msearch).toHaveBeenCalledWith({ body: expectedBody, index: "meetingpoint" });
     });
   });
 
