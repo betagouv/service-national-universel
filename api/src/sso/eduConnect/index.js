@@ -35,9 +35,13 @@ function sso(passport) {
       // logoutCallbackUrl: EDUCONNECT_LOGOUT_CALLBACK_URL,
     },
     async function (profile, done) {
+      console.log("Signon profile :", profile);
+
       return done(null, profile);
     },
     async function (profile, done) {
+      console.log("Logout profile :", profile);
+
       return done(null, profile);
     },
   );
