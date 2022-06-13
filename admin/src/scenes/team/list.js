@@ -61,7 +61,7 @@ export default function List() {
     getService();
     updateFilter({ region: [user.region] });
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: [user.department] });
+      updateFilter({ department: user.department });
     }
   }, []);
 

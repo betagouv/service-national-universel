@@ -116,8 +116,7 @@ const Schema = new mongoose.Schema({
     },
   },
   department: {
-    type: String,
-    default: "",
+    type: [String],
     documentation: {
       description: "Département de l'utilisateur, si applicable",
     },

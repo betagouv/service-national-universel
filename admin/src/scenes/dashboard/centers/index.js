@@ -22,7 +22,7 @@ export default function Index() {
 
   useEffect(() => {
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: [user.department] });
+      updateFilter({ department: user.department });
     } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
       updateFilter({ region: [user.region] });
     } else {

@@ -28,7 +28,7 @@ export default function Index() {
       setFilter({ status: [YOUNG_STATUS.VALIDATED], cohort: ["2021"], region: [], department: [] });
     }
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: [user.department] });
+      updateFilter({ department: user.department });
     } else if (user.role === ROLES.REFERENT_REGION) {
       updateFilter({ region: [user.region] });
     }

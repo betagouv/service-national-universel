@@ -32,6 +32,8 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
       filter.push({ terms: { "structureId.keyword": [user.structureId] } });
     }
 
+    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ terms: { "department.keyword": user.department } });
+
     // A supervisor can only see their structures' missions.
     if (user.role === ROLES.SUPERVISOR) {
       if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -127,7 +129,7 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
     }
 
     if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
-    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
+    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ terms: { "department.keyword": user.department } });
 
     // Visitors can only get aggregations and is limited to its region.
     if (user.role === ROLES.VISITOR) {
@@ -163,7 +165,7 @@ router.post("/young-having-school-in-department/:view/export", passport.authenti
 
     if (!canSearchInElasticSearch(user, "young-having-school-in-department")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const filter = [{ term: { "schoolDepartment.keyword": user.department } }];
+    const filter = [{ terms: { "schoolDepartment.keyword": user.department } }];
 
     if (view === "volontaires") {
       filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } });
@@ -375,7 +377,7 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
           should: [
             { terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE] } },
             { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_REGION } }, { term: { "region.keyword": user.region } }] } },
-            { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { term: { "department.keyword": user.department } }] } },
+            { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { terms: { "department.keyword": user.department } }] } },
           ],
         },
       });
@@ -454,7 +456,7 @@ router.post("/cohesioncenter/:action(_msearch|export)", passport.authenticate(["
     if (!canSearchInElasticSearch(user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
-    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
+    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ terms: { "department.keyword": user.department } });
 
     if (req.params.action === "export") {
       const response = await allRecords("cohesioncenter", applyFilterOnQuery(req.body.query, filter));

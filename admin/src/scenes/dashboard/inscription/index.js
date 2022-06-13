@@ -42,7 +42,7 @@ export default function Index({ onChangeFilter = () => {} }) {
   useEffect(() => {
     const status = Object.keys(YOUNG_STATUS).filter((e) => !["NOT_ELIGIBLE"].includes(e));
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: [user.department], status });
+      updateFilter({ department: user.department, status });
     } else if (user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR) {
       updateFilter({ region: [user.region], status });
     } else {

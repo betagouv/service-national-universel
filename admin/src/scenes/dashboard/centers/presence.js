@@ -63,7 +63,7 @@ export default function Presence() {
                         onValueChange={setFilterCohort}
                       />
                       <RegionFilter filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-                      <DepartmentFilter filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
+                      <DepartmentFilter filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
                       <MultiDropdownList
                         className="dropdown-filter"
                         placeholder="Code 2022"

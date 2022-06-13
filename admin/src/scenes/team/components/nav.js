@@ -13,7 +13,7 @@ export default function Nav({ filter, updateFilter }) {
       updateFilter({ department: [], role: [ROLES.REFERENT_REGION, ROLES.VISITOR] });
     } else if (currentTab === "department") {
       if (user.role === ROLES.REFERENT_DEPARTMENT) {
-        updateFilter({ department: [user.department], role: [ROLES.REFERENT_DEPARTMENT] });
+        updateFilter({ department: user.department, role: [ROLES.REFERENT_DEPARTMENT] });
       } else {
         updateFilter({ role: [ROLES.REFERENT_DEPARTMENT] });
       }
