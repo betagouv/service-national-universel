@@ -31,6 +31,11 @@ function sso(passport) {
       identifierFormat: null,
       disableRequestedAuthnContext: true,
       validateInResponseTo: false,
+      logoutUrl: EDUCONNECT_LOGOUT_POINT,
+      // logoutCallbackUrl: EDUCONNECT_LOGOUT_CALLBACK_URL,
+    },
+    async function (profile, done) {
+      return done(null, profile);
     },
     async function (profile, done) {
       return done(null, profile);

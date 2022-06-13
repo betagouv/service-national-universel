@@ -17,6 +17,24 @@ const YoungAuth = new AuthObject(YoungObject);
 
 router.get("/login", passport.authenticate(["educonnect"], { successRedirect: "/", failureRedirect: "/login" }));
 
+router.get("/logout", async (req, res) => {
+  console.log("logout");
+  passport._strategy("educonnect").logout(req, (err, request) => {
+    console.log(err);
+
+    if (!err) {
+      // redirect to the IdP Logout URL
+      res.redirect(request);
+    }
+  });
+});
+
+router.post("/logout/callback", async (req, res) => {
+  console.log("sso/logout", req);
+  // req.logout()
+  // res.redirect('/');
+});
+
 // Assert endpoint for when login completes
 router.post("/callback", passport.authenticate("educonnect"), async (req, res) => {
   try {
