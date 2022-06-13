@@ -551,11 +551,11 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
 
     const young = await YoungModel.findById(youngId);
     let center = null;
-    if (young.cohesionCenterId) center = await CohesionCenterModel.findById(young.cohesionCenterId);
+    const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+    if (sessionPhase1) center = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (req.user.role === ROLES.HEAD_CENTER) {
-      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
       if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       if (sessionPhase1.headCenterId !== req.user.id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else if (!canViewYoungFile(req.user, young, center)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
