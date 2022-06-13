@@ -159,7 +159,7 @@ export default function List() {
               </FilterRow>
               <FilterRow visible={filterVisible}>
                 <div className="uppercase text-xs text-snu-purple-800">Général</div>
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
