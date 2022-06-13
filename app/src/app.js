@@ -168,7 +168,9 @@ const Espace = () => {
             <Route path="/candidature" component={Applications} />
             <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
-            {youngCanChangeSession({ cohort: young.cohort, statusPhase1: young.statusPhase1 }) ? <Route path="/changer-de-sejour" component={changeSejour} /> : null}
+            {youngCanChangeSession({ cohort: young.cohort, status: young.status, statusPhase1: young.statusPhase1 }) ? (
+              <Route path="/changer-de-sejour" component={changeSejour} />
+            ) : null}
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>

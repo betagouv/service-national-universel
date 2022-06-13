@@ -33,7 +33,7 @@ export default function WaitingList() {
             </svg>
             <p>
               <strong>Vous êtes inscrit sur liste complémentaire pour le séjour {COHESION_STAY_LIMIT_DATE[young.cohort]}</strong>
-              {youngCanChangeSession({ cohort: young.cohort, statusPhase1: young.statusPhase1 }) ? (
+              {youngCanChangeSession({ cohort: young.cohort, status: young.status, statusPhase1: young.statusPhase1 }) ? (
                 <button className="m-2">
                   <Link to="/changer-de-sejour">
                     <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
