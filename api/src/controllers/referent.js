@@ -550,7 +550,9 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     const { youngId, key, fileName } = value;
 
     const young = await YoungModel.findById(youngId);
-    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
+    let center = null;
+    if (young.cohesionCenterId) center = await CohesionCenterModel.findById(young.cohesionCenterId);
+
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (req.user.role === ROLES.HEAD_CENTER) {
       const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
