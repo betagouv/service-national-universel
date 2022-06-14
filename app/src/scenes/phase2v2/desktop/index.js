@@ -146,7 +146,7 @@ export default function IndexDesktop() {
             </a>
           </div>
         </div>
-        <Link to='/mission?MILITARY_PREPARATION=%5B"true"%5D'>
+        <Link to="/ma-preparation-militaire">
           <div className="group border-[1px] border-gray-200 hover:border-gray-300 rounded-lg mt-3 p-3 flex items-center gap-4">
             <Medaille className="text-gray-400" />
             <div className="w-full">

@@ -31,6 +31,7 @@ import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
 import MilitaryPreparation from "./scenes/militaryPreparation";
+import MilitaryPreparationV2 from "./scenes/militaryPreparationV2";
 import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
 import CGU from "./scenes/CGU";
@@ -169,7 +170,9 @@ const Espace = () => {
             <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
             {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? <Route path="/changer-de-sejour" component={changeSejour} /> : null}
-            {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
+            {environment === "production"
+              ? ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />
+              : ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparationV2} />}
             <Route path="/" component={Home} />
           </Switch>
         </Content>
