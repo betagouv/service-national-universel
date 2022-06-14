@@ -232,8 +232,8 @@ export default function changeSejour() {
                           </>
                         }
                         onCancel={() => setmodalConfirmGoalReached(false)}
-                        onConfirm={() => {
-                          handleWaitingList();
+                        onConfirm={async () => {
+                          await handleWaitingList();
                         }}
                         disableConfirm={!motif}
                         showHeaderIcon={true}></ModalConfirm>
