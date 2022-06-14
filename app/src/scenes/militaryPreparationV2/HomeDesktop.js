@@ -21,7 +21,7 @@ export default function HomeDesktop() {
                 Lire plus
               </span>
             </div>
-            <div className="flex items-center w-full mt-12 gap-24">
+            <div className="flex items-center w-full mt-12 justify-between">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-green-500" />
@@ -99,6 +99,7 @@ export default function HomeDesktop() {
             filled={false}
             color={"bg-blue-600 text-white"}
             status={"À renseigner"}
+            description="Facultatif"
             onClick={() => console.log("click")}
           />
         </div>
