@@ -161,7 +161,7 @@ export default function IndexDesktop() {
         {/* TODO activer si plusieurs cartes 👇 */}
         {/* <div className="mt-12 mb-4 text-lg">Vous avez déjà fait preuve de solidarité ?</div> */}
         {equivalences.length < 3 && equivalences.filter((equivalence) => equivalence.status !== "REFUSED").length === 0 ? (
-          <div className="border-0 flex rounded-lg shadow-lg w-1/2 items-center">
+          <div className="border-0 flex rounded-lg shadow-lg w-1/2 items-center mt-4">
             <img src={require("../../../assets/phase2Reconnaissance.png")} className="rounded-lg" />
             <div className="pr-4 ml-3">
               <div className="flex items-end">
