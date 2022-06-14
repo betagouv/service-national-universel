@@ -11,6 +11,12 @@
 	},
 	{
 		"path": "lib"
+	},
+	{
+		"path": "analytics"
+	},
+	{
+		"path": "knowledge-base-public"
 	}
 ],
   "settings": {}
