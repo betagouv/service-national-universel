@@ -1,15 +1,15 @@
 import React from "react";
-import DesktopView from "./desktop";
-import MobileView from "./mobile";
+import InProgressDesktop from "./desktop";
+import InProgressMobile from "./mobile";
 
 export default function View() {
   return (
     <>
       <div className="hidden md:flex flex-1">
-        <DesktopView />
+        <InProgressDesktop />
       </div>
       <div className="flex md:hidden ">
-        <MobileView />
+        <InProgressMobile />
       </div>
     </>
   );
