@@ -1,3 +1,14 @@
+## [1.99.2](https://github.com/betagouv/service-national-universel/compare/v1.99.1...v1.99.2) (2022-06-14)
+
+
+### Bug Fixes
+
+* **admin:** commentaire de départ obligatoire ([1d32937](https://github.com/betagouv/service-national-universel/commit/1d3293760976113c4ab313c66dcbc9c8b8e947dd))
+* **admin:** dashboard centre -  ne pas compter prendre en compte les desistés ([039ac9b](https://github.com/betagouv/service-national-universel/commit/039ac9b50d1af153b1de0a920997ac8d1b74913b))
+* **app:** add drag and drop candidatures ([cc934ca](https://github.com/betagouv/service-national-universel/commit/cc934ca3222d2cafe89bac7d21ce6250998d7351))
+* **app:** start candidatures v2 ([273300a](https://github.com/betagouv/service-national-universel/commit/273300a5ee177ae9c041eb6a19f000bfdd1526f5))
+* **app:** wip candidatures ([8ec44e7](https://github.com/betagouv/service-national-universel/commit/8ec44e77f24915989816c0549820181442615662))
+
 ## [1.99.1](https://github.com/betagouv/service-national-universel/compare/v1.99.0...v1.99.1) (2022-06-13)
 
 
