@@ -24,6 +24,7 @@ import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
 import v2Missions from "./scenes/missionsv2";
 import Applications from "./scenes/applications";
+import v2Applications from "./scenes/applicationsv2";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
 import Loader from "./components/Loader";
@@ -165,7 +166,7 @@ const Espace = () => {
             <Route path="/les-programmes" component={Engagement} />
             <Route path="/preferences" component={Preferences} />
             {environment === "production" ? <Route path="/mission" component={Missions} /> : <Route path="/mission" component={v2Missions} />}
-            <Route path="/candidature" component={Applications} />
+            {environment === "production" ? <Route path="/candidature" component={Applications} /> : <Route path="/candidature" component={v2Applications} />}
             <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
             {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? <Route path="/changer-de-sejour" component={changeSejour} /> : null}
