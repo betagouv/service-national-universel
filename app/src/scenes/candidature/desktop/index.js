@@ -1,40 +1,49 @@
 import React from "react";
-import { MdOutlineContentCopy } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 
-import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
-import Medaille from "../../../assets/icons/Medaille";
 import api from "../../../services/api";
-import CardMission from "./components/CardCandidature";
-import { copyToClipboard } from "../../../utils";
+import CardCandidature from "./components/CardCandidature";
 import Loader from "../../../components/Loader";
 
 export default function IndexDesktop() {
   const young = useSelector((state) => state.Auth.young);
   const [applications, setApplications] = React.useState();
-  const [equivalences, setEquivalences] = React.useState();
 
-  const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
-  React.useEffect(() => {
-    (async () => {
-      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
-      if (ok) return setReferentManagerPhase2(data);
-    })();
-  }, []);
   React.useEffect(() => {
     (async () => {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/application`);
-      if (ok) return setApplications(data);
-    })();
-    (async () => {
-      const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalences`);
-      if (ok) return setEquivalences(data);
+      if (ok) {
+        data.sort((a, b) => Number(a.priority) - Number(b.priority));
+        return setApplications(data);
+      }
     })();
   }, []);
 
-  if (!applications || !equivalences) return <Loader />;
+  const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+  };
+
+  const onDragEnd = (result) => {
+    if (!result.destination || result.destination.index === result.source.index) return;
+    const res = reorder(applications, result.source.index, result.destination.index);
+    setApplications(res.map((application, index) => ({ ...application, priority: index + 1 })));
+    updatePriority(res);
+  };
+
+  const updatePriority = async (value) => {
+    for (let i = 0; i < value.length; i++) {
+      //todo put /id
+      await api.put("/application", { ...value[i], priority: i + 1 });
+    }
+  };
+
+  if (!applications) return <Loader />;
 
   return (
     <div className="bg-white mx-4 pb-12 my-3 rounded-lg w-full">
@@ -52,12 +61,19 @@ export default function IndexDesktop() {
       {/* END HEADER */}
 
       {/* BEGIN CANDIDATURES */}
-      <div className="flex flex-col items-center px-14 -translate-y-4 space-y-4">
-        {(applications || [])
-          .sort((a, b) => a.priority - b.priority)
-          .map((application) => (
-            <CardMission key={application._id} application={application} />
-          ))}
+      <div className="px-14 -mt-4 ">
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="list">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {(applications || []).map((application, i) => (
+                  <CardCandidature key={application._id.toString()} application={application} index={i} />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </div>
       {/* END CANDIDATURES */}
     </div>
