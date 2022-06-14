@@ -10,7 +10,6 @@ export default function Nav({ filter, updateFilter }) {
   const [userInTheSameRegion, setUserInTheSameRegion] = useState();
 
   useEffect(() => {
-    console.log(user.department.map((department) => department2region[department]).includes(currentTab));
     if (currentTab === "region") {
       updateFilter({ department: [], role: [ROLES.REFERENT_REGION, ROLES.VISITOR] });
     } else if (user.department.map((department) => department2region[department]).includes(currentTab)) {
