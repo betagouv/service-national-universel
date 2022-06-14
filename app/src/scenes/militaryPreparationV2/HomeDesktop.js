@@ -1,10 +1,13 @@
 import React from "react";
-import CheckCircle from "../../../assets/icons/CheckCircle";
+import CheckCircle from "../../assets/icons/CheckCircle";
 import { HiOutlineSearch } from "react-icons/hi";
-import FileCard from "./FileCard";
+import FileCard from "./components/FileCard";
 import { Link } from "react-router-dom";
+import ModalInform from "./components/ModalInfom";
 
 export default function HomeDesktop() {
+  const [modalInform, setModalInform] = React.useState({ isOpen: false });
+
   return (
     <div className="flex flex-col bg-gray-100 mx-4 my-4 w-full">
       <div className="mx-12 mt-8">
@@ -14,7 +17,9 @@ export default function HomeDesktop() {
             <div className="text-gray-700 text-sm mt-4">
               Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence, des rencontres ? Continuer d’apprendre et rencontrer des jeunes de
               tous horizons ? Embarquez pour l’aventure en rejoignant une des missions d’intérêt général...
-              <span className="font-semibold cursor-pointer underline ml-2">Lire plus</span>
+              <span className="font-semibold cursor-pointer underline ml-2" onClick={() => setModalInform({ isOpen: true })}>
+                Lire plus
+              </span>
             </div>
             <div className="flex items-center w-full mt-12 gap-24">
               <div className="flex flex-col gap-4">
@@ -40,9 +45,15 @@ export default function HomeDesktop() {
                   <CheckCircle className="w-5 h-5 text-green-500" />
                   <div className="flex flex-col">
                     <div className="text-gray-700 text-sm leading-5">
-                      J'ai effectué mon <strong>recensement</strong> citoyen
+                      J&apos;ai effectué mon <strong>recensement</strong> citoyen
                     </div>
-                    <div className="text-gray-400 text-sm leading-5 underline cursor-pointer">En savoir plus</div>
+                    <a
+                      href="https://www.service-public.fr/particuliers/vosdroits/R2054"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-gray-400 text-sm leading-5 underline cursor-pointer hover:underline">
+                      En savoir plus
+                    </a>
                   </div>
                 </div>
               </div>
@@ -59,7 +70,7 @@ export default function HomeDesktop() {
               </div>
             </div>
           </div>
-          <img className="w-1/4 mb-16 ml-10 mr-10" src={require("../../../assets/militaryPrep.png")} />
+          <img className="w-1/4 mb-16 ml-10 mr-10" src={require("../../assets/militaryPrep.png")} />
         </div>
 
         <div className="flex items-center justify-between">
@@ -92,6 +103,7 @@ export default function HomeDesktop() {
           />
         </div>
       </div>
+      <ModalInform isOpen={modalInform?.isOpen} onCancel={() => setModalInform({ isOpen: false, value: null })} />
     </div>
   );
 }
