@@ -18,6 +18,10 @@ function validateString(string) {
   return Joi.string().validate(string, { stripUnknown: true });
 }
 
+function validateArray(array) {
+  return Joi.array().items(Joi.string().allow(null, "")).validate(array, { stripUnknown: true });
+}
+
 function validateMission(mission) {
   return Joi.object()
     .keys({
@@ -112,7 +116,8 @@ function validateProgram(program) {
       imageFile: Joi.string().allow(null, ""),
       imageString: Joi.string().allow(null, ""),
       type: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
+      department: Joi.any,
+      // string().allow(null, ""),
       region: Joi.string().allow(null, ""),
       visibility: Joi.string().allow(null, ""),
     })
@@ -668,6 +673,7 @@ function validatePhase1Document(phase1document, key) {
 module.exports = {
   validateId,
   validateString,
+  validateArray,
   validateMission,
   validateStructure,
   validateProgram,
