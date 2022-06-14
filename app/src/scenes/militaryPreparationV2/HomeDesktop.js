@@ -82,7 +82,7 @@ export default function HomeDesktop() {
             En savoir plus
           </div>
         </div>
-        <div className="flex flex-row gap-4 mt-4 w-full justify-between">
+        <div className="flex flex-row flex-wrap lg:!flex-nowrap gap-4 mt-4 w-full justify-between">
           <FileCard name="Pièce d’identité" icon="reglement" filled={false} color={"bg-blue-600 text-white"} status={"À renseigner"} onClick={() => console.log("click")} />
           <FileCard name="Autorisation parentale" icon="image" filled={false} color={"bg-blue-600 text-white"} status={"À renseigner"} onClick={() => console.log("click")} />
           <FileCard
