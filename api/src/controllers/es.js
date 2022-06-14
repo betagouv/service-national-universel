@@ -222,7 +222,7 @@ router.post("/cohesionyoung/:id/:action(_msearch|export)", passport.authenticate
     }
 
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      const centers = await CohesionCenterObject.find({ department: user.department });
+      const centers = await CohesionCenterObject.find({ department: { $in: user.department } });
       if (!centers.map((e) => e._id.toString()).includes(req.params.id)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
