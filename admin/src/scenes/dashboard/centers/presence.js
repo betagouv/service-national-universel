@@ -1,23 +1,29 @@
-import React, { useState, useEffect } from "react";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import { useHistory } from "react-router-dom";
+import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-
-import { apiURL } from "../../../config";
+import { useHistory } from "react-router-dom";
 import FilterSvg from "../../../assets/icons/Filter";
-import api from "../../../services/api";
-import Panel from "../../volontaires/panel";
-import { RegionFilter, DepartmentFilter } from "../../../components/filters";
-import { getFilterLabel, translate, ROLES } from "../../../utils";
-import { FilterRow, ResultTable, Filter2 } from "../../../components/list";
-const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
+import ExportComponent from "../../../components/ExportXlsx";
+import { DepartmentFilter, RegionFilter } from "../../../components/filters";
+import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
+import { apiURL } from "../../../config";
+import api from "../../../services/api";
+import { ES_NO_LIMIT, getFilterLabel, ROLES, translate, formatLongDateFR } from "../../../utils";
+import Panel from "../../volontaires/panel";
+
+const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
 
 export default function Presence() {
   const [young, setYoung] = useState();
   const [filterVisible, setFilterVisible] = useState(false);
   const [filterCohort, setFilterCohort] = useState([]);
   const user = useSelector((state) => state.Auth.user);
+
+  const getDefaultQuery = () => {
+    return { query: { match_all: {} }, track_total_hits: true };
+  };
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   return (
     <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -28,24 +34,59 @@ export default function Presence() {
             <div className="flex items-start w-full h-full">
               <div className="flex-1 relative">
                 <div className="flex items-center mb-2 gap-2">
-                  <Filter2>
-                    <div className="flex items-center mb-2 gap-2">
-                      <DataSearch
-                        showIcon={false}
-                        placeholder="Rechercher par nom de centre, ville, code postal..."
-                        componentId="SEARCH"
-                        dataField={["name", "city", "zip", "code", "code2022"]}
-                        react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                        innerClass={{ input: "searchbox" }}
-                        autosuggest={false}
-                        queryFormat="and"
-                      />
-                      <div
-                        className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-                        onClick={() => setFilterVisible((e) => !e)}>
-                        <FilterSvg className="text-gray-400" />
-                        Filtres
+                  <Filter2 className="w-full">
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center gap-2">
+                        <DataSearch
+                          showIcon={false}
+                          placeholder="Rechercher par nom de centre, ville, code postal..."
+                          componentId="SEARCH"
+                          dataField={["name", "city", "zip", "code", "code2022"]}
+                          react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                          innerClass={{ input: "searchbox" }}
+                          autosuggest={false}
+                          queryFormat="and"
+                        />
+                        <div
+                          className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
+                          onClick={() => setFilterVisible((e) => !e)}>
+                          <FilterSvg className="text-gray-400" />
+                          Filtres
+                        </div>
                       </div>
+                      <ExportComponent
+                        title="Exporter les présences"
+                        defaultQuery={getExportQuery}
+                        exportTitle="Centres_de_cohesion"
+                        index="cohesioncenter"
+                        react={{ and: FILTERS }}
+                        transform={async (data) => {
+                          let all = data.reduce((prev, current) => {}, []);
+                          return all.map((data) => {
+                            return {
+                              Nom: data.name,
+                              id: data._id,
+                              "Code (2021)": data.code,
+                              "Code (2022)": data.code2022,
+                              "Cohorte(s)": data.cohorts?.join(", "),
+                              COR: data.COR,
+                              "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
+                              Adresse: data.address,
+                              Ville: data.city,
+                              "Code Postal": data.zip,
+                              "N˚ Département": data.departmentCode,
+                              Département: data.department,
+                              Région: data.region,
+                              "Places total": data.placesTotal,
+                              "Places disponibles": data.placesLeft,
+                              "Tenues livrées": data.outfitDelivered,
+                              Observations: data.observations,
+                              "Créé lé": formatLongDateFR(data.createdAt),
+                              "Mis à jour le": formatLongDateFR(data.updatedAt),
+                            };
+                          });
+                        }}
+                      />
                     </div>
                     <FilterRow visible={filterVisible}>
                       <MultiDropdownList

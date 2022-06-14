@@ -219,6 +219,55 @@ router.get("/:id/cohort/:cohort/stats", passport.authenticate("referent", { sess
   }
 });
 
+router.post("/export-presence", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // todo : ajouter des filtres
+
+    // const { error, value } = Joi.object({
+    //   id: Joi.string().required(),
+    // }).validate({ ...req.params }, { stripUnknown: true });
+
+    // if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const centers = await CohesionCenterModel.find();
+    if (!centers || centers.length === 0) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: { $in: centers.map((c) => c._id.toString()) } });
+    if (!sessionsPhase1 || sessionsPhase1.length === 0) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let result = [];
+
+    for (let sessionPhase1 of sessionsPhase1) {
+      const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
+      const stats = (youngs || []).reduce((previous, young) => {
+        if (young.cohesionStayPresence === "true") {
+          previous.presenceArrive = (previous.presenceArrive || 0) + 1;
+        }
+        if (young.cohesionStayPresence === "false") {
+          previous.absenceArrive = (previous.absenceArrive || 0) + 1;
+        }
+        if (!young.cohesionStayPresence) {
+          previous.nonRenseigneArrive = (previous.nonRenseigneArrive || 0) + 1;
+        }
+        if (young.departSejourAt) {
+          previous.depart = (previous.depart || 0) + 1;
+        }
+        return previous;
+      }, {});
+      result.push({
+        sessionPhase1: sessionPhase1,
+        center: centers.find((c) => c._id.toString() === sessionPhase1.cohesionCenterId.toString()),
+        stats,
+      });
+    }
+
+    res.status(200).send({ ok: true, data: result });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params);
