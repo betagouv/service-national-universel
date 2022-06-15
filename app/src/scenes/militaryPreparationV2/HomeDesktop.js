@@ -66,7 +66,7 @@ export default function HomeDesktop() {
                       J&apos;ai effectué mon <strong>recensement</strong> citoyen
                     </div>
                     <a
-                      href="https://www.service-public.fr/particuliers/vosdroits/R2054"
+                      href="https://www.service-public.fr/particuliers/vosdroits/F870"
                       target="_blank"
                       rel="noreferrer"
                       className="text-gray-400 text-sm leading-5 underline cursor-pointer hover:underline">

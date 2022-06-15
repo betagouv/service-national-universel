@@ -1,29 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Container, Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
-
 import api from "../../services/api";
 import { translate, formatStringDateTimezoneUTC, htmlCleaner } from "../../utils";
-import SocialIcons from "../../components/SocialIcons";
-import ApplyModal from "./components/ApplyModal";
-import ApplyDoneModal from "./components/ApplyDoneModal";
 import Loader from "../../components/Loader";
-import Badge from "../../components/Badge";
 import DomainThumb from "../../components/DomainThumb";
-import DayTile from "../../components/DayTile";
 import DoubleDayTile from "../../components/DoubleDayTile";
 import plausibleEvent from "../../services/plausible";
+import DocumentsPM from "../militaryPreparationV2/components/DocumentsPM";
+import WithTooltip from "../../components/WithTooltip";
 
 export default function View(props) {
   const [mission, setMission] = useState();
-  console.log("✍️ ~ mission", mission);
   const [modal, setModal] = useState(null);
-  const [disabledApplication, setDisabledApplication] = useState(false);
+  const [disabledAge, setDisabledAge] = useState(false);
+  const [disabledIncomplete, setDisabledIncomplete] = useState(false);
   const young = useSelector((state) => state.Auth.young);
-
+  const docRef = useRef();
   const getMission = async () => {
     const id = props.match && props.match.params && props.match.params.id;
     if (!id) return setMission(null);
@@ -50,9 +46,14 @@ export default function View(props) {
     // on vérifie que le vonlontaire aura plus de 16 ans au début de la mission
     if (mission?.isMilitaryPreparation === "true") {
       const ageAtStart = getDiffYear(mission.startAt, young.birthdateAt);
-      setDisabledApplication(ageAtStart < 16);
+      setDisabledAge(ageAtStart < 16);
+      if (!young.militaryPreparationFilesIdentity.length || !young.militaryPreparationFilesAuthorization.length || !young.militaryPreparationFilesCertificate.length) {
+        setDisabledIncomplete(true);
+      } else {
+        setDisabledIncomplete(false);
+      }
     }
-  }, [mission]);
+  }, [mission, young]);
 
   const getTags = () => {
     const tags = [];
@@ -60,6 +61,12 @@ export default function View(props) {
     // tags.push(mission.remote ? "À distance" : "En présentiel");
     mission.domains.forEach((d) => tags.push(translate(d)));
     return tags;
+  };
+  const scrollToBottom = () => {
+    if (!docRef.current) return;
+    docRef.current.scrollIntoView({
+      behavior: "smooth",
+    });
   };
 
   if (mission === undefined) return <Loader />;
@@ -100,9 +107,10 @@ export default function View(props) {
               <ApplyButton
                 applied={mission.application}
                 placesLeft={mission.placesLeft}
-                placesTotal={mission.placesTotal}
                 setModal={setModal}
-                disabledApplication={disabledApplication}
+                disabledAge={disabledAge}
+                disabledIncomplete={disabledIncomplete}
+                scrollToBottom={scrollToBottom}
               />
             )}
           </div>
@@ -110,48 +118,42 @@ export default function View(props) {
       </div>
       {/* END HEADER */}
 
-      <Box>
-        <Row>
-          <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-            <Wrapper>
-              <Legend>La mission en quelques mots</Legend>
-              <Detail title="Format" content={translate(mission.format)} />
-              <Detail title="Objectifs" content={mission.description} />
-              <Detail title="Actions" content={mission.actions} />
-              <Detail title="Contraintes" content={mission.contraintes} />
-              <InfoStructure title="à propos de la structure" structure={mission.structureId} />
-            </Wrapper>
-          </Col>
-          <Col md={6}>
-            <Wrapper>
-              <Legend>
-                <DoubleDayTile date1={mission.startAt} date2={mission.endAt} />
-                {mission.startAt && mission.endAt
-                  ? `Du ${formatStringDateTimezoneUTC(mission.startAt)} au ${formatStringDateTimezoneUTC(mission.endAt)}`
-                  : "Aucune date renseignée"}
-              </Legend>
-              <Detail title="Fréquence" content={mission.frequence} />
-              {mission.duration ? <Detail title="Durée estimée" content={`${mission.duration} heure(s)`} /> : null}
-              <Detail title="Période pour réaliser la mission" content={mission.period} />
-              <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
-            </Wrapper>
-          </Col>
-        </Row>
-      </Box>
-      <Footer>
-        <ApplyButton
-          applied={mission.application}
-          placesLeft={mission.placesLeft}
-          placesTotal={mission.placesTotal}
-          setModal={setModal}
-          disabledApplication={disabledApplication}
-        />
-      </Footer>
+      <div className="flex m-8 justify-around">
+        <div className="flex flex-col w-1/2 mr-4">
+          <div className="text-lg font-bold mb-2">La mission en quelques mots</div>
+          <Detail title="Format" content={translate(mission.format)} />
+          <Detail title="Objectifs" content={mission.description} />
+          <Detail title="Actions" content={mission.actions} />
+          <Detail title="Contraintes" content={mission.contraintes} />
+          <InfoStructure title="à propos de la structure" structure={mission.structureId} />
+        </div>
+        <div className="flex flex-col w-1/2 mr-4">
+          <div className="flex items-center justify-between">
+            <div className="text-lg font-bold mb-2">Informations pratiques</div>
+            <DoubleDayTile date1={mission.startAt} date2={mission.endAt} />
+          </div>
+          <Detail
+            title="Date"
+            content={
+              mission.startAt && mission.endAt ? `Du ${formatStringDateTimezoneUTC(mission.startAt)} au ${formatStringDateTimezoneUTC(mission.endAt)}` : "Aucune date renseignée"
+            }
+          />
+
+          <Detail title="Fréquence" content={mission.frequence} />
+          {mission.duration ? <Detail title="Durée estimée" content={`${mission.duration} heure(s)`} /> : null}
+          <Detail title="Période pour réaliser la mission" content={mission.period} />
+          <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
+        </div>
+      </div>
+
+      <div className="mx-8">
+        <DocumentsPM docRef={docRef} />
+      </div>
     </div>
   );
 }
 
-const ApplyButton = ({ applied, placesLeft, placesTotal, setModal, disabledApplication }) => {
+const ApplyButton = ({ applied, placesLeft, setModal, disabledAge, disabledIncomplete, scrollToBottom }) => {
   if (applied)
     return (
       <div className="flex flex-col items-center">
@@ -162,38 +164,40 @@ const ApplyButton = ({ applied, placesLeft, placesTotal, setModal, disabledAppli
       </div>
     );
 
-  if (disabledApplication)
+  if (disabledAge)
     return (
       <div className="flex flex-col items-center">
-        <div className="px-5 py-2 bg-coolGray-300 text-coolGray-500 rounded-full shadow-md hover:cursor-not-allowed text-center">Candidater</div>
-        <p className="button-subtitle">
-          Vous ne pouvez pas candidater à cette Préparation Militaire car vous n&apos;aurez pas 16 ans révolus au 1er jour de la mission.
-          <br />
-          Pour en savoir plus{" "}
-          <a
-            className="underline hover:underline hover:text-snu-purple-300"
-            href="https://support.snu.gouv.fr/base-de-connaissance/je-televerse-mes-justificatifs-pour-ma-preparation-militaire"
-            target="_blank"
-            rel="noreferrer">
-            cliquez ici
-          </a>
-        </p>
+        <WithTooltip tooltipText="Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)">
+          <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
+            Candidater
+          </button>
+        </WithTooltip>
+        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
       </div>
     );
+  if (disabledIncomplete)
+    return (
+      <div className="flex flex-col items-center">
+        <WithTooltip tooltipText="Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page">
+          <button className="px-12 py-2 rounded-lg text-white bg-blue-600  text-sm cursor-pointer" onClick={() => scrollToBottom()}>
+            Candidater
+          </button>
+        </WithTooltip>
+        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
+      </div>
+    );
+
   return (
     <div className="flex flex-col items-center space-y-4">
-      <div
-        className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-2 w-52 items-center border-blue-600 hover:border-[#4881FF] bg-blue-600 hover:bg-[#4881FF] cursor-pointer"
+      <button
+        className="px-12 py-2 rounded-lg text-white bg-blue-600 text-sm cursor-pointer "
         onClick={() => {
           setModal("APPLY");
           plausibleEvent("Phase2/CTA missions - Candidater");
         }}>
-        {/* <HiOutlineSearch className="text-blue-300" /> */}
-        <div className="text-white text-sm text-center flex-1">Candidater</div>
-      </div>
-      <div className="text-gray-500 text-xs">
-        Place(s) disponible(s)&nbsp;:&nbsp;{placesLeft}/{placesTotal}
-      </div>
+        Candidater
+      </button>
+      <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
     </div>
   );
 };
@@ -201,10 +205,10 @@ const ApplyButton = ({ applied, placesLeft, placesTotal, setModal, disabledAppli
 const Detail = ({ title, content }) => {
   const [value] = useState((Array.isArray(content) && content) || [content]);
   return content && content.length ? (
-    <div className="detail">
-      <div className="detail-title">{title}</div>
+    <div className="my-3">
+      <div className="text-gray-500 text-xs uppercase">{title}</div>
       {value.map((e, i) => (
-        <div key={i} className="detail-text" dangerouslySetInnerHTML={{ __html: htmlCleaner(translate(e)) }} />
+        <div key={i} className="text-sm leading-5 font-normal" dangerouslySetInnerHTML={{ __html: htmlCleaner(translate(e)) }} />
       ))}
     </div>
   ) : (
@@ -233,16 +237,16 @@ const InfoStructure = ({ title, structure }) => {
   };
 
   return value ? (
-    <div className="detail">
-      <div className="detail-title">{title}</div>
-      <div className="detail-text">
+    <div className="my-3">
+      <div className="text-gray-500 text-xs uppercase">{title}</div>
+      <div className="text-sm leading-5 font-normal">
         {rest ? (
-          <>
+          <div className="my-2">
             <div dangerouslySetInnerHTML={{ __html: preview + (expandNote ? rest : " ...") + " " }} />
             <div className="see-more" onClick={toggleNote}>
               {expandNote ? "  VOIR MOINS" : "  VOIR PLUS"}
             </div>
-          </>
+          </div>
         ) : (
           preview
         )}
@@ -253,20 +257,6 @@ const InfoStructure = ({ title, structure }) => {
   );
 };
 
-const Footer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  margin-bottom: 2rem;
-  p {
-    margin-top: 1rem;
-    text-align: center;
-    color: #6b7280;
-    font-size: 0.75rem;
-  }
-`;
-
 const Legend = styled.div`
   color: rgb(38, 42, 62);
   margin-bottom: 20px;
@@ -275,58 +265,6 @@ const Legend = styled.div`
     font-size: 1.1rem;
   }
   font-weight: 500;
-`;
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  height: 100%;
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
-`;
-
-const Heading = styled(Container)`
-  margin-bottom: 3rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  @media (max-width: 768px) {
-    margin-bottom: 1rem;
-  }
-  h1 {
-    color: #161e2e;
-    font-size: 3rem;
-    font-weight: 700;
-    padding-right: 3rem;
-    @media (max-width: 768px) {
-      padding-right: 1rem;
-      font-size: 1.1rem;
-    }
-  }
-  p {
-    &.title {
-      color: #42389d;
-      font-size: 1rem;
-      @media (max-width: 768px) {
-        font-size: 0.7rem;
-      }
-      font-weight: 700;
-      margin-bottom: 5px;
-      text-transform: uppercase;
-    }
-    &.button-subtitle {
-      margin-top: 1rem;
-      text-align: center;
-      color: #6b7280;
-      font-size: 0.75rem;
-    }
-  }
-`;
-
-const Tags = styled.div`
-  display: flex;
-  align-items: center;
-  margin-top: 0.8rem;
 `;
 
 const Wrapper = styled.div`
@@ -361,45 +299,6 @@ const Wrapper = styled.div`
       :hover {
         color: #5145cd;
       }
-    }
-  }
-`;
-
-const HeadCard = styled.div`
-  display: flex;
-  padding: 0 1.5rem;
-  align-items: center;
-  min-height: 4rem;
-  @media (max-width: 768px) {
-    flex-direction: column;
-    padding: 0 0.5rem;
-  }
-  p {
-    margin: 0;
-    color: #929292;
-    span {
-      color: #242526;
-      font-weight: 600;
-    }
-    @media (max-width: 768px) {
-      font-size: 0.8rem;
-      padding: 0.3rem 0;
-    }
-  }
-  .social-link {
-    color: #aaa;
-    border: solid 1px #aaa;
-    padding: 5px 7px 7px 7px;
-    margin: 5px;
-    border-radius: 5px;
-    :hover {
-      color: #5145cd;
-    }
-  }
-  .social-icons-container {
-    margin-left: auto;
-    @media (max-width: 768px) {
-      margin: 0.5rem 0;
     }
   }
 `;

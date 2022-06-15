@@ -4,14 +4,13 @@ import { useSelector } from "react-redux";
 import ModalDocument from "./ModalDocument";
 import ModalInform from "./ModalInfom";
 
-export default function DocumentsPM() {
+export default function DocumentsPM({ docRef = null }) {
   const young = useSelector((state) => state.Auth.young);
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
   const [modalInform, setModalInform] = React.useState({ isOpen: false });
-
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" ref={docRef}>
         <div className="flex flex-col">
           <div className="text-lg leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>
           <div className="text-sm leading-5 font-normal text-gray-500 mt-1">Pour candidater, veuillez téléverser les documents justificatifs ci-dessous.</div>
