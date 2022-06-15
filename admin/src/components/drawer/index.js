@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import { useSelector, connect } from "react-redux";
-import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors } from "../../utils";
+import { totalNewTickets, totalOpenedTickets, totalClosedTickets, department2region, ROLES, colors } from "../../utils";
+
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
 import SuccessIcon from "../SuccessIcon";
@@ -211,7 +212,7 @@ const Drawer = (props) => {
       let query = undefined;
       if (user.role === ROLES.ADMIN) query = {};
       else if (user.role === ROLES.REFERENT_DEPARTMENT) query = { department: user.department, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
-      else if (user.role === ROLES.REFERENT_REGION) query = { region: department2region[user.region], subject: "J'ai une question", role: "young", canal: "PLATFORM" };
+      else if (user.role === ROLES.REFERENT_REGION) query = { region: department2region[user.department], subject: "J'ai une question", role: "young", canal: "PLATFORM" };
 
       const getTickets = async (query) => {
         const { ok, data } = await api.post(`/zammood/tickets`, query);
