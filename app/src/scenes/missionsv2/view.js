@@ -1,17 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { Container, Col, Row } from "reactstrap";
-import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
-import api from "../../services/api";
-import { translate, formatStringDateTimezoneUTC, htmlCleaner } from "../../utils";
-import Loader from "../../components/Loader";
+import { toastr } from "react-redux-toastr";
+import { Link } from "react-router-dom";
 import DomainThumb from "../../components/DomainThumb";
 import DoubleDayTile from "../../components/DoubleDayTile";
-import plausibleEvent from "../../services/plausible";
-import DocumentsPM from "../militaryPreparationV2/components/DocumentsPM";
+import Loader from "../../components/Loader";
 import WithTooltip from "../../components/WithTooltip";
+import api from "../../services/api";
+import plausibleEvent from "../../services/plausible";
+import { formatStringDateTimezoneUTC, htmlCleaner, translate } from "../../utils";
+import DocumentsPM from "../militaryPreparationV2/components/DocumentsPM";
+import ApplyDoneModal from "./components/ApplyDoneModal";
+import ApplyModal from "./components/ApplyModal";
 
 export default function View(props) {
   const [mission, setMission] = useState();
@@ -149,6 +149,17 @@ export default function View(props) {
       <div className="mx-8 mt-8">
         <DocumentsPM docRef={docRef} />
       </div>
+      {modal === "APPLY" && (
+        <ApplyModal
+          value={mission}
+          onChange={() => setModal(null)}
+          onSend={async () => {
+            await getMission();
+            setModal("DONE");
+          }}
+        />
+      )}
+      {modal === "DONE" && <ApplyDoneModal young={young} value={mission} onChange={() => setModal(null)} />}
     </div>
   );
 }
@@ -256,49 +267,3 @@ const InfoStructure = ({ title, structure }) => {
     <div />
   );
 };
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-bottom: 20px;
-  font-size: 1.3rem;
-  @media (max-width: 768px) {
-    font-size: 1.1rem;
-  }
-  font-weight: 500;
-`;
-
-const Wrapper = styled.div`
-  padding: 3rem;
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
-  .detail {
-    font-size: 1rem;
-    text-align: left;
-    margin-top: 2rem;
-    @media (max-width: 768px) {
-      margin-top: 1rem;
-    }
-    &-title {
-      font-size: 0.8rem;
-      margin-right: 1rem;
-      color: #798399;
-      text-transform: uppercase;
-    }
-    &-text {
-      color: #242526;
-    }
-    .see-more {
-      font-style: normal;
-      color: #696974;
-      margin-bottom: 0.8rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      cursor: pointer;
-      text-decoration: underline;
-      :hover {
-        color: #5145cd;
-      }
-    }
-  }
-`;

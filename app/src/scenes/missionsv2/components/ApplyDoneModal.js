@@ -5,11 +5,10 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { ENABLE_PM } from "../../../utils";
 
-export default function ApplyDoneModal({ value, onChange, young }) {
+export default function ApplyDoneModal({ value, onChange }) {
   if (!value) return <div />;
 
   const renderText = () => {
-    if (ENABLE_PM && value.isMilitaryPreparation === "true" && !young.statusMilitaryPreparationFiles) return "Merci de téléverser vos pièces dans « Ma préparation militaire »";
     return "Votre candidature sera traitée dans les prochains jours par le responsable de la structure.";
   };
 
@@ -17,7 +16,7 @@ export default function ApplyDoneModal({ value, onChange, young }) {
     if (ENABLE_PM && value.isMilitaryPreparation === "true")
       return (
         <Link to="/ma-preparation-militaire">
-          <Button>{young.statusMilitaryPreparationFiles ? "Consulter mon dossier" : "Je renseigne mes documents"}</Button>
+          <Button>Consulter mon dossier</Button>
         </Link>
       );
     return (
@@ -28,7 +27,7 @@ export default function ApplyDoneModal({ value, onChange, young }) {
   };
 
   return (
-    <Modal isOpen={true} toggle={onChange} style={{}}>
+    <Modal centered isOpen={true} toggle={onChange} style={{}}>
       <ModalContainer>
         <img src={require("../../../assets/close.svg")} height={10} width={10} onClick={onChange} />
         <h1>Félicitations, votre candidature a bien été enregistrée.</h1>
