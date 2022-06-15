@@ -110,6 +110,8 @@ const sync = async (result) => {
             firstName: resp.first_name,
             lastName: resp.last_name,
             email: resp.email,
+            phone: resp?.phone !== "null" ? resp?.phone : undefined,
+            mobile: resp?.mobile !== "null" ? resp?.mobile : undefined,
             role: ROLES.RESPONSIBLE,
           });
           newResps.push(user);
