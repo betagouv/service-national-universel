@@ -118,8 +118,8 @@ export default function View(props) {
       </div>
       {/* END HEADER */}
 
-      <div className="flex m-8 justify-around">
-        <div className="flex flex-col w-1/2 mr-4">
+      <div className="flex m-8">
+        <div className="flex flex-col w-1/2 pl-12">
           <div className="text-lg font-bold mb-2">La mission en quelques mots</div>
           <Detail title="Format" content={translate(mission.format)} />
           <Detail title="Objectifs" content={mission.description} />
@@ -127,7 +127,7 @@ export default function View(props) {
           <Detail title="Contraintes" content={mission.contraintes} />
           <InfoStructure title="à propos de la structure" structure={mission.structureId} />
         </div>
-        <div className="flex flex-col w-1/2 mr-4">
+        <div className="flex flex-col w-1/2 pl-12 border-l-[1px] border-gray-100">
           <div className="flex items-center justify-between">
             <div className="text-lg font-bold mb-2">Informations pratiques</div>
             <DoubleDayTile date1={mission.startAt} date2={mission.endAt} />
@@ -145,8 +145,8 @@ export default function View(props) {
           <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
         </div>
       </div>
-
-      <div className="mx-8">
+      <hr className="text-gray-100" />
+      <div className="mx-8 mt-8">
         <DocumentsPM docRef={docRef} />
       </div>
     </div>
