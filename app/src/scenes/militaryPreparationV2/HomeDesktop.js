@@ -1,12 +1,17 @@
 import React from "react";
-import CheckCircle from "../../assets/icons/CheckCircle";
 import { HiOutlineSearch } from "react-icons/hi";
-import FileCard from "./components/FileCard";
-import { Link } from "react-router-dom";
-import ModalInform from "./components/ModalInfom";
+import { useSelector } from "react-redux";
+import { Link, useHistory } from "react-router-dom";
+import CheckCircle from "../../assets/icons/CheckCircle";
+import { permissionPhase2 } from "../../utils";
+import DocumentsPM from "./components/DocumentsPM";
 
 export default function HomeDesktop() {
-  const [modalInform, setModalInform] = React.useState({ isOpen: false });
+  const young = useSelector((state) => state.Auth.young);
+  const history = useHistory();
+  const [readMore, setReadMore] = React.useState(false);
+
+  if (!young || !permissionPhase2(young)) history.push("/");
 
   return (
     <div className="flex flex-col bg-gray-100 mx-4 my-4 w-full">
@@ -14,14 +19,27 @@ export default function HomeDesktop() {
         <div className="flex flex-row">
           <div className="flex flex-col mr-4">
             <div className="text-3xl text-gray-800 font-bold">Partez en préparation militaire</div>
-            <div className="text-gray-700 text-sm mt-4">
-              Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence, des rencontres ? Continuer d’apprendre et rencontrer des jeunes de
-              tous horizons ? Embarquez pour l’aventure en rejoignant une des missions d’intérêt général...
-              <span className="font-semibold cursor-pointer underline ml-2" onClick={() => setModalInform({ isOpen: true })}>
-                Lire plus
-              </span>
-            </div>
-            <div className="flex items-center w-full mt-12 justify-between">
+            {!readMore ? (
+              <div className="text-gray-700 text-sm mt-4">
+                Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence, des rencontres ? Continuer d’apprendre et rencontrer des jeunes de
+                tous horizons ? Embarquez pour l’aventure en rejoignant une des missions d’intérêt général...
+                <span className="font-semibold cursor-pointer underline ml-2" onClick={() => setReadMore(true)}>
+                  Lire plus
+                </span>
+              </div>
+            ) : (
+              <div className="text-gray-700 text-sm mt-4">
+                Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence, des rencontres ? Continuer d’apprendre et rencontrer des jeunes de
+                tous horizons ? Embarquez pour l’aventure en rejoignant une des missions d’intérêt général proposées par l’armée de terre, la marine nationale, l’armée de l’air et
+                de l’espace, le service de santé des armées, le service du commissariat des armées et le service de l’énergie opérationnelle. Vous effectuerez une période militaire
+                d’initiation-défense nationale qui ne vous engagera à rien mais vous permettra, si vous le souhaitez, de postuler plus tard pour un engagement dans l’active ou dans
+                la réserve.
+                <span className="font-semibold cursor-pointer underline ml-2" onClick={() => setReadMore(false)}>
+                  Voir moins
+                </span>
+              </div>
+            )}
+            <div className="flex items-center w-full mt-12 justify-between mb-8">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-green-500" />
@@ -72,39 +90,8 @@ export default function HomeDesktop() {
           </div>
           <img className="w-1/4 mb-16 ml-10 mr-10" src={require("../../assets/militaryPrep.png")} />
         </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <div className="text-lg leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>
-            <div className="text-sm leading-5 font-normal text-gray-500 mt-1">Pour candidater, veuillez téléverser les documents justificatifs ci-dessous.</div>
-          </div>
-          <div className="rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out">
-            En savoir plus
-          </div>
-        </div>
-        <div className="flex flex-row flex-wrap lg:!flex-nowrap gap-4 mt-4 w-full justify-between">
-          <FileCard name="Pièce d’identité" icon="reglement" filled={false} color={"bg-blue-600 text-white"} status={"À renseigner"} onClick={() => console.log("click")} />
-          <FileCard name="Autorisation parentale" icon="image" filled={false} color={"bg-blue-600 text-white"} status={"À renseigner"} onClick={() => console.log("click")} />
-          <FileCard
-            name="Certifical médical de non contre-indication..."
-            icon="autotest"
-            filled={false}
-            color={"bg-blue-600 text-white"}
-            status={"À renseigner"}
-            onClick={() => console.log("click")}
-          />
-          <FileCard
-            name="Attestation de recensement"
-            icon="sanitaire"
-            filled={false}
-            color={"bg-blue-600 text-white"}
-            status={"À renseigner"}
-            description="Facultatif"
-            onClick={() => console.log("click")}
-          />
-        </div>
+        <DocumentsPM />
       </div>
-      <ModalInform isOpen={modalInform?.isOpen} onCancel={() => setModalInform({ isOpen: false, value: null })} />
     </div>
   );
 }

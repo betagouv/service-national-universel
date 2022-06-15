@@ -185,7 +185,7 @@ router.post(
       user.set({ [key]: names });
       await user.save({ fromUser: req.user });
 
-      return res.status(200).send({ data: names, ok: true });
+      return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
     } catch (error) {
       capture(error);
       if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
