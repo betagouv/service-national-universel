@@ -59,7 +59,7 @@ export default function Affected() {
                       <h1 className="text-5xl">
                         <strong>{translateCohort(young.cohort)}</strong>
                       </h1>
-                      {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? (
+                      {youngCanChangeSession({ cohort: young.cohort, statusPhase1: young.statusPhase1 }) ? (
                         <Link to="/changer-de-sejour">
                           <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
                         </Link>
