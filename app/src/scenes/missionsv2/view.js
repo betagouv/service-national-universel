@@ -101,18 +101,14 @@ export default function View(props) {
         </div>
         <div className="flex items-center">
           <div className="text-xs text-gray-700">
-            {mission.application ? (
-              <Link to={`/candidature`}>Voir la candidature</Link>
-            ) : (
-              <ApplyButton
-                applied={mission.application}
-                placesLeft={mission.placesLeft}
-                setModal={setModal}
-                disabledAge={disabledAge}
-                disabledIncomplete={disabledIncomplete}
-                scrollToBottom={scrollToBottom}
-              />
-            )}
+            <ApplyButton
+              applied={mission.application}
+              placesLeft={mission.placesLeft}
+              setModal={setModal}
+              disabledAge={disabledAge}
+              disabledIncomplete={disabledIncomplete}
+              scrollToBottom={scrollToBottom}
+            />
           </div>
         </div>
       </div>
@@ -169,9 +165,8 @@ const ApplyButton = ({ applied, placesLeft, setModal, disabledAge, disabledIncom
     return (
       <div className="flex flex-col items-center">
         <Link to="/candidature">
-          <div className="px-5 py-2 bg-[#31c48d] text-white rounded-full shadow-md hover:cursor-pointer hover:scale-105 text-center">Voir&nbsp;la&nbsp;candidature</div>
+          <div className="px-12 py-2 rounded-lg text-white bg-blue-600 text-sm cursor-pointer">Voir&nbsp;la&nbsp;candidature</div>
         </Link>
-        <p className="button-subtitle">Vous avez déjà candidaté à cette mission</p>
       </div>
     );
 
