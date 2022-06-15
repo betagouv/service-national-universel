@@ -61,7 +61,7 @@ export default function IndexDesktop() {
       {/* END HEADER */}
 
       {/* BEGIN CANDIDATURES */}
-      <div className="px-14 -mt-4 ">
+      <div className="px-14 -mt-4">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="list">
             {(provided) => (

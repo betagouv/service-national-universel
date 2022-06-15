@@ -1,41 +1,46 @@
 import React from "react";
-import { HiOutlineAdjustments, HiOutlineSearch } from "react-icons/hi";
-import { MdOutlineContentCopy } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 
-import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
-import Medaille from "../../../assets/icons/Medaille";
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
-import { copyToClipboard } from "../../../utils";
 import CardCandidature from "./components/CardCandidature";
 
 export default function IndexPhase2Mobile() {
   const young = useSelector((state) => state.Auth.young);
   const [applications, setApplications] = React.useState();
-  const [equivalences, setEquivalences] = React.useState();
 
-  const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
-  React.useEffect(() => {
-    (async () => {
-      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
-      if (ok) return setReferentManagerPhase2(data);
-    })();
-  }, []);
   React.useEffect(() => {
     (async () => {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/application`);
       if (ok) return setApplications(data);
     })();
-    (async () => {
-      const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalences`);
-      if (ok) return setEquivalences(data);
-    })();
   }, []);
 
-  if (!applications || !equivalences) return <Loader />;
+  const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+  };
+
+  const onDragEnd = (result) => {
+    if (!result.destination || result.destination.index === result.source.index) return;
+    const res = reorder(applications, result.source.index, result.destination.index);
+    setApplications(res.map((application, index) => ({ ...application, priority: index + 1 })));
+    updatePriority(res);
+  };
+
+  const updatePriority = async (value) => {
+    for (let i = 0; i < value.length; i++) {
+      //todo put /id
+      await api.put("/application", { ...value[i], priority: i + 1 });
+    }
+  };
+
+  if (!applications) return <Loader />;
 
   return (
     <div className="bg-white pb-5">
@@ -53,15 +58,21 @@ export default function IndexPhase2Mobile() {
       {/* END HEADER */}
 
       {/* BEGIN CANDIDATURES */}
-      <div className="-translate-y-4 w-screen">
-        <div className="px-3 pb-4 flex flex-col items-center space-y-4 w-full">
-          {applications
-            .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)) // afficher d'abord les candidatures mis a jour récemment
-            .slice(0, 4) // afficher uniquement 4 candidatures
-            .map((application) => (
-              <CardCandidature key={application._id} application={application} />
-            ))}
-        </div>
+      <div className="px-3 -mt-4">
+        {/* <div className="px-3 pb-4 flex flex-col items-center w-full"> */}
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="list">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {applications.map((application, i) => (
+                  <CardCandidature key={application._id.toString()} application={application} index={i} />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+        {/* </div> */}
       </div>
       {/* END CANDIDATURES */}
     </div>
