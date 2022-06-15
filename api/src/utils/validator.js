@@ -116,8 +116,7 @@ function validateProgram(program) {
       imageFile: Joi.string().allow(null, ""),
       imageString: Joi.string().allow(null, ""),
       type: Joi.string().allow(null, ""),
-      department: Joi.any,
-      // string().allow(null, ""),
+      department: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
       visibility: Joi.string().allow(null, ""),
     })

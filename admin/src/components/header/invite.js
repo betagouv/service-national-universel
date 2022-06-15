@@ -244,7 +244,7 @@ const ChooseDepartment = ({ value, onChange, validate }) => {
   useEffect(() => {
     //force the value if it is a referent_department
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      return onChange({ target: { value: user.department, name: "department" } });
+      setList(user.department);
     }
     //filter the array if it is a referent_region
     if (user.role === ROLES.REFERENT_REGION) {
@@ -254,7 +254,7 @@ const ChooseDepartment = ({ value, onChange, validate }) => {
 
   return (
     <Field
-      disabled={user.role === ROLES.REFERENT_DEPARTMENT}
+      disabled={user.role === ROLES.REFERENT_DEPARTMENT && user.department.length === 1}
       as="select"
       validate={validate}
       className="form-control"

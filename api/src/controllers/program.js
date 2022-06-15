@@ -11,7 +11,7 @@ const { ROLES, canCreateOrUpdateProgram } = require("snu-lib/roles");
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedProgram } = validateProgram(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: error.message });
     if (!canCreateOrUpdateProgram(req.user, checkedProgram)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await ProgramObject.create(checkedProgram);
     return res.status(200).send({ ok: true, data });

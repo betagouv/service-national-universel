@@ -217,11 +217,9 @@ const ChooseDepartment = ({ value, onChange, validate }) => {
   const [list, setList] = useState(departmentList);
 
   useEffect(() => {
-    if (value) return;
-
     //force the value if it is a referent_department
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-      return onChange({ target: { value: user.department, name: "department" } });
+      setList(user.department);
     }
     //filter the array if it is a referent_region
     if (user.role === REFERENT_ROLES.REFERENT_REGION) {
@@ -231,7 +229,13 @@ const ChooseDepartment = ({ value, onChange, validate }) => {
   }, []);
 
   return (
-    <Field validate={validate} component="select" disabled={user.role === REFERENT_ROLES.REFERENT_DEPARTMENT} name="department" value={value} onChange={onChange}>
+    <Field
+      validate={validate}
+      component="select"
+      disabled={user.role === REFERENT_ROLES.REFERENT_DEPARTMENT && user.department.length === 1}
+      name="department"
+      value={value}
+      onChange={onChange}>
       {list.map((e) => {
         return (
           <option value={e} key={e}>
