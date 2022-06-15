@@ -1,8 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { translateApplication } from "../../../../utils";
+import { translateApplication, translate } from "../../../../utils";
+import DomainThumb from "../../../../components/DomainThumb";
+import LocationMarker from "../../../../assets/icons/LocationMarker";
+import EyeOff from "../../../../assets/icons/EyeOff";
+import SixDotsVertical from "../../../../assets/icons/SixDotsVertical";
+import { Draggable } from "react-beautiful-dnd";
 
-export default function application({ application }) {
+export default function application({ application, index }) {
   const theme = {
     background: {
       WAITING_VALIDATION: "bg-sky-100",
@@ -27,23 +32,68 @@ export default function application({ application }) {
       ABANDON: "text-gray-400",
     },
   };
+
+  const tags = [];
+  application.mission.city && tags.push(application.mission.city + (application.mission.zip ? ` - ${application.mission.zip}` : ""));
+  application.mission.domains.forEach((d) => tags.push(translate(d)));
+
   return (
-    <Link
-      to="/candidature"
-      className="group flex shrink-0  bg-white flex-col w-56 justify-start items-start border shadow-md rounded-lg  p-3 hover:-translate-y-1 transition duration-100 ease-in">
-      <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm mb-2`}>
-        {translateApplication(application.status)}
-      </div>
-      <div className="flex flex-1 flex-col justify-between">
-        <div className="flex flex-1 flex-col">
-          <div className="text-gray-500 text-xs mt-2 uppercase">{application.mission?.structureName}</div>
-          <div className="font-bold text-sm mt-2 break-words">
-            {application.missionName.substring(0, 150)}
-            {application.missionName.length > 150 ? "..." : ""}
+    <Draggable draggableId={application._id} index={index}>
+      {(provided) => (
+        <Link
+          ref={provided.innerRef}
+          to={`/mission/${application.missionId}`}
+          className="bg-white relative flex flex-col w-full justify-between shadow-nina rounded-xl p-3 border-[1px] border-[#ffffff] hover:border-gray-200 mb-3"
+          {...provided.draggableProps}>
+          <div className="absolute top-0 right-0 flex space-x-2 p-3" {...provided.dragHandleProps}>
+            <div className="text-gray-500 text-xs font-normal tracking-wider">CHOIX Nº{application.priority}</div>
+            <SixDotsVertical className="text-gray-400" />
           </div>
-        </div>
-        <div className="text-gray-500 text-xs mt-3">Voir ma candidature&nbsp;›</div>
-      </div>
-    </Link>
+
+          {/* STATUT */}
+          <div className="flex items-center">
+            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+              {translateApplication(application.status)}
+            </div>
+          </div>
+          {/* END STATUT */}
+
+          <div className="flex my-3">
+            {/* icon */}
+            <div className="flex items-start">
+              <DomainThumb domain={application.mission?.domain} size="3rem" />
+            </div>
+
+            {/* infos mission */}
+            <div className="flex flex-col flex-1">
+              <div className="space-y-1">
+                <div className="flex space-x-4">
+                  <div className="text-gray-500 text-xs uppercase font-medium">{application.mission?.structureName}</div>
+                </div>
+                <div className="text-gray-900 font-bold text-base">{application.mission?.name}</div>
+                <div className="flex justify-between">
+                  <div className="text-gray-500 text-xs">{application.mission?.placesLeft} places disponibles</div>
+                  {/* TODO */}
+                  <div className="flex items-center space-x-2">
+                    <LocationMarker className="text-gray-400" />
+                    <div className="text-gray-800 text-sm font-bold">à 11 km</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-1 justify-between divide-x divide-gray-200">
+            <div className="flex flex-1 items-center justify-center space-x-2 text-gray-400 py-1">
+              <EyeOff />
+              <div className="text-xs font-normal">masquer</div>
+            </div>
+            <div className="flex flex-1 items-center justify-center space-x-2 text-gray-400">
+              <div className="text-xs font-normal">Voir plus&nbsp;›</div>
+            </div>
+          </div>
+        </Link>
+      )}
+    </Draggable>
   );
 }
