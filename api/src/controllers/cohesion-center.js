@@ -20,6 +20,7 @@ const {
   isYoung,
   getBaseUrl,
   sanitizeAll,
+  YOUNG_STATUS,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
 const { ROLES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1 } = require("snu-lib/roles");
@@ -209,7 +210,7 @@ router.get("/:id/cohort/:cohort/stats", passport.authenticate("referent", { sess
     const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort: value.cohort });
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
+    const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
 
     return res.status(200).send({ ok: true, data: { youngs, sessionPhase1 } });
   } catch (error) {

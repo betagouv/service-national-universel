@@ -1,15 +1,15 @@
 import React from "react";
-import DesktopView from "./desktop";
-import MobileView from "./mobile";
+import HomeDesktop from "./HomeDesktop";
+import HomeMobile from "./HomeMobile";
 
 export default function View() {
   return (
     <>
       <div className="hidden md:flex flex-1">
-        <DesktopView />
+        <HomeDesktop />
       </div>
       <div className="flex md:hidden ">
-        <MobileView />
+        <HomeMobile />
       </div>
     </>
   );

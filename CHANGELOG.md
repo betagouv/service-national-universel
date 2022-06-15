@@ -1,3 +1,22 @@
+## [1.99.2](https://github.com/betagouv/service-national-universel/compare/v1.99.1...v1.99.2) (2022-06-14)
+
+
+### Bug Fixes
+
+* **admin:** commentaire de départ obligatoire ([1d32937](https://github.com/betagouv/service-national-universel/commit/1d3293760976113c4ab313c66dcbc9c8b8e947dd))
+* **admin:** dashboard centre -  ne pas compter prendre en compte les desistés ([039ac9b](https://github.com/betagouv/service-national-universel/commit/039ac9b50d1af153b1de0a920997ac8d1b74913b))
+* **app:** add drag and drop candidatures ([cc934ca](https://github.com/betagouv/service-national-universel/commit/cc934ca3222d2cafe89bac7d21ce6250998d7351))
+* **app:** start candidatures v2 ([273300a](https://github.com/betagouv/service-national-universel/commit/273300a5ee177ae9c041eb6a19f000bfdd1526f5))
+* **app:** wip candidatures ([8ec44e7](https://github.com/betagouv/service-national-universel/commit/8ec44e77f24915989816c0549820181442615662))
+
+## [1.99.1](https://github.com/betagouv/service-national-universel/compare/v1.99.0...v1.99.1) (2022-06-13)
+
+
+### Bug Fixes
+
+* **admin:** open download young file to referent  reception center ([#1607](https://github.com/betagouv/service-national-universel/issues/1607)) ([e205a58](https://github.com/betagouv/service-national-universel/commit/e205a5899293466690bbe2668148899746f8e665))
+* **admin:** Show status désistement ([6a810d6](https://github.com/betagouv/service-national-universel/commit/6a810d6a2bf62dce70f965c98dedc55e6510aa43))
+
 # [1.99.0](https://github.com/betagouv/service-national-universel/compare/v1.98.1...v1.99.0) (2022-06-10)
 
 
