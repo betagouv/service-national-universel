@@ -1,3 +1,15 @@
+# [1.100.0](https://github.com/betagouv/service-national-universel/compare/v1.99.2...v1.100.0) (2022-06-15)
+
+
+### Bug Fixes
+
+* **app:** pouvoir masquer une candidature ([f6f498e](https://github.com/betagouv/service-national-universel/commit/f6f498e8af20b1df5331425c5b4801f442c2fca0))
+
+
+### Features
+
+* change sejour waiting list ([#1609](https://github.com/betagouv/service-national-universel/issues/1609)) ([53ec27c](https://github.com/betagouv/service-national-universel/commit/53ec27cdc7113e3627cd208b909d085e04c260ba))
+
 ## [1.99.2](https://github.com/betagouv/service-national-universel/compare/v1.99.1...v1.99.2) (2022-06-14)
 
 
