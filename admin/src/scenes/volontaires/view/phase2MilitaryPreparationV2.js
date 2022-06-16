@@ -201,6 +201,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
                           <ChevronDown className="ml-2 text-gray-400 cursor-pointer" />
                         </button>
                         {/* display options */}
+      {/*
                         <div className={`${open ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[35px]`}>
                           {optionsStatus.map((option) => (
                             <div
@@ -293,7 +294,8 @@ export default function Phase2militaryPrepartionV2({ young }) {
             </div>
           </>
         ) : null}
-      </div> */}
+      </div>
+      */}
     </>
   );
 }
