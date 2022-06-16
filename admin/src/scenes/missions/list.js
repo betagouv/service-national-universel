@@ -45,6 +45,7 @@ export default function List() {
   useEffect(() => {
     if (user.role !== ROLES.SUPERVISOR) return;
     (async () => {
+      if (!user.structureId) return;
       const { data } = await api.get(`/structure/${user.structureId}/children`);
       const ids = data.map((s) => s._id);
       setStructureIds([...ids, user.structureId]);
@@ -53,6 +54,7 @@ export default function List() {
   }, []);
   useEffect(() => {
     (async () => {
+      if (!user.structureId) return;
       const { data } = await api.get(`/structure/${user.structureId}`);
       setStructure(data);
     })();
