@@ -4,24 +4,26 @@ import { useSelector } from "react-redux";
 import ModalDocument from "./ModalDocument";
 import ModalInform from "./ModalInfom";
 
-export default function DocumentsPM({ docRef = null }) {
+export default function DocumentsPM({ docRef = null, showHelp = true }) {
   const young = useSelector((state) => state.Auth.young);
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
   const [modalInform, setModalInform] = React.useState({ isOpen: false });
   return (
     <>
-      <div className="flex items-center justify-between" ref={docRef}>
-        <div className="flex flex-col">
-          <div className="text-lg leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>
-          <div className="text-sm leading-5 font-normal text-gray-500 mt-1">Pour candidater, veuillez téléverser les documents justificatifs ci-dessous.</div>
+      {showHelp ? (
+        <div className="flex items-center justify-between" ref={docRef}>
+          <div className="flex flex-col">
+            <div className="text-lg leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>
+            <div className="text-sm leading-5 font-normal text-gray-500 mt-1">Pour candidater, veuillez téléverser les documents justificatifs ci-dessous.</div>
+          </div>
+          <div
+            className="rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
+            onClick={() => setModalInform({ isOpen: true })}>
+            En savoir plus
+          </div>
         </div>
-        <div
-          className="rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
-          onClick={() => setModalInform({ isOpen: true })}>
-          En savoir plus
-        </div>
-      </div>
-      <div className="flex flex-row flex-wrap lg:!flex-nowrap gap-4 mt-4 w-full justify-between">
+      ) : null}
+      <div className="flex flex-row flex-wrap lg:!flex-nowrap gap-4 my-4 w-full justify-between">
         <FileCard
           name="Pièce d’identité"
           icon="reglement"
