@@ -79,9 +79,7 @@ export default function IndexDesktop() {
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
                 {(applications || [])
-                  .filter((application) => {
-                    return toggleButtonDisplayHidden || !application.hidden;
-                  })
+                  .filter((application) => toggleButtonDisplayHidden || application.hidden !== "true")
                   .map((application, i) => (
                     <CardCandidature key={application._id.toString()} application={application} index={i} onChange={getApplications} />
                   ))}

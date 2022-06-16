@@ -4,10 +4,13 @@ import { translateApplication, translate } from "../../../../utils";
 import DomainThumb from "../../../../components/DomainThumb";
 import LocationMarker from "../../../../assets/icons/LocationMarker";
 import EyeOff from "../../../../assets/icons/EyeOff";
+import Eye from "../../../../assets/icons/Eye";
 import SixDotsVertical from "../../../../assets/icons/SixDotsVertical";
 import { Draggable } from "react-beautiful-dnd";
+import api from "../../../../services/api";
+import { toastr } from "react-redux-toastr";
 
-export default function application({ application, index }) {
+export default function application({ application, index, onChange }) {
   const theme = {
     background: {
       WAITING_VALIDATION: "bg-sky-100",
@@ -37,12 +40,17 @@ export default function application({ application, index }) {
   application.mission.city && tags.push(application.mission.city + (application.mission.zip ? ` - ${application.mission.zip}` : ""));
   application.mission.domains.forEach((d) => tags.push(translate(d)));
 
+  const handleHide = async ({ value }) => {
+    const { ok, data } = await api.put(`/application/${application._id.toString()}/visibilite`, { hidden: value });
+    if (!ok) return toastr.error("Une erreur est survenue lors du masquage de la candidature");
+    onChange();
+  };
+
   return (
     <Draggable draggableId={application._id} index={index}>
       {(provided) => (
-        <Link
+        <div
           ref={provided.innerRef}
-          to={`/mission/${application.missionId}`}
           className="bg-white relative flex flex-col w-full justify-between shadow-nina rounded-xl p-3 border-[1px] border-[#ffffff] hover:border-gray-200 mb-3"
           {...provided.draggableProps}>
           <div className="absolute top-0 right-0 flex space-x-2 p-3" {...provided.dragHandleProps}>
@@ -84,15 +92,24 @@ export default function application({ application, index }) {
           </div>
 
           <div className="flex flex-1 justify-between divide-x divide-gray-200">
-            <div className="flex flex-1 items-center justify-center space-x-2 text-gray-400 py-1">
-              <EyeOff />
-              <div className="text-xs font-normal">masquer</div>
-            </div>
+            {application.hidden === "true" ? (
+              <div className="flex flex-1 items-center justify-center space-x-2 text-gray-400 py-1" onClick={() => handleHide({ value: "false" })}>
+                <Eye />
+                <div className="text-xs font-normal">afficher</div>
+              </div>
+            ) : (
+              <div className="flex flex-1 items-center justify-center space-x-2 text-gray-400 py-1" onClick={() => handleHide({ value: "true" })}>
+                <EyeOff />
+                <div className="text-xs font-normal">masquer</div>
+              </div>
+            )}
             <div className="flex flex-1 items-center justify-center space-x-2 text-gray-400">
-              <div className="text-xs font-normal">Voir plus&nbsp;›</div>
+              <Link to={`/mission/${application.missionId}`}>
+                <div className="text-xs font-normal">Voir plus&nbsp;›</div>
+              </Link>
             </div>
           </div>
-        </Link>
+        </div>
       )}
     </Draggable>
   );
