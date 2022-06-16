@@ -29,13 +29,15 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
 
   const [centers, setCenters] = useState(null);
 
+  // TODO - Refresh session on reselect other center
+
   useEffect(() => {
     (async () => {
       try {
         let { data } = await api.get("/cohesion-center");
 
         if (user.role === ROLES.REFERENT_REGION) data = data.filter((e) => e.region === user.region);
-        if (user.role === ROLES.REFERENT_DEPARTMENT) data = data.filter((e) => e.department === user.department);
+        if (user.role === ROLES.REFERENT_DEPARTMENT) data = data.filter((e) => user.department.includes(e.department));
 
         const c = data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         setCenters(c);
