@@ -11,7 +11,7 @@ import { Draggable } from "react-beautiful-dnd";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
 
-export default function application({ application: propsApplication, index }) {
+export default function application({ application: propsApplication, index, onChange }) {
   const [application, setApplication] = React.useState(propsApplication);
 
   const theme = {
@@ -47,6 +47,7 @@ export default function application({ application: propsApplication, index }) {
     const { ok, data } = await api.put(`/application/${application._id.toString()}/visibilite`, { hidden: value });
     if (!ok) return toastr.error("Une erreur est survenue lors du masquage de la candidature");
     setApplication((prev) => ({ ...prev, hidden: data.hidden }));
+    onChange();
   };
 
   return (
@@ -60,7 +61,7 @@ export default function application({ application: propsApplication, index }) {
             <div className="text-gray-500 text-xs font-normal tracking-wider">CHOIX Nº{application.priority}</div>
             <SixDotsVertical className="text-gray-400" />
           </div>
-          <div className="flex flex-[2_2_0%]">
+          <div className="flex flex-1">
             {/* icon */}
             <div className="flex items-center">
               <DomainThumb domain={application.mission?.domain} size="3rem" />
@@ -95,14 +96,14 @@ export default function application({ application: propsApplication, index }) {
           <div className="flex flex-1 justify-between">
             {/* TODO */}
             {/* DISTANCE */}
-            <div className="flex basis-1/4 items-center space-x-2">
+            <div className="flex basis-[31%] items-center space-x-2">
               <LocationMarker className="text-gray-400" />
               <div className="text-gray-800 text-base font-bold">à 11 km</div>
             </div>
             {/* END DISTANCE */}
 
             {/* MASQUAGE */}
-            <div className="flex basis-1/4 items-center">
+            <div className="flex basis-[25%] items-center">
               {application.hidden === "true" ? (
                 <div className="group flex items-center">
                   <div className="flex group-hover:hidden items-center space-x-2 text-gray-400" onClick={handleHide}>
@@ -130,7 +131,7 @@ export default function application({ application: propsApplication, index }) {
             {/* END MASQUAGE */}
 
             {/* STATUT */}
-            <div className="flex basis-1/2 items-center justify-end">
+            <div className="flex basis-[44%] items-center justify-end">
               <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
                 {translateApplication(application.status)}
               </div>
