@@ -580,6 +580,43 @@ async function notifDepartmentChange(department, template, young) {
   }
 }
 
+async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
+  const dateDeValidation = {
+    "Juin 2022": new Date(2022, 5, 20, 18), //20 juin 2022 à 18h
+    "Juillet 2022": new Date(2022, 6, 11, 18), //11 juillet 2022 à 18h
+  };
+
+  const dateDeValidationTerminale = {
+    "Juin 2022": new Date(2022, 5, 22, 18), //22 juin 2022 à 18h
+    "Juillet 2022": new Date(2022, 6, 13, 18), //13 juillet 2022 à 18h
+  };
+
+  const now = new Date();
+
+  if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
+    if (
+      (now > dateDeValidation[sessionPhase1.cohort] && young?.grade !== "Terminale" && young.departSejourAt > dateDeValidation[sessionPhase1.cohort]) ||
+      (now > dateDeValidationTerminale[sessionPhase1.cohort] && young?.grade === "Terminale" && young.departSejourAt > dateDeValidationTerminale[sessionPhase1.cohort])
+    ) {
+      if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
+        young.set({ statusPhase1: "NOT_DONE" });
+      } else {
+        young.set({ statusPhase1: "DONE" });
+      }
+    } else {
+      if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
+        young.set({ statusPhase1: "NOT_DONE" });
+      } else if (young?.departSejourMotif && ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young.departSejourMotif)) {
+        young.set({ statusPhase1: "DONE" });
+      }
+    }
+  } else {
+    //pas sur peut etre ne r faire
+    young.set({ statusPhase1: "NOT_DONE" });
+  }
+  await young.save({ fromUser: req.user });
+}
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -676,4 +713,5 @@ module.exports = {
   translateFileStatusPhase1,
   getCcOfYoung,
   notifDepartmentChange,
+  autoValidationSessionPhase1Young,
 };

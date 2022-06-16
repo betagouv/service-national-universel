@@ -39,6 +39,7 @@ const {
   getCcOfYoung,
   getFile,
   notifDepartmentChange,
+  autoValidationSessionPhase1Young,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
@@ -914,9 +915,16 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
+    if (youngs.some((young) => young.sessionPhase1Id !== youngs[0].sessionPhase1Id)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const sessionPhase1 = await SessionPhase1.findById(youngs[0].sessionPhase1Id);
+
     for (let young of youngs) {
       young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
       await young.save({ fromUser: req.user });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
     }
 
     res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });
@@ -950,9 +958,16 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
+    if (youngs.some((young) => young.sessionPhase1Id !== youngs[0].sessionPhase1Id)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const sessionPhase1 = await SessionPhase1.findById(youngs[0].sessionPhase1Id);
+
     for (let young of youngs) {
       young.set({ [key]: newValue });
       await young.save({ fromUser: req.user });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
       if (key === "cohesionStayPresence" && newValue === "true") {
         let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
         if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });

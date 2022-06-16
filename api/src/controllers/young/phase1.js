@@ -7,7 +7,8 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
-const { ERRORS } = require("../../utils");
+const SessionPhase1Model = require("../../models/sessionPhase1");
+const { ERRORS, autoValidationSessionPhase1Young } = require("../../utils");
 const { serializeYoung } = require("../../utils/serializer");
 const { sendTemplate } = require("../../sendinblue");
 
@@ -34,6 +35,9 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
 
     young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
     await young.save({ fromUser: req.user });
+
+    const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+    await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
 
     res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -68,6 +72,10 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
 
     young.set({ [key]: newValue });
     await young.save({ fromUser: req.user });
+
+    const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+    await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+
     if (key === "cohesionStayPresence" && newValue === "true") {
       let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
       if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
