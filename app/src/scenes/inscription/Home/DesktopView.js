@@ -171,8 +171,8 @@ export default function DesktopView() {
           {/* Info container Text */}
           <div className="w-9/12  m-auto pt-4">
             <p className="text-sm text-[#32267f]">
-              *Les élèves de 2nde dont l&apos;établissement relève du ministère de l’éducation nationale, de la jeunesse et des sports peuvent s’inscrire même si le séjour se
-              déroule sur leur temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.
+              *Les élèves de 2nde dont l&apos;établissement relève du ministère de l’éducation nationale et de la jeunesse peuvent s’inscrire même si le séjour se déroule sur leur
+              temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.
             </p>
           </div>
         </div>

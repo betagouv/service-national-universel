@@ -3,7 +3,15 @@ import { ReactiveList } from "@appbaseio/reactivesearch";
 import { TopResultStats, BottomResultStats } from "./list";
 import { getResultLabel } from "../utils";
 
-export default function ReactiveListComponent({ showTopResultStats = true, showBottomResultStats = true, pageSize = 10, pagination = true, paginationAt = "both", ...props }) {
+export default function ReactiveListComponent({
+  showTopResultStats = true,
+  showBottomResultStats = true,
+  pageSize = 10,
+  pagination = true,
+  paginationAt = "both",
+  URLParams = true,
+  ...props
+}) {
   return (
     <ReactiveList
       // default props
@@ -15,7 +23,7 @@ export default function ReactiveListComponent({ showTopResultStats = true, showB
       dataField="createdAt"
       sortBy="desc"
       showLoader={true}
-      URLParams={true}
+      URLParams={URLParams}
       loader={<div style={{ position: "absolute", width: "100%", textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Chargement...</div>}
       renderNoResults={() => <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun résultat.</div>}
       renderResultStats={(e) => {

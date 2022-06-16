@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useHistory, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import queryString from "query-string";
 
 import api from "../../../services/api";
 import CenterInformations from "./CenterInformations";
@@ -12,7 +13,7 @@ import Template from "../../../assets/icons/Template.js";
 
 export default function Index({ ...props }) {
   const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
+  const { user, sessionPhase1: sessionPhase1Redux } = useSelector((state) => state.Auth);
 
   const [center, setCenter] = useState();
   const [sessions, setSessions] = useState([]);
@@ -20,6 +21,8 @@ export default function Index({ ...props }) {
   const [focusedSession, setFocusedSession] = useState();
   const [occupationPercentage, setOccupationPercentage] = useState();
   const [availableCohorts, setAvailableCohorts] = useState([]);
+  const query = queryString.parse(location.search);
+  const { cohorte: cohortQueryUrl } = query;
 
   useEffect(() => {
     (async () => {
@@ -47,7 +50,10 @@ export default function Index({ ...props }) {
 
   useEffect(() => {
     if (!center) return;
-    setFocusedCohort(center.cohorts[0]);
+    // si on a une cohorte dans l'url , on la selectionne directement
+    // -> sinon on a une session dans le redux, on la selectionne directement
+    //    -> sinon on prend la première session du centre
+    setFocusedCohort(cohortQueryUrl || sessionPhase1Redux?.cohort || center.cohorts[0]);
   }, [center]);
 
   useEffect(() => {

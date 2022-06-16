@@ -293,7 +293,6 @@ export default function VolontaireList() {
                         "Adresse point de rassemblement": meetingPoint?.departureAddress,
                         "Date aller": meetingPoint?.departureAtString,
                         "Date retour": meetingPoint?.returnAtString,
-                        "TMP statusPhase1Tmp": data.statusPhase1Tmp,
                         "Présence à l'arrivée": !data.cohesionStayPresence ? "Non renseignée" : data.cohesionStayPresence === "true" ? "Présent" : "Absent",
                         "Présence à la JDM": !data.presenceJDM ? "Non renseignée" : data.presenceJDM === "true" ? "Présent" : "Absent",
                         "Date de départ": !data.departSejourAt ? "Non renseignée" : formatDateFRTimezoneUTC(data.departSejourAt),

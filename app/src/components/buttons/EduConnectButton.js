@@ -15,7 +15,7 @@ export default function EduConnectButton() {
       onClick={() => setRedirection(`${apiURL}/educonnect/login`)}>
       <IconFrance />
       <span className=" text-sm text-left text-gray-800 ">
-        S’identifier avec <b>Éduconnect</b>
+        S’identifier avec <b>ÉduConnect</b>
       </span>
     </button>
   );

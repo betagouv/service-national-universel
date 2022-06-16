@@ -1,25 +1,28 @@
 import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React, { useEffect, useRef, useState } from "react";
 import { MdOutlineOpenInNew } from "react-icons/md";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import ArrowCircleRightSvg from "../../assets/icons/ArrowCircleRight";
 import BusSvg from "../../assets/icons/Bus";
 import FilterSvg from "../../assets/icons/Filter";
 import Pencil from "../../assets/icons/Pencil";
+import Eye from "../../assets/icons/Eye";
 import Badge from "../../components/Badge";
+import Breadcrumbs from "../../components/Breadcrumbs";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import ExportComponent from "../../components/ExportXlsx";
 import { Filter2, FilterRow, ResultTable } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
-import { apiURL } from "../../config";
+import { apiURL, environment } from "../../config";
 import api from "../../services/api";
-import { ES_NO_LIMIT, getDepartmentNumber } from "../../utils";
-import Breadcrumbs from "../../components/Breadcrumbs";
+import { canCreateMeetingPoint, ES_NO_LIMIT, getDepartmentNumber, ROLES } from "../../utils";
 
-const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT"];
+const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT", "REGION"];
 
 export default function MeetingPoint() {
   const [filterVisible, setFilterVisible] = useState(false);
+  const user = useSelector((state) => state.Auth.user);
 
   const getDefaultQuery = () => {
     return { query: { match_all: {} }, track_total_hits: true };
@@ -36,41 +39,49 @@ export default function MeetingPoint() {
             <div className="font-bold text-2xl mb-4" style={{ fontFamily: "Marianne" }}>
               Points de rassemblements
             </div>
-            <ExportComponent
-              title="Exporter les points de rassemblements"
-              defaultQuery={getExportQuery}
-              exportTitle="point_de_rassemblement"
-              index="meetingpoint"
-              react={{ and: FILTERS }}
-              transform={async (data) => {
-                let res = [];
-                for (const item of data) {
-                  let bus = {};
-                  if (item.busId) {
-                    const { data: busResult } = await api.get(`/bus/${item.busId}`);
-                    if (!busResult) bus = {};
-                    else bus = busResult;
-                  }
+            <div className="flex space-x-2">
+              {canCreateMeetingPoint(user) ? (
+                <Link to={`/point-de-rassemblement/nouveau`}>
+                  <div className="font-marianne bg-snu-purple-300 rounded-lg flex justify-center items-center px-6 py-2 text-white hover:bg-snu-purple-200">
+                    <div>Créer un nouveau point de rassemblement</div>
+                  </div>
+                </Link>
+              ) : null}
+              <ExportComponent
+                title="Exporter les points de rassemblements"
+                defaultQuery={getExportQuery}
+                exportTitle="point_de_rassemblement"
+                index="meetingpoint"
+                react={{ and: FILTERS }}
+                transform={async (data) => {
+                  let res = [];
+                  for (const item of data) {
+                    let bus = {};
+                    if (item.busId) {
+                      const { data: busResult } = await api.get(`/bus/${item.busId}`);
+                      if (!busResult) bus = {};
+                      else bus = busResult;
+                    }
 
-                  res.push({
-                    Cohorte: item?.cohort,
-                    "ID de transport": item?.busExcelId,
-                    [`N° du département de départ`]: getDepartmentNumber(item?.departureDepartment),
-                    "Centre de destination": item?.centerCode,
-                    "Département de départ / du point de rassemblement": item?.departureDepartment,
-                    "Code postal du point de rassemblement": item?.departureZip,
-                    "Adresse du point de rassemblement": item?.departureAddress,
-                    "ID du point de rassemblement": item?._id,
-                    "Nombre de place proposées": bus?.capacity || 0,
-                    "Nombre de places occupées": bus?.capacity && bus?.placesLeft ? bus?.capacity - bus.placesLeft : 0,
-                    "Date/heure aller": item?.departureAtString,
-                    "Date/heure retour": item?.returnAtString,
-                  });
-                }
-                console.log(res);
-                return res;
-              }}
-            />
+                    res.push({
+                      Cohorte: item?.cohort,
+                      "ID de transport": item?.busExcelId,
+                      [`N° du département de départ`]: getDepartmentNumber(item?.departureDepartment),
+                      "Centre de destination": item?.centerCode,
+                      "Département de départ / du point de rassemblement": item?.departureDepartment,
+                      "Code postal du point de rassemblement": item?.departureZip,
+                      "Adresse du point de rassemblement": item?.departureAddress,
+                      "ID du point de rassemblement": item?._id,
+                      "Nombre de place proposées": bus?.capacity || 0,
+                      "Nombre de places occupées": bus?.capacity && bus?.placesLeft ? bus?.capacity - bus.placesLeft : 0,
+                      "Date/heure aller": item?.departureAtString,
+                      "Date/heure retour": item?.returnAtString,
+                    });
+                  }
+                  return res;
+                }}
+              />
+            </div>
           </div>
           <div className="bg-white pt-4 rounded-lg">
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -99,6 +110,21 @@ export default function MeetingPoint() {
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
+                      placeholder="Region"
+                      componentId="REGION"
+                      dataField="departureRegion.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "REGION") }}
+                      title=""
+                      URLParams={true}
+                      sortBy="asc"
+                      showSearch={true}
+                      searchPlaceholder="Rechercher..."
+                      size={1000}
+                      defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
                       placeholder="Département"
                       componentId="DEPARTMENT"
                       dataField="departureDepartment.keyword"
@@ -109,6 +135,7 @@ export default function MeetingPoint() {
                       showSearch={true}
                       searchPlaceholder="Rechercher..."
                       size={1000}
+                      defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
                     />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
@@ -176,7 +203,7 @@ export default function MeetingPoint() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {data.map((hit) => {
-                            return <Hit key={hit._id} hit={hit} />;
+                            return <Hit key={hit._id} hit={hit} user={user} />;
                           })}
                         </tbody>
                       </table>
@@ -192,7 +219,7 @@ export default function MeetingPoint() {
   );
 }
 
-const Hit = ({ hit }) => {
+const Hit = ({ hit, user }) => {
   let mounted = useRef(true);
   const [bus, setBus] = useState();
   const [center, setCenter] = useState();
@@ -255,15 +282,27 @@ const Hit = ({ hit }) => {
       ) : (
         <td>chargement...</td>
       )}
-      <td className="rounded-r-lg">
-        <div className="flex justify-center items-center">
-          <Link to={`/point-de-rassemblement/${hit._id}/edit`}>
-            <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
-              <Pencil width={16} height={16} />
-            </div>
-          </Link>
-        </div>
-      </td>
+      {user.role === ROLES.ADMIN ? (
+        <td className="rounded-r-lg">
+          <div className="flex justify-center items-center">
+            <Link to={`/point-de-rassemblement/${hit._id}`}>
+              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
+                <Pencil width={16} height={16} />
+              </div>
+            </Link>
+          </div>
+        </td>
+      ) : (
+        <td className="rounded-r-lg">
+          <div className="flex justify-center items-center">
+            <Link to={`/point-de-rassemblement/${hit._id}`}>
+              <div className="flex justify-center items-center h-8 w-8 bg-gray-100 group-hover:bg-white text-gray-600 rounded-full hover:scale-105">
+                <Eye width={16} height={16} />
+              </div>
+            </Link>
+          </div>
+        </td>
+      )}
     </tr>
   );
 };

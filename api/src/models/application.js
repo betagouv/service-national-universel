@@ -137,6 +137,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  hidden: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Indique si la candidature est cachée",
+    },
+  },
+
   status: {
     type: String,
     enum: ["WAITING_VALIDATION", "WAITING_ACCEPTATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"],

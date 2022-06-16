@@ -1,6 +1,6 @@
 import * as React from "react";
 
-const Autotest = ({ filled = false, icon }) => (
+const FileIcon = ({ filled = false, icon }) => (
   <svg width="85" height="87" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
       d="M70.334 11.366c1.784 0 3.241 1.475 3.241 3.28v65.44c0 1.806-1.457 3.28-3.241 3.28H18.817c-1.785 0-3.242-1.474-3.242-3.28v-65.44c0-1.805 1.457-3.28 3.242-3.28h51.517z"
@@ -91,4 +91,4 @@ const Autotest = ({ filled = false, icon }) => (
   </svg>
 );
 
-export default Autotest;
+export default FileIcon;

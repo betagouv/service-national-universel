@@ -1,3 +1,145 @@
+# [1.100.0](https://github.com/betagouv/service-national-universel/compare/v1.99.2...v1.100.0) (2022-06-15)
+
+
+### Bug Fixes
+
+* **app:** pouvoir masquer une candidature ([f6f498e](https://github.com/betagouv/service-national-universel/commit/f6f498e8af20b1df5331425c5b4801f442c2fca0))
+
+
+### Features
+
+* change sejour waiting list ([#1609](https://github.com/betagouv/service-national-universel/issues/1609)) ([53ec27c](https://github.com/betagouv/service-national-universel/commit/53ec27cdc7113e3627cd208b909d085e04c260ba))
+
+## [1.99.2](https://github.com/betagouv/service-national-universel/compare/v1.99.1...v1.99.2) (2022-06-14)
+
+
+### Bug Fixes
+
+* **admin:** commentaire de départ obligatoire ([1d32937](https://github.com/betagouv/service-national-universel/commit/1d3293760976113c4ab313c66dcbc9c8b8e947dd))
+* **admin:** dashboard centre -  ne pas compter prendre en compte les desistés ([039ac9b](https://github.com/betagouv/service-national-universel/commit/039ac9b50d1af153b1de0a920997ac8d1b74913b))
+* **app:** add drag and drop candidatures ([cc934ca](https://github.com/betagouv/service-national-universel/commit/cc934ca3222d2cafe89bac7d21ce6250998d7351))
+* **app:** start candidatures v2 ([273300a](https://github.com/betagouv/service-national-universel/commit/273300a5ee177ae9c041eb6a19f000bfdd1526f5))
+* **app:** wip candidatures ([8ec44e7](https://github.com/betagouv/service-national-universel/commit/8ec44e77f24915989816c0549820181442615662))
+
+## [1.99.1](https://github.com/betagouv/service-national-universel/compare/v1.99.0...v1.99.1) (2022-06-13)
+
+
+### Bug Fixes
+
+* **admin:** open download young file to referent  reception center ([#1607](https://github.com/betagouv/service-national-universel/issues/1607)) ([e205a58](https://github.com/betagouv/service-national-universel/commit/e205a5899293466690bbe2668148899746f8e665))
+* **admin:** Show status désistement ([6a810d6](https://github.com/betagouv/service-national-universel/commit/6a810d6a2bf62dce70f965c98dedc55e6510aa43))
+
+# [1.99.0](https://github.com/betagouv/service-national-universel/compare/v1.98.1...v1.99.0) (2022-06-10)
+
+
+### Bug Fixes
+
+* **admin:** head center dashboard ([5b493ec](https://github.com/betagouv/service-national-universel/commit/5b493ec4a96e4243e7b31b9112227526d4d6bc2e))
+* **admin:** PDR session share ([0fbc925](https://github.com/betagouv/service-national-universel/commit/0fbc925ed98b77a21ed6133794ebb11293b2f097))
+* **api:** ne pas supprimer session si ya des jeunes ([ec2e4d3](https://github.com/betagouv/service-national-universel/commit/ec2e4d3868ff227a12f00ed0152794e1409e6a92))
+
+
+### Features
+
+* **admin:** delete meeting point ([#1600](https://github.com/betagouv/service-national-universel/issues/1600)) ([9544f57](https://github.com/betagouv/service-national-universel/commit/9544f57cd890c73098fb39ac88e855f2ecd2ec3d))
+
+## [1.98.1](https://github.com/betagouv/service-national-universel/compare/v1.98.0...v1.98.1) (2022-06-09)
+
+
+### Bug Fixes
+
+* **admin,app,support:** Ministère de l’éducation nationale et de la jeunesse ([fe5cf0c](https://github.com/betagouv/service-national-universel/commit/fe5cf0c26673769f8c7d02c167f035cf1668aed2))
+* add count sessionPhase1 share ([528ac9c](https://github.com/betagouv/service-national-universel/commit/528ac9ccafa0fc5033b6533b56713ad743fdab40))
+* **admin:** list of user's sessions ([e2ea76a](https://github.com/betagouv/service-national-universel/commit/e2ea76a39d16441eaccc4204db78796afebe814c))
+* **admin:** séjour sélectionné par défaut ([14fe339](https://github.com/betagouv/service-national-universel/commit/14fe3396d9b9b9f5953e80caa53ede332e653a33))
+* **admin:** selection du séjour initiale - vue centre ([734d639](https://github.com/betagouv/service-national-universel/commit/734d639302f7c5128aca3a930380d89d229827dd))
+* **api:** afficher uniquement volontaires validés - partage données sessionPhase1 ([336a3c9](https://github.com/betagouv/service-national-universel/commit/336a3c9f71295e81a0d3e003d0863b9dca8f3a6d))
+
+# [1.98.0](https://github.com/betagouv/service-national-universel/compare/v1.97.0...v1.98.0) (2022-06-07)
+
+
+### Features
+
+* **api:** send step1form connected young ([#1597](https://github.com/betagouv/service-national-universel/issues/1597)) ([43d67ee](https://github.com/betagouv/service-national-universel/commit/43d67ee77067eca0161a8924da0d60a3362ea361))
+
+# [1.97.0](https://github.com/betagouv/service-national-universel/compare/v1.96.1...v1.97.0) (2022-06-06)
+
+
+### Bug Fixes
+
+* ajout link écran phase 1 affecté ([ed7d8d5](https://github.com/betagouv/service-national-universel/commit/ed7d8d5fd19f0fbc8b0197bc1909de7d2e2e2747))
+* **admin:** create meeting point center ([af4c519](https://github.com/betagouv/service-national-universel/commit/af4c519d0fe97d714e09c59c78a3da01beda992d))
+* **admin:** remove `statusPhase1Tmp` from export ([d43a7e9](https://github.com/betagouv/service-national-universel/commit/d43a7e9b66be53b34e375159a08e715aeebd69b5))
+* **api,admin:** changer ou pas centre de destination point de rassemblement ([a8ba06b](https://github.com/betagouv/service-national-universel/commit/a8ba06b342c7a3cdbaac6998aa3a1929f73e13d7))
+
+
+### Features
+
+* **admin,api:** creation point de rassemblement ([#1596](https://github.com/betagouv/service-national-universel/issues/1596)) ([da4dc7b](https://github.com/betagouv/service-national-universel/commit/da4dc7bad69fa4524655fd33bd4ceb8236266159))
+* **admin,api:** ouverture création point de rassemblement en prod ([dab3518](https://github.com/betagouv/service-national-universel/commit/dab35180402cb0589179dd59b42b4bf944b14395))
+
+## [1.96.1](https://github.com/betagouv/service-national-universel/compare/v1.96.0...v1.96.1) (2022-06-03)
+
+
+### Bug Fixes
+
+* **admin:** referent peut voir details point de rassemblement ([3f43288](https://github.com/betagouv/service-national-universel/commit/3f4328815d52010d9540374260281fc0a165224b))
+* **app:** Bloquer onglets phase 1/2/3 aux volontaires désistés ([#1595](https://github.com/betagouv/service-national-universel/issues/1595)) ([2ecf773](https://github.com/betagouv/service-national-universel/commit/2ecf773868fdbc7f70538186acde5ea38776b26d))
+
+# [1.96.0](https://github.com/betagouv/service-national-universel/compare/v1.95.0...v1.96.0) (2022-06-02)
+
+
+### Bug Fixes
+
+* **admin:** referent can't edit meeting point ([d3270ef](https://github.com/betagouv/service-national-universel/commit/d3270ef50b7da0d27ade83674d4a62a28297625a))
+* continue v2 mission + home phase 2 ([8092fa0](https://github.com/betagouv/service-national-universel/commit/8092fa0c6d0d455df69b70e121cf5b8f438c3c08))
+
+
+### Features
+
+* **admin:** PR ouverture à la consultation pour les référents régionaux et départementaux ([#1594](https://github.com/betagouv/service-national-universel/issues/1594)) ([13f671a](https://github.com/betagouv/service-national-universel/commit/13f671add877ed2c549e6427ff9fbe08e5c59a9f))
+
+# [1.95.0](https://github.com/betagouv/service-national-universel/compare/v1.94.0...v1.95.0) (2022-06-01)
+
+
+### Bug Fixes
+
+* start new screen missions ([242c9c2](https://github.com/betagouv/service-national-universel/commit/242c9c2bb664dab7593a37790d8f3fc1df1c32c4))
+* **admin:** affectation par ref regional ([df9867c](https://github.com/betagouv/service-national-universel/commit/df9867c599e08be9906ff7bf7ac7c5680faf0256))
+* **admin:** statut available for new affectation by referent ([a22f918](https://github.com/betagouv/service-national-universel/commit/a22f918e44259bfaa58dabec94b49f25a2212e15))
+* **app:** header in mobile home phase2 ([828164b](https://github.com/betagouv/service-national-universel/commit/828164b0ef242d7fce5c1cb6d4442074ad8dc4a0))
+* **app,admin:** font faces ([d22c9d7](https://github.com/betagouv/service-national-universel/commit/d22c9d7a6be6044f94dbb401dd3b47d7538a4854))
+* home phase 2 wip ([ada32c0](https://github.com/betagouv/service-national-universel/commit/ada32c0100fd83b248440d8513544430acfa7fbe))
+* **app:** phase2 home + add router ([8255a37](https://github.com/betagouv/service-national-universel/commit/8255a375ab4b0fa0f3fdc2c8b86d4b34f6e2acf5))
+* phase2 home ([9387f1b](https://github.com/betagouv/service-national-universel/commit/9387f1b3224cee28fd41f47fb316ed56517c7033))
+
+
+### Features
+
+* **app:** font Marianne ✨ ([78283f8](https://github.com/betagouv/service-national-universel/commit/78283f84a6373a8c59e2452ffeb62fc9edc82949))
+* setup phase2v2 ([#1593](https://github.com/betagouv/service-national-universel/issues/1593)) ([f8e3206](https://github.com/betagouv/service-national-universel/commit/f8e32063bbe0e6f7670cabe3b2059939e4bc2e59))
+* **admin:** Ouvrir l’affectation aux référents régionaux ([#1591](https://github.com/betagouv/service-national-universel/issues/1591)) ([396366e](https://github.com/betagouv/service-national-universel/commit/396366eacccdeeec980cc0cba22de1c86451fd5f))
+
+# [1.94.0](https://github.com/betagouv/service-national-universel/compare/v1.93.0...v1.94.0) (2022-05-31)
+
+
+### Features
+
+* **admin:** rajouter choix de la cohorte création nouvelle inscription ([#1592](https://github.com/betagouv/service-national-universel/issues/1592)) ([de0d5f3](https://github.com/betagouv/service-national-universel/commit/de0d5f3f2fa78e4582d6354e843245b2e95a3335))
+
+# [1.93.0](https://github.com/betagouv/service-national-universel/compare/v1.92.0...v1.93.0) (2022-05-30)
+
+
+### Bug Fixes
+
+* **admin:** article centre de support chef de centre ([#1588](https://github.com/betagouv/service-national-universel/issues/1588)) ([5951430](https://github.com/betagouv/service-national-universel/commit/59514300fc80d86edba03865d4c53df0af4e4bc6))
+* **app:** se désister, changer lien de redirection vers article BDC ([b2063f7](https://github.com/betagouv/service-national-universel/commit/b2063f707863fecf9a18edc3da2fc590f4096db8))
+
+
+### Features
+
+* **admin:**  ouvrir modification affectation référents régionaux ([#1589](https://github.com/betagouv/service-national-universel/issues/1589)) ([e89a66c](https://github.com/betagouv/service-national-universel/commit/e89a66c0cc00efc7ff06d34a57957a1e83b0a05e))
+
 # [1.92.0](https://github.com/betagouv/service-national-universel/compare/v1.91.0...v1.92.0) (2022-05-25)
 
 

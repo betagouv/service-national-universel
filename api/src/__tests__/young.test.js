@@ -448,14 +448,16 @@ describe("Young", () => {
         .post("/young/file/cniFiles")
         .send({ body: JSON.stringify({ names: ["e"] }) });
       expect(res.status).toEqual(200);
-      expect(res.body).toEqual({ data: ["e"], ok: true });
+      expect(res.body.data).toEqual(["e"]);
+      expect(res.body.ok).toEqual(true);
 
       // With military file.
       res = await request(getAppHelper())
         .post("/young/file/militaryPreparationFilesIdentity")
         .send({ body: JSON.stringify({ names: ["e"] }) });
       expect(res.status).toEqual(200);
-      expect(res.body).toEqual({ data: ["e"], ok: true });
+      expect(res.body.data).toEqual(["e"]);
+      expect(res.body.ok).toEqual(true);
 
       passport.user = previous;
     });

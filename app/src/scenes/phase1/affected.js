@@ -59,7 +59,7 @@ export default function Affected() {
                       <h1 className="text-5xl">
                         <strong>{translateCohort(young.cohort)}</strong>
                       </h1>
-                      {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? (
+                      {youngCanChangeSession({ cohort: young.cohort, statusPhase1: young.statusPhase1 }) ? (
                         <Link to="/changer-de-sejour">
                           <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
                         </Link>
@@ -114,7 +114,17 @@ export default function Affected() {
                     target="_blank"
                     rel="noreferrer"
                     className="flex w-full justify-between items-start border-[1px] border-gray-200 rounded-lg pl-4">
-                    <span className="py-3 font-bold text-base pr-4 flex-1">J'ai des questions sur le séjour</span>
+                    <span className="py-3 font-bold text-base pr-4 flex-1">J&apos;ai des questions sur le séjour</span>
+                    <div>
+                      <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
+                    </div>
+                  </a>
+                  <a
+                    href={`${supportURL}/base-de-connaissance/mon-affectation-lieu-de-sejour`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex w-full justify-between items-start border-[1px] border-gray-200 rounded-lg pl-4">
+                    <span className="py-3 font-bold text-base pr-4 flex-1">J&apos;ai des questions sur mon affectation</span>
                     <div>
                       <BsArrowUpShort className="rotate-45 text-gray-400 m-1 h-8 w-8" />
                     </div>

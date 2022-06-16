@@ -7,13 +7,13 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const NodeClam = require("clamscan");
+const mime = require("mime-types");
 const fs = require("fs");
 const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
-
+const { decrypt, encrypt } = require("../../cryptoUtils");
 const config = require("../../config");
 const { capture } = require("../../sentry");
-const { encrypt } = require("../../cryptoUtils");
 const { getQPV, getDensity } = require("../../geo");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
@@ -37,6 +37,7 @@ const {
   updatePlacesSessionPhase1,
   translateFileStatusPhase1,
   getCcOfYoung,
+  getFile,
   notifDepartmentChange,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
@@ -124,6 +125,7 @@ router.post(
         "imageRightFiles",
         "dataProcessingConsentmentFiles",
         "rulesFiles",
+        "equivalenceFiles",
       ];
       const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
       const { error: keyError, value: key } = Joi.string()
@@ -183,7 +185,7 @@ router.post(
       user.set({ [key]: names });
       await user.save({ fromUser: req.user });
 
-      return res.status(200).send({ data: names, ok: true });
+      return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
     } catch (error) {
       capture(error);
       if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
@@ -477,7 +479,8 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const { id } = req.params;
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-    if (!youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!youngCanChangeSession({ cohort: young.cohort, status: young.status, statusPhase1: young.statusPhase1 }))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // young can only update their own cohort.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
@@ -535,6 +538,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         cohort,
         cohortChangeReason,
         cohortDetailedChangeReason,
+        status: YOUNG_STATUS.VALIDATED,
         statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
         cohesionStayPresence: undefined,
         cohesionStayMedicalFileReceived: undefined,
@@ -969,9 +973,50 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
   }
 });
 
+router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      youngId: Joi.string().required(),
+      key: Joi.string().required(),
+      fileName: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { youngId, key, fileName } = value;
+
+    const young = await YoungObject.findById(youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (req.user._id.toString() !== young._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
+    const decryptedBuffer = decrypt(downloaded.Body);
+
+    let mimeFromFile = null;
+    try {
+      const { mime } = await FileType.fromBuffer(decryptedBuffer);
+      mimeFromFile = mime;
+    } catch (e) {
+      //
+    }
+
+    return res.status(200).send({
+      data: Buffer.from(decryptedBuffer, "base64"),
+      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
+      fileName: fileName,
+      ok: true,
+    });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.use("/:id/documents", require("./documents"));
 router.use("/:id/meeting-point", require("./meeting-point"));
 router.use("/:id/phase1", require("./phase1"));
+router.use("/:id/phase2", require("./phase2"));
 router.use("/inscription", require("./inscription"));
 
 module.exports = router;

@@ -170,6 +170,38 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
   }
 });
 
+router.put("/:id/visibilite", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const joiId = Joi.string().required().validate(req.params.id);
+    if (joiId.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // const joiBody = validateUpdateApplication(req.body, req.user);
+    const joiBody = Joi.object()
+      .keys({ hidden: Joi.string().allow(null, "") })
+      .validate(req.body, { stripUnknown: true });
+    if (joiBody.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const application = await ApplicationObject.findById(joiId.value);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const young = await YoungObject.findById(application.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // A young can only update his own application.
+    if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    application.set({ hidden: joiBody.value.hidden });
+    await application.save({ fromUser: req.user });
+
+    res.status(200).send({ ok: true, data: serializeApplication(application) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);

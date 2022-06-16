@@ -17,9 +17,9 @@ export default function Index() {
       </Header>
       <p>
         admin.snu.gouv.fr et moncompte.snu.gouv.fr (ci-après la « Plateforme ») sont deux sites mis en œuvre par la Direction de la jeunesse, de l&apos;éducation populaire et de la
-        vie associative (DJEPVA) du Ministère de l’éducation nationale et de la jeunesse et des sports (MENJS), dans le cadre de sa politique publique. La Plateforme permet aux
-        volontaires du Service National Universel (SNU) de s’inscrire et de suivre leur parcours, à l’administration de piloter et accompagner la mise en œuvre du SNU, et à des
-        structures publiques, privées ou associatives de déposer des missions d’intérêt général.
+        vie associative (DJEPVA) du Ministère de l’éducation nationale et de la jeunesse (MENJ), dans le cadre de sa politique publique. La Plateforme permet aux volontaires du
+        Service National Universel (SNU) de s’inscrire et de suivre leur parcours, à l’administration de piloter et accompagner la mise en œuvre du SNU, et à des structures
+        publiques, privées ou associatives de déposer des missions d’intérêt général.
       </p>
       <p>
         Les présentes conditions générales d’utilisation (ci-après dénommées « CGU ») ont pour objet de déterminer les modalités d’utilisation de la « Plateforme ». En vous
