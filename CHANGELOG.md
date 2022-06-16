@@ -1,3 +1,10 @@
+## [1.100.1](https://github.com/betagouv/service-national-universel/compare/v1.100.0...v1.100.1) (2022-06-16)
+
+
+### Bug Fixes
+
+* **api:** re-ouverture séjour juillet ([6df72fd](https://github.com/betagouv/service-national-universel/commit/6df72fde0bdb00393b9d2fceefccd15dc42909b2))
+
 # [1.100.0](https://github.com/betagouv/service-national-universel/compare/v1.99.2...v1.100.0) (2022-06-15)
 
 
