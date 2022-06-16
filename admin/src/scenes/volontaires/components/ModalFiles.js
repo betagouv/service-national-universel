@@ -82,7 +82,7 @@ export default function ModalFiles({ isOpen, onCancel, initialValues, young, nam
       <Modal centered isOpen={isOpen} toggle={onCancel} size="lg">
         <ModalContainer>
           <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={onCancel} />
-          <div className="px-2 pt-2 pb-4 text-center flex flex-col items-center">
+          <div className="px-2 pt-2 pb-4 text-center flex flex-col items-center mx-8">
             <h3 className="mb-4">Documents demande de reconnaissance d’engagement déjà réalisé</h3>
 
             {filesList?.length

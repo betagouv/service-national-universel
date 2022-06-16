@@ -1,86 +1,150 @@
-import React from "react";
-import { BiCopy } from "react-icons/bi";
-import { BsCheck2, BsChevronDown } from "react-icons/bs";
-import { GoPrimitiveDot } from "react-icons/go";
-import { HiCheckCircle } from "react-icons/hi";
+import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
-import Bell from "../../../assets/icons/Bell";
-import CheckCircle from "../../../assets/icons/CheckCircle";
-import ChevronDown from "../../../assets/icons/ChevronDown";
-import Download from "../../../assets/icons/Download";
-import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
-import SimpleFileIcon from "../../../assets/icons/SimpleFileIcon";
-import XCircle from "../../../assets/icons/XCircle";
+import { useHistory } from "react-router-dom";
+
+import Loader from "../../../components/Loader";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import api from "../../../services/api";
-import { copyToClipboard, formatDateFR, translate, translateEquivalenceStatus } from "../../../utils";
-import ModalChangeStatus from "./ModalChangeStatus";
-import ModalFiles from "./ModalFiles";
+import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 
-export default function CardEquivalence({ young, equivalence }) {
-  const optionsStatus = ["WAITING_CORRECTION", "REFUSED", "VALIDATED"];
-  const [copied, setCopied] = React.useState(false);
-  const [modalFiles, setModalFiles] = React.useState({ isOpen: false });
-  const [modalStatus, setModalStatus] = React.useState({ isOpen: false });
+export default function Phase2militaryPrepartionV2({ young }) {
+  const [applicationsToMilitaryPreparation, setApplicationsToMilitaryPreparation] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, template: null, data: null });
+  const history = useHistory();
 
-  const ref = React.useRef(null);
-  const [open, setOpen] = React.useState(false);
-  const [cardOpen, setCardOpen] = React.useState(false);
-  React.useEffect(() => {
-    if (copied) {
-      setTimeout(() => setCopied(false), 3000);
-    }
-  }, [copied]);
-
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
+  useEffect(() => {
+    getApplications();
   }, []);
 
-  const theme = {
-    WAITING_CORRECTION: "text-[#4484FF] h-4 w-4",
-    VALIDATED: "text-[#27AF66] h-4 w-4",
-    REFUSED: "text-[#EF6737] h-4 w-4",
+  const getApplications = async () => {
+    if (!young) return;
+    const { ok, data, code } = await api.get(`/young/${young._id}/application`);
+    if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+    return setApplicationsToMilitaryPreparation(data?.filter((a) => a?.mission?.isMilitaryPreparation === "true"));
   };
 
-  const themeBadge = {
-    background: {
-      WAITING_VERIFICATION: "bg-sky-100",
-      WAITING_CORRECTION: "bg-[#FD7A02]",
-      VALIDATED: "bg-[#71C784]",
-      REFUSED: "bg-red-500",
-    },
-    text: {
-      WAITING_VERIFICATION: "text-sky-600",
-      WAITING_CORRECTION: "text-white",
-      VALIDATED: "text-white",
-      REFUSED: "text-white",
-    },
-  };
+  if (!applicationsToMilitaryPreparation) return <Loader />;
 
-  const onChangeFiles = async ({ data, equivalenceId }) => {
+  if (!["WAITING_VALIDATION", "VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+    // display nothing if the young has not validated the files at least one time
+    return null;
+  }
+
+  const handleValidate = () => {
+    console.log("handleValidate");
+    setModal({ isOpen: true, template: "confirm" });
+  };
+  const onValidate = async () => {
     try {
-      const { ok } = await api.put(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`, { files: data });
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue");
-        return;
+      // validate the files
+      const responseYoung = await api.put(`/referent/young/${young._id}`, { statusMilitaryPreparationFiles: "VALIDATED" });
+      if (!responseYoung.ok) return toastr.error(translate(responseYoung.code), "Une erreur s'est produite lors de la validation des documents");
+
+      // change status of applications
+      for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
+        const app = applicationsToMilitaryPreparation[i];
+        if (app.status === APPLICATION_STATUS.WAITING_VERIFICATION) {
+          const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VALIDATION" });
+          if (!responseApplication.ok)
+            toastr.error(
+              translate(responseApplication.code),
+              `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
+            );
+        }
       }
-      toastr.success("Fichier téléversé");
-    } catch (error) {
-      toastr.error("Oups, une erreur est survenue");
-      return;
+      setModal({ isOpen: false, template: null, data: null });
+      await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED}`);
+      for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
+        const app = applicationsToMilitaryPreparation[i];
+        if (app.status === APPLICATION_STATUS.WAITING_VERIFICATION) {
+          await api.post(`/referent/${app.tutorId}/email/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED}`, { app });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      toastr.error("Une erreur est survenue", translate(e.code));
     }
+    //Refresh
+    history.go(0);
+  };
+
+  const handleCorrection = () => {
+    console.log("handleCorrection");
+    setModal({ isOpen: true, template: "correction" });
+  };
+  const onCorrection = async (message) => {
+    // update the young
+    const responseYoung = await api.put(`/referent/young/${young._id}`, { statusMilitaryPreparationFiles: "WAITING_CORRECTION" });
+    if (!responseYoung.ok) return toastr.error(translate(responseYoung.code), "Une erreur s'est produite lors de la validation des documents");
+
+    await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION}`, { message });
+    toastr.success("Email envoyé !");
+    setModal({ isOpen: false, template: null, data: null });
+    // Refresh
+    history.go(0);
+  };
+
+  const handleRefused = () => {
+    console.log("handleRefused");
+    setModal({ isOpen: true, template: "refuse" });
+  };
+
+  const onRefuse = async (message) => {
+    console.log("onRefuse");
+
+    // update the young
+    const responseYoung = await api.post(`/referent/young/${young._id}/refuse-military-preparation-files`);
+    if (!responseYoung.ok) return toastr.error(translate(responseYoung.code), "Une erreur s'est produite lors de la validation des documents");
+
+    // change status of applications if its not already correct
+    for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
+      const app = applicationsToMilitaryPreparation[i];
+      if (app.status === APPLICATION_STATUS.WAITING_VERIFICATION) {
+        const responseApplication = await api.put("/application", { _id: app._id, status: "REFUSED" });
+        if (!responseApplication.ok)
+          toastr.error(
+            translate(responseApplication.code),
+            `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`,
+          );
+      }
+    }
+    await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REFUSED}`, { message });
+    toastr.success("Email envoyé !");
+    setModal({ isOpen: false, template: null, data: null });
+    // Refresh
+    history.go(0);
   };
 
   return (
     <>
-      <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
+      <ModalConfirm
+        isOpen={modal.isOpen && modal.template === "confirm"}
+        topTitle="alerte"
+        title={`Vous êtes sur le point de confirmer l'éligibilité de ${young.firstName} à la préparation militaire, sur la base des documents reçus.`}
+        message={`Une fois l'éligibilité confirmée un mail sera envoyé à ${young.firstName} (${young.email}).`}
+        onCancel={() => setModal({ isOpen: false, template: null, data: null })}
+        onConfirm={onValidate}
+      />
+      <ModalConfirmWithMessage
+        isOpen={modal.isOpen && modal.template === "correction"}
+        topTitle="alerte"
+        title={`Attention, vous êtes sur le point de demander des corrections aux documents envoyés, car ces derniers ne vous permettent pas de confirmer ou d'infirmer l'éligibilité de ${young.firstName} à la préparation militaire`}
+        message={`Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName} (${young.email}).`}
+        young={young}
+        onChange={() => setModal({ isOpen: false, template: null, data: null })}
+        onConfirm={onCorrection}
+      />
+      <ModalConfirmWithMessage
+        isOpen={modal.isOpen && modal.template === "refuse"}
+        topTitle="alerte"
+        title={`Attention, vous êtes sur le point d'infirmer l'éligibilité de ${young.firstName} à la préparation militaire, sur la base des documents reçus.`}
+        message={`Merci de motiver votre refus au jeune en lui expliquant sur quelle base il n'est pas éligible à la préparation militaire. Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName} (${young.email}).`}
+        young={young}
+        onChange={() => setModal({ isOpen: false, template: null, data: null })}
+        onConfirm={onRefuse}
+      />
+      {/* <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
         <div className="mb-3">
           <div className="flex items-center justify-between px-4">
             <div className="flex items-center">
@@ -229,31 +293,7 @@ export default function CardEquivalence({ young, equivalence }) {
             </div>
           </>
         ) : null}
-
-        <ModalChangeStatus
-          isOpen={modalStatus?.isOpen}
-          onCancel={() => setModalStatus({ isOpen: false, value: null })}
-          status={modalStatus?.status}
-          equivalenceId={modalStatus?.equivalenceId}
-          young={young}
-        />
-        <ModalFiles
-          isOpen={modalFiles?.isOpen}
-          onCancel={() => setModalFiles({ isOpen: false })}
-          initialValues={equivalence?.files ? equivalence.files : []}
-          young={young}
-          nameFiles="equivalenceFiles"
-          equivalenceId={equivalence?._id}
-          onChange={onChangeFiles}
-        />
-      </div>
+      </div> */}
     </>
   );
 }
-
-const getInitials = (word) =>
-  (word || "UK")
-    .match(/\b(\w)/g)
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
