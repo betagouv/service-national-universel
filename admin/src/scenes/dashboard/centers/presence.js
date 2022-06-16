@@ -1,16 +1,20 @@
-import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import React, { useEffect, useState } from "react";
+import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import FilterSvg from "../../../assets/icons/Filter";
-import ExportComponent from "../../../components/ExportXlsx";
 import { DepartmentFilter, RegionFilter } from "../../../components/filters";
 import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { ES_NO_LIMIT, getFilterLabel, ROLES, translate, formatLongDateFR } from "../../../utils";
+import { getFilterLabel, ROLES, translate, formatLongDateFR, formatDateFRTimezoneUTC } from "../../../utils";
 import Panel from "../../volontaires/panel";
+import * as XLSX from "xlsx";
+import { toastr } from "react-redux-toastr";
+import * as FileSaver from "file-saver";
+import dayjs from "dayjs";
+import Download from "../../../assets/icons/Download";
 
 const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
 
@@ -18,12 +22,48 @@ export default function Presence() {
   const [young, setYoung] = useState();
   const [filterVisible, setFilterVisible] = useState(false);
   const [filterCohort, setFilterCohort] = useState([]);
+  const [filter, setFilter] = useState({});
   const user = useSelector((state) => state.Auth.user);
+  const [loading, setLoading] = useState(false);
 
-  const getDefaultQuery = () => {
-    return { query: { match_all: {} }, track_total_hits: true };
+  const exportData = async () => {
+    try {
+      setLoading(true);
+      const { ok, data, code } = await api.post(`/cohesion-center/export-presence`, filter);
+      console.log("✍️ ~ { ok, data, code }", { ok, data, code });
+      if (!ok) {
+        toastr.error("Erreur !", translate(code));
+      }
+      const sheet = {
+        name: "présence",
+        data: data.map((elem) => {
+          return {
+            centre: elem.center.name,
+            "id centre": elem.center._id.toString(),
+            "Code centre": elem.center.code2022,
+            "Région centre": elem.center.region,
+            "Académie centre": elem.center.academy,
+            "Département centre": elem.center.department,
+            cohorte: elem.sessionPhase1.cohort,
+          };
+        }),
+      };
+
+      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+      const fileExtension = ".xlsx";
+
+      const wb = XLSX.utils.book_new();
+      let ws = XLSX.utils.json_to_sheet(sheet.data);
+      XLSX.utils.book_append_sheet(wb, ws, sheet.name);
+      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      const resultData = new Blob([excelBuffer], { type: fileType });
+      setLoading(false);
+      FileSaver.saveAs(resultData, `présence_séjour_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}` + fileExtension);
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !", translate(e.code));
+    }
   };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   return (
     <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -54,39 +94,19 @@ export default function Presence() {
                           Filtres
                         </div>
                       </div>
-                      <ExportComponent
-                        title="Exporter les présences"
-                        defaultQuery={getExportQuery}
-                        exportTitle="Centres_de_cohesion"
-                        index="cohesioncenter"
-                        react={{ and: FILTERS }}
-                        transform={async (data) => {
-                          let all = data.reduce((prev, current) => {}, []);
-                          return all.map((data) => {
-                            return {
-                              Nom: data.name,
-                              id: data._id,
-                              "Code (2021)": data.code,
-                              "Code (2022)": data.code2022,
-                              "Cohorte(s)": data.cohorts?.join(", "),
-                              COR: data.COR,
-                              "Accessibilité aux personnes à mobilité réduite": translate(data.pmr),
-                              Adresse: data.address,
-                              Ville: data.city,
-                              "Code Postal": data.zip,
-                              "N˚ Département": data.departmentCode,
-                              Département: data.department,
-                              Région: data.region,
-                              "Places total": data.placesTotal,
-                              "Places disponibles": data.placesLeft,
-                              "Tenues livrées": data.outfitDelivered,
-                              Observations: data.observations,
-                              "Créé lé": formatLongDateFR(data.createdAt),
-                              "Mis à jour le": formatLongDateFR(data.updatedAt),
-                            };
-                          });
-                        }}
-                      />
+                      <button
+                        disabled={loading}
+                        className="border-[1px] border-gray-300 rounded-md px-3 py-2 flex items-center space-x-2 cursor-pointer hover:border-gray-400 disabled:bg-gray-200 disabled:cursor-progress"
+                        onClick={exportData}>
+                        {loading ? (
+                          <div className="text-sm text-gray-400 font-medium">Export en cours...</div>
+                        ) : (
+                          <>
+                            <Download className="text-gray-400" />
+                            <div className="text-sm text-gray-700 font-medium">Exporter</div>
+                          </>
+                        )}
+                      </button>
                     </div>
                     <FilterRow visible={filterVisible}>
                       <MultiDropdownList
@@ -101,10 +121,18 @@ export default function Presence() {
                         URLParams={true}
                         showSearch={false}
                         renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
-                        onValueChange={setFilterCohort}
+                        onValueChange={(e) => setFilter((prev) => ({ ...prev, cohorts: e }))}
                       />
-                      <RegionFilter filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-                      <DepartmentFilter filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
+                      <RegionFilter
+                        filters={FILTERS}
+                        defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
+                        onValueChange={(e) => setFilter((prev) => ({ ...prev, region: e }))}
+                      />
+                      <DepartmentFilter
+                        filters={FILTERS}
+                        defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+                        onValueChange={(e) => setFilter((prev) => ({ ...prev, department: e }))}
+                      />
                       <MultiDropdownList
                         className="dropdown-filter"
                         placeholder="Code 2022"
@@ -119,6 +147,7 @@ export default function Presence() {
                         renderLabel={(items) => getFilterLabel(items, "Code 2022", "Code 2022")}
                         showMissing
                         missingLabel="Non renseigné"
+                        onValueChange={(e) => setFilter((prev) => ({ ...prev, code2022: e }))}
                       />
                     </FilterRow>
                   </Filter2>
@@ -144,7 +173,7 @@ export default function Presence() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {(data || []).map((centre) => (
-                            <Centre key={centre._id} centre={centre} filterCohort={filterCohort} />
+                            <Centre key={centre._id} centre={centre} filterCohort={filter.cohorts} />
                           ))}
                         </tbody>
                       </table>

@@ -108,5 +108,8 @@ Schema.plugin(patchHistory, {
 
 Schema.plugin(mongooseElastic(esClient, { ignore: ["team"] }), MODELNAME);
 
+Schema.index({ cohesionCenterId: 1 });
+
 const OBJ = mongoose.model(MODELNAME, Schema);
+OBJ.syncIndexes();
 module.exports = OBJ;
