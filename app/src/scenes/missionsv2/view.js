@@ -142,9 +142,11 @@ export default function View(props) {
         </div>
       </div>
       <hr className="text-gray-100" />
-      <div className="mx-8 mt-8">
-        <DocumentsPM docRef={docRef} />
-      </div>
+      {mission.isMilitaryPreparation === "true" ? (
+        <div className="mx-8 mt-8">
+          <DocumentsPM docRef={docRef} showFolder={!["VALIDATED"].includes(young.statusMilitaryPreparationFiles)} />
+        </div>
+      ) : null}
       {modal === "APPLY" && (
         <ApplyModal
           value={mission}

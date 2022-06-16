@@ -12,7 +12,7 @@ export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsu
   const dispatch = useDispatch();
 
   return (
-    <Modal centered isOpen={isOpen} onCancel={onCancel}>
+    <Modal centered isOpen={isOpen} onCancel={onCancel} size="lg">
       <div className="w-full">
         <div className="flex flex-col items-center justify-center mx-4">
           <div className="text-gray-900 text-lg font-medium mt-4 mb-1 uppercase">Documents requis</div>
@@ -20,20 +20,24 @@ export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsu
           <div className=" text-gray-500 text-base font-normal text-center mt-4">{subTitle}</div>
           {subsubTitle ? <div className=" text-gray-500 text-sm font-normal text-center mt-4">{subsubTitle}</div> : null}
           {template ? (
-            <a
-              href={urlWithScheme(template)}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-[10px] border-[1px] py-2.5 px-3 items-center bg-blue-600 hover:bg-white hover:border-blue-600 mt-4 text-[#ffffff] hover:text-blue-600 text-sm">
-              Télécharger le modèle obligatoire
-            </a>
+            <div className="flex flex-col items-center bg-gray-50 mt-4 py-3 rounded-lg mb-3 w-full">
+              <a
+                href={urlWithScheme(template)}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-[10px] border-[1px] py-2.5 px-3 items-center bg-blue-600 hover:bg-white hover:border-blue-600 mt-4 text-[#ffffff] hover:text-blue-600 text-sm">
+                Télécharger le modèle obligatoire
+              </a>
+              <div className="text-xs leading-none font-normal text-gray-700 mt-2">puis téléversez le formulaire rempli ci-contre</div>
+            </div>
           ) : null}
-          <div className="mt-4">
-            <Formik initialValues={young} validateOnChange={false} validateOnBlur={false}>
-              {({ values, handleChange }) => (
-                <>
-                  {console.log(values)}
+
+          <Formik initialValues={young} validateOnChange={false} validateOnBlur={false}>
+            {({ values, handleChange }) => (
+              <>
+                <div className="flex mt-2 items-center justify-center">
                   <DndFileInput
+                    className="flex flex-col items-center"
                     value={values[name]}
                     name={name}
                     onChange={async (e) => {
@@ -52,10 +56,10 @@ export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsu
                       dispatch(setYoung(res.young));
                     }}
                   />
-                </>
-              )}
-            </Formik>
-          </div>
+                </div>
+              </>
+            )}
+          </Formik>
           <button className="my-4 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer w-full" onClick={onCancel}>
             Fermer
           </button>

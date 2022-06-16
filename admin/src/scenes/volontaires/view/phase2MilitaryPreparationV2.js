@@ -189,7 +189,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
               <div className="duration-150 flex rounded-full bg-[#FD7A02] p-2 items-center justify-center mr-2">
                 <Bell className="h-4 w-4 text-white" />
               </div>
-              <div className="text-base leading-5 font-bold">Demande de reconnaissance d’engagement déjà réalisé</div>
+              <div className="text-base leading-5 font-bold">Dossier d’éligibilité aux préparations militaires</div>
             </div>
             {!cardOpen ? (
               <div className="flex items-center gap-5">
@@ -277,7 +277,6 @@ export default function Phase2militaryPrepartionV2({ young }) {
         </div>
         {cardOpen ? (
           <>
-            {console.log(young.militaryPreparationFilesIdentity)}
             <hr className="text-gray-200" />
             <div className="flex flex-row flex-wrap lg:!flex-nowrap gap-4 my-4 w-full justify-between">
               <FileCard
