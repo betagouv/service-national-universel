@@ -4,7 +4,7 @@ import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appb
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import MissionCard from "./components/missionCard";
+import CardMission from "./components/CardMission";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import { apiURL } from "../../config";
 import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM } from "../../utils";
@@ -13,8 +13,18 @@ import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
 import AlertBox from "../../components/AlertBox";
 import MilitaryPreparationCard from "./components/MilitaryPreparationCard";
-import MissionDomainSante from "../../assets/icons/MissionDomainSante";
-import MissionDomainSolidarite from "../../assets/icons/MissionDomainSolidarite";
+import Sante from "../../assets/mission-domaines/sante";
+import Solidarite from "../../assets/mission-domaines/solidarite";
+import Citoyennete from "../../assets/mission-domaines/citoyennete";
+import Education from "../../assets/mission-domaines/education";
+import Sport from "../../assets/mission-domaines/sport";
+import DefenseEtMemoire from "../../assets/mission-domaines/defense-et-memoire";
+import Environment from "../../assets/mission-domaines/environment";
+import Securite from "../../assets/mission-domaines/securite";
+import Culture from "../../assets/mission-domaines/culture";
+import PreparationMilitaire from "../../assets/mission-domaines/preparation-militaire";
+import { Link } from "react-router-dom";
+import { HiOutlineAdjustments, HiOutlineSearch } from "react-icons/hi";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
@@ -90,39 +100,45 @@ export default function List() {
   return (
     <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14">
       {/* BEGIN HEADER */}
-      <div className="mb-4">
-        <h1 className="text-3xl font-bold text-gray-800 mb-3">Trouvez une mission d&apos;intérêt général</h1>
-        <div className="text-sm font-normal text-gray-700">
-          Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.
-          <br />
-          Pour plus d&apos;informations,{" "}
-          <a
-            className="underline hover:underline font-medium hover:text-gray-700"
-            href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
-            target="_blank"
-            rel="noreferrer">
-            cliquez-ici
-          </a>
-          .
+      <div className="flex justify-between mb-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-3">Trouvez une mission d&apos;intérêt général</h1>
+          <div className="text-sm font-normal text-gray-700">
+            Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.
+            <br />
+            Pour plus d&apos;informations,{" "}
+            <a
+              className="underline hover:underline font-medium hover:text-gray-700"
+              href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
+              target="_blank"
+              rel="noreferrer">
+              cliquez-ici
+            </a>
+            .
+          </div>
         </div>
+        <Link to="/preferences">
+          <div className="group flex gap-1 rounded-[10px] border-[1px] border-blue-700 py-2.5 px-3 items-center hover:bg-blue-700 hover:text-[#ffffff]">
+            <HiOutlineAdjustments className="text-blue-700 group-hover:text-[#ffffff]" />
+            <div className="text-blue-700 group-hover:text-[#ffffff] text-sm flex-1">Renseigner mes préférences</div>
+          </div>
+        </Link>
       </div>
       {/* END HEADER */}
 
       {/* BEGIN CONTROL */}
-      <div className="bg-gray-50 rounded-lg">
-        <div className="flex justify-around">
-          <div className="flex flex-col items-center space-y-2">
-            <div className="bg-[#212B44] w-9 h-9 flex justify-center items-center rounded-xl">
-              <MissionDomainSante className="text-white" />
-            </div>
-            <div className="text-xs text-gray-700">Santé</div>
-          </div>
-          <div className="flex flex-col items-center space-y-2">
-            <div className="bg-[#212B44] w-9 h-9 flex justify-center items-center rounded-xl">
-              <MissionDomainSolidarite className="text-white" />
-            </div>
-            <div className="text-xs text-gray-700">Solidarité</div>
-          </div>
+      <div className="bg-gray-50 p-10 rounded-lg">
+        <div className="flex justify-between">
+          <DomainFilter Icon={Sante} label="Santé" />
+          <DomainFilter Icon={Solidarite} label="Solidarité" />
+          <DomainFilter Icon={Citoyennete} label="Citoyenneté" />
+          <DomainFilter Icon={Education} label="Éducation" />
+          <DomainFilter Icon={Sport} label="Sport" />
+          <DomainFilter Icon={DefenseEtMemoire} label="Défense et mémoire" />
+          <DomainFilter Icon={Environment} label="Environment" />
+          <DomainFilter Icon={Securite} label="Sécurité" />
+          <DomainFilter Icon={Culture} label="Culture" />
+          <DomainFilter Icon={PreparationMilitaire} label="Préparations militaires" />
         </div>
       </div>
       {/* END CONTROL */}
@@ -142,7 +158,7 @@ export default function List() {
             innerClass={{ pagination: "pagination" }}
             dataField="created_at"
             renderResultStats={({ numberOfResults }) => {
-              return <div className="text-gray-700 mb-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
+              return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
             }}
             render={({ data }) => {
               return data.map((e) => {
@@ -150,19 +166,7 @@ export default function List() {
                 e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
                 // tags.push(e.remote ? "À distance" : "En présentiel");
                 e.domains.forEach((d) => tags.push(translate(d)));
-                return (
-                  <MissionCard
-                    applied={applications && applications.includes(e._id)}
-                    key={e._id}
-                    id={e._id}
-                    structureName={e.structureName}
-                    missionName={e.name}
-                    tags={tags}
-                    places={e.placesLeft}
-                    isMilitaryPreparation={e.isMilitaryPreparation}
-                    domain={e.domains[0]}
-                  />
-                );
+                return <CardMission key={e._id} mission={e} />;
               });
             }}
             renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
@@ -172,6 +176,16 @@ export default function List() {
     </div>
   );
 }
+const DomainFilter = ({ Icon, label, onClick, active }) => {
+  return (
+    <div className="group flex flex-1 flex-col items-center space-y-2 cursor-pointer" onClick={onClick}>
+      <div className={`${active ? "bg-[#212B44]" : "bg-gray-200"} w-9 h-9 flex justify-center items-center rounded-xl group-hover:-translate-y-1 transition duration-100 ease-in`}>
+        <Icon className="text-white" />
+      </div>
+      <div className="text-xs text-gray-700 text-center">{label}</div>
+    </div>
+  );
+};
 
 const Missions = styled.div`
   .pagination {
