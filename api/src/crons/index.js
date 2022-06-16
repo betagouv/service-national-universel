@@ -23,7 +23,6 @@ const EVERY_HOUR = "0 * * * *";
 const everySeconds = (x) => `*/${x} * * * * *`;
 const everyMinutes = (x) => `*/${x} * * * *`;
 const everyHours = (x) => `0 */${x} * * *`;
-const now = new Date();
 /* eslint-enable no-unused-vars */
 
 // See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)
