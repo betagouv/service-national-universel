@@ -14,7 +14,7 @@ import XCircle from "../../../assets/icons/XCircle";
 import api from "../../../services/api";
 import { copyToClipboard, formatDateFR, translate, translateEquivalenceStatus } from "../../../utils";
 import ModalChangeStatus from "./ModalChangeStatus";
-import ModalFiles from "./ModalFiles";
+import ModalFilesEquivalence from "./ModalFilesEquivalence";
 
 export default function CardEquivalence({ young, equivalence }) {
   const optionsStatus = ["WAITING_CORRECTION", "REFUSED", "VALIDATED"];
@@ -237,7 +237,7 @@ export default function CardEquivalence({ young, equivalence }) {
           equivalenceId={modalStatus?.equivalenceId}
           young={young}
         />
-        <ModalFiles
+        <ModalFilesEquivalence
           isOpen={modalFiles?.isOpen}
           onCancel={() => setModalFiles({ isOpen: false })}
           initialValues={equivalence?.files ? equivalence.files : []}
