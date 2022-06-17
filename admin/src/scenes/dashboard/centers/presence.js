@@ -29,7 +29,6 @@ export default function Presence() {
     try {
       setLoading(true);
       const { ok, data, code } = await api.post(`/cohesion-center/export-presence`, filter);
-      console.log("✍️ ~ { ok, data, code }", { ok, data, code });
       if (!ok) {
         toastr.error("Erreur !", translate(code));
       }
