@@ -155,8 +155,6 @@ export default function EditEquivalence() {
   if (!data) return null;
   if (data && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data.status)) history.push("/phase2");
 
-  console.log(errorMail);
-
   return (
     <div className="flex justify-center align-center my-4 ">
       <div className="lg:w-1/2 p-4">

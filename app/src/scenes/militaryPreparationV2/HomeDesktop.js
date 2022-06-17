@@ -16,11 +16,11 @@ export default function HomeDesktop() {
   return (
     <div className="flex flex-col bg-gray-100 mx-4 my-4 w-full">
       <div className="mx-12 mt-8">
-        <div className="flex flex-row">
-          <div className="flex flex-col mr-4">
+        <div className="flex flex-col-reverse items-center  lg:!flex-row  mb-8">
+          <div className="flex flex-col mr-4 items-center lg:items-start">
             <div className="text-3xl text-gray-800 font-bold">Partez en préparation militaire</div>
             {!readMore ? (
-              <div className="text-gray-700 text-sm mt-4">
+              <div className="text-gray-700 text-sm mt-4 text-center lg:!text-left">
                 Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence, des rencontres ? Continuer d’apprendre et rencontrer des jeunes de
                 tous horizons ? Embarquez pour l’aventure en rejoignant une des missions d’intérêt général...
                 <span className="font-semibold cursor-pointer underline ml-2" onClick={() => setReadMore(true)}>
@@ -28,7 +28,7 @@ export default function HomeDesktop() {
                 </span>
               </div>
             ) : (
-              <div className="text-gray-700 text-sm mt-4">
+              <div className="text-gray-700 text-sm mt-4 text-center lg:!text-left">
                 Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence, des rencontres ? Continuer d’apprendre et rencontrer des jeunes de
                 tous horizons ? Embarquez pour l’aventure en rejoignant une des missions d’intérêt général proposées par l’armée de terre, la marine nationale, l’armée de l’air et
                 de l’espace, le service de santé des armées, le service du commissariat des armées et le service de l’énergie opérationnelle. Vous effectuerez une période militaire
@@ -39,7 +39,7 @@ export default function HomeDesktop() {
                 </span>
               </div>
             )}
-            <div className="flex items-center w-full mt-12 justify-between mb-8">
+            <div className="flex items-center w-full mt-12 gap-8 mb-8 flex-wrap lg:!flex-nowrap justify-center lg:justify-start">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-green-500" />
@@ -75,8 +75,8 @@ export default function HomeDesktop() {
                   </div>
                 </div>
               </div>
-              <div className="border-l-[1px] border-gray-200 h-2/3" />
-              <div className="flex flex-col">
+              <div className="hidden lg:flex  border-l-[1px] border-gray-200 h-2/3" />
+              <div className="flex flex-col ">
                 <div className="text-lg leading-6 font-semibold">Vous remplissez les conditions ?</div>
                 <div className="text-lg leading-6 font-semibold"> N’attendez plus !</div>
                 <Link
@@ -88,7 +88,9 @@ export default function HomeDesktop() {
               </div>
             </div>
           </div>
-          <img className="w-1/4 mb-16 ml-10 mr-10" src={require("../../assets/militaryPrep.png")} />
+          <div className="flex flex-shrink-0 w-1/3">
+            <img className="object-contain" src={require("../../assets/militaryPrep.png")} />
+          </div>
         </div>
         <DocumentsPM />
       </div>
