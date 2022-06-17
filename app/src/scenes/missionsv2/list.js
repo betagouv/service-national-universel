@@ -4,7 +4,6 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import CardMission from "./components/CardMission";
-import ReactiveFilter from "../../components/ReactiveFilter";
 import { apiURL } from "../../config";
 import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM, ES_NO_LIMIT } from "../../utils";
 import api from "../../services/api";
@@ -23,13 +22,14 @@ import Securite from "../../assets/mission-domaines/securite";
 import Culture from "../../assets/mission-domaines/culture";
 import PreparationMilitaire from "../../assets/mission-domaines/preparation-militaire";
 import { Link } from "react-router-dom";
-import { HiOutlineAdjustments, HiOutlineSearch } from "react-icons/hi";
+import { HiOutlineAdjustments } from "react-icons/hi";
 
 const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
 export default function List() {
   const young = useSelector((state) => state.Auth.young);
   const [filter, setFilter] = React.useState();
+  const [bufferText, setBufferText] = React.useState();
 
   const getDefaultQuery = () => {
     let body = {
@@ -66,7 +66,7 @@ export default function List() {
             {
               multi_match: {
                 query: filter?.SEARCH,
-                fields: ["name^10.keyword", "structureName.folded", "description.folded", "actions.folded", "city.folded"],
+                fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "cross_fields",
                 operator: "and",
               },
@@ -74,7 +74,7 @@ export default function List() {
             {
               multi_match: {
                 query: filter?.SEARCH,
-                fields: ["name^10.keyword", "structureName.folded", "description.folded", "actions.folded", "city.folded"],
+                fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "phrase",
                 operator: "and",
               },
@@ -82,7 +82,7 @@ export default function List() {
             {
               multi_match: {
                 query: filter?.SEARCH,
-                fields: ["name^10.keyword", "structureName.folded", "description.folded", "actions.folded", "city.folded"],
+                fields: ["name^10", "structureName^5", "description", "actions", "city"],
                 type: "phrase_prefix",
                 operator: "and",
               },
@@ -94,6 +94,7 @@ export default function List() {
     }
 
     if (filter?.DOMAINS?.length) body.query.bool.filter.push({ terms: { "domains.keyword": filter.DOMAINS } });
+    if (filter?.MILITARY_PREPARATION) body.query.bool.filter.push({ term: { "isMilitaryPreparation.keyword": filter?.MILITARY_PREPARATION } });
     return body;
   };
 
@@ -105,6 +106,15 @@ export default function List() {
       } else {
         newFilter.DOMAINS = [...(newFilter.DOMAINS || []), domain];
       }
+      return newFilter;
+    });
+  };
+
+  const search = (e) => {
+    e.preventDefault();
+    setFilter((prev) => {
+      const newFilter = { ...prev };
+      newFilter.SEARCH = bufferText;
       return newFilter;
     });
   };
@@ -139,7 +149,19 @@ export default function List() {
       {/* END HEADER */}
 
       {/* BEGIN CONTROL */}
-      <div className="bg-gray-50 p-10 rounded-lg">
+      <form onSubmit={search} className="bg-gray-50 p-10 rounded-lg space-y-4">
+        {/* search bar recherche */}
+        <div>
+          <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-2 divide-x divide-gray-300">
+            <input
+              value={bufferText}
+              onChange={(e) => setBufferText(e.target.value)}
+              className="flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm"
+              type="text"
+              placeholder="Rechercher une mission..."
+            />
+          </div>
+        </div>
         <div className="flex justify-between gap-2 flex-wrap">
           <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("HEALTH")} />
           <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SOLIDARITY")} />
@@ -150,9 +172,21 @@ export default function List() {
           <DomainFilter Icon={Environment} name="ENVIRONMENT" label="Environment" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("ENVIRONMENT")} />
           <DomainFilter Icon={Securite} name="SECURITY" label="Sécurité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SECURITY")} />
           <DomainFilter Icon={Culture} name="CULTURE" label="Culture" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("CULTURE")} />
-          <DomainFilter Icon={PreparationMilitaire} name="Préparations militaires" />
+          <DomainFilter
+            Icon={PreparationMilitaire}
+            label="Préparations militaires"
+            active={filter?.MILITARY_PREPARATION === "true"}
+            onClick={() =>
+              setFilter((prev) => {
+                const newFilter = { ...prev };
+                if (newFilter?.MILITARY_PREPARATION === "true") newFilter.MILITARY_PREPARATION = "false";
+                else newFilter.MILITARY_PREPARATION = "true";
+                return newFilter;
+              })
+            }
+          />
         </div>
-      </div>
+      </form>
       {/* END CONTROL */}
 
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
