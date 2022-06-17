@@ -166,7 +166,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
         .required(),
       subRole: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
-      department: Joi.array().items(Joi.string().allow(null, "")),
+      department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
       structureId: Joi.string().allow(null, ""),
       structureName: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
