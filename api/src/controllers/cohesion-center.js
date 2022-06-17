@@ -219,6 +219,94 @@ router.get("/:id/cohort/:cohort/stats", passport.authenticate("referent", { sess
   }
 });
 
+// todo : optimiser - ca ne scale pas
+router.post("/export-presence", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      region: Joi.array().items(Joi.string().allow(null, "")),
+      department: Joi.array().items(Joi.string().allow(null, "")),
+      code2022: Joi.array().items(Joi.string().allow(null, "")),
+      cohorts: Joi.array().items(Joi.string().allow(null, "")),
+    }).validate({ ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const filterCenter = {};
+    if (value.region?.length) filterCenter.region = { $in: value.region };
+    if (value.department?.length) filterCenter.department = { $in: value.department };
+    if (value.code2022?.length) filterCenter.code2022 = { $in: value.code2022 };
+    if (value.cohorts?.length) filterCenter.cohorts = { $in: value.cohorts };
+
+    const allSessionsPhase1 = await SessionPhase1.find();
+    const cursorCenters = await CohesionCenterModel.find(filterCenter).cursor();
+
+    let result = [];
+
+    await cursorCenters.eachAsync(async function (center) {
+      const sessionsPhase1 = allSessionsPhase1
+        .filter((session) => session.cohesionCenterId === center._id.toString())
+        .filter((session) => value.cohorts?.length === 0 || value.cohorts?.includes(session.cohort));
+      if (!sessionsPhase1 || sessionsPhase1.length === 0) return;
+
+      for (let sessionPhase1 of sessionsPhase1) {
+        const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
+        const stats = (youngs || []).reduce(
+          (previous, young) => {
+            if (young.cohesionStayPresence === "true") previous.presenceArrive++;
+            if (young.cohesionStayPresence === "false") previous.absenceArrive++;
+            if (!young.cohesionStayPresence) previous.nonRenseigneArrive++;
+            if (young.departSejourAt) previous.depart++;
+            if (young.presenceJDM === "true") previous.presenceJDM++;
+            if (young.absenceJDM === "false") previous.absenceJDM++;
+            if (young.departSejourMotif === "Exclusion") previous.departSejourMotif_exclusion++;
+            if (young.departSejourMotif === "Cas de force majeure pour le volontaire") previous.departSejourMotif_forcemajeure++;
+            if (young.departSejourMotif === "Autre") previous.departSejourMotif_autre++;
+            return previous;
+          },
+          {
+            presenceArrive: 0,
+            absenceArrive: 0,
+            nonRenseigneArrive: 0,
+            depart: 0,
+            presenceJDM: 0,
+            absenceJDM: 0,
+            departSejourMotif_exclusion: 0,
+            departSejourMotif_forcemajeure: 0,
+            departSejourMotif_autre: 0,
+          },
+        );
+
+        const pourcentageRemplissage = ((((sessionPhase1.placesTotal || 0) - (sessionPhase1.placesLeft || 0)) * 100) / (sessionPhase1.placesTotal || 1)).toFixed(2);
+        result.push({
+          "Nom du centre": center.name,
+          "ID du centre": center._id.toString(),
+          "Code du centre": center.code2022 || "",
+          "Région du centre": center.region,
+          // "Académie du centre": center.academy,
+          "Département du centre": center.department,
+          Cohorte: sessionPhase1.cohort,
+          "Nombre de volontaires affectés (validés)": youngs.length,
+          "% de remplissage": pourcentageRemplissage,
+          "Nombre de présents à l’arrivée": stats.presenceArrive,
+          "Nombre d’absents à l’arrivée": stats.absenceArrive,
+          "Nombre de présence non renseignée": stats.nonRenseigneArrive,
+          "Nombre de départ": stats.depart,
+          // 'Nombre de motif "abandon"': "",
+          'Nombre de motif "exclusion"': stats.departSejourMotif_exclusion,
+          'Nombre de motif "cas de force majeur"': stats.departSejourMotif_forcemajeure,
+          'Nombre de motif "autre"': stats.departSejourMotif_autre,
+          "Nombre de présent à la JDC": stats.presenceJDM,
+          "Nombre d’absent à la JDC": stats.absenceJDM,
+        });
+      }
+    });
+
+    res.status(200).send({ ok: true, data: result });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params);

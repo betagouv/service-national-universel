@@ -1,23 +1,57 @@
-import React, { useState, useEffect } from "react";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import { useHistory } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { DataSearch, MultiDropdownList, ReactiveBase } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
-
-import { apiURL } from "../../../config";
+import { useHistory } from "react-router-dom";
 import FilterSvg from "../../../assets/icons/Filter";
-import api from "../../../services/api";
-import Panel from "../../volontaires/panel";
-import { RegionFilter, DepartmentFilter } from "../../../components/filters";
-import { getFilterLabel, translate, ROLES } from "../../../utils";
-import { FilterRow, ResultTable, Filter2 } from "../../../components/list";
-const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
+import { DepartmentFilter, RegionFilter } from "../../../components/filters";
+import { Filter2, FilterRow, ResultTable } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
+import { apiURL } from "../../../config";
+import api from "../../../services/api";
+import { getFilterLabel, ROLES, translate, formatLongDateFR, formatDateFRTimezoneUTC } from "../../../utils";
+import Panel from "../../volontaires/panel";
+import * as XLSX from "xlsx";
+import { toastr } from "react-redux-toastr";
+import * as FileSaver from "file-saver";
+import dayjs from "dayjs";
+import Download from "../../../assets/icons/Download";
+
+const FILTERS = ["SEARCH", "PLACES", "COHORT", "DEPARTMENT", "REGION", "STATUS", "CODE2022"];
 
 export default function Presence() {
   const [young, setYoung] = useState();
   const [filterVisible, setFilterVisible] = useState(false);
-  const [filterCohort, setFilterCohort] = useState([]);
+  const [filter, setFilter] = useState({ cohorts: [], region: [], department: [], code2022: [] });
   const user = useSelector((state) => state.Auth.user);
+  const [loading, setLoading] = useState(false);
+
+  const exportData = async () => {
+    try {
+      setLoading(true);
+      const { ok, data, code } = await api.post(`/cohesion-center/export-presence`, filter);
+      if (!ok) {
+        toastr.error("Erreur !", translate(code));
+      }
+      const sheet = {
+        name: "présence",
+        data: data,
+      };
+
+      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+      const fileExtension = ".xlsx";
+
+      const wb = XLSX.utils.book_new();
+      let ws = XLSX.utils.json_to_sheet(sheet.data);
+      XLSX.utils.book_append_sheet(wb, ws, sheet.name);
+      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      const resultData = new Blob([excelBuffer], { type: fileType });
+      setLoading(false);
+      FileSaver.saveAs(resultData, `présence_séjour_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}` + fileExtension);
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !", translate(e.code));
+    }
+  };
 
   return (
     <ReactiveBase url={`${apiURL}/es`} app="cohesioncenter" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -28,24 +62,41 @@ export default function Presence() {
             <div className="flex items-start w-full h-full">
               <div className="flex-1 relative">
                 <div className="flex items-center mb-2 gap-2">
-                  <Filter2>
-                    <div className="flex items-center mb-2 gap-2">
-                      <DataSearch
-                        showIcon={false}
-                        placeholder="Rechercher par nom de centre, ville, code postal..."
-                        componentId="SEARCH"
-                        dataField={["name", "city", "zip", "code", "code2022"]}
-                        react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                        innerClass={{ input: "searchbox" }}
-                        autosuggest={false}
-                        queryFormat="and"
-                      />
-                      <div
-                        className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
-                        onClick={() => setFilterVisible((e) => !e)}>
-                        <FilterSvg className="text-gray-400" />
-                        Filtres
+                  <Filter2 className="w-full">
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center gap-2">
+                        <DataSearch
+                          showIcon={false}
+                          placeholder="Rechercher par nom de centre, ville, code postal..."
+                          componentId="SEARCH"
+                          dataField={["name", "city", "zip", "code", "code2022"]}
+                          react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                          innerClass={{ input: "searchbox" }}
+                          autosuggest={false}
+                          queryFormat="and"
+                        />
+                        <div
+                          className="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 text-[14px] font-medium text-gray-700 cursor-pointer hover:underline"
+                          onClick={() => setFilterVisible((e) => !e)}>
+                          <FilterSvg className="text-gray-400" />
+                          Filtres
+                        </div>
                       </div>
+                      {user?.role === "admin" ? (
+                        <button
+                          disabled={loading}
+                          className="border-[1px] border-gray-300 rounded-md px-3 py-2 flex items-center space-x-2 cursor-pointer hover:border-gray-400 disabled:bg-gray-200 disabled:cursor-progress"
+                          onClick={exportData}>
+                          {loading ? (
+                            <div className="text-sm text-gray-400 font-medium">Export en cours...</div>
+                          ) : (
+                            <>
+                              <Download className="text-gray-400" />
+                              <div className="text-sm text-gray-700 font-medium">Exporter</div>
+                            </>
+                          )}
+                        </button>
+                      ) : null}
                     </div>
                     <FilterRow visible={filterVisible}>
                       <MultiDropdownList
@@ -60,10 +111,18 @@ export default function Presence() {
                         URLParams={true}
                         showSearch={false}
                         renderLabel={(items) => getFilterLabel(items, "Cohortes", "Cohortes")}
-                        onValueChange={setFilterCohort}
+                        onValueChange={(e) => setFilter((prev) => ({ ...prev, cohorts: e }))}
                       />
-                      <RegionFilter filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-                      <DepartmentFilter filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
+                      <RegionFilter
+                        filters={FILTERS}
+                        defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []}
+                        onValueChange={(e) => setFilter((prev) => ({ ...prev, region: e }))}
+                      />
+                      <DepartmentFilter
+                        filters={FILTERS}
+                        defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
+                        onValueChange={(e) => setFilter((prev) => ({ ...prev, department: e }))}
+                      />
                       <MultiDropdownList
                         className="dropdown-filter"
                         placeholder="Code 2022"
@@ -78,6 +137,7 @@ export default function Presence() {
                         renderLabel={(items) => getFilterLabel(items, "Code 2022", "Code 2022")}
                         showMissing
                         missingLabel="Non renseigné"
+                        onValueChange={(e) => setFilter((prev) => ({ ...prev, code2022: e }))}
                       />
                     </FilterRow>
                   </Filter2>
@@ -103,7 +163,7 @@ export default function Presence() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {(data || []).map((centre) => (
-                            <Centre key={centre._id} centre={centre} filterCohort={filterCohort} />
+                            <Centre key={centre._id} centre={centre} filterCohort={filter.cohorts} />
                           ))}
                         </tbody>
                       </table>
