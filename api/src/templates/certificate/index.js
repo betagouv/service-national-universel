@@ -16,10 +16,11 @@ const getLocationCohesionCenter = (cohesionCenter) => {
   return t;
 };
 
-function getBgUrl({ cohort }) {
+function getBgUrl({ cohort } = { cohort: "" }) {
   if (cohort === "2019") return getSignedUrl("certificates/certificateTemplate-2019.png");
   if (["2020", "2021", "Février 2022"].includes(cohort)) return getSignedUrl("certificates/certificateTemplate.png");
   if (["Juin 2022", "Juillet 2022"].includes(cohort)) return getSignedUrl("certificates/certificateTemplate_2022.png");
+  return getSignedUrl("certificates/certificateTemplate.png");
 }
 
 const phase1 = async (young) => {
