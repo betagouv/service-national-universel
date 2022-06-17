@@ -6,15 +6,23 @@ import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 import Trophy from "../../../assets/icons/Trophy";
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
-import { copyToClipboard } from "../../../utils";
+import { copyToClipboard, translate } from "../../../utils";
+import downloadPDF from "../../../utils/download-pdf";
 import CardEquivalence from "./components/CardEquivalence";
 import CardMission from "./components/CardMission";
+import { Spinner } from "reactstrap";
 
 export default function ValidatedDesktop() {
   const young = useSelector((state) => state.Auth.young);
   const [equivalences, setEquivalences] = React.useState();
   const [applications, setApplications] = React.useState();
   const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
+  const [loading, setLoading] = React.useState({
+    attestationPhase2: false,
+    attestationSNU: false,
+    mailPhase2: false,
+    mailSNU: false,
+  });
 
   React.useEffect(() => {
     (async () => {
@@ -30,6 +38,25 @@ export default function ValidatedDesktop() {
       if (ok) return setReferentManagerPhase2(data);
     })();
   }, []);
+
+  const viewAttestation = async ({ uri, button }) => {
+    setLoading({ ...loading, [button]: true });
+    await downloadPDF({
+      url: `/young/${young._id}/documents/certificate/${uri}`,
+      fileName: `${young.firstName} ${young.lastName} - attestation ${uri}.pdf`,
+    });
+    setLoading({ ...loading, [button]: false });
+  };
+
+  const sendAttestation = async ({ template, type, button }) => {
+    setLoading({ ...loading, [button]: true });
+    const { ok, code } = await api.post(`/young/${young._id}/documents/${template}/${type}/send-email`, {
+      fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
+    });
+    setLoading({ ...loading, [button]: false });
+    if (ok) return toastr.success(`Document envoyé à ${young.email}`);
+    else return toastr.error("Erreur lors de l'envoie du document", translate(code));
+  };
 
   if (!applications || !equivalences) return <Loader />;
 
@@ -58,8 +85,18 @@ export default function ValidatedDesktop() {
             <div className="flex flex-col">
               <div className="text-sm leading-none font-normal text-gray-800 whitespace-nowrap">Attestation de réalisation de la Phase 2</div>
               <div className="flex items-center flex-wrap flex-1 mt-2 gap-x-4">
-                <button className="border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end bg-blue-600 text-white">Télécharger</button>
-                <button className="border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600 bg-white whitespace-nowrap">Envoyer par mail</button>
+                <button
+                  disabled={loading.attestationPhase2}
+                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end bg-blue-600 text-white disabled:opacity-50 disabled:cursor-wait"
+                  onClick={() => viewAttestation({ uri: "2", button: "attestationPhase2" })}>
+                  {loading.attestationPhase2 ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Télécharger
+                </button>
+                <button
+                  disabled={loading.mailPhase2}
+                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600 bg-white whitespace-nowrap disabled:opacity-50 disabled:cursor-wait"
+                  onClick={() => sendAttestation({ type: "2", template: "certificate", button: "mailPhase2" })}>
+                  {loading.mailPhase2 ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Envoyer par mail
+                </button>
               </div>
             </div>
           </div>
@@ -67,8 +104,18 @@ export default function ValidatedDesktop() {
             <div className="flex flex-col">
               <div className="text-sm leading-none font-normal text-gray-800 whitespace-nowrap">Attestation SNU</div>
               <div className="flex items-center flex-wrap flex-1 mt-2 gap-x-4">
-                <button className="border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end bg-blue-600 text-white">Télécharger</button>
-                <button className="border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600 bg-white whitespace-nowrap">Envoyer par mail</button>
+                <button
+                  disabled={loading.attestationSNU}
+                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end bg-blue-600 text-white disabled:opacity-50 disabled:cursor-wait"
+                  onClick={() => viewAttestation({ uri: "snu", button: "attestationSNU" })}>
+                  {loading.attestationSNU ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Télécharger
+                </button>
+                <button
+                  disabled={loading.mailSNU}
+                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600 bg-white whitespace-nowrap disabled:opacity-50 disabled:cursor-wait"
+                  onClick={() => sendAttestation({ type: "snu", template: "certificate", button: "mailSNU" })}>
+                  {loading.mailSNU ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Envoyer par mail
+                </button>
               </div>
             </div>
           </div>
