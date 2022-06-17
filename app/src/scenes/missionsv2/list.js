@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Col, Container, Row } from "reactstrap";
 import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -7,7 +6,7 @@ import { useSelector } from "react-redux";
 import CardMission from "./components/CardMission";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import { apiURL } from "../../config";
-import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM } from "../../utils";
+import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM, ES_NO_LIMIT } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
@@ -26,20 +25,17 @@ import PreparationMilitaire from "../../assets/mission-domaines/preparation-mili
 import { Link } from "react-router-dom";
 import { HiOutlineAdjustments, HiOutlineSearch } from "react-icons/hi";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
+const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
 export default function List() {
   const young = useSelector((state) => state.Auth.young);
-  const [targetLocation, setTargetLocation] = useState("");
-  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
-  const [showAlertLimitDate, setShowAlertLimitDate] = useState(true);
-  const [showAlertMilitaryPreparation, setShowAlertMilitaryPreparation] = useState(true);
-  const [showAlert100km, setShowAlert100km] = useState(true);
-  const [applications, setApplications] = useState();
+  const [filter, setFilter] = React.useState();
+
   const getDefaultQuery = () => {
-    let query = {
+    let body = {
       query: {
         bool: {
+          must: [],
           filter: [
             {
               range: {
@@ -59,43 +55,59 @@ export default function List() {
           ],
         },
       },
+      track_total_hits: true,
+      size: ES_NO_LIMIT,
     };
-    if (young.location && !targetLocation)
-      query.sort = [
-        {
-          _geo_distance: {
-            location: [young.location.lon, young.location.lat],
-            order: "asc",
-            unit: "km",
-            mode: "min",
-          },
+
+    if (filter?.SEARCH) {
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            {
+              multi_match: {
+                query: filter?.SEARCH,
+                fields: ["name^10.keyword", "structureName.folded", "description.folded", "actions.folded", "city.folded"],
+                type: "cross_fields",
+                operator: "and",
+              },
+            },
+            {
+              multi_match: {
+                query: filter?.SEARCH,
+                fields: ["name^10.keyword", "structureName.folded", "description.folded", "actions.folded", "city.folded"],
+                type: "phrase",
+                operator: "and",
+              },
+            },
+            {
+              multi_match: {
+                query: filter?.SEARCH,
+                fields: ["name^10.keyword", "structureName.folded", "description.folded", "actions.folded", "city.folded"],
+                type: "phrase_prefix",
+                operator: "and",
+              },
+            },
+          ],
+          minimum_should_match: "1",
         },
-      ];
-    return query;
+      });
+    }
+
+    if (filter?.DOMAINS?.length) body.query.bool.filter.push({ terms: { "domains.keyword": filter.DOMAINS } });
+    return body;
   };
 
-  useEffect(() => {
-    (async () => {
-      if (!young) return setApplications(null);
-      const { data } = await api.get(`/young/${young._id}/application`);
-      const app = data?.reduce((acc, a) => {
-        acc.push(a.missionId);
-        return acc;
-      }, []);
-      return setApplications(app);
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
-      if (ok) return setReferentManagerPhase2(data);
-    })();
-  }, []);
-
-  const handleChangeTargetLocation = (e) => setTargetLocation(e.target.value);
-
-  if (!applications) return <Loader />;
+  const handleToggleChangeDomain = (domain) => {
+    setFilter((prev) => {
+      const newFilter = { ...prev };
+      if (newFilter?.DOMAINS?.includes(domain)) {
+        newFilter.DOMAINS = newFilter.DOMAINS.filter((d) => d !== domain);
+      } else {
+        newFilter.DOMAINS = [...(newFilter.DOMAINS || []), domain];
+      }
+      return newFilter;
+    });
+  };
 
   return (
     <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14">
@@ -128,24 +140,23 @@ export default function List() {
 
       {/* BEGIN CONTROL */}
       <div className="bg-gray-50 p-10 rounded-lg">
-        <div className="flex justify-between">
-          <DomainFilter Icon={Sante} label="Santé" />
-          <DomainFilter Icon={Solidarite} label="Solidarité" />
-          <DomainFilter Icon={Citoyennete} label="Citoyenneté" />
-          <DomainFilter Icon={Education} label="Éducation" />
-          <DomainFilter Icon={Sport} label="Sport" />
-          <DomainFilter Icon={DefenseEtMemoire} label="Défense et mémoire" />
-          <DomainFilter Icon={Environment} label="Environment" />
-          <DomainFilter Icon={Securite} label="Sécurité" />
-          <DomainFilter Icon={Culture} label="Culture" />
-          <DomainFilter Icon={PreparationMilitaire} label="Préparations militaires" />
+        <div className="flex justify-between gap-2 flex-wrap">
+          <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("HEALTH")} />
+          <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SOLIDARITY")} />
+          <DomainFilter Icon={Citoyennete} name="CITIZENSHIP" label="Citoyenneté" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("CITIZENSHIP")} />
+          <DomainFilter Icon={Education} name="EDUCATION" label="Éducation" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("EDUCATION")} />
+          <DomainFilter Icon={Sport} name="SPORT" label="Sport" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SPORT")} />
+          <DomainFilter Icon={DefenseEtMemoire} name="DEFENSE" label="Défense et mémoire" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("DEFENSE")} />
+          <DomainFilter Icon={Environment} name="ENVIRONMENT" label="Environment" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("ENVIRONMENT")} />
+          <DomainFilter Icon={Securite} name="SECURITY" label="Sécurité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SECURITY")} />
+          <DomainFilter Icon={Culture} name="CULTURE" label="Culture" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("CULTURE")} />
+          <DomainFilter Icon={PreparationMilitaire} name="Préparations militaires" />
         </div>
       </div>
       {/* END CONTROL */}
 
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <Missions>
-          <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
           <ReactiveList
             defaultQuery={getDefaultQuery}
             componentId="result"
@@ -176,10 +187,10 @@ export default function List() {
     </div>
   );
 }
-const DomainFilter = ({ Icon, label, onClick, active }) => {
+const DomainFilter = ({ Icon, name, label, onClick, active }) => {
   return (
-    <div className="group flex flex-1 flex-col items-center space-y-2 cursor-pointer" onClick={onClick}>
-      <div className={`${active ? "bg-[#212B44]" : "bg-gray-200"} w-9 h-9 flex justify-center items-center rounded-xl group-hover:-translate-y-1 transition duration-100 ease-in`}>
+    <div className="group flex flex-1 flex-col items-center justify-start space-y-2 cursor-pointer" onClick={() => onClick(name)}>
+      <div className={`${active ? "bg-[#212B44]" : "bg-gray-200"} w-9 h-9 flex justify-center items-center rounded-xl group-hover:-translate-y-1 transition duration-200 ease-in`}>
         <Icon className="text-white" />
       </div>
       <div className="text-xs text-gray-700 text-center">{label}</div>
