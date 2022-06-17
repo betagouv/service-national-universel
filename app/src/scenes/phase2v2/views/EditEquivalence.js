@@ -9,6 +9,7 @@ import ChevronDown from "../../../assets/icons/ChevronDown";
 import InformationCircle from "../../../assets/icons/InformationCircle";
 import PaperClip from "../../../assets/icons/PaperClip";
 import api from "../../../services/api";
+import validator from "validator";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -25,6 +26,7 @@ export default function EditEquivalence() {
   const [loading, setLoading] = useState(false);
   const [filesList, setFilesList] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [errorMail, setErrorMail] = useState(false);
   const refType = useRef(null);
   const refDuree = useRef(null);
   const refFrequence = useRef(null);
@@ -115,6 +117,15 @@ export default function EditEquivalence() {
       } else if (data[key] === undefined || data[key] === "") {
         error = true;
       }
+
+      if (key === "contactEmail") {
+        if (!validator.isEmail(data[key])) {
+          setErrorMail(true);
+          error = true;
+        } else {
+          setErrorMail(false);
+        }
+      }
     }
     setError(error);
 
@@ -143,6 +154,8 @@ export default function EditEquivalence() {
   };
   if (!data) return null;
   if (data && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data.status)) history.push("/phase2");
+
+  console.log(errorMail);
 
   return (
     <div className="flex justify-center align-center my-4 ">
@@ -259,6 +272,7 @@ export default function EditEquivalence() {
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Date de début"
                 type="date"
+                max={formatDate(new Date())}
                 value={formatDate(data?.startDate)}
                 onChange={(e) => setData({ ...data, startDate: e.target.value })}
               />
@@ -269,6 +283,7 @@ export default function EditEquivalence() {
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Date de fin"
                 min={formatDate(data?.startDate)}
+                max={formatDate(new Date())}
                 type="date"
                 value={formatDate(data?.endDate)}
                 onChange={(e) => setData({ ...data, endDate: e.target.value })}
@@ -400,6 +415,7 @@ export default function EditEquivalence() {
               onChange={(e) => setData({ ...data, contactEmail: e.target.value })}
             />
           </div>
+          {errorMail ? <div className="text-sm leading-5 font-normal text-red-500 mt-2 text-center">L&apos;adresse email n&apos;est pas valide.</div> : null}
         </div>
         <div className="rounded-lg bg-white mt-4 p-6">
           <div className="text-lg leading-7 font-bold">Document justificatif d’engagement</div>
