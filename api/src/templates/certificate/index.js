@@ -16,18 +16,17 @@ const getLocationCohesionCenter = (cohesionCenter) => {
   return t;
 };
 
-function getBgUrl() {
-  return getSignedUrl("certificates/certificateTemplate.png");
-}
-
-function getBgUrl2019() {
-  return getSignedUrl("certificates/certificateTemplate-2019.png");
+function getBgUrl({ cohort }) {
+  if (cohort === "2019") return getSignedUrl("certificates/certificateTemplate-2019.png");
+  if (["2020", "2021", "Février 2022"].includes(cohort)) return getSignedUrl("certificates/certificateTemplate.png");
+  if (["Juin 2022", "Juillet 2022"].includes(cohort)) return getSignedUrl("certificates/certificateTemplate_2022.png");
 }
 
 const phase1 = async (young) => {
   const now = new Date();
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
-  const template = young.cohort === "2019" ? getBgUrl2019() : getBgUrl();
+  const template = getBgUrl({ cohort: young.cohort });
+  if (!template) return;
 
   const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
   if (!session) return;
