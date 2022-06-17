@@ -30,7 +30,7 @@ export default function UserPanel({ onChange, value }) {
     (async () => {
       if (!value.structureId) return;
       const { ok, data, code } = await api.get(`/structure/${value.structureId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survnue lors de la récupération de la structure", translate(code));
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
       return setStructure(data);
     })();
     (async () => {
@@ -135,7 +135,7 @@ export default function UserPanel({ onChange, value }) {
       <Info title="Informations">
         <Details title="Rôle" value={translate(value.role)} />
         <Details title="Fonction" value={translate(value.subRole)} />
-        {console.log(value) || value.role === ROLES.REFERENT_DEPARTMENT ? (
+        {value.role === ROLES.REFERENT_DEPARTMENT ? (
           value.department.map((v, i) => <Details key={i} title="Département" value={`${v} (${department2region[v]})`} />)
         ) : (
           <Details title="Région" value={value.region} />
