@@ -262,9 +262,9 @@ const ChooseDepartment = ({ value, onChange, validate }) => {
       className="form-control"
       placeholder="Département"
       name="department"
+      multiple={true}
       value={value}
       onChange={onChange}>
-      <option disabled value="" label=""></option>
       {list.map((e) => {
         return (
           <option value={e} key={e}>

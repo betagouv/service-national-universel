@@ -166,7 +166,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
         .required(),
       subRole: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
+      department: Joi.array().items(Joi.string().allow(null, "")),
       structureId: Joi.string().allow(null, ""),
       structureName: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
@@ -175,7 +175,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId } = value;
