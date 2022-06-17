@@ -595,8 +595,12 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
 
   if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
     if (
-      (now > dateDeValidation[sessionPhase1.cohort] && young?.grade !== "Terminale" && young.departSejourAt > dateDeValidation[sessionPhase1.cohort]) ||
-      (now > dateDeValidationTerminale[sessionPhase1.cohort] && young?.grade === "Terminale" && young.departSejourAt > dateDeValidationTerminale[sessionPhase1.cohort])
+      (now > dateDeValidation[sessionPhase1.cohort] &&
+        young?.grade !== "Terminale" &&
+        (!young?.departSejourAt || young?.departSejourAt > dateDeValidation[sessionPhase1.cohort])) ||
+      (now > dateDeValidationTerminale[sessionPhase1.cohort] &&
+        young?.grade === "Terminale" &&
+        (!young?.departSejourAt || young?.departSejourAt > dateDeValidationTerminale[sessionPhase1.cohort]))
     ) {
       if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
         young.set({ statusPhase1: "NOT_DONE" });
