@@ -35,17 +35,7 @@ export default function Presence() {
       }
       const sheet = {
         name: "présence",
-        data: data.map((elem) => {
-          return {
-            centre: elem.center.name,
-            "id centre": elem.center._id.toString(),
-            "Code centre": elem.center.code2022,
-            "Région centre": elem.center.region,
-            "Académie centre": elem.center.academy,
-            "Département centre": elem.center.department,
-            cohorte: elem.sessionPhase1.cohort,
-          };
-        }),
+        data: data,
       };
 
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";

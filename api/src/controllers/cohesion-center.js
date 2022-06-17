@@ -242,27 +242,61 @@ router.post("/export-presence", passport.authenticate("referent", { session: fal
     let result = [];
 
     await cursorCenters.eachAsync(async function (center) {
-      const sessionsPhase1 = allSessionsPhase1.filter((session) => session.cohesionCenterId === center._id.toString());
+      const sessionsPhase1 = allSessionsPhase1
+        .filter((session) => session.cohesionCenterId === center._id.toString())
+        .filter((session) => value.cohorts?.length === 0 || value.cohorts?.includes(session.cohort));
       if (!sessionsPhase1 || sessionsPhase1.length === 0) return;
 
       for (let sessionPhase1 of sessionsPhase1) {
         const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
-        const stats = (youngs || []).reduce((previous, young) => {
-          if (young.cohesionStayPresence === "true") {
-            previous.presenceArrive = (previous.presenceArrive || 0) + 1;
-          }
-          if (young.cohesionStayPresence === "false") {
-            previous.absenceArrive = (previous.absenceArrive || 0) + 1;
-          }
-          if (!young.cohesionStayPresence) {
-            previous.nonRenseigneArrive = (previous.nonRenseigneArrive || 0) + 1;
-          }
-          if (young.departSejourAt) {
-            previous.depart = (previous.depart || 0) + 1;
-          }
-          return previous;
-        }, {});
-        result.push({ sessionPhase1, center, stats });
+        const stats = (youngs || []).reduce(
+          (previous, young) => {
+            if (young.cohesionStayPresence === "true") previous.presenceArrive++;
+            if (young.cohesionStayPresence === "false") previous.absenceArrive++;
+            if (!young.cohesionStayPresence) previous.nonRenseigneArrive++;
+            if (young.departSejourAt) previous.depart++;
+            if (young.presenceJDM === "true") previous.presenceJDM++;
+            if (young.absenceJDM === "false") previous.absenceJDM++;
+            if (young.departSejourMotif === "Exclusion") previous.departSejourMotif_exclusion++;
+            if (young.departSejourMotif === "Cas de force majeure pour le volontaire") previous.departSejourMotif_forcemajeure++;
+            if (young.departSejourMotif === "Autre") previous.departSejourMotif_autre++;
+            return previous;
+          },
+          {
+            presenceArrive: 0,
+            absenceArrive: 0,
+            nonRenseigneArrive: 0,
+            depart: 0,
+            presenceJDM: 0,
+            absenceJDM: 0,
+            departSejourMotif_exclusion: 0,
+            departSejourMotif_forcemajeure: 0,
+            departSejourMotif_autre: 0,
+          },
+        );
+
+        const pourcentageRemplissage = ((((sessionPhase1.placesTotal || 0) - (sessionPhase1.placesLeft || 0)) * 100) / (sessionPhase1.placesTotal || 1)).toFixed(2);
+        result.push({
+          "Nom du centre": center.name,
+          "ID du centre": center._id.toString(),
+          "Code du centre": center.code2022 || "",
+          "Région du centre": center.region,
+          // "Académie du centre": center.academy,
+          "Département du centre": center.department,
+          Cohorte: sessionPhase1.cohort,
+          "Nombre de volontaires affectés (validés)": youngs.length,
+          "% de remplissage": pourcentageRemplissage,
+          "Nombre de présents à l’arrivée": stats.presenceArrive,
+          "Nombre d’absents à l’arrivée": stats.absenceArrive,
+          "Nombre de présence non renseignée": stats.nonRenseigneArrive,
+          "Nombre de départ": stats.depart,
+          // 'Nombre de motif "abandon"': "",
+          'Nombre de motif "exclusion"': stats.departSejourMotif_exclusion,
+          'Nombre de motif "cas de force majeur"': stats.departSejourMotif_forcemajeure,
+          'Nombre de motif "autre"': stats.departSejourMotif_autre,
+          "Nombre de présent à la JDC": stats.presenceJDM,
+          "Nombre d’absent à la JDC": stats.absenceJDM,
+        });
       }
     });
 
