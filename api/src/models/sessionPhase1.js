@@ -3,6 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "sessionphase1";
+const { ENVIRONMENT } = require("../config");
 
 const Schema = new mongoose.Schema({
   cohesionCenterId: {
@@ -111,5 +112,6 @@ Schema.plugin(mongooseElastic(esClient, { ignore: ["team"] }), MODELNAME);
 Schema.index({ cohesionCenterId: 1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
-OBJ.syncIndexes();
+if (ENVIRONMENT === "production") OBJ.syncIndexes();
+
 module.exports = OBJ;

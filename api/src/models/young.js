@@ -5,6 +5,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const zammad = require("../zammad");
+const { ENVIRONMENT } = require("../config");
 
 const MODELNAME = "young";
 
@@ -1515,6 +1516,6 @@ Schema.index({ sessionPhase1Id: 1 });
 Schema.index({ sessionPhase1Id: 1, status: 1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
-OBJ.syncIndexes();
+if (ENVIRONMENT === "production") OBJ.syncIndexes();
 
 module.exports = OBJ;
