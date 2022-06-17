@@ -1,3 +1,16 @@
+# [1.101.0](https://github.com/betagouv/service-national-universel/compare/v1.100.1...v1.101.0) (2022-06-17)
+
+
+### Bug Fixes
+
+* **api,app:** ouverture changement de séjour pour dourdan ([71d6fc0](https://github.com/betagouv/service-national-universel/commit/71d6fc08c038506c6cfdeba9f3f6633560ccc641))
+
+
+### Features
+
+* attestation phase1 ([01988aa](https://github.com/betagouv/service-national-universel/commit/01988aaf6754028c95c2f12e8036114ec56f8265))
+* export-presence ([#1610](https://github.com/betagouv/service-national-universel/issues/1610)) ([2bcf9a0](https://github.com/betagouv/service-national-universel/commit/2bcf9a0a998e1131e9dcdd576773cc43fcc5154f))
+
 ## [1.100.1](https://github.com/betagouv/service-national-universel/compare/v1.100.0...v1.100.1) (2022-06-16)
 
 
