@@ -219,6 +219,7 @@ router.get("/:id/cohort/:cohort/stats", passport.authenticate("referent", { sess
   }
 });
 
+// todo : optimiser - ca ne scale pas
 router.post("/export-presence", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -230,18 +231,18 @@ router.post("/export-presence", passport.authenticate("referent", { session: fal
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const filterCenter = {};
-    if (value.region) filterCenter.region = { $in: value.region };
-    if (value.department) filterCenter.department = { $in: value.department };
-    if (value.code2022) filterCenter.code2022 = { $in: value.code2022 };
+    if (value.region?.length) filterCenter.region = { $in: value.region };
+    if (value.department?.length) filterCenter.department = { $in: value.department };
+    if (value.code2022?.length) filterCenter.code2022 = { $in: value.code2022 };
+    if (value.cohorts?.length) filterCenter.cohorts = { $in: value.cohorts };
 
-    const filterSession = {};
-    if (value.cohorts) filterSession.cohort = { $in: value.cohorts };
+    const allSessionsPhase1 = await SessionPhase1.find();
+    const cursorCenters = await CohesionCenterModel.find(filterCenter).cursor();
 
-    const cursorCenters = await CohesionCenterModel.find(filterCenter).limit(10).cursor();
     let result = [];
 
     await cursorCenters.eachAsync(async function (center) {
-      const sessionsPhase1 = await SessionPhase1.find({ ...filterSession, cohesionCenterId: center._id.toString() });
+      const sessionsPhase1 = allSessionsPhase1.filter((session) => session.cohesionCenterId === center._id.toString());
       if (!sessionsPhase1 || sessionsPhase1.length === 0) return;
 
       for (let sessionPhase1 of sessionsPhase1) {
