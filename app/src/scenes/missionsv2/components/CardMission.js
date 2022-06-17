@@ -44,7 +44,7 @@ export default function mission({ mission }) {
   return (
     <Link
       to={`/mission/${mission._id}`}
-      className="bg-white relative flex w-full justify-between shadow-nina rounded-xl p-4 border-[1px] border-[#ffffff] hover:border-gray-200 mb-4">
+      className="bg-white relative flex w-full justify-between shadow-nina rounded-xl p-4 border-[1px] border-[#ffffff] mb-4 hover:translate-x-1 transition duration-200 ease-in">
       <div className="flex flex-1">
         {/* icon */}
         <div className="flex items-center">

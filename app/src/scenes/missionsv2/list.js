@@ -56,7 +56,7 @@ export default function List() {
         },
       },
       track_total_hits: true,
-      size: ES_NO_LIMIT,
+      size: 20,
     };
 
     if (filter?.SEARCH) {
