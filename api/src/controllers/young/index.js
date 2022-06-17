@@ -479,8 +479,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const { id } = req.params;
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-    if (!youngCanChangeSession({ cohort: young.cohort, status: young.status, statusPhase1: young.statusPhase1 }))
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!youngCanChangeSession(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // young can only update their own cohort.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {

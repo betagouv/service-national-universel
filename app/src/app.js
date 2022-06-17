@@ -170,9 +170,7 @@ const Espace = () => {
             {environment === "production" ? <Route path="/candidature" component={Applications} /> : <Route path="/candidature" component={Candidature} />}
             <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
-            {youngCanChangeSession({ cohort: young.cohort, status: young.status, statusPhase1: young.statusPhase1 }) ? (
-              <Route path="/changer-de-sejour" component={changeSejour} />
-            ) : null}
+            {youngCanChangeSession(young) ? <Route path="/changer-de-sejour" component={changeSejour} /> : null}
             {environment === "production"
               ? ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />
               : ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparationV2} />}
