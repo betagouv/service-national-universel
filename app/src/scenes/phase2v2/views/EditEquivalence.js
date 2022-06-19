@@ -9,7 +9,7 @@ import ChevronDown from "../../../assets/icons/ChevronDown";
 import InformationCircle from "../../../assets/icons/InformationCircle";
 import PaperClip from "../../../assets/icons/PaperClip";
 import api from "../../../services/api";
-import { RiErrorWarningLine } from "react-icons/ri";
+import validator from "validator";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -26,6 +26,7 @@ export default function EditEquivalence() {
   const [loading, setLoading] = useState(false);
   const [filesList, setFilesList] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [errorMail, setErrorMail] = useState(false);
   const refType = useRef(null);
   const refDuree = useRef(null);
   const refFrequence = useRef(null);
@@ -116,6 +117,15 @@ export default function EditEquivalence() {
       } else if (data[key] === undefined || data[key] === "") {
         error = true;
       }
+
+      if (key === "contactEmail") {
+        if (!validator.isEmail(data[key])) {
+          setErrorMail(true);
+          error = true;
+        } else {
+          setErrorMail(false);
+        }
+      }
     }
     setError(error);
 
@@ -156,13 +166,10 @@ export default function EditEquivalence() {
           </div>
         </div>
         {data.status === "WAITING_CORRECTION" ? (
-          <div className="border-[1px] border-[#FD7A02] rounded-lg bg-[#FD7A02]/10 mt-4">
-            <div className="flex items-center px-4 py-3">
-              <RiErrorWarningLine className="text-[#FD7A02]" />
-              <div className="flex flex-col flex-1">
-                <div className="ml-4 text-[#FD7A02] text-sm leading-5 font-medium">Corrections demandées</div>
-                <div className="ml-4 text-[#FD7A02] text-sm leading-5 font-medium">{data?.message}</div>
-              </div>
+          <div className="border-[1px] border-gray-200 rounded-lg bg-white mt-4">
+            <div className="flex flex-col px-3 py-2 gap-2">
+              <div className="text-neutral-900 text-base leading-5 font-medium">Corrections demandées</div>
+              <div className="text-gray-500 text-sm leading-5 font-medium">{data?.message}</div>
             </div>
           </div>
         ) : null}
@@ -263,6 +270,7 @@ export default function EditEquivalence() {
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Date de début"
                 type="date"
+                max={formatDate(new Date())}
                 value={formatDate(data?.startDate)}
                 onChange={(e) => setData({ ...data, startDate: e.target.value })}
               />
@@ -272,6 +280,8 @@ export default function EditEquivalence() {
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Date de fin"
+                min={formatDate(data?.startDate)}
+                max={formatDate(new Date())}
                 type="date"
                 value={formatDate(data?.endDate)}
                 onChange={(e) => setData({ ...data, endDate: e.target.value })}
@@ -403,6 +413,7 @@ export default function EditEquivalence() {
               onChange={(e) => setData({ ...data, contactEmail: e.target.value })}
             />
           </div>
+          {errorMail ? <div className="text-sm leading-5 font-normal text-red-500 mt-2 text-center">L&apos;adresse email n&apos;est pas valide.</div> : null}
         </div>
         <div className="rounded-lg bg-white mt-4 p-6">
           <div className="text-lg leading-7 font-bold">Document justificatif d’engagement</div>
@@ -448,7 +459,7 @@ export default function EditEquivalence() {
           className="rounded-lg w-full py-2 mt-4 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600 disabled:bg-blue-300 disabled:!text-white disabled:border-blue-300"
           disabled={loading || uploading}
           onClick={() => handleSubmit()}>
-          {loading ? "Chargement" : "Valider ma demande"}
+          {loading ? "Chargement" : "Modifier ma demande"}
         </button>
       </div>
     </div>

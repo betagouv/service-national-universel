@@ -9,6 +9,7 @@ import ChevronDown from "../../../assets/icons/ChevronDown";
 import InformationCircle from "../../../assets/icons/InformationCircle";
 import PaperClip from "../../../assets/icons/PaperClip";
 import api from "../../../services/api";
+import validator from "validator";
 
 export default function CreateEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -27,6 +28,7 @@ export default function CreateEquivalence() {
   const [loading, setLoading] = useState(false);
   const [filesList, setFilesList] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [errorMail, setErrorMail] = useState(false);
   const refType = useRef(null);
   const refStartDate = useRef(null);
   const refEndDate = useRef(null);
@@ -105,6 +107,15 @@ export default function CreateEquivalence() {
         }
       } else if (data[key] === undefined || data[key] === "") {
         error = true;
+      }
+
+      if (key === "contactEmail") {
+        if (!validator.isEmail(data[key])) {
+          setErrorMail(true);
+          error = true;
+        } else {
+          setErrorMail(false);
+        }
       }
     }
     setError(error);
@@ -230,6 +241,7 @@ export default function CreateEquivalence() {
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Date de début"
                 type="text"
+                max={formatDate(new Date())}
                 ref={refStartDate}
                 onFocus={(e) => {
                   e.target.type = "date";
@@ -247,6 +259,8 @@ export default function CreateEquivalence() {
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
                 placeholder="Date de fin"
+                min={data?.startDate}
+                max={formatDate(new Date())}
                 type="text"
                 ref={refEndDate}
                 onFocus={(e) => {
@@ -383,7 +397,9 @@ export default function CreateEquivalence() {
               onChange={(e) => setData({ ...data, contactEmail: e.target.value })}
             />
           </div>
+          {errorMail ? <div className="text-sm leading-5 font-normal text-red-500 mt-2 text-center">L&apos;adresse email n&apos;est pas valide.</div> : null}
         </div>
+
         <div className="rounded-lg bg-white mt-4 p-6">
           <div className="text-lg leading-7 font-bold">Document justificatif d’engagement</div>
           <div className="flex flex-col items-center bg-gray-50 mt-4 py-10 rounded-lg mb-3">
@@ -442,3 +458,17 @@ function isFileSupported(fileName) {
   if (!allowTypes.includes(type.toLowerCase())) return false;
   return true;
 }
+
+const formatDate = (date) => {
+  let d = new Date(date);
+  let month = (d.getMonth() + 1).toString();
+  let day = d.getDate().toString();
+  let year = d.getFullYear();
+  if (month.length < 2) {
+    month = "0" + month;
+  }
+  if (day.length < 2) {
+    day = "0" + day;
+  }
+  return [year, month, day].join("-");
+};

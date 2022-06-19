@@ -58,6 +58,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
           <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
             <label className="text-left text-gray-500 w-full">Motif du départ</label>
             <select
+              required
               className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
               value={departSejourMotif}
               onChange={(e) => setDepartSejourMotif(e.target.value)}
@@ -76,6 +77,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
           <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
             <label className="text-left text-gray-500 w-full">Date du départ</label>
             <input
+              required
               type="date"
               className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
               value={departSejourAt}
@@ -88,7 +90,8 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
           <div className={`w-full border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
             <label className="text-left text-gray-500 w-full">Commentaire</label>
             <textarea
-              placeholder="Votre commentaire facultatif"
+              required
+              placeholder="Votre commentaire"
               className="w-full bg-inherit disabled:cursor-not-allowed"
               value={departSejourMotifComment}
               onChange={(e) => setDepartSejourMotifComment(e.target.value)}
@@ -103,7 +106,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
             onClick={onClickCancel}>
             Annuler
           </button>
-          {departSejourMotif && departSejourAt ? (
+          {departSejourMotif && departSejourAt && departSejourMotifComment ? (
             <button
               className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
               disabled={isLoading}

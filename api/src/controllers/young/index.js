@@ -185,7 +185,7 @@ router.post(
       user.set({ [key]: names });
       await user.save({ fromUser: req.user });
 
-      return res.status(200).send({ data: names, ok: true });
+      return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
     } catch (error) {
       capture(error);
       if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
@@ -479,7 +479,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const { id } = req.params;
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-    if (!youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!youngCanChangeSession(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // young can only update their own cohort.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
@@ -537,6 +537,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         cohort,
         cohortChangeReason,
         cohortDetailedChangeReason,
+        status: YOUNG_STATUS.VALIDATED,
         statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
         cohesionStayPresence: undefined,
         cohesionStayMedicalFileReceived: undefined,

@@ -36,12 +36,13 @@ import {
   VISITOR_SUBROLES,
 } from "../../utils";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import { MdOutlineOpenInNew } from "react-icons/md";
+import Badge from "../../components/Badge";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Utilisateurs");
   const [user, setUser] = useState();
   const [service, setService] = useState();
-  const [centers, setCenters] = useState();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
   const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
@@ -66,19 +67,30 @@ export default function Edit(props) {
         const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         data.structureId ? setStructure(s.find((struct) => struct._id === data.structureId)) : null;
         setStructures(s);
-        if (data.role === ROLES.HEAD_CENTER) {
-          const responseCenter = await api.get(`/cohesion-center`);
-          const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
-          setCenters(c);
-        }
-        const responseSession = await api.get(`/referent/${id}/session-phase1`);
-        setSessionsWhereUserIsHeadCenter(responseSession.data);
       } catch (e) {
         console.log(e);
         return toastr.error("Une erreur s'est produite lors du chargement de cet utilisateur");
       }
     })();
   }, []);
+  useEffect(() => {
+    (async () => {
+      try {
+        if (user?.role === ROLES.HEAD_CENTER) {
+          const responseSession = await api.get(`/referent/${user?._id}/session-phase1`);
+          let sessionsWithCenterWhereUserIsHeadCenter = [];
+          for (let session of responseSession.data) {
+            const responseCenter = await api.get(`/cohesion-center/${session.cohesionCenterId}`);
+            sessionsWithCenterWhereUserIsHeadCenter.push({ ...session, center: responseCenter.data });
+          }
+          setSessionsWhereUserIsHeadCenter(sessionsWithCenterWhereUserIsHeadCenter);
+        }
+      } catch (e) {
+        console.log(e);
+        return toastr.error("Une erreur s'est produite lors du chargement de cet utilisateur");
+      }
+    })();
+  }, [user]);
 
   if (user === undefined || service === undefined) return <Loader />;
 
@@ -241,20 +253,6 @@ export default function Edit(props) {
                             }),
                           )}
                         />
-                        {values.role === ROLES.HEAD_CENTER ? (
-                          centers ? (
-                            <AutocompleteSelectCenter
-                              options={centers}
-                              defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
-                              onChange={(e) => {
-                                handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
-                                handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
-                              }}
-                            />
-                          ) : (
-                            <Loader />
-                          )
-                        ) : null}
                         {values.role === ROLES.RESPONSIBLE ? (
                           structures ? (
                             <AutocompleteSelectStructure
@@ -329,7 +327,25 @@ export default function Edit(props) {
                             <Col md={4}>
                               <label>Séjours </label>
                             </Col>
-                            <Col md={8}>{sessionsWhereUserIsHeadCenter.map((session) => session.cohort).join(", ")}</Col>
+                            {sessionsWhereUserIsHeadCenter?.length > 0 ? (
+                              <Col md={8}>
+                                {(sessionsWhereUserIsHeadCenter || [])
+                                  .map((session) => (
+                                    <div className="py-1" key={session._id.toString()}>
+                                      <a
+                                        href={`/centre/${session?.center?._id}?cohorte=${session.cohort}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-1 group-hover:underline">
+                                        {session?.center?.name}
+                                        <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={session.cohort} style={{ cursor: "default" }} />
+                                        <MdOutlineOpenInNew />
+                                      </a>
+                                    </div>
+                                  ))
+                                  .reduce((prev, curr) => [prev, "", curr])}
+                              </Col>
+                            ) : null}
                           </Row>
                         ) : null}
                       </BoxContent>
@@ -420,33 +436,6 @@ const Select = ({ title, name, values, onChange, disabled, options, allowEmpty =
             </option>
           ))}
         </select>
-      </Col>
-    </Row>
-  );
-};
-
-const AutocompleteSelectCenter = ({ options, defaultValue, onChange }) => {
-  return (
-    <Row className="detail">
-      <Col md={4} style={{ alignSelf: "flex-start" }}>
-        <label>{"Centre"}</label>
-      </Col>
-      <Col md={8}>
-        <ReactSelect
-          styles={{
-            menu: () => ({
-              borderStyle: "solid",
-              borderWidth: 1,
-              borderRadius: 5,
-              borderColor: "#dedede",
-            }),
-          }}
-          defaultValue={defaultValue}
-          options={options}
-          placeholder="Choisir un centre"
-          noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
-          onChange={onChange}
-        />
       </Col>
     </Row>
   );

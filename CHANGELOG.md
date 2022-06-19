@@ -1,3 +1,87 @@
+# [1.101.0](https://github.com/betagouv/service-national-universel/compare/v1.100.1...v1.101.0) (2022-06-17)
+
+
+### Bug Fixes
+
+* **api,app:** ouverture changement de séjour pour dourdan ([71d6fc0](https://github.com/betagouv/service-national-universel/commit/71d6fc08c038506c6cfdeba9f3f6633560ccc641))
+
+
+### Features
+
+* attestation phase1 ([01988aa](https://github.com/betagouv/service-national-universel/commit/01988aaf6754028c95c2f12e8036114ec56f8265))
+* export-presence ([#1610](https://github.com/betagouv/service-national-universel/issues/1610)) ([2bcf9a0](https://github.com/betagouv/service-national-universel/commit/2bcf9a0a998e1131e9dcdd576773cc43fcc5154f))
+
+## [1.100.1](https://github.com/betagouv/service-national-universel/compare/v1.100.0...v1.100.1) (2022-06-16)
+
+
+### Bug Fixes
+
+* **api:** re-ouverture séjour juillet ([6df72fd](https://github.com/betagouv/service-national-universel/commit/6df72fde0bdb00393b9d2fceefccd15dc42909b2))
+
+# [1.100.0](https://github.com/betagouv/service-national-universel/compare/v1.99.2...v1.100.0) (2022-06-15)
+
+
+### Bug Fixes
+
+* **app:** pouvoir masquer une candidature ([f6f498e](https://github.com/betagouv/service-national-universel/commit/f6f498e8af20b1df5331425c5b4801f442c2fca0))
+
+
+### Features
+
+* change sejour waiting list ([#1609](https://github.com/betagouv/service-national-universel/issues/1609)) ([53ec27c](https://github.com/betagouv/service-national-universel/commit/53ec27cdc7113e3627cd208b909d085e04c260ba))
+
+## [1.99.2](https://github.com/betagouv/service-national-universel/compare/v1.99.1...v1.99.2) (2022-06-14)
+
+
+### Bug Fixes
+
+* **admin:** commentaire de départ obligatoire ([1d32937](https://github.com/betagouv/service-national-universel/commit/1d3293760976113c4ab313c66dcbc9c8b8e947dd))
+* **admin:** dashboard centre -  ne pas compter prendre en compte les desistés ([039ac9b](https://github.com/betagouv/service-national-universel/commit/039ac9b50d1af153b1de0a920997ac8d1b74913b))
+* **app:** add drag and drop candidatures ([cc934ca](https://github.com/betagouv/service-national-universel/commit/cc934ca3222d2cafe89bac7d21ce6250998d7351))
+* **app:** start candidatures v2 ([273300a](https://github.com/betagouv/service-national-universel/commit/273300a5ee177ae9c041eb6a19f000bfdd1526f5))
+* **app:** wip candidatures ([8ec44e7](https://github.com/betagouv/service-national-universel/commit/8ec44e77f24915989816c0549820181442615662))
+
+## [1.99.1](https://github.com/betagouv/service-national-universel/compare/v1.99.0...v1.99.1) (2022-06-13)
+
+
+### Bug Fixes
+
+* **admin:** open download young file to referent  reception center ([#1607](https://github.com/betagouv/service-national-universel/issues/1607)) ([e205a58](https://github.com/betagouv/service-national-universel/commit/e205a5899293466690bbe2668148899746f8e665))
+* **admin:** Show status désistement ([6a810d6](https://github.com/betagouv/service-national-universel/commit/6a810d6a2bf62dce70f965c98dedc55e6510aa43))
+
+# [1.99.0](https://github.com/betagouv/service-national-universel/compare/v1.98.1...v1.99.0) (2022-06-10)
+
+
+### Bug Fixes
+
+* **admin:** head center dashboard ([5b493ec](https://github.com/betagouv/service-national-universel/commit/5b493ec4a96e4243e7b31b9112227526d4d6bc2e))
+* **admin:** PDR session share ([0fbc925](https://github.com/betagouv/service-national-universel/commit/0fbc925ed98b77a21ed6133794ebb11293b2f097))
+* **api:** ne pas supprimer session si ya des jeunes ([ec2e4d3](https://github.com/betagouv/service-national-universel/commit/ec2e4d3868ff227a12f00ed0152794e1409e6a92))
+
+
+### Features
+
+* **admin:** delete meeting point ([#1600](https://github.com/betagouv/service-national-universel/issues/1600)) ([9544f57](https://github.com/betagouv/service-national-universel/commit/9544f57cd890c73098fb39ac88e855f2ecd2ec3d))
+
+## [1.98.1](https://github.com/betagouv/service-national-universel/compare/v1.98.0...v1.98.1) (2022-06-09)
+
+
+### Bug Fixes
+
+* **admin,app,support:** Ministère de l’éducation nationale et de la jeunesse ([fe5cf0c](https://github.com/betagouv/service-national-universel/commit/fe5cf0c26673769f8c7d02c167f035cf1668aed2))
+* add count sessionPhase1 share ([528ac9c](https://github.com/betagouv/service-national-universel/commit/528ac9ccafa0fc5033b6533b56713ad743fdab40))
+* **admin:** list of user's sessions ([e2ea76a](https://github.com/betagouv/service-national-universel/commit/e2ea76a39d16441eaccc4204db78796afebe814c))
+* **admin:** séjour sélectionné par défaut ([14fe339](https://github.com/betagouv/service-national-universel/commit/14fe3396d9b9b9f5953e80caa53ede332e653a33))
+* **admin:** selection du séjour initiale - vue centre ([734d639](https://github.com/betagouv/service-national-universel/commit/734d639302f7c5128aca3a930380d89d229827dd))
+* **api:** afficher uniquement volontaires validés - partage données sessionPhase1 ([336a3c9](https://github.com/betagouv/service-national-universel/commit/336a3c9f71295e81a0d3e003d0863b9dca8f3a6d))
+
+# [1.98.0](https://github.com/betagouv/service-national-universel/compare/v1.97.0...v1.98.0) (2022-06-07)
+
+
+### Features
+
+* **api:** send step1form connected young ([#1597](https://github.com/betagouv/service-national-universel/issues/1597)) ([43d67ee](https://github.com/betagouv/service-national-universel/commit/43d67ee77067eca0161a8924da0d60a3362ea361))
+
 # [1.97.0](https://github.com/betagouv/service-national-universel/compare/v1.96.1...v1.97.0) (2022-06-06)
 
 

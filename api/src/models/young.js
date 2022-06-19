@@ -5,6 +5,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const zammad = require("../zammad");
+const { ENVIRONMENT } = require("../config");
 
 const MODELNAME = "young";
 
@@ -1512,6 +1513,9 @@ Schema.plugin(patchHistory, {
 Schema.plugin(mongooseElastic(esClient, { ignore: ["historic"] }), MODELNAME);
 
 Schema.index({ sessionPhase1Id: 1 });
+Schema.index({ sessionPhase1Id: 1, status: 1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
+if (ENVIRONMENT === "production") OBJ.syncIndexes();
+
 module.exports = OBJ;

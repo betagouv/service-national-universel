@@ -13,6 +13,7 @@ export default function Status({ filter }) {
   const [departInform, setDepartInform] = useState({});
   const [departSejourMotif, setDepartSejourMotif] = useState({});
   const [presenceJDM, setPresenceJDM] = useState({});
+  const [status, setStatus] = useState({});
   const [totalHit, setTotalHit] = useState();
 
   const { sessionPhase1 } = useSelector((state) => state.Auth);
@@ -23,7 +24,7 @@ export default function Status({ filter }) {
         query: {
           bool: {
             must: { match_all: {} },
-            filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }],
+            filter: [{ terms: { "status.keyword": ["VALIDATED"] } }],
           },
         },
         aggs: {
@@ -39,11 +40,36 @@ export default function Status({ filter }) {
         size: 0,
       };
 
-      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
-      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
-      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      const body2 = {
+        query: {
+          bool: {
+            must: { match_all: {} },
+            filter: [{ terms: { "status.keyword": ["WITHDRAWN"] } }],
+          },
+        },
+        aggs: {
+          status: { terms: { field: "status.keyword" } },
+        },
+        track_total_hits: true,
+        size: 0,
+      };
+
+      if (filter.cohort?.length) {
+        body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
+        body2.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
+      }
+      if (filter.region?.length) {
+        body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+        body2.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      }
+      if (filter.department?.length) {
+        body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+        body2.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      }
 
       const { responses } = await api.esQuery("young", body);
+      const { responses: responses2 } = await api.esQuery("young", body2);
+
       if (responses?.length) {
         setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         addNullAttributes(responses[0].hits.total.value, responses[0].aggregations.cohesionStayMedicalFileReceived.buckets);
@@ -55,6 +81,10 @@ export default function Status({ filter }) {
         setDepartInform(responses[0].aggregations.departInform.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setDepartSejourMotif(responses[0].aggregations.departSejourMotif.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setTotalHit(responses[0].hits.total.value);
+      }
+
+      if (responses2?.length) {
+        setStatus(responses2[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       }
     })();
   }, [JSON.stringify(filter)]);
@@ -74,9 +104,11 @@ export default function Status({ filter }) {
     return link;
   };
 
+  console.log(status);
+
   return (
     <>
-      <Phase1 data={statusPhase1} getLink={getLink} sessionPhase1Id={sessionPhase1?._id} centerId={sessionPhase1?.cohesionCenterId} />
+      <Phase1 data={statusPhase1} status={status} getLink={getLink} sessionPhase1Id={sessionPhase1?._id} centerId={sessionPhase1?.cohesionCenterId} />
       <CohesionStayMedicalFileReceived data={cohesionStayMedicalFileReceived} getLink={getLink} sessionPhase1Id={sessionPhase1?._id} centerId={sessionPhase1?.cohesionCenterId} />
       <Participation
         cohesionStayPresence={cohesionStayPresence}

@@ -154,7 +154,9 @@ const Home = () => {
       let activeSession;
       let activeSessionLocalStorage = JSON.parse(localStorage.getItem("active_session_chef_de_centre"));
 
-      if (!activeSessionLocalStorage) {
+      if (!activeSessionLocalStorage || activeSessionLocalStorage?.headCenterId !== user._id.toString()) {
+        // si il n y a pas de session dans le local storage
+        // ou si ce n'est pas une session de l'utilisateur connecté
         activeSession = sessions.find((s) => COHESION_STAY_END[s.cohort] >= Date.now()) || sessions[0];
         localStorage.setItem("active_session_chef_de_centre", JSON.stringify(activeSession));
       } else {

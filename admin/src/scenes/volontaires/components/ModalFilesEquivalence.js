@@ -5,7 +5,7 @@ import { Modal } from "reactstrap";
 import CloseSvg from "../../../assets/Close";
 import AddImage from "../../../assets/icons/AddImage";
 import PaperClip from "../../../assets/icons/PaperClip";
-import ModalButton from "../../../components//buttons/ModalButton";
+import ModalButton from "../../../components/buttons/ModalButton";
 import { Footer, ModalContainer } from "../../../components/modals/Modal";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
@@ -14,7 +14,7 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default function ModalFiles({ isOpen, onCancel, initialValues, young, nameFiles, equivalenceId, onChange }) {
+export default function ModalFilesEquivalence({ isOpen, onCancel, initialValues, young, nameFiles, equivalenceId, onChange }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [uploading, setUploading] = useState(false);
   const [filesList, setFilesList] = useState([]);
@@ -82,7 +82,7 @@ export default function ModalFiles({ isOpen, onCancel, initialValues, young, nam
       <Modal centered isOpen={isOpen} toggle={onCancel} size="lg">
         <ModalContainer>
           <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={onCancel} />
-          <div className="px-2 pt-2 pb-4 text-center flex flex-col items-center">
+          <div className="pt-2 pb-4 text-center flex flex-col items-center px-8 w-full">
             <h3 className="mb-4">Documents demande de reconnaissance d’engagement déjà réalisé</h3>
 
             {filesList?.length

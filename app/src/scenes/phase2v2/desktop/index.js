@@ -13,19 +13,22 @@ import CardMissionEmpty from "./components/CardMissionEmpty";
 import { copyToClipboard } from "../../../utils";
 import Loader from "../../../components/Loader";
 import CardEquivalence from "./components/CardEquivalence";
+import CardPM from "./components/CardPM";
 
 export default function IndexDesktop() {
   const young = useSelector((state) => state.Auth.young);
+  const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
   const [applications, setApplications] = React.useState();
   const [equivalences, setEquivalences] = React.useState();
+  const [hasPM, setHasPM] = React.useState(false);
 
-  const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
   React.useEffect(() => {
     (async () => {
       const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
       if (ok) return setReferentManagerPhase2(data);
     })();
   }, []);
+
   React.useEffect(() => {
     (async () => {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/application`);
@@ -37,7 +40,15 @@ export default function IndexDesktop() {
     })();
   }, []);
 
-  if (!applications) return <Loader />;
+  React.useEffect(() => {
+    if (["WAITING_CORRECTION", "REFUSED", "VALIDATED", "WAITING_VALIDATION"].includes(young.statusMilitaryPreparationFiles)) {
+      setHasPM(true);
+    } else {
+      setHasPM(false);
+    }
+  }, [young]);
+
+  if (!applications || !equivalences) return <Loader />;
 
   return (
     <div className="bg-white mx-4 pb-12 my-3 rounded-lg">
@@ -77,6 +88,8 @@ export default function IndexDesktop() {
       {/* END HEADER */}
 
       <div className="flex flex-col items-center px-14 -translate-y-4">
+        {/* BEGIN PM */}
+        {hasPM ? <CardPM young={young} /> : null}
         {/* BEGIN EQUIVALENCE */}
         {equivalences.map((equivalence, index) => (
           <CardEquivalence key={index} equivalence={equivalence} young={young} />
@@ -97,7 +110,7 @@ export default function IndexDesktop() {
             {applications.length >= 4 ? (
               <div className="flex justify-center">
                 <Link to="/candidature">
-                  <div className="text-gray-700 bg-gray-100 rounded-lg px-4 py-2 text-center hover:underline">
+                  <div className="text-gray-700 bg-gray-100 rounded-lg px-4 py-2 text-center hover:underline mt-4">
                     {applications.length === 4 ? "Gérer mes candidatures" : `Toutes mes candidatures (${applications.length})`}
                   </div>
                 </Link>
@@ -109,7 +122,7 @@ export default function IndexDesktop() {
       </div>
 
       {/* BEGIN LINKS */}
-      <div className="mx-10 mt-10">
+      <div className="mx-10 mt-4">
         <div className="flex gap-2">
           {referentManagerPhase2 ? (
             <div className="w-1/3 border border-gray-200 rounded-lg py-2 px-3 flex flex-col justify-around">
@@ -146,7 +159,7 @@ export default function IndexDesktop() {
             </a>
           </div>
         </div>
-        <Link to='/mission?MILITARY_PREPARATION=%5B"true"%5D'>
+        <Link to="/ma-preparation-militaire">
           <div className="group border-[1px] border-gray-200 hover:border-gray-300 rounded-lg mt-3 p-3 flex items-center gap-4">
             <Medaille className="text-gray-400" />
             <div className="w-full">
@@ -161,7 +174,7 @@ export default function IndexDesktop() {
         {/* TODO activer si plusieurs cartes 👇 */}
         {/* <div className="mt-12 mb-4 text-lg">Vous avez déjà fait preuve de solidarité ?</div> */}
         {equivalences.length < 3 && equivalences.filter((equivalence) => equivalence.status !== "REFUSED").length === 0 ? (
-          <div className="border-0 flex rounded-lg shadow-lg w-1/2 items-center">
+          <div className="border-0 flex rounded-lg shadow-lg w-1/2 items-center mt-4">
             <img src={require("../../../assets/phase2Reconnaissance.png")} className="rounded-lg" />
             <div className="pr-4 ml-3">
               <div className="flex items-end">

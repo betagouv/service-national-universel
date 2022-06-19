@@ -21,6 +21,7 @@ const StructureModel = require("../models/structure");
 const AuthObject = require("../auth");
 const ReferentAuth = new AuthObject(ReferentModel);
 const patches = require("./patches");
+const CohesionCenterModel = require("../models/cohesionCenter");
 
 const { getQPV, getDensity } = require("../geo");
 const config = require("../config");
@@ -549,12 +550,15 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     const { youngId, key, fileName } = value;
 
     const young = await YoungModel.findById(youngId);
+    let center = null;
+    const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+    if (sessionPhase1) center = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
+
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (req.user.role === ROLES.HEAD_CENTER) {
-      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
       if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       if (sessionPhase1.headCenterId !== req.user.id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    } else if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else if (!canViewYoungFile(req.user, young, center)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);

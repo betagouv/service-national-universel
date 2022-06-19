@@ -12,18 +12,16 @@ export default function Breadcrumbs({ items }) {
         </Link>
         {items.map((item) => {
           return (
-            <>
-              <ChevronRight className="" />
+            <React.Fragment key={item.label}>
+              <ChevronRight />
               {item.to ? (
-                <Link key={item.label} className="text-xs hover:underline hover:text-snu-purple-300" to={item.to}>
+                <Link className="text-xs hover:underline hover:text-snu-purple-300" to={item.to}>
                   {item.label}
                 </Link>
               ) : (
-                <div key={item.label} className="text-xs">
-                  {item.label}
-                </div>
+                <div className="text-xs">{item.label}</div>
               )}
-            </>
+            </React.Fragment>
           );
         })}
       </div>

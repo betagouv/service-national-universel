@@ -11,10 +11,12 @@ import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 import { copyToClipboard } from "../../../utils";
 import CardMission from "./components/CardMission";
+import CardEquivalence from "./components/CardEquivalence";
 
 export default function IndexPhase2Mobile() {
   const young = useSelector((state) => state.Auth.young);
   const [applications, setApplications] = React.useState();
+  const [equivalences, setEquivalences] = React.useState();
 
   const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
   React.useEffect(() => {
@@ -28,9 +30,13 @@ export default function IndexPhase2Mobile() {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/application`);
       if (ok) return setApplications(data);
     })();
+    (async () => {
+      const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalences`);
+      if (ok) return setEquivalences(data);
+    })();
   }, []);
 
-  if (!applications) return <Loader />;
+  if (!applications || !equivalences) return <Loader />;
 
   return (
     <div className="bg-white pb-5">
@@ -65,6 +71,9 @@ export default function IndexPhase2Mobile() {
       </div>
       {/* END HEADER */}
 
+      {equivalences.map((equivalence, index) => (
+        <CardEquivalence key={index} equivalence={equivalence} young={young} />
+      ))}
       {/* BEGIN CANDIDATURES */}
       {applications.length > 0 ? (
         <>
@@ -140,16 +149,18 @@ export default function IndexPhase2Mobile() {
         </Link>
         {/* TODO activer si plusieurs cartes 👇 */}
         {/* <div className="mt-4 mb-2 text-base">Vous avez déjà fait preuve de solidarité ?</div> */}
-        <div className="border-0 rounded-lg shadow-lg items-center">
-          <img src={require("../../../assets/phase2MobileReconnaissance.png")} className="rounded-lg w-full" />
-          <div className="px-3 pb-4">
-            <div className="font-bold text-lg text-gray-900 ">Demandez la reconnaissance d’un engagement déjà réalisé</div>
-            <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
-            <Link to="phase2/equivalence">
-              <div className="rounded-lg text-blue-600 text-center text-sm py-1 border-[1px] border-blue-600">Faire ma demande</div>
-            </Link>
+        {equivalences.length < 3 && equivalences.filter((equivalence) => equivalence.status !== "REFUSED").length === 0 ? (
+          <div className="border-0 rounded-lg shadow-lg items-center">
+            <img src={require("../../../assets/phase2MobileReconnaissance.png")} className="rounded-lg w-full" />
+            <div className="px-3 pb-4">
+              <div className="font-bold text-lg text-gray-900 ">Demandez la reconnaissance d’un engagement déjà réalisé</div>
+              <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
+              <Link to="phase2/equivalence">
+                <div className="rounded-lg text-blue-600 text-center text-sm py-1 border-[1px] border-blue-600">Faire ma demande</div>
+              </Link>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
       {/* END LINKS */}
     </div>

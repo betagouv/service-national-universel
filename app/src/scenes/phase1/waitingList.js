@@ -20,7 +20,7 @@ export default function WaitingList({ young }) {
               <br />
               <strong className="flex items-center">
                 {translateCohort(young.cohort)}{" "}
-                {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? (
+                {youngCanChangeSession({ cohort: young.cohort, status: young.status, statusPhase1: young.statusPhase1 }) ? (
                   <Link to="/changer-de-sejour">
                     <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
                   </Link>
@@ -43,10 +43,13 @@ export default function WaitingList({ young }) {
             <br />
             <span className="text-gray-500">
               Nous vous contacterons par email dès qu'une place se libèrera vous permettant de participer au séjour de cohésion, ne perdez pas espoir !<br />
-              Vous pouvez consulter <a className="text-indigo-600 underline hover:text-indigo-800" href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
+              Vous pouvez consulter{" "}
+              <a className="text-indigo-600 underline hover:text-indigo-800" href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
                 les articles de notre base de connaissance a propos de la Phase 1
-              </a>.<br />
-              Merci de votre patience.<br />
+              </a>
+              .<br />
+              Merci de votre patience.
+              <br />
               L&apos;équipe SNU
             </span>
           </article>
