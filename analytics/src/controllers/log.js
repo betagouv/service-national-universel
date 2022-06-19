@@ -15,6 +15,7 @@ router.post("/", async (req, res) => {
   const { error, value } = Joi.object({
     evenement_nom: Joi.string().trim().required(),
     evenement_type: Joi.string().trim().required(),
+    evenement_valeur: Joi.string(),
     user_id: Joi.string().trim().required(),
     user_genre: Joi.string(),
     user_date_de_naissance: Joi.string(),
@@ -26,6 +27,7 @@ router.post("/", async (req, res) => {
     user_region: Joi.string(),
     user_cohorte: Joi.string(),
     date: Joi.string(),
+    raw_data: Joi.object(),
   }).validate(req.body);
 
   if (error) {
@@ -35,8 +37,8 @@ router.post("/", async (req, res) => {
 
   value.date = new Date(value.date);
 
-  const logs = await LogModel.create(value);
-  return res.status(200).send({ ok: false, data: logs });
+  const log = await LogModel.create(value);
+  return res.status(200).send({ ok: true, data: log });
 });
 
 module.exports = router;

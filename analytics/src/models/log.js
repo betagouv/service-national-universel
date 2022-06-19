@@ -18,10 +18,11 @@ const OBJ = db.define(
     user_region: DataTypes.TEXT,
     user_cohorte: DataTypes.TEXT,
     date: DataTypes.DATE,
+    raw_data: DataTypes.JSONB,
   },
   {
     defaultScope: {
-      attributes: { exclude: ["createdAt", "updatedAt"] },
+      attributes: { exclude: ["createdAt", "updatedAt", "raw_data"] },
     },
   }
 );
