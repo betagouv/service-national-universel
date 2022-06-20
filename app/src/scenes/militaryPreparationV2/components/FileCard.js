@@ -7,7 +7,7 @@ export default function FileCard({ name, status, filled, icon, color, onClick, t
       <FileIcon filled={filled} icon={icon} />
       <section className="min-h-[52px]">
         <p className="text-base font-bold mt-2">{name}</p>
-        {description ? <p className="ttext-xs leading-4 font-normal mt-1">{description}</p> : null}
+        {description ? <p className="text-xs leading-4 font-normal mt-1">{description}</p> : null}
       </section>
       <button className={`${color} border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end`} onClick={onClick}>
         {status}

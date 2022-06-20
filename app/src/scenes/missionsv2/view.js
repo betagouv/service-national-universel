@@ -18,6 +18,7 @@ export default function View(props) {
   const [modal, setModal] = useState(null);
   const [disabledAge, setDisabledAge] = useState(false);
   const [disabledIncomplete, setDisabledIncomplete] = useState(false);
+  const [disabledPmRefused, setDisabledPmRefused] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const docRef = useRef();
   const getMission = async () => {
@@ -47,6 +48,7 @@ export default function View(props) {
     if (mission?.isMilitaryPreparation === "true") {
       const ageAtStart = getDiffYear(mission.startAt, young.birthdateAt);
       setDisabledAge(ageAtStart < 16);
+      setDisabledPmRefused(young.statusMilitaryPreparationFiles === "REFUSED");
       if (!young.militaryPreparationFilesIdentity.length || !young.militaryPreparationFilesAuthorization.length || !young.militaryPreparationFilesCertificate.length) {
         setDisabledIncomplete(true);
       } else {
@@ -70,6 +72,8 @@ export default function View(props) {
   };
 
   if (mission === undefined) return <Loader />;
+
+  console.log(disabledAge, disabledIncomplete, disabledPmRefused);
 
   return (
     <div className="bg-white mx-4 pb-12 my-4 rounded-xl">
@@ -107,6 +111,7 @@ export default function View(props) {
               setModal={setModal}
               disabledAge={disabledAge}
               disabledIncomplete={disabledIncomplete}
+              disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
             />
           </div>
@@ -162,7 +167,7 @@ export default function View(props) {
   );
 }
 
-const ApplyButton = ({ applied, placesLeft, setModal, disabledAge, disabledIncomplete, scrollToBottom }) => {
+const ApplyButton = ({ applied, placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom }) => {
   if (applied)
     return (
       <div className="flex flex-col items-center">
@@ -179,6 +184,16 @@ const ApplyButton = ({ applied, placesLeft, setModal, disabledAge, disabledIncom
           <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
             Candidater
           </button>
+        </WithTooltip>
+        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
+      </div>
+    );
+
+  if (disabledPmRefused)
+    return (
+      <div className="flex flex-col items-center">
+        <WithTooltip tooltipText="Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater">
+          <button className="px-12 py-2 rounded-lg text-white bg-blue-600/60  text-sm cursor-pointer">Candidater</button>
         </WithTooltip>
         <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
       </div>
