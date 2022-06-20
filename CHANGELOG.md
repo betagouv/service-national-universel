@@ -1,3 +1,17 @@
+# [1.102.0](https://github.com/betagouv/service-national-universel/compare/v1.101.0...v1.102.0) (2022-06-20)
+
+
+### Bug Fixes
+
+* **admin:** wording status phase 1 ([632f9d9](https://github.com/betagouv/service-national-universel/commit/632f9d91938fb487d05a3de6ec7f1fb8f92e587b))
+* **admin,api:** bon template certificat en masse ([f0dfb42](https://github.com/betagouv/service-national-universel/commit/f0dfb428e9160f525b9af6a83074e49a807dc5ff))
+* ajouter cohorte `à venir` fiche edition volontaire ([dfc91ef](https://github.com/betagouv/service-national-universel/commit/dfc91efae1a4237c16bfbabc70248a53f313dc0a))
+
+
+### Features
+
+* **api:** automatisation validation du séjour de cohésion ([#1590](https://github.com/betagouv/service-national-universel/issues/1590)) ([8b01209](https://github.com/betagouv/service-national-universel/commit/8b0120988ef1c86536f024821d9bfd4df4f1ff4e))
+
 # [1.101.0](https://github.com/betagouv/service-national-universel/compare/v1.100.1...v1.101.0) (2022-06-17)
 
 
