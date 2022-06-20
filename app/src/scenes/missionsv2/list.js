@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import CardMission from "./components/CardMission";
 import { apiURL } from "../../config";
-import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM, ES_NO_LIMIT } from "../../utils";
+import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM, ES_NO_LIMIT, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
@@ -22,6 +22,7 @@ import PreparationMilitaire from "../../assets/mission-domaines/preparation-mili
 import AcademicCap from "../../assets/icons/AcademicCap";
 import Sun from "../../assets/icons/Sun";
 import Calendar from "../../assets/icons/Calendar";
+import Search from "../../assets/icons/Search";
 import { Link } from "react-router-dom";
 import { HiOutlineAdjustments } from "react-icons/hi";
 import PietonSvg from "./assets/Pieton";
@@ -34,11 +35,10 @@ const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "REL
 
 export default function List() {
   const young = useSelector((state) => state.Auth.young);
-  const [filter, setFilter] = React.useState({ DOMAINS: ["CITIZENSHIP"], DISTANCE: 600 });
+  const [filter, setFilter] = React.useState({ DOMAINS: [], DISTANCE: 50 });
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
   const DISTANCE_MAX = 1000;
-  const [bufferText, setBufferText] = React.useState();
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
 
@@ -125,6 +125,7 @@ export default function List() {
     }
 
     if (filter?.DOMAINS?.length) body.query.bool.filter.push({ terms: { "domains.keyword": filter.DOMAINS } });
+    if (filter?.PERIOD?.length) body.query.bool.filter.push({ terms: { "period.keyword": filter.PERIOD } });
     if (filter?.MILITARY_PREPARATION) body.query.bool.filter.push({ term: { "isMilitaryPreparation.keyword": filter?.MILITARY_PREPARATION } });
     console.log("✍️ ~ body", body);
     return body;
@@ -137,6 +138,18 @@ export default function List() {
         newFilter.DOMAINS = newFilter.DOMAINS.filter((d) => d !== domain);
       } else {
         newFilter.DOMAINS = [...(newFilter.DOMAINS || []), domain];
+      }
+      return newFilter;
+    });
+  };
+
+  const handleToggleChangePeriod = (period) => {
+    setFilter((prev) => {
+      const newFilter = { ...prev };
+      if (newFilter?.PERIOD?.includes(period)) {
+        newFilter.PERIOD = newFilter.PERIOD.filter((d) => d !== period);
+      } else {
+        newFilter.PERIOD = [...(newFilter.PERIOD || []), period];
       }
       return newFilter;
     });
@@ -218,9 +231,9 @@ export default function List() {
       <form onSubmit={search} className="bg-gray-50 p-10 rounded-lg space-y-6">
         {/* search bar recherche */}
         <div className="relative">
-          <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-2 divide-x divide-gray-300">
+          <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-1.5 ">
             <input
-              value={bufferText}
+              value={filter?.SEARCH}
               onChange={(e) => {
                 e.persist();
                 setFilter((prev) => ({ ...prev, SEARCH: e.target.value }));
@@ -229,11 +242,18 @@ export default function List() {
               type="text"
               placeholder="Rechercher une mission..."
             />
-            <div className="flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer" onClick={() => setDropdownControlDistanceOpen((e) => !e)}>
+            <div
+              className="flex items-center flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer border-l-[1px] border-gray-300"
+              onClick={() => setDropdownControlDistanceOpen((e) => !e)}>
               Distance max. {filter?.DISTANCE}km
             </div>
-            <div className="flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer" onClick={() => setDropdownControlWhenOpen((e) => !e)}>
+            <div
+              className="flex items-center flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer border-l-[1px] border-gray-300"
+              onClick={() => setDropdownControlWhenOpen((e) => !e)}>
               {getLabelWhen(filter?.PERIOD_PARENT)}
+            </div>
+            <div className="w-[34px] h-[34px] rounded-full bg-blue-600 flex justify-center items-center cursor-pointer hover:bg-blue-500">
+              <Search className="text-white" />
             </div>
           </div>
           {/* BEGIN MODAL CONTROL DISTANCE */}
@@ -241,14 +261,14 @@ export default function List() {
             ref={refDropdownControlDistance}
             className={`${
               dropdownControlDistanceOpen ? "block" : "hidden"
-            } group-hover:block w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 border-3 border-red-600 shadow overflow-hidden p-3 z-20`}>
+            } w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 shadow overflow-hidden p-3 z-20`}>
             <div className="font-bold text-sm text-gray-00 text-center">Distance maximum</div>
             <div className="flex w-full flex-col space-y-2 py-2 px-4">
               {/* <div className="">{filter?.DISTANCE}</div> */}
               <input
                 list="distance-list"
                 type="range"
-                className="w-full appearance-none h-2 bg-gray-200 items-center justify-center rounded-full cursor-pointer text-red-400"
+                className="w-full appearance-none h-2 bg-gray-200 items-center justify-center rounded-full cursor-pointer"
                 min="1"
                 max={DISTANCE_MAX}
                 step="1"
@@ -280,10 +300,10 @@ export default function List() {
             ref={refDropdownControlWhen}
             className={`${
               dropdownControlWhenOpen ? "block" : "hidden"
-            } group-hover:block w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 border-3 border-red-600 shadow overflow-hidden p-3 z-20`}>
+            } w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 shadow overflow-hidden p-3 z-20`}>
             <div className="font-bold text-sm text-gray-00 text-center">Période de réalisation de la mission</div>
-            <div className="flex w-full flex-col space-y-2 py-2 px-4">
-              <div className="flex justify-between w-full mt-4 px-[10px] font-medium text-gray-700 text-sm">
+            <div className="flex w-full flex-col py-2 px-4">
+              <div className="flex justify-between w-full mt-4 px-[10px] font-medium text-gray-700 text-sm gap-2">
                 <PeriodeTab label={getLabelWhen("")} active={!filter?.PERIOD_PARENT} name="" onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: undefined }))} />
                 <PeriodeTab
                   Icon={AcademicCap}
@@ -308,19 +328,51 @@ export default function List() {
                 />
               </div>
               {filter?.PERIOD_PARENT === "SCOLAIRE" ? (
-                <div className="flex space-x-2 justify-center items-center mt-14">
-                  <PeriodeItem active label="En soirée" name="" />
-                  <PeriodeItem label="L'après-midi" name="" />
-                  <PeriodeItem label="Le week-end" name="" />
+                <div className="flex gap-2 justify-center items-center mt-6">
+                  <PeriodeItem
+                    name={MISSION_PERIOD_DURING_SCHOOL.EVENING}
+                    onClick={handleToggleChangePeriod}
+                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.EVENING)}
+                  />
+                  <PeriodeItem
+                    name={MISSION_PERIOD_DURING_SCHOOL.END_DAY}
+                    onClick={handleToggleChangePeriod}
+                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.END_DAY)}
+                  />
+                  <PeriodeItem
+                    name={MISSION_PERIOD_DURING_SCHOOL.WEEKEND}
+                    onClick={handleToggleChangePeriod}
+                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.WEEKEND)}
+                  />
                 </div>
               ) : null}
               {filter?.PERIOD_PARENT === "VACANCES" ? (
-                <div>
-                  <div>Vacances été</div>
-                  <div>Vacances automne</div>
-                  <div>Vacances fin d'année</div>
-                  <div>Vacances hiver</div>
-                  <div>Vacances printemps</div>
+                <div className="flex flex-wrap gap-2 justify-center items-center mt-6">
+                  <PeriodeItem
+                    name={MISSION_PERIOD_DURING_HOLIDAYS.SUMMER}
+                    onClick={handleToggleChangePeriod}
+                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SUMMER)}
+                  />
+                  <PeriodeItem
+                    name={MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN}
+                    onClick={handleToggleChangePeriod}
+                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN)}
+                  />
+                  <PeriodeItem
+                    name={MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER}
+                    onClick={handleToggleChangePeriod}
+                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER)}
+                  />
+                  <PeriodeItem
+                    name={MISSION_PERIOD_DURING_HOLIDAYS.WINTER}
+                    onClick={handleToggleChangePeriod}
+                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.WINTER)}
+                  />
+                  <PeriodeItem
+                    name={MISSION_PERIOD_DURING_HOLIDAYS.SPRING}
+                    onClick={handleToggleChangePeriod}
+                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SPRING)}
+                  />
                 </div>
               ) : null}
               {filter?.PERIOD_PARENT === "CUSTOM" ? <div>Choisis ta periode</div> : null}
@@ -402,7 +454,6 @@ const DomainFilter = ({ Icon, name, label, onClick, active }) => {
 const PeriodeTab = ({ Icon, name, label, onClick, active }) => {
   return (
     <div className="group flex flex-1 flex-col items-center justify-start space-y-2 cursor-pointer" onClick={() => onClick(name)}>
-      {/* <div className="border-b-2 border-blue-600 pb-2">N&apos;importe quand</div> */}
       {active ? (
         <div className="flex border-b-2 border-blue-600 pb-2 font-bold gap-2 items-center">
           {label}
@@ -418,18 +469,18 @@ const PeriodeTab = ({ Icon, name, label, onClick, active }) => {
   );
 };
 
-const PeriodeItem = ({ name, label, onClick, active }) => {
+const PeriodeItem = ({ name, onClick, active }) => {
   return active ? (
     <div
       className="group flex flex-col items-center justify-center cursor-pointer rounded-full py-1 px-4 border-[1px] text-blue-600 border-blue-600 hover:border-blue-500 text-xs"
       onClick={() => onClick(name)}>
-      <div className="">{label}</div>
+      <div className="">{translate(name)}</div>
     </div>
   ) : (
     <div
       className="group flex flex-col items-center justify-center cursor-pointer rounded-full py-1 px-4 border-[1px] text-gray-700 border-gray-200 hover:border-gray-300 text-xs"
       onClick={() => onClick(name)}>
-      <div className="">{label}</div>
+      <div className="">{translate(name)}</div>
     </div>
   );
 };
