@@ -592,31 +592,35 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   };
 
   const now = new Date();
-
-  if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
-    if (
-      (now > dateDeValidation[sessionPhase1.cohort] &&
-        young?.grade !== "Terminale" &&
-        (!young?.departSejourAt || young?.departSejourAt > dateDeValidation[sessionPhase1.cohort])) ||
-      (now > dateDeValidationTerminale[sessionPhase1.cohort] &&
-        young?.grade === "Terminale" &&
-        (!young?.departSejourAt || young?.departSejourAt > dateDeValidationTerminale[sessionPhase1.cohort]))
-    ) {
-      if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
-        young.set({ statusPhase1: "NOT_DONE" });
+  if (now > dateDeValidation[sessionPhase1.cohort]) {
+    if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
+      if (
+        (now > dateDeValidation[sessionPhase1.cohort] &&
+          young?.grade !== "Terminale" &&
+          (!young?.departSejourAt || young?.departSejourAt > dateDeValidation[sessionPhase1.cohort])) ||
+        (now > dateDeValidationTerminale[sessionPhase1.cohort] &&
+          young?.grade === "Terminale" &&
+          (!young?.departSejourAt || young?.departSejourAt > dateDeValidationTerminale[sessionPhase1.cohort]))
+      ) {
+        if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
+          young.set({ statusPhase1: "NOT_DONE" });
+        } else {
+          young.set({ statusPhase1: "DONE" });
+        }
       } else {
-        young.set({ statusPhase1: "DONE" });
+        if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
+          young.set({ statusPhase1: "NOT_DONE" });
+        } else if (
+          young?.departSejourMotif &&
+          ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young.departSejourMotif)
+        ) {
+          young.set({ statusPhase1: "DONE" });
+        }
       }
     } else {
-      if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
-        young.set({ statusPhase1: "NOT_DONE" });
-      } else if (young?.departSejourMotif && ["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young.departSejourMotif)) {
-        young.set({ statusPhase1: "DONE" });
-      }
+      //pas sur peut etre ne r faire
+      young.set({ statusPhase1: "NOT_DONE" });
     }
-  } else {
-    //pas sur peut etre ne r faire
-    young.set({ statusPhase1: "NOT_DONE" });
   }
   await young.save({ fromUser: req.user });
 }
