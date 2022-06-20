@@ -1,7 +1,6 @@
 import React from "react";
 import { BsArrowUpShort } from "react-icons/bs";
 import { formatDateFR, translateEquivalenceStatus } from "../../../../utils";
-import clock from "../../../../assets/clock.svg";
 import ModalEquivalenceInformations from "./ModalEquivalenceInformations";
 
 export default function CardEquivalence({ equivalence, young }) {
@@ -31,8 +30,8 @@ export default function CardEquivalence({ equivalence, young }) {
 
   return (
     <>
-      <div className="flex flex-col rounded-lg bg-white px-3 pt-2 mb-4 shadow-md -translate-y-4 mx-3 space-y-4 ">
-        <div className="mb-3 cursor-pointer   " onClick={() => setOpen(!open)}>
+      <div className="flex flex-col rounded-lg bg-white px-3 pt-2 mb-4 shadow-md -translate-y-4 space-y-4 ">
+        <div className="mb-3 cursor-pointer" onClick={() => setOpen(!open)}>
           <div className="flex items-center justify-between ">
             <div className={`text-xs font-normal ${theme.background[equivalence.status]} ${theme.text[equivalence.status]} px-2 py-[2px] rounded-sm flex `}>
               {/* <img src={clock} alt="clock icon" className="w-5 h-5 bg-blue-50" /> */}

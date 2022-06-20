@@ -70,10 +70,11 @@ export default function IndexPhase2Mobile() {
         <img className="rounded-t-lg w-full " src={require("../../../assets/phase2MobileHeader.png")} />
       </div>
       {/* END HEADER */}
-
-      {equivalences.map((equivalence, index) => (
-        <CardEquivalence key={index} equivalence={equivalence} young={young} />
-      ))}
+      <div className=" mx-3">
+        {equivalences.map((equivalence, index) => (
+          <CardEquivalence key={index} equivalence={equivalence} young={young} />
+        ))}
+      </div>
       {/* BEGIN CANDIDATURES */}
       {applications.length > 0 ? (
         <>

@@ -75,7 +75,7 @@ export default function ValidatedDesktop() {
           </div>
         </div>
         <div className="flex items-start justify-center lg:items-start flex-shrink-0 w-full lg:w-1/3">
-          <img className="object-scale-down h-80" src={require("../../../assets/militaryPrep.png")} />
+          <img className="object-scale-down h-80" src={require("../../../assets/validatedPhase2.png")} />
         </div>
       </div>
       <div className="mx-10 mb-14">
@@ -142,7 +142,6 @@ export default function ValidatedDesktop() {
                     onClick={() => {
                       copyToClipboard(referentManagerPhase2.email);
                       toastr.info("L'email de votre référent a été copié dans le presse-papier");
-                      // setCopied(true);
                     }}
                   />
                 </div>
