@@ -4,12 +4,20 @@ import DndFileInput from "../../../components/dndFileInput";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { Formik } from "formik";
-import { urlWithScheme } from "../../../utils";
+import { urlWithScheme, translate } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
 import { useDispatch } from "react-redux";
 
 export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsubTitle = null, name, template = null, young }) {
   const dispatch = useDispatch();
+
+  const updateStatus = async (tempYoung) => {
+    if (young.statusMilitaryPreparationFiles === "WAITING_CORRECTION") {
+      const responseChangeStatusPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
+      if (!responseChangeStatusPM.ok) return toastr.error(translate(responseChangeStatusPM?.code), "Oups, une erreur est survenue de la modification de votre dossier.");
+      else dispatch(setYoung(responseChangeStatusPM.data));
+    } else dispatch(setYoung(tempYoung));
+  };
 
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="lg">
@@ -53,7 +61,7 @@ export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsu
                       // We update it instant ( because the bucket is updated instant )
                       toastr.success("Fichier téléversé");
                       handleChange({ target: { value: res.data, name } });
-                      dispatch(setYoung(res.young));
+                      await updateStatus(res.young);
                     }}
                   />
                 </div>

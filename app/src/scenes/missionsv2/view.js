@@ -149,7 +149,7 @@ export default function View(props) {
       <hr className="text-gray-100" />
       {mission.isMilitaryPreparation === "true" ? (
         <div className="mx-8 mt-8">
-          <DocumentsPM docRef={docRef} showFolder={!["VALIDATED"].includes(young.statusMilitaryPreparationFiles)} />
+          <DocumentsPM docRef={docRef} />
         </div>
       ) : null}
       {modal === "APPLY" && (

@@ -24,7 +24,7 @@ export default function CardPM({ young }) {
 
   return (
     <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
-      <div className="mb-3 cursor-pointer" onClick={() => setOpen(!open)}>
+      <div className="mb-3 cursor-pointer" onClick={() => setOpen(young.statusMilitaryPreparationFiles !== "REFUSED" ? !open : false)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <Prepa className="w-6 h-6 mr-2 text-gray-500" />
@@ -37,7 +37,7 @@ export default function CardPM({ young }) {
               } px-2 py-[2px] rounded-sm `}>
               {translate(young.statusMilitaryPreparationFiles)}
             </div>
-            <BsChevronDown className={`text-gray-400 h-5 w-5 ${open ? "rotate-180" : ""}`} />
+            {young.statusMilitaryPreparationFiles !== "REFUSED" ? <BsChevronDown className={`text-gray-400 h-5 w-5 ${open ? "rotate-180" : ""}`} /> : null}
           </div>
         </div>
       </div>

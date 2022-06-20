@@ -51,7 +51,7 @@ export default function ApplyModal({ value, onChange, onSend }) {
       if (!["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
         const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
         if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
-        else dispatch(setYoung(young));
+        else dispatch(setYoung(responseChangeStatsPM.data));
       }
       const responseNotificationYoung = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER}`);
       if (!responseNotificationYoung?.ok) return toastr.error(translate(responseNotificationYoung?.code), "Une erreur s'est produite avec le service de notification.");
