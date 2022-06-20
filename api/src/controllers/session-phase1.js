@@ -180,7 +180,11 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   </div>
 </div>`;
 
-  const template = getSignedUrl("certificates/certificateTemplate.png");
+  let template = getSignedUrl("certificates/certificateTemplate.png");
+  if (session.cohort === "2019") template = getSignedUrl("certificates/certificateTemplate-2019.png");
+  if (["2020", "2021", "Février 2022"].includes(session.cohort)) template = getSignedUrl("certificates/certificateTemplate.png");
+  if (["Juin 2022", "Juillet 2022"].includes(session.cohort)) template = getSignedUrl("certificates/certificateTemplate_2022.png");
+
   const d = new Date();
   const data = [];
   for (const young of youngs) {
