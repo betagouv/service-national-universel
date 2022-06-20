@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ReactiveBase, MultiDropdownList, DataSearch, ReactiveComponent } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useParams } from "react-router";
 
 import { apiURL } from "../../../config";
@@ -499,7 +499,7 @@ const Line = ({ hit, onClick, selected }) => {
       </td>
       <td className={`${bgColor} rounded-r-lg`}>
         <div>
-          <Badge text={translate(value.statusPhase1)} color={YOUNG_STATUS_COLORS[value.statusPhase1]} />
+          <Badge text={translatePhase1(value.statusPhase1)} color={YOUNG_STATUS_COLORS[value.statusPhase1]} />
         </div>
       </td>
     </tr>
