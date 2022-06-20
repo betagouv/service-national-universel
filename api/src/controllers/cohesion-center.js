@@ -429,9 +429,16 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
+
+    const linkedObject = sessionsPhase1.reduce((acc, { placesTotal, placesLeft }) => {
+      return acc || placesTotal !== placesLeft;
+    }, false);
+
+    if (linkedObject) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
+
     await center.remove();
     await deleteCenterDependencies({ _id: id });
-    const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
     for (let sessionPhase1 of sessionsPhase1) {
       await sessionPhase1.remove();
     }
