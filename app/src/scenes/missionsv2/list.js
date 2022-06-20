@@ -127,7 +127,12 @@ export default function List() {
     if (filter?.DOMAINS?.length) body.query.bool.filter.push({ terms: { "domains.keyword": filter.DOMAINS } });
     if (filter?.PERIOD?.length) body.query.bool.filter.push({ terms: { "period.keyword": filter.PERIOD } });
     if (filter?.MILITARY_PREPARATION) body.query.bool.filter.push({ term: { "isMilitaryPreparation.keyword": filter?.MILITARY_PREPARATION } });
-    console.log("✍️ ~ body", body);
+    if (filter?.START_DATE && Object.keys(filter?.START_DATE).length) {
+      body.query.bool.filter?.push({ range: { startAt: filter.START_DATE } });
+    }
+    if (filter?.END_DATE && Object.keys(filter?.END_DATE).length) {
+      body.query.bool.filter.push({ range: { endAt: filter.END_DATE } });
+    }
     return body;
   };
 
@@ -172,6 +177,47 @@ export default function List() {
         return "N'importe quand";
     }
   };
+
+  React.useEffect(() => {
+    let range;
+    const fromDate = filter?.FROM;
+    const toDate = filter?.TO;
+    //If just the from date is filled
+    if (fromDate && !toDate) {
+      range = {
+        startDate: {
+          gte: fromDate,
+        },
+        endDate: {
+          gte: fromDate,
+        },
+      };
+      //If just the to date is filled
+    } else if (!fromDate && toDate) {
+      range = {
+        startDate: {
+          lte: toDate,
+        },
+        endDate: {
+          lte: toDate,
+        },
+      };
+      //If both date are filled
+    } else if (fromDate && toDate) {
+      range = {
+        startDate: {
+          lte: toDate,
+        },
+        endDate: {
+          gte: fromDate,
+        },
+      };
+      //If none of the dates is filled, reset filter
+    } else {
+      range = { startDate: {}, endDate: {} };
+    }
+    setFilter((prev) => ({ ...prev, START_DATE: range.startDate, END_DATE: range.endDate }));
+  }, [filter?.FROM, filter?.TO]);
 
   React.useEffect(() => {
     if (!refDropdownControlDistance) return;
@@ -328,54 +374,104 @@ export default function List() {
                 />
               </div>
               {filter?.PERIOD_PARENT === "SCOLAIRE" ? (
-                <div className="flex gap-2 justify-center items-center mt-6">
-                  <PeriodeItem
-                    name={MISSION_PERIOD_DURING_SCHOOL.EVENING}
-                    onClick={handleToggleChangePeriod}
-                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.EVENING)}
-                  />
-                  <PeriodeItem
-                    name={MISSION_PERIOD_DURING_SCHOOL.END_DAY}
-                    onClick={handleToggleChangePeriod}
-                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.END_DAY)}
-                  />
-                  <PeriodeItem
-                    name={MISSION_PERIOD_DURING_SCHOOL.WEEKEND}
-                    onClick={handleToggleChangePeriod}
-                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.WEEKEND)}
-                  />
+                <div className="flex flex-col gap-2 justify-center items-center mt-6">
+                  <div className="flex flex-wrap gap-2 justify-center items-center mt-6">
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_SCHOOL.EVENING}
+                      onClick={handleToggleChangePeriod}
+                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.EVENING)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_SCHOOL.END_DAY}
+                      onClick={handleToggleChangePeriod}
+                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.END_DAY)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_SCHOOL.WEEKEND}
+                      onClick={handleToggleChangePeriod}
+                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.WEEKEND)}
+                    />
+                  </div>
+                  {filter?.PERIOD?.length ? (
+                    <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
+                      Effacer
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
               {filter?.PERIOD_PARENT === "VACANCES" ? (
-                <div className="flex flex-wrap gap-2 justify-center items-center mt-6">
-                  <PeriodeItem
-                    name={MISSION_PERIOD_DURING_HOLIDAYS.SUMMER}
-                    onClick={handleToggleChangePeriod}
-                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SUMMER)}
-                  />
-                  <PeriodeItem
-                    name={MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN}
-                    onClick={handleToggleChangePeriod}
-                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN)}
-                  />
-                  <PeriodeItem
-                    name={MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER}
-                    onClick={handleToggleChangePeriod}
-                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER)}
-                  />
-                  <PeriodeItem
-                    name={MISSION_PERIOD_DURING_HOLIDAYS.WINTER}
-                    onClick={handleToggleChangePeriod}
-                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.WINTER)}
-                  />
-                  <PeriodeItem
-                    name={MISSION_PERIOD_DURING_HOLIDAYS.SPRING}
-                    onClick={handleToggleChangePeriod}
-                    active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SPRING)}
-                  />
+                <div className="flex flex-col gap-2 justify-center items-center mt-6">
+                  <div className="flex flex-wrap gap-2 justify-center items-center">
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_HOLIDAYS.SUMMER}
+                      onClick={handleToggleChangePeriod}
+                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SUMMER)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN}
+                      onClick={handleToggleChangePeriod}
+                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER}
+                      onClick={handleToggleChangePeriod}
+                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_HOLIDAYS.WINTER}
+                      onClick={handleToggleChangePeriod}
+                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.WINTER)}
+                    />
+                    <PeriodeItem
+                      name={MISSION_PERIOD_DURING_HOLIDAYS.SPRING}
+                      onClick={handleToggleChangePeriod}
+                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SPRING)}
+                    />
+                  </div>
+                  {filter?.PERIOD?.length ? (
+                    <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
+                      Effacer
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
-              {filter?.PERIOD_PARENT === "CUSTOM" ? <div>Choisis ta periode</div> : null}
+              {filter?.PERIOD_PARENT === "CUSTOM" ? (
+                <div className="flex flex-col gap-2 justify-center items-center mt-6">
+                  <div className="flex flex-wrap gap-2 justify-center items-center">
+                    <div className={`border-[1px] rounded-lg  py-1 px-2`}>
+                      <label className="text-left text-gray-500 w-full">Du</label>
+                      <input
+                        required
+                        type="date"
+                        className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                        value={filter?.FROM}
+                        onChange={(e) => {
+                          e.persist();
+                          setFilter((prev) => ({ ...prev, FROM: e.target.value }));
+                        }}
+                      />
+                    </div>
+                    <div className={`border-[1px] rounded-lg  py-1 px-2`}>
+                      <label className="text-left text-gray-500 w-full">Au</label>
+                      <input
+                        required
+                        type="date"
+                        className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                        value={filter?.TO}
+                        onChange={(e) => {
+                          e.persist();
+                          setFilter((prev) => ({ ...prev, TO: e.target.value }));
+                        }}
+                      />
+                    </div>
+                  </div>
+                  {filter?.FROM || filter?.TO ? (
+                    <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, TO: "", FROM: "" }))}>
+                      Effacer
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </div>
           {/* END MODAL CONTROL WHEN */}
