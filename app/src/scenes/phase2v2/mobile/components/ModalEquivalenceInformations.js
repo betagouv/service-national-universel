@@ -14,7 +14,7 @@ export default function ModalEquivalenceInformations({ theme, equivalence, open,
   const history = useHistory();
 
   return (
-    <Modal isOpen={open} className="bg-white m-3 rounded">
+    <Modal isOpen={open} centered>
       <div className="w-full mb-20 px-3 py-2">
         <div className="flex items-center justify-between ">
           <div className={`text-xs font-normal ${theme.background[equivalence.status]} ${theme.text[equivalence.status]} px-2 py-[2px] rounded-sm flex `}>

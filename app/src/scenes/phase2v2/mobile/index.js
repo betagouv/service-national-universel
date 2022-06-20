@@ -12,11 +12,13 @@ import api from "../../../services/api";
 import { copyToClipboard } from "../../../utils";
 import CardMission from "./components/CardMission";
 import CardEquivalence from "./components/CardEquivalence";
+import CardPM from "./components/CardPM";
 
 export default function IndexPhase2Mobile() {
   const young = useSelector((state) => state.Auth.young);
   const [applications, setApplications] = React.useState();
   const [equivalences, setEquivalences] = React.useState();
+  const [hasPM, setHasPM] = React.useState(false);
 
   const [referentManagerPhase2, setReferentManagerPhase2] = React.useState();
   React.useEffect(() => {
@@ -35,6 +37,14 @@ export default function IndexPhase2Mobile() {
       if (ok) return setEquivalences(data);
     })();
   }, []);
+
+  React.useEffect(() => {
+    if (["WAITING_CORRECTION", "REFUSED", "VALIDATED", "WAITING_VALIDATION"].includes(young.statusMilitaryPreparationFiles)) {
+      setHasPM(true);
+    } else {
+      setHasPM(false);
+    }
+  }, [young]);
 
   if (!applications || !equivalences) return <Loader />;
 
@@ -70,7 +80,10 @@ export default function IndexPhase2Mobile() {
         <img className="rounded-t-lg w-full " src={require("../../../assets/phase2MobileHeader.png")} />
       </div>
       {/* END HEADER */}
-      <div className=" mx-3">
+      <div className="mx-3">
+        {/* BEGIN PM */}
+        {hasPM ? <CardPM young={young} /> : null}
+        {/* BEGIN EQUIVALENCE */}
         {equivalences.map((equivalence, index) => (
           <CardEquivalence key={index} equivalence={equivalence} young={young} />
         ))}
