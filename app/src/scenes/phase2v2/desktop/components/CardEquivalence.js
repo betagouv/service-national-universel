@@ -82,7 +82,7 @@ export default function CardEquivalence({ equivalence, young }) {
           ) : null}
           <div className="flex items-stretch mb-3 gap-4 justify-around">
             <div className="flex ">
-              <div className="grid grid-cols-2 py-2 items-center">
+              <div className="grid grid-cols-2 py-2">
                 <div className="flex flex-col gap-y-4 text-sm leading-none font-normal text-gray-400">
                   <span>Type d’engagement :</span>
                   <span>Structure d’accueil :</span>
@@ -133,8 +133,9 @@ export default function CardEquivalence({ equivalence, young }) {
                 </div>
               </div>
               <div className="flex flex-col justify-center border-[1px] border-gray-200 rounded-lg py-4 px-8">
-                <div className="text-base leading-6 font-bold text-gray-900 mb-4">
-                  Personne contact au sein <br /> de la structure
+                <div className="text-base leading-6 font-bold text-gray-900 mb-4 whitespace-nowrap">
+                  Personne contact au sein
+                  <br /> de la structure
                 </div>
                 <div className={`h-10 w-10 flex justify-center items-center rounded-full bg-gray-100 text-indigo-600 text-base font-semibold mb-3`}>
                   {getInitials(equivalence.contactFullName)}

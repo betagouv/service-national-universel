@@ -23,7 +23,7 @@ export default function CardPM({ young }) {
   };
 
   return (
-    <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md ">
+    <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
       <div className="mb-3 cursor-pointer" onClick={() => setOpen(!open)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
