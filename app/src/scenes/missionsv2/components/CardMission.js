@@ -44,7 +44,7 @@ export default function mission({ mission }) {
   return (
     <Link
       to={`/mission/${mission._id}`}
-      className="bg-white relative flex w-full justify-between shadow-nina rounded-xl p-4 border-[1px] border-[#ffffff] mb-4 hover:translate-x-1 transition duration-200 ease-in">
+      className="bg-white relative flex w-full justify-between shadow-nina rounded-xl p-4 border-[1px] border-[#ffffff] mb-4 hover:translate-x-1 transition duration-200 ease-in z-10">
       <div className="flex flex-1">
         {/* icon */}
         <div className="flex items-center">
@@ -73,12 +73,15 @@ export default function mission({ mission }) {
       </div>
 
       <div className="flex flex-1 justify-between">
-        {/* TODO */}
         {/* DISTANCE */}
-        <div className="flex basis-[60%] items-center justify-end space-x-2">
-          <LocationMarker className="text-gray-400" />
-          <div className="text-gray-800 text-base font-bold">à 11 km</div>
-        </div>
+        {mission?.sort?.length ? (
+          <div className="flex basis-[60%] items-center justify-end space-x-2">
+            <LocationMarker className="text-gray-400" />
+            <div className="text-gray-800 text-base font-bold">à {Math.round((mission?.sort || [])[0])} km</div>
+          </div>
+        ) : (
+          <div />
+        )}
         {/* END DISTANCE */}
 
         {/* STATUT */}

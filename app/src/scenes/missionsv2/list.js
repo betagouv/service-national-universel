@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -9,8 +9,6 @@ import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM, ES_NO_LIMI
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
-import AlertBox from "../../components/AlertBox";
-import MilitaryPreparationCard from "./components/MilitaryPreparationCard";
 import Sante from "../../assets/mission-domaines/sante";
 import Solidarite from "../../assets/mission-domaines/solidarite";
 import Citoyennete from "../../assets/mission-domaines/citoyennete";
@@ -21,15 +19,28 @@ import Environment from "../../assets/mission-domaines/environment";
 import Securite from "../../assets/mission-domaines/securite";
 import Culture from "../../assets/mission-domaines/culture";
 import PreparationMilitaire from "../../assets/mission-domaines/preparation-militaire";
+import AcademicCap from "../../assets/icons/AcademicCap";
+import Sun from "../../assets/icons/Sun";
+import Calendar from "../../assets/icons/Calendar";
 import { Link } from "react-router-dom";
 import { HiOutlineAdjustments } from "react-icons/hi";
+import PietonSvg from "./assets/Pieton";
+import VeloSvg from "./assets/Velo";
+import VoitureSvg from "./assets/Voiture";
+import TrainSvg from "./assets/Train";
+import FuseeSvg from "./assets/Fusee";
 
 const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
 export default function List() {
   const young = useSelector((state) => state.Auth.young);
-  const [filter, setFilter] = React.useState();
+  const [filter, setFilter] = React.useState({ DOMAINS: ["CITIZENSHIP"], DISTANCE: 600 });
+  const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
+  const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
+  const DISTANCE_MAX = 1000;
   const [bufferText, setBufferText] = React.useState();
+  const refDropdownControlDistance = React.useRef(null);
+  const refDropdownControlWhen = React.useRef(null);
 
   const getDefaultQuery = () => {
     let body = {
@@ -55,6 +66,16 @@ export default function List() {
           ],
         },
       },
+      sort: [
+        {
+          _geo_distance: {
+            location: [young.location?.lon, young.location?.lat],
+            order: "asc",
+            unit: "km",
+            mode: "min",
+          },
+        },
+      ],
       track_total_hits: true,
       size: 20,
     };
@@ -93,8 +114,19 @@ export default function List() {
       });
     }
 
+    if (filter?.DISTANCE) {
+      // todo : make it work
+      body.query.bool.filter.push({
+        geo_distance: {
+          distance: `${filter?.DISTANCE}km`,
+          location: young.location,
+        },
+      });
+    }
+
     if (filter?.DOMAINS?.length) body.query.bool.filter.push({ terms: { "domains.keyword": filter.DOMAINS } });
     if (filter?.MILITARY_PREPARATION) body.query.bool.filter.push({ term: { "isMilitaryPreparation.keyword": filter?.MILITARY_PREPARATION } });
+    console.log("✍️ ~ body", body);
     return body;
   };
 
@@ -112,12 +144,46 @@ export default function List() {
 
   const search = (e) => {
     e.preventDefault();
-    setFilter((prev) => {
-      const newFilter = { ...prev };
-      newFilter.SEARCH = bufferText;
-      return newFilter;
-    });
+    setFilter((prev) => ({ ...prev, SEARCH: e.target.value }));
   };
+
+  const getLabelWhen = (when) => {
+    switch (when) {
+      case "SCOLAIRE":
+        return "Période scolaire";
+      case "VACANCES":
+        return "Pendant les vacances";
+      case "CUSTOM":
+        return "Choisir une période";
+      default:
+        return "N'importe quand";
+    }
+  };
+
+  React.useEffect(() => {
+    if (!refDropdownControlDistance) return;
+    const handleClickOutside = (event) => {
+      if (refDropdownControlDistance?.current && !refDropdownControlDistance.current.contains(event.target)) {
+        setDropdownControlDistanceOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+  React.useEffect(() => {
+    if (!refDropdownControlWhen) return;
+    const handleClickOutside = (event) => {
+      if (refDropdownControlWhen?.current && !refDropdownControlWhen.current.contains(event.target)) {
+        setDropdownControlWhenOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
 
   return (
     <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14">
@@ -149,18 +215,118 @@ export default function List() {
       {/* END HEADER */}
 
       {/* BEGIN CONTROL */}
-      <form onSubmit={search} className="bg-gray-50 p-10 rounded-lg space-y-4">
+      <form onSubmit={search} className="bg-gray-50 p-10 rounded-lg space-y-6">
         {/* search bar recherche */}
-        <div>
+        <div className="relative">
           <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-2 divide-x divide-gray-300">
             <input
               value={bufferText}
-              onChange={(e) => setBufferText(e.target.value)}
+              onChange={(e) => {
+                e.persist();
+                setFilter((prev) => ({ ...prev, SEARCH: e.target.value }));
+              }}
               className="flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm"
               type="text"
               placeholder="Rechercher une mission..."
             />
+            <div className="flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer" onClick={() => setDropdownControlDistanceOpen((e) => !e)}>
+              Distance max. {filter?.DISTANCE}km
+            </div>
+            <div className="flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer" onClick={() => setDropdownControlWhenOpen((e) => !e)}>
+              {getLabelWhen(filter?.PERIOD_PARENT)}
+            </div>
           </div>
+          {/* BEGIN MODAL CONTROL DISTANCE */}
+          <div
+            ref={refDropdownControlDistance}
+            className={`${
+              dropdownControlDistanceOpen ? "block" : "hidden"
+            } group-hover:block w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 border-3 border-red-600 shadow overflow-hidden p-3 z-20`}>
+            <div className="font-bold text-sm text-gray-00 text-center">Distance maximum</div>
+            <div className="flex w-full flex-col space-y-2 py-2 px-4">
+              {/* <div className="">{filter?.DISTANCE}</div> */}
+              <input
+                list="distance-list"
+                type="range"
+                className="w-full appearance-none h-2 bg-gray-200 items-center justify-center rounded-full cursor-pointer text-red-400"
+                min="1"
+                max={DISTANCE_MAX}
+                step="1"
+                onChange={(e) => {
+                  e.persist();
+                  setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
+                }}
+              />
+              <datalist id="distance-list">
+                {[...Array(DISTANCE_MAX).keys()].map((i) => (
+                  <option key={i} value={i + 1}>
+                    {i + 1}
+                  </option>
+                ))}
+              </datalist>
+              <div className="flex justify-between w-full mt-4 px-[10px] text-gray-200">
+                <PietonSvg />
+                <VeloSvg />
+                <VoitureSvg />
+                <TrainSvg />
+                <FuseeSvg />
+              </div>
+            </div>
+          </div>
+          {/* END MODAL CONTROL DISTANCE */}
+
+          {/* BEGIN MODAL CONTROL WHEN */}
+          <div
+            ref={refDropdownControlWhen}
+            className={`${
+              dropdownControlWhenOpen ? "block" : "hidden"
+            } group-hover:block w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 border-3 border-red-600 shadow overflow-hidden p-3 z-20`}>
+            <div className="font-bold text-sm text-gray-00 text-center">Période de réalisation de la mission</div>
+            <div className="flex w-full flex-col space-y-2 py-2 px-4">
+              <div className="flex justify-between w-full mt-4 px-[10px] font-medium text-gray-700 text-sm">
+                <PeriodeTab label={getLabelWhen("")} active={!filter?.PERIOD_PARENT} name="" onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: undefined }))} />
+                <PeriodeTab
+                  Icon={AcademicCap}
+                  label={getLabelWhen("SCOLAIRE")}
+                  active={filter?.PERIOD_PARENT === "SCOLAIRE"}
+                  name="SCOLAIRE"
+                  onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "SCOLAIRE" }))}
+                />
+                <PeriodeTab
+                  Icon={Sun}
+                  label={getLabelWhen("VACANCES")}
+                  active={filter?.PERIOD_PARENT === "VACANCES"}
+                  name="VACANCES"
+                  onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "VACANCES" }))}
+                />
+                <PeriodeTab
+                  Icon={Calendar}
+                  label={getLabelWhen("CUSTOM")}
+                  active={filter?.PERIOD_PARENT === "CUSTOM"}
+                  name="CUSTOM"
+                  onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "CUSTOM" }))}
+                />
+              </div>
+              {filter?.PERIOD_PARENT === "SCOLAIRE" ? (
+                <div className="flex space-x-2 justify-center items-center mt-14">
+                  <PeriodeItem active label="En soirée" name="" />
+                  <PeriodeItem label="L'après-midi" name="" />
+                  <PeriodeItem label="Le week-end" name="" />
+                </div>
+              ) : null}
+              {filter?.PERIOD_PARENT === "VACANCES" ? (
+                <div>
+                  <div>Vacances été</div>
+                  <div>Vacances automne</div>
+                  <div>Vacances fin d'année</div>
+                  <div>Vacances hiver</div>
+                  <div>Vacances printemps</div>
+                </div>
+              ) : null}
+              {filter?.PERIOD_PARENT === "CUSTOM" ? <div>Choisis ta periode</div> : null}
+            </div>
+          </div>
+          {/* END MODAL CONTROL WHEN */}
         </div>
         <div className="flex justify-between gap-2 flex-wrap">
           <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("HEALTH")} />
@@ -221,6 +387,7 @@ export default function List() {
     </div>
   );
 }
+
 const DomainFilter = ({ Icon, name, label, onClick, active }) => {
   return (
     <div className="group flex flex-1 flex-col items-center justify-start space-y-2 cursor-pointer" onClick={() => onClick(name)}>
@@ -228,6 +395,41 @@ const DomainFilter = ({ Icon, name, label, onClick, active }) => {
         <Icon className="text-white" />
       </div>
       <div className="text-xs text-gray-700 text-center">{label}</div>
+    </div>
+  );
+};
+
+const PeriodeTab = ({ Icon, name, label, onClick, active }) => {
+  return (
+    <div className="group flex flex-1 flex-col items-center justify-start space-y-2 cursor-pointer" onClick={() => onClick(name)}>
+      {/* <div className="border-b-2 border-blue-600 pb-2">N&apos;importe quand</div> */}
+      {active ? (
+        <div className="flex border-b-2 border-blue-600 pb-2 font-bold gap-2 items-center">
+          {label}
+          {Icon ? <Icon className="text-gray-500" /> : null}
+        </div>
+      ) : (
+        <div className="flex pb-2 font-medium hover:border-b-2 hover:border-blue-600 gap-2 items-center">
+          {label}
+          {Icon ? <Icon className="text-gray-500" /> : null}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const PeriodeItem = ({ name, label, onClick, active }) => {
+  return active ? (
+    <div
+      className="group flex flex-col items-center justify-center cursor-pointer rounded-full py-1 px-4 border-[1px] text-blue-600 border-blue-600 hover:border-blue-500 text-xs"
+      onClick={() => onClick(name)}>
+      <div className="">{label}</div>
+    </div>
+  ) : (
+    <div
+      className="group flex flex-col items-center justify-center cursor-pointer rounded-full py-1 px-4 border-[1px] text-gray-700 border-gray-200 hover:border-gray-300 text-xs"
+      onClick={() => onClick(name)}>
+      <div className="">{label}</div>
     </div>
   );
 };
