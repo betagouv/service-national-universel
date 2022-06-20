@@ -595,10 +595,10 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   if (now > dateDeValidation[sessionPhase1.cohort]) {
     if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
       if (
-        (now > dateDeValidation[sessionPhase1.cohort] &&
+        (now >= dateDeValidation[sessionPhase1.cohort] &&
           young?.grade !== "Terminale" &&
           (!young?.departSejourAt || young?.departSejourAt > dateDeValidation[sessionPhase1.cohort])) ||
-        (now > dateDeValidationTerminale[sessionPhase1.cohort] &&
+        (now >= dateDeValidationTerminale[sessionPhase1.cohort] &&
           young?.grade === "Terminale" &&
           (!young?.departSejourAt || young?.departSejourAt > dateDeValidationTerminale[sessionPhase1.cohort]))
       ) {
@@ -618,7 +618,6 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
         }
       }
     } else {
-      //pas sur peut etre ne r faire
       young.set({ statusPhase1: "NOT_DONE" });
     }
   }
