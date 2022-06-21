@@ -1,3 +1,17 @@
+# [1.103.0](https://github.com/betagouv/service-national-universel/compare/v1.102.0...v1.103.0) (2022-06-21)
+
+
+### Bug Fixes
+
+* **admin:** young center 50 per page ([697c838](https://github.com/betagouv/service-national-universel/commit/697c838b47b5679538416310240594e6c76a7e19))
+* **api:** plural on attestation ([3ab0714](https://github.com/betagouv/service-national-universel/commit/3ab071418a5f10cb0262552e8591427899bf8f75))
+* **api:** QW export presence ([9615027](https://github.com/betagouv/service-national-universel/commit/9615027b20b6d6650ea2daed06468d3e2e330680))
+
+
+### Features
+
+* **api:** update jva information ([#1611](https://github.com/betagouv/service-national-universel/issues/1611)) ([7bedc81](https://github.com/betagouv/service-national-universel/commit/7bedc81a41b6401de5e4354fb0230cd2959fd4a3))
+
 # [1.102.0](https://github.com/betagouv/service-national-universel/compare/v1.101.0...v1.102.0) (2022-06-20)
 
 
