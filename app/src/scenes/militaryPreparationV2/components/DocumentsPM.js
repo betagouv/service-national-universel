@@ -38,10 +38,10 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
 
   return (
     <>
-      <div className="w-full mb-4">
+      <div className="w-full mb-4" ref={docRef}>
         {showHelp ? (
           <>
-            <div className="hidden md:flex items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4 w-full" ref={docRef}>
+            <div className="hidden md:flex items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4 w-full">
               {!showFolder ? (
                 <>
                   <div className="flex flex-col items-center lg:items-start">

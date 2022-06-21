@@ -3,7 +3,6 @@ import { Modal } from "reactstrap";
 import styled from "styled-components";
 
 import { Link } from "react-router-dom";
-import { ENABLE_PM } from "../../../utils";
 
 export default function ApplyDoneModal({ value, onChange }) {
   if (!value) return <div />;
@@ -13,12 +12,6 @@ export default function ApplyDoneModal({ value, onChange }) {
   };
 
   const renderRedirect = () => {
-    if (ENABLE_PM && value.isMilitaryPreparation === "true")
-      return (
-        <Link to="/ma-preparation-militaire">
-          <Button>Consulter mon dossier</Button>
-        </Link>
-      );
     return (
       <Link to="/candidature">
         <Button>Classer mes missions</Button>
@@ -32,9 +25,6 @@ export default function ApplyDoneModal({ value, onChange }) {
         <img src={require("../../../assets/close.svg")} height={10} width={10} onClick={onChange} />
         <h1>Félicitations, votre candidature a bien été enregistrée.</h1>
         <h3>{renderText()}</h3>
-        {/* todo: gerer classement candidature */}
-        {/* <h2>Positionnez cette candidature dans vos préférences.</h2> */}
-        {/* <Select></Select> */}
         {renderRedirect()}
         <CancelButton onClick={onChange}>Fermer</CancelButton>
       </ModalContainer>
