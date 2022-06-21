@@ -405,6 +405,7 @@ export default function General({ updateFilter }) {
                     sortBy="asc"
                     paginationAt="bottom"
                     showTopResultStats={false}
+                    pageSize={50}
                     render={({ data }) => (
                       <table className="w-full">
                         <thead className="">

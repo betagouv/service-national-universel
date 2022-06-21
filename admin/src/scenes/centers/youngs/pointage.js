@@ -615,6 +615,7 @@ export default function Pointage({ updateFilter }) {
                     sortBy="asc"
                     paginationAt="bottom"
                     showTopResultStats={false}
+                    pageSize={50}
                     onData={async ({ rawData }) => {
                       if (rawData?.hits?.hits) setYoungsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, firstName: h._source.firstName, lastName: h._source.lastName })));
                     }}
