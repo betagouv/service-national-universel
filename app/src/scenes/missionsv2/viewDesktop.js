@@ -16,6 +16,7 @@ import { IoMdInformationCircleOutline } from "react-icons/io";
 import { MdOutlineContentCopy } from "react-icons/md";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
+import { AiOutlineClockCircle } from "react-icons/ai";
 
 export default function viewDesktop() {
   const [mission, setMission] = useState();
@@ -96,7 +97,7 @@ export default function viewDesktop() {
   };
 
   if (!mission) return <Loader />;
-
+  console.log(mission);
   return (
     <div className="bg-white mx-4 pb-12 my-4 rounded-xl w-full">
       {/* BEGIN HEADER */}
@@ -121,25 +122,29 @@ export default function viewDesktop() {
                 {mission.isMilitaryPreparation === "true" ? (
                   <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
                 ) : null}
+                {mission?.duration ? (
+                  <div className="flex items-center gap-1 ml-2">
+                    <AiOutlineClockCircle className="text-gray-400" />
+                    <div className="text-xs">{mission.duration} heure(s)</div>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
         </div>
         <div className="flex items-center justify-center mt-3 lg:!mt-0">
-          <div className="text-xs text-gray-700">
-            {mission.application ? (
-              <ApplicationStatus application={mission.application} tutor={mission?.tutor} mission={mission} updateApplication={updateApplication} loading={loading} />
-            ) : (
-              <ApplyButton
-                placesLeft={mission.placesLeft}
-                setModal={setModal}
-                disabledAge={disabledAge}
-                disabledIncomplete={disabledIncomplete}
-                disabledPmRefused={disabledPmRefused}
-                scrollToBottom={scrollToBottom}
-              />
-            )}
-          </div>
+          {mission.application ? (
+            <ApplicationStatus application={mission.application} tutor={mission?.tutor} mission={mission} updateApplication={updateApplication} loading={loading} />
+          ) : (
+            <ApplyButton
+              placesLeft={mission.placesLeft}
+              setModal={setModal}
+              disabledAge={disabledAge}
+              disabledIncomplete={disabledIncomplete}
+              disabledPmRefused={disabledPmRefused}
+              scrollToBottom={scrollToBottom}
+            />
+          )}
         </div>
       </div>
       {/* END HEADER */}
@@ -356,8 +361,6 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
       </div>
     );
   }
-
-  return <div>{application.status}</div>;
 };
 
 const Detail = ({ title, content }) => {
