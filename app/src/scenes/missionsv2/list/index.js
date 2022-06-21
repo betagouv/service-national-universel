@@ -8,7 +8,7 @@ export default function View() {
       <div className="hidden md:flex flex-1">
         <DesktopView />
       </div>
-      <div className="flex md:hidden ">
+      <div className="flex md:hidden w-screen">
         <MobileView />
       </div>
     </>

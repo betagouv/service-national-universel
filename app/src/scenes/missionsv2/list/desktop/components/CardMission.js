@@ -1,42 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { translateApplication, translate } from "../../../utils";
-import DomainThumb from "../../../components/DomainThumb";
-import LocationMarker from "../../../assets/icons/LocationMarker";
-import EyeOff from "../../../assets/icons/EyeOff";
-import Eye from "../../../assets/icons/Eye";
-import Check from "../../../assets/icons/Check";
-import SixDotsVertical from "../../../assets/icons/SixDotsVertical";
+import { translateApplication, translate } from "../../../../../utils";
+import DomainThumb from "../../../../../components/DomainThumb";
+import LocationMarker from "../../../../../assets/icons/LocationMarker";
+import EyeOff from "../../../../../assets/icons/EyeOff";
+import Eye from "../../../../../assets/icons/Eye";
+import Check from "../../../../../assets/icons/Check";
+import SixDotsVertical from "../../../../../assets/icons/SixDotsVertical";
 import { Draggable } from "react-beautiful-dnd";
-import api from "../../../services/api";
+import api from "../../../../../services/api";
 import { toastr } from "react-redux-toastr";
 
 export default function mission({ mission }) {
-  const theme = {
-    background: {
-      WAITING_VALIDATION: "bg-sky-100",
-      WAITING_VERIFICATION: "bg-sky-100",
-      WAITING_ACCEPTATION: "bg-orange-500",
-      VALIDATED: "bg-[#71C784]",
-      DONE: "bg-[#5694CD]",
-      REFUSED: "bg-[#0B508F]",
-      CANCEL: "bg-[#F4F4F4]",
-      IN_PROGRESS: "bg-indigo-600",
-      ABANDON: "bg-gray-50",
-    },
-    text: {
-      WAITING_VALIDATION: "text-sky-600",
-      WAITING_VERIFICATION: "text-sky-600",
-      WAITING_ACCEPTATION: "text-white",
-      VALIDATED: "text-white",
-      DONE: "text-white",
-      REFUSED: "text-white",
-      CANCEL: "text-[#6B6B6B]",
-      IN_PROGRESS: "text-white",
-      ABANDON: "text-gray-400",
-    },
-  };
-
   const tags = [];
   mission.city && tags.push(mission.city + (mission.zip ? ` - ${mission.zip}` : ""));
   mission.domains.forEach((d) => tags.push(translate(d)));
