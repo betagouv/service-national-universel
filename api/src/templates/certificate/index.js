@@ -39,9 +39,13 @@ const phase1 = async (young) => {
   // on prend la date de fin de séjour si on édite l'attestation après la date de fin de séjour
   const date = COHESION_STAY_END[young.cohort].getTime() < now.getTime() ? COHESION_STAY_END[young.cohort] : now;
 
+  const destinaireLabelEnFonctionDeLaCohorte = (cohort) => {
+    if (["Juin 2022", "Juillet 2022"].includes(cohort)) return `félicite <strong>${young.firstName} ${young.lastName}</strong>`;
+    else return `félicitent <strong>${young.firstName} ${young.lastName}</strong>`;
+  };
+
   return html
-    .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
-    .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+    .replace(/{{TO}}/g, sanitizeAll(destinaireLabelEnFonctionDeLaCohorte(young.cohort)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort].toLowerCase()))
     .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
