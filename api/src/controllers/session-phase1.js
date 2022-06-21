@@ -137,7 +137,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
   const body = {
     sessionPhase1Id: session._id,
-    cohesionStayPresence: "true",
+    statusPhase1: "DONE",
   };
 
   const youngs = await YoungModel.find(body);
@@ -170,7 +170,9 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" style="min-height:100vh;width:100%;" />
   <div class="container">
     <div class="text-center l4">
-      <p>félicitent <strong>{{FIRST_NAME}} {{LAST_NAME}}</strong>, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
+      <p>${
+        ["Juin 2022", "Juillet 2022"].includes(session.cohort) ? "félicite" : "félicitent"
+      } <strong>{{FIRST_NAME}} {{LAST_NAME}}</strong>, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
       <p>pour la réalisation de son <strong>séjour de cohésion</strong> au centre de :</p>
       <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
       <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
