@@ -38,9 +38,24 @@ export default function List() {
   const [filter, setFilter] = React.useState({ DOMAINS: [], DISTANCE: 50 });
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
+  const [focusedAddress, setFocusedAddress] = React.useState();
   const DISTANCE_MAX = 1000;
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
+
+  const getCoordinates = async ({ q, postcode }) => {
+    try {
+      let url = `https://api-adresse.data.gouv.fr/search/?q=${q || postcode}`;
+      if (postcode) url += `&postcode=${postcode}`;
+      const res = await fetch(url).then((response) => response.json());
+      const lon = res?.features[0]?.geometry?.coordinates[0] || null;
+      const lat = res?.features[0]?.geometry?.coordinates[1] || null;
+      return lon && lat && { lat, lon };
+    } catch (e) {
+      console.log("error", e);
+      return null;
+    }
+  };
 
   const getDefaultQuery = () => {
     let body = {
@@ -69,7 +84,7 @@ export default function List() {
       sort: [
         {
           _geo_distance: {
-            location: [young.location?.lon, young.location?.lat],
+            location: filter?.LOCATION || [young.location?.lon, young.location?.lat],
             order: "asc",
             unit: "km",
             mode: "min",
@@ -220,6 +235,16 @@ export default function List() {
   }, [filter?.FROM, filter?.TO]);
 
   React.useEffect(() => {
+    if (!focusedAddress) return setFilter((prev) => ({ ...prev, LOCATION: undefined }));
+    (async () => {
+      let location;
+      location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
+      if (!location) location = await getCoordinates({ postcode: focusedAddress.address });
+      setFilter((prev) => ({ ...prev, LOCATION: location }));
+    })();
+  }, [focusedAddress]);
+
+  React.useEffect(() => {
     if (!refDropdownControlDistance) return;
     const handleClickOutside = (event) => {
       if (refDropdownControlDistance?.current && !refDropdownControlDistance.current.contains(event.target)) {
@@ -310,7 +335,49 @@ export default function List() {
             } w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 shadow overflow-hidden p-3 z-20`}>
             <div className="font-bold text-sm text-gray-00 text-center">Distance maximum</div>
             <div className="flex w-full flex-col space-y-2 py-2 px-4">
-              {/* <div className="">{filter?.DISTANCE}</div> */}
+              <div className="flex justify-around my-3">
+                <div className="flex items-center gap-2">
+                  <input
+                    id="main-address"
+                    name="main-address"
+                    type="radio"
+                    checked={focusedAddress?.address === young?.address}
+                    onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
+                  />
+                  <label htmlFor="main-address" className="cursor-pointer">
+                    <span className="text-xs text-gray-700">Autours de mon adresse principale</span>
+                    <br />
+                    <span className="text-sm text-gray-700">{young.city}</span>
+                  </label>
+                </div>
+                {young?.mobilityNearRelativeCity ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="second-address"
+                      name="address"
+                      type="radio"
+                      checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
+                      onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
+                    />
+                    <label htmlFor="second-address" className="cursor-pointer">
+                      <span className="text-xs text-gray-700">Autours de l&apos;adresse de mon proche</span>
+                      <br />
+                      <span className="text-sm text-gray-700">{young?.mobilityNearRelativeCity}</span>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <input id="second-address" name="address" type="radio" value={young.city} disabled />
+                    <label htmlFor="second-address">
+                      <span className="text-xs text-gray-400">Autours de l&apos;adresse de mon proche</span>
+                      <br />
+                      <Link to="/preferences" className="text-sm text-blue-600 underline hover:underline">
+                        Renseigner une adresse
+                      </Link>
+                    </label>
+                  </div>
+                )}
+              </div>
               <input
                 list="distance-list"
                 type="range"
@@ -375,7 +442,7 @@ export default function List() {
               </div>
               {filter?.PERIOD_PARENT === "SCOLAIRE" ? (
                 <div className="flex flex-col gap-2 justify-center items-center mt-6">
-                  <div className="flex flex-wrap gap-2 justify-center items-center mt-6">
+                  <div className="flex flex-wrap gap-2 justify-center items-center">
                     <PeriodeItem
                       name={MISSION_PERIOD_DURING_SCHOOL.EVENING}
                       onClick={handleToggleChangePeriod}
@@ -438,8 +505,8 @@ export default function List() {
               {filter?.PERIOD_PARENT === "CUSTOM" ? (
                 <div className="flex flex-col gap-2 justify-center items-center mt-6">
                   <div className="flex flex-wrap gap-2 justify-center items-center">
-                    <div className={`border-[1px] rounded-lg  py-1 px-2`}>
-                      <label className="text-left text-gray-500 w-full">Du</label>
+                    <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
+                      <label className="text-left text-gray-500 w-full m-0">Du</label>
                       <input
                         required
                         type="date"
@@ -451,8 +518,8 @@ export default function List() {
                         }}
                       />
                     </div>
-                    <div className={`border-[1px] rounded-lg  py-1 px-2`}>
-                      <label className="text-left text-gray-500 w-full">Au</label>
+                    <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
+                      <label className="text-left text-gray-500 w-full m-0">Au</label>
                       <input
                         required
                         type="date"
