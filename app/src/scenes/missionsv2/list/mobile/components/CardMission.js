@@ -1,21 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { translateApplication, translate } from "../../../../../utils";
 import DomainThumb from "../../../../../components/DomainThumb";
 import LocationMarker from "../../../../../assets/icons/LocationMarker";
-import EyeOff from "../../../../../assets/icons/EyeOff";
-import Eye from "../../../../../assets/icons/Eye";
-import Check from "../../../../../assets/icons/Check";
-import SixDotsVertical from "../../../../../assets/icons/SixDotsVertical";
-import { Draggable } from "react-beautiful-dnd";
-import api from "../../../../../services/api";
-import { toastr } from "react-redux-toastr";
 
 export default function mission({ mission }) {
-  const tags = [];
-  mission.city && tags.push(mission.city + (mission.zip ? ` - ${mission.zip}` : ""));
-  mission.domains.forEach((d) => tags.push(translate(d)));
-
   return (
     <Link to={`/mission/${mission._id}`} className="bg-white relative flex  justify-between shadow-nina rounded-xl p-3 border-[1px] border-[#ffffff] mb-4 z-10">
       <div className="flex flex-1">

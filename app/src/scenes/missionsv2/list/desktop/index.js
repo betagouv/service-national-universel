@@ -39,7 +39,7 @@ export default function List() {
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
   const [focusedAddress, setFocusedAddress] = React.useState();
-  const DISTANCE_MAX = 1000;
+  const DISTANCE_MAX = 100;
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
 
