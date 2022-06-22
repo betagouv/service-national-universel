@@ -57,10 +57,12 @@ export default function IndexPhase2Mobile() {
           <div className="text-gray-300 text-sm mt-2 mb-2 font-normal">
             Mettez votre énergie au service d’une société plus solidaire et découvrez votre talent pour l’engagement en réalisant une mission d’intérêt général !
           </div>
-          <div className="flex items-center mb-4">
-            <HiOutlineAdjustments className="text-gray-400 mr-1" />
-            <div className="text-gray-200 text-sm underline">Renseigner mes préférences mission </div>
-          </div>
+          <Link to="/preferences">
+            <div className="flex items-center mb-4">
+              <HiOutlineAdjustments className="text-gray-400 mr-1" />
+              <div className="text-gray-200 text-sm underline">Renseigner mes préférences mission </div>
+            </div>
+          </Link>
           {applications.length > 0 ? (
             <Link to="/mission">
               <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center justify-center hover:bg-white hover:text-gray-800">
