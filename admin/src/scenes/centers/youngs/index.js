@@ -579,7 +579,6 @@ async function toArrayOfArray(data) {
 async function getAllResults(index, query) {
   const result = await api.post(`/es/${index}/export`, query);
   if (!result.data.length) return [];
-  console.log({ result });
   return result.data;
 }
 
