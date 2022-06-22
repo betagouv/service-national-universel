@@ -1,13 +1,12 @@
 import { Field, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { BiHandicap } from "react-icons/bi";
-import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { Col, DropdownItem, DropdownMenu, DropdownToggle, Row, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
-import Plus from "../../assets/icons/Plus.js";
+import Trash from "../../assets/icons/Trash";
 import AddressInput from "../../components/addressInputVCenter";
 import Badge from "../../components/Badge";
 import { Box, BoxContent } from "../../components/box";
@@ -28,20 +27,6 @@ export default function Edit(props) {
   const user = useSelector((state) => state.Auth.user);
   const [sessionShow, setsessionShow] = useState(null);
   const [sessionStatus, setSessionStatus] = useState(null);
-  const [open, setOpen] = React.useState(false);
-  const ref = React.useRef(null);
-
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
-  }, []);
 
   async function init() {
     if (isNew) return setDefaultValue(null);
@@ -104,7 +89,7 @@ export default function Edit(props) {
       {({ values, handleChange, handleSubmit, errors, touched, validateField, setFieldValue }) => {
         const handleChangeCohort = (cohort) => {
           let tempCohorts = values.cohorts ? values.cohorts : [];
-          if (tempCohorts.includes(cohort)) return;
+          if (tempCohorts.includes(cohort)) tempCohorts = tempCohorts.filter((c) => c !== cohort);
           else tempCohorts.push(cohort);
           setFieldValue("cohorts", tempCohorts);
           tempCohorts.length > 0 ? setsessionShow(tempCohorts[tempCohorts.length - 1]) : setsessionShow(null);
@@ -257,6 +242,9 @@ export default function Edit(props) {
                                       />
                                     </div>
                                   </div>
+                                  <div className="flex flex-row-reverse mt-3 mr-4">
+                                    <DeleteSejourBtn onClick={() => handleChangeCohort(cohort)} />
+                                  </div>
                                 </div>
                               ))
                             : null}
@@ -291,6 +279,13 @@ export default function Edit(props) {
     </Formik>
   );
 }
+
+const DeleteSejourBtn = ({ onClick }) => (
+  <button className="group flex justify-center items-center p-2 bg-white rounded shadow-sm gap-2" onClick={() => onClick()}>
+    <Trash className="text-red-400 group-hover:scale-110" width={14} height={14} />
+    Supprimer le séjour
+  </button>
+);
 
 const PlaceCapacity = ({ title, values, name, handleChange, disabled = false, validate }) => {
   return (
