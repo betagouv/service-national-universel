@@ -29,7 +29,7 @@ export default function application({ application }) {
   };
   return (
     <Link
-      to="/candidature"
+      to={`/mission/${application.missionId}`}
       className="group flex shrink-0  bg-white flex-col w-56 justify-start items-start border shadow-md rounded-lg  p-3 hover:-translate-y-1 transition duration-100 ease-in">
       <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm mb-2`}>
         {translateApplication(application.status)}
