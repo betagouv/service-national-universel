@@ -472,6 +472,7 @@ const transformData = async ({ data, centerId }) => {
       Prénom: data.firstName,
       Nom: data.lastName,
       "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
+      "Ville de naissance": data.birthCity,
       Sexe: translate(data.gender),
       Email: data.email,
       Téléphone: data.phone,
@@ -578,6 +579,7 @@ async function toArrayOfArray(data) {
 async function getAllResults(index, query) {
   const result = await api.post(`/es/${index}/export`, query);
   if (!result.data.length) return [];
+  console.log({ result });
   return result.data;
 }
 
