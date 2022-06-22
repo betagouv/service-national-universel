@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { translateApplicationForYoungs } from "../../../../utils";
+import Clock from "../../../../assets/icons/Clock";
 
 export default function application({ application }) {
   const theme = {
@@ -26,12 +27,17 @@ export default function application({ application }) {
       IN_PROGRESS: "text-white",
       ABANDON: "text-gray-400",
     },
+    icon: {
+      WAITING_VALIDATION: <Clock className="text-sky-400" />,
+      WAITING_VERIFICATION: <Clock className="text-sky-400" />,
+    },
   };
   return (
     <Link
       to={`/mission/${application.missionId}`}
-      className="group flex shrink-0  bg-white flex-col w-56 justify-start items-start border shadow-md rounded-lg  p-3 hover:-translate-y-1 transition duration-100 ease-in">
-      <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm mb-2`}>
+      className="group flex shrink-0  bg-white flex-col w-56 justify-start items-start border shadow-md rounded-lg  p-3 transition duration-100 ease-in">
+      <div className={`flex gap-1 items-center text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm mb-2`}>
+        {theme.icon[application.status] ? theme.icon[application.status] : null}
         {translateApplicationForYoungs(application.status)}
       </div>
       <div className="flex flex-1 flex-col justify-between">
