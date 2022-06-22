@@ -36,8 +36,10 @@ export default function ApplyModal({ value, onChange, onSend }) {
       tutorId: value.tutorId,
       tutorName: value.tutorName,
     };
+
+    console.log(value);
     if (ENABLE_PM && value.isMilitaryPreparation === "true") {
-      if (young.statusMilitaryPreparationFiles === "VALIDATED") {
+      if (!["WAITING_VALIDATION", "WAITING_CORRECTION"].includes(young.statusMilitaryPreparationFiles)) {
         application.status = APPLICATION_STATUS.WAITING_VALIDATION;
       } else {
         application.status = APPLICATION_STATUS.WAITING_VERIFICATION;
