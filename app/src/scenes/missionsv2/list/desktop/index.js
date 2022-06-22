@@ -38,7 +38,7 @@ export default function List() {
   const [filter, setFilter] = React.useState({ DOMAINS: [], DISTANCE: 50 });
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
-  const [focusedAddress, setFocusedAddress] = React.useState();
+  const [focusedAddress, setFocusedAddress] = React.useState({ address: young?.address, zip: young?.zip });
   const DISTANCE_MAX = 100;
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
