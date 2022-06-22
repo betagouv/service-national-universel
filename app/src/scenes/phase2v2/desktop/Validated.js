@@ -93,7 +93,7 @@ export default function ValidatedDesktop() {
                 </button>
                 <button
                   disabled={loading.mailPhase2}
-                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600 bg-white whitespace-nowrap disabled:opacity-50 disabled:cursor-wait"
+                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600  whitespace-nowrap disabled:opacity-50 disabled:cursor-wait"
                   onClick={() => sendAttestation({ type: "2", template: "certificate", button: "mailPhase2" })}>
                   {loading.mailPhase2 ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Envoyer par mail
                 </button>
@@ -112,7 +112,7 @@ export default function ValidatedDesktop() {
                 </button>
                 <button
                   disabled={loading.mailSNU}
-                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600 bg-white whitespace-nowrap disabled:opacity-50 disabled:cursor-wait"
+                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600  whitespace-nowrap disabled:opacity-50 disabled:cursor-wait"
                   onClick={() => sendAttestation({ type: "snu", template: "certificate", button: "mailSNU" })}>
                   {loading.mailSNU ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Envoyer par mail
                 </button>

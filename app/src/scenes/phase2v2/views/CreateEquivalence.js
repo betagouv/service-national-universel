@@ -142,7 +142,7 @@ export default function CreateEquivalence() {
   return (
     <div className="flex justify-center align-center my-4 ">
       <div className="lg:w-1/2 p-4">
-        <div className="text-2xl md:text-4xl text-center font-extrabold leading-10 tracking-tight ">Je demande la reconnaissance d’un engagement déjà réalisé</div>
+        <div className="text-2xl md:text-4xl text-center font-extrabold leading-10 tracking-tight ">Je demande la reconnaissance d'un engagement déjà réalisé</div>
         <div className="border-[1px] border-blue-400 rounded-lg bg-blue-50 mt-4">
           <div className="flex items-center px-4 py-3">
             <InformationCircle className="text-blue-400" />
@@ -169,7 +169,7 @@ export default function CreateEquivalence() {
                   {data?.type ? (
                     <span className="text-sm leading-5 font-normal">{data?.type}</span>
                   ) : (
-                    <span className="text-gray-400 text-sm leading-5 font-normal">Type d’engagement</span>
+                    <span className="text-gray-400 text-sm leading-5 font-normal">Type d'engagement</span>
                   )}
                 </div>
                 <ChevronDown className="text-gray-400" />
@@ -194,7 +194,7 @@ export default function CreateEquivalence() {
             </div>
             {error?.type ? <div className="text-xs leading-4 font-normal text-red-500">{error.type}</div> : null}
           </div>
-          <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
+          <div className="border-[1px] border-gray-300 w-full px-3 py-2.5 rounded-lg mt-3">
             {data?.structureName ? <div className="text-xs leading-4 font-normal text-gray-500">Nom de la structure</div> : null}
             <input
               className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
@@ -204,7 +204,7 @@ export default function CreateEquivalence() {
             />
           </div>
           <div className="mt-4 text-xs leading-4 font-medium">Où ?</div>
-          <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
+          <div className="border-[1px] border-gray-300 w-full px-3 py-2.5 rounded-lg mt-3">
             {data?.address ? <div className="text-xs leading-4 font-normal text-gray-500">Adresse du lieu</div> : null}
             <input
               className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
@@ -214,7 +214,7 @@ export default function CreateEquivalence() {
             />
           </div>
           <div className="flex items-stretch gap-2">
-            <div className="flex flex-col justify-center border-[1px] border-gray-300 w-2/3 px-3 py-2 rounded-lg mt-3">
+            <div className="flex flex-col justify-center border-[1px] border-gray-300 w-2/3 px-3 py-2.5 rounded-lg mt-3">
               {data?.zip ? <div className="text-xs leading-4 font-normal text-gray-500">Code postal</div> : null}
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
@@ -223,7 +223,7 @@ export default function CreateEquivalence() {
                 onChange={(e) => setData({ ...data, zip: e.target.value })}
               />
             </div>
-            <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
+            <div className="flex flex-col justify-center border-[1px] border-gray-300 w-full px-3 py-2.5 rounded-lg mt-3">
               {data?.city ? <div className="text-xs leading-4 font-normal text-gray-500">Ville</div> : null}
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
@@ -235,7 +235,7 @@ export default function CreateEquivalence() {
           </div>
           <div className="mt-4 text-xs leading-4 font-medium">Quand ?</div>
           <div className="flex gap-2 items-stretch align-middle">
-            <div className="flex justify-center flex-col border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
+            <div className="flex justify-center flex-col border-[1px] border-gray-300 w-full px-3 py-2.5 rounded-lg mt-3">
               {data?.startDate || clickStartDate ? <div className="text-xs leading-4 font-normal text-gray-500">Date de début</div> : null}
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
@@ -254,7 +254,7 @@ export default function CreateEquivalence() {
                 onChange={(e) => setData({ ...data, startDate: e.target.value })}
               />
             </div>
-            <div className="flex justify-center flex-col border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
+            <div className="flex justify-center flex-col border-[1px] border-gray-300 w-full px-3 py-2.5 rounded-lg mt-3">
               {data?.endDate || clickEndDate ? <div className="text-xs leading-4 font-normal text-gray-500">Date de fin</div> : null}
               <input
                 className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
@@ -279,7 +279,7 @@ export default function CreateEquivalence() {
             <>
               <div className="flex items-stretch gap-2 mt-2 flex-wrap md:!flex-nowrap">
                 <div className="flex flex-1 gap-2 md:flex-none">
-                  <div className="flex flex-col justify-center border-[1px] border-gray-300 px-3 py-2 rounded-lg mt-3 w-1/2">
+                  <div className="flex flex-col justify-center border-[1px] border-gray-300 px-3 py-2.5 rounded-lg mt-3 w-1/2">
                     {data?.frequency?.nombre ? <div className="text-xs leading-4 font-normal text-gray-500">Nombre</div> : null}
                     <input
                       className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
@@ -379,7 +379,7 @@ export default function CreateEquivalence() {
           <div className="text-sm leading-5 font-normal text-gray-500 mt-2">
             Cette personne doit vous connaître et pourra être contactée par l’administration sur votre dossier.
           </div>
-          <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
+          <div className="border-[1px] border-gray-300 w-full px-3 py-2.5 rounded-lg mt-3">
             {data?.contactFullName ? <div className="text-xs leading-4 font-normal text-gray-500">Prénom et Nom</div> : null}
             <input
               className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
@@ -388,7 +388,7 @@ export default function CreateEquivalence() {
               onChange={(e) => setData({ ...data, contactFullName: e.target.value })}
             />
           </div>
-          <div className="border-[1px] border-gray-300 w-full px-3 py-2 rounded-lg mt-3">
+          <div className="border-[1px] border-gray-300 w-full px-3 py-2.5 rounded-lg mt-3">
             {data?.contactEmail ? <div className="text-xs leading-4 font-normal text-gray-500">Adresse email</div> : null}
             <input
               className="w-full text-sm leading-5 font-normal ::placeholder:text-gray-500"
@@ -403,14 +403,14 @@ export default function CreateEquivalence() {
         <div className="rounded-lg bg-white mt-4 p-6">
           <div className="text-lg leading-7 font-bold">Document justificatif d’engagement</div>
           <div className="flex flex-col items-center bg-gray-50 mt-4 py-10 rounded-lg mb-3">
-            <button className="rounded-lg px-3 py-2 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600">
+            <button className="rounded-lg px-3 py-2.5 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600">
               Télécharger le modèle à remplir
             </button>
             <div className="text-xs leading-none font-normal text-gray-700 mt-2">puis téléversez le formulaire rempli ci-contre</div>
           </div>
           {data?.files?.length
             ? data.files.map((file, index) => (
-                <div key={index} className="flex flex-row justify-between items-center border-[1px] border-gray-300 w-full rounded-lg py-2 px-3 mt-1">
+                <div key={index} className="flex flex-row justify-between items-center border-[1px] border-gray-300 w-full rounded-lg py-2.5 px-3 mt-1">
                   <div className="flex flex-row items-center">
                     <PaperClip className="text-gray-400 mr-2" />
                     <div className="text-sm leading-5 font-normal text-gray-800">{file}</div>
@@ -441,7 +441,7 @@ export default function CreateEquivalence() {
           </div>
         ) : null}
         <button
-          className="rounded-lg w-full py-2 mt-4 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600 disabled:bg-blue-300 disabled:!text-white disabled:border-blue-300"
+          className="rounded-lg w-full py-2.5 mt-4 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600 disabled:bg-blue-300 disabled:!text-white disabled:border-blue-300"
           disabled={loading || uploading}
           onClick={() => handleSubmit()}>
           {loading ? "Chargement" : "Valider ma demande"}
