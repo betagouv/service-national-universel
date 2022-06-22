@@ -248,7 +248,7 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                  renderLabel={(items) => getFilterLabel(items, "Statut phase 1", "Statut Phase 1")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}

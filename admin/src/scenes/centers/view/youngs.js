@@ -250,7 +250,7 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       title=""
                       URLParams={true}
                       showSearch={false}
-                      renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                      renderLabel={(items) => getFilterLabel(items, "Statut phase 1", "Statut phase 1")}
                     />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}

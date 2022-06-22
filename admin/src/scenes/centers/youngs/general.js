@@ -126,7 +126,7 @@ export default function General({ updateFilter }) {
                       title=""
                       URLParams={true}
                       showSearch={false}
-                      renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                      renderLabel={(items) => getFilterLabel(items, "Statut phase 1", "Statut phase 1")}
                       onValueChange={(e) => updateFilter({ STATUS_PHASE_1: e })}
                     />
                     <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} onValueChange={(e) => updateFilter({ REGION: e })} />
