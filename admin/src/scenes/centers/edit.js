@@ -214,6 +214,10 @@ export default function Edit(props) {
                           {sessionShow
                             ? values.cohorts.map((cohort) => (
                                 <div key={cohort} className="ml-5 mt-4" hidden={cohort !== sessionShow}>
+                                  <div className="mb-2">
+                                    <span className="font-weight-bold">{values[cohort]?.placesTotal - values[cohort]?.placesLeft || "Aucuns"}</span> jeunes sont affectés dans ce
+                                    centre pour ce séjour.
+                                  </div>
                                   <div className="flex">
                                     <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
                                       <PlaceCapacity
@@ -243,7 +247,13 @@ export default function Edit(props) {
                                     </div>
                                   </div>
                                   <div className="flex flex-row-reverse mt-3 mr-4">
-                                    <DeleteSejourBtn onClick={() => handleChangeCohort(cohort)} />
+                                    <DeleteSejourBtn
+                                      onClick={() =>
+                                        values[cohort]?.placesLeft ?? values[cohort]?.placesTotal - values[cohort]?.placesLeft
+                                          ? toastr.error("Des volontaires sont assignés à ce séjour !")
+                                          : handleChangeCohort(cohort)
+                                      }
+                                    />
                                   </div>
                                 </div>
                               ))
