@@ -156,7 +156,7 @@ export default function Drawer(props) {
             disabled={getDisabled(DRAWER_TABS.PHASE2)}
             handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}
             open={activeTab === DRAWER_TABS.PHASE2}>
-            <SubMenuPhase2 young={young} handleClick={handleClick} />
+            {/* <SubMenuPhase2 young={young} handleClick={handleClick} /> */}
           </Item>
           <Item
             title="poursuivre mon snu"
