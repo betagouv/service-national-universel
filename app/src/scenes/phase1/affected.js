@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { BsArrowUpShort } from "react-icons/bs";
-import { HiOutlineShieldCheck } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
@@ -72,7 +71,7 @@ export default function Affected() {
                   <div className="flex flex-1 flex-row items-start justify-center">
                     <Iceberg className="w-16 h-16 md:w-24 md:h-24 mr-4" />
                     <article>
-                      <h1 className="font-bold text-xl leading-7">Votre lieu d'affectation</h1>
+                      <h1 className="font-bold text-xl leading-7">Votre lieu d&apos;affectation</h1>
                       <p className="text-sm leading-5">
                         {center?.name}, {center?.city}
                       </p>
