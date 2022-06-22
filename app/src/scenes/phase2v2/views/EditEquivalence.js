@@ -417,12 +417,12 @@ export default function EditEquivalence() {
         </div>
         <div className="rounded-lg bg-white mt-4 p-6">
           <div className="text-lg leading-7 font-bold">Document justificatif d’engagement</div>
-          <div className="flex flex-col items-center bg-gray-50 mt-4 py-10 rounded-lg mb-3">
+          {/* <div className="flex flex-col items-center bg-gray-50 mt-4 py-10 rounded-lg mb-3">
             <button className="rounded-lg px-3 py-2 text-sm leading-5 font-medium bg-blue-600 text-white border-[1px] border-blue-600 hover:bg-white hover:!text-blue-600">
               Télécharger le modèle à remplir
             </button>
             <div className="text-xs leading-none font-normal text-gray-700 mt-2">puis téléversez le formulaire rempli ci-contre</div>
-          </div>
+          </div> */}
           {data?.files?.length
             ? data.files.map((file, index) => (
                 <div key={index} className="flex flex-row justify-between items-center border-[1px] border-gray-300 w-full rounded-lg py-2 px-3 mt-1">
