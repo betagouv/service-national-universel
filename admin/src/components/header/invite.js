@@ -8,7 +8,6 @@ import { toastr } from "react-redux-toastr";
 import {
   colors,
   translate,
-  departmentList,
   regionList,
   region2department,
   department2region,
@@ -23,6 +22,7 @@ import { Footer } from "../../components/modals/Modal";
 import ModalButton from "../../components/buttons/ModalButton";
 import api from "../../services/api";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
+import CustomMultiSelect from "../CustomMultiSelect";
 
 export default function InviteHeader({ setOpen, open, label = "Inviter un référent" }) {
   const { user } = useSelector((state) => state.Auth);
@@ -68,7 +68,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
               subRole: "",
               email: "",
               region: "",
-              department: "",
+              department: [],
               cohesionCenterName: "",
               cohesionCenterId: "",
               sessionPhase1Id: "",
@@ -162,7 +162,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       <Col md={6}>
                         <FormGroup>
                           <div>Département</div>
-                          <ChooseDepartment validate={(v) => !v && requiredMessage} name="department" value={values.department} onChange={handleChange} />
+                          <ChooseDepartment />
                           <ErrorMessage errors={errors} touched={touched} name="department" />
                         </FormGroup>
                       </Col>
@@ -239,40 +239,25 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
   );
 }
 
-const ChooseDepartment = ({ value, onChange, validate }) => {
+const ChooseDepartment = () => {
   const { user } = useSelector((state) => state.Auth);
-  const [list, setList] = useState(departmentList);
+  const [list, setList] = useState([]);
 
   useEffect(() => {
-    //force the value if it is a referent_department
-    if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      setList(user.department);
-    }
-    //filter the array if it is a referent_region
-    if (user.role === ROLES.REFERENT_REGION) {
-      setList(region2department[user.region]);
-    }
+    const list = user.role === ROLES.REFERENT_REGION ? region2department[user.region] : user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [];
+
+    setList(list.map((e) => ({ value: e, label: e })));
   }, []);
 
   return (
     <Field
-      disabled={user.role === ROLES.REFERENT_DEPARTMENT && user.department.length === 1}
-      as="select"
-      validate={validate}
-      className="form-control"
-      placeholder="Département"
       name="department"
-      multiple={true}
-      value={value}
-      onChange={onChange}>
-      {list.map((e) => {
-        return (
-          <option value={e} key={e}>
-            {e}
-          </option>
-        );
-      })}
-    </Field>
+      options={list}
+      component={CustomMultiSelect}
+      placeholder="Sélectionnez le(s) département(s)..."
+      disabled={user.role === ROLES.REFERENT_DEPARTMENT && user.department.length === 1}
+      validate={(v) => !v.length && requiredMessage}
+    />
   );
 };
 
