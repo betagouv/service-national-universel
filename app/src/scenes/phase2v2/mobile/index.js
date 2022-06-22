@@ -144,7 +144,11 @@ export default function IndexPhase2Mobile() {
           </a>
         </div>
         <div className="border-[1px] border-gray-200 rounded-lg">
-          <a href={`https://support.snu.gouv.fr/base-de-connaissance/`} target="_blank" rel="noreferrer" className="flex gap-1 items-start justify-between p-3">
+          <a
+            href={`https://support.snu.gouv.fr/base-de-connaissance/demander-la-reconnaissance-dun-engagement-deja-realise`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex gap-1 items-start justify-between p-3">
             <div className="font-bold flex-1 text-gray-800">J’ai des questions sur la reconnaissance d’engagement</div>
             <ArrowUpRight className="text-gray-400 text-2xl" />
           </a>
