@@ -194,7 +194,7 @@ export default function Edit(props) {
                               </>
                             ))}
                             {filteredCohorts.length ? (
-                              <button className="pb-2 px-2 cursor-pointer hover:text-snu-purple-300 hover:border-b-2 hover:border-snu-purple-300">
+                              <button className="pb-2 px-2 border-b-2 hover:text-snu-purple-300 hover:border-snu-purple-300">
                                 <UncontrolledDropdown setActiveFromChild>
                                   <DropdownToggle tag="button" className="inline-flex">
                                     Ajouter un séjour
