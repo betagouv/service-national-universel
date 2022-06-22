@@ -5,17 +5,20 @@ import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { Col, Row } from "reactstrap";
+import { Col, DropdownItem, DropdownMenu, DropdownToggle, Row, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import Plus from "../../assets/icons/Plus.js";
 import AddressInput from "../../components/addressInputVCenter";
 import Badge from "../../components/Badge";
 import { Box, BoxContent } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import Chevron from "../../components/Chevron.js";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 import { colors, ROLES, SESSION_STATUS, translate, translateSessionStatus } from "../../utils";
+
+const cohortList = ["Juillet 2022", "Juin 2022", "Février 2022", "2021"];
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -101,11 +104,12 @@ export default function Edit(props) {
       {({ values, handleChange, handleSubmit, errors, touched, validateField, setFieldValue }) => {
         const handleChangeCohort = (cohort) => {
           let tempCohorts = values.cohorts ? values.cohorts : [];
-          if (tempCohorts.includes(cohort)) tempCohorts = tempCohorts.filter((c) => c !== cohort);
+          if (tempCohorts.includes(cohort)) return;
           else tempCohorts.push(cohort);
           setFieldValue("cohorts", tempCohorts);
           tempCohorts.length > 0 ? setsessionShow(tempCohorts[tempCohorts.length - 1]) : setsessionShow(null);
         };
+        const filteredCohorts = cohortList.filter((cohort) => !values.cohorts?.includes(cohort));
         return (
           <div>
             <Header>
@@ -175,32 +179,6 @@ export default function Edit(props) {
                   <Box>
                     <div className="flex flex-row items-center justify-between p-6">
                       <div className="text-lg font-bold">Par séjour</div>
-                      <div className="relative" ref={ref}>
-                        <button className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700" onClick={() => setOpen((e) => !e)}>
-                          <div className="flex flex-row items-center p-2">
-                            <Plus className="text-blue-700 group-hover:text-white" />
-                            <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Ajouter un séjour</div>
-                          </div>
-                        </button>
-                        {/* display options */}
-                        <div
-                          className={`${
-                            open ? "block" : "hidden"
-                          } rounded-lg min-w-full bg-white transition absolute right-0 border-3 border-red-600 shadow overflow-hidden z-50 top-[40px]`}>
-                          {["Juillet 2022", "Juin 2022", "Février 2022", "2021"].map((option, index) => (
-                            <div key={index} onClick={() => handleChangeCohort(option)}>
-                              <div className="group flex items-center justify-beetween gap-2 py-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                {values.cohorts && values.cohorts.includes(option) ? (
-                                  <MdCheckBox className="text-blue-500 h-5 w-5" />
-                                ) : (
-                                  <MdCheckBoxOutlineBlank className="text-gray-400 h-5 w-5" />
-                                )}
-                                <div className="text-base whitespace-nowrap">{option}</div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
                     </div>
                     <div className="flex justify-center">
                       <Field
@@ -230,6 +208,23 @@ export default function Edit(props) {
                                 </div>
                               </>
                             ))}
+                            {filteredCohorts.length ? (
+                              <button className="pb-2 px-2 cursor-pointer hover:text-snu-purple-300 hover:border-b-2 hover:border-snu-purple-300">
+                                <UncontrolledDropdown setActiveFromChild>
+                                  <DropdownToggle tag="button" className="inline-flex">
+                                    Ajouter un séjour
+                                    <Chevron color="#444" />
+                                  </DropdownToggle>
+                                  <DropdownMenu>
+                                    {filteredCohorts.map((o, i) => (
+                                      <DropdownItem onClick={() => handleChangeCohort(o)} className="dropdown-item" key={i}>
+                                        {o}
+                                      </DropdownItem>
+                                    ))}
+                                  </DropdownMenu>
+                                </UncontrolledDropdown>
+                              </button>
+                            ) : null}
                           </div>
                           {sessionShow
                             ? values.cohorts.map((cohort) => (
