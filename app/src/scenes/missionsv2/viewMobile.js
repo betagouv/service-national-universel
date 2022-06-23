@@ -127,7 +127,17 @@ export default function viewMobile() {
         </div>
         <div className="flex items-center justify-center mt-2">
           {mission.application ? (
-            <ApplicationStatus application={mission.application} tutor={mission?.tutor} mission={mission} updateApplication={updateApplication} loading={loading} />
+            <ApplicationStatus
+              application={mission.application}
+              tutor={mission?.tutor}
+              mission={mission}
+              updateApplication={updateApplication}
+              loading={loading}
+              disabledAge={disabledAge}
+              disabledIncomplete={disabledIncomplete}
+              disabledPmRefused={disabledPmRefused}
+              scrollToBottom={scrollToBottom}
+            />
           ) : (
             <ApplyButton
               placesLeft={mission.placesLeft}
@@ -282,7 +292,15 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
   );
 };
 
-const ApplicationStatus = ({ application, tutor, mission, updateApplication, loading }) => {
+const ApplicationStatus = ({ application, tutor, mission, updateApplication, loading, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom }) => {
+  const [message, setMessage] = React.useState(null);
+
+  useEffect(() => {
+    if (disabledIncomplete) setMessage("Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page");
+    if (disabledPmRefused) setMessage("Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater");
+    if (disabledAge) setMessage("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
+  }, [disabledAge, disabledIncomplete, disabledPmRefused]);
+
   const theme = {
     background: {
       WAITING_VALIDATION: "bg-sky-100",
@@ -355,13 +373,22 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
           Cette mission vous a été proposée <br /> par votre référent
         </div>
         <div className="flex items-center gap-3">
-          <button
-            className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
-            disabled={loading}
-            onClick={() => updateApplication(APPLICATION_STATUS.WAITING_VALIDATION)}>
-            <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
-            <span className="text-sm leading-5 font-medium text-white">Accepter</span>
-          </button>
+          {disabledAge || disabledIncomplete || disabledPmRefused ? (
+            <button
+              className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-400"
+              onClick={() => disabledIncomplete && !disabledPmRefused && !disabledAge && scrollToBottom()}>
+              <CheckCircle className="text-blue-400 mr-2 w-5 h-5 " />
+              <span className="text-sm leading-5 font-medium text-white">Accepter</span>
+            </button>
+          ) : (
+            <button
+              className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
+              disabled={loading}
+              onClick={() => updateApplication(APPLICATION_STATUS.WAITING_VALIDATION)}>
+              <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
+              <span className="text-sm leading-5 font-medium text-white">Accepter</span>
+            </button>
+          )}
           <button
             className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 transition duration-300 ease-in-out border-[1px] border-[#fff] hover:border-gray-200 disabled:shadow-none disabled:border-gray-200"
             disabled={loading}
@@ -370,6 +397,8 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
             <span className="text-sm leading-5 font-medium text-black">Décliner</span>
           </button>
         </div>
+        {disabledAge || disabledIncomplete || disabledPmRefused ? <div className="text-red-500 text-center text-xs">{message}</div> : null}
+
         <HoursAndPlaces duration={mission?.duration} placesLeft={mission.placesLeft} />
       </div>
     );

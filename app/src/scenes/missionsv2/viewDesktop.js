@@ -97,11 +97,11 @@ export default function viewDesktop() {
   };
 
   if (!mission) return <Loader />;
-  console.log(mission);
+
   return (
     <div className="bg-white mx-4 pb-12 my-4 rounded-xl w-full">
       {/* BEGIN HEADER */}
-      <div className="flex flex-col lg:flex-row justify-between py-8 px-12 border-b-[1px] border-gray-100">
+      <div className="flex flex-col lg:flex-row justify-between py-8 px-12 border-b-[1px] border-gray-100 gap-4">
         <div className="flex gap-4">
           {/* icon */}
           <div className="flex items-center">
@@ -110,7 +110,7 @@ export default function viewDesktop() {
 
           {/* infos mission */}
           <div className="flex flex-col">
-            <div className="space-y-2">
+            <div className="">
               <div className="text-gray-500 text-xs uppercase">{mission.structureName}</div>
               <div className="text-gray-900 font-bold text-base">{mission.name}</div>
               <div className="flex gap-2 flex-wrap">
@@ -134,7 +134,17 @@ export default function viewDesktop() {
         </div>
         <div className="flex items-center justify-center mt-3 lg:!mt-0">
           {mission.application ? (
-            <ApplicationStatus application={mission.application} tutor={mission?.tutor} mission={mission} updateApplication={updateApplication} loading={loading} />
+            <ApplicationStatus
+              application={mission.application}
+              tutor={mission?.tutor}
+              mission={mission}
+              updateApplication={updateApplication}
+              loading={loading}
+              disabledAge={disabledAge}
+              disabledIncomplete={disabledIncomplete}
+              disabledPmRefused={disabledPmRefused}
+              scrollToBottom={scrollToBottom}
+            />
           ) : (
             <ApplyButton
               placesLeft={mission.placesLeft}
@@ -249,7 +259,15 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
   );
 };
 
-const ApplicationStatus = ({ application, tutor, mission, updateApplication, loading }) => {
+const ApplicationStatus = ({ application, tutor, mission, updateApplication, loading, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom }) => {
+  const [message, setMessage] = React.useState(null);
+
+  useEffect(() => {
+    if (disabledIncomplete) setMessage("Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page");
+    if (disabledPmRefused) setMessage("Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater");
+    if (disabledAge) setMessage("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
+  }, [disabledAge, disabledIncomplete, disabledPmRefused]);
+
   const theme = {
     background: {
       WAITING_VALIDATION: "bg-sky-100",
@@ -340,13 +358,25 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
           Cette mission vous a été proposée <br /> par votre référent
         </div>
         <div className="flex items-center gap-3">
-          <button
-            className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
-            disabled={loading}
-            onClick={() => updateApplication(APPLICATION_STATUS.WAITING_VALIDATION)}>
-            <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
-            <span className="text-sm leading-5 font-medium text-white">Accepter</span>
-          </button>
+          {disabledAge || disabledIncomplete || disabledPmRefused ? (
+            <WithTooltip tooltipText={message}>
+              <button
+                className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-400"
+                onClick={() => disabledIncomplete && !disabledPmRefused && !disabledAge && scrollToBottom()}>
+                <CheckCircle className="text-blue-400 mr-2 w-5 h-5" />
+                <span className="text-sm leading-5 font-medium text-white">Accepter</span>
+              </button>
+            </WithTooltip>
+          ) : (
+            <button
+              className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
+              disabled={loading}
+              onClick={() => updateApplication(APPLICATION_STATUS.WAITING_VALIDATION)}>
+              <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
+              <span className="text-sm leading-5 font-medium text-white">Accepter</span>
+            </button>
+          )}
+
           <button
             className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 transition duration-300 ease-in-out border-[1px] border-[#fff] hover:border-gray-200 disabled:shadow-none disabled:border-gray-200"
             disabled={loading}
