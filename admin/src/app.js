@@ -150,18 +150,16 @@ const Home = () => {
       if (!ok) return console.log(`Error: ${code}`);
 
       const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
 
-      let activeSession;
-      let activeSessionLocalStorage = JSON.parse(localStorage.getItem("active_session_chef_de_centre"));
-
-      if (!activeSessionLocalStorage || activeSessionLocalStorage?.headCenterId !== user._id.toString()) {
-        // si il n y a pas de session dans le local storage
-        // ou si ce n'est pas une session de l'utilisateur connecté
-        activeSession = sessions.find((s) => COHESION_STAY_END[s.cohort] >= Date.now()) || sessions[0];
-        localStorage.setItem("active_session_chef_de_centre", JSON.stringify(activeSession));
-      } else {
-        activeSession = activeSessionLocalStorage;
-      }
+      // on regarde la session la plus proche dans le futur qui ne sait pas terminé il y a plus de 3 jours
+      // i.e. une session est considérée terminée 3 jours après la date de fin du séjour
+      const activeSession =
+        sessions.find((s) => {
+          const limit = COHESION_STAY_END[s.cohort].setDate(COHESION_STAY_END[s.cohort].getDate() + 3);
+          return limit >= now;
+        }) || sessions[0];
 
       setSessionPhase1List(sessions.reverse());
       dispatch(setSessionPhase1(activeSession));
