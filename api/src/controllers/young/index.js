@@ -964,7 +964,11 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
     const sessionPhase1 = await SessionPhase1.findById(youngs[0].sessionPhase1Id);
 
     for (let young of youngs) {
-      young.set({ [key]: newValue });
+      if ((key === "cohesionStayPresence" && newValue === "false") || (key === "presenceJDM" && young.cohesionStayPresence === "false")) {
+        young.set({ cohesionStayPresence: "false", presenceJDM: "false" });
+      } else {
+        young.set({ [key]: newValue });
+      }
       await young.save({ fromUser: req.user });
       await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
       if (key === "cohesionStayPresence" && newValue === "true") {

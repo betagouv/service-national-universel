@@ -768,8 +768,9 @@ const Line = ({ hit, onClick, opened, onSelect, selected }) => {
         <td className={`${bgColor}`}>
           <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
             <select
-              className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer ${presenceJDMBgColor} ${presenceJDMTextColor}`}
+              className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer ${presenceJDMBgColor} ${presenceJDMTextColor} disabled:text-gray-500 disabled:cursor-auto`}
               value={value.presenceJDM || ""}
+              disabled={value.cohesionStayPresence === "false"}
               onChange={(e) => {
                 setModalPointagePresenceJDM({
                   isOpen: true,
