@@ -175,11 +175,6 @@ export default function List() {
     });
   };
 
-  const search = (e) => {
-    e.preventDefault();
-    setFilter((prev) => ({ ...prev, SEARCH: e.target.value }));
-  };
-
   const getLabelWhen = (when) => {
     switch (when) {
       case "SCOLAIRE":
@@ -294,7 +289,7 @@ export default function List() {
       {/* END HEADER */}
 
       {/* BEGIN CONTROL */}
-      <form onSubmit={search} className="w-full bg-white rounded-lg space-y-6">
+      <div className="w-full bg-white rounded-lg space-y-6">
         {/* search bar recherche */}
         <div className="relative">
           <div className="bg-white border-[1px] border-gray-300 rounded-xl overflow-hidden p-1.5 mx-2 mb-4">
@@ -565,7 +560,7 @@ export default function List() {
             />
           </div>
         </div>
-      </form>
+      </div>
       {/* END CONTROL */}
 
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
