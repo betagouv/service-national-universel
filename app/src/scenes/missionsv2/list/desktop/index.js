@@ -1,34 +1,35 @@
 import React from "react";
-import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
-import { useSelector } from "react-redux";
+import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
-import { useParams } from "react-router";
+import { useSelector } from "react-redux";
 
-import { HiOutlineAdjustments } from "react-icons/hi";
-import { Link } from "react-router-dom";
+import CardMission from "./components/CardMission";
+import { apiURL } from "../../../../config";
+import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM, ES_NO_LIMIT, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../../utils";
+import api from "../../../../services/api";
+import Loader from "../../../../components/Loader";
+import FilterGeoloc from "../../components/FilterGeoloc";
+import Sante from "../../../../assets/mission-domaines/sante";
+import Solidarite from "../../../../assets/mission-domaines/solidarite";
+import Citoyennete from "../../../../assets/mission-domaines/citoyennete";
+import Education from "../../../../assets/mission-domaines/education";
+import Sport from "../../../../assets/mission-domaines/sport";
+import DefenseEtMemoire from "../../../../assets/mission-domaines/defense-et-memoire";
+import Environment from "../../../../assets/mission-domaines/environment";
+import Securite from "../../../../assets/mission-domaines/securite";
+import Culture from "../../../../assets/mission-domaines/culture";
+import PreparationMilitaire from "../../../../assets/mission-domaines/preparation-militaire";
 import AcademicCap from "../../../../assets/icons/AcademicCap";
+import Sun from "../../../../assets/icons/Sun";
 import Calendar from "../../../../assets/icons/Calendar";
 import Search from "../../../../assets/icons/Search";
-import Sun from "../../../../assets/icons/Sun";
-import Citoyennete from "../../../../assets/mission-domaines/citoyennete";
-import Culture from "../../../../assets/mission-domaines/culture";
-import DefenseEtMemoire from "../../../../assets/mission-domaines/defense-et-memoire";
-import Education from "../../../../assets/mission-domaines/education";
-import Environment from "../../../../assets/mission-domaines/environment";
-import PreparationMilitaire from "../../../../assets/mission-domaines/preparation-militaire";
-import Sante from "../../../../assets/mission-domaines/sante";
-import Securite from "../../../../assets/mission-domaines/securite";
-import Solidarite from "../../../../assets/mission-domaines/solidarite";
-import Sport from "../../../../assets/mission-domaines/sport";
-import { apiURL } from "../../../../config";
-import api from "../../../../services/api";
-import { MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, translate } from "../../../../utils";
-import FuseeSvg from "../../assets/Fusee";
+import { Link } from "react-router-dom";
+import { HiOutlineAdjustments } from "react-icons/hi";
 import PietonSvg from "../../assets/Pieton";
-import TrainSvg from "../../assets/Train";
 import VeloSvg from "../../assets/Velo";
 import VoitureSvg from "../../assets/Voiture";
-import CardMission from "./components/CardMission";
+import TrainSvg from "../../assets/Train";
+import FuseeSvg from "../../assets/Fusee";
 
 const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
@@ -242,12 +243,6 @@ export default function List() {
       setFilter((prev) => ({ ...prev, LOCATION: location }));
     })();
   }, [focusedAddress]);
-
-  React.useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const MILITARY_PREPARATION = urlParams.get("MILITARY_PREPARATION");
-    if (MILITARY_PREPARATION === "true") setFilter((prev) => ({ ...prev, MILITARY_PREPARATION: "true" }));
-  }, []);
 
   React.useEffect(() => {
     if (!refDropdownControlDistance) return;

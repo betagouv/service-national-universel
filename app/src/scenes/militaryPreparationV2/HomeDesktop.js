@@ -79,7 +79,7 @@ export default function HomeDesktop() {
               <div className="text-lg leading-6 font-semibold">Vous remplissez les conditions ?</div>
               <div className="text-lg leading-6 font-semibold"> N’attendez plus !</div>
               <Link
-                to="/mission?MILITARY_PREPARATION=true"
+                to='/mission?MILITARY_PREPARATION=%5B"true"%5D'
                 className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center bg-blue-600 hover:bg-white hover:border-blue-600 mt-4">
                 <HiOutlineSearch className="text-[#ffffff] group-hover:text-blue-600 mr-2" />
                 <div className="text-[#ffffff] group-hover:text-blue-600 text-sm flex-1">Trouver une préparation militaire</div>
