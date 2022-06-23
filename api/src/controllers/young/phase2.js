@@ -34,7 +34,7 @@ router.post("/equivalence", passport.authenticate("young", { session: false, fai
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     const young = await YoungModel.findById(value.id);
-    if (!young) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
