@@ -20,7 +20,7 @@ import Phase3 from "./scenes/phase3";
 import Diagoriente from "./scenes/diagoriente";
 import SupportCenter from "./scenes/support-center";
 import Preferences from "./scenes/preferences";
-import Missions from "./scenes/missionsv2";
+import Missions from "./scenes/missions";
 import Candidature from "./scenes/candidature";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
