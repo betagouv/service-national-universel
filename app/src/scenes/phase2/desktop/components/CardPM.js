@@ -1,7 +1,7 @@
 import React from "react";
 import { translate } from "../../../../utils";
 import { BsChevronDown } from "react-icons/bs";
-import DocumentsPM from "../../../militaryPreparationV2/components/DocumentsPM";
+import DocumentsPM from "../../../militaryPreparation/components/DocumentsPM";
 import Prepa from "../../../../assets/icons/Prepa";
 
 export default function CardPM({ young }) {

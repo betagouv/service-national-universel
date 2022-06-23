@@ -28,7 +28,7 @@ import Loader from "./components/Loader";
 import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
-import MilitaryPreparation from "./scenes/militaryPreparationV2";
+import MilitaryPreparation from "./scenes/militaryPreparation";
 import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
 import CGU from "./scenes/CGU";

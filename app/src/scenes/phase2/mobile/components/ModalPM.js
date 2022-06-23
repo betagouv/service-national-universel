@@ -3,7 +3,7 @@ import { Modal } from "reactstrap";
 import { translate } from "../../../../utils";
 import CloseSvg from "../../../../assets/Close";
 import Prepa from "../../../../assets/icons/Prepa";
-import DocumentsPM from "../../../militaryPreparationV2/components/DocumentsPM";
+import DocumentsPM from "../../../militaryPreparation/components/DocumentsPM";
 
 export default function ModalPM({ theme, open, setOpen, young }) {
   return (

@@ -8,7 +8,7 @@ import WithTooltip from "../../components/WithTooltip";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import { formatStringDateTimezoneUTC, htmlCleaner, translate, translateApplication, copyToClipboard, APPLICATION_STATUS, SENDINBLUE_TEMPLATES } from "../../utils";
-import DocumentsPM from "../militaryPreparationV2/components/DocumentsPM";
+import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
 import ApplyDoneModal from "./components/ApplyDoneModal";
 import ApplyModal from "./components/ApplyModal";
 import IconDomain from "./components/IconDomain";
