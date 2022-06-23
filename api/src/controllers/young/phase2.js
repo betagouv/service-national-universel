@@ -36,7 +36,7 @@ router.post("/equivalence", passport.authenticate("young", { session: false, fai
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     //Pas plus de 3 demandes d'équivalence + creation possible seulement si le statut des ancienne equiv est "REFUSED"
     const equivalences = await MissionEquivalenceModel.find({ youngId: value.id });
@@ -84,7 +84,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
