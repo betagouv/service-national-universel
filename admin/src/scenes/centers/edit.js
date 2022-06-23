@@ -213,12 +213,12 @@ export default function Edit(props) {
                           </div>
                           {sessionShow
                             ? values.cohorts.map((cohort) => {
-                                const nbJeunes = values[cohort]?.placesTotal - values[cohort]?.placesLeft;
+                                const nbJeunes = defaultValue[cohort]?.placesTotal - defaultValue[cohort]?.placesLeft;
                                 return (
                                   <div key={cohort} className="ml-5 mt-4" hidden={cohort !== sessionShow}>
                                     <div className="mb-2 text-gray-500">
-                                      <span className="font-weight-bold">{nbJeunes || "Aucun"}</span>
-                                      {nbJeunes > 1 ? " jeunes sont affectés" : " jeune" + (nbJeunes ? " est" : " n'est") + " affecté"} dans ce centre pour ce séjour.
+                                      <span className="font-weight-bold">{nbJeunes > 0 ? nbJeunes : "Aucun"}</span>
+                                      {nbJeunes > 1 ? " jeunes sont affectés" : " jeune" + (nbJeunes > 0 ? " est" : " n'est") + " affecté"} dans ce centre pour ce séjour.
                                     </div>
                                     <div className="flex">
                                       <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
@@ -250,11 +250,10 @@ export default function Edit(props) {
                                     </div>
                                     <div className="flex flex-row-reverse mt-3 mr-4">
                                       <DeleteSejourBtn
-                                        onClick={() =>
-                                          values[cohort]?.placesLeft ?? values[cohort]?.placesTotal - values[cohort]?.placesLeft
-                                            ? toastr.error("Des volontaires sont assignés à ce séjour !")
-                                            : handleChangeCohort(cohort)
-                                        }
+                                        onClick={() => {
+                                          const nbVolontaires = defaultValue[cohort]?.placesLeft >= 0 ? defaultValue[cohort]?.placesTotal - defaultValue[cohort]?.placesLeft : 0;
+                                          return nbVolontaires > 0 ? toastr.error("Des volontaires sont assignés à ce séjour !") : handleChangeCohort(cohort);
+                                        }}
                                       />
                                     </div>
                                   </div>
