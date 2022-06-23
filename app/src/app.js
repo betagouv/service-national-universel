@@ -15,7 +15,7 @@ import Auth from "./scenes/auth";
 import Home from "./scenes/home";
 import Inscription from "./scenes/inscription";
 import Phase1 from "./scenes/phase1";
-import Phase2 from "./scenes/phase2v2";
+import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Diagoriente from "./scenes/diagoriente";
 import SupportCenter from "./scenes/support-center";
