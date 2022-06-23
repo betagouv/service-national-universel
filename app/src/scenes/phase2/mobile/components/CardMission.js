@@ -44,8 +44,8 @@ export default function application({ application }) {
         <div className="flex flex-1 flex-col">
           <div className="text-gray-500 text-xs mt-2 uppercase">{application.mission?.structureName}</div>
           <div className="font-bold text-sm mt-2 break-words">
-            {application.missionName.substring(0, 150)}
-            {application.missionName.length > 150 ? "..." : ""}
+            {application.missionName?.substring(0, 150)}
+            {application.missionName?.length > 150 ? "..." : ""}
           </div>
         </div>
         <div className="text-gray-500 text-xs mt-3">Voir ma candidature&nbsp;›</div>
