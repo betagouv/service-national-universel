@@ -33,7 +33,7 @@ export default function mission({ mission }) {
               <div className="text-gray-500 text-xs uppercase font-medium">{mission?.structureName}</div>
             </div>
             <div className="text-gray-900 font-bold text-base">{mission?.name}</div>
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap gap-2">
               {tags.map((e, i) => (
                 <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">
                   {e}

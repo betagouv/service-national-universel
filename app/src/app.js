@@ -15,12 +15,12 @@ import Auth from "./scenes/auth";
 import Home from "./scenes/home";
 import Inscription from "./scenes/inscription";
 import Phase1 from "./scenes/phase1";
-import v2Phase2 from "./scenes/phase2v2";
+import Phase2 from "./scenes/phase2v2";
 import Phase3 from "./scenes/phase3";
 import Diagoriente from "./scenes/diagoriente";
 import SupportCenter from "./scenes/support-center";
 import Preferences from "./scenes/preferences";
-import v2Missions from "./scenes/missionsv2";
+import Missions from "./scenes/missionsv2";
 import Candidature from "./scenes/candidature";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
@@ -28,7 +28,7 @@ import Loader from "./components/Loader";
 import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
-import MilitaryPreparationV2 from "./scenes/militaryPreparationV2";
+import MilitaryPreparation from "./scenes/militaryPreparationV2";
 import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
 import CGU from "./scenes/CGU";
@@ -158,16 +158,16 @@ const Espace = () => {
           <Switch>
             <Route path="/account" component={Account} />
             <Route path="/phase1" component={Phase1} />
-            <Route path="/phase2" component={v2Phase2} />
+            <Route path="/phase2" component={Phase2} />
             <Route path="/phase3" component={Phase3} />
             <Route path="/les-programmes" component={Engagement} />
             <Route path="/preferences" component={Preferences} />
-            <Route path="/mission" component={v2Missions} />
+            <Route path="/mission" component={Missions} />
             <Route path="/candidature" component={Candidature} />
             <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
             {youngCanChangeSession(young) ? <Route path="/changer-de-sejour" component={changeSejour} /> : null}
-            {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparationV2} />}
+            {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>
         </Content>
