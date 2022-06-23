@@ -245,6 +245,12 @@ export default function List() {
   }, [focusedAddress]);
 
   React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const MILITARY_PREPARATION = urlParams.get("MILITARY_PREPARATION");
+    if (MILITARY_PREPARATION === "true") setFilter((prev) => ({ ...prev, MILITARY_PREPARATION: "true" }));
+  }, []);
+
+  React.useEffect(() => {
     if (!refDropdownControlDistance) return;
     const handleClickOutside = (event) => {
       if (refDropdownControlDistance?.current && !refDropdownControlDistance.current.contains(event.target)) {
