@@ -8,6 +8,7 @@ import { toastr } from "react-redux-toastr";
 import {
   colors,
   translate,
+  departmentList,
   regionList,
   region2department,
   department2region,
@@ -244,7 +245,7 @@ const ChooseDepartment = () => {
   const [list, setList] = useState([]);
 
   useEffect(() => {
-    const list = user.role === ROLES.REFERENT_REGION ? region2department[user.region] : user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [];
+    const list = user.role === ROLES.REFERENT_REGION ? region2department[user.region] : user.role === ROLES.REFERENT_DEPARTMENT ? user.department : departmentList;
 
     setList(list.map((e) => ({ value: e, label: e })));
   }, []);
