@@ -202,7 +202,7 @@ export default function Edit(props) {
                                   </DropdownToggle>
                                   <DropdownMenu>
                                     {filteredCohorts.map((o, i) => (
-                                      <DropdownItem onClick={() => handleChangeCohort(o)} className="dropdown-item" key={i}>
+                                      <DropdownItem onClick={() => handleChangeCohort(o)} className="dropdown-item text-sm" key={i}>
                                         {o}
                                       </DropdownItem>
                                     ))}
@@ -212,51 +212,54 @@ export default function Edit(props) {
                             ) : null}
                           </div>
                           {sessionShow
-                            ? values.cohorts.map((cohort) => (
-                                <div key={cohort} className="ml-5 mt-4" hidden={cohort !== sessionShow}>
-                                  <div className="mb-2">
-                                    <span className="font-weight-bold">{values[cohort]?.placesTotal - values[cohort]?.placesLeft || "Aucuns"}</span> jeunes sont affectés dans ce
-                                    centre pour ce séjour.
-                                  </div>
-                                  <div className="flex">
-                                    <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
-                                      <PlaceCapacity
-                                        key={`${cohort}.Places`}
-                                        title={"Capacite d'accueil"}
-                                        values={values[cohort]?.placesTotal || ""}
-                                        name={`${cohort}.placesTotal`}
-                                        handleChange={handleChange}
-                                        required
-                                        errors={errors}
-                                        touched={touched}
-                                        validate={(e) => !e && `La capacité d'accueil de ${cohort} doit être renseignée`}
+                            ? values.cohorts.map((cohort) => {
+                                const nbJeunes = values[cohort]?.placesTotal - values[cohort]?.placesLeft;
+                                return (
+                                  <div key={cohort} className="ml-5 mt-4" hidden={cohort !== sessionShow}>
+                                    <div className="mb-2 text-gray-500">
+                                      <span className="font-weight-bold">{nbJeunes || "Aucun"}</span>
+                                      {nbJeunes > 1 ? " jeunes sont affectés" : " jeune" + (nbJeunes ? " est" : " n'est") + " affecté"} dans ce centre pour ce séjour.
+                                    </div>
+                                    <div className="flex">
+                                      <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
+                                        <PlaceCapacity
+                                          key={`${cohort}.Places`}
+                                          title={"Capacite d'accueil"}
+                                          values={values[cohort]?.placesTotal || ""}
+                                          name={`${cohort}.placesTotal`}
+                                          handleChange={handleChange}
+                                          required
+                                          errors={errors}
+                                          touched={touched}
+                                          validate={(e) => !e && `La capacité d'accueil de ${cohort} doit être renseignée`}
+                                        />
+                                      </div>
+                                      <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
+                                        <SelectStatus
+                                          name={`${cohort}.status`}
+                                          values={values[cohort]?.status || ""}
+                                          handleChange={handleChange}
+                                          title="Statut"
+                                          options={sessionStatus}
+                                          required
+                                          errors={errors}
+                                          touched={touched}
+                                          validate={(e) => !e && `Le status pour la session de ${cohort} est obligatoire`}
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="flex flex-row-reverse mt-3 mr-4">
+                                      <DeleteSejourBtn
+                                        onClick={() =>
+                                          values[cohort]?.placesLeft ?? values[cohort]?.placesTotal - values[cohort]?.placesLeft
+                                            ? toastr.error("Des volontaires sont assignés à ce séjour !")
+                                            : handleChangeCohort(cohort)
+                                        }
                                       />
                                     </div>
-                                    <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
-                                      <SelectStatus
-                                        name={`${cohort}.status`}
-                                        values={values[cohort]?.status || ""}
-                                        handleChange={handleChange}
-                                        title="Statut"
-                                        options={sessionStatus}
-                                        required
-                                        errors={errors}
-                                        touched={touched}
-                                        validate={(e) => !e && `Le status pour la session de ${cohort} est obligatoire`}
-                                      />
-                                    </div>
                                   </div>
-                                  <div className="flex flex-row-reverse mt-3 mr-4">
-                                    <DeleteSejourBtn
-                                      onClick={() =>
-                                        values[cohort]?.placesLeft ?? values[cohort]?.placesTotal - values[cohort]?.placesLeft
-                                          ? toastr.error("Des volontaires sont assignés à ce séjour !")
-                                          : handleChangeCohort(cohort)
-                                      }
-                                    />
-                                  </div>
-                                </div>
-                              ))
+                                );
+                              })
                             : null}
                           <div className="ml-5 mt-2 flex flex-col items-center w-3/4">
                             {values.cohorts.map((cohort) => (
