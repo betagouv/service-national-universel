@@ -592,7 +592,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   };
 
   const now = new Date();
-  if (now > dateDeValidation[sessionPhase1.cohort]) {
+  if (now > dateDeValidation[sessionPhase1.cohort] && ["true", "false"].includes(young.cohesionStayPresence)) {
     if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
       if (
         (now >= dateDeValidation[sessionPhase1.cohort] &&
