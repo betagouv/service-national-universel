@@ -18,8 +18,8 @@ export default function Done() {
           <article className="lg:flex lg:items-center">
             <img className="mr-4 hidden lg:block" src={trophy} alt="trophy" />
             <div>
-              <h1 className="text-2xl md:text-5xl mb-4">
-                <strong>{young.firstName}, vous avez validé votre Phase 1 !</strong>
+              <h1 className="text-2xl md:text-[40px] mb-4 leading-10">
+                <strong>{young.firstName}</strong>, vous avez validé votre Phase&nbsp;1&nbsp;!
               </h1>
               <p className="text-[#738297]">Bravo pour votre engagement.</p>
             </div>
@@ -29,13 +29,13 @@ export default function Done() {
             <section>
               <p className="text-2xl font-bold mb-4">Avez-vous effectué votre recensement citoyen ?</p>
               <div className="lg:flex lg:flex-row">
-                <article className="bg-gray-50 px-4 py-8 rounded md:mr-4">
+                <article className="bg-gray-50 px-4 py-8 rounded-md md:mr-4">
                   <p className="text-2xl font-bold mb-2">Oui</p>
                   <p className="text-base text-[#738297]">
                     Vous pouvez dès à présent transmettre votre attestation de réalisation de Phase 1 au CSNJ afin qu&apos;il valide votre JDC.
                   </p>
                   <a
-                    className="text-sm text-indigo-600 underline hover:text-indigo-700"
+                    className="text-sm text-blue-600 underline hover:text-blue-700 hover:underline"
                     href="https://support.snu.gouv.fr/base-de-connaissance/journee-defense-et-citoyennete"
                     target="_blank"
                     rel="noreferrer">
@@ -45,11 +45,11 @@ export default function Done() {
                     <DownloadAttestationButton
                       young={young}
                       uri="1"
-                      className="flex items-center border-[1px] border-indigo-700 rounded-lg px-4 py-2.5 font-sm leading-5  mt-4 shadow-sm bg-indigo-700 text-white mr-3">
+                      className="flex items-center border-[1px] border-blue-600 rounded-lg px-4 py-2.5 font-sm leading-5  mt-4 shadow-sm bg-blue-600 text-white mr-3 hover:bg-blue-500 hover:border-blue-500 hover:!no-underline">
                       Télécharger mon attestation
                     </DownloadAttestationButton>
                     <MailAttestationButton
-                      className="flex items-center border-[1px] border-indigo-700 rounded-lg px-4 py-2.5 font-sm leading-5 mt-4 shadow-sm text-indigo-700 bg-white"
+                      className="flex items-center border-[1px] border-blue-600 rounded-lg px-4 py-2.5 font-sm leading-5 mt-4 shadow-sm text-blue-600 bg-[#ffffff] hover:bg-blue-500 hover:border-blue-500 hover:text-white hover:!no-underline"
                       young={young}
                       type="1"
                       template="certificate"
@@ -59,11 +59,11 @@ export default function Done() {
                     </MailAttestationButton>
                   </div>
                 </article>
-                <article className="bg-gray-50 px-4 py-8 rounded md:mr-4">
+                <article className="bg-gray-50 px-4 py-8 rounded-md md:mr-4">
                   <p className="text-2xl font-bold mb-2">Non</p>
                   <p className="text-base text-[#738297]">Vous devez effectuer vos démarches auprès de votre mairie ou en ligne à partir de vos 16 ans.</p>
                   <a
-                    className="text-sm text-indigo-600 underline hover:text-indigo-700"
+                    className="text-sm text-blue-600 underline hover:text-blue-700 hover:underline"
                     href="https://www.service-public.fr/particuliers/vosdroits/F870"
                     target="_blank"
                     rel="noreferrer">
@@ -71,7 +71,7 @@ export default function Done() {
                   </a>
                 </article>
               </div>
-              <article className="mt-4 rounded-md shadow-sm p-6 max-w-[50%]">
+              <article className="mt-4 rounded-md shadow-nina p-6 max-w-[50%]">
                 <a
                   href="https://support.snu.gouv.fr/base-de-connaissance/permis-et-code-de-la-route"
                   target="_blank"
