@@ -46,6 +46,33 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
   }
 });
 
+router.delete("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    }).validate({ ...req.params });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
+    const young = await YoungModel.findById(value.id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    if (!canEditPresenceYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    young.set({ departSejourAt: undefined, departSejourMotif: undefined, departSejourMotifComment: undefined, departInform: undefined });
+    await young.save({ fromUser: req.user });
+
+    const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+    await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+
+    res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived"];
