@@ -1,3 +1,11 @@
+## [1.104.1](https://github.com/betagouv/service-national-universel/compare/v1.104.0...v1.104.1) (2022-06-24)
+
+
+### Bug Fixes
+
+* **api:** La Majuscule ! (fixup) ([721667a](https://github.com/betagouv/service-national-universel/commit/721667ac6d5314fa7a9e85acb59f33bd867ab12e))
+* **app:** désistement jeune sur liste complémentaire ([6e61cd1](https://github.com/betagouv/service-national-universel/commit/6e61cd13036189b27cb3af83dab2558dad8fe6b9))
+
 # [1.104.0](https://github.com/betagouv/service-national-universel/compare/v1.103.1...v1.104.0) (2022-06-23)
 
 
