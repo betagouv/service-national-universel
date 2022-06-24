@@ -195,7 +195,7 @@ export default function Drawer(props) {
               </DownloadAttestationButton>
             </DrawerButton>
           ) : null} */}
-            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) ? (
+            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST].includes(young.status) ? (
               <DrawerButton>
                 <DeleteAccountButton young={young} />
               </DrawerButton>
