@@ -70,7 +70,12 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    young.set({ [key]: newValue });
+    if ((key === "cohesionStayPresence" && newValue === "false") || (key === "presenceJDM" && young.cohesionStayPresence === "false")) {
+      young.set({ cohesionStayPresence: "false", presenceJDM: "false" });
+    } else {
+      young.set({ [key]: newValue });
+    }
+
     await young.save({ fromUser: req.user });
 
     const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);

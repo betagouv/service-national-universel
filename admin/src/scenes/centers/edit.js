@@ -1,21 +1,23 @@
 import { Field, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { BiHandicap } from "react-icons/bi";
-import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { Col, Row } from "reactstrap";
+import { Col, DropdownItem, DropdownMenu, DropdownToggle, Row, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
-import Plus from "../../assets/icons/Plus.js";
+import Trash from "../../assets/icons/Trash";
 import AddressInput from "../../components/addressInputVCenter";
 import Badge from "../../components/Badge";
 import { Box, BoxContent } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import Chevron from "../../components/Chevron.js";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 import { colors, ROLES, SESSION_STATUS, translate, translateSessionStatus } from "../../utils";
+
+const cohortList = ["Juillet 2022", "Juin 2022", "Février 2022", "2021"];
 
 export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -25,20 +27,6 @@ export default function Edit(props) {
   const user = useSelector((state) => state.Auth.user);
   const [sessionShow, setsessionShow] = useState(null);
   const [sessionStatus, setSessionStatus] = useState(null);
-  const [open, setOpen] = React.useState(false);
-  const ref = React.useRef(null);
-
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
-  }, []);
 
   async function init() {
     if (isNew) return setDefaultValue(null);
@@ -106,6 +94,7 @@ export default function Edit(props) {
           setFieldValue("cohorts", tempCohorts);
           tempCohorts.length > 0 ? setsessionShow(tempCohorts[tempCohorts.length - 1]) : setsessionShow(null);
         };
+        const filteredCohorts = cohortList.filter((cohort) => !values.cohorts?.includes(cohort));
         return (
           <div>
             <Header>
@@ -175,32 +164,6 @@ export default function Edit(props) {
                   <Box>
                     <div className="flex flex-row items-center justify-between p-6">
                       <div className="text-lg font-bold">Par séjour</div>
-                      <div className="relative" ref={ref}>
-                        <button className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700" onClick={() => setOpen((e) => !e)}>
-                          <div className="flex flex-row items-center p-2">
-                            <Plus className="text-blue-700 group-hover:text-white" />
-                            <div className="ml-2 text-sm text-blue-700 leading-5 group-hover:text-white">Ajouter un séjour</div>
-                          </div>
-                        </button>
-                        {/* display options */}
-                        <div
-                          className={`${
-                            open ? "block" : "hidden"
-                          } rounded-lg min-w-full bg-white transition absolute right-0 border-3 border-red-600 shadow overflow-hidden z-50 top-[40px]`}>
-                          {["Juillet 2022", "Juin 2022", "Février 2022", "2021"].map((option, index) => (
-                            <div key={index} onClick={() => handleChangeCohort(option)}>
-                              <div className="group flex items-center justify-beetween gap-2 py-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                {values.cohorts && values.cohorts.includes(option) ? (
-                                  <MdCheckBox className="text-blue-500 h-5 w-5" />
-                                ) : (
-                                  <MdCheckBoxOutlineBlank className="text-gray-400 h-5 w-5" />
-                                )}
-                                <div className="text-base whitespace-nowrap">{option}</div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
                     </div>
                     <div className="flex justify-center">
                       <Field
@@ -230,40 +193,72 @@ export default function Edit(props) {
                                 </div>
                               </>
                             ))}
+                            {filteredCohorts.length ? (
+                              <button className="pb-2 px-2 hover:text-snu-purple-300">
+                                <UncontrolledDropdown setActiveFromChild>
+                                  <DropdownToggle tag="button" className="inline-flex">
+                                    Ajouter un séjour
+                                    <Chevron color="#444" />
+                                  </DropdownToggle>
+                                  <DropdownMenu>
+                                    {filteredCohorts.map((o, i) => (
+                                      <DropdownItem onClick={() => handleChangeCohort(o)} className="dropdown-item text-sm" key={i}>
+                                        {o}
+                                      </DropdownItem>
+                                    ))}
+                                  </DropdownMenu>
+                                </UncontrolledDropdown>
+                              </button>
+                            ) : null}
                           </div>
                           {sessionShow
-                            ? values.cohorts.map((cohort) => (
-                                <div key={cohort} className="ml-5 mt-4" hidden={cohort !== sessionShow}>
-                                  <div className="flex">
-                                    <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
-                                      <PlaceCapacity
-                                        key={`${cohort}.Places`}
-                                        title={"Capacite d'accueil"}
-                                        values={values[cohort]?.placesTotal || ""}
-                                        name={`${cohort}.placesTotal`}
-                                        handleChange={handleChange}
-                                        required
-                                        errors={errors}
-                                        touched={touched}
-                                        validate={(e) => !e && `La capacité d'accueil de ${cohort} doit être renseignée`}
-                                      />
+                            ? values.cohorts.map((cohort) => {
+                                const nbJeunes = defaultValue[cohort]?.placesTotal - defaultValue[cohort]?.placesLeft;
+                                return (
+                                  <div key={cohort} className="ml-5 mt-4" hidden={cohort !== sessionShow}>
+                                    <div className="mb-2 text-gray-500">
+                                      <span className="font-weight-bold">{nbJeunes > 0 ? nbJeunes : "Aucun"}</span>
+                                      {nbJeunes > 1 ? " jeunes sont affectés" : " jeune" + (nbJeunes > 0 ? " est" : " n'est") + " affecté"} dans ce centre pour ce séjour.
                                     </div>
-                                    <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
-                                      <SelectStatus
-                                        name={`${cohort}.status`}
-                                        values={values[cohort]?.status || ""}
-                                        handleChange={handleChange}
-                                        title="Statut"
-                                        options={sessionStatus}
-                                        required
-                                        errors={errors}
-                                        touched={touched}
-                                        validate={(e) => !e && `Le status pour la session de ${cohort} est obligatoire`}
+                                    <div className="flex">
+                                      <div className="w-1/4 flex border flex-col justify-items-start rounded-lg rounded-grey-300 p-1">
+                                        <PlaceCapacity
+                                          key={`${cohort}.Places`}
+                                          title={"Capacite d'accueil"}
+                                          values={values[cohort]?.placesTotal || ""}
+                                          name={`${cohort}.placesTotal`}
+                                          handleChange={handleChange}
+                                          required
+                                          errors={errors}
+                                          touched={touched}
+                                          validate={(e) => !e && `La capacité d'accueil de ${cohort} doit être renseignée`}
+                                        />
+                                      </div>
+                                      <div className="w-2/4 flex border flex-col justify-items-start ml-2 rounded-lg rounded-grey-300 p-1">
+                                        <SelectStatus
+                                          name={`${cohort}.status`}
+                                          values={values[cohort]?.status || ""}
+                                          handleChange={handleChange}
+                                          title="Statut"
+                                          options={sessionStatus}
+                                          required
+                                          errors={errors}
+                                          touched={touched}
+                                          validate={(e) => !e && `Le status pour la session de ${cohort} est obligatoire`}
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="flex flex-row-reverse mt-3 mr-4">
+                                      <DeleteSejourBtn
+                                        onClick={() => {
+                                          const nbVolontaires = defaultValue[cohort]?.placesLeft >= 0 ? defaultValue[cohort]?.placesTotal - defaultValue[cohort]?.placesLeft : 0;
+                                          return nbVolontaires > 0 ? toastr.error("Des volontaires sont assignés à ce séjour !") : handleChangeCohort(cohort);
+                                        }}
                                       />
                                     </div>
                                   </div>
-                                </div>
-                              ))
+                                );
+                              })
                             : null}
                           <div className="ml-5 mt-2 flex flex-col items-center w-3/4">
                             {values.cohorts.map((cohort) => (
@@ -296,6 +291,13 @@ export default function Edit(props) {
     </Formik>
   );
 }
+
+const DeleteSejourBtn = ({ onClick }) => (
+  <button className="group flex justify-center items-center p-2 bg-white rounded shadow-sm gap-2" onClick={() => onClick()}>
+    <Trash className="text-red-400 group-hover:scale-110" width={14} height={14} />
+    Supprimer le séjour
+  </button>
+);
 
 const PlaceCapacity = ({ title, values, name, handleChange, disabled = false, validate }) => {
   return (

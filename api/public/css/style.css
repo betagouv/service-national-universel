@@ -130,9 +130,9 @@ img.bg {
   min-width: 50%;
 }
 
-#convocation-cohesion > .referent  > .title {
+#convocation-cohesion > .referent > .title {
   font-size: 0.8rem;
-  font-weight: bold; 
+  font-weight: bold;
   text-decoration: underline;
   text-align: left;
   max-width: 50%;
@@ -152,7 +152,6 @@ img.bg {
   right: 60px;
   top: 200px;
 }
-
 
 #convocation-cohesion > .title-container {
   position: absolute;
@@ -262,7 +261,7 @@ img.bg {
 
 #convocation-cohesion > .stuff > .info {
   position: absolute;
-  top : 130px;
+  top: 150px;
 }
 
 #convocation-cohesion > .stuff-DOM > .list {
@@ -272,7 +271,7 @@ img.bg {
 
 #convocation-cohesion > .stuff-DOM > .info {
   position: absolute;
-  top : 100px;
+  top: 120px;
 }
 
 #convocation-cohesion > .meeting-point-date-return {
@@ -280,7 +279,7 @@ img.bg {
   font-size: 0.8rem;
   position: absolute;
   left: 50px;
-  top: 715px;
+  top: 725px;
   width: 85%;
 }
 
@@ -292,9 +291,6 @@ img.bg {
   top: 735px;
   width: 85%;
 }
-
-
-
 
 p.attributes {
   color: #372f78;

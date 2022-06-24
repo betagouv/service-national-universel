@@ -23,7 +23,7 @@ export default function PanelCenter({ onChange, center }) {
     try {
       const { ok, code } = await api.remove(`/cohesion-center/${center._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_OBJECT") return toastr.error("Ce centre a des jeunes inscrits sur l'une de ses sessions");
+      if (!ok && code === "LINKED_OBJECT") return toastr.error("Impossible de supprimer un centre pour lequel des volontaires sont/ont été inscrits à une session");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce centre a été supprimé.");
       return history.go(0);
