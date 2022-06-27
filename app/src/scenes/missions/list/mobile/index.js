@@ -344,7 +344,13 @@ export default function List() {
             <div className="flex flex-col space-y-5">
               <div className=" border rounded-xl bg-white py-3.5 pl-4 pr-4">
                 {!keyWordOpen && (
-                  <div className="flex justify-between " onClick={() => setKeyWordOpen(!keyWordOpen)}>
+                  <div
+                    className="flex justify-between "
+                    onClick={() => {
+                      setDropdownControlDistanceOpen(false);
+                      setDropdownControlWhenOpen(false);
+                      setKeyWordOpen(true);
+                    }}>
                     <div className="font-bold">Mot clé</div>
                     <div className="text-gray-500 text-md">{filter?.SEARCH || "Aucun"}</div>
                   </div>
@@ -379,6 +385,7 @@ export default function List() {
                 onClick={() => {
                   setDropdownControlDistanceOpen(true);
                   setDropdownControlWhenOpen(false);
+                  setKeyWordOpen(false);
                 }}>
                 {!dropdownControlDistanceOpen && (
                   <div className="flex justify-between">
@@ -475,6 +482,7 @@ export default function List() {
                     onClick={() => {
                       setDropdownControlDistanceOpen(false);
                       setDropdownControlWhenOpen(true);
+                      setKeyWordOpen(false);
                     }}>
                     <div className="font-bold">Période</div>
                     <div className="text-gray-500 text-md">N'importe quand</div>
