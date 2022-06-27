@@ -46,7 +46,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
   }
 });
 
-router.delete("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),

@@ -44,7 +44,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
 
   const handleDelete = async () => {
     setIsLoading(true);
-    const { data, ok, code } = await api.remove(`/young/${young._id}/phase1/depart`);
+    const { data, ok, code } = await api.put(`/young/${young._id}/phase1/depart`);
     if (!ok) {
       toastr.error("Oups, une erreur s'est produite", translate(code));
       setIsLoading(false);
