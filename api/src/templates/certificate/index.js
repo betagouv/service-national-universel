@@ -23,6 +23,16 @@ function getBgUrl({ cohort } = { cohort: "" }) {
   return getSignedUrl("certificates/certificateTemplate.png");
 }
 
+function getBgUrlFromDate(date) {
+  if (!date) throw new Error("Must choose a date");
+
+  let actualSignedUrl = "certificates/certificateTemplate_2022.png";
+  if (date < new Date("2020")) actualSignedUrl = "certificates/certificateTemplate-2019.png";
+  if (date < new Date("2022-05-20")) actualSignedUrl = "certificates/certificateTemplate.png";
+
+  return getSignedUrl(actualSignedUrl);
+}
+
 const phase1 = async (young) => {
   const now = new Date();
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
@@ -57,6 +67,7 @@ const phase1 = async (young) => {
 
 const phase2 = (young) => {
   let d = young.statusPhase2UpdatedAt;
+  const template = getBgUrlFromDate(d);
   if (!d) {
     // 31 mars 2021
     if (young.cohort === "2019") d = new Date(2021, 2, 31);
@@ -70,7 +81,7 @@ const phase2 = (young) => {
     .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBgUrl()))
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(template))
     .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
