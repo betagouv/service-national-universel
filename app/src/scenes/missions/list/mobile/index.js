@@ -270,6 +270,13 @@ export default function List() {
     };
   }, []);
 
+  useEffect(() => {
+    const ele = document.querySelector(".buble");
+    if (ele) {
+      ele.style.left = `${Number((ele.scrollWidth + ((filter?.DISTANCE - DISTANCE_MAX) * ele.scrollWidth) / DISTANCE_MAX) * 0.92)}px`;
+    }
+  }, [filter?.DISTANCE]);
+
   return (
     <div className="bg-white pb-12 rounded-lg w-full">
       {/* BEGIN HEADER */}
@@ -415,28 +422,28 @@ export default function List() {
                           </div>
                         )}
                       </div>
-                      {/* <div className={`ml-[${12}px]`}>
-                        <div>{filter?.DISTANCE}km</div>
-                      </div> */}
-                      <input
-                        list="distance-list"
-                        type="range"
-                        className="w-full appearance-none h-2 bg-gray-200 items-center justify-center rounded-full cursor-pointer"
-                        min="1"
-                        max={DISTANCE_MAX}
-                        step="1"
-                        onChange={(e) => {
-                          e.persist();
-                          setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
-                        }}
-                      />
-                      <datalist id="distance-list">
-                        {[...Array(DISTANCE_MAX).keys()].map((i) => (
-                          <option key={i} value={i + 1}>
-                            {i + 1}
-                          </option>
-                        ))}
-                      </datalist>
+                      <div className="relative">
+                        <input
+                          list="distance-list"
+                          type="range"
+                          className="w-full appearance-none h-2 bg-gray-200 items-center justify-center rounded-full cursor-pointer "
+                          min="1"
+                          max={DISTANCE_MAX}
+                          step="1"
+                          onChange={(e) => {
+                            e.persist();
+                            setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
+                          }}
+                        />
+                        <div className="absolute buble w-full -mt-10 -ml-2 font-bold">{filter?.DISTANCE}km</div>
+                        <datalist id="distance-list" className="border">
+                          {[...Array(DISTANCE_MAX).keys()].map((i) => (
+                            <option key={i} value={i + 1}>
+                              {i + 1}
+                            </option>
+                          ))}
+                        </datalist>
+                      </div>
                       <div className="flex justify-between w-full mt-4 px-[10px] text-gray-200">
                         <PietonSvg />
                         <VeloSvg />
