@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -42,6 +42,7 @@ export default function List() {
   const DISTANCE_MAX = 100;
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
+  const [marginDistance, setMarginDistance] = useState();
 
   const getCoordinates = async ({ q, postcode }) => {
     try {
@@ -270,6 +271,20 @@ export default function List() {
     };
   }, []);
 
+  const marginLeftDistance = (ele) => {
+    if (ele) {
+      return Number(ele.scrollWidth + ((filter?.DISTANCE - DISTANCE_MAX) * ele.scrollWidth) / DISTANCE_MAX) * 0.96;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    const ele = document.querySelector(".distanceKm");
+    if (ele) {
+      setMarginDistance(marginLeftDistance(ele));
+    }
+  }, [filter?.DISTANCE]);
+
   return (
     <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14 w-full">
       {/* BEGIN HEADER */}
@@ -303,7 +318,7 @@ export default function List() {
       <div className="bg-gray-50 p-10 rounded-lg space-y-6">
         {/* search bar recherche */}
         <div className="relative">
-          <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-1.5 ">
+          <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-1.5 items-center">
             <input
               value={filter?.SEARCH}
               onChange={(e) => {
@@ -379,26 +394,26 @@ export default function List() {
                   </div>
                 )}
               </div>
-              <input
-                list="distance-list"
-                type="range"
-                className="w-full appearance-none h-2 bg-gray-200 items-center justify-center rounded-full cursor-pointer"
-                min="1"
-                max={DISTANCE_MAX}
-                step="1"
-                onChange={(e) => {
-                  e.persist();
-                  setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
-                }}
-              />
-              <datalist id="distance-list">
-                {[...Array(DISTANCE_MAX).keys()].map((i) => (
-                  <option key={i} value={i + 1}>
-                    {i + 1}
-                  </option>
-                ))}
-              </datalist>
-              <div className="flex justify-between w-full mt-4 px-[10px] text-gray-200">
+              <div className="relative">
+                <input
+                  list="distance-list"
+                  type="range"
+                  className="w-full distanceKm appearance-none h-2 bg-gray-200 items-center  rounded-full cursor-pointer"
+                  min="1"
+                  max={DISTANCE_MAX}
+                  step="1"
+                  onChange={(e) => {
+                    e.persist();
+                    setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
+                  }}
+                />
+                {marginDistance ? (
+                  <div className="absolute -ml-2 -mt-10 font-bold " style={{ left: `${marginDistance}px` }}>
+                    {filter?.DISTANCE}km
+                  </div>
+                ) : null}
+              </div>
+              <div className="flex justify-between w-full mt-4 px-[10px] text-gray-200 items-center">
                 <PietonSvg />
                 <VeloSvg />
                 <VoitureSvg />

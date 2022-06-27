@@ -7,8 +7,6 @@ import CardMission from "./components/CardMission";
 import { apiURL } from "../../../../config";
 import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../../utils";
 import api from "../../../../services/api";
-import Loader from "../../../../components/Loader";
-import FilterGeoloc from "../../components/FilterGeoloc";
 import Sante from "../../../../assets/mission-domaines/sante";
 import Solidarite from "../../../../assets/mission-domaines/solidarite";
 import Citoyennete from "../../../../assets/mission-domaines/citoyennete";
@@ -24,7 +22,7 @@ import Sun from "../../../../assets/icons/Sun";
 import Calendar from "../../../../assets/icons/Calendar";
 import Search from "../../../../assets/icons/Search";
 import { Link } from "react-router-dom";
-import { HiOutlineAdjustments, HiOutlineArrowNarrowRight, HiSearch } from "react-icons/hi";
+import { HiOutlineAdjustments, HiOutlineArrowNarrowRight } from "react-icons/hi";
 import PietonSvg from "../../assets/Pieton";
 import VeloSvg from "../../assets/Velo";
 import VoitureSvg from "../../assets/Voiture";
@@ -47,6 +45,7 @@ export default function List() {
   const [modalControl, setModalControl] = React.useState(false);
   const [keyWordOpen, setKeyWordOpen] = React.useState(false);
   const [keyWord, setKeyWord] = React.useState("");
+  const [marginDistance, setMarginDistance] = useState();
 
   const getCoordinates = async ({ q, postcode }) => {
     try {
@@ -270,10 +269,17 @@ export default function List() {
     };
   }, []);
 
-  useEffect(() => {
-    const ele = document.querySelector(".buble");
+  const marginLeftDistance = (ele) => {
     if (ele) {
-      ele.style.left = `${Number((ele.scrollWidth + ((filter?.DISTANCE - DISTANCE_MAX) * ele.scrollWidth) / DISTANCE_MAX) * 0.92)}px`;
+      return Number((ele.scrollWidth + ((filter?.DISTANCE - DISTANCE_MAX) * ele.scrollWidth) / DISTANCE_MAX) * 0.92);
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    const ele = document.getElementById("distanceKm");
+    if (ele) {
+      setMarginDistance(marginLeftDistance(ele));
     }
   }, [filter?.DISTANCE]);
 
@@ -319,11 +325,19 @@ export default function List() {
         <Modal size={"20px"} isOpen={modalControl} toggle={setModalControl}>
           <div className="p-2 bg-gray-50 rounded-xl">
             <div className="flex justify-between mb-3 items-center ml-2">
-              <div className="text-xs text-gray-500" onClick={() => setModalControl(false)}>
+              <div
+                className="text-xs text-gray-500"
+                onClick={() => {
+                  setModalControl(false);
+                }}>
                 Fermer
               </div>
               <div>Filtrez</div>
-              <div className="h-10 w-10 bg-blue-600 rounded-full flex " onClick={() => setModalControl(false)}>
+              <div
+                className="h-10 w-10 bg-blue-600 rounded-full flex "
+                onClick={() => {
+                  setModalControl(false);
+                }}>
                 <Search className="text-white  m-auto " />
               </div>
             </div>
@@ -424,9 +438,11 @@ export default function List() {
                       </div>
                       <div className="relative">
                         <input
+                          id="distanceKm"
                           list="distance-list"
                           type="range"
-                          className="w-full appearance-none h-2 bg-gray-200 items-center justify-center rounded-full cursor-pointer "
+                          className="w-full  appearance-none h-2 bg-gray-200 rounded-full cursor-pointer items-center"
+                          value={filter?.DISTANCE}
                           min="1"
                           max={DISTANCE_MAX}
                           step="1"
@@ -435,16 +451,13 @@ export default function List() {
                             setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
                           }}
                         />
-                        <div className="absolute buble w-full -mt-10 -ml-2 font-bold">{filter?.DISTANCE}km</div>
-                        <datalist id="distance-list" className="border">
-                          {[...Array(DISTANCE_MAX).keys()].map((i) => (
-                            <option key={i} value={i + 1}>
-                              {i + 1}
-                            </option>
-                          ))}
-                        </datalist>
+                        {marginDistance ? (
+                          <div className={`absolute  -mt-10 -ml-2 font-bold `} style={{ left: `${marginDistance}px` }}>
+                            {filter?.DISTANCE}km
+                          </div>
+                        ) : null}
                       </div>
-                      <div className="flex justify-between w-full mt-4 px-[10px] text-gray-200">
+                      <div className="flex justify-between items-center w-full mt-2 px-[10px] text-gray-200">
                         <PietonSvg />
                         <VeloSvg />
                         <VoitureSvg />
