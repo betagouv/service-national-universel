@@ -87,13 +87,13 @@ export default function ValidatedDesktop() {
               <div className="flex items-center flex-wrap flex-1 mt-2 gap-x-4">
                 <button
                   disabled={loading.attestationPhase2}
-                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end bg-blue-600 text-white disabled:opacity-50 disabled:cursor-wait"
+                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end bg-blue-600 text-white disabled:opacity-50 disabled:cursor-wait hover:bg-blue-500 hover:border-blue-500"
                   onClick={() => viewAttestation({ uri: "2", button: "attestationPhase2" })}>
                   {loading.attestationPhase2 ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Télécharger
                 </button>
                 <button
                   disabled={loading.mailPhase2}
-                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600 bg-white whitespace-nowrap disabled:opacity-50 disabled:cursor-wait"
+                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600 bg-[#ffffff] whitespace-nowrap disabled:opacity-50 disabled:cursor-wait hover:bg-blue-500 hover:border-blue-500 hover:text-white"
                   onClick={() => sendAttestation({ type: "2", template: "certificate", button: "mailPhase2" })}>
                   {loading.mailPhase2 ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Envoyer par mail
                 </button>
@@ -106,13 +106,13 @@ export default function ValidatedDesktop() {
               <div className="flex items-center flex-wrap flex-1 mt-2 gap-x-4">
                 <button
                   disabled={loading.attestationSNU}
-                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end bg-blue-600 text-white disabled:opacity-50 disabled:cursor-wait"
+                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end bg-blue-600 text-white disabled:opacity-50 disabled:cursor-wait hover:bg-blue-500 hover:border-blue-500"
                   onClick={() => viewAttestation({ uri: "snu", button: "attestationSNU" })}>
                   {loading.attestationSNU ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Télécharger
                 </button>
                 <button
                   disabled={loading.mailSNU}
-                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600 bg-white whitespace-nowrap disabled:opacity-50 disabled:cursor-wait"
+                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600 bg-[#ffffff] whitespace-nowrap disabled:opacity-50 disabled:cursor-wait hover:bg-blue-500 hover:border-blue-500 hover:text-white"
                   onClick={() => sendAttestation({ type: "snu", template: "certificate", button: "mailSNU" })}>
                   {loading.mailSNU ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Envoyer par mail
                 </button>

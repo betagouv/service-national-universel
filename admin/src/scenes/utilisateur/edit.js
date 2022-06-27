@@ -230,7 +230,8 @@ export default function Edit(props) {
                     </BoxContent>
                   </Box>
                 </Col>
-                {canUpdateReferent({ actor: currentUser, originalTarget: values }) && (
+                {/* FIXME : Do not work because structure only contains id and value/label with same name */}
+                {canUpdateReferent({ actor: currentUser, originalTarget: user, structure }) && (
                   <Col md={6} style={{ marginBottom: "20px" }}>
                     <Box>
                       <BoxHeadTitle>Information</BoxHeadTitle>
@@ -357,15 +358,15 @@ export default function Edit(props) {
           )}
         </Formik>
         <Emails email={user.email} />
-        {currentUser.role === ROLES.ADMIN ? (
+        {currentUser.role === ROLES.ADMIN && (
           <Box>
             <div style={{ fontSize: ".9rem", padding: "1rem", color: colors.darkPurple }}>Historique</div>
             <HistoricComponent model="referent" value={user} />
           </Box>
-        ) : null}
-        {canDeleteReferent({ actor: currentUser, originalTarget: user }) ? (
+        )}
+        {canDeleteReferent({ actor: currentUser, originalTarget: user, structure }) && (
           <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn>
-        ) : null}
+        )}
 
         <ModalConfirm
           isOpen={modal?.isOpen}

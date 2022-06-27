@@ -24,7 +24,7 @@ const {
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
-const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES } = require("snu-lib/constants");
+const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, COHESION_STAY_END } = require("snu-lib/constants");
 
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { getQPV, getDensity } = require("../geo");
@@ -592,7 +592,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   };
 
   const now = new Date();
-  if (now > dateDeValidation[sessionPhase1.cohort] && ["true", "false"].includes(young.cohesionStayPresence)) {
+  if ((["true", "false"].includes(young.cohesionStayPresence) && ["true", "false"].includes(young.presenceJDM)) || now > COHESION_STAY_END[sessionPhase1.cohort]) {
     if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
       if (
         (now >= dateDeValidation[sessionPhase1.cohort] &&

@@ -62,6 +62,45 @@ const getReferentManagerPhase2 = async (department) => {
   return toReferent;
 };
 
+router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const JoiId = Joi.string().required().validate(req.params.id);
+    if (JoiId.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const JoiRank = Joi.string().required().validate(req.params.rank);
+    if (JoiRank.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const application = await ApplicationObject.findById(JoiId.value);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const young = await YoungObject.findById(application.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // A young can only update his own application.
+    if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const allApplications = await ApplicationObject.find({ youngId: young._id.toString() });
+    const allApplicationsSorted = allApplications.sort((a, b) => Number(a.priority) - Number(b.priority));
+    const currentIndex = allApplicationsSorted.findIndex((app) => app._id.toString() === application._id.toString());
+
+    // on l'enlève de sa position initiale
+    allApplicationsSorted.splice(currentIndex, 1);
+    // et on l'insère au nouveau rang
+    allApplicationsSorted.splice(JoiRank.value, 0, application);
+
+    for (const i in allApplicationsSorted) {
+      const applicationTemp = allApplicationsSorted[i];
+      applicationTemp.set({ priority: Number(i) + 1 });
+      await applicationTemp.save({ fromUser: req.user });
+    }
+    return res.status(200).send({ ok: true, data: allApplicationsSorted.map(serializeApplication) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateNewApplication(req.body, req.user);

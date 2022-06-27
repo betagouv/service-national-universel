@@ -6,6 +6,7 @@ const { capture } = require("../sentry");
 const StructureObject = require("../models/structure");
 const MissionObject = require("../models/mission");
 const ReferentObject = require("../models/referent");
+const ApplicationObject = require("../models/application");
 const { ERRORS } = require("../utils");
 const { ROLES, canModifyStructure, canDeleteStructure, canCreateStructure, canViewMission, canViewStructures, canViewStructureChildren } = require("snu-lib/roles");
 const patches = require("./patches");
@@ -183,6 +184,11 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     const structure = await StructureObject.findById(checkedId);
     if (!canDeleteStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const missionsLinkedToReferent = await MissionObject.find({ structureId: checkedId });
+    // ? Supprimer les missions et responsables par la même occasion ?
+    const applicationsLinkedToReferent = await ApplicationObject.find({ missionId: { $in: missionsLinkedToReferent.map((mission) => mission._id) } });
+    if (applicationsLinkedToReferent.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
 
     await structure.remove();
     console.log(`Structure ${req.params.id} has been deleted by ${req.user._id}`);

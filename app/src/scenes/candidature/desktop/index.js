@@ -14,6 +14,7 @@ export default function IndexDesktop() {
   const young = useSelector((state) => state.Auth.young);
   const [applications, setApplications] = React.useState();
   const [toggleButtonDisplayHidden, setToggleButtonDisplayHidden] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   const getApplications = async () => {
     try {
@@ -38,18 +39,17 @@ export default function IndexDesktop() {
     return result;
   };
 
-  const onDragEnd = (result) => {
-    if (!result.destination || result.destination.index === result.source.index) return;
-    const res = reorder(applications, result.source.index, result.destination.index);
-    setApplications(res.map((application, index) => ({ ...application, priority: index + 1 })));
-    updatePriority(res);
-  };
+  const onDragEnd = async (result) => {
+    setLoading(true);
+    if (!result.destination || result.destination.index === result.source.index) return setLoading(false);
+    // we change the front first for a better UX
+    setApplications((prev) => reorder(prev, result.source.index, result.destination.index).map((application, index) => ({ ...application, priority: index + 1 })));
 
-  const updatePriority = async (value) => {
-    for (let i = 0; i < value.length; i++) {
-      //todo put /id
-      await api.put("/application", { ...value[i], priority: i + 1 });
-    }
+    //then we change in the back
+    const { data } = await api.post(`/application/${result.draggableId}/change-classement/${result.destination.index}`);
+    // and we update to make sure everything is ok
+    setApplications(data);
+    setLoading(false);
   };
 
   if (!applications) return <Loader />;
@@ -81,7 +81,13 @@ export default function IndexDesktop() {
                 {(applications || [])
                   .filter((application) => toggleButtonDisplayHidden || application.hidden !== "true")
                   .map((application, i) => (
-                    <CardCandidature key={application._id.toString()} application={application} index={i} onChange={getApplications} />
+                    <CardCandidature
+                      key={`${application._id.toString()}_${application.priority}`}
+                      application={application}
+                      index={i}
+                      onChange={getApplications}
+                      loading={loading}
+                    />
                   ))}
                 {provided.placeholder}
               </div>

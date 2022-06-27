@@ -437,11 +437,9 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
 
-    const linkedObject = sessionsPhase1.reduce((acc, { placesTotal, placesLeft }) => {
-      return acc || placesTotal !== placesLeft;
-    }, false);
+    const youngsInSessions = await YoungModel.find({ sessionPhase1Id: sessionsPhase1.map((session) => session._id.toString()) });
 
-    if (linkedObject) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
+    if (youngsInSessions.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
 
     await center.remove();
     await deleteCenterDependencies({ _id: id });

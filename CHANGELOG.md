@@ -1,3 +1,32 @@
+## [1.104.1](https://github.com/betagouv/service-national-universel/compare/v1.104.0...v1.104.1) (2022-06-24)
+
+
+### Bug Fixes
+
+* **api:** La Majuscule ! (fixup) ([721667a](https://github.com/betagouv/service-national-universel/commit/721667ac6d5314fa7a9e85acb59f33bd867ab12e))
+* **app:** désistement jeune sur liste complémentaire ([6e61cd1](https://github.com/betagouv/service-national-universel/commit/6e61cd13036189b27cb3af83dab2558dad8fe6b9))
+
+# [1.104.0](https://github.com/betagouv/service-national-universel/compare/v1.103.1...v1.104.0) (2022-06-23)
+
+
+### Bug Fixes
+
+* **admin:** affichage session par défaut chef de centre multi séjour ([ae0733c](https://github.com/betagouv/service-national-universel/commit/ae0733cc5a21a4cedc837b9780900a776e002057))
+* **admin:** pointage presence JDM ([20a0acc](https://github.com/betagouv/service-national-universel/commit/20a0acc5e2eee84568472cfc964a7b0589705849))
+* **api:** auto validation status phase1 ([a6dcbca](https://github.com/betagouv/service-national-universel/commit/a6dcbca884a0d9a654697ba28724d6df34930d60))
+* **app:** candidature PM conditionnel ([f78fdd2](https://github.com/betagouv/service-national-universel/commit/f78fdd247d856881f67f31b052dd150260d50e4e))
+* **app:** change image phase 1 validée ([a0a8944](https://github.com/betagouv/service-national-universel/commit/a0a8944a61e7489e50f3a184e643a2fa87ea7200))
+* **app:** missionName not defined in application ([56c79ba](https://github.com/betagouv/service-national-universel/commit/56c79ba8a8455a7c2f7b38baed7ae29970f6e14e))
+* **app:** phase 2 button attestion ([81499f8](https://github.com/betagouv/service-national-universel/commit/81499f8c1d88a2879f5313aa759a321e35a8ab3b))
+* **app:** raccourci vers preparation militaire ([54679ed](https://github.com/betagouv/service-national-universel/commit/54679ed02923022ca49386091cf525ea68e00c79))
+* **app:** recherche missions - supprimer form ([68babb0](https://github.com/betagouv/service-national-universel/commit/68babb013e9f587405ad1d58384020c1b922411f))
+* **app:** ui phase 1 done ([77e452b](https://github.com/betagouv/service-national-universel/commit/77e452bb95f2bbe37f0c457febb1d2181bb81f63))
+
+
+### Features
+
+* **app+admin:** open new phase 2 ([ec64ab1](https://github.com/betagouv/service-national-universel/commit/ec64ab12fdae4a83ce37ef2943946a6d7964783f))
+
 ## [1.103.1](https://github.com/betagouv/service-national-universel/compare/v1.103.0...v1.103.1) (2022-06-22)
 
 
