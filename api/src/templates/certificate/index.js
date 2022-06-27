@@ -24,7 +24,7 @@ function getBgUrl({ cohort } = { cohort: "" }) {
 }
 
 function getBgUrlFromDate(date) {
-  if (!date) throw new Error("Must choose a date");
+  if (!date) return;
 
   let actualSignedUrl = "certificates/certificateTemplate_2022.png";
   if (date < new Date("2020")) actualSignedUrl = "certificates/certificateTemplate-2019.png";
@@ -67,7 +67,7 @@ const phase1 = async (young) => {
 
 const phase2 = (young) => {
   let d = young.statusPhase2UpdatedAt;
-  const template = getBgUrlFromDate(d);
+  const template = getBgUrlFromDate(d) ?? getBgUrl({ cohort: young.cohort });
   if (!d) {
     // 31 mars 2021
     if (young.cohort === "2019") d = new Date(2021, 2, 31);
