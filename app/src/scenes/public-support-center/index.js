@@ -6,6 +6,8 @@ import { HeroContainer } from "../../components/Content";
 import { supportURL } from "../../config";
 import { colors, urlWithScheme } from "../../utils";
 import ZammadForm from "./form";
+import { Modal } from "reactstrap";
+import CloseSvg from "../../assets/Close";
 
 const articles = [
   {
@@ -23,7 +25,7 @@ const articles = [
   {
     title: "Les documents à fournir",
     emoji: "📋",
-    body: `Les documents du formulaire d’inscription, ...`,
+    body: `Les documents du formulaire d'inscription, ...`,
     url: `${supportURL}/base-de-connaissance/les-documents-a-fournir`,
   },
   {
@@ -53,7 +55,7 @@ const articles = [
   {
     title: "Pourrais-je quitter le centre pendant le séjour ?",
     emoji: "🏃",
-    body: `Pour des soucis d’organisation, il n’est pas possible de déroger aux dates prévues pour le séjour de cohésion...`,
+    body: `Pour des soucis d'organisation, il n'est pas possible de déroger aux dates prévues pour le séjour de cohésion...`,
     url: `${supportURL}/base-de-connaissance/pourrais-je-quitter-le-centre-pendant-le-sejour`,
   },
   {
@@ -69,6 +71,7 @@ export default function Index(props) {
   const [open, setOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const fromPage = new URLSearchParams(props.location.search).get("from");
+  const [affectationsJuilletMessage, setAffectationsJuilletMessage] = useState(true);
 
   return (
     <HeroContainer style={{ paddingBottom: "5rem" }}>
@@ -142,6 +145,30 @@ export default function Index(props) {
         {open && <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
         {successMessage && <p style={{ color: "#6B7280" }}>{successMessage}</p>}
       </Container>
+
+      <Modal centered isOpen={affectationsJuilletMessage} toggle={() => setAffectationsJuilletMessage(false)}>
+        <div className="p-4">
+          <div className="flex flex-row-reverse absolute right-4">
+            <CloseSvg className="m-1" height={15} onClick={() => setAffectationsJuilletMessage(false)} />
+          </div>
+          <h1 className="font-bold text-lg mb-2 text-center">Qu'en est-il des affectations de Juillet ?</h1>
+          <div className="flex flex-col space-y-5">
+            <div>Bonjour,</div>
+            <div className="text-justify">
+              Nous nous excusons pour les désagréments causés par ce retard, nous n'avons malheureusement pas encore de date précise à vous communiquer. Vous allez recevoir votre
+              affectation très prochainement. Transport, alimentation, activités et tenue des volontaires, tous les frais inhérents à la mise en oeuvre du séjour de cohésion sont
+              pris en charge par l'Etat. Concernant le transport pour le séjour de cohésion, il sera pris en charge d'un point de rassemblement jusqu'à son centre d'accueil aller
+              et retour, sauf exception dans le cas d'affectation au sein de son département.
+            </div>
+            <div className="text-justify">⚠️ Ce n'est pas nécessaire d'envoyer un message au support au sujet de la date d'affectation.</div>
+            <div className=" flex justify-center">
+              <div className="p-2 bg-blue-600 text-center rounded text-white " onClick={() => setAffectationsJuilletMessage(false)}>
+                J'ai compris !
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </HeroContainer>
   );
 }
