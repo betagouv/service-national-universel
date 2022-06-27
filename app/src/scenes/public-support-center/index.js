@@ -148,23 +148,23 @@ export default function Index(props) {
 
       <Modal centered isOpen={affectationsJuilletMessage} toggle={() => setAffectationsJuilletMessage(false)}>
         <div className="p-4">
-          <div className="flex flex-row-reverse absolute right-4">
+          <div className="flex flex-row-reverse absolute right-4 cursor-pointer">
             <CloseSvg className="m-1" height={15} onClick={() => setAffectationsJuilletMessage(false)} />
           </div>
-          <h1 className="font-bold text-lg mb-2 text-center">Qu'en est-il des affectations de Juillet ?</h1>
+          <h1 className="font-bold text-lg mb-2 text-center">Qu&apos;en est-il des affectations de Juillet ?</h1>
           <div className="flex flex-col space-y-5">
             <div>Bonjour,</div>
             <div className="text-justify">
-              Nous nous excusons pour les désagréments causés par ce retard, nous n'avons malheureusement pas encore de date précise à vous communiquer. Vous allez recevoir votre
-              affectation très prochainement. Transport, alimentation, activités et tenue des volontaires, tous les frais inhérents à la mise en oeuvre du séjour de cohésion sont
-              pris en charge par l'Etat. Concernant le transport pour le séjour de cohésion, il sera pris en charge d'un point de rassemblement jusqu'à son centre d'accueil aller
-              et retour, sauf exception dans le cas d'affectation au sein de son département.
+              Nous nous excusons pour les désagréments causés par ce retard, nous n&apos;avons malheureusement pas encore de date précise à vous communiquer. Vous allez recevoir
+              votre affectation très prochainement. Transport, alimentation, activités et tenue des volontaires, tous les frais inhérents à la mise en oeuvre du séjour de cohésion
+              sont pris en charge par l&apos;Etat. Concernant le transport pour le séjour de cohésion, il sera pris en charge d&apos;un point de rassemblement jusqu&apos;à son
+              centre d&apos;accueil aller et retour, sauf exception dans le cas d&apos;affectation au sein de son département.
             </div>
-            <div className="text-justify">⚠️ Ce n'est pas nécessaire d'envoyer un message au support au sujet de la date d'affectation.</div>
+            <div className="text-justify">⚠️ Ce n&apos;est pas nécessaire d&apos;envoyer un message au support au sujet de la date d&apos;affectation.</div>
             <div className=" flex justify-center">
-              <div className="p-2 bg-blue-600 text-center rounded text-white " onClick={() => setAffectationsJuilletMessage(false)}>
-                J'ai compris !
-              </div>
+              <button className="py-1.5 px-6 bg-blue-600 text-center rounded text-white " onClick={() => setAffectationsJuilletMessage(false)}>
+                J&apos;ai compris !
+              </button>
             </div>
           </div>
         </div>
