@@ -27,7 +27,7 @@ function getCertificateTemplateFromDate(date) {
   if (!date) return;
 
   let template = "certificates/certificateTemplate_2022.png";
-  if (date < new Date("2020")) template = "certificates/certificateTemplate-2019.png";
+  if (date < new Date("2020-07-26")) template = "certificates/certificateTemplate-2019.png";
   else if (date < new Date("2022-05-20")) template = "certificates/certificateTemplate.png";
 
   return template;
