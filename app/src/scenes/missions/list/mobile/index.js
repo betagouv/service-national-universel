@@ -686,8 +686,6 @@ const Select = ({ value, options, handleChangeValue, placeholder }) => {
     setSelected(placeholderValue === "" ? placeholder : placeholderValue.length <= 28 ? placeholderValue.slice(2) : placeholderValue.slice(2, 26) + "...");
   }, [value]);
 
-  //active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.WEEKEND)}
-
   return (
     <div style={{ fontFamily: "Marianne" }} className="flex justify-center">
       {/* select item */}
