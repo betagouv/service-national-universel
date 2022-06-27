@@ -1,3 +1,19 @@
+# [1.105.0](https://github.com/betagouv/service-national-universel/compare/v1.104.1...v1.105.0) (2022-06-27)
+
+
+### Bug Fixes
+
+* **admin:** Element déclencheur validation sejour phase1 ([e4ca4b9](https://github.com/betagouv/service-national-universel/commit/e4ca4b99776cc95da76c5e49ac352e8a28bf48af))
+* **api,app:** change ordre candidature [#1618](https://github.com/betagouv/service-national-universel/issues/1618) ([49664cb](https://github.com/betagouv/service-national-universel/commit/49664cb91822d5d92eed4be8342c8cca776756ca))
+* **app:** classement candidatures responsive ([79bcb47](https://github.com/betagouv/service-national-universel/commit/79bcb47d680f73b63ce0efc0803ccedbbf0269e3))
+* **app:** pop up support affectation ([e69dc7a](https://github.com/betagouv/service-national-universel/commit/e69dc7a0a1a508f7c0d53d224ab0af579980f416))
+
+
+### Features
+
+* **admin:** suppression depart phase 1 ([#1620](https://github.com/betagouv/service-national-universel/issues/1620)) ([c41057c](https://github.com/betagouv/service-national-universel/commit/c41057c0ffa4a849bde171e5e3dd061e93019993))
+* **app:** add modal ([#1625](https://github.com/betagouv/service-national-universel/issues/1625)) ([14247e7](https://github.com/betagouv/service-national-universel/commit/14247e732d5f2fa3cfc8ee25c61932a264efe437))
+
 ## [1.104.1](https://github.com/betagouv/service-national-universel/compare/v1.104.0...v1.104.1) (2022-06-24)
 
 
