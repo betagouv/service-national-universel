@@ -47,15 +47,29 @@ export default function List() {
   const [keyWord, setKeyWord] = React.useState("");
   const [marginDistance, setMarginDistance] = useState();
 
+  const callSingleAddressAPI = async (params) => {
+    try {
+      const url = `https://api-adresse.data.gouv.fr/search/?q=${params}&limit=1`;
+      const res = await fetch(url).then((response) => response.json());
+      return res?.features[0];
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  };
+
   const getCoordinates = async ({ q, postcode }) => {
     try {
-      let url = `https://api-adresse.data.gouv.fr/search/?q=${q}+${postcode}`;
-      const res = await fetch(url).then((response) => response.json());
-      const coordinates = res?.features[0]?.geometry?.coordinates;
-      if (!coordinates) throw "Erreur en utilisant l'api d'adresse";
-      return { lat: coordinates[0], lon: coordinates[1] };
+      let adresse = await callSingleAddressAPI(`${q}+${postcode}`);
+      if (!adresse) {
+        console.warn("Utilisation du zip code seul");
+        adresse = await callSingleAddressAPI(postcode);
+        if (!adresse) throw "Erreur en utilisant l'api d'adresse";
+      }
+      const coordinates = adresse?.geometry?.coordinates;
+      return { lat: coordinates[1], lon: coordinates[0] };
     } catch (e) {
-      console.log("error", e);
+      console.error(e);
       return null;
     }
   };
@@ -191,6 +205,15 @@ export default function List() {
     }
   };
 
+  useEffect(() => {
+    (async () => {
+      if (!young) return;
+      const filterLocation = young?.location || (await getCoordinates({ q: young?.address, postcode: young?.zip }));
+
+      setFilter({ ...filter, LOCATION: filterLocation });
+    })();
+  }, [young]);
+
   React.useEffect(() => {
     let range;
     const fromDate = filter?.FROM;
@@ -233,7 +256,7 @@ export default function List() {
   }, [filter?.FROM, filter?.TO]);
 
   React.useEffect(() => {
-    if (!focusedAddress) return setFilter((prev) => ({ ...prev, LOCATION: undefined }));
+    if (!focusedAddress) return;
     (async () => {
       let location;
       location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
@@ -404,7 +427,7 @@ export default function List() {
                             id="main-address"
                             name="main-address"
                             type="radio"
-                            checked={focusedAddress?.address === young?.address}
+                            checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
                             onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
                           />
                           <label htmlFor="main-address" className="cursor-pointer">
