@@ -65,6 +65,15 @@ const Schema = new mongoose.Schema({
     },
   }, // OK ( slave data from structure)
 
+  status: {
+    type: String,
+    default: "DRAFT",
+    enum: ["DRAFT", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "CANCEL", "ARCHIVED"],
+    documentation: {
+      description: "Statut de la mission",
+    },
+  },
+
   tutorId: {
     type: String,
     documentation: {
