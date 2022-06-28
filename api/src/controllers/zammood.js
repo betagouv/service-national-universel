@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const slack = require("../slack");
 const Joi = require("joi");
-
+const { cookieOptions } = require("../cookie-options");
 const { capture } = require("../sentry");
 const zammood = require("../zammood");
 const { ERRORS, isYoung } = require("../utils");
@@ -25,6 +25,17 @@ router.get("/tickets", passport.authenticate(["referent", "young"], { session: f
   }
 });
 
+router.get("/signin", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { ok, data, token } = await zammood.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
+    if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    res.cookie("jwtzamoud", token, cookieOptions());
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 router.post("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { ok, data } = await zammood.api(`/v0/ticket/search`, {

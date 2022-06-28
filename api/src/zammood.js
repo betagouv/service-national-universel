@@ -1,9 +1,9 @@
 const fetch = require("node-fetch");
 const environment = getEnvironment();
-let SUPPORT_URL = process.env.SUPPORT_URL;
+const { SUPPORT_URL } = require("./config");
 
 if (environment === "staging") {
-  SUPPORT_URL = "https://app-e08e5b05-2416-486c-ad68-2d511fadbe50.cleverapps.io";
+  SUPPORT_URL = "https://app-923a364e-4cf7-439f-a6f0-b519d4244545.cleverapps.io";
 }
 if (environment === "production") {
   SUPPORT_URL = "https://app-e08e5b05-2416-486c-ad68-2d511fadbe50.cleverapps.io";

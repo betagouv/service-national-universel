@@ -48,6 +48,20 @@ const HelpButton = ({ onClick, to }) => (
   </div>
 );
 
+const SupportButton = ({}) => (
+  <div
+    className="justify-center flex p-8"
+    onClick={async () => {
+      const { ok, data } = await api.get(`/zammood/signin`);
+      if (ok) window.location.href = data;
+    }}>
+    <div className=" items-center border rounded flex p-2 hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg" activeClassName="flex bg-snu-purple-300 p-2">
+      <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px", "padding-left": "6px" }} />
+      <div className=" font-normal text-sm text-center  ">Boîte de réception</div>
+    </div>
+  </div>
+);
+
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
     <div onClick={onClick} className="hover:bg-snu-purple-800 hover:shadow-lg block">
@@ -117,6 +131,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
           </>
         )}
       </DrawerTabWithIcons>
+      {environment === "staging" && <SupportButton />}
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
