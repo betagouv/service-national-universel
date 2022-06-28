@@ -60,30 +60,32 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       cc,
     });
 
-    // get the manager_phase2
-    let data = await ReferentModel.findOne({
-      subRole: SUB_ROLES.manager_phase2,
-      role: ROLES.REFERENT_DEPARTMENT,
-      department: young.department,
-    });
-    // if not found, get the manager_department
-    if (!data) {
-      data = await ReferentModel.findOne({
-        subRole: SUB_ROLES.manager_department,
+    if (isYoung) {
+      // get the manager_phase2
+      let data = await ReferentModel.findOne({
+        subRole: SUB_ROLES.manager_phase2,
         role: ROLES.REFERENT_DEPARTMENT,
         department: young.department,
       });
-    }
+      // if not found, get the manager_department
+      if (!data) {
+        data = await ReferentModel.findOne({
+          subRole: SUB_ROLES.manager_department,
+          role: ROLES.REFERENT_DEPARTMENT,
+          department: young.department,
+        });
+      }
 
-    template = SENDINBLUE_TEMPLATES.referent.EQUIVALENCE_WAITING_VERIFICATION;
-    await sendTemplate(template, {
-      emailTo: [{ name: `${data.firstName} ${data.lastName}`, email: data.email }],
-      params: {
-        cta: `${config.ADMIN_URL}/volontaire/${young._id}/phase2`,
-        youngFirstName: young.firstName,
-        youngLastName: young.lastName,
-      },
-    });
+      template = SENDINBLUE_TEMPLATES.referent.EQUIVALENCE_WAITING_VERIFICATION;
+      await sendTemplate(template, {
+        emailTo: [{ name: `${data.firstName} ${data.lastName}`, email: data.email }],
+        params: {
+          cta: `${config.ADMIN_URL}/volontaire/${young._id}/phase2`,
+          youngFirstName: young.firstName,
+          youngLastName: young.lastName,
+        },
+      });
+    }
 
     res.status(200).send({ ok: true });
   } catch (error) {

@@ -39,6 +39,7 @@ export default function FormEquivalence({ young, onChange }) {
   const hiddenFileInput = React.useRef(null);
 
   const handleClickUpload = () => {
+    console.log("click");
     hiddenFileInput.current.click();
   };
 
@@ -61,7 +62,7 @@ export default function FormEquivalence({ young, onChange }) {
   const uploadFiles = async (files) => {
     setFilesList(files);
     setUploading(true);
-    const res = await api.uploadFile("/referent/file/equivalenceFiles", files);
+    const res = await api.uploadFile("/referent/file/equivalenceFiles", files, { youngId: young._id });
     if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
     // We update it instant ( because the bucket is updated instant )
     setData({ ...data, files: res.data });
@@ -111,7 +112,7 @@ export default function FormEquivalence({ young, onChange }) {
           return;
         }
         toastr.success("Votre demande d'équivalence a bien été envoyée");
-        history.push("/phase2");
+        history.push(`/volontaire/${young._id}/phase2`);
       }
       setLoading(false);
     } catch (error) {

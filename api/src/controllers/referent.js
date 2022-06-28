@@ -648,7 +648,7 @@ router.post(
         youngId: Joi.string().required(),
       }).validate(JSON.parse(body), { stripUnknown: true });
 
-      if (error || bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (error || bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error, bodyError });
 
       const young = await YoungModel.findById(youngId);
       if (!young) return res.status(404).send({ ok: false });
