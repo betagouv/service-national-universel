@@ -42,7 +42,9 @@ export default function Toolbox({ young }) {
               <div className="text-gray-600">Reconnaissez l’engagement externe du volontaire comme équivalence MIG.</div>
             </div>
           </div>
-          <button className="group flex gap-1 rounded-[10px] border-[1px] py-2 items-center justify-center border-blue-600 hover:border-[#4881FF] bg-blue-600 hover:bg-[#4881FF]">
+          <button
+            className="group flex gap-1 rounded-[10px] border-[1px] py-2 items-center justify-center border-blue-600 hover:border-[#4881FF] bg-blue-600 hover:bg-[#4881FF]"
+            onClick={() => history.push(`/volontaire/${young._id}/phase2/equivalence`)}>
             <div className="text-blue-100 group-hover:text-white text-sm ">Déclarer une équivalence MIG</div>
           </button>
         </div>

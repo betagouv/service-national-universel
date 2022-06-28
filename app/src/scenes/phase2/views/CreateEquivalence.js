@@ -110,7 +110,7 @@ export default function CreateEquivalence() {
       }
 
       if (key === "contactEmail") {
-        if (!validator.isEmail(data[key])) {
+        if (data[key] && !validator.isEmail(data[key])) {
           setErrorMail(true);
           error = true;
         } else {
