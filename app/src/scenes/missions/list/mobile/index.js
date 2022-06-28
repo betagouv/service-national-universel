@@ -38,7 +38,7 @@ export default function List() {
   const [filter, setFilter] = React.useState({ DOMAINS: [], DISTANCE: 50 });
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
-  const [focusedAddress, setFocusedAddress] = React.useState();
+  const [focusedAddress, setFocusedAddress] = React.useState({ address: young?.address, zip: young?.zip });
   const DISTANCE_MAX = 100;
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
@@ -49,12 +49,11 @@ export default function List() {
 
   const getCoordinates = async ({ q, postcode }) => {
     try {
-      let url = `https://api-adresse.data.gouv.fr/search/?q=${q || postcode}`;
-      if (postcode) url += `&postcode=${postcode}`;
+      let url = `https://api-adresse.data.gouv.fr/search/?q=${q}+${postcode}`;
       const res = await fetch(url).then((response) => response.json());
-      const lon = res?.features[0]?.geometry?.coordinates[0] || null;
-      const lat = res?.features[0]?.geometry?.coordinates[1] || null;
-      return lon && lat && { lat, lon };
+      const coordinates = res?.features[0]?.geometry?.coordinates;
+      if (!coordinates) throw "Erreur en utilisant l'api d'adresse";
+      return { lat: coordinates[0], lon: coordinates[1] };
     } catch (e) {
       console.log("error", e);
       return null;
@@ -88,7 +87,7 @@ export default function List() {
       sort: [
         {
           _geo_distance: {
-            location: filter?.LOCATION || [young.location?.lon, young.location?.lat],
+            location: filter?.LOCATION,
             order: "asc",
             unit: "km",
             mode: "min",
@@ -138,7 +137,7 @@ export default function List() {
       body.query.bool.filter.push({
         geo_distance: {
           distance: `${filter?.DISTANCE}km`,
-          location: young.location,
+          location: filter?.LOCATION,
         },
       });
     }
@@ -238,7 +237,6 @@ export default function List() {
     (async () => {
       let location;
       location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
-      if (!location) location = await getCoordinates({ postcode: focusedAddress.address });
       setFilter((prev) => ({ ...prev, LOCATION: location }));
     })();
   }, [focusedAddress]);
