@@ -1,3 +1,20 @@
+# [1.106.0](https://github.com/betagouv/service-national-universel/compare/v1.105.0...v1.106.0) (2022-06-28)
+
+
+### Bug Fixes
+
+* **api:** Erreur certificat phase 1 ([80f4b64](https://github.com/betagouv/service-national-universel/commit/80f4b64565972a3fb50d37948256cd8a71b566f8))
+* **app:** désistement message obligatoire ([590b488](https://github.com/betagouv/service-national-universel/commit/590b488c02f9dab0f29b5214ebc84f53502038a4))
+
+
+### Features
+
+* **admin:** add filter volontaire list ([6010afc](https://github.com/betagouv/service-national-universel/commit/6010afc53ee91c6bfe8501244909db4b88a3cb5c))
+* **admin:** add mail equivalence ([#1629](https://github.com/betagouv/service-national-universel/issues/1629)) ([ae3f65c](https://github.com/betagouv/service-national-universel/commit/ae3f65c9170bfee908c2916658dcbb8fbb9081dd))
+* **api:** utm batch 3 ([#1626](https://github.com/betagouv/service-national-universel/issues/1626)) ([68f75ff](https://github.com/betagouv/service-national-universel/commit/68f75ff3306f3494954cbda47ce647cadb33e7d1))
+* **app:** find mission mobile ([#1621](https://github.com/betagouv/service-national-universel/issues/1621)) ([3306e76](https://github.com/betagouv/service-national-universel/commit/3306e762f3820cb063f15b73c8c455742afd22f9))
+* **app:** ouverture des écrans phase 2 à la consultation pendant le séjour ([#1617](https://github.com/betagouv/service-national-universel/issues/1617)) ([82164fb](https://github.com/betagouv/service-national-universel/commit/82164fb7e6a3675fe8582a0f1ad381e6e81c290d))
+
 # [1.105.0](https://github.com/betagouv/service-national-universel/compare/v1.104.1...v1.105.0) (2022-06-27)
 
 
