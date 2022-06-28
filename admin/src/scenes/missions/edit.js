@@ -158,10 +158,11 @@ export default function Edit(props) {
           domains: [],
           period: [],
           subPeriod: [],
-          visibility: "",
         }
       }
       onSubmit={async (values) => {
+        console.log(values);
+        values.visibility = values.visibility || "VISIBLE";
         values.status === "DRAFT"
           ? setLoadings({
               saveButton: true,
@@ -665,7 +666,7 @@ export default function Edit(props) {
                   loading={loadings.submitButton}
                   disabled={loadings.saveButton || loadings.changeStructureButton}
                   onClick={() => {
-                    handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } }, { target: { value: "VISIBLE", name: "visibility" } });
+                    handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                     handleSubmit();
                   }}>
                   Enregistrer et proposer la mission
