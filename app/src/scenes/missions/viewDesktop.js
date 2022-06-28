@@ -199,6 +199,7 @@ export default function viewDesktop() {
         <ApplyModal
           value={mission}
           onChange={() => setModal(null)}
+          onCancel={() => setModal(null)}
           onSend={async () => {
             await getMission();
             setModal("DONE");

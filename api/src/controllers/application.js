@@ -13,7 +13,7 @@ const { sendTemplate } = require("../sendinblue");
 const { ERRORS, isYoung, isReferent } = require("../utils");
 const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
-const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications } = require("snu-lib");
+const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
 const { serializeApplication } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, getCcOfYoung } = require("../utils");
 
@@ -117,6 +117,8 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {

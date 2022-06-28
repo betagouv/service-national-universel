@@ -42,7 +42,8 @@ export function permissionPhase2(y) {
   return (
     (y.status !== YOUNG_STATUS.WITHDRAWN &&
       (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "DONE" || y.statusPhase1 === "EXEMPTED")) ||
-    y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED
+    y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ||
+    y.cohesionStayPresence === "true"
   );
 }
 
