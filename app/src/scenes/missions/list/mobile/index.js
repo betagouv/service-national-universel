@@ -71,6 +71,7 @@ export default function List() {
               },
             },
             { term: { "status.keyword": "VALIDATED" } },
+            { term: { "visibility.keyword": "VISIBLE" } },
             {
               range: {
                 placesLeft: {

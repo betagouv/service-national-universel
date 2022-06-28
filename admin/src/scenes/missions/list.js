@@ -17,7 +17,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
-import { HiAdjustments } from "react-icons/hi";
+import { HiAdjustments, HiOutlineLockClosed } from "react-icons/hi";
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION", "DATE", "SOURCE"];
@@ -205,7 +205,7 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Domaine d’action principal", "Domaine d’action principal")}
+                  renderLabel={(items) => getFilterLabel(items, "Domaine d'action principal", "Domaine d'action principal")}
                   showMissing
                   missingLabel="Non renseigné"
                 />
@@ -321,9 +321,9 @@ export default function List() {
                     <thead>
                       <tr>
                         <th>Mission</th>
-                        <th style={{ width: "100px" }}>Sources</th>
-                        <th style={{ width: "200px" }}>Dates</th>
+                        <th style={{ width: "45px" }}></th>
                         <th style={{ width: "90px" }}>Places</th>
+                        <th style={{ width: "150px" }}>Dates</th>
                         <th style={{ width: "250px" }}>Statut</th>
                       </tr>
                     </thead>
@@ -368,21 +368,28 @@ const Hit = ({ hit, onClick, selected, callback }) => {
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={() => onClick(value)}>
       <td>
-        <MultiLine>
-          <span className="font-bold text-black">{value.name}</span>
-          <p>
-            {value.structureName} {`• ${value.city} (${value.department})`}
-          </p>
-        </MultiLine>
+        <div className="flex space-x-2">
+          <span className="w-1/12  ">
+            {value.isJvaMission === "true" ? (
+              <img src={require("../../assets/JVA_round.png")} className="h-9 w-9 group-hover:scale-105 mx-auto" />
+            ) : (
+              <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 group-hover:scale-105 mx-auto" />
+            )}
+          </span>
+          <MultiLine className="w-11/12 ">
+            <span className="font-bold text-black">{value.name}</span>
+            <p>
+              {value.structureName} {`• ${value.city} (${value.department})`}
+            </p>
+          </MultiLine>
+        </div>
       </td>
+      <td>{value?.visibility === "HIDE" && <HiOutlineLockClosed size={20} className="text-gray-400" />}</td>
       <td>
-        <span>
-          {value.isJvaMission === "true" ? (
-            <img src={require("../../assets/JVA_round.png")} className="h-9 w-9 group-hover:scale-105 mx-auto" />
-          ) : (
-            <img src={require("../../assets/logo-snu.png")} className="h-9 w-9 group-hover:scale-105 mx-auto" />
-          )}
-        </span>
+        {value.placesTotal <= 1 ? `${value.placesTotal} place` : `${value.placesTotal} places`}
+        <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
+          {value.placesTotal - value.placesLeft} / {value.placesTotal}
+        </div>
       </td>
       <td>
         <div>
@@ -390,12 +397,6 @@ const Hit = ({ hit, onClick, selected, callback }) => {
         </div>
         <div>
           <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDateTimezoneUTC(value.endAt)}
-        </div>
-      </td>
-      <td>
-        {value.placesTotal <= 1 ? `${value.placesTotal} place` : `${value.placesTotal} places`}
-        <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
-          {value.placesTotal - value.placesLeft} / {value.placesTotal}
         </div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>

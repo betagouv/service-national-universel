@@ -8,7 +8,7 @@ import ErrorMessage, { requiredMessage } from "./errorMessage";
 export default function MobilityCard({ title, handleChange, values, errors, touched }) {
   return (
     <Container>
-      <h2 class="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>
+      <h2 className="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>
       <Item values={values} handleChange={handleChange} name="mobilityNearSchool" label="Votre établissement" errors={errors} touched={touched} />
       <Item values={values} handleChange={handleChange} name="mobilityNearHome" label="Votre domicile" errors={errors} touched={touched} />
       <Item values={values} handleChange={handleChange} name="mobilityNearRelative" label="Hébergement chez un proche" errors={errors} touched={touched} />
