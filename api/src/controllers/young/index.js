@@ -210,7 +210,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     const young = await YoungObject.create({ ...obj, fromUser: req.user });
 
     const toName = `${young.firstName} ${young.lastName}`;
-    const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}`;
+    const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}?utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+166+activer`;
     const fromName = `${req.user.firstName} ${req.user.lastName}`;
     await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_YOUNG, {
       emailTo: [{ name: toName, email: young.email }],
@@ -671,9 +671,16 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
 
     let buttonCta = cta || config.APP_URL;
     if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
-    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) buttonCta = `${config.APP_URL}/inscription/coordonnees`;
+    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED)
+      buttonCta = `${config.APP_URL}/inscription/coordonnees?utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+219+acceder`;
     if (template === SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION)
       buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+170+acceder`;
+    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED)
+      buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+compte+reactive&utm_source=notifauto&utm_medium=mail+168+seconnecter`;
+    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED)
+      buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+inscription+validee&utm_source=notifauto&utm_medium=mail+167+seconnecter`;
+    if (buttonCta === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION)
+      buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+dossier+attente+correction&utm_source=notifauto&utm_medium=mail+169+corriger`;
 
     let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
