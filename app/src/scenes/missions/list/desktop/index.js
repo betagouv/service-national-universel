@@ -32,28 +32,41 @@ import TrainSvg from "../../assets/Train";
 import FuseeSvg from "../../assets/Fusee";
 
 const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
+const DISTANCE_MAX = 100;
 
 export default function List() {
   const young = useSelector((state) => state.Auth.young);
   const [filter, setFilter] = React.useState({ DOMAINS: [], DISTANCE: 50 });
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
-  const [focusedAddress, setFocusedAddress] = React.useState({ address: young?.address, zip: young?.zip });
-  const DISTANCE_MAX = 100;
+  const [focusedAddress, setFocusedAddress] = React.useState();
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
   const [marginDistance, setMarginDistance] = useState();
 
+  const callSingleAddressAPI = async (params) => {
+    try {
+      const url = `https://api-adresse.data.gouv.fr/search/?q=${params}&limit=1`;
+      const res = await fetch(url).then((response) => response.json());
+      return res?.features[0];
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  };
+
   const getCoordinates = async ({ q, postcode }) => {
     try {
-      let url = `https://api-adresse.data.gouv.fr/search/?q=${q || postcode}`;
-      if (postcode) url += `&postcode=${postcode}`;
-      const res = await fetch(url).then((response) => response.json());
-      const lon = res?.features[0]?.geometry?.coordinates[0] || null;
-      const lat = res?.features[0]?.geometry?.coordinates[1] || null;
-      return lon && lat && { lat, lon };
+      let adresse = await callSingleAddressAPI(`${q}+${postcode}`);
+      if (!adresse) {
+        console.warn("Utilisation du zip code seul");
+        adresse = await callSingleAddressAPI(postcode);
+        if (!adresse) throw "Erreur en utilisant l'api d'adresse";
+      }
+      const coordinates = adresse?.geometry?.coordinates;
+      return { lat: coordinates[1], lon: coordinates[0] };
     } catch (e) {
-      console.log("error", e);
+      console.error(e);
       return null;
     }
   };
@@ -85,7 +98,7 @@ export default function List() {
       sort: [
         {
           _geo_distance: {
-            location: filter?.LOCATION || [young.location?.lon, young.location?.lat],
+            location: filter?.LOCATION,
             order: "asc",
             unit: "km",
             mode: "min",
@@ -131,11 +144,10 @@ export default function List() {
     }
 
     if (filter?.DISTANCE) {
-      // todo : make it work
       body.query.bool.filter.push({
         geo_distance: {
           distance: `${filter?.DISTANCE}km`,
-          location: young.location,
+          location: filter?.LOCATION,
         },
       });
     }
@@ -189,6 +201,15 @@ export default function List() {
     }
   };
 
+  useEffect(() => {
+    (async () => {
+      if (!young) return;
+      const filterLocation = young?.location || (await getCoordinates({ q: young?.address, postcode: young?.zip }));
+
+      setFilter({ ...filter, LOCATION: filterLocation });
+    })();
+  }, [young]);
+
   React.useEffect(() => {
     let range;
     const fromDate = filter?.FROM;
@@ -231,11 +252,10 @@ export default function List() {
   }, [filter?.FROM, filter?.TO]);
 
   React.useEffect(() => {
-    if (!focusedAddress) return setFilter((prev) => ({ ...prev, LOCATION: undefined }));
+    if (!focusedAddress) return;
     (async () => {
       let location;
       location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
-      if (!location) location = await getCoordinates({ postcode: focusedAddress.address });
       setFilter((prev) => ({ ...prev, LOCATION: location }));
     })();
   }, [focusedAddress]);
@@ -357,7 +377,7 @@ export default function List() {
                     id="main-address"
                     name="main-address"
                     type="radio"
-                    checked={focusedAddress?.address === young?.address}
+                    checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
                     onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
                   />
                   <label htmlFor="main-address" className="cursor-pointer">
@@ -586,35 +606,37 @@ export default function List() {
       </div>
       {/* END CONTROL */}
 
-      <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <Missions>
-          <ReactiveList
-            defaultQuery={getDefaultQuery}
-            componentId="result"
-            react={{ and: FILTERS }}
-            pagination={true}
-            paginationAt="bottom"
-            size={25}
-            showLoader={true}
-            loader="Chargement..."
-            innerClass={{ pagination: "pagination" }}
-            dataField="created_at"
-            renderResultStats={({ numberOfResults }) => {
-              return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
-            }}
-            render={({ data }) => {
-              return data.map((e) => {
-                const tags = [];
-                e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
-                // tags.push(e.remote ? "À distance" : "En présentiel");
-                e.domains.forEach((d) => tags.push(translate(d)));
-                return <CardMission key={e._id} mission={e} />;
-              });
-            }}
-            renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
-          />
-        </Missions>
-      </ReactiveBase>
+      {filter?.LOCATION && (
+        <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+          <Missions>
+            <ReactiveList
+              defaultQuery={getDefaultQuery}
+              componentId="result"
+              react={{ and: FILTERS }}
+              pagination={true}
+              paginationAt="bottom"
+              size={25}
+              showLoader={true}
+              loader="Chargement..."
+              innerClass={{ pagination: "pagination" }}
+              dataField="created_at"
+              renderResultStats={({ numberOfResults }) => {
+                return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
+              }}
+              render={({ data }) => {
+                return data.map((e) => {
+                  const tags = [];
+                  e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
+                  // tags.push(e.remote ? "À distance" : "En présentiel");
+                  e.domains.forEach((d) => tags.push(translate(d)));
+                  return <CardMission key={e._id} mission={e} />;
+                });
+              }}
+              renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
+            />
+          </Missions>
+        </ReactiveBase>
+      )}
     </div>
   );
 }
