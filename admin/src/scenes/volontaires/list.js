@@ -80,6 +80,7 @@ const FILTERS = [
   "COHESION_PRESENCE",
   "DEPART",
   "DEPART_MOTIF",
+  "SAME_DEPARTMENT_SPORT",
 ];
 
 export default function VolontaireList() {
@@ -674,7 +675,7 @@ export default function VolontaireList() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  placeholder="Affectation dans son département"
+                  placeholder="Affectation dans son département (handicap)"
                   componentId="SAME_DEPARTMENT"
                   dataField="handicapInSameDepartment.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "SAME_DEPARTMENT") }}
