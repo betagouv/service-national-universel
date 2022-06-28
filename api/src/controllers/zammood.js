@@ -25,7 +25,7 @@ router.get("/tickets", passport.authenticate(["referent", "young"], { session: f
   }
 });
 
-router.get("/signin", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/signin", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { ok, data, token } = await zammood.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
