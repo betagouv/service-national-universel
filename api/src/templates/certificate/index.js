@@ -62,7 +62,7 @@ const phase1 = async (young) => {
     .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
     .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(COHESION_CENTER_LOCATION))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-    .replace(/{{GENERAL_BG}}/g, sanitizeAll(template))
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
     .replace(/{{DATE}}/g, sanitizeAll(date.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
