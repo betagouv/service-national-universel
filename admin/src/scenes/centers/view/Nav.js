@@ -36,18 +36,6 @@ export default function Nav({ center, tab, onChangeTab, focusedSession, user, co
               Volontaires
             </Tab>
           ) : null}
-          {/* {canAssignCohesionCenter(user) ? (
-            <Tab
-              isActive={tab === "affectation"}
-              last
-              onClick={() => {
-                onChangeTab("affectation");
-                history.push(`/centre/${center._id}/affectation`);
-              }}
-              style={{ borderRadius: "0 0.5rem 0.5rem 0", minWidth: "168px" }}>
-              Affectation manuelle
-            </Tab>
-          ) : null} */}
         </TabList>
       </div>
 
