@@ -27,7 +27,6 @@ import {
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1_MOTIF,
-  canAssignCohesionCenter,
   isTemporaryAffected,
 } from "../../../utils";
 import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
