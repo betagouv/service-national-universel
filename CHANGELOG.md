@@ -1,3 +1,20 @@
+# [1.107.0](https://github.com/betagouv/service-national-universel/compare/v1.106.0...v1.107.0) (2022-06-29)
+
+
+### Bug Fixes
+
+* **admin:** vue temp affected ([9aa715f](https://github.com/betagouv/service-national-universel/commit/9aa715f7cf4f0a51e4033e6c53a1424eb79951f1))
+* **app:** delete modal support affectation ([8147501](https://github.com/betagouv/service-national-universel/commit/81475014b48c3a5da96f58a638cbbd4b01da6a01))
+* hide retour ([37615bc](https://github.com/betagouv/service-national-universel/commit/37615bc126e5a06cbc0d1972719519ee29b3e302))
+
+
+### Features
+
+* **admin:** add grade user attributes support ([#1636](https://github.com/betagouv/service-national-universel/issues/1636)) ([afd9ed7](https://github.com/betagouv/service-national-universel/commit/afd9ed71b651dfe69f188d85882c85cb910613bb))
+* **app:** Cards mission ([#1632](https://github.com/betagouv/service-national-universel/issues/1632)) ([b22d141](https://github.com/betagouv/service-national-universel/commit/b22d141a032b93362834b858fb9c24232fc25d17))
+* **app:** Change convocation date for return ([fd29acf](https://github.com/betagouv/service-national-universel/commit/fd29acf9ae0c7370cc39a4ce89bfe74fe3bfa5b1))
+* **app:** Forms ([#1633](https://github.com/betagouv/service-national-universel/issues/1633)) ([05935cf](https://github.com/betagouv/service-national-universel/commit/05935cfd3f3c3e68a46871254ccb53b2832bb758))
+
 # [1.106.0](https://github.com/betagouv/service-national-universel/compare/v1.105.0...v1.106.0) (2022-06-28)
 
 
