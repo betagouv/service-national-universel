@@ -39,7 +39,6 @@ export default function FormEquivalence({ young, onChange }) {
   const hiddenFileInput = React.useRef(null);
 
   const handleClickUpload = () => {
-    console.log("click");
     hiddenFileInput.current.click();
   };
 
