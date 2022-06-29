@@ -91,6 +91,7 @@ export default function Convocation() {
     return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = () => {
+    if (young.cohort === "Juillet 2022" && young.deplacementPhase1Autonomous !== "true") return "vendredi 15 juillet, 18:00";
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return returnMeetingDate[young.cohort]; // new Date("2021-07-02T12:00:00.000+00:00");
     return meetingPoint.returnAtString;
   };
@@ -190,7 +191,7 @@ export default function Convocation() {
           </ul>
         </ConvocText>
         <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
-        {/* {!isFromDOMTOM() ? (
+        {!isFromDOMTOM() ? (
           <ConvocText>
             Le <b>retour de votre séjour </b>est prévu le {getReturnMeetingDate().split(",")[1]} à{" "}
             {getReturnMeetingDate()
@@ -199,7 +200,7 @@ export default function Convocation() {
               .join(" ")}
             , au même endroit que le jour du départ en centre.
           </ConvocText>
-        ) : null} */}
+        ) : null}
         <ConvocText>
           <b>
             Votre représentant légal veillera à bien respecter ces modalités de retour (horaire, lieu de prise en charge). Vous ne pourrez repartir seul, sauf si vous présentez une
