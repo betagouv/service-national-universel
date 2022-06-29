@@ -474,16 +474,10 @@ router.post("/edit-cohesioncenter/_msearch", passport.authenticate(["referent"],
     const { user, body } = req;
     let filter = [];
 
-    if (!canSearchInElasticSearch(user, "cohesioncenter") || ![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role))
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if (req.params.action === "export") {
-      const response = await allRecords("cohesioncenter", applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: response });
-    } else {
-      const response = await esClient.msearch({ index: "cohesioncenter", body: withFilterForMSearch(body, filter) });
-      return res.status(200).send(response.body);
-    }
+    const response = await esClient.msearch({ index: "cohesioncenter", body: withFilterForMSearch(body, filter) });
+    return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
