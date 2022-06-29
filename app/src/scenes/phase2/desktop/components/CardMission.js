@@ -42,7 +42,7 @@ export default function application({ application }) {
       </div>
       <div className="flex flex-1 flex-col justify-between">
         <div className="flex flex-1 flex-col">
-          <div className="text-gray-500 text-xs mt-2 uppercase">{application.mission?.structureName}</div>
+          <div className="text-gray-500 text-xs mt-2 uppercase tracking-wider">{application.mission?.structureName}</div>
           <div className="font-bold text-sm mt-2 break-words">
             {application.missionName?.substring(0, 150)}
             {application.missionName?.length > 150 ? "..." : ""}
