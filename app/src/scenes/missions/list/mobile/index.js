@@ -479,11 +479,9 @@ export default function List() {
                             setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
                           }}
                         />
-                        {marginDistance ? (
-                          <div className={`absolute  -mt-10 -ml-2 font-bold `} style={{ left: `${marginDistance}px` }}>
-                            {filter?.DISTANCE}km
-                          </div>
-                        ) : null}
+                        <div className={`absolute  -mt-10 -ml-2 font-bold  w-full ${!marginDistance && " flex justify-center ml-1"} `} style={{ left: `${marginDistance}px` }}>
+                          {filter?.DISTANCE}km
+                        </div>
                       </div>
                       <div className="flex justify-between items-center w-full mt-2 px-[10px] text-gray-200">
                         <PietonSvg />
