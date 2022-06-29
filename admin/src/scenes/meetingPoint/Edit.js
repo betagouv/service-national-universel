@@ -166,6 +166,11 @@ export default function Edit(props) {
               <h4>
                 <strong>Point de rassemblement</strong>
               </h4>
+              {meetingPoint.isValid === "false" ? (
+                <div className="flex bg-yellow-100 rounded-full px-3 py-1 items-center text-yellow-600 text-md gap-1">
+                  <div>Non validé</div>
+                </div>
+              ) : null}
             </div>
             <div>
               <Donnee title={"Adresse"} value={meetingPoint.departureAddress} number={""} />

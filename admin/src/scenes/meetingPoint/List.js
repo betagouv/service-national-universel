@@ -16,9 +16,9 @@ import { Filter2, FilterRow, ResultTable } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import { apiURL, environment } from "../../config";
 import api from "../../services/api";
-import { canCreateMeetingPoint, ES_NO_LIMIT, getDepartmentNumber, ROLES } from "../../utils";
+import { canCreateMeetingPoint, ES_NO_LIMIT, getDepartmentNumber, ROLES, translate } from "../../utils";
 
-const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT", "REGION"];
+const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT", "REGION", "IS_VALID"];
 
 export default function MeetingPoint() {
   const [filterVisible, setFilterVisible] = useState(false);
@@ -180,6 +180,21 @@ export default function MeetingPoint() {
                       searchPlaceholder="Rechercher..."
                       size={1000}
                     />
+                    {user.role === ROLES.ADMIN ? (
+                      <MultiDropdownList
+                        defaultQuery={getDefaultQuery}
+                        className="dropdown-filter"
+                        placeholder="Validité"
+                        componentId="IS_VALID"
+                        dataField="isValid.keyword"
+                        react={{ and: FILTERS.filter((e) => e !== "IS_VALID") }}
+                        renderItem={(e, count) => {
+                          return `${translate(e)} (${count})`;
+                        }}
+                        title=""
+                        URLParams={true}
+                      />
+                    ) : null}
                     <DeleteFilters />
                   </FilterRow>
                 </Filter2>
@@ -242,7 +257,7 @@ const Hit = ({ hit, user }) => {
   }, [hit]);
 
   return (
-    <tr className="hover:!bg-gray-100">
+    <tr className={`hover:!bg-gray-100 ${hit.isValid === "false" ? "bg-yellow-100" : "bg-[#ffffff"}`}>
       <td className={`pl-4 ml-2 rounded-l-lg`}>
         <div className="flex gap-2 items-center text-sm">
           <BusSvg className="text-gray-400" />
