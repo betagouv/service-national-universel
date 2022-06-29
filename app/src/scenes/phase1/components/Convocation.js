@@ -199,6 +199,9 @@ export default function Convocation() {
               .slice(0, 3)
               .join(" ")}
             , au même endroit que le jour du départ en centre.
+            {young?.cohort === "Juillet 2022" && young?.deplacementPhase1Autonomous !== "true"
+              ? "(Cet horaire est donné à titre indicatif, il vous sera confirmé ultérieurement.)"
+              : null}
           </ConvocText>
         ) : null}
         <ConvocText>
