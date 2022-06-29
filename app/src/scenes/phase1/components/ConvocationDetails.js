@@ -30,7 +30,7 @@ const returnMeetingDate = {
   2021: "mardi 02 juillet, 14:00",
   "Février 2022": "vendredi 25 février, 11:00",
   "Juin 2022": "vendredi 24 juin, 11:00",
-  "Juillet 2022": "vendredi 15 juillet, 18:00",
+  "Juillet 2022": "vendredi 15 juillet, 11:00",
 };
 
 const cohortToMonth = {
@@ -83,6 +83,7 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
     return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = () => {
+    if (young.cohort === "Juillet 2022" && !isAutonomous) return "vendredi 15 juillet, 18:00";
     if (isAutonomous || !meetingPoint) return returnMeetingDate[young.cohort]; // new Date("2021-07-02T12:00:00.000+00:00");
     return meetingPoint.returnAtString;
   };
@@ -143,39 +144,23 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
                   </div>
                 </div>
                 {/* FIXME Hot fix sale pour juillet */}
-                {young?.cohort === "Juillet 2022" ? (
-                  <>
-                    <Calendar date={returnMeetingDate[young.cohort].split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12" />
-                    <div className="flex flex-col">
-                      <div className="flex gap-x-1">
-                        <div className="font-bold text-sm whitespace-nowrap">Retour à{returnMeetingDate[young.cohort].split(",")[1]}</div>
-                        <WithTooltip tooltipText="Cet horaire est donné à titre indicatif. Il vous sera confirmé ultérieurement">
-                          <IoMdInformationCircleOutline />
-                        </WithTooltip>
-                      </div>
-
-                      <div className="text-sm text-gray-600 whitespace-nowrap">
-                        {returnMeetingDate[young.cohort]
-                          .split(/[,\s]+/)
-                          .slice(0, 3)
-                          .join(" ")}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <Calendar date={getReturnMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12" />
-                    <div className="flex flex-col">
-                      <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
-                      <div className="text-sm text-gray-600 whitespace-nowrap">
-                        {getReturnMeetingDate()
-                          .split(/[,\s]+/)
-                          .slice(0, 3)
-                          .join(" ")}
-                      </div>
-                    </div>
-                  </>
-                )}
+                <Calendar date={getReturnMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12" />
+                <div className="flex flex-col">
+                  <div className="flex gap-x-1">
+                    <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
+                    {young.cohort === "Juillet 2022" && !isAutonomous && (
+                      <WithTooltip tooltipText="Cet horaire est donné à titre indicatif. Il vous sera confirmé ultérieurement">
+                        <IoMdInformationCircleOutline />
+                      </WithTooltip>
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600 whitespace-nowrap">
+                    {getReturnMeetingDate()
+                      .split(/[,\s]+/)
+                      .slice(0, 3)
+                      .join(" ")}
+                  </div>
+                </div>
               </div>
             </>
           )}
