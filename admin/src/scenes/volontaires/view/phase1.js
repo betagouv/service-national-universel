@@ -307,16 +307,14 @@ export default function Phase1(props) {
                 </div>
               ) : (
                 isTemporaryAffected(young) && (
-                  <p className="flex bg-yellow-300 gap-x-1 font-bold my-1">
-                    <div className="flex items-center gap-x-2">
-                      <MdOutlineWarningAmber className="text-xl ml-2" />
-                      <div>
-                        Le jeune est déjà préaffecté à un centre !
-                        <br />
-                        L&apos;affectation manuelle est désactivée temporairement pour ce jeune !
+                  <div className="flex bg-yellow-100 gap-x-1 font-bold my-1 rounded-lg p-2">
+                    <div className="flex items-center gap-x-2 ">
+                      <MdOutlineWarningAmber className="text-xl ml-2 text-yellow-600" />
+                      <div className="flex flex-1 text-yellow-600">
+                        Le jeune est déjà préaffecté à un centre ! L&apos;affectation manuelle est désactivée temporairement pour ce jeune.
                       </div>
                     </div>
-                  </p>
+                  </div>
                 )
               )}
               {getCohesionStay(young)}
