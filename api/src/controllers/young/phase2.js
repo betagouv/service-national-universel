@@ -51,7 +51,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 
     const youngId = value.id;
     delete value.id;
-    await MissionEquivalenceModel.create({ ...value, youngId, status: "WAITING_VERIFICATION" });
+    await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
 
     let template = SENDINBLUE_TEMPLATES.young.EQUIVALENCE_WAITING_VERIFICATION;
     let cc = getCcOfYoung({ template, young });
