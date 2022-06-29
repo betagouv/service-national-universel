@@ -161,8 +161,6 @@ export default function Edit(props) {
         }
       }
       onSubmit={async (values) => {
-        console.log(values);
-        values.visibility = values.visibility || "VISIBLE";
         values.status === "DRAFT"
           ? setLoadings({
               saveButton: true,
@@ -272,7 +270,9 @@ export default function Edit(props) {
                         <div className="flex items-center">
                           <div
                             onClick={() => {
-                              values.status !== "VALIDATED" ? null : handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDE" : "VISIBLE", name: "visibility" } });
+                              values.status !== "VALIDATED"
+                                ? null
+                                : handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDDEN" : "VISIBLE", name: "visibility" } });
                             }}
                             name="visibility"
                             className={`flex items-center w-9 h-4 rounded-full ${

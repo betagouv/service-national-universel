@@ -384,7 +384,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           </MultiLine>
         </div>
       </td>
-      <td>{value?.visibility === "HIDE" && <HiOutlineLockClosed size={20} className="text-gray-400" />}</td>
+      <td>{value?.visibility === "HIDDEN" && <HiOutlineLockClosed size={20} className="text-gray-400" />}</td>
       <td>
         {value.placesTotal <= 1 ? `${value.placesTotal} place` : `${value.placesTotal} places`}
         <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
