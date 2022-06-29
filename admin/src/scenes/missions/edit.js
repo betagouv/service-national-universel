@@ -262,7 +262,7 @@ export default function Edit(props) {
                 <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                   <Wrapper>
                     <BoxTitle>Détails de la mission</BoxTitle>
-                    {defaultValue ? (
+                    {values.status === "VALIDATED" ? (
                       <FormGroup>
                         <label className="uppercase">
                           <span>*</span>visibilité pour les candidats
