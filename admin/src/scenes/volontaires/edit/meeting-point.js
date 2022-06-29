@@ -83,14 +83,14 @@ export default function MeetingPointView({ values, handleChange, handleSubmit })
               <Loader />
             ) : (
               <>
-                {canAssignMeetingPoint(user) ? <AssignMeetingPoint young={values} onAffect={getData} /> : null}
+                {canAssignMeetingPoint(user, values) ? <AssignMeetingPoint young={values} onAffect={getData} /> : null}
                 {values.deplacementPhase1Autonomous === "true" ? <i>{`${values.firstName} se rend au centre par ses propres moyens.`}</i> : <MeetingPoint value={meetingPoint} />}
-                {canAssignMeetingPoint(user) && (meetingPoint || values.deplacementPhase1Autonomous === "true") ? (
+                {canAssignMeetingPoint(user, values) && (meetingPoint || values.deplacementPhase1Autonomous === "true") ? (
                   <CancelButton color={colors.red} onClick={onClickCancel}>
                     Annuler ce choix
                   </CancelButton>
                 ) : null}
-                {canAssignMeetingPoint(user) && !meetingPoint && values.deplacementPhase1Autonomous !== "true" ? (
+                {canAssignMeetingPoint(user, values) && !meetingPoint && values.deplacementPhase1Autonomous !== "true" ? (
                   <LoadingButton loading={isLoading} disabled={isLoading} onClick={onClickDeplacementPhase1Autonomous}>
                     {values.firstName} se rendra au centre de cohésion par ses propres moyens.
                   </LoadingButton>

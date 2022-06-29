@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { ImQuotesLeft } from "react-icons/im";
-import { MdOutlineOpenInNew } from "react-icons/md";
+import { MdOutlineOpenInNew, MdOutlineWarningAmber } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Row } from "reactstrap";
@@ -28,6 +28,7 @@ import {
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1_MOTIF,
   canAssignCohesionCenter,
+  isTemporaryAffected,
 } from "../../../utils";
 import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../../centers/components/modals/ModalPointagePresenceArrivee";
@@ -298,12 +299,26 @@ export default function Phase1(props) {
               </section>
             </Bloc>
             <Bloc title="Détails" borderBottom disabled={disabled}>
-              {canAssignCohesionCenter(user) && (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) ? (
+              {canAssignCohesionCenter(user, young) &&
+              (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) ? (
                 <div className="flex items-center hover:underline hover:text-blue-600 cursor-pointer mb-4" onClick={() => setModalAffectation({ isOpen: true })}>
                   <AiOutlinePlus className="text-blue-800 mr-2 border-[1px] border-blue-800 rounded-full h-4 w-4" />
                   Affecter dans un centre
                 </div>
-              ) : null}
+              ) : (
+                isTemporaryAffected(young) && (
+                  <p className="flex bg-yellow-300 gap-x-1 font-bold my-1">
+                    <div className="flex items-center gap-x-2">
+                      <MdOutlineWarningAmber className="text-xl ml-2" />
+                      <div>
+                        Le jeune est déjà préaffecté à un centre !
+                        <br />
+                        L&apos;affectation manuelle est désactivée temporairement pour ce jeune !
+                      </div>
+                    </div>
+                  </p>
+                )
+              )}
               {getCohesionStay(young)}
               <Details title="Dates" value={translateCohort(young.cohort)} className="flex" />
               <p className="text-base my-1">Point de rassemblement :</p>
