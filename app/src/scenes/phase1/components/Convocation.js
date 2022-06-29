@@ -190,7 +190,7 @@ export default function Convocation() {
           </ul>
         </ConvocText>
         <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
-        {!isFromDOMTOM() ? (
+        {/* {!isFromDOMTOM() ? (
           <ConvocText>
             Le <b>retour de votre séjour </b>est prévu le {getReturnMeetingDate().split(",")[1]} à{" "}
             {getReturnMeetingDate()
@@ -199,7 +199,7 @@ export default function Convocation() {
               .join(" ")}
             , au même endroit que le jour du départ en centre.
           </ConvocText>
-        ) : null}
+        ) : null} */}
         <ConvocText>
           <b>
             Votre représentant légal veillera à bien respecter ces modalités de retour (horaire, lieu de prise en charge). Vous ne pourrez repartir seul, sauf si vous présentez une
