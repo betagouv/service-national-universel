@@ -246,7 +246,7 @@ router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
 
-    if (!canAssignCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canAssignCohesionCenter(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // update youngs infos
     young.set({
