@@ -16,7 +16,7 @@ import MailAttestationButton from "../../../components/buttons/MailAttestationBu
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
 import {
-  FORCE_DISABLED_ASSIGN_COHESION_CENTER,
+  canAssignCohesionCenter,
   formatDateFR,
   formatStringLongDate,
   ROLES,
@@ -138,7 +138,7 @@ export default function Phase1(props) {
       return (
         <>
           <p>{young.firstName} est en attente d&apos;affectation à un centre de cohésion</p>
-          {!FORCE_DISABLED_ASSIGN_COHESION_CENTER && user.role === ROLES.ADMIN ? <AssignCenter young={young} onAffect={props.onChange} /> : null}
+          {canAssignCohesionCenter(user, young) ? <AssignCenter young={young} onAffect={props.onChange} /> : null}
         </>
       );
     if (young.statusPhase1 === "WAITING_LIST")
