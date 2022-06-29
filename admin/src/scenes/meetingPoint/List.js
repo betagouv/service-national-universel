@@ -16,7 +16,7 @@ import { Filter2, FilterRow, ResultTable } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import { apiURL, environment } from "../../config";
 import api from "../../services/api";
-import { canCreateMeetingPoint, ES_NO_LIMIT, getDepartmentNumber, ROLES, translate } from "../../utils";
+import { canCreateMeetingPoint, ES_NO_LIMIT, getDepartmentNumber, ROLES, translate, getFilterLabel } from "../../utils";
 
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS", "COHORT", "REGION", "IS_VALID"];
 
@@ -191,6 +191,7 @@ export default function MeetingPoint() {
                         renderItem={(e, count) => {
                           return `${translate(e)} (${count})`;
                         }}
+                        renderLabel={(items) => getFilterLabel(items, "Validité", "Validité")}
                         title=""
                         URLParams={true}
                       />
