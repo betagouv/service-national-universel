@@ -270,24 +270,21 @@ export default function Edit(props) {
                         <div className="flex items-center">
                           <div
                             onClick={() => {
-                              values.status !== "VALIDATED"
-                                ? null
-                                : handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDDEN" : "VISIBLE", name: "visibility" } });
+                              handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDDEN" : "VISIBLE", name: "visibility" } });
                             }}
                             name="visibility"
                             className={`flex items-center w-9 h-4 rounded-full ${
-                              values.status === "VALIDATED" && values.visibility === "VISIBLE" ? "bg-blue-600" : "bg-red-500"
+                              values.visibility === "VISIBLE" ? "bg-blue-600" : "bg-red-500"
                             } cursor-pointer transition duration-100 ease-in`}>
                             <div
                               className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] ${
-                                values.status === "VALIDATED" && values.visibility === "VISIBLE" ? "translate-x-[16px]" : "translate-x-0"
+                                values.visibility === "VISIBLE" ? "translate-x-[16px]" : "translate-x-0"
                               } transition duration-100 ease-in shadow-nina`}>
-                              {values.status === "VALIDATED" && values.visibility === "VISIBLE" ? null : <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />}
+                              {values.visibility === "VISIBLE" ? null : <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />}
                             </div>
                           </div>
                           <div className="ml-2 ">
-                            La mission est <label className="font-bold">{values.status === "VALIDATED" && values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</label> aux
-                            candidatures
+                            La mission est <label className="font-bold">{values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</label> aux candidatures
                           </div>
                         </div>
                       </FormGroup>
