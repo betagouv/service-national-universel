@@ -252,6 +252,7 @@ const getUserAttributes = async (user) => {
       name: "lien vers équipe départementale",
       value: `${ADMIN_URL}/user?DEPARTMENT=%5B%22${user.department}%22%5D&ROLE=%5B%22referent_department%22%5D`,
     });
+    userAttributes.push({ name: "classe", value: user.grade });
   } else {
     if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
       userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
