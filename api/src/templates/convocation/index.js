@@ -119,7 +119,7 @@ const render = async (young) => {
       .replace(
         /{{MEETING_DATE_TEMPLATE}}/g,
         sanitizeAll(
-          young?.cohort !== "Juillet 2022"
+          young?.cohort === "Juillet 2022"
             ? "Le retour est prévu le <b>vendredi 15 juillet à 18h</b> au même point de rendez-vous.\
              (Cet horaire est donné à titre indicatif, il vous sera confirmé ultérieurement.)"
             : "Le retour de votre séjour est prévu le <b>{{MEETING_DATE_RETURN}} à {{MEETING_HOURS_RETURN}}</b>, \
