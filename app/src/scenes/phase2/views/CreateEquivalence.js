@@ -142,7 +142,7 @@ export default function CreateEquivalence() {
   return (
     <div className="flex justify-center align-center my-4 ">
       <div className="lg:w-1/2 p-4">
-        <div className="text-2xl md:text-4xl text-center font-extrabold leading-10 tracking-tight ">Je demande la reconnaissance d'un engagement déjà réalisé</div>
+        <div className="text-2xl md:text-4xl text-center font-extrabold leading-10 tracking-tight ">Je demande la reconnaissance d&apos;un engagement déjà réalisé</div>
         <div className="border-[1px] border-blue-400 rounded-lg bg-blue-50 mt-4">
           <div className="flex items-center px-4 py-3">
             <InformationCircle className="text-blue-400" />
@@ -162,10 +162,12 @@ export default function CreateEquivalence() {
           <div className="text-sm leading-5 font-normal text-gray-500 mt-2">Veuillez compléter le formulaire ci-dessous.</div>
           <div className="mt-6 text-xs leading-4 font-medium">Quoi ?</div>
           <div className="border-[1px] border-gray-300 w-full  h-14 rounded-lg mt-3  ">
-            <div className="flex justify-center h-full  flex-col space-y-1">
-              <div className="relative" ref={refType}>
+            <div className="flex justify-center h-full flex-col space-y-1">
+              <div className="relative h-full" ref={refType}>
                 {data?.type ? <div className="text-xs leading-4 font-normal text-gray-500 px-3 ">Type d&apos;engagement</div> : null}
-                <button className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full px-3" onClick={() => setOpenType((e) => !e)}>
+                <button
+                  className="flex justify-between items-center cursor-pointer disabled:opacity-50 disabled:cursor-wait w-full h-full px-3"
+                  onClick={() => setOpenType((e) => !e)}>
                   <div className="flex items-center gap-2">
                     {data?.type ? (
                       <span className="text-sm leading-5 font-normal">{data?.type}</span>
@@ -221,7 +223,7 @@ export default function CreateEquivalence() {
               />
             </div>
           </div>
-          <div className="flex items-stretch gap-2">
+          <div className="flex flex-col md:flex-row items-stretch md:gap-2">
             <div className="border-[1px] border-gray-300 w-full px-3 h-14 rounded-lg mt-3  ">
               <div className="flex justify-center h-full  flex-col space-y-1">
                 {data?.zip ? <div className="text-xs leading-4 font-normal text-gray-500  ">Code postal</div> : null}
