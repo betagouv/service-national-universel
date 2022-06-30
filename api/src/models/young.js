@@ -165,7 +165,6 @@ const Schema = new mongoose.Schema({
   },
   statusPhase1Tmp: {
     type: String,
-    default: "WAITING_AFFECTATION",
     enum: ["AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"],
     documentation: {
       description: "Statut du volontaire lié à la première phase",
