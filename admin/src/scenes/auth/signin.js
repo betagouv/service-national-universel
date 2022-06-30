@@ -72,7 +72,11 @@ export default function Signin() {
                         <GoTools className="text-yellow-600 text-lg" />
                         <h5 className="text-yellow-600 text-xl">MAINTENANCE</h5>
                       </div>
-                      <div className="text-yellow-900 py-6 text-lg">La plateforme est actuellement en maintenance et sera de nouveau disponible dans quelques heures.</div>
+                      <div className="text-yellow-900 py-6 text-lg">
+                        {" "}
+                        A cause de la très forte charge sur les serveurs du SNU, le site admin rencontre des difficultés importantes ce matin. Des mesures d&apos;urgence sont en
+                        cours. Le site sera à nouveau disponible à partir de 11h30.
+                      </div>
                       {/* <div className="mt-4">
                         Pour toute demande, merci de nous contacter par mail à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
                       </div> */}
