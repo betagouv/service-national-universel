@@ -5,7 +5,9 @@ import styled from "styled-components";
 import { HeroContainer } from "../../components/Content";
 import { supportURL } from "../../config";
 import { colors, urlWithScheme } from "../../utils";
-import ZammadForm from "./form";
+import { Modal } from "reactstrap";
+import CloseSvg from "../../assets/Close";
+
 
 const articles = [
   {
@@ -139,7 +141,6 @@ export default function Index(props) {
             </div>
           </div>
         </div>
-        {open && <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
         {successMessage && <p style={{ color: "#6B7280" }}>{successMessage}</p>}
       </Container>
     </HeroContainer>
