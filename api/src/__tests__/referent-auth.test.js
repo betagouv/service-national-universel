@@ -81,18 +81,14 @@ describe("Referent", () => {
     it("should return 200", async () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
+      res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
       expect(res.status).toBe(200);
       expect(res.body.token).toBeTruthy();
     });
 
     it("should transform firstName and lastName", async () => {
       const fixture = getNewReferentFixture();
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
+      res = await request(getAppHelper()).post("/referent/signup").send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
       expect(res.body.user.firstName).toBe("Foo");
       expect(res.body.user.lastName).toBe("BAR");
       expect(res.body.user.email).toBe(fixture.email.toLowerCase());
@@ -102,9 +98,7 @@ describe("Referent", () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email.toLowerCase();
       await createReferentHelper({ ...fixture, email });
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
+      res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
       expect(res.status).toBe(409);
     });
     it("should return 400 when user doesnt specify CGU choice", async () => {
@@ -161,9 +155,7 @@ describe("Referent", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
-      res = await request(getAppHelper())
-        .post("/referent/reset_password")
-        .send({ password: VALID_PASSWORD, verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+      res = await request(getAppHelper()).post("/referent/reset_password").send({ password: VALID_PASSWORD, verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(401);
       passport.user = previous;
     });
@@ -171,9 +163,7 @@ describe("Referent", () => {
     it("should return return 401 when original password does not match", async () => {
       res = await request(getAppHelper()).post("/referent/reset_password").send({ password: VALID_PASSWORD, verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       passport.user = young;
-      res = await request(getAppHelper())
-        .post("/referent/reset_password")
-        .send({ password: "bar", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+      res = await request(getAppHelper()).post("/referent/reset_password").send({ password: "bar", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(401);
       passport.user = previous;
     });
@@ -181,7 +171,7 @@ describe("Referent", () => {
     it("should return return 422 when verifyPassword !== newPassword", async () => {
       const young = await createReferentHelper({ ...getNewReferentFixture(), password: "foo" });
       const passport = require("passport");
-      res = await request(getAppHelper()).post("/referent/reset_password").send({ password: "bar", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+      res = await request(getAppHelper())
         .post("/referent/reset_password")
         .send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD + "HOP" });
       expect(res.status).toBe(422);
@@ -193,9 +183,7 @@ describe("Referent", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
-      res = await request(getAppHelper())
-        .post("/referent/reset_password")
-        .send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+      res = await request(getAppHelper()).post("/referent/reset_password").send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(200);
       passport.user = previous;
     });
