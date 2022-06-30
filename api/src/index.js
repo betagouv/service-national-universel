@@ -23,7 +23,7 @@ const app = express();
 app.use(helmet());
 
 // if (ENVIRONMENT === "development") {
-// app.use(logger(":id :method :url :response-time"));
+app.use(logger("dev"));
 // }
 
 // eslint-disable-next-line no-unused-vars
