@@ -35,7 +35,7 @@ export default function Signin() {
 
   if (young) return <Redirect to={"/" + (redirect || "")} />;
   if (disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
-  const ouverturePartielle = Math.random() < 0.05;
+  const ouverturePartielle = Math.random() < 0.15;
 
   return (
     <div className="flex flex-col min-h-screen">
