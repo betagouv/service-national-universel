@@ -4,7 +4,7 @@ const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
 
 const SENDER_NAME = "Service National Universel";
-const SENDER_EMAIL = "contact@snu.gouv.fr";
+const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
 //https://my.sendinblue.com/lists/add-attributes
 
