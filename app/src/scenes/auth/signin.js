@@ -13,7 +13,6 @@ import { toastr } from "react-redux-toastr";
 import PasswordEye from "../../components/PasswordEye";
 import EduConnectButton from "../../components/buttons/EduConnectButton";
 import { educonnectAllowed } from "../../config";
-import { GoTools } from "react-icons/go";
 
 /*
 About Redirect after signin
@@ -57,18 +56,6 @@ export default function Signin() {
         )}
         <div className="relative text-center text-[0.8rem] md:text-[1rem] font-bold	mb-[1.25rem] after:content-[''] after:block after:h-[1px] after:w-full after:bg-[#d2d6dc] after:absolute after:left-0 after:top-1/2 after:z-[-1] after:translate-y-[-50%]">
           <span className="bg-[#fff] text-[#161E2E] p-2">Mon espace volontaire</span>
-        </div>
-        <div className="flex items-center mb-2">
-          <div className="bg-yellow-50 p-3 rounded-lg shadow-sm ">
-            <div className="flex space-x-2 items-center ">
-              <GoTools className="text-yellow-600 text-base" />
-              <h5 className="text-yellow-600 text-base">MAINTENANCE</h5>
-            </div>
-            <div className="text-yellow-900  pt-2 text-sm">
-              A cause de la très forte charge sur les serveurs du SNU, le site rencontre des difficultés importantes ce matin. Des mesures d&apos;urgence sont en cours. Le site
-              sera à nouveau disponible à partir de 15h00.
-            </div>
-          </div>
         </div>
         <Formik
           initialValues={{ email: "", password: "" }}
@@ -119,7 +106,6 @@ export default function Signin() {
                       placeholder="Adresse e-mail"
                       value={values.email}
                       onChange={handleChange}
-                      disabled
                     />
                     <label className="text-[#37415b] text-sm	mb-[5px] focus:text-[#434190]" htmlFor="email">
                       E-mail
@@ -145,9 +131,9 @@ export default function Signin() {
                 {/* Forget Password */}
                 {/* Submit Button */}
                 <button
-                  className="w-full block text-[18px] text-lg text-white font-bold p-[12px] bg-[#5145cd] mt-[30px] mb-[30px] cursor-pointer shadow-xl rounded-[10px] hover:bg-[#42389d] disabled:bg-[#5145cd]/60 disabled:cursor-disabled"
+                  className="w-full block text-[18px] text-lg text-white font-bold p-[12px] bg-[#5145cd] mt-[30px] mb-[30px] cursor-pointer shadow-xl rounded-[10px] hover:bg-[#42389d]"
                   loading={isSubmitting}
-                  disabled={isSubmitting || true}
+                  disabled={isSubmitting}
                   type="submit">
                   Connexion
                 </button>

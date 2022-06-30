@@ -7,21 +7,12 @@ import EyeOpen from "../assets/eye.svg";
 import EyeClose from "../assets/eye-slash.svg";
 
 // eslint-disable-next-line prettier/prettier
-export default function PasswordEye({
-  value,
-  onChange,
-  showError = true,
-  autoComplete = "new-password",
-  placeholder = "Tapez votre mot de passe",
-  name = "password",
-  validate = () => {},
-}) {
+export default function PasswordEye({ value, onChange, showError = true, autoComplete = "new-password", placeholder = "Tapez votre mot de passe", name = "password", validate = () => { } }) {
   const [passwordText, setPasswordText] = useState(false);
 
   return (
     <ContainerPassword>
       <InputField
-        disabled
         placeholder={placeholder}
         className="form-control"
         validate={(v) => validate(v) || (showError && getPasswordErrorMessage(v))}
