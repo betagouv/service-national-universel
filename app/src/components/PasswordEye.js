@@ -21,7 +21,6 @@ export default function PasswordEye({
   return (
     <ContainerPassword>
       <InputField
-        disabled
         placeholder={placeholder}
         className="form-control"
         validate={(v) => validate(v) || (showError && getPasswordErrorMessage(v))}
