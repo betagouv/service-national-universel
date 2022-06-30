@@ -20,9 +20,10 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Referent", () => {
+  let res;
   describe("POST /referent/signin", () => {
     it("should return 400 when no email, no password or wrong email", async () => {
-      let res = await request(getAppHelper()).post("/referent/signin");
+      res = await request(getAppHelper()).post("/referent/signin");
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/referent/signin").send({ email: "foo@bar.fr" });
