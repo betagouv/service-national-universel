@@ -119,7 +119,7 @@ class Auth {
       if (!match) {
         const loginAttempts = (user.loginAttempts || 0) + 1;
         user.set({ loginAttempts });
-        await user.save();
+        // await user.save();
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 
@@ -160,7 +160,7 @@ class Auth {
     try {
       const { user } = req;
       user.set({ lastLoginAt: Date.now() });
-      await user.save();
+      // await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       res.send({ ok: true, token: value.token, user: data, data });
     } catch (error) {
