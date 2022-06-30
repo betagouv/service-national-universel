@@ -35,7 +35,7 @@ export default function Signin() {
 
   if (young) return <Redirect to={"/" + (redirect || "")} />;
   if (disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
-  const ouverturePartielle = Math.random() < 0.5;
+  const ouverturePartielle = Math.random() < 0.75;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -67,8 +67,8 @@ export default function Signin() {
                 <h5 className="text-yellow-600 text-base">MAINTENANCE</h5>
               </div>
               <div className="text-yellow-900  pt-2 text-sm">
-                Un nombre important de connexion sur la plateforme impacte son bon fonctionnement. Nous faisons notre possible pour rétablir la situation. Vous pourrez de nouveau
-                vous connecter en fin d’après midi
+                Un nombre important de connexion sur la plateforme impacte son bon fonctionnement. Nous faisons notre possible pour rétablir la situation. Vous pourrez de nous vous
+                connecter en fin d&apos;après-midi !
               </div>
             </div>
           </div>
