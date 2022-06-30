@@ -23,9 +23,9 @@ if (process.env.NODE_ENV !== "test") {
 const app = express();
 app.use(helmet());
 
-if (ENVIRONMENT === "development") {
-  app.use(logger("dev"));
-}
+// if (ENVIRONMENT === "development") {
+app.use(logger("dev"));
+// }
 
 // eslint-disable-next-line no-unused-vars
 function handleError(err, req, res, next) {
