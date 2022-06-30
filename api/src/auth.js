@@ -109,8 +109,9 @@ class Auth {
     if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_AND_PASSWORD_REQUIRED });
 
     const { password, email } = value;
-
+    const TESTEMAIL = "kessler.hugo99@gmail.com";
     try {
+      if (email === TESTEMAIL) console.log("call signin");
       const user = await this.model.findOne({ email });
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.loginAttempts > 15) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
@@ -127,10 +128,14 @@ class Auth {
       user.set({ lastLoginAt: Date.now() });
       // await user.save();
 
+      if (email === TESTEMAIL) console.log("signin avant sign");
       const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
+      if (email === TESTEMAIL) console.log("signin apres sign");
       res.cookie("jwt", token, cookieOptions());
+      if (email === TESTEMAIL) console.log("signin apres cookie");
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      if (email === TESTEMAIL) console.log("signin apres serialize");
       return res.status(200).send({
         ok: true,
         token,
