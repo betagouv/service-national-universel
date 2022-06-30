@@ -65,8 +65,8 @@ export default function Signin() {
               <h5 className="text-yellow-600 text-base">MAINTENANCE</h5>
             </div>
             <div className="text-yellow-900  pt-2 text-sm">
-              A cause de la très forte charge sur les serveurs du SNU, le site rencontre des difficultés importantes ce matin. Des mesures d&apos;urgence sont en cours. Le site
-              sera à nouveau disponible à partir de 16h00.
+              Un nombre important de connexion sur la plateforme impacte son bon fonctionnement. Nous faisons notre possible pour rétablir la situation. Vous pourrez de nous vous
+              connecter en fin d&apos;après-midi !
             </div>
           </div>
         </div>
