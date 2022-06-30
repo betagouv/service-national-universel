@@ -5,6 +5,7 @@ import styled from "styled-components";
 //import { HeroContainer } from "../../components/Content";
 import { colors, urlWithScheme } from "../../utils";
 import { adminURL, supportURL } from "../../config";
+import ZammadForm from "./form";
 
 const articles = [
   {
@@ -127,6 +128,7 @@ export default function PublicSupportCenter(props) {
             </div>
           </div>
         </div>
+        {open && <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
         {successMessage && <p style={{ color: "#6B7280" }}>{successMessage}</p>}
       </Container>
     </div>
