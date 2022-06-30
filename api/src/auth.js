@@ -125,7 +125,7 @@ class Auth {
 
       user.set({ loginAttempts: 0 });
       user.set({ lastLoginAt: Date.now() });
-      await user.save();
+      // await user.save();
 
       const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
