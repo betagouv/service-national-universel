@@ -19,13 +19,12 @@ if (process.env.NODE_ENV !== "test") {
   console.log("KNOWLEDGEBASE_URL", KNOWLEDGEBASE_URL);
   console.log("ENVIRONMENT: ", ENVIRONMENT);
 }
-
 const app = express();
 app.use(helmet());
 
-if (ENVIRONMENT === "development") {
-  app.use(logger("dev"));
-}
+// if (ENVIRONMENT === "development") {
+app.use(logger(":id :method :url :response-time"));
+// }
 
 // eslint-disable-next-line no-unused-vars
 function handleError(err, req, res, next) {
