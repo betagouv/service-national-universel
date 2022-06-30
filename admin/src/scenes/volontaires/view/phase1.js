@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { ImQuotesLeft } from "react-icons/im";
-import { MdOutlineOpenInNew } from "react-icons/md";
+import { MdOutlineOpenInNew, MdOutlineWarningAmber } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Row } from "reactstrap";
@@ -16,7 +16,7 @@ import MailAttestationButton from "../../../components/buttons/MailAttestationBu
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
 import {
-  FORCE_DISABLED_ASSIGN_COHESION_CENTER,
+  canAssignCohesionCenter,
   formatDateFR,
   formatStringLongDate,
   ROLES,
@@ -27,7 +27,7 @@ import {
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1_MOTIF,
-  canAssignCohesionCenter,
+  isTemporaryAffected,
 } from "../../../utils";
 import ModalPointageDepart from "../../centers/components/modals/ModalPointageDepart";
 import ModalPointagePresenceArrivee from "../../centers/components/modals/ModalPointagePresenceArrivee";
@@ -137,7 +137,7 @@ export default function Phase1(props) {
       return (
         <>
           <p>{young.firstName} est en attente d&apos;affectation à un centre de cohésion</p>
-          {!FORCE_DISABLED_ASSIGN_COHESION_CENTER && user.role === ROLES.ADMIN ? <AssignCenter young={young} onAffect={props.onChange} /> : null}
+          {canAssignCohesionCenter(user, young) ? <AssignCenter young={young} onAffect={props.onChange} /> : null}
         </>
       );
     if (young.statusPhase1 === "WAITING_LIST")
@@ -298,12 +298,24 @@ export default function Phase1(props) {
               </section>
             </Bloc>
             <Bloc title="Détails" borderBottom disabled={disabled}>
-              {canAssignCohesionCenter(user) && (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) ? (
+              {canAssignCohesionCenter(user, young) &&
+              (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) ? (
                 <div className="flex items-center hover:underline hover:text-blue-600 cursor-pointer mb-4" onClick={() => setModalAffectation({ isOpen: true })}>
                   <AiOutlinePlus className="text-blue-800 mr-2 border-[1px] border-blue-800 rounded-full h-4 w-4" />
                   Affecter dans un centre
                 </div>
-              ) : null}
+              ) : (
+                isTemporaryAffected(young) && (
+                  <div className="flex bg-yellow-100 gap-x-1 font-bold my-1 rounded-lg p-2">
+                    <div className="flex items-center gap-x-2 ">
+                      <MdOutlineWarningAmber className="text-xl ml-2 text-yellow-600" />
+                      <div className="flex flex-1 text-yellow-600">
+                        Le jeune est déjà préaffecté à un centre ! L&apos;affectation manuelle est désactivée temporairement pour ce jeune.
+                      </div>
+                    </div>
+                  </div>
+                )
+              )}
               {getCohesionStay(young)}
               <Details title="Dates" value={translateCohort(young.cohort)} className="flex" />
               <p className="text-base my-1">Point de rassemblement :</p>

@@ -10,6 +10,7 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
+import { GoTools } from "react-icons/go";
 
 export default function Signin() {
   const dispatch = useDispatch();
@@ -66,7 +67,22 @@ export default function Signin() {
                       </div>
                     )}
 
-                    <div className="self-stretch">
+                    <div className="bg-yellow-50 p-6 rounded-lg shadow-sm">
+                      <div className="flex space-x-2 items-center">
+                        <GoTools className="text-yellow-600 text-lg" />
+                        <h5 className="text-yellow-600 text-xl">MAINTENANCE</h5>
+                      </div>
+                      <div className="text-yellow-900 py-6 text-lg">
+                        {" "}
+                        A cause de la très forte charge sur les serveurs du SNU, le site admin rencontre des difficultés importantes ce matin. Des mesures d&apos;urgence sont en
+                        cours. Le site sera à nouveau disponible à partir de 11h30.
+                      </div>
+                      {/* <div className="mt-4">
+                        Pour toute demande, merci de nous contacter par mail à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
+                      </div> */}
+                    </div>
+
+                    {/* <div className="self-stretch">
                       <label htmlFor="email" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                         E-mail
                       </label>
@@ -95,13 +111,13 @@ export default function Signin() {
                       loading={isSubmitting}
                       type="submit">
                       Se connecter
-                    </LoadingButton>
+                    </LoadingButton> */}
                   </form>
                 );
               }}
             </Formik>
           </div>
-          <div className="flex flex-col gap-3 border-t border-gray-200 pt-4">
+          {/* <div className="flex flex-col gap-3 border-t border-gray-200 pt-4">
             <p className="text-center text-sm text-brand-grey ">
               Vous êtes une structure ?{" "}
               <Link to="/auth/signup" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
@@ -118,7 +134,7 @@ export default function Signin() {
                 Cliquez ici
               </Link>
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
