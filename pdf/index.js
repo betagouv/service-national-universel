@@ -41,14 +41,19 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 });
 
-app.post('/render', (req, res) => {
-  const buffer = renderFromHtml(req.body.html, req.body.options || {});
-  console.log(req.body.html);
-  console.log(buffer);
-  res.contentType("application/pdf");
-  res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-  res.set("Cache-Control", "public, max-age=1");
-  res.send(buffer);
+app.post('/render', async (req, res) => {
+  try {
+    const buffer = await renderFromHtml(req.body.html, req.body.options || {});
+    console.log(req.body.html);
+    console.log(buffer);
+    res.contentType("application/pdf");
+    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+    res.set("Cache-Control", "public, max-age=1");
+    res.send(buffer);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
 })
 
 app.listen(port, () => {
