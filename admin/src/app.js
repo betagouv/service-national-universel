@@ -94,21 +94,6 @@ export default function App() {
   );
 }
 
-const Maintenance = () => (
-  <div className="flex items-center justify-center h-full">
-    <div className="bg-yellow-50 p-6 rounded-lg shadow-sm m-8 w-1/2">
-      <div className="flex space-x-2 items-center">
-        <GoTools className="text-yellow-600 text-lg" />
-        <h5 className="text-yellow-600 text-xl">MAINTENANCE</h5>
-      </div>
-      <div className="text-yellow-900 py-6 text-lg">
-        A cause de la très forte charge sur les serveurs du SNU, le site admin rencontre des difficultés importantes ce matin. Des mesures d&apos;urgence sont en cours. Le site
-        sera à nouveau disponible à partir de 15h00
-      </div>
-    </div>
-  </div>
-);
-
 const Home = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
