@@ -201,7 +201,7 @@ export default function MeetingPoint() {
                 </Filter2>
                 <ResultTable>
                   <ReactiveListComponent
-                    pageSize={50}
+                    pageSize={10}
                     defaultQuery={getDefaultQuery}
                     react={{ and: FILTERS }}
                     paginationAt="bottom"
