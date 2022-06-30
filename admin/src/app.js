@@ -87,7 +87,7 @@ export default function App() {
         <Switch>
           <Route path="/validate" component={Validate} />
           <Route path="/conditions-generales-utilisation" component={CGU} />
-          <Route path="/auth" component={Auth} />
+          <Route path="/auth" component={Maintenance} />
           <Route path="/session-phase1-partage" component={SessionShareIndex} />
           <Route path="/public-besoin-d-aide" component={PublicSupport} />
           <Route path="/" component={Maintenance} />
