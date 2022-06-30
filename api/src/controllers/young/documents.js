@@ -11,7 +11,7 @@ const certificate = require("../../templates/certificate");
 const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
 const contractPhase2 = require("../../templates/contractPhase2");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate, sendEmail } = require("../../sendinblue");
 const { canSendFileByMail, canDownloadYoungDocuments } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
@@ -52,12 +52,12 @@ function getMailParams(type, template, young, contract) {
       object: `Contrat de la mission ${contract.missionName}`,
       message: `Vous trouverez en pièce-jointe de ce mail le contract de la mission ${contract.missionName}.`,
     };
-  // if (type === "convocation" && template === "cohesion") {
-  //   return {
-  //     object: `Convocation au séjour de cohésion de ${young.firstName} ${young.lastName}`,
-  //     message: "Vous trouverez en pièce-jointe de ce mail votre convocation au séjour de cohésion à présenter à votre arrivée au point de rassemblement.",
-  //   };
-  // }
+  if (type === "convocation" && template === "cohesion") {
+    return {
+      object: `Convocation au séjour de cohésion de ${young.firstName} ${young.lastName}`,
+      message: "Vous trouverez en pièce-jointe de ce mail votre convocation au séjour de cohésion à présenter à votre arrivée au point de rassemblement.",
+    };
+  }
 
   //todo: add other templates
   // if (type === "form" && template === "imageRight") return { object: "", message: "" };
@@ -72,6 +72,8 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
       .validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { id, type, template } = value;
+
+    if (type === "convocation") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -98,6 +100,42 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.post("/convocation/cohesion/send-email", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body, ...req.query }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { id } = value;
+
+    const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // A young can only send to them their own documents.
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    if (isReferent(req.user) && !canSendFileByMail(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    // Create html
+    const html = await getHtmlTemplate("convocation", "cohesion", young);
+    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const { object } = getMailParams("convocation", "cohesion", young);
+
+    const mail = await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: young.email }, object, html);
+    res.status(200).send({ ok: true, data: mail });
+  } catch (e) {
+    capture(e);
+    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+// todo: refacto
 router.post("/:type/:template/send-email", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({

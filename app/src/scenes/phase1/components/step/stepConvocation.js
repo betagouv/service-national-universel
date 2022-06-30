@@ -46,6 +46,7 @@ export default function StepAgreement({ young }) {
     if (ok) toastr.success(`Document envoyé à ${young.email}`);
     else toastr.error("Erreur lors de l'envoie du document");
     setStateMobil(false);
+    await handleDownload();
     setModal({ isOpen: false, onConfirm: null });
   };
 
@@ -80,7 +81,7 @@ export default function StepAgreement({ young }) {
                   {showConvocation ? <AiOutlineEyeInvisible className="h-5 w-5 text-gray-600" /> : <AiOutlineEye className="h-5 w-5 text-gray-600" />}
                 </WithTooltip>
               </button>
-              {/* <button
+              <button
                 type="button"
                 className="flex items-center justify-center bg-gray-100 h-8 w-8 rounded-full mr-4 cursor-pointer hover:scale-110"
                 onClick={() =>
@@ -94,7 +95,7 @@ export default function StepAgreement({ young }) {
                 <WithTooltip tooltipText="Recevoir par email">
                   <HiOutlineMail className="h-5 w-5 text-gray-600" />
                 </WithTooltip>
-              </button> */}
+              </button>
 
               {/* <div onClick={handleDownload}>
                 <DownloadConvocationButton
@@ -170,7 +171,7 @@ export default function StepAgreement({ young }) {
                       Voir
                     </span>
                   </button>
-                  {/* <button
+                  <button
                     onClick={() =>
                       setModal({
                         isOpen: true,
@@ -186,7 +187,7 @@ export default function StepAgreement({ young }) {
                     <span young={young} uri="cohesion" className="text-blue-700 text-sm">
                       Recevoir par mail
                     </span>
-                  </button> */}
+                  </button>
                 </div>
               </div>
               {showConvocation ? (
