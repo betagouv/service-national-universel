@@ -90,8 +90,7 @@ export default function App() {
           <Route path="/auth" component={Auth} />
           <Route path="/session-phase1-partage" component={SessionShareIndex} />
           <Route path="/public-besoin-d-aide" component={PublicSupport} />
-          <Route path="/" component={Maintenance} />
-          {/* <Route path="/" component={Home} /> */}
+          {localStorage.getItem("override_maintenance") ? <Route path="/" component={Home} /> : <Route path="/" component={Maintenance} />}
         </Switch>
         <Footer />
       </div>
