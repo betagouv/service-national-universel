@@ -1508,7 +1508,7 @@ Schema.plugin(patchHistory, {
   excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/phase3Token", "/loginAttempts"],
 });
 
-// Schema.plugin(mongooseElastic(esClient, { ignore: ["historic"] }), MODELNAME);
+Schema.plugin(mongooseElastic(esClient, { ignore: ["historic"] }), MODELNAME);
 
 Schema.index({ sessionPhase1Id: 1 });
 Schema.index({ sessionPhase1Id: 1, status: 1 });
