@@ -96,6 +96,7 @@ export default function Signin() {
                         <LoadingButton
                           className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
                           loading={isSubmitting}
+                          disabled={isSubmitting}
                           type="submit">
                           Se connecter
                         </LoadingButton>
