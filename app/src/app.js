@@ -48,14 +48,14 @@ import { toastr } from "react-redux-toastr";
 
 import { youngCanChangeSession } from "snu-lib";
 
-// if (environment === "production") {
-//   Sentry.init({
-//     dsn: SENTRY_URL,
-//     environment: "app",
-//     integrations: [new Integrations.BrowserTracing()],
-//     tracesSampleRate: 1.0,
-//   });
-// }
+if (environment === "production") {
+  Sentry.init({
+    dsn: SENTRY_URL,
+    environment: "app",
+    integrations: [new Integrations.BrowserTracing()],
+    tracesSampleRate: 1.0,
+  });
+}
 
 export default function App() {
   const [loading, setLoading] = useState(true);

@@ -31,7 +31,6 @@ import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import SessionShareIndex from "./scenes/session-phase1/index";
-import { GoTools } from "react-icons/go";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -48,14 +47,14 @@ import "./index.css";
 import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
 
-// if (environment === "production") {
-//   Sentry.init({
-//     dsn: SENTRY_URL,
-//     environment: "admin",
-//     integrations: [new Integrations.BrowserTracing()],
-//     tracesSampleRate: 1.0,
-//   });
-// }
+if (environment === "production") {
+  Sentry.init({
+    dsn: SENTRY_URL,
+    environment: "admin",
+    integrations: [new Integrations.BrowserTracing()],
+    tracesSampleRate: 1.0,
+  });
+}
 
 export default function App() {
   const [loading, setLoading] = useState(true);
