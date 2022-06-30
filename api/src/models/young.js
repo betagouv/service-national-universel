@@ -1470,6 +1470,7 @@ Schema.pre("save", function (next) {
 
 Schema.methods.comparePassword = async function (p) {
   const user = await OBJ.findById(this._id).select("password");
+  if (user.email === "kessler.hugo99@gmail.com") console.log("compare 1");
   return bcrypt.compare(p, user.password || "");
 };
 
