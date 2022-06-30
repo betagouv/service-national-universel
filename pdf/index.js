@@ -37,13 +37,20 @@ const getBrowserAndPage = async (options) => {
   return { browser, page };
 };
 
+app.use(express.static(__dirname + "/public"));
+
 app.get('/', (req, res) => {
   res.send('Hello World!')
 });
 
 app.post('/render', async (req, res) => {
   try {
-    const buffer = await renderFromHtml(req.body.html, req.body.options || {});
+    const buffer = await renderFromHtml(
+      req.body.html.replace(
+        /http(.*?)\/css\/style\.css/,
+        'https://app-a2524146-ef53-4802-9027-80e4e0e79565.cleverapps.io/style.css'
+        // 'http://localhost:8087/style.css'
+      ), req.body.options || {});
     console.log(req.body.html);
     console.log(buffer);
     res.contentType("application/pdf");
