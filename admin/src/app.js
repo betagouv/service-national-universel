@@ -103,7 +103,7 @@ const Maintenance = () => (
       </div>
       <div className="text-yellow-900 py-6 text-lg">
         A cause de la très forte charge sur les serveurs du SNU, le site admin rencontre des difficultés importantes ce matin. Des mesures d&apos;urgence sont en cours. Le site
-        sera à nouveau disponible à partir de 13h30.
+        sera à nouveau disponible à partir de 15h00
       </div>
     </div>
   </div>
