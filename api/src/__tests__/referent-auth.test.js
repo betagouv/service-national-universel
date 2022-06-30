@@ -20,10 +20,9 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Referent", () => {
-  let res;
   describe("POST /referent/signin", () => {
     it("should return 400 when no email, no password or wrong email", async () => {
-      res = await request(getAppHelper()).post("/referent/signin");
+      let res = await request(getAppHelper()).post("/referent/signin");
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/referent/signin").send({ email: "foo@bar.fr" });
@@ -103,7 +102,9 @@ describe("Referent", () => {
       expect(res.status).toBe(409);
     });
     it("should return 400 when user doesnt specify CGU choice", async () => {
-      res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true" });
+      const fixture = getNewReferentFixture();
+      const email = fixture.email.toLowerCase();
+      await createReferentHelper({ ...fixture, email });
       let res = await request(getAppHelper()).post("/referent/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar" });
       expect(res.status).toBe(400);
     });
@@ -162,7 +163,9 @@ describe("Referent", () => {
     });
 
     it("should return return 401 when original password does not match", async () => {
-      res = await request(getAppHelper()).post("/referent/reset_password").send({ password: VALID_PASSWORD, verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+      const young = await createReferentHelper({ ...getNewReferentFixture(), password: "foo" });
+      const passport = require("passport");
+      const previous = passport.user;
       passport.user = young;
       res = await request(getAppHelper()).post("/referent/reset_password").send({ password: "bar", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(401);
@@ -172,6 +175,8 @@ describe("Referent", () => {
     it("should return return 422 when verifyPassword !== newPassword", async () => {
       const young = await createReferentHelper({ ...getNewReferentFixture(), password: "foo" });
       const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
       res = await request(getAppHelper())
         .post("/referent/reset_password")
         .send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD + "HOP" });
@@ -194,7 +199,9 @@ describe("Referent", () => {
     it("should return return 404 when missing email", async () => {
       let res = await request(getAppHelper()).post("/referent/forgot_password");
       expect(res.status).toBe(404);
-      res = await request(getAppHelper()).post("/referent/reset_password").send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+    });
+    it("should return 404 when user does not exist", async () => {
+      const res = await request(getAppHelper()).post("/referent/forgot_password").send({ email: "foo@bar.fr" });
       expect(res.status).toBe(404);
     });
     it("should return return 200 when user exists", async () => {
