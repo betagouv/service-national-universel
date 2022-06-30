@@ -11,10 +11,6 @@ const Schema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // zammad migration
-    zammadId: {
-      type: String,
-    },
   },
   { timestamps: true },
 );
