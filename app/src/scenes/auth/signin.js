@@ -66,7 +66,7 @@ export default function Signin() {
             </div>
             <div className="text-yellow-900  pt-2 text-sm">
               A cause de la très forte charge sur les serveurs du SNU, le site rencontre des difficultés importantes ce matin. Des mesures d&apos;urgence sont en cours. Le site
-              sera à nouveau disponible à partir de 15h00.
+              sera à nouveau disponible à partir de 16h00.
             </div>
           </div>
         </div>
