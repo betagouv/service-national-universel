@@ -43,6 +43,8 @@ app.get('/', (req, res) => {
 
 app.post('/render', (req, res) => {
   const buffer = renderFromHtml(req.body.html, req.body.options || {});
+  console.log(req.body.html);
+  console.log(buffer);
   res.contentType("application/pdf");
   res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
   res.set("Cache-Control", "public, max-age=1");
