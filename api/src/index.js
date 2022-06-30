@@ -86,6 +86,13 @@ app.use("/jeveuxaider", require("./services/jeveuxaider"));
 app.use(handleError);
 
 app.get("/", async (req, res) => {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+  // ! Memory usage
+>>>>>>> 7c62caee (revert shit)
+>>>>>>> 4f80b4b7 (revert shit)
   // const formatMemoryUsage = (data) => `${Math.round((data / 1024 / 1024) * 100) / 100} MB`;
 
   // const memoryData = process.memoryUsage();
