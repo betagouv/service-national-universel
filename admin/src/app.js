@@ -31,6 +31,7 @@ import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import SessionShareIndex from "./scenes/session-phase1/index";
+import { GoTools } from "react-icons/go";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -85,13 +86,29 @@ export default function App() {
           <Route path="/auth" component={Auth} />
           <Route path="/session-phase1-partage" component={SessionShareIndex} />
           <Route path="/public-besoin-d-aide" component={PublicSupport} />
-          <Route path="/" component={Home} />
+          <Route path="/" component={Maintenance} />
+          {/* <Route path="/" component={Home} /> */}
         </Switch>
         <Footer />
       </div>
     </Router>
   );
 }
+
+const Maintenance = () => (
+  <div className="flex items-center justify-center h-full">
+    <div className="bg-yellow-50 p-6 rounded-lg shadow-sm m-8 w-1/2">
+      <div className="flex space-x-2 items-center">
+        <GoTools className="text-yellow-600 text-lg" />
+        <h5 className="text-yellow-600 text-xl">MAINTENANCE</h5>
+      </div>
+      <div className="text-yellow-900 py-6 text-lg">
+        A cause de la très forte charge sur les serveurs du SNU, le site admin rencontre des difficultés importantes ce matin. Des mesures d&apos;urgence sont en cours. Le site
+        sera à nouveau disponible à partir de 11h30.
+      </div>
+    </div>
+  </div>
+);
 
 const Home = () => {
   const dispatch = useDispatch();
