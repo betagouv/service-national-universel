@@ -37,6 +37,7 @@ import Drawer from "./components/drawer";
 import Header from "./components/header";
 import Footer from "./components/footer";
 import Loader from "./components/Loader";
+import Zammad from "./components/Zammad";
 
 import api from "./services/api";
 
@@ -67,6 +68,8 @@ export default function App() {
         if (!res.ok || !res.user) return setLoading(false);
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
+        // const { data } = await api.get(`/zammad-support-center/ticket_overviews`);
+        // dispatch(setTickets(data));
       } catch (e) {
         console.log(e);
       }
@@ -79,6 +82,7 @@ export default function App() {
 
   return (
     <Router>
+      <Zammad />
       <div className="main">
         <Switch>
           <Route path="/validate" component={Validate} />

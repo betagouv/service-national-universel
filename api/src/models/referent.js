@@ -5,6 +5,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib/roles");
+const zammad = require("../zammad");
 
 const MODELNAME = "referent";
 
@@ -185,9 +186,9 @@ Schema.methods.comparePassword = async function (p) {
   return bcrypt.compare(p, user.password || "");
 };
 
-//Sync with Sendinblue
+//Sync with Sendinblue & Zammad
 Schema.post("save", function (doc) {
-  // sendinblue.sync(doc, MODELNAME);
+  sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
   sendinblue.sync(doc, MODELNAME);
