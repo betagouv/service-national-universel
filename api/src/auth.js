@@ -113,10 +113,12 @@ class Auth {
     try {
       if (email === TESTEMAIL) console.log("call signin");
       const user = await this.model.findOne({ email });
+      if (email === TESTEMAIL) console.log("user found");
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.loginAttempts > 15) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
 
       const match = config.ENVIRONMENT === "development" || (await user.comparePassword(password));
+      if (email === TESTEMAIL) console.log("compare");
       if (!match) {
         const loginAttempts = (user.loginAttempts || 0) + 1;
         user.set({ loginAttempts });
