@@ -47,6 +47,38 @@ const Message = new mongoose.Schema(
         description: "rôle de l'émetteur : agent, référent, volontaire...",
       },
     },
+
+    // zammad migration
+    zammadCreatedById: {
+      type: String,
+      documentation: {
+        description: "identifiant Zammad de l'émetteur",
+      },
+    },
+    zammadEmitterRole: {
+      type: String,
+      documentation: {
+        description: "rôle de l'émetteur sur Zammad",
+      },
+    },
+    zammadId: {
+      type: String,
+      documentation: {
+        description: "identifiant dans Zammad",
+      },
+    },
+    zammadType: {
+      type: String,
+      documentation: {
+        description: "zammad type",
+      },
+    },
+    zammadContentType: {
+      type: String,
+      documentation: {
+        description: "zammad content type",
+      },
+    },
   },
   { timestamps: true },
 );
@@ -216,6 +248,31 @@ const Schema = new mongoose.Schema(
       ref: "referent",
       documentation: {
         description: "Identifiant de l'émetteur",
+      },
+    },
+    // zammad migration
+    zammadId: {
+      type: String,
+      documentation: {
+        description: "identifiant dans Zammad",
+      },
+    },
+    agentInChargeZammadId: {
+      type: String,
+      documentation: {
+        description: "identifiant de l'agent en charge du ticket",
+      },
+    },
+    emitterZammadId: {
+      type: String,
+      documentation: {
+        description: "identifiant Zammad de l'émetteur",
+      },
+    },
+    lastUpdateById: {
+      type: String,
+      documentation: {
+        description: "zammad: updated by id...",
       },
     },
   },

@@ -11,6 +11,9 @@ const Schema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    zammadId: {
+      type: String,
+    },
   },
   { timestamps: true },
 );
