@@ -109,7 +109,7 @@ export default function Signin() {
                         <div className="text-yellow-900 py-6 text-lg">
                           {" "}
                           A cause de la très forte charge sur les serveurs du SNU, le site admin rencontre des difficultés importantes ce matin. Des mesures d&apos;urgence sont en
-                          cours. Le site sera à nouveau disponible à partir de 11h30.
+                          cours. Le site sera à nouveau disponible à partir de 13h30.
                         </div>
                         {/* <div className="mt-4">
                         Pour toute demande, merci de nous contacter par mail à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
