@@ -67,8 +67,8 @@ export default function Signin() {
                 <h5 className="text-yellow-600 text-base">MAINTENANCE</h5>
               </div>
               <div className="text-yellow-900  pt-2 text-sm">
-                Un nombre important de connexion sur la plateforme impacte son bon fonctionnement. Nous faisons notre possible pour rétablir la situation. Vous pourrez de nous vous
-                connecter en fin d&apos;après-midi !
+                Un nombre important de connexion sur la plateforme impacte son bon fonctionnement. Nous faisons notre possible pour rétablir la situation. Vous pourrez de nouveau
+                vous connecter en fin d’après midi
               </div>
             </div>
           </div>
