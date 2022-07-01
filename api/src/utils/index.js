@@ -429,6 +429,11 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
+function getPdfGeneratorUrl() {
+  if (["staging", "production"].includes(ENVIRONMENT)) return "https://app-a2524146-ef53-4802-9027-80e4e0e79565.cleverapps.io/render";
+  return "http://localhost:8087/render";
+}
+
 async function updateApplicationsWithYoungOrMission({ young, newYoung, mission, newMission }) {
   if (young && Object.keys(young).length !== 0) {
     const noNeedToUpdate = isObjectKeysIsEqual(young, newYoung, ["firstName", "lastName", "email", "birthdateAt", "city", "department", "cohort"]);
@@ -721,4 +726,5 @@ module.exports = {
   getCcOfYoung,
   notifDepartmentChange,
   autoValidationSessionPhase1Young,
+  getPdfGeneratorUrl,
 };

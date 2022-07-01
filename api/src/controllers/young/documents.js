@@ -1,12 +1,13 @@
 const express = require("express");
 const passport = require("passport");
 const Joi = require("joi");
+const fetch = require("node-fetch");
 const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
 const renderFromHtml = require("../../htmlToPdf");
 const YoungObject = require("../../models/young");
 const ContractObject = require("../../models/contract");
-const { ERRORS, isYoung, isReferent, getCcOfYoung } = require("../../utils");
+const { ERRORS, isYoung, isReferent, getCcOfYoung, getPdfGeneratorUrl } = require("../../utils");
 const certificate = require("../../templates/certificate");
 const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
@@ -90,11 +91,23 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
-    res.contentType("application/pdf");
-    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-    res.set("Cache-Control", "public, max-age=1");
-    res.send(buffer);
+    fetch(getPdfGeneratorUrl(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+      body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
+    }).then((response) => {
+      res.set({
+        "content-length": response.headers.get("content-length"),
+        "content-disposition": `inline; filename="test.pdf"`,
+        "content-type": "application/pdf",
+        "cache-control": "public, max-age=1",
+      });
+      response.body.pipe(res);
+      response.body.on("error", (e) => {
+        capture(e);
+        res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
+      });
+    });
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
