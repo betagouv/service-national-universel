@@ -1,3 +1,12 @@
+## [1.107.2](https://github.com/betagouv/service-national-universel/compare/v1.107.1...v1.107.2) (2022-07-01)
+
+
+### Bug Fixes
+
+* **admin:** PM file download ([d620442](https://github.com/betagouv/service-national-universel/commit/d6204425aa57701491126f86ec0f6206c5681855))
+* **api:** convocation for DOMTOM ([6cd8886](https://github.com/betagouv/service-national-universel/commit/6cd8886e267e8bbf56b7a04919f1e6ec14d3bc23))
+* warning message IDF ([8661e98](https://github.com/betagouv/service-national-universel/commit/8661e9856bf5dda0df74ef3902e4546e87889a5b))
+
 ## [1.107.1](https://github.com/betagouv/service-national-universel/compare/v1.107.0...v1.107.1) (2022-06-30)
 
 
