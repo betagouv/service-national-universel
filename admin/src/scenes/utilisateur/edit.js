@@ -230,7 +230,7 @@ export default function Edit(props) {
                     </BoxContent>
                   </Box>
                 </Col>
-                {/* FIXME : Do not work because structure only contains id and value/label with same name */}
+                {/* FIXME : Do not work because structure only contains id and value/label with same name  */}
                 {canUpdateReferent({ actor: currentUser, originalTarget: user, structure }) && (
                   <Col md={6} style={{ marginBottom: "20px" }}>
                     <Box>
