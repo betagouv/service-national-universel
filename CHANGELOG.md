@@ -1,3 +1,10 @@
+## [1.107.3](https://github.com/betagouv/service-national-universel/compare/v1.107.2...v1.107.3) (2022-07-03)
+
+
+### Bug Fixes
+
+* **api:** reactivate crons ([441e0d5](https://github.com/betagouv/service-national-universel/commit/441e0d5ec85076d3a30a12ac686ea1b5d188312a))
+
 ## [1.107.2](https://github.com/betagouv/service-national-universel/compare/v1.107.1...v1.107.2) (2022-07-01)
 
 
