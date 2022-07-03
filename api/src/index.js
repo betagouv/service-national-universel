@@ -45,7 +45,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.text({ type: "application/x-ndjson" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// require("./crons");
+require("./crons");
 app.use(cookieParser());
 
 app.use(express.static(__dirname + "/../public"));

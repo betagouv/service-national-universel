@@ -86,7 +86,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     computeGoalsInscription.handler();
   });
 
-  cron.schedule(everyHours(1), () => {
+  cron.schedule(everyMinutes(30), () => {
     loginAttempts.handler();
   });
 }
