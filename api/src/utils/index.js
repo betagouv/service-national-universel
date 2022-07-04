@@ -359,7 +359,13 @@ const updateStatusPhase2 = async (young) => {
     young.set({ statusPhase2: young.statusPhase2 });
   } else if (Number(young.phase2NumberHoursDone) >= 84) {
     // We change young status to DONE if he has 84 hours of phase 2 done.
-    young.set({ statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED });
+    young.set({
+      statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+      militaryPreparationFilesIdentity: [],
+      militaryPreparationFilesCensus: [],
+      militaryPreparationFilesAuthorization: [],
+      militaryPreparationFilesCertificate: [],
+    });
     let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
     let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
