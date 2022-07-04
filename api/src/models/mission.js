@@ -155,6 +155,15 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  visibility: {
+    type: String,
+    default: "VISIBLE",
+    enum: ["VISIBLE", "HIDDEN"],
+    documentation: {
+      description: "Statut de la mission",
+    },
+  },
+
   statusComment: {
     type: String,
     default: "",
