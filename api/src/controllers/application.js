@@ -9,13 +9,28 @@ const MissionObject = require("../models/mission");
 const StructureObject = require("../models/structure");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
+const { encrypt } = require("../cryptoUtils");
+const NodeClam = require("clamscan");
+const fs = require("fs");
+const FileType = require("file-type");
+const fileUpload = require("express-fileupload");
 const { sendTemplate } = require("../sendinblue");
-const { ERRORS, isYoung, isReferent } = require("../utils");
 const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
-const { serializeApplication } = require("../utils/serializer");
-const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, getCcOfYoung } = require("../utils");
+const { serializeApplication, serializeYoung } = require("../utils/serializer");
+const { config } = require("dotenv");
+const {
+  uploadFile,
+  ERRORS,
+  isYoung,
+  isReferent,
+  // updateApplicationsWithYoungOrMission,
+  getCcOfYoung,
+  updateYoungPhase2Hours,
+  updateStatusPhase2,
+  updateYoungStatusPhase2Contract,
+} = require("../utils");
 
 const updatePlacesMission = async (app, fromUser) => {
   try {
@@ -386,5 +401,78 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.post(
+  "/:id/file/:key",
+  passport.authenticate("young", { session: false, failWithError: true }),
+  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  async (req, res) => {
+    try {
+      const application = await ApplicationObject.findById(req.params.id);
+      const rootKeys = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
+      const { error: keyError, value: key } = Joi.string()
+        .required()
+        .valid(...rootKeys)
+        .validate(req.params.key);
+      if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      const { error: bodyError, value: body } = Joi.string().required().validate(req.body.body);
+      if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      const {
+        error: namesError,
+        value: { names },
+      } = Joi.object({ names: Joi.array().items(Joi.string()).required() }).validate(JSON.parse(body), { stripUnknown: true });
+      if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      const user = await YoungObject.findById(application.youngId);
+
+      if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
+      const files = Object.keys(req.files || {}).map((e) => req.files[e]);
+
+      //const application = await ApplicationObject.find({ youngId: req.user._id });
+      if (!application) return res.status(404).send({ ok: false, code: ERRORS.APPLICATION_NOT_FOUND });
+
+      for (let i = 0; i < files.length; i++) {
+        let currentFile = files[i];
+        // If multiple file with same names are provided, currentFile is an array. We just take the latest.
+        if (Array.isArray(currentFile)) {
+          currentFile = currentFile[currentFile.length - 1];
+        }
+        const { name, tempFilePath, mimetype } = currentFile;
+        const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+        const validTypes = ["image/jpeg", "image/png", "application/pdf"];
+        if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
+          fs.unlinkSync(tempFilePath);
+          return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+        }
+        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
+          const clamscan = await new NodeClam().init({
+            removeInfected: true,
+          });
+          const { isInfected } = await clamscan.isInfected(tempFilePath);
+          if (isInfected) {
+            fs.unlinkSync(tempFilePath);
+            return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+          }
+        }
+        const data = fs.readFileSync(tempFilePath);
+        const encryptedBuffer = encrypt(data);
+        const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+        await uploadFile(`app/young/${user._id}/application/${key}/${name}`, resultingFile);
+        //get application et get j eunes
+        fs.unlinkSync(tempFilePath);
+      }
+      application.set({ [key]: names });
+      await application.save({ fromUser: req.user });
+      // console.log("contractAvenantFiles    ", application.contractAvenantFiles);
+      // console.log("justificatifsFiles      ", application.justificatifsFiles);
+      // console.log("feedBackExperienceFiles ", application.feedBackExperienceFiles);
+      // console.log("                        ", application.othersFiles);
+      return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
+    } catch (error) {
+      capture(error);
+      if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
 
 module.exports = router;

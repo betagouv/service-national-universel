@@ -168,9 +168,10 @@ export default function Youngs({ mission, applications, updateApplications }) {
                       <Table>
                         <thead>
                           <tr>
-                            <th width="50%">Volontaire</th>
+                            <th width="40%">Volontaire</th>
                             <th>Date</th>
                             <th width="20%">Statut pour la mission</th>
+                            <th width="20%">Pièces jointes</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -328,6 +329,12 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
             />
           </React.Fragment>
         )}
+      </td>
+      <td>
+        {hit.contractAvenantFiles.length > 0 && <div>Avenant</div>}
+        {hit.justificatifsFiles.length > 0 && <div>Document justificatif</div>}
+        {hit.feedBackExperienceFiles.length > 0 && <div>Retour d'expérience</div>}
+        {hit.othersFiles.length > 0 && <div>Autre</div>}
       </td>
     </tr>
   );

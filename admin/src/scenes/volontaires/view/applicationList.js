@@ -47,6 +47,7 @@ export default function ApplicationList({ young, onChangeApplication }) {
             <th style={{ width: "200px" }}>Dates</th>
             <th style={{ width: "90px" }}>Places</th>
             <th style={{ width: "250px" }}>Statut</th>
+            <th style={{ width: "150px" }}>Pièces jointes</th>
           </tr>
         </thead>
         <tbody>
@@ -288,6 +289,12 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             />
           </React.Fragment>
         ) : null}
+      </td>
+      <td>
+        {hit.contractAvenantFiles.length > 0 && <div>Avenant</div>}
+        {hit.justificatifsFiles.length > 0 && <div>Document justificatif</div>}
+        {hit.feedBackExperienceFiles.length > 0 && <div>Retour d'expérience</div>}
+        {hit.othersFiles.length > 0 && <div>Autre</div>}
       </td>
     </tr>
   );
