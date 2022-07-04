@@ -73,8 +73,6 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { id, type, template } = value;
 
-    if (type === "convocation") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
