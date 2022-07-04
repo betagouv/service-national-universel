@@ -66,6 +66,13 @@ export default function DndFileInput({ optional, value, onChange, name, errorMes
     onChange({ target: { files, name } });
   }
 
+  useEffect(() => {
+    setFilesList(value);
+  }, [name]);
+
+  useEffect(() => {
+    console.log(filesList || []);
+  }, [filesList]);
   return (
     <div style={{}} {...props}>
       <ImageInput id={`file-drop-${name}`}>
@@ -77,7 +84,9 @@ export default function DndFileInput({ optional, value, onChange, name, errorMes
           name={name}
           value={[]}
           validate={(v) => (!optional && (!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
-          onChange={(e) => onAdd(e.target.files)}
+          onChange={(e) => {
+            onAdd(e.target.files);
+          }}
         />
         <img src={require("../assets/image.svg")} />
         <>
