@@ -45,6 +45,7 @@ export default function Edit(props) {
   const [service, setService] = useState();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
+  const [structureForCheck, setStructureForCheck] = useState();
   const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
   const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -61,6 +62,12 @@ export default function Edit(props) {
         if (!ok) return setUser(null);
         setDocumentTitle(`${data.firstName} ${data.lastName}`);
         setUser(data);
+        
+        /* Fetching structure info */
+        const strucRes = await api.get(`/structure/${data.structureId}`);
+        console.log('strucRes:', strucRes);
+        setStructureForCheck(strucRes.data);
+
         const { data: d } = await api.get(`/department-service/${data.department}`);
         setService(d);
         const responseStructure = await api.get("/structure");
@@ -231,87 +238,56 @@ export default function Edit(props) {
                   </Box>
                 </Col>
                 {/* FIXME : Do not work because structure only contains id and value/label with same name  */}
-                {canUpdateReferent({ actor: currentUser, originalTarget: user, structure }) && (
+                {canUpdateReferent({ actor: currentUser, originalTarget: user, structure: structureForCheck }) && (
                   <Col md={6} style={{ marginBottom: "20px" }}>
-                    <Box>
-                      <BoxHeadTitle>Information</BoxHeadTitle>
-                      <BoxContent direction="column">
-                        <Select
-                          name="role"
-                          disabled={currentUser.role !== ROLES.ADMIN}
-                          values={values}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            clearDepartmentAndRegion(handleChange);
-                            handleChange({ target: { name: "role", value } });
-                          }}
-                          allowEmpty={false}
-                          title="Rôle"
-                          options={[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR].map(
-                            (key) => ({
-                              value: key,
-                              label: translate(key),
-                            }),
+                  <Box>
+                    <BoxHeadTitle>Information</BoxHeadTitle>
+                    <BoxContent direction="column">
+                      <Select
+                        name="role"
+                        disabled={currentUser.role !== ROLES.ADMIN}
+                        values={values}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          clearDepartmentAndRegion(handleChange);
+                          handleChange({ target: { name: "role", value } });
+                        }}
+                        allowEmpty={false}
+                        title="Rôle"
+                        options={[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR].map(
+                          (key) => ({
+                            value: key,
+                            label: translate(key),
+                          }),
                           )}
-                        />
-                        {values.role === ROLES.RESPONSIBLE ? (
-                          structures ? (
-                            <AutocompleteSelectStructure
-                              options={structures}
-                              structure={structure}
-                              setStructure={(e) => {
-                                setStructure(e);
-                              }}
-                              userId={user._id}
-                              onClick={modifyStructure}
-                              disabled={isSubmitting}
-                              loading={loadingChangeStructure}
-                            />
+                          />
+                      {values.role === ROLES.RESPONSIBLE ? (
+                        structures ? (
+                          <AutocompleteSelectStructure
+                          options={structures}
+                          structure={structure}
+                          setStructure={(e) => {
+                            setStructure(e);
+                          }}
+                          userId={user._id}
+                          onClick={modifyStructure}
+                          disabled={isSubmitting}
+                          loading={loadingChangeStructure}
+                          />
                           ) : (
                             <Loader />
-                          )
+                        )
+                      ) : null}
+                      {values.role === ROLES.REFERENT_DEPARTMENT ? (
+                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
                         ) : null}
-                        {values.role === ROLES.REFERENT_DEPARTMENT ? (
-                          <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
+                      {values.role === ROLES.REFERENT_REGION ? (
+                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
                         ) : null}
-                        {values.role === ROLES.REFERENT_REGION ? (
-                          <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
-                        ) : null}
-                        {values.role === ROLES.VISITOR ? (
-                          <>
-                            <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(VISITOR_SUBROLES)} />
-                            <Select
-                              name="region"
-                              values={values}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                handleChange({ target: { name: "region", value } });
-                                handleChange({ target: { name: "department", value: "" } });
-                              }}
-                              title="Région"
-                              options={regionList.map((r) => ({ value: r, label: r }))}
-                            />
-                          </>
-                        ) : null}
-
-                        {values.role === ROLES.REFERENT_DEPARTMENT ? (
+                      {values.role === ROLES.VISITOR ? (
+                        <>
+                          <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(VISITOR_SUBROLES)} />
                           <Select
-                            disabled={currentUser.role !== ROLES.ADMIN}
-                            name="department"
-                            values={values}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              handleChange({ target: { name: "department", value } });
-                              const region = department2region[value];
-                              handleChange({ target: { name: "region", value: region } });
-                            }}
-                            title="Département"
-                            options={departmentList.map((d) => ({ value: d, label: d }))}
-                          />
-                        ) : null}
-                        {values.role === ROLES.REFERENT_REGION ? (
-                          <Select
-                            disabled={values.role === ROLES.REFERENT_DEPARTMENT}
                             name="region"
                             values={values}
                             onChange={(e) => {
@@ -321,38 +297,69 @@ export default function Edit(props) {
                             }}
                             title="Région"
                             options={regionList.map((r) => ({ value: r, label: r }))}
+                            />
+                        </>
+                      ) : null}
+
+                      {values.role === ROLES.REFERENT_DEPARTMENT ? (
+                        <Select
+                        disabled={currentUser.role !== ROLES.ADMIN}
+                        name="department"
+                        values={values}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          handleChange({ target: { name: "department", value } });
+                          const region = department2region[value];
+                          handleChange({ target: { name: "region", value: region } });
+                        }}
+                        title="Département"
+                        options={departmentList.map((d) => ({ value: d, label: d }))}
+                        />
+                        ) : null}
+                      {values.role === ROLES.REFERENT_REGION ? (
+                        <Select
+                        disabled={values.role === ROLES.REFERENT_DEPARTMENT}
+                        name="region"
+                        values={values}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          handleChange({ target: { name: "region", value } });
+                          handleChange({ target: { name: "department", value: "" } });
+                        }}
+                        title="Région"
+                          options={regionList.map((r) => ({ value: r, label: r }))}
                           />
-                        ) : null}
-                        {values.role === ROLES.HEAD_CENTER ? (
-                          <Row className="detail">
-                            <Col md={4}>
-                              <label>Séjours </label>
+                          ) : null}
+                      {values.role === ROLES.HEAD_CENTER ? (
+                        <Row className="detail">
+                          <Col md={4}>
+                            <label>Séjours </label>
+                          </Col>
+                          {sessionsWhereUserIsHeadCenter?.length > 0 ? (
+                            <Col md={8}>
+                              {(sessionsWhereUserIsHeadCenter || [])
+                                .map((session) => (
+                                  <div className="py-1" key={session._id.toString()}>
+                                    <a
+                                      href={`/centre/${session?.center?._id}?cohorte=${session.cohort}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="flex items-center gap-1 group-hover:underline">
+                                      {session?.center?.name}
+                                      <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={session.cohort} style={{ cursor: "default" }} />
+                                      <MdOutlineOpenInNew />
+                                    </a>
+                                  </div>
+                                ))
+                                .reduce((prev, curr) => [prev, "", curr])}
                             </Col>
-                            {sessionsWhereUserIsHeadCenter?.length > 0 ? (
-                              <Col md={8}>
-                                {(sessionsWhereUserIsHeadCenter || [])
-                                  .map((session) => (
-                                    <div className="py-1" key={session._id.toString()}>
-                                      <a
-                                        href={`/centre/${session?.center?._id}?cohorte=${session.cohort}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="flex items-center gap-1 group-hover:underline">
-                                        {session?.center?.name}
-                                        <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={session.cohort} style={{ cursor: "default" }} />
-                                        <MdOutlineOpenInNew />
-                                      </a>
-                                    </div>
-                                  ))
-                                  .reduce((prev, curr) => [prev, "", curr])}
-                              </Col>
-                            ) : null}
-                          </Row>
-                        ) : null}
-                      </BoxContent>
-                    </Box>
-                  </Col>
-                )}
+                          ) : null}
+                        </Row>
+                      ) : null}
+                    </BoxContent>
+                  </Box>
+                </Col>
+                      )}
               </Row>
             </>
           )}
