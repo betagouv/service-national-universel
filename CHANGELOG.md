@@ -1,3 +1,20 @@
+# [1.108.0](https://github.com/betagouv/service-national-universel/compare/v1.107.3...v1.108.0) (2022-07-04)
+
+
+### Bug Fixes
+
+* add filter visibility mission ([52122eb](https://github.com/betagouv/service-national-universel/commit/52122eb2853bd4beff0b6c244211345ea833bdf9))
+* **admin:** BUG pointage des volontaires par les CDC ([f524905](https://github.com/betagouv/service-national-universel/commit/f5249058afebd871d4015ead5ed7a881a8e7749d))
+* **api:** sécurité automatisation suppression fichier préparation militaire ([#1646](https://github.com/betagouv/service-national-universel/issues/1646)) ([7b204a1](https://github.com/betagouv/service-national-universel/commit/7b204a13ff4ec266020fd61583bdf7a05315b4e7))
+* **app:** reopen form zammood ([50f9d2b](https://github.com/betagouv/service-national-universel/commit/50f9d2b9a4e57596ada20cbad7c6b6ca934f167b))
+
+
+### Features
+
+* **admin:** ouverture creation equivalence pour les referent ([#1634](https://github.com/betagouv/service-national-universel/issues/1634)) ([604d3de](https://github.com/betagouv/service-national-universel/commit/604d3dec0a17b0d08a511dc3f86f982b9cf23dce))
+* **api:** sync referent support ([#1647](https://github.com/betagouv/service-national-universel/issues/1647)) ([47d7ec2](https://github.com/betagouv/service-national-universel/commit/47d7ec207b39fe2f599d1a1a2a7671280e206658))
+* **app, admin:** Masquer la mission pour suspendre les candidatures ([#1630](https://github.com/betagouv/service-national-universel/issues/1630)) ([9624322](https://github.com/betagouv/service-national-universel/commit/962432237b368c96c79ab1242c657a04c5e7e69c))
+
 ## [1.107.3](https://github.com/betagouv/service-national-universel/compare/v1.107.2...v1.107.3) (2022-07-03)
 
 
