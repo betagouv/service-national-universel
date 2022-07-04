@@ -35,5 +35,5 @@ Lancer la commande `npm run dev` pour accéder à l'application via l'URL `http:
   ``` 
  - voir les fichier : `s3cmd ls [path]`
  - ajouter un fichier dans le cellar : `s3cmd put [path] s3://[bucket]/[path]`
- - ajouter l'option `--acl-public` pour rendre le fichier accessible en lecture publique.
+ - ajouter l'option `--acl-public` pour rendre le fichier accessible en lecture publique
 

@@ -274,6 +274,7 @@ describe("Cohesion Center", () => {
           name: "new name",
           code2022: "new code",
         });
+      expect(res.status).toBe(200);
 
       const updatedReferent = await getReferentByIdHelper(referent._id);
       const updatedYoung = await getYoungByIdHelper(young._id);

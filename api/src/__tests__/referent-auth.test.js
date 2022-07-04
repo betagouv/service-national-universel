@@ -116,21 +116,21 @@ describe("Referent", () => {
     });
   });
 
-  // describe("GET /referent/signin_token", () => {
-  //   it("should return 200", async () => {
-  //     const referent = await createReferentHelper(getNewReferentFixture());
-  //     const passport = require("passport");
-  //     const previous = passport.user;
-  //     passport.user = referent;
-  //     passport.user.set = jest.fn();
-  //     passport.user.save = jest.fn();
-  //     const res = await request(getAppHelper()).get("/referent/signin_token").set("Cookie", ["jwt=blah"]);
-  //     expect(res.status).toBe(200);
-  //     expect(passport.user.set).toHaveBeenCalled();
-  //     expect(passport.user.save).toHaveBeenCalled();
-  //     passport.user = previous;
-  //   });
-  // });
+  describe("GET /referent/signin_token", () => {
+    it("should return 200", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = referent;
+      passport.user.set = jest.fn();
+      passport.user.save = jest.fn();
+      const res = await request(getAppHelper()).get("/referent/signin_token").set("Cookie", ["jwt=blah"]);
+      expect(res.status).toBe(200);
+      expect(passport.user.set).toHaveBeenCalled();
+      expect(passport.user.save).toHaveBeenCalled();
+      passport.user = previous;
+    });
+  });
 
   describe("POST /referent/reset_password", () => {
     it("should return return 400 when missing password", async () => {
