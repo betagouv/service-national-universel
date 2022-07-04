@@ -98,7 +98,7 @@ function supervisor({ onClick, from }) {
   );
 }
 
-function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from }) {
+function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -131,7 +131,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
           </>
         )}
       </DrawerTabWithIcons>
-      {environment === "staging" && <SupportButton />}
+      {ssoSupportStorage === "sso-support" && <SupportButton />}
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -207,6 +207,7 @@ const Drawer = (props) => {
   const [open, setOpen] = useState();
   const [from, setFrom] = useState();
   const history = useHistory();
+  const ssoSupportStorage = localStorage.getItem("sso-support");
 
   useEffect(() => {
     setOpen(props.open);
@@ -256,7 +257,7 @@ const Drawer = (props) => {
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
