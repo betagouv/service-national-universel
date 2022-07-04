@@ -7,7 +7,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL, supportURL } from "../../config";
 import Panel from "./panel";
-import { formatStringDateTimezoneUTC, translate, getFilterLabel, formatLongDateFR, formatDateFRTimezoneUTC, ES_NO_LIMIT, ROLES } from "../../utils";
+import { formatStringDateTimezoneUTC, translate, getFilterLabel, formatLongDateFR, formatDateFRTimezoneUTC, ES_NO_LIMIT, ROLES, translateVisibilty } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
@@ -20,7 +20,7 @@ import DatePickerWrapper from "../../components/filters/DatePickerWrapper";
 import { HiAdjustments, HiOutlineLockClosed } from "react-icons/hi";
 import LockedSvg from "../../assets/lock.svg";
 import UnlockedSvg from "../../assets/lock-open.svg";
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION", "DATE", "SOURCE"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION", "DATE", "SOURCE", "VISIBILITY"];
 import Breadcrumbs from "../../components/Breadcrumbs";
 
 export default function List() {
@@ -188,6 +188,20 @@ export default function List() {
                     let value = translated.join(", ");
                     return value;
                   }}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Visibilité"
+                  componentId="VISIBILITY"
+                  dataField="visibility.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "VISIBILITY") }}
+                  renderItem={(e, count) => {
+                    return `${translateVisibilty(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Visibilité", "Visibilité")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
