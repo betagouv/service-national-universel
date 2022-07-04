@@ -35,14 +35,14 @@ export default function application({ application }) {
   return (
     <Link
       to={`/mission/${application.missionId}`}
-      className="group flex flex-col w-56 justify-start items-start border shadow-md rounded-lg bg-white p-3 hover:-translate-y-1 transition duration-100 ease-in">
+      className="group flex flex-col w-56 justify-start items-start shadow-nina rounded-lg bg-white pb-4 p-3 hover:-translate-y-1 transition duration-100 ease-in">
       <div className={`flex gap-1 items-center text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm mb-2`}>
         {theme.icon[application.status] ? theme.icon[application.status] : null}
         {translateApplicationForYoungs(application.status)}
       </div>
       <div className="flex flex-1 flex-col justify-between">
         <div className="flex flex-1 flex-col">
-          <div className="text-gray-500 text-xs mt-2 uppercase">{application.mission?.structureName}</div>
+          <div className="text-gray-500 text-xs mt-2 uppercase tracking-wider">{application.mission?.structureName}</div>
           <div className="font-bold text-sm mt-2 break-words">
             {application.missionName?.substring(0, 150)}
             {application.missionName?.length > 150 ? "..." : ""}

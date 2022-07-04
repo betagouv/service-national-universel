@@ -6,6 +6,13 @@ const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "meetingpoint";
 
 const Schema = new mongoose.Schema({
+  isValid: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le point de rassemblement est validé",
+    },
+  },
   cohort: {
     type: String,
     enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2021"],

@@ -1,14 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import CardMission from "./components/CardMission";
 import { apiURL } from "../../../../config";
-import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM, ES_NO_LIMIT, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../../utils";
 import api from "../../../../services/api";
-import Loader from "../../../../components/Loader";
-import FilterGeoloc from "../../components/FilterGeoloc";
 import Sante from "../../../../assets/mission-domaines/sante";
 import Solidarite from "../../../../assets/mission-domaines/solidarite";
 import Citoyennete from "../../../../assets/mission-domaines/citoyennete";
@@ -24,12 +22,14 @@ import Sun from "../../../../assets/icons/Sun";
 import Calendar from "../../../../assets/icons/Calendar";
 import Search from "../../../../assets/icons/Search";
 import { Link } from "react-router-dom";
-import { HiOutlineAdjustments } from "react-icons/hi";
+import { HiOutlineAdjustments, HiOutlineArrowNarrowRight } from "react-icons/hi";
 import PietonSvg from "../../assets/Pieton";
 import VeloSvg from "../../assets/Velo";
 import VoitureSvg from "../../assets/Voiture";
 import TrainSvg from "../../assets/Train";
 import FuseeSvg from "../../assets/Fusee";
+import { Modal } from "reactstrap";
+import ChevronDown from "../../../../assets/icons/ChevronDown";
 
 const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
@@ -38,21 +38,38 @@ export default function List() {
   const [filter, setFilter] = React.useState({ DOMAINS: [], DISTANCE: 50 });
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
-  const [focusedAddress, setFocusedAddress] = React.useState();
+  const [focusedAddress, setFocusedAddress] = React.useState({ address: young?.address, zip: young?.zip });
   const DISTANCE_MAX = 100;
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
+  const [modalControl, setModalControl] = React.useState(false);
+  const [keyWordOpen, setKeyWordOpen] = React.useState(false);
+  const [keyWord, setKeyWord] = React.useState("");
+  const [marginDistance, setMarginDistance] = useState();
+
+  const callSingleAddressAPI = async (params) => {
+    try {
+      const url = `https://api-adresse.data.gouv.fr/search/?q=${params}&limit=1`;
+      const res = await fetch(url).then((response) => response.json());
+      return res?.features[0];
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  };
 
   const getCoordinates = async ({ q, postcode }) => {
     try {
-      let url = `https://api-adresse.data.gouv.fr/search/?q=${q || postcode}`;
-      if (postcode) url += `&postcode=${postcode}`;
-      const res = await fetch(url).then((response) => response.json());
-      const lon = res?.features[0]?.geometry?.coordinates[0] || null;
-      const lat = res?.features[0]?.geometry?.coordinates[1] || null;
-      return lon && lat && { lat, lon };
+      let adresse = await callSingleAddressAPI(`${q}+${postcode}`);
+      if (!adresse) {
+        console.warn("Utilisation du zip code seul");
+        adresse = await callSingleAddressAPI(postcode);
+        if (!adresse) throw "Erreur en utilisant l'api d'adresse";
+      }
+      const coordinates = adresse?.geometry?.coordinates;
+      return { lat: coordinates[1], lon: coordinates[0] };
     } catch (e) {
-      console.log("error", e);
+      console.error(e);
       return null;
     }
   };
@@ -85,7 +102,7 @@ export default function List() {
       sort: [
         {
           _geo_distance: {
-            location: filter?.LOCATION || [young.location?.lon, young.location?.lat],
+            location: filter?.LOCATION,
             order: "asc",
             unit: "km",
             mode: "min",
@@ -135,7 +152,7 @@ export default function List() {
       body.query.bool.filter.push({
         geo_distance: {
           distance: `${filter?.DISTANCE}km`,
-          location: young.location,
+          location: filter?.LOCATION,
         },
       });
     }
@@ -189,6 +206,15 @@ export default function List() {
     }
   };
 
+  useEffect(() => {
+    (async () => {
+      if (!young) return;
+      const filterLocation = young?.location || (await getCoordinates({ q: young?.address, postcode: young?.zip }));
+
+      setFilter({ ...filter, LOCATION: filterLocation });
+    })();
+  }, [young]);
+
   React.useEffect(() => {
     let range;
     const fromDate = filter?.FROM;
@@ -231,11 +257,10 @@ export default function List() {
   }, [filter?.FROM, filter?.TO]);
 
   React.useEffect(() => {
-    if (!focusedAddress) return setFilter((prev) => ({ ...prev, LOCATION: undefined }));
+    if (!focusedAddress) return;
     (async () => {
       let location;
       location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
-      if (!location) location = await getCoordinates({ postcode: focusedAddress.address });
       setFilter((prev) => ({ ...prev, LOCATION: location }));
     })();
   }, [focusedAddress]);
@@ -266,270 +291,318 @@ export default function List() {
     };
   }, []);
 
+  const marginLeftDistance = (ele) => {
+    if (ele) {
+      return Number((ele.scrollWidth + ((filter?.DISTANCE - DISTANCE_MAX) * ele.scrollWidth) / DISTANCE_MAX) * 0.92);
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    const ele = document.getElementById("distanceKm");
+    if (ele) {
+      setMarginDistance(marginLeftDistance(ele));
+    }
+  }, [filter?.DISTANCE]);
+
   return (
     <div className="bg-white pb-12 rounded-lg w-full">
       {/* BEGIN HEADER */}
-      <div className="flex justify-between p-4">
+      <div className="flex justify-between p-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 mb-3">Trouvez une mission d&apos;intérêt général</h1>
           <div className="text-sm font-normal text-gray-700">
-            Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.
-            <br />
-            Pour plus d&apos;informations,{" "}
+            Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.{" "}
             <a
               className="underline hover:underline font-medium hover:text-gray-700"
               href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
               target="_blank"
               rel="noreferrer">
-              cliquez-ici
+              En savoir plus
             </a>
-            .
           </div>
         </div>
       </div>
       {/* END HEADER */}
 
+      <div className=" border flex rounded-full mx-4 items-center pl-2.5 pr-1 py-1  justify-between mb-3">
+        <input
+          value={filter?.SEARCH}
+          onChange={(e) => {
+            e.persist();
+            setFilter((prev) => ({ ...prev, SEARCH: e.target.value }));
+          }}
+          className="text-[11px] w-11/12 "
+          type="text"
+          placeholder="Mot clé • N'importe quand • Distance max 100km..."
+        />
+        <div className="h-10 w-10 bg-blue-600 rounded-full flex " onClick={() => setModalControl(true)}>
+          <HiOutlineAdjustments className="text-white m-auto" />
+        </div>
+      </div>
+
       {/* BEGIN CONTROL */}
       <div className="w-full bg-white rounded-lg space-y-6">
-        {/* search bar recherche */}
-        <div className="relative">
-          <div className="bg-white border-[1px] border-gray-300 rounded-xl overflow-hidden p-1.5 mx-2 mb-4">
-            <input
-              value={filter?.SEARCH}
-              onChange={(e) => {
-                e.persist();
-                setFilter((prev) => ({ ...prev, SEARCH: e.target.value }));
-              }}
-              className="flex-1 p-1.5 w-full placeholder:text-gray-400 text-gray-700 text-sm border-b-[1px] border-gray-300"
-              type="text"
-              placeholder="Rechercher une mission..."
-            />
-            <div className="flex">
+        {/* BEGIN MODAL CONTROL*/}
+        <Modal size={"20px"} isOpen={modalControl} toggle={setModalControl}>
+          <div className="p-2 bg-gray-50 rounded-xl">
+            <div className="flex justify-between mb-3 items-center ml-2">
               <div
-                className="flex items-center flex-1 p-1.5 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer"
-                onClick={() => setDropdownControlDistanceOpen((e) => !e)}>
-                Distance max. {filter?.DISTANCE}km
+                className="text-xs text-gray-500"
+                onClick={() => {
+                  setModalControl(false);
+                }}>
+                Fermer
               </div>
+              <div>Filtrez</div>
               <div
-                className="flex items-center flex-1 p-1.5 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer border-l-[1px] border-gray-300"
-                onClick={() => setDropdownControlWhenOpen((e) => !e)}>
-                {getLabelWhen(filter?.PERIOD_PARENT)}
+                className="h-10 w-10 bg-blue-600 rounded-full flex "
+                onClick={() => {
+                  setModalControl(false);
+                }}>
+                <Search className="text-white  m-auto " />
               </div>
             </div>
-          </div>
-
-          {/* BEGIN MODAL CONTROL DISTANCE */}
-          <div
-            ref={refDropdownControlDistance}
-            className={`${dropdownControlDistanceOpen ? "block" : "hidden"} w-full rounded-lg bg-white transition absolute left-0 shadow overflow-hidden p-2 z-20`}>
-            <div className="font-bold text-sm text-gray-00 text-center">Distance maximum</div>
-            <div className="flex w-full flex-col space-y-2 py-2 px-2">
-              <div className="flex justify-around my-3">
-                <div className="flex items-center gap-2">
-                  <input
-                    id="main-address"
-                    name="main-address"
-                    type="radio"
-                    checked={focusedAddress?.address === young?.address}
-                    onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
-                  />
-                  <label htmlFor="main-address" className="cursor-pointer">
-                    <span className="text-xs text-gray-700">Autours de mon adresse principale</span>
-                    <br />
-                    <span className="text-sm text-gray-700">{young.city}</span>
-                  </label>
-                </div>
-                {young?.mobilityNearRelativeCity ? (
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="second-address"
-                      name="address"
-                      type="radio"
-                      checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
-                      onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
-                    />
-                    <label htmlFor="second-address" className="cursor-pointer">
-                      <span className="text-xs text-gray-700">Autours de l&apos;adresse de mon proche</span>
-                      <br />
-                      <span className="text-sm text-gray-700">{young?.mobilityNearRelativeCity}</span>
-                    </label>
+            <div className="flex flex-col space-y-5">
+              <div className=" border rounded-xl bg-white py-3.5 pl-4 pr-4">
+                {!keyWordOpen && (
+                  <div
+                    className="flex justify-between "
+                    onClick={() => {
+                      setDropdownControlDistanceOpen(false);
+                      setDropdownControlWhenOpen(false);
+                      setKeyWordOpen(true);
+                    }}>
+                    <div className="font-bold">Mot clé</div>
+                    <div className="text-gray-500 text-md">{filter?.SEARCH || "Aucun"}</div>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <input id="second-address" name="address" type="radio" value={young.city} disabled />
-                    <label htmlFor="second-address">
-                      <span className="text-xs text-gray-400">Autours de l&apos;adresse de mon proche</span>
-                      <br />
-                      <Link to="/preferences" className="text-sm text-blue-600 underline hover:underline">
-                        Renseigner une adresse
-                      </Link>
-                    </label>
+                )}
+                {keyWordOpen && (
+                  <div>
+                    <div className="font-bold text-center ">Mot clé</div>
+                    <input
+                      value={keyWord}
+                      onChange={(e) => {
+                        setKeyWord(e.target.value);
+                      }}
+                      className="flex-1 py-1.5 pl-3 w-full placeholder:text-gray-400 text-gray-700 text-sm  border-gray-300 border rounded-md my-3"
+                      type="text"
+                      placeholder="Rechercher par mot clé..."
+                    />
+                    <div className="flex justify-end ">
+                      <div
+                        className="bg-blue-600 text-white text-center w-2/5 rounded-md p-2 "
+                        onClick={() => {
+                          setKeyWordOpen(!keyWordOpen);
+                          setFilter((prev) => ({ ...prev, SEARCH: keyWord }));
+                        }}>
+                        Valider
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
-              <input
-                list="distance-list"
-                type="range"
-                className="w-full appearance-none h-2 bg-gray-200 items-center justify-center rounded-full cursor-pointer"
-                min="1"
-                max={DISTANCE_MAX}
-                step="1"
-                onChange={(e) => {
-                  e.persist();
-                  setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
-                }}
-              />
-              <datalist id="distance-list">
-                {[...Array(DISTANCE_MAX).keys()].map((i) => (
-                  <option key={i} value={i + 1}>
-                    {i + 1}
-                  </option>
-                ))}
-              </datalist>
-              <div className="flex justify-between w-full mt-4 px-[10px] text-gray-200">
-                <PietonSvg />
-                <VeloSvg />
-                <VoitureSvg />
-                <TrainSvg />
-                <FuseeSvg />
+              <div
+                className=" border rounded-xl bg-white py-3.5 pl-4 pr-4"
+                onClick={() => {
+                  setDropdownControlDistanceOpen(true);
+                  setDropdownControlWhenOpen(false);
+                  setKeyWordOpen(false);
+                }}>
+                {!dropdownControlDistanceOpen && (
+                  <div className="flex justify-between">
+                    <div className="font-bold">Distance maximum</div>
+                    <div className="text-gray-500 text-md">{filter?.DISTANCE || 100}km max</div>
+                  </div>
+                )}
+                {dropdownControlDistanceOpen && (
+                  <div>
+                    <div className="font-bold text-center">Distance maximum</div>
+                    <div className="text-sm text-gray-500 text-center">
+                      Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. En savoir plus
+                    </div>
+                    <div className="flex w-full flex-col space-y-2 py-2 px-2">
+                      <div className="flex justify-around my-3">
+                        <div className="flex items-center gap-2">
+                          <input
+                            id="main-address"
+                            name="main-address"
+                            type="radio"
+                            checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
+                            onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
+                          />
+                          <label htmlFor="main-address" className="cursor-pointer">
+                            <span className="text-xs text-gray-700">Autours de mon adresse principale</span>
+                            <br />
+                            <span className="text-sm text-gray-700">{young.city}</span>
+                          </label>
+                        </div>
+                        {young?.mobilityNearRelativeCity ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              id="second-address"
+                              name="address"
+                              type="radio"
+                              checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
+                              onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
+                            />
+                            <label htmlFor="second-address" className="cursor-pointer">
+                              <span className="text-xs text-gray-700">Autours de l&apos;adresse de mon proche</span>
+                              <br />
+                              <span className="text-sm text-gray-700">{young?.mobilityNearRelativeCity}</span>
+                            </label>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <input id="second-address" name="address" type="radio" value={young.city} disabled />
+                            <label htmlFor="second-address">
+                              <span className="text-xs text-gray-400">Autours de l&apos;adresse de mon proche</span>
+                              <br />
+                              <Link to="/preferences" className="text-sm text-blue-600 underline hover:underline">
+                                Renseigner une adresse
+                              </Link>
+                            </label>
+                          </div>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <input
+                          id="distanceKm"
+                          list="distance-list"
+                          type="range"
+                          className="w-full  appearance-none h-2 bg-gray-200 rounded-full cursor-pointer items-center"
+                          value={filter?.DISTANCE}
+                          min="1"
+                          max={DISTANCE_MAX}
+                          step="1"
+                          onChange={(e) => {
+                            e.persist();
+                            setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
+                          }}
+                        />
+                        <div className={`absolute  -mt-10 -ml-2 font-bold  w-full ${!marginDistance && " flex justify-center ml-1"} `} style={{ left: `${marginDistance}px` }}>
+                          {filter?.DISTANCE}km
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center w-full mt-2 px-[10px] text-gray-200">
+                        <PietonSvg />
+                        <VeloSvg />
+                        <VoitureSvg />
+                        <TrainSvg />
+                        <FuseeSvg />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="border rounded-xl bg-white py-3.5 ">
+                {!dropdownControlWhenOpen && (
+                  <div
+                    className="flex justify-between px-4"
+                    onClick={() => {
+                      setDropdownControlDistanceOpen(false);
+                      setDropdownControlWhenOpen(true);
+                      setKeyWordOpen(false);
+                    }}>
+                    <div className="font-bold">Période</div>
+                    <div className="text-gray-500 text-md">N'importe quand</div>
+                  </div>
+                )}
+                {dropdownControlWhenOpen && (
+                  <div>
+                    <div className="font-bold text-center ">Période</div>
+                    <div>
+                      <div className="flex flex-wrap text-sm mt-3">
+                        <PeriodeTab label={getLabelWhen("")} active={!filter?.PERIOD_PARENT} name="" onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: undefined }))} />
+                        <PeriodeTab
+                          Icon={Calendar}
+                          label={getLabelWhen("CUSTOM")}
+                          active={filter?.PERIOD_PARENT === "CUSTOM"}
+                          name="CUSTOM"
+                          onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "CUSTOM" }))}
+                        />
+                        <PeriodeTab
+                          Icon={AcademicCap}
+                          label={getLabelWhen("SCOLAIRE")}
+                          active={filter?.PERIOD_PARENT === "SCOLAIRE"}
+                          name="SCOLAIRE"
+                          onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "SCOLAIRE" }))}
+                        />
+                        <PeriodeTab
+                          Icon={Sun}
+                          label={getLabelWhen("VACANCES")}
+                          active={filter?.PERIOD_PARENT === "VACANCES"}
+                          name="VACANCES"
+                          onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "VACANCES" }))}
+                        />
+                      </div>
+                      {filter?.PERIOD_PARENT === "SCOLAIRE" ? (
+                        <Select placeholder={getLabelWhen("SCOLAIRE")} options={MISSION_PERIOD_DURING_SCHOOL} handleChangeValue={handleToggleChangePeriod} value={filter?.PERIOD} />
+                      ) : null}
+                      {filter?.PERIOD_PARENT === "VACANCES" ? (
+                        <Select
+                          placeholder={getLabelWhen("VACANCES")}
+                          options={MISSION_PERIOD_DURING_HOLIDAYS}
+                          handleChangeValue={handleToggleChangePeriod}
+                          value={filter?.PERIOD}
+                        />
+                      ) : null}
+                      {filter?.PERIOD_PARENT === "CUSTOM" ? (
+                        <div className="flex flex-col gap-2 justify-center items-center mt-6">
+                          <div className="flex flex-wrap gap-2 justify-center items-center">
+                            <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
+                              <label className="text-left text-gray-500 w-full m-0">Du</label>
+                              <input
+                                required
+                                type="date"
+                                className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                                value={filter?.FROM}
+                                onChange={(e) => {
+                                  e.persist();
+                                  setFilter((prev) => ({ ...prev, FROM: e.target.value }));
+                                }}
+                              />
+                            </div>
+                            <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
+                              <label className="text-left text-gray-500 w-full m-0">Au</label>
+                              <input
+                                required
+                                type="date"
+                                className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                                value={filter?.TO}
+                                onChange={(e) => {
+                                  e.persist();
+                                  setFilter((prev) => ({ ...prev, TO: e.target.value }));
+                                }}
+                              />
+                            </div>
+                          </div>
+                          {filter?.FROM || filter?.TO ? (
+                            <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, TO: "", FROM: "" }))}>
+                              Effacer
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-          {/* END MODAL CONTROL DISTANCE */}
-
-          {/* BEGIN MODAL CONTROL WHEN */}
-          <div
-            ref={refDropdownControlWhen}
-            className={`${dropdownControlWhenOpen ? "block" : "hidden"} w-full rounded-lg bg-white transition absolute left-0 shadow overflow-hidden p-3 z-20`}>
-            <div className="font-bold text-sm text-gray-00 text-center">Période de réalisation de la mission</div>
-            <div className="flex w-full flex-col py-2 px-4">
-              <div className="flex flex-col justify-between w-full mt-4 px-[10px] font-medium text-gray-700 text-sm gap-2">
-                <PeriodeTab label={getLabelWhen("")} active={!filter?.PERIOD_PARENT} name="" onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: undefined }))} />
-                <PeriodeTab
-                  Icon={AcademicCap}
-                  label={getLabelWhen("SCOLAIRE")}
-                  active={filter?.PERIOD_PARENT === "SCOLAIRE"}
-                  name="SCOLAIRE"
-                  onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "SCOLAIRE" }))}
-                />
-                <PeriodeTab
-                  Icon={Sun}
-                  label={getLabelWhen("VACANCES")}
-                  active={filter?.PERIOD_PARENT === "VACANCES"}
-                  name="VACANCES"
-                  onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "VACANCES" }))}
-                />
-                <PeriodeTab
-                  Icon={Calendar}
-                  label={getLabelWhen("CUSTOM")}
-                  active={filter?.PERIOD_PARENT === "CUSTOM"}
-                  name="CUSTOM"
-                  onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "CUSTOM" }))}
-                />
+            <Link to="/preferences">
+              <div className="flex mx-3 justify-between mt-4 pb-20 items-center">
+                <div>
+                  <div className="font-bold">Gagnez du temps</div>
+                  <div className="text-xs text-gray-600">Renseignez vos préférences pour les prochaines fois</div>
+                </div>
+                <HiOutlineArrowNarrowRight className="text-gray-500 w-5" />
               </div>
-              {filter?.PERIOD_PARENT === "SCOLAIRE" ? (
-                <div className="flex flex-col gap-2 justify-center items-center mt-6">
-                  <div className="flex flex-wrap gap-2 justify-center items-center">
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_SCHOOL.EVENING}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.EVENING)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_SCHOOL.END_DAY}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.END_DAY)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_SCHOOL.WEEKEND}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.WEEKEND)}
-                    />
-                  </div>
-                  {filter?.PERIOD?.length ? (
-                    <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
-                      Effacer
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-              {filter?.PERIOD_PARENT === "VACANCES" ? (
-                <div className="flex flex-col gap-2 justify-center items-center mt-6">
-                  <div className="flex flex-wrap gap-2 justify-center items-center">
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_HOLIDAYS.SUMMER}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SUMMER)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_HOLIDAYS.WINTER}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.WINTER)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_HOLIDAYS.SPRING}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SPRING)}
-                    />
-                  </div>
-                  {filter?.PERIOD?.length ? (
-                    <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
-                      Effacer
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-              {filter?.PERIOD_PARENT === "CUSTOM" ? (
-                <div className="flex flex-col gap-2 justify-center items-center mt-6">
-                  <div className="flex flex-wrap gap-2 justify-center items-center">
-                    <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
-                      <label className="text-left text-gray-500 w-full m-0">Du</label>
-                      <input
-                        required
-                        type="date"
-                        className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
-                        value={filter?.FROM}
-                        onChange={(e) => {
-                          e.persist();
-                          setFilter((prev) => ({ ...prev, FROM: e.target.value }));
-                        }}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
-                      <label className="text-left text-gray-500 w-full m-0">Au</label>
-                      <input
-                        required
-                        type="date"
-                        className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
-                        value={filter?.TO}
-                        onChange={(e) => {
-                          e.persist();
-                          setFilter((prev) => ({ ...prev, TO: e.target.value }));
-                        }}
-                      />
-                    </div>
-                  </div>
-                  {filter?.FROM || filter?.TO ? (
-                    <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, TO: "", FROM: "" }))}>
-                      Effacer
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
+            </Link>
           </div>
-          {/* END MODAL CONTROL WHEN */}
+        </Modal>
+        {/* END MODAL CONTROL*/}
 
+        <div className="relative">
           <div className="flex gap-4 px-4 overflow-x-scroll">
             <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("HEALTH")} />
             <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SOLIDARITY")} />
@@ -604,34 +677,67 @@ const DomainFilter = ({ Icon, name, label, onClick, active }) => {
 
 const PeriodeTab = ({ Icon, name, label, onClick, active }) => {
   return (
-    <div className="group flex flex-1 flex-col items-center justify-start space-y-2 cursor-pointer" onClick={() => onClick(name)}>
+    <div className="ml-2 mb-2" onClick={() => onClick(name)}>
       {active ? (
-        <div className="flex border-b-2 border-blue-600 pb-2 font-bold gap-2 items-center">
+        <div className="flex items-center justify-center cursor-pointer rounded-full py-1  px-2 border-[1px] text-blue-600 border-blue-600 hover:border-blue-500 font-medium ">
           {label}
-          {Icon ? <Icon className="text-gray-500" /> : null}
+          {Icon ? <Icon className="text-gray-500 ml-1" /> : null}
         </div>
       ) : (
-        <div className="flex pb-2 font-medium hover:border-b-2 hover:border-blue-600 gap-2 items-center">
+        <div className="group flex items-center justify-center cursor-pointer rounded-full py-1 px-2 border-[1px] text-gray-700 border-gray-200 hover:border-gray-300 font-medium">
           {label}
-          {Icon ? <Icon className="text-gray-500" /> : null}
+          {Icon ? <Icon className="text-gray-500 ml-1" /> : null}
         </div>
       )}
     </div>
   );
 };
 
-const PeriodeItem = ({ name, onClick, active }) => {
-  return active ? (
-    <div
-      className="group flex flex-col items-center justify-center cursor-pointer rounded-full py-1 px-4 border-[1px] text-blue-600 border-blue-600 hover:border-blue-500 text-xs"
-      onClick={() => onClick(name)}>
-      <div className="">{translate(name)}</div>
-    </div>
-  ) : (
-    <div
-      className="group flex flex-col items-center justify-center cursor-pointer rounded-full py-1 px-4 border-[1px] text-gray-700 border-gray-200 hover:border-gray-300 text-xs"
-      onClick={() => onClick(name)}>
-      <div className="">{translate(name)}</div>
+const Select = ({ value, options, handleChangeValue, placeholder }) => {
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState("");
+
+  const values = Object.values(options);
+
+  useEffect(() => {
+    let placeholderValue = "";
+    values.forEach((option) => ((value || []).includes(option) ? (placeholderValue += ", " + translate(option)) : null));
+
+    setSelected(placeholderValue === "" ? placeholder : placeholderValue.length <= 28 ? placeholderValue.slice(2) : placeholderValue.slice(2, 26) + "...");
+  }, [value]);
+
+  return (
+    <div style={{ fontFamily: "Marianne" }} className="flex justify-center">
+      {/* select item */}
+      <div>
+        <button
+          className="flex justify-between items-center gap-3 border-[1px] px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait min-w-[250px]"
+          style={{ fontFamily: "Marianne" }}
+          onClick={() => setOpen((e) => !e)}>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-700 font-medium text-sm whitespace-nowrap ">{selected}</span>
+          </div>
+          <ChevronDown className="text-gray-400" />
+        </button>
+
+        {/* display options */}
+        <div className=" h-0 flex flex-col justify-end relative">
+          <div className={`${open ? "block" : "hidden"} left-0 right-0  rounded-lg bottom-11 bg-white transition absolute border-3 border-red-600 shadow overflow-hidden z-50 `}>
+            {values.map((option, index) => (
+              <div key={index} className={`${(value || []).includes(option) && "font-bold bg-gray"}`}>
+                <div
+                  className="group flex  items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer"
+                  onClick={() => {
+                    handleChangeValue(option);
+                  }}>
+                  <input type="checkbox" className="rounded-xl" checked={(value || []).includes(option)} />
+                  <div>{translate(option)}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

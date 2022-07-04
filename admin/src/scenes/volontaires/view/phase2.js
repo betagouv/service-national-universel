@@ -9,6 +9,7 @@ import SelectStatus from "../../../components/selectStatus";
 import api from "../../../services/api";
 import { colors, ENABLE_PM, translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../utils";
 import CardEquivalence from "../components/Equivalence";
+import Toolbox from "../components/Toolbox";
 import ApplicationList from "./applicationList.js";
 import Phase2militaryPrepartionV2 from "./phase2MilitaryPreparationV2";
 import WrapperPhase2 from "./wrapper";
@@ -144,6 +145,9 @@ export default function Phase2({ young, onChange }) {
         <Box>
           <ApplicationList young={young} onChangeApplication={onChange} />
         </Box>
+
+        <Toolbox young={young} />
+
         {young.statusPhase2 === "VALIDATED" ? (
           <div style={{ display: "flex", alignItems: "flex-start" }}>
             <div style={{ textAlign: "center" }}>

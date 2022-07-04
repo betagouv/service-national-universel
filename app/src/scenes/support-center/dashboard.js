@@ -13,8 +13,6 @@ import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
 import { supportURL } from "../../config";
-import { Modal } from "reactstrap";
-import CloseSvg from "../../assets/Close";
 
 const articles = [
   {
@@ -40,7 +38,6 @@ const articles = [
 export default function Dashboard(props) {
   const [userTickets, setUserTickets] = useState(null);
   const fromPage = new URLSearchParams(props.location.search).get("from");
-  const [affectationsJuilletMessage, setAffectationsJuilletMessage] = useState(true);
 
   dayjs.extend(relativeTime).locale("fr");
 
@@ -177,29 +174,6 @@ export default function Dashboard(props) {
             </NavLink>
           ))}
       </List>
-      <Modal centered isOpen={affectationsJuilletMessage} toggle={() => setAffectationsJuilletMessage(false)}>
-        <div className="p-4">
-          <div className="flex flex-row-reverse absolute right-4 cursor-pointer">
-            <CloseSvg className="m-1" height={15} onClick={() => setAffectationsJuilletMessage(false)} />
-          </div>
-          <h1 className="font-bold text-lg mb-2 text-center">Qu&apos;en est-il des affectations de Juillet ?</h1>
-          <div className="flex flex-col space-y-5">
-            <div>Bonjour,</div>
-            <div className="text-justify">
-              Nous nous excusons pour les désagréments causés par ce retard, nous n&apos;avons malheureusement pas encore de date précise à vous communiquer. Vous allez recevoir
-              votre affectation très prochainement. <br /> <br /> Transport, alimentation, activités et tenue des volontaires, tous les frais inhérents à la mise en oeuvre du
-              séjour de cohésion sont pris en charge par l&apos;Etat. <br /> <br /> Concernant le transport pour le séjour de cohésion, il sera pris en charge d&apos;un point de
-              rassemblement jusqu&apos;à son centre d&apos;accueil aller et retour, sauf exception dans le cas d&apos;affectation au sein de son département.
-            </div>
-            <div className="text-justify">⚠️ Ce n&apos;est pas nécessaire d&apos;envoyer un message au support au sujet de la date d&apos;affectation.</div>
-            <div className=" flex justify-center">
-              <button className="py-1.5 px-6 bg-blue-600 text-center rounded text-white " onClick={() => setAffectationsJuilletMessage(false)}>
-                J&apos;ai compris !
-              </button>
-            </div>
-          </div>
-        </div>
-      </Modal>
     </HeroContainer>
   );
 }

@@ -42,7 +42,6 @@ import ModalCGU from "./components/modals/ModalCGU";
 
 import "./index.css";
 import { YOUNG_STATUS, ENABLE_PM, inscriptionCreationOpenForYoungs } from "./utils";
-import Zammad from "./components/Zammad";
 import GoogleTags from "./components/GoogleTags";
 import { toastr } from "react-redux-toastr";
 
@@ -87,7 +86,6 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      <Zammad />
       <GoogleTags />
       <div className="main">
         <Switch>

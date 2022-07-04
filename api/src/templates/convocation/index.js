@@ -22,6 +22,12 @@ const isFromDOMTOM = (young) => {
 function getBg() {
   return getSignedUrl("convocation/convocation_template_base.png");
 }
+function getTop() {
+  return getSignedUrl("convocation/top.png");
+}
+function getBottom() {
+  return getSignedUrl("convocation/bottom.png");
+}
 
 // ! WARNING : Change date also in app/src/scenes/phase1/components/Convocation.js
 const departureMeetingDate = {
@@ -59,6 +65,7 @@ const render = async (young) => {
     return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = (meetingPoint) => {
+    if (young.cohort === "Juillet 2022" && young.deplacementPhase1Autonomous !== "true") return "vendredi 15 juillet, 18:00";
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return returnMeetingDate[young.cohort]; // new Date("2021-07-02T12:00:00.000+00:00");
     return meetingPoint.returnAtString;
   };
@@ -87,7 +94,7 @@ const render = async (young) => {
         sanitizeAll(
           contacts
             .map((contact) => {
-              return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
+              return `<li>${contact.contactName} - ${contact.contactPhone || ""} - ${contact.contactMail || ""}</li>`;
             })
             .join(""),
         ),
@@ -115,7 +122,17 @@ const render = async (young) => {
       )
       .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${getDepartureMeetingDate(meetingPoint).split(",")[1]}`))
       .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
-      .replace(/{{TRANPORT}}/g, sanitizeAll(bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : ""))
+      .replace(/{{TRANSPORT}}/g, sanitizeAll(bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : ""))
+      .replace(
+        /{{MEETING_DATE_TEMPLATE}}/g,
+        sanitizeAll(
+          young?.cohort === "Juillet 2022" && young.deplacementPhase1Autonomous !== "true"
+            ? "Le retour est prévu le <b>vendredi 15 juillet à 18h</b> au même point de rendez-vous.\
+             (Cet horaire est donné à titre indicatif, il vous sera confirmé ultérieurement.)"
+            : "Le retour de votre séjour est prévu le <b>{{MEETING_DATE_RETURN}} à {{MEETING_HOURS_RETURN}}</b>, \
+            au même endroit que le jour du départ en centre.",
+        ),
+      )
       .replace(
         /{{MEETING_DATE_RETURN}}/g,
         sanitizeAll(
@@ -128,6 +145,8 @@ const render = async (young) => {
       .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(getReturnMeetingDate(meetingPoint).split(",")[1]))
 
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+      .replace(/{{TOP}}/g, sanitizeAll(getTop()))
+      .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
       .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()));
   } catch (e) {
     throw e;

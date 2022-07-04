@@ -236,7 +236,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
   if (disabledIncomplete)
     return (
       <div className="flex flex-col items-center gap-2">
-        <WithTooltip tooltipText="Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page">
+        <WithTooltip tooltipText="Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page">
           <button className="px-12 py-2 rounded-lg text-white bg-blue-600  text-sm cursor-pointer" onClick={() => scrollToBottom()}>
             Candidater
           </button>

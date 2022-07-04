@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
+import { IoMdInformationCircleOutline } from "react-icons/io";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import Calendar from "../../../assets/calendar";
 import LinearMap from "../../../assets/Linear-map.js";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import WithTooltip from "../../../components/WithTooltip";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
@@ -81,6 +83,7 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
     return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = () => {
+    if (young.cohort === "Juillet 2022" && !isAutonomous) return "vendredi 15 juillet, 18:00";
     if (isAutonomous || !meetingPoint) return returnMeetingDate[young.cohort]; // new Date("2021-07-02T12:00:00.000+00:00");
     return meetingPoint.returnAtString;
   };
@@ -140,9 +143,17 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
                       .join(" ")}
                   </div>
                 </div>
+                {/* FIXME Hot fix sale pour juillet */}
                 <Calendar date={getReturnMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12" />
                 <div className="flex flex-col">
-                  <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
+                  <div className="flex gap-x-1">
+                    <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
+                    {young.cohort === "Juillet 2022" && !isAutonomous && (
+                      <WithTooltip tooltipText="Cet horaire est donné à titre indicatif. Il vous sera confirmé ultérieurement">
+                        <IoMdInformationCircleOutline />
+                      </WithTooltip>
+                    )}
+                  </div>
                   <div className="text-sm text-gray-600 whitespace-nowrap">
                     {getReturnMeetingDate()
                       .split(/[,\s]+/)

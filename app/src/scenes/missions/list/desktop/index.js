@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -32,27 +32,41 @@ import TrainSvg from "../../assets/Train";
 import FuseeSvg from "../../assets/Fusee";
 
 const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
+const DISTANCE_MAX = 100;
 
 export default function List() {
   const young = useSelector((state) => state.Auth.young);
   const [filter, setFilter] = React.useState({ DOMAINS: [], DISTANCE: 50 });
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
-  const [focusedAddress, setFocusedAddress] = React.useState({ address: young?.address, zip: young?.zip });
-  const DISTANCE_MAX = 100;
+  const [focusedAddress, setFocusedAddress] = React.useState();
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
+  const [marginDistance, setMarginDistance] = useState();
+
+  const callSingleAddressAPI = async (params) => {
+    try {
+      const url = `https://api-adresse.data.gouv.fr/search/?q=${params}&limit=1`;
+      const res = await fetch(url).then((response) => response.json());
+      return res?.features[0];
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  };
 
   const getCoordinates = async ({ q, postcode }) => {
     try {
-      let url = `https://api-adresse.data.gouv.fr/search/?q=${q || postcode}`;
-      if (postcode) url += `&postcode=${postcode}`;
-      const res = await fetch(url).then((response) => response.json());
-      const lon = res?.features[0]?.geometry?.coordinates[0] || null;
-      const lat = res?.features[0]?.geometry?.coordinates[1] || null;
-      return lon && lat && { lat, lon };
+      let adresse = await callSingleAddressAPI(`${q}+${postcode}`);
+      if (!adresse) {
+        console.warn("Utilisation du zip code seul");
+        adresse = await callSingleAddressAPI(postcode);
+        if (!adresse) throw "Erreur en utilisant l'api d'adresse";
+      }
+      const coordinates = adresse?.geometry?.coordinates;
+      return { lat: coordinates[1], lon: coordinates[0] };
     } catch (e) {
-      console.log("error", e);
+      console.error(e);
       return null;
     }
   };
@@ -85,7 +99,7 @@ export default function List() {
       sort: [
         {
           _geo_distance: {
-            location: filter?.LOCATION || [young.location?.lon, young.location?.lat],
+            location: filter?.LOCATION,
             order: "asc",
             unit: "km",
             mode: "min",
@@ -131,11 +145,10 @@ export default function List() {
     }
 
     if (filter?.DISTANCE) {
-      // todo : make it work
       body.query.bool.filter.push({
         geo_distance: {
           distance: `${filter?.DISTANCE}km`,
-          location: young.location,
+          location: filter?.LOCATION,
         },
       });
     }
@@ -189,6 +202,15 @@ export default function List() {
     }
   };
 
+  useEffect(() => {
+    (async () => {
+      if (!young) return;
+      const filterLocation = young?.location || (await getCoordinates({ q: young?.address, postcode: young?.zip }));
+
+      setFilter({ ...filter, LOCATION: filterLocation });
+    })();
+  }, [young]);
+
   React.useEffect(() => {
     let range;
     const fromDate = filter?.FROM;
@@ -231,11 +253,10 @@ export default function List() {
   }, [filter?.FROM, filter?.TO]);
 
   React.useEffect(() => {
-    if (!focusedAddress) return setFilter((prev) => ({ ...prev, LOCATION: undefined }));
+    if (!focusedAddress) return;
     (async () => {
       let location;
       location = await getCoordinates({ q: focusedAddress.address, postcode: focusedAddress.zip });
-      if (!location) location = await getCoordinates({ postcode: focusedAddress.address });
       setFilter((prev) => ({ ...prev, LOCATION: location }));
     })();
   }, [focusedAddress]);
@@ -271,6 +292,20 @@ export default function List() {
     };
   }, []);
 
+  const marginLeftDistance = (ele) => {
+    if (ele) {
+      return Number(ele.scrollWidth + ((filter?.DISTANCE - DISTANCE_MAX) * ele.scrollWidth) / DISTANCE_MAX) * 0.96;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    const ele = document.querySelector(".distanceKm");
+    if (ele) {
+      setMarginDistance(marginLeftDistance(ele));
+    }
+  }, [filter?.DISTANCE]);
+
   return (
     <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14 w-full">
       {/* BEGIN HEADER */}
@@ -304,7 +339,7 @@ export default function List() {
       <div className="bg-gray-50 p-10 rounded-lg space-y-6">
         {/* search bar recherche */}
         <div className="relative">
-          <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-1.5 ">
+          <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-1.5 items-center">
             <input
               value={filter?.SEARCH}
               onChange={(e) => {
@@ -343,7 +378,7 @@ export default function List() {
                     id="main-address"
                     name="main-address"
                     type="radio"
-                    checked={focusedAddress?.address === young?.address}
+                    checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
                     onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
                   />
                   <label htmlFor="main-address" className="cursor-pointer">
@@ -380,26 +415,24 @@ export default function List() {
                   </div>
                 )}
               </div>
-              <input
-                list="distance-list"
-                type="range"
-                className="w-full appearance-none h-2 bg-gray-200 items-center justify-center rounded-full cursor-pointer"
-                min="1"
-                max={DISTANCE_MAX}
-                step="1"
-                onChange={(e) => {
-                  e.persist();
-                  setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
-                }}
-              />
-              <datalist id="distance-list">
-                {[...Array(DISTANCE_MAX).keys()].map((i) => (
-                  <option key={i} value={i + 1}>
-                    {i + 1}
-                  </option>
-                ))}
-              </datalist>
-              <div className="flex justify-between w-full mt-4 px-[10px] text-gray-200">
+              <div className="relative">
+                <input
+                  list="distance-list"
+                  type="range"
+                  className="w-full distanceKm appearance-none h-2 bg-gray-200 items-center  rounded-full cursor-pointer"
+                  min="1"
+                  max={DISTANCE_MAX}
+                  step="1"
+                  onChange={(e) => {
+                    e.persist();
+                    setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
+                  }}
+                />
+                <div className={`absolute -ml-2 -mt-10 font-bold w-full ${!marginDistance && " flex justify-center ml-1"} `} style={{ left: `${marginDistance}px` }}>
+                  {filter?.DISTANCE}km
+                </div>
+              </div>
+              <div className="flex justify-between w-full mt-4 px-[10px] text-gray-200 items-center">
                 <PietonSvg />
                 <VeloSvg />
                 <VoitureSvg />
@@ -572,35 +605,37 @@ export default function List() {
       </div>
       {/* END CONTROL */}
 
-      <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <Missions>
-          <ReactiveList
-            defaultQuery={getDefaultQuery}
-            componentId="result"
-            react={{ and: FILTERS }}
-            pagination={true}
-            paginationAt="bottom"
-            size={25}
-            showLoader={true}
-            loader="Chargement..."
-            innerClass={{ pagination: "pagination" }}
-            dataField="created_at"
-            renderResultStats={({ numberOfResults }) => {
-              return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
-            }}
-            render={({ data }) => {
-              return data.map((e) => {
-                const tags = [];
-                e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
-                // tags.push(e.remote ? "À distance" : "En présentiel");
-                e.domains.forEach((d) => tags.push(translate(d)));
-                return <CardMission key={e._id} mission={e} />;
-              });
-            }}
-            renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
-          />
-        </Missions>
-      </ReactiveBase>
+      {filter?.LOCATION && (
+        <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+          <Missions>
+            <ReactiveList
+              defaultQuery={getDefaultQuery}
+              componentId="result"
+              react={{ and: FILTERS }}
+              pagination={true}
+              paginationAt="bottom"
+              size={25}
+              showLoader={true}
+              loader="Chargement..."
+              innerClass={{ pagination: "pagination" }}
+              dataField="created_at"
+              renderResultStats={({ numberOfResults }) => {
+                return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
+              }}
+              render={({ data }) => {
+                return data.map((e) => {
+                  const tags = [];
+                  e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
+                  // tags.push(e.remote ? "À distance" : "En présentiel");
+                  e.domains.forEach((d) => tags.push(translate(d)));
+                  return <CardMission key={e._id} mission={e} />;
+                });
+              }}
+              renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
+            />
+          </Missions>
+        </ReactiveBase>
+      )}
     </div>
   );
 }

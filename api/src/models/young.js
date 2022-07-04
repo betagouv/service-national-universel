@@ -4,7 +4,6 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
-const zammad = require("../zammad");
 const { ENVIRONMENT } = require("../config");
 
 const MODELNAME = "young";
@@ -166,7 +165,6 @@ const Schema = new mongoose.Schema({
   },
   statusPhase1Tmp: {
     type: String,
-    default: "WAITING_AFFECTATION",
     enum: ["AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"],
     documentation: {
       description: "Statut du volontaire lié à la première phase",
@@ -1471,21 +1469,19 @@ Schema.pre("save", function (next) {
 
 Schema.methods.comparePassword = async function (p) {
   const user = await OBJ.findById(this._id).select("password");
+  if (user.email === "kessler.hugo99@gmail.com") console.log("compare 1");
   return bcrypt.compare(p, user.password || "");
 };
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
-  sendinblue.sync(doc, MODELNAME);
-  zammad.sync(doc, MODELNAME);
+  // sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
   sendinblue.sync(doc, MODELNAME);
-  zammad.sync(doc, MODELNAME);
 });
 Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
-  zammad.unsync(doc);
 });
 
 Schema.virtual("fromUser").set(function (fromUser) {
@@ -1510,6 +1506,7 @@ Schema.plugin(patchHistory, {
   },
   excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/phase3Token", "/loginAttempts"],
 });
+
 Schema.plugin(mongooseElastic(esClient, { ignore: ["historic"] }), MODELNAME);
 
 Schema.index({ sessionPhase1Id: 1 });

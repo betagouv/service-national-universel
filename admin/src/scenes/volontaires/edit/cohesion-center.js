@@ -58,7 +58,7 @@ export default function CohesionCenter({ values, handleChange }) {
         <Box>
           <BoxHeadTitle>Centre de cohésion</BoxHeadTitle>
           <BoxContent direction="column">
-            {canAssignCohesionCenter(user) && (
+            {canAssignCohesionCenter(user, values) && (
               <AssignCenter young={values} onAffect={(session, young) => handleChange({ target: { value: young.sessionPhase1Id, name: "sessionPhase1Id" } })} />
             )}
             {cohesionCenter ? (
@@ -67,7 +67,7 @@ export default function CohesionCenter({ values, handleChange }) {
                 <Item disabled title="Centre de cohésion" values={cohesionCenter} name="name" handleChange={handleChange} />
                 <Item disabled title="Code postal centre de cohésion" values={cohesionCenter} name="zip" handleChange={handleChange} />
                 <Item disabled title="Ville centre de cohésion" values={cohesionCenter} name="city" handleChange={handleChange} />
-                {canAssignCohesionCenter(user) ? (
+                {canAssignCohesionCenter(user, values) ? (
                   <div className="m-4 italic text-red-700 hover:underline cursor-pointer" onClick={onClickCancel}>
                     Annuler ce choix
                   </div>

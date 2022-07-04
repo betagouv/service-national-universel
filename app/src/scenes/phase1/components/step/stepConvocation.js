@@ -46,6 +46,7 @@ export default function StepAgreement({ young }) {
     if (ok) toastr.success(`Document envoyé à ${young.email}`);
     else toastr.error("Erreur lors de l'envoie du document");
     setStateMobil(false);
+    await handleDownload();
     setModal({ isOpen: false, onConfirm: null });
   };
 
@@ -96,7 +97,7 @@ export default function StepAgreement({ young }) {
                 </WithTooltip>
               </button>
 
-              <div onClick={handleDownload}>
+              {/* <div onClick={handleDownload}>
                 <DownloadConvocationButton
                   young={young}
                   uri="cohesion"
@@ -106,7 +107,7 @@ export default function StepAgreement({ young }) {
                   <HiOutlineDownload className={`h-5 w-5 ${valid ? "text-blue-700" : "text-blue-300"} mr-2`} />
                   Télécharger
                 </DownloadConvocationButton>
-              </div>
+              </div> */}
             </div>
           </>
         ) : null}
@@ -151,7 +152,7 @@ export default function StepAgreement({ young }) {
             <div className="w-full p-4">
               <div className="flex flex-col items-center justify-center">
                 <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
-                <div className="w-full" onClick={handleDownload}>
+                {/* <div className="w-full" onClick={handleDownload}>
                   <DownloadConvocationButton
                     young={young}
                     uri="cohesion"
@@ -159,7 +160,7 @@ export default function StepAgreement({ young }) {
                     <HiOutlineDownload className="h-5 w-5 text-blue-300 mr-2" />
                     Télécharger
                   </DownloadConvocationButton>
-                </div>
+                </div> */}
                 <div className="flex w-full flex-row flex-shrink items-center py-2">
                   <button
                     type="button"
