@@ -32,13 +32,17 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    const { data, ok, code } = await api.post(`/young/${young._id}/phase1/depart`, { departSejourMotif, departSejourAt, departSejourMotifComment });
-    if (!ok) {
-      toastr.error("Oups, une erreur s'est produite", translate(code));
-      setIsLoading(false);
-      return;
+    try {
+      const { data, ok, code } = await api.post(`/young/${young._id}/phase1/depart`, { departSejourMotif, departSejourAt, departSejourMotifComment });
+      if (!ok) {
+        toastr.error("Oups, une erreur s'est produite", translate(code));
+        setIsLoading(false);
+        return;
+      }
+      await onSubmit(data);
+    } catch (error) {
+      toastr.error("Oups, une erreur s'est produite", translate(error.code));
     }
-    await onSubmit(data);
     setIsLoading(false);
   };
 

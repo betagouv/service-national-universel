@@ -620,8 +620,8 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
     } else {
       young.set({ statusPhase1: "NOT_DONE" });
     }
+    await young.save({ fromUser: req.user });
   }
-  await young.save({ fromUser: req.user });
 }
 
 const ERRORS = {
@@ -655,6 +655,7 @@ const ERRORS = {
   NEW_PASSWORD_IDENTICAL_PASSWORD: "NEW_PASSWORD_IDENTICAL_PASSWORD",
   INVALID_IP: "INVALID_IP",
   ALREADY_EXISTS: "ALREADY_EXISTS",
+  YOUNG_NOT_FOUND: "YOUNG_NOT_FOUND",
 };
 
 const YOUNG_SITUATIONS = {
