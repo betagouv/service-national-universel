@@ -9,7 +9,7 @@ const MissionObject = require("../models/mission");
 const StructureObject = require("../models/structure");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
-const { encrypt } = require("../cryptoUtils");
+const { decrypt, encrypt } = require("../cryptoUtils");
 const NodeClam = require("clamscan");
 const fs = require("fs");
 const FileType = require("file-type");
@@ -29,8 +29,10 @@ const {
   getCcOfYoung,
   updateYoungPhase2Hours,
   updateStatusPhase2,
+  getFile,
   updateYoungStatusPhase2Contract,
 } = require("../utils");
+const mime = require("mime-types");
 
 const updatePlacesMission = async (app, fromUser) => {
   try {
@@ -474,5 +476,46 @@ router.post(
     }
   },
 );
+
+router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const { error, value } = Joi.object({
+      youngId: Joi.string().required(),
+      key: Joi.string().required(),
+      fileName: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { youngId, key, fileName } = value;
+
+    const young = await YoungObject.findById(youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (req.user._id.toString() !== young._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
+    const decryptedBuffer = decrypt(downloaded.Body);
+
+    let mimeFromFile = null;
+    try {
+      const { mime } = await FileType.fromBuffer(decryptedBuffer);
+      mimeFromFile = mime;
+    } catch (e) {
+      //
+    }
+
+    return res.status(200).send({
+      data: Buffer.from(decryptedBuffer, "base64"),
+      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
+      fileName: fileName,
+      ok: true,
+    });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 module.exports = router;

@@ -638,7 +638,6 @@ router.get("/youngFile/:youngId/application/:key/:fileName", passport.authentica
       .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { youngId, key, fileName } = value;
-
     const young = await YoungModel.findById(youngId);
     // if they are not admin nor referent, it is not allowed to access this route unless they are from a military preparation structure
     //if (!canViewYoungMilitaryPreparationFile(req.user, young)) {

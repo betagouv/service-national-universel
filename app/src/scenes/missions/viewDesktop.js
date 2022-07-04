@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import DoubleDayTile from "../../components/DoubleDayTile";
@@ -30,6 +30,8 @@ import ModalPJ from "./components/ModalPJ";
 import { BsChevronDown } from "react-icons/bs";
 import Download from "../../assets/icons/Download";
 import ModalFiles from "../phase2/desktop/components/ModalFiles";
+import { setYoung } from "../../redux/auth/actions";
+import { HiOutlineAdjustments } from "react-icons/hi";
 
 export default function viewDesktop() {
   const [mission, setMission] = useState();
@@ -44,6 +46,7 @@ export default function viewDesktop() {
   const [modalFiles, setModalFiles] = useState({ isOpen: false });
 
   const young = useSelector((state) => state.Auth.young);
+  const dispatch = useDispatch();
   const docRef = useRef();
   let { id } = useParams();
 
@@ -218,44 +221,62 @@ export default function viewDesktop() {
           <div className="mx-8 mt-8">
             <div className="flex justify-between">
               <div className="text-lg leading-6 font-semibold">Pièces jointes</div>
-              <div
-                className="group flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
-                onClick={() => setOpenAttachments(!openAttachments)}>
-                Voir mes pièces jointes
-                <BsChevronDown className={`ml-3 text-blue-600 group-hover:text-white h-5 w-5 ${openAttachments ? "rotate-180" : ""}`} />
+              <div className="flex space-x-4 items-center">
+                {optionsType.reduce((nmb, option) => nmb + mission.application[option].length, 0) !== 0 && (
+                  <div
+                    className="group flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
+                    onClick={() => setOpenAttachments(!openAttachments)}>
+                    Voir mes pièces jointes
+                    <BsChevronDown className={`ml-3 text-blue-600 group-hover:text-white h-5 w-5 ${openAttachments ? "rotate-180" : ""}`} />
+                  </div>
+                )}
+                <div
+                  className="text-xl text-center text-white bg-blue-600  rounded-full  w-8 h-8"
+                  onClick={() => {
+                    setModalDocument({
+                      isOpen: true,
+                      name: "justificatifsFiles",
+                    });
+                  }}>
+                  +
+                </div>
               </div>
             </div>
-            {openAttachments && (
-              <div className="flex mt-3 items-center">
-                <div className="flex space-x-2 w-11/12">
-                  {optionsType.map((option, index) => (
-                    <div className={`bg-gray-50 rounded-lg p-2  w-1/4 space-y-3 justify-center`} key={index}>
-                      <div className="font-bold text-center">{translateFilesAddPhase2(option)}</div>
-                      {mission.application[option].map((file, index) => (
-                        <div className="border flex items-center p-1 rounded-md justify-between" key={index}>
-                          <div>{file}</div>
+            {true && (
+              <div className="flex mt-3 space-x-3 ">
+                {optionsType.map((option, index) => (
+                  <>
+                    {mission.application[option].length !== 0 && (
+                      <div key={index} className=" w-1/4 ">
+                        <div className="bg-gray-50 rounded-lg p-3  flex flex-col justify-between h-full space-y-3">
+                          <div className=" space-y-2">
+                            <div className="font-bold text-center">{translateFilesAddPhase2(option)}</div>
+
+                            {mission.application[option].map((file, index) => (
+                              <div className="border flex items-center p-1 rounded-md justify-between bg-white  space-y-3" key={index}>
+                                <div>{file}</div>
+                              </div>
+                            ))}
+                          </div>
+                          {mission.application[option].length > 0 && (
+                            <div className="flex justify-center mb-0">
+                              <div
+                                className="text-white bg-blue-600  rounded-full"
+                                onClick={() =>
+                                  setModalDocument({
+                                    isOpen: true,
+                                    name: option,
+                                  })
+                                }>
+                                <HiOutlineAdjustments className="text-white m-2" />
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      ))}
-                      {mission.application[option].length > 0 && (
-                        <div className="text-white bg-blue-600 p-1 rounded-full h-8 w-8 text-center" onClick={() => setModalFiles({ isOpen: true, nameFiles: option })}>
-                          <Download />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div className=" m-auto">
-                  <div
-                    className="text-xl text-center text-white bg-blue-600  rounded-full  w-8 h-8"
-                    onClick={() => {
-                      setModalDocument({
-                        isOpen: true,
-                        name: "justificatifsFiles",
-                      });
-                    }}>
-                    +
-                  </div>
-                </div>
+                      </div>
+                    )}
+                  </>
+                ))}
               </div>
             )}
             <ModalPJ
@@ -265,13 +286,10 @@ export default function viewDesktop() {
               application={mission.application}
               optionsType={optionsType}
               onCancel={() => setModalDocument({ isOpen: false })}
-            />
-            <ModalFiles
-              isOpen={modalFiles?.isOpen}
-              onCancel={() => setModalFiles({ isOpen: false })}
-              initialValues={mission.application[modalFiles?.nameFiles] || []}
-              young={young}
-              nameFiles={modalFiles?.nameFiles}
+              onSave={() => {
+                setModalDocument({ isOpen: false });
+                dispatch(setYoung(young));
+              }}
             />
           </div>
         </>

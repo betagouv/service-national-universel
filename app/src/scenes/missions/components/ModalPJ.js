@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import * as FileSaver from "file-saver";
 import { Modal } from "reactstrap";
 import DndFileInput from "../../../components/dndFileInput";
 import api from "../../../services/api";
@@ -8,9 +9,13 @@ import { translateFilesAddPhase2 } from "../../../utils";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import { BsCheck2 } from "react-icons/bs";
 
-export default function ModalPJ({ isOpen, onCancel, name, young, application, optionsType }) {
+function getFileName(file) {
+  return (file && file.name) || file;
+}
+
+export default function ModalPJ({ isOpen, onCancel, onSave, name, young, application, optionsType }) {
   const [openType, setOpenType] = useState(false);
-  const [type, setType] = useState(name);
+  const [type, setType] = useState(name || "justificatifsFiles");
 
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="lg">
@@ -53,6 +58,16 @@ export default function ModalPJ({ isOpen, onCancel, name, young, application, op
                     className="flex flex-col items-center"
                     value={application[type] || []}
                     name={type}
+                    download={true}
+                    onDownload={async (file) => {
+                      //console.log("ferihn", file[0].name);
+                      try {
+                        const f = await api.get(`/young/file/${young._id}/${type}/${getFileName(file)}`);
+                        FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
+                      } catch (e) {
+                        toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
+                      }
+                    }}
                     onChange={async (e) => {
                       const res = await api.uploadFile(`/application/${application._id}/file/${type}`, e.target.files);
                       if (res.code === "FILE_CORRUPTED") {
@@ -77,7 +92,7 @@ export default function ModalPJ({ isOpen, onCancel, name, young, application, op
             <button className="my-4 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer w-full" onClick={onCancel}>
               Annuler
             </button>
-            <button className="my-4 border-[1px] border-gray-300 text-white rounded-lg py-2 cursor-pointer w-full bg-blue-600" onClick={onCancel}>
+            <button className="my-4 border-[1px] border-gray-300 text-white rounded-lg py-2 cursor-pointer w-full bg-blue-600" onClick={onSave}>
               Enregistrer et avertir les parties-prenantes.
             </button>
           </div>
