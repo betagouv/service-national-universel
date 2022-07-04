@@ -237,7 +237,7 @@ export default function Edit(props) {
                     </BoxContent>
                   </Box>
                 </Col>
-                {/* FIXME : Do not work because structure only contains id and value/label with same name  */}
+                {/* FIXME : Do not work because structure only contains id and value/label with same name */}
                 {canUpdateReferent({ actor: currentUser, originalTarget: user, structure: structureForCheck }) && (
                   <Col md={6} style={{ marginBottom: "20px" }}>
                     <Box>
@@ -264,15 +264,15 @@ export default function Edit(props) {
                         {values.role === ROLES.RESPONSIBLE ? (
                           structures ? (
                             <AutocompleteSelectStructure
-                            options={structures}
-                            structure={structure}
-                            setStructure={(e) => {
-                              setStructure(e);
-                            }}
-                            userId={user._id}
-                            onClick={modifyStructure}
-                            disabled={isSubmitting}
-                            loading={loadingChangeStructure}
+                              options={structures}
+                              structure={structure}
+                              setStructure={(e) => {
+                                setStructure(e);
+                              }}
+                              userId={user._id}
+                              onClick={modifyStructure}
+                              disabled={isSubmitting}
+                              loading={loadingChangeStructure}
                             />
                           ) : (
                             <Loader />
@@ -280,7 +280,7 @@ export default function Edit(props) {
                         ) : null}
                         {values.role === ROLES.REFERENT_DEPARTMENT ? (
                           <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)} />
-                          ) : null}
+                        ) : null}
                         {values.role === ROLES.REFERENT_REGION ? (
                           <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRoleOptions(REFERENT_REGION_SUBROLE)} />
                         ) : null}
@@ -297,7 +297,7 @@ export default function Edit(props) {
                               }}
                               title="Région"
                               options={regionList.map((r) => ({ value: r, label: r }))}
-                              />
+                            />
                           </>
                         ) : null}
 
