@@ -46,6 +46,7 @@ export default function StepAgreement({ young }) {
     if (ok) toastr.success(`Document envoyé à ${young.email}`);
     else toastr.error("Erreur lors de l'envoie du document");
     setStateMobil(false);
+    await handleDownload();
     setModal({ isOpen: false, onConfirm: null });
   };
 

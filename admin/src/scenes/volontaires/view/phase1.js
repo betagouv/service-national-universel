@@ -283,7 +283,7 @@ export default function Phase1(props) {
                     </>
                   ) : (
                     <>
-                      {young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && (young.meetingPointId || young.deplacementPhase1Autonomous === "true") ? (
+                      {/* {young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && (young.meetingPointId || young.deplacementPhase1Autonomous === "true") ? (
                         <>
                           <p className="text-gray-500 mb-[22px]">Convocation au séjour :</p>
                           <DownloadConvocationButton young={young} uri="cohesion">
@@ -291,7 +291,7 @@ export default function Phase1(props) {
                             Télécharger
                           </DownloadConvocationButton>
                         </>
-                      ) : null}
+                      ) : null} */}
                     </>
                   )}
                 </div>

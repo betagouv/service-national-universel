@@ -150,7 +150,7 @@ export default function MeetingPoint() {
                       title=""
                       URLParams={true}
                       showSearch={false}
-                      defaultValue={["Juin 2022", "Juillet 2022"]}
+                      defaultValue={["Juillet 2022"]}
                     />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}

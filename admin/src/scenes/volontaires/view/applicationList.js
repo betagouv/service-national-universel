@@ -1,27 +1,20 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
-import { Row } from "reactstrap";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
-
-import { apiURL } from "../../../config";
-import api from "../../../services/api";
-import SelectStatusApplication from "../../../components/selectStatusApplication";
-import { APPLICATION_STATUS, formatStringDateTimezoneUTC, ES_NO_LIMIT, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
+import React, { useEffect, useState } from "react";
+import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import ProposalMission from "./proposalMission";
-import CreateMission from "./createMission";
-import PlusSVG from "../../../assets/plus.svg";
-import CrossSVG from "../../../assets/cross.svg";
-import Loader from "../../../components/Loader";
+import styled from "styled-components";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
-import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
+import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
+import SelectStatusApplication from "../../../components/selectStatusApplication";
+import { apiURL } from "../../../config";
+import api from "../../../services/api";
+import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
-  const [createMissionVisible, setCreateMissionVisible] = useState(false);
   const getExportQuery = () => ({ query: { bool: { filter: { term: { "youngId.keyword": young._id } } } }, sort: [{ "priority.keyword": "asc" }], size: ES_NO_LIMIT });
 
   useEffect(() => {
@@ -59,7 +52,7 @@ export default function ApplicationList({ young, onChangeApplication }) {
       </Table>
       {applications.length ? null : <NoResult>Aucune candidature n&apos;est liée à ce volontaire.</NoResult>}
       <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div style={{ marginTop: "1rem" }}>
+        <div className="px-4 py-2">
           <ExportComponent
             defaultQuery={getExportQuery}
             title="Exporter les candidatures"
@@ -101,24 +94,6 @@ export default function ApplicationList({ young, onChangeApplication }) {
           />
         </div>
       </ReactiveBase>
-      <Wrapper style={{ borderBottom: "2px solid #f4f5f7" }}>
-        <Legend>Proposer une mission existante au volontaire</Legend>
-        <ProposalMission young={young} onSend={getApplications} />
-      </Wrapper>
-      <ToggleBloc
-        visible={createMissionVisible}
-        title="Créer une mission personnalisée pour le volontaire"
-        onClick={() => {
-          setCreateMissionVisible(!createMissionVisible);
-        }}>
-        <CreateMission
-          young={young}
-          onSend={() => {
-            getApplications();
-            setCreateMissionVisible(false);
-          }}
-        />
-      </ToggleBloc>
     </>
   );
 }
@@ -293,34 +268,6 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
   );
 };
 
-const ToggleBloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled, onClick, visible }) => {
-  return (
-    <Row
-      style={{
-        borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
-        borderRight: borderRight ? "2px solid #f4f5f7" : 0,
-        borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
-        backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}>
-      <Wrapper>
-        <div onClick={onClick} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
-          <Legend>{title}</Legend>
-          <div style={{}}>
-            <Icon src={visible ? CrossSVG : PlusSVG} />
-          </div>
-        </div>
-        {visible ? children : null}
-      </Wrapper>
-    </Row>
-  );
-};
-
-const Icon = styled.img`
-  height: 18px;
-  font-size: 18px;
-  cursor: pointer;
-`;
-
 const CopyLink = styled.button`
   background: none;
   color: rgb(81, 69, 205);
@@ -372,35 +319,6 @@ const Table = styled.table`
       background-color: #e6ebfa;
     }
   }
-`;
-
-const Wrapper = styled.div`
-  padding: 3rem;
-  width: 100%;
-  .detail {
-    display: flex;
-    align-items: flex-start;
-    font-size: 14px;
-    text-align: left;
-    margin-top: 1rem;
-    &-title {
-      color: #798399;
-    }
-    &-text {
-      color: rgba(26, 32, 44);
-    }
-  }
-  p {
-    font-size: 13px;
-    color: #798399;
-    margin-top: 1rem;
-  }
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  font-size: 1.3rem;
-  font-weight: 500;
 `;
 
 const ModifyDurationLink = styled.span`

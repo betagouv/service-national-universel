@@ -13,7 +13,7 @@ const { ERRORS, getCcOfYoung } = require("../../utils");
 const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 
-router.post("/equivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -39,7 +39,9 @@ router.post("/equivalence", passport.authenticate("young", { session: false, fai
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const isYoung = req.user.constructor.modelName === "young";
+
+    if (isYoung && !canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     //Pas plus de 3 demandes d'équivalence + creation possible seulement si le statut des ancienne equiv est "REFUSED"
     const equivalences = await MissionEquivalenceModel.find({ youngId: value.id });
@@ -49,7 +51,7 @@ router.post("/equivalence", passport.authenticate("young", { session: false, fai
 
     const youngId = value.id;
     delete value.id;
-    await MissionEquivalenceModel.create({ ...value, youngId, status: "WAITING_VERIFICATION" });
+    await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
 
     let template = SENDINBLUE_TEMPLATES.young.EQUIVALENCE_WAITING_VERIFICATION;
     let cc = getCcOfYoung({ template, young });
@@ -58,30 +60,32 @@ router.post("/equivalence", passport.authenticate("young", { session: false, fai
       cc,
     });
 
-    // get the manager_phase2
-    let data = await ReferentModel.findOne({
-      subRole: SUB_ROLES.manager_phase2,
-      role: ROLES.REFERENT_DEPARTMENT,
-      department: young.department,
-    });
-    // if not found, get the manager_department
-    if (!data) {
-      data = await ReferentModel.findOne({
-        subRole: SUB_ROLES.manager_department,
+    if (isYoung) {
+      // get the manager_phase2
+      let data = await ReferentModel.findOne({
+        subRole: SUB_ROLES.manager_phase2,
         role: ROLES.REFERENT_DEPARTMENT,
         department: young.department,
       });
-    }
+      // if not found, get the manager_department
+      if (!data) {
+        data = await ReferentModel.findOne({
+          subRole: SUB_ROLES.manager_department,
+          role: ROLES.REFERENT_DEPARTMENT,
+          department: young.department,
+        });
+      }
 
-    template = SENDINBLUE_TEMPLATES.referent.EQUIVALENCE_WAITING_VERIFICATION;
-    await sendTemplate(template, {
-      emailTo: [{ name: `${data.firstName} ${data.lastName}`, email: data.email }],
-      params: {
-        cta: `${config.ADMIN_URL}/volontaire/${young._id}/phase2`,
-        youngFirstName: young.firstName,
-        youngLastName: young.lastName,
-      },
-    });
+      template = SENDINBLUE_TEMPLATES.referent.EQUIVALENCE_WAITING_VERIFICATION;
+      await sendTemplate(template, {
+        emailTo: [{ name: `${data.firstName} ${data.lastName}`, email: data.email }],
+        params: {
+          cta: `${config.ADMIN_URL}/volontaire/${young._id}/phase2`,
+          youngFirstName: young.firstName,
+          youngLastName: young.lastName,
+        },
+      });
+    }
 
     res.status(200).send({ ok: true });
   } catch (error) {

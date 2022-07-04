@@ -22,6 +22,12 @@ const isFromDOMTOM = (young) => {
 function getBg() {
   return getSignedUrl("convocation/convocation_template_base.png");
 }
+function getTop() {
+  return getSignedUrl("convocation/top.png");
+}
+function getBottom() {
+  return getSignedUrl("convocation/bottom.png");
+}
 
 // ! WARNING : Change date also in app/src/scenes/phase1/components/Convocation.js
 const departureMeetingDate = {
@@ -88,7 +94,7 @@ const render = async (young) => {
         sanitizeAll(
           contacts
             .map((contact) => {
-              return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
+              return `<li>${contact.contactName} - ${contact.contactPhone || ""} - ${contact.contactMail || ""}</li>`;
             })
             .join(""),
         ),
@@ -139,6 +145,8 @@ const render = async (young) => {
       .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(getReturnMeetingDate(meetingPoint).split(",")[1]))
 
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+      .replace(/{{TOP}}/g, sanitizeAll(getTop()))
+      .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
       .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()));
   } catch (e) {
     throw e;
