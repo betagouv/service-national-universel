@@ -45,7 +45,7 @@ export default function Edit(props) {
   const [service, setService] = useState();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
-  const [structureForCheck, setStructureForCheck] = useState();
+  //const [structureForCheck, setStructureForCheck] = useState();
   const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
   const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -64,9 +64,11 @@ export default function Edit(props) {
         setUser(data);
         
         /* Fetching structure info */
-        const strucRes = await api.get(`/structure/${data.structureId}`);
-        console.log('strucRes:', strucRes);
-        setStructureForCheck(strucRes.data);
+        if (data.structureId) {
+          const {ok, res} = await api.get(`/structure/${data.structureId}`);
+          if (!ok) setStructure(null);
+          setStructure(res);
+        }
 
         const { data: d } = await api.get(`/department-service/${data.department}`);
         setService(d);
@@ -237,8 +239,7 @@ export default function Edit(props) {
                     </BoxContent>
                   </Box>
                 </Col>
-                {/* FIXME : Do not work because structure only contains id and value/label with same name */}
-                {canUpdateReferent({ actor: currentUser, originalTarget: user, structure: structureForCheck }) && (
+                {canUpdateReferent({ actor: currentUser, originalTarget: user, structure: structure }) && (
                   <Col md={6} style={{ marginBottom: "20px" }}>
                     <Box>
                       <BoxHeadTitle>Information</BoxHeadTitle>
