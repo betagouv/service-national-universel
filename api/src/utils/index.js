@@ -24,7 +24,7 @@ const {
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
-const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, COHESION_STAY_END } = require("snu-lib/constants");
+const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, COHESION_STAY_END } = require("snu-lib");
 
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { getQPV, getDensity } = require("../geo");
@@ -588,17 +588,22 @@ async function notifDepartmentChange(department, template, young) {
 
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   const dateDeValidation = {
+    2019: new Date("06/28/2019"),
+    2020: new Date("07/02/2021"),
+    2021: new Date("07/02/2021"),
     "Juin 2022": new Date(2022, 5, 20, 18), //20 juin 2022 à 18h
     "Juillet 2022": new Date(2022, 6, 11, 18), //11 juillet 2022 à 18h
   };
 
   const dateDeValidationTerminale = {
+    2019: new Date("06/28/2019"),
+    2020: new Date("07/02/2021"),
+    2021: new Date("07/02/2021"),
     "Juin 2022": new Date(2022, 5, 22, 18), //22 juin 2022 à 18h
     "Juillet 2022": new Date(2022, 6, 13, 18), //13 juillet 2022 à 18h
   };
-
   const now = new Date();
-  if ((["true", "false"].includes(young.cohesionStayPresence) && ["true", "false"].includes(young.presenceJDM)) || now > COHESION_STAY_END[sessionPhase1.cohort]) {
+  if ((["true", "false"].includes(young?.cohesionStayPresence) && ["true", "false"].includes(young.presenceJDM)) || now > COHESION_STAY_END[sessionPhase1.cohort]) {
     if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
       if (
         (now >= dateDeValidation[sessionPhase1.cohort] &&

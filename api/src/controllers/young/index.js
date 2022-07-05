@@ -953,7 +953,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     const { value: newValue, key, ids } = value;
 
