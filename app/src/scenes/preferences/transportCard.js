@@ -23,7 +23,7 @@ export default function TransportCard({ title, handleChange, values, errors, tou
 
   return (
     <Container>
-      <h2 class="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>
+      <h2 className="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>
       <Row>
         <Button
           name="mobilityTransport"

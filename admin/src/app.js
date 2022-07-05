@@ -31,7 +31,6 @@ import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import SessionShareIndex from "./scenes/session-phase1/index";
-import { GoTools } from "react-icons/go";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";

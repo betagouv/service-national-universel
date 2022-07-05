@@ -19,6 +19,7 @@ if (process.env.NODE_ENV !== "test") {
   console.log("KNOWLEDGEBASE_URL", KNOWLEDGEBASE_URL);
   console.log("ENVIRONMENT: ", ENVIRONMENT);
 }
+
 const app = express();
 app.use(helmet());
 
@@ -84,19 +85,20 @@ app.use("/jeveuxaider", require("./services/jeveuxaider"));
 app.use(handleError);
 
 app.get("/", async (req, res) => {
-  const formatMemoryUsage = (data) => `${Math.round((data / 1024 / 1024) * 100) / 100} MB`;
+  // ! Memory usage
+  // const formatMemoryUsage = (data) => `${Math.round((data / 1024 / 1024) * 100) / 100} MB`;
 
-  const memoryData = process.memoryUsage();
+  // const memoryData = process.memoryUsage();
 
-  const memoryUsage = {
-    rss: `${formatMemoryUsage(memoryData.rss)} -> Resident Set Size - total memory allocated for the process execution`,
-    heapTotal: `${formatMemoryUsage(memoryData.heapTotal)} -> total size of the allocated heap`,
-    heapUsed: `${formatMemoryUsage(memoryData.heapUsed)} -> actual memory used during the execution`,
-    external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
-  };
+  // const memoryUsage = {
+  //   rss: `${formatMemoryUsage(memoryData.rss)} -> Resident Set Size - total memory allocated for the process execution`,
+  //   heapTotal: `${formatMemoryUsage(memoryData.heapTotal)} -> total size of the allocated heap`,
+  //   heapUsed: `${formatMemoryUsage(memoryData.heapUsed)} -> actual memory used during the execution`,
+  //   external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
+  // };
 
   const d = new Date();
-  res.status(200).send(memoryUsage);
+  res.status(200).send("SNU " + d.toLocaleString());
 });
 
 require("./passport")();

@@ -82,39 +82,36 @@ export default function Signin() {
                       </div>
                     )}
 
-                    <>
-                      <div className="self-stretch">
-                        <label htmlFor="email" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
-                          E-mail
-                        </label>
-                        <Field
-                          autoComplete="username"
-                          className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
-                          name="email"
-                          type="email"
-                          id="email"
-                          placeholder="Adresse e-mail"
-                          value={values.email}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div className="self-stretch">
-                        <label htmlFor="password" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
-                          Mot de passe
-                        </label>
-                        <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
-                      </div>
-                      <Link to="/auth/forgot" className="text-sm text-brand-purple transition-colors hover:text-brand-darkPurple hover:underline">
-                        Mot de passe perdu ?
-                      </Link>
-                      <LoadingButton
-                        className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
-                        loading={isSubmitting}
-                        disabled={isSubmitting}
-                        type="submit">
-                        Se connecter
-                      </LoadingButton>
-                    </>
+                    <div className="self-stretch">
+                      <label htmlFor="email" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                        E-mail
+                      </label>
+                      <Field
+                        autoComplete="username"
+                        className="block w-full rounded border border-brand-lightGrey bg-white py-2.5 px-4 text-sm text-brand-black/80 outline-0 transition-colors placeholder:text-brand-black/25 focus:border-brand-grey"
+                        name="email"
+                        type="email"
+                        id="email"
+                        placeholder="Adresse e-mail"
+                        value={values.email}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="self-stretch">
+                      <label htmlFor="password" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
+                        Mot de passe
+                      </label>
+                      <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
+                    </div>
+                    <Link to="/auth/forgot" className="text-sm text-brand-purple transition-colors hover:text-brand-darkPurple hover:underline">
+                      Mot de passe perdu ?
+                    </Link>
+                    <LoadingButton
+                      className="block cursor-pointer !rounded-xl border-0 bg-brand-purple py-2 px-5 text-base font-medium text-white transition-colors"
+                      loading={isSubmitting}
+                      type="submit">
+                      Se connecter
+                    </LoadingButton>
                   </form>
                 );
               }}
