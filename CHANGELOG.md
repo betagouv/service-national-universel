@@ -1,3 +1,12 @@
+## [1.108.1](https://github.com/betagouv/service-national-universel/compare/v1.108.0...v1.108.1) (2022-07-05)
+
+
+### Bug Fixes
+
+* **api,admin:** ajout nom du centre - espace chef de centre ([07498a1](https://github.com/betagouv/service-national-universel/commit/07498a118acc3f60ad0753e80e3a46d8756c1cbd))
+* condition validation phase 1 ([b8c68d0](https://github.com/betagouv/service-national-universel/commit/b8c68d05c3cfc64a22714e234d2b572065b8887a))
+* **admin:** pointage ([768bc9a](https://github.com/betagouv/service-national-universel/commit/768bc9ac1d38db9d51cb1884ae626826fcad6469))
+
 # [1.108.0](https://github.com/betagouv/service-national-universel/compare/v1.107.3...v1.108.0) (2022-07-04)
 
 
