@@ -417,17 +417,41 @@ router.post(
         .valid(...rootKeys)
         .validate(req.params.key);
       if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
       const { error: bodyError, value: body } = Joi.string().required().validate(req.body.body);
       if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
       const {
         error: namesError,
         value: { names },
       } = Joi.object({ names: Joi.array().items(Joi.string()).required() }).validate(JSON.parse(body), { stripUnknown: true });
       if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       const user = await YoungObject.findById(application.youngId);
-
       if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
-      const files = Object.keys(req.files || {}).map((e) => req.files[e]);
+
+      // Validate files with Joi
+      const { error: filesError, value: files } = Joi.array()
+        .items(
+          Joi.alternatives().try(
+            Joi.object({
+              name: Joi.string().required(),
+              data: Joi.binary().required(),
+              tempFilePath: Joi.string().allow("").optional(),
+            }).unknown(),
+            Joi.array().items(
+              Joi.object({
+                name: Joi.string().required(),
+                data: Joi.binary().required(),
+                tempFilePath: Joi.string().allow("").optional(),
+              }).unknown(),
+            ),
+          ),
+        )
+        .validate(
+          Object.keys(req.files || {}).map((e) => req.files[e]),
+          { stripUnknown: true },
+        );
+      if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       //const application = await ApplicationObject.find({ youngId: req.user._id });
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.APPLICATION_NOT_FOUND });
@@ -477,25 +501,26 @@ router.post(
   },
 );
 
-router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/file/:key/:name", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const { error, value } = Joi.object({
-      youngId: Joi.string().required(),
+      id: Joi.string().required(),
       key: Joi.string().required(),
-      fileName: Joi.string().required(),
+      name: Joi.string().required(),
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { youngId, key, fileName } = value;
+    const { id, key, name } = value;
 
-    const young = await YoungObject.findById(youngId);
+    const application = await ApplicationObject.findById(id);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const young = await YoungObject.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (req.user._id.toString() !== young._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
+    const downloaded = await getFile(`app/young/${young._id}/application/${key}/${name}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
     let mimeFromFile = null;
@@ -508,8 +533,8 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
 
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
-      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
-      fileName: fileName,
+      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(name),
+      fileName: name,
       ok: true,
     });
   } catch (error) {
