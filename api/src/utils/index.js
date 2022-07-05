@@ -603,7 +603,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
     "Juillet 2022": new Date(2022, 6, 13, 18), //13 juillet 2022 à 18h
   };
   const now = new Date();
-  if ((["true", "false"].includes(young?.cohesionStayPresence) && ["true", "false"].includes(young.presenceJDM)) || now > COHESION_STAY_END[sessionPhase1.cohort]) {
+  if ((now >= dateDeValidation[sessionPhase1.cohort] && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale[sessionPhase1.cohort] && young?.grade === "Terminale")) {
     if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
       if (
         (now >= dateDeValidation[sessionPhase1.cohort] &&
