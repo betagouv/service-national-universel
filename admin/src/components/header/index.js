@@ -88,7 +88,9 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
                   <div className="text-gray-500 text-xs uppercase font-medium">{session.cohesionCenter?.name || "Mon espace chef de centre"}</div>
                   <div className="text-sm font-normal">{session.cohort}</div>
                 </div>
-                <div className="ml-4">{sessionPhase1.cohort === session.cohort ? <Check className="text-green-500" /> : <SwitchHorizontal className="text-gray-500" />}</div>
+                <div className="ml-4">
+                  {sessionPhase1._id.toString() === session._id.toString() ? <Check className="text-green-500" /> : <SwitchHorizontal className="text-gray-500" />}
+                </div>
               </div>
             ))}
           </div>
