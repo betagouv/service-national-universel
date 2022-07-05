@@ -4,6 +4,7 @@ import { Link, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
+import { maintenance } from "../../config";
 
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
@@ -31,6 +32,20 @@ export default function Signin() {
           <div>
             <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Espace Administrateur</h1>
             <h2 className="mb-8 text-base font-normal text-brand-grey">A destination des référents et des structures d’accueil</h2>
+            
+            {maintenance && !localStorage.getItem("MAINTENANCE_BYPASS") ? (
+              <div className="flex items-center m-4">
+                <div className="bg-yellow-50 p-3 rounded-lg shadow-sm ">
+                  <div className="flex space-x-2 items-center ">
+                    {/* <GoTools className="text-yellow-600 text-base" /> */}
+                    <h5 className="text-yellow-600 text-base">MAINTENANCE</h5>
+                  </div>
+                  <div className="text-yellow-900  pt-2 text-sm">
+                    Un nombre important de connexion sur la plateforme impacte son bon fonctionnement. Nous faisons notre possible pour rétablir la situation.
+                  </div>
+                </div>
+              </div>
+            ) : (
             <Formik
               initialValues={{ email: "", password: "" }}
               onSubmit={async ({ email, password }, actions) => {
@@ -103,6 +118,7 @@ export default function Signin() {
                 );
               }}
             </Formik>
+            )}
           </div>
           <div className="flex flex-col gap-3 border-t border-gray-200 pt-4">
             <p className="text-center text-sm text-brand-grey ">
