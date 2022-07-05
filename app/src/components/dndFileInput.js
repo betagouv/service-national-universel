@@ -17,7 +17,7 @@ export default function DndFileInput({ optional, value, onChange, name, errorMes
   const handleClick = (e) => {
     setModal({
       isOpen: true,
-      onConfirm: onDownload(e),
+      onConfirm: () => onDownload(e),
       title: "Téléchargement de document",
       message:
         "En téléchargeant cette pièce jointe, vous vous engagez à la supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)",

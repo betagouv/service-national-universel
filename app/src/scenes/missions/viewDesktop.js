@@ -43,7 +43,6 @@ export default function viewDesktop() {
   const [modalDocument, setModalDocument] = useState({ isOpen: false });
   const [openAttachments, setOpenAttachments] = useState({ isOpen: false });
   const history = useHistory();
-  const [modalFiles, setModalFiles] = useState({ isOpen: false });
 
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();

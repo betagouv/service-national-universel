@@ -406,7 +406,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
 
 router.post(
   "/:id/file/:key",
-  passport.authenticate("young", { session: false, failWithError: true }),
+  passport.authenticate(["referent", "young"], { session: false, failWithError: true }),
   fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req, res) => {
     try {
