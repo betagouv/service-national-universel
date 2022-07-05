@@ -142,7 +142,7 @@ const Home = () => {
     if (!user) return;
     if (user.role !== ROLES.HEAD_CENTER) return;
     (async () => {
-      const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1`);
+      const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);
       if (!ok) return console.log(`Error: ${code}`);
 
       const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);

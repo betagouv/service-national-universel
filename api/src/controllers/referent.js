@@ -911,11 +911,21 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    const JoiQueryWithCohesionCenter = Joi.string().validate(req.query.with_cohesion_center);
+    if (JoiQueryWithCohesionCenter.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
     if (!canSearchSessionPhase1(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const sessions = await SessionPhase1.find({ headCenterId: checkedId });
+    let sessions = await SessionPhase1.find({ headCenterId: checkedId });
+    const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: sessions.map((s) => s.cohesionCenterId.toString()) } });
+    if (JoiQueryWithCohesionCenter.value === "true") {
+      sessions = sessions.map((s) => {
+        s._doc.cohesionCenter = cohesionCenters.find((c) => c._id.toString() === s.cohesionCenterId.toString());
+        return s;
+      });
+    }
     return res.status(200).send({ ok: true, data: sessions.map(serializeSessionPhase1) });
   } catch (error) {
     capture(error);
