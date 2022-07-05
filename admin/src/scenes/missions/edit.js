@@ -28,6 +28,7 @@ import Invite from "../structure/components/invite";
 import Loader from "../../components/Loader";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import { HiOutlineLockClosed } from "react-icons/hi";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Missions");
@@ -261,6 +262,33 @@ export default function Edit(props) {
                 <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                   <Wrapper>
                     <BoxTitle>Détails de la mission</BoxTitle>
+                    {values.status === "VALIDATED" ? (
+                      <FormGroup>
+                        <label className="uppercase">
+                          <span>*</span>visibilité pour les candidats
+                        </label>
+                        <div className="flex items-center">
+                          <div
+                            onClick={() => {
+                              handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDDEN" : "VISIBLE", name: "visibility" } });
+                            }}
+                            name="visibility"
+                            className={`flex items-center w-9 h-4 rounded-full ${
+                              values.visibility === "VISIBLE" ? "bg-blue-600" : "bg-red-500"
+                            } cursor-pointer transition duration-100 ease-in`}>
+                            <div
+                              className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] ${
+                                values.visibility === "VISIBLE" ? "translate-x-[16px]" : "translate-x-0"
+                              } transition duration-100 ease-in shadow-nina`}>
+                              {values.visibility === "VISIBLE" ? null : <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />}
+                            </div>
+                          </div>
+                          <div className="ml-2 ">
+                            La mission est <label className="font-bold">{values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</label> aux candidatures
+                          </div>
+                        </div>
+                      </FormGroup>
+                    ) : null}
                     <FormGroup>
                       <label>
                         <span>*</span>NOM DE LA MISSION

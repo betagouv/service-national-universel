@@ -31,7 +31,7 @@ export default function UserPanel({ onChange, value }) {
     (async () => {
       if (!value.structureId) return;
       const { ok, data, code } = await api.get(`/structure/${value.structureId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survnue lors de la récupération de la structure", translate(code));
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
       return setStructure(data);
     })();
     (async () => {

@@ -41,6 +41,7 @@ function validateMission(mission) {
       structureId: Joi.string().allow(null, ""),
       structureName: Joi.string().allow(null, ""),
       status: Joi.string().allow(null, ""),
+      visibility: Joi.string().allow(null, ""),
       statusComment: Joi.string().allow(null, ""),
       tutorId: Joi.string().allow(null, ""),
       tutorName: Joi.string().allow(null, ""),

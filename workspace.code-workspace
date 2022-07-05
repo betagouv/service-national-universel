@@ -1,17 +1,23 @@
 {
   "folders": [
-	{
-		"path": "api"
-	},
-	{
-		"path": "admin"
-	},
-	{
-		"path": "app"
-	},
-	{
-		"path": "lib"
-	}
-],
+    {
+      "path": "api"
+    },
+    {
+      "path": "admin"
+    },
+    {
+      "path": "app"
+    },
+    {
+      "path": "knowledge-base-public"
+    },
+    {
+      "path": "pdf"
+    },
+    {
+      "path": "lib"
+    },
+  ],
   "settings": {}
 }

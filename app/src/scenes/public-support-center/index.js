@@ -7,7 +7,7 @@ import { supportURL } from "../../config";
 import { colors, urlWithScheme } from "../../utils";
 import { Modal } from "reactstrap";
 import CloseSvg from "../../assets/Close";
-
+import ZammoodForm from "./form";
 
 const articles = [
   {
@@ -141,6 +141,7 @@ export default function Index(props) {
             </div>
           </div>
         </div>
+        {open && <ZammoodForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
         {successMessage && <p style={{ color: "#6B7280" }}>{successMessage}</p>}
       </Container>
     </HeroContainer>

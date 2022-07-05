@@ -165,15 +165,21 @@ export default function Pointage({ updateFilter }) {
                                     values: youngSelected,
                                     value: "true",
                                     onSubmit: async () => {
-                                      const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
-                                        value: "true",
-                                        ids: youngSelected.map((y) => y._id),
-                                      });
-                                      if (!ok) {
-                                        toastr.error("Oups, une erreur s'est produite", translate(code));
+                                      try {
+                                        const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
+                                          value: "true",
+                                          ids: youngSelected.map((y) => y._id),
+                                        });
+                                        if (!ok) {
+                                          toastr.error("Oups, une erreur s'est produite", translate(code));
+                                          return;
+                                        }
+                                        history.go(0);
+                                      } catch (e) {
+                                        console.log(e);
+                                        toastr.error("Oups, une erreur s'est produite", translate(e.code));
                                         return;
                                       }
-                                      history.go(0);
                                     },
                                   });
                                 },
@@ -195,15 +201,21 @@ export default function Pointage({ updateFilter }) {
                                     values: youngSelected,
                                     value: "false",
                                     onSubmit: async () => {
-                                      const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
-                                        value: "false",
-                                        ids: youngSelected.map((y) => y._id),
-                                      });
-                                      if (!ok) {
-                                        toastr.error("Oups, une erreur s'est produite", translate(code));
+                                      try {
+                                        const { ok, code } = await api.post(`/young/phase1/multiaction/cohesionStayPresence`, {
+                                          value: "false",
+                                          ids: youngSelected.map((y) => y._id),
+                                        });
+                                        if (!ok) {
+                                          toastr.error("Oups, une erreur s'est produite", translate(code));
+                                          return;
+                                        }
+                                        history.go(0);
+                                      } catch (e) {
+                                        console.log(e);
+                                        toastr.error("Oups, une erreur s'est produite", translate(e.code));
                                         return;
                                       }
-                                      history.go(0);
                                     },
                                   });
                                 },
@@ -224,20 +236,26 @@ export default function Pointage({ updateFilter }) {
                             items: [
                               {
                                 action: async () => {
-                                  if (youngSelected.length === 0) return;
-                                  setModalMultiPointagePresenceJDM({
-                                    isOpen: true,
-                                    values: youngSelected,
-                                    value: "true",
-                                    onSubmit: async () => {
-                                      const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "true", ids: youngSelected.map((y) => y._id) });
-                                      if (!ok) {
-                                        toastr.error("Oups, une erreur s'est produite", translate(code));
-                                        return;
-                                      }
-                                      history.go(0);
-                                    },
-                                  });
+                                  try {
+                                    if (youngSelected.length === 0) return;
+                                    setModalMultiPointagePresenceJDM({
+                                      isOpen: true,
+                                      values: youngSelected,
+                                      value: "true",
+                                      onSubmit: async () => {
+                                        const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "true", ids: youngSelected.map((y) => y._id) });
+                                        if (!ok) {
+                                          toastr.error("Oups, une erreur s'est produite", translate(code));
+                                          return;
+                                        }
+                                        history.go(0);
+                                      },
+                                    });
+                                  } catch (e) {
+                                    console.log(e);
+                                    toastr.error("Oups, une erreur s'est produite", translate(e.code));
+                                    return;
+                                  }
                                 },
                                 render: (
                                   <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
@@ -251,20 +269,26 @@ export default function Pointage({ updateFilter }) {
                               },
                               {
                                 action: async () => {
-                                  if (youngSelected.length === 0) return;
-                                  setModalMultiPointagePresenceJDM({
-                                    isOpen: true,
-                                    values: youngSelected,
-                                    value: "false",
-                                    onSubmit: async () => {
-                                      const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "false", ids: youngSelected.map((y) => y._id) });
-                                      if (!ok) {
-                                        toastr.error("Oups, une erreur s'est produite", translate(code));
-                                        return;
-                                      }
-                                      history.go(0);
-                                    },
-                                  });
+                                  try {
+                                    if (youngSelected.length === 0) return;
+                                    setModalMultiPointagePresenceJDM({
+                                      isOpen: true,
+                                      values: youngSelected,
+                                      value: "false",
+                                      onSubmit: async () => {
+                                        const { ok, code } = await api.post(`/young/phase1/multiaction/presenceJDM`, { value: "false", ids: youngSelected.map((y) => y._id) });
+                                        if (!ok) {
+                                          toastr.error("Oups, une erreur s'est produite", translate(code));
+                                          return;
+                                        }
+                                        history.go(0);
+                                      },
+                                    });
+                                  } catch (e) {
+                                    console.log(e);
+                                    toastr.error("Oups, une erreur s'est produite", translate(e.code));
+                                    return;
+                                  }
                                 },
                                 render: (
                                   <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">

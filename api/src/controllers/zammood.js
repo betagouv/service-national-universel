@@ -38,7 +38,6 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
 });
 router.post("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    return res.status(200).send({ ok: true });
     const { ok, data } = await zammood.api(`/v0/ticket/search`, {
       method: "POST",
       credentials: "include",
