@@ -11,6 +11,7 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
+import { GoTools } from "react-icons/go";
 
 export default function Signin() {
   const dispatch = useDispatch();
@@ -37,7 +38,7 @@ export default function Signin() {
               <div className="flex items-center m-4">
                 <div className="bg-yellow-50 p-3 rounded-lg shadow-sm ">
                   <div className="flex space-x-2 items-center ">
-                    {/* <GoTools className="text-yellow-600 text-base" /> */}
+                    <GoTools className="text-yellow-600 text-base" />
                     <h5 className="text-yellow-600 text-base">MAINTENANCE</h5>
                   </div>
                   <div className="text-yellow-900  pt-2 text-sm">
