@@ -1,96 +1,482 @@
 import React from "react";
+import { FiChevronDown, FiMail } from "react-icons/fi";
+import { RiErrorWarningFill } from "react-icons/ri";
 import { useSelector } from "react-redux";
-import Bus from "../../assets/Bus.js";
-import phase1done from "../../assets/phase1done.png";
-import trophy from "../../assets/trophy.svg";
-import DownloadAttestationButton from "../../components/buttons/DownloadAttestationButton";
-import MailAttestationButton from "../../components/buttons/MailAttestationButton";
-import plausibleEvent from "../../services/plausible";
-import Container from "./components/Container";
+import { useHistory } from "react-router-dom";
+import CheckCircleFill from "../../assets/icons/CheckCircleFill";
+import ChevronDown from "../../assets/icons/ChevronDown";
+import Download from "../../assets/icons/Download";
+import Unlock from "../../assets/icons/Unlock";
+import XCircleFill from "../../assets/icons/XCircleFill";
+import InfoConvocation from "./components/modals/InfoConvocation";
+import downloadPDF from "../../utils/download-pdf";
+import api from "../../services/api";
+import { toastr } from "react-redux-toastr";
+import { translate } from "../../utils";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
+  const [openAttestationButton, setOpenAttestationButton] = React.useState(false);
+  const [checkOpen, setCheckOpen] = React.useState(false);
+  const [XOpen, setXOpen] = React.useState(false);
+  const [FaqOpen, setFaqOpen] = React.useState(false);
+  const [Faq2Open, setFaq2Open] = React.useState(false);
+  const [modalOpen, setModalOpen] = React.useState({ isOpen: false });
+  const [loading, setLoading] = React.useState(false);
+
+  const refAttestationButton = React.useRef();
+  const history = useHistory();
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (refAttestationButton.current && !refAttestationButton.current.contains(event.target)) {
+        setOpenAttestationButton(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
+  const viewAttestation = async ({ uri }) => {
+    setLoading(true);
+    await downloadPDF({
+      url: `/young/${young._id}/documents/certificate/${uri}`,
+      fileName: `${young.firstName} ${young.lastName} - attestation ${uri}.pdf`,
+    });
+    setLoading(false);
+  };
+
+  const sendAttestation = async ({ template, type }) => {
+    setLoading(true);
+    const { ok, code } = await api.post(`/young/${young._id}/documents/${template}/${type}/send-email`, {
+      fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
+    });
+    setLoading(false);
+    if (ok) return toastr.success(`Document envoyé à ${young.email}`);
+    else return toastr.error("Erreur lors de l'envoie du document", translate(code));
+  };
 
   return (
     <>
-      <Container>
-        <div className="content">
-          <article className="lg:flex lg:items-center">
-            <img className="mr-4 hidden lg:block" src={trophy} alt="trophy" />
-            <div>
-              <h1 className="text-2xl md:text-[40px] mb-4 leading-10">
-                <strong>{young.firstName}</strong>, vous avez validé votre Phase&nbsp;1&nbsp;!
-              </h1>
-              <p className="text-[#738297]">Bravo pour votre engagement.</p>
-            </div>
-            <img src={phase1done} />
-          </article>
-          {young.statusPhase1 === "DONE" ? (
-            <section>
-              <p className="text-2xl font-bold mb-4">Avez-vous effectué votre recensement citoyen ?</p>
-              <div className="lg:flex lg:flex-row">
-                <article className="bg-gray-50 px-4 py-8 rounded-md md:mr-4">
-                  <p className="text-2xl font-bold mb-2">Oui</p>
-                  <p className="text-base text-[#738297]">
-                    Vous pouvez dès à présent transmettre votre attestation de réalisation de Phase 1 au CSNJ afin qu&apos;il valide votre JDC.
-                  </p>
-                  <a
-                    className="text-sm text-blue-600 underline hover:text-blue-700 hover:underline"
-                    href="https://support.snu.gouv.fr/base-de-connaissance/journee-defense-et-citoyennete"
-                    target="_blank"
-                    rel="noreferrer">
-                    J&apos;ai une question sur la JDC ›
-                  </a>
-                  <div className="flex items-center">
-                    <DownloadAttestationButton
-                      young={young}
-                      uri="1"
-                      className="flex items-center border-[1px] border-blue-600 rounded-lg px-4 py-2.5 font-sm leading-5  mt-4 shadow-sm bg-blue-600 text-white mr-3 hover:bg-blue-500 hover:border-blue-500 hover:!no-underline">
-                      Télécharger mon attestation
-                    </DownloadAttestationButton>
-                    <MailAttestationButton
-                      className="flex items-center border-[1px] border-blue-600 rounded-lg px-4 py-2.5 font-sm leading-5 mt-4 shadow-sm text-blue-600 bg-[#ffffff] hover:bg-blue-500 hover:border-blue-500 hover:text-white hover:!no-underline"
-                      young={young}
-                      type="1"
-                      template="certificate"
-                      placeholder="Attestation de réalisation de la phase 1"
-                      onClick={() => plausibleEvent("Phase1/CTA - Envoi par mail de l'attestation réussite")}>
-                      Envoyer par mail
-                    </MailAttestationButton>
+      {/* DESKTOP VIEW*/}
+      <div className="hidden md:flex flex-col">
+        <div className="flex flex-col rounded-lg bg-white mx-4 my-8">
+          <div className="flex px-8 pt-4 justify-between flex-col-reverse items-start lg:!flex-row">
+            <div className="flex flex-col w-full lg:w-2/3 py-5">
+              <div className="flex items-center lg:items-start">
+                <div className="flex flex-col flex-1 gap-5 ml-4">
+                  <div className="text-[44px] leading-tight">
+                    <strong>{young.firstName},</strong> vous avez <br /> validé votre Phase 1 !
                   </div>
-                </article>
-                <article className="bg-gray-50 px-4 py-8 rounded-md md:mr-4">
-                  <p className="text-2xl font-bold mb-2">Non</p>
-                  <p className="text-base text-[#738297]">Vous devez effectuer vos démarches auprès de votre mairie ou en ligne à partir de vos 16 ans.</p>
-                  <a
-                    className="text-sm text-blue-600 underline hover:text-blue-700 hover:underline"
-                    href="https://www.service-public.fr/particuliers/vosdroits/F870"
-                    target="_blank"
-                    rel="noreferrer">
-                    En savoir plus sur le recensement ›
-                  </a>
-                </article>
+                  <div className="text-sm leading-5 font-normal text-gray-500">
+                    Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
+                  </div>
+                  <div className="flex gap-5 items-center">
+                    <button className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium" onClick={() => setModalOpen({ isOpen: true })}>
+                      Mes informations de retour de séjour
+                    </button>
+                    <div className="relative" ref={refAttestationButton}>
+                      <button
+                        disabled={loading}
+                        className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
+                        onClick={() => setOpenAttestationButton((e) => !e)}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white leading-4 text-xs font-medium">Attestation de réalisation phase 1</span>
+                        </div>
+                        <ChevronDown className="text-white font-medium" />
+                      </button>
+                      {/* display options */}
+                      <div
+                        className={`${
+                          openAttestationButton ? "block" : "hidden"
+                        }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+                        <div
+                          key="download"
+                          onClick={() => {
+                            viewAttestation({ uri: "1" });
+                            setOpenAttestationButton(false);
+                          }}>
+                          <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                            <Download className="text-gray-400 w-4 h-4" />
+                            <div>Télécharger</div>
+                          </div>
+                        </div>
+                        <div
+                          key="email"
+                          onClick={() => {
+                            sendAttestation({ type: "1", template: "certificate" });
+                            setOpenAttestationButton(false);
+                          }}>
+                          <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                            <FiMail className="text-gray-400 w-4 h-4" />
+                            <div>Envoyer par mail</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <article className="mt-4 rounded-md shadow-nina p-6 max-w-[50%]">
-                <a
-                  href="https://support.snu.gouv.fr/base-de-connaissance/permis-et-code-de-la-route"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="flex justify-between items-center">
-                  <Bus className="w-24" />
-                  <section>
-                    <p className="font-bold text-gray-900">Envie de gagner en mobilité ?</p>
-                    <p className="text-gray-500 text-sm">
-                      Découvrez comment accéder à la prise en charge du <strong>code de la route</strong>.
-                    </p>
-                  </section>
-                </a>
-              </article>
-            </section>
-          ) : null}
+            </div>
+            <div className="flex items-start justify-center lg:items-start flex-shrink-0 w-full lg:w-1/3">
+              <img className="object-scale-down h-80" src={require("../../assets/validatedPhase2.png")} />
+            </div>
+          </div>
+          <div className="flex px-8 pt-8 pb-12 justify-between flex-col items-stretch lg:!flex-row gap-8">
+            <div className="flex flex-col w-full lg:w-1/2 items-center px-8  gap-3 lg:border-r-[1px] border-gray-200">
+              <Unlock />
+              <div className="leading-7 text-xl text-center font-bold">Le code de la route, c’est facile !</div>
+              <div className="text-xs leading-4 font-medium text-gray-500 text-center">
+                Vous bénéficiez désormais d’un accès <strong>gratuit</strong> à la <br />
+                plateforme en ligne d’apprentissage du code de la route.
+              </div>
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href="https://support.snu.gouv.fr/base-de-connaissance/permis-et-code-de-la-route"
+                className="rounded-lg border-[1px] border-blue-700 text-blue-700 text-sm leading-5 font-medium px-12 py-2 mt-3 hover:text-white hover:bg-blue-700 transition duration-100 ease-in-out cursor-pointer">
+                Plus d’informations
+              </a>
+            </div>
+            <div className="flex flex-col w-full lg:w-1/2 items-stretch px-10 gap-3">
+              <div className="flex justify-center">
+                <Unlock />
+              </div>
+              <div className="leading-7 text-xl text-center font-bold">
+                Obtenez votre certificat <br /> de participation à la JDC !
+              </div>
+              <div className="text-xs leading-4 font-medium text-gray-500 text-center w-full">grâce à la validation de votre phase 1</div>
+              <div className="flex flex-col p-4 rounded-lg shadow-ninaBlock">
+                <div
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => {
+                    setCheckOpen(!checkOpen);
+                    setFaqOpen(false);
+                  }}>
+                  <div className="flex items-center gap-3">
+                    <CheckCircleFill className="text-green-500 w-5 h-5" />
+                    <div className="text-base font-bold">
+                      J’ai <strong>effectué</strong> mon recensement citoyen
+                    </div>
+                  </div>
+                  <FiChevronDown className={`text-gray-400 w-6 h-6 cursor-pointer hover:scale-105 ${checkOpen ? "rotate-180" : ""}`} />
+                </div>
+                {checkOpen ? (
+                  <>
+                    <div className="text-sm leading-5 font-medium text-gray-800 mt-3 text-justify">
+                      Vous recevrez automatiquement votre certificat individuel de participation après le séjour. Vous n’avez rien à faire.
+                    </div>
+                    <div className="text-sm leading-5 text-gray-500 mt-3 text-justify">
+                      <RiErrorWarningFill className="w-4 h-4 inline mr-1 align-text-bottom" />
+                      Attention, si vous n’avez pas pu participer à la Journée défense et mémoire (JDM), vous devrez tout de même réaliser votre JDC.
+                    </div>
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                      href="https://support.snu.gouv.fr/base-de-connaissance/journee-defense-et-citoyennete"
+                      className="text-sm leading-5 cursor-pointer underline text-blue-600 hover:underline">
+                      En savoir plus
+                    </a>
+                    <div className="w-full rounded-lg bg-gray-100 mt-3 py-3 px-2 cursor-pointer ">
+                      <div className="text-base leading-6 font-bold" onClick={() => setFaqOpen(!FaqOpen)}>
+                        Voir la F.A.Q
+                      </div>
+                      {FaqOpen ? (
+                        <>
+                          <div className="text-sm leading-5 font-medium text-gray-800 mt-3">Je n’ai pas reçu mon certificat...</div>
+                          <div className="text-xs leading-5 text-gray-500 text-justify mt-1">
+                            Rapprochez-vous de votre CSNJ (Centre du service national et de la jeunesse de votre lieu de résidence) pour vérifier votre situation.
+                          </div>
+                          <div className="text-sm leading-5 font-medium text-gray-800 mt-3">J’ai quand même reçu ma convocation à la JDC...</div>
+                          <div className="text-xs leading-5 text-gray-500 text-justify mt-1">
+                            Dans ce cas, transmettez votre attestation de réalisation de phase 1 au CSNJ afin de recevoir votre CIP à la JDC.
+                          </div>
+                        </>
+                      ) : null}
+                    </div>
+                  </>
+                ) : null}
+              </div>
+              <div className="flex flex-col px-4 py-3 rounded-lg shadow-ninaBlock">
+                <div
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => {
+                    setXOpen(!XOpen);
+                    setFaq2Open(false);
+                  }}>
+                  <div className="flex items-center gap-3">
+                    <XCircleFill className="text-red-500 w-4 h-4" />
+                    <div className="text-base font-bold">
+                      Je n’ai <strong>pas</strong> effectué mon recensement <br /> citoyen
+                    </div>
+                  </div>
+                  <FiChevronDown className={`text-gray-400 w-6 h-6 cursor-pointer hover:scale-105 ${XOpen ? "rotate-180" : ""}`} />
+                </div>
+                {XOpen ? (
+                  <>
+                    <div className="text-sm leading-5 font-medium text-gray-800 mt-3 text-justify">
+                      Recensez-vous auprès de votre mairie ou en ligne à partir de vos 16 ans, vous recevez votre convocation à la JDC.
+                    </div>
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                      href="https://www.service-public.fr/particuliers/vosdroits/F870"
+                      className="text-sm leading-5 cursor-pointer underline text-blue-600 hover:underline mt-1.5">
+                      En savoir plus sur le recensement
+                    </a>
+                    <div className="text-sm leading-5 text-gray-500 mt-3 text-justify">
+                      <RiErrorWarningFill className="w-4 h-4 inline mr-1 align-text-bottom" />
+                      Attention, si vous n’avez pas pu participer à la Journée défense et mémoire (JDM), vous devrez tout de même réaliser votre JDC.
+                    </div>
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                      href="https://support.snu.gouv.fr/base-de-connaissance/journee-defense-et-citoyennete"
+                      className="text-sm leading-5 cursor-pointer underline text-blue-600 hover:underline">
+                      En savoir plus
+                    </a>
+                    <div className="w-full rounded-lg bg-gray-100 mt-3 py-3 px-2 cursor-pointer ">
+                      <div className="text-sm leading-6 font-medium" onClick={() => setFaq2Open(!Faq2Open)}>
+                        Vous ne souhaitez par réaliser votre JDC ?
+                      </div>
+                      {Faq2Open ? (
+                        <>
+                          <div className="text-xs leading-5 text-gray-500 text-justify mt-1">
+                            Transmettez votre attestation de réalisation de la phase 1 à votre CSNJ pour obtenir votre certificat de participation à la JDC.
+                          </div>
+                          <a
+                            target="_blank"
+                            rel="noreferrer"
+                            href="https://www.service-public.fr/particuliers/vosdroits/F870"
+                            className="text-sm leading-5 cursor-pointer underline text-blue-600 hover:underline mt-1.5">
+                            En savoir plus sur la procédure
+                          </a>
+                        </>
+                      ) : null}
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="thumb" />
-      </Container>
+        <div className="flex flex-col lg:flex-row text-center gap-4 lg:!text-left items-center rounded-lg justify-between bg-white mx-4 mb-4 px-10 py-5">
+          <div className="w-full lg:w-2/3 text-xl leading-7 font-bold">
+            Et maintenant, votre parcours d’engagement se poursuit désormais avec la phase 2, la mission d’intérêt général
+          </div>
+          <button
+            className="bg-blue-600 border-[1px] border-blue-600 hover:bg-white text-white hover:!text-blue-600 text-sm leading-5 font-medium py-2 px-4 rounded-lg transition duration-100 ease-in-out"
+            onClick={() => history.push("/phase2")}>
+            Je trouve une mission d’intérêt général
+          </button>
+        </div>
+      </div>
+
+      {/* MOBILE VIEW*/}
+      <div className="flex md:hidden flex-col bg-white mb-4 rounded-lg">
+        <div className="px-4 py-4">
+          <div className="text-2xl leading-tight">
+            <strong>{young.firstName},</strong> vous avez <br /> validé votre Phase 1 !
+          </div>
+          <div className="text-xs leading-5 font-normal text-gray-500 mt-2">
+            Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
+          </div>
+          <div className="flex flex-col gap-3 items-center py-3">
+            <button className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium whitespace-nowrap" onClick={() => setModalOpen({ isOpen: true })}>
+              Mes informations de retour de séjour
+            </button>
+            <div className="relative" ref={refAttestationButton}>
+              <button
+                disabled={loading}
+                className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
+                onClick={() => setOpenAttestationButton((e) => !e)}>
+                <div className="flex items-center gap-2">
+                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Attestation de réalisation phase 1</span>
+                </div>
+                <ChevronDown className="text-white font-medium" />
+              </button>
+              {/* display options */}
+              <div
+                className={`${
+                  openAttestationButton ? "block" : "hidden"
+                }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+                <div
+                  key="download"
+                  onClick={() => {
+                    viewAttestation({ uri: "1" });
+                    setOpenAttestationButton(false);
+                  }}>
+                  <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                    <Download className="text-gray-400 w-4 h-4" />
+                    <div>Télécharger</div>
+                  </div>
+                </div>
+                <div
+                  key="email"
+                  onClick={() => {
+                    sendAttestation({ type: "1", template: "certificate" });
+                    setOpenAttestationButton(false);
+                  }}>
+                  <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                    <FiMail className="text-gray-400 w-4 h-4" />
+                    <div>Envoyer par mail</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-3 mt-4">
+            <Unlock />
+            <div className="leading-7 text-xl text-center font-bold">Le code de la route, c’est facile !</div>
+            <div className="text-xs leading-4 font-medium text-gray-500 text-center">
+              Vous bénéficiez désormais d’un accès <strong>gratuit</strong> à la <br />
+              plateforme en ligne d’apprentissage du code de la route.{" "}
+              <span>
+                <a
+                  target="_blank"
+                  rel="noreferrer"
+                  href="https://support.snu.gouv.fr/base-de-connaissance/permis-et-code-de-la-route"
+                  className="font-bold text-gray-800 hover:text-gray-800">
+                  Plus d’informations
+                </a>
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col w-full items-stretch gap-3 mt-4">
+            <div className="flex justify-center">
+              <Unlock />
+            </div>
+            <div className="leading-7 text-xl text-center font-bold">
+              Obtenez votre certificat <br /> de participation à la JDC !
+            </div>
+            <div className="text-xs leading-4 font-medium text-gray-500 text-center w-full">grâce à la validation de votre phase 1</div>
+            <div className="flex flex-col px-4 py-3 rounded-lg bg-white shadow-ninaBlock">
+              <div
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => {
+                  setCheckOpen(!checkOpen);
+                  setFaqOpen(false);
+                }}>
+                <div className="flex items-center gap-3">
+                  <CheckCircleFill className="text-green-500 w-5 h-5" />
+                  <div className="text-base font-bold">
+                    J’ai <strong>effectué</strong> mon recensement citoyen
+                  </div>
+                </div>
+                <FiChevronDown className={`text-gray-400 w-6 h-6 cursor-pointer hover:scale-105 ${checkOpen ? "rotate-180" : ""}`} />
+              </div>
+              {checkOpen ? (
+                <>
+                  <div className="text-sm leading-5 font-medium text-gray-800 mt-3 text-justify">
+                    Vous recevrez automatiquement votre certificat individuel de participation après le séjour. Vous n’avez rien à faire.
+                  </div>
+                  <div className="text-sm leading-5 text-gray-500 mt-3 text-justify">
+                    <RiErrorWarningFill className="w-4 h-4 inline mr-1 align-text-bottom" />
+                    Attention, si vous n’avez pas pu participer à la Journée défense et mémoire (JDM), vous devrez tout de même réaliser votre JDC.
+                  </div>
+                  <a
+                    target="_blank"
+                    rel="noreferrer"
+                    href="https://support.snu.gouv.fr/base-de-connaissance/journee-defense-et-citoyennete"
+                    className="text-sm leading-5 cursor-pointer underline text-blue-600 hover:underline">
+                    En savoir plus
+                  </a>
+                  <div className="w-full rounded-lg bg-gray-100 mt-3 py-3 px-2 cursor-pointer ">
+                    <div className="text-base leading-6 font-bold" onClick={() => setFaqOpen(!FaqOpen)}>
+                      Voir la F.A.Q
+                    </div>
+                    {FaqOpen ? (
+                      <>
+                        <div className="text-sm leading-5 font-medium text-gray-800 mt-3">Je n’ai pas reçu mon certificat...</div>
+                        <div className="text-xs leading-5 text-gray-500 text-justify mt-1">
+                          Rapprochez-vous de votre CSNJ (Centre du service national et de la jeunesse de votre lieu de résidence) pour vérifier votre situation.
+                        </div>
+                        <div className="text-sm leading-5 font-medium text-gray-800 mt-3">J’ai quand même reçu ma convocation à la JDC...</div>
+                        <div className="text-xs leading-5 text-gray-500 text-justify mt-1">
+                          Dans ce cas, transmettez votre attestation de réalisation de phase 1 au CSNJ afin de recevoir votre CIP à la JDC.
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                </>
+              ) : null}
+            </div>
+            <div className="flex flex-col px-4 py-3 rounded-lg bg-white shadow-ninaBlock">
+              <div
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => {
+                  setXOpen(!XOpen);
+                  setFaq2Open(false);
+                }}>
+                <div className="flex items-center gap-3">
+                  <XCircleFill className="text-red-500 w-4 h-4" />
+                  <div className="text-base font-bold">
+                    Je n’ai <strong>pas</strong> effectué mon recensement citoyen
+                  </div>
+                </div>
+                <FiChevronDown className={`text-gray-400 w-6 h-6 cursor-pointer hover:scale-105 ${XOpen ? "rotate-180" : ""}`} />
+              </div>
+              {XOpen ? (
+                <>
+                  <div className="text-sm leading-5 font-medium text-gray-800 mt-3 text-justify">
+                    Recensez-vous auprès de votre mairie ou en ligne à partir de vos 16 ans, vous recevez votre convocation à la JDC.
+                  </div>
+                  <a
+                    target="_blank"
+                    rel="noreferrer"
+                    href="https://www.service-public.fr/particuliers/vosdroits/F870"
+                    className="text-sm leading-5 cursor-pointer underline text-blue-600 hover:underline mt-1.5">
+                    En savoir plus sur le recensement
+                  </a>
+                  <div className="text-sm leading-5 text-gray-500 mt-3 text-justify">
+                    <RiErrorWarningFill className="w-4 h-4 inline mr-1 align-text-bottom" />
+                    Attention, si vous n’avez pas pu participer à la Journée défense et mémoire (JDM), vous devrez tout de même réaliser votre JDC.
+                  </div>
+                  <a
+                    target="_blank"
+                    rel="noreferrer"
+                    href="https://support.snu.gouv.fr/base-de-connaissance/journee-defense-et-citoyennete"
+                    className="text-sm leading-5 cursor-pointer underline text-blue-600 hover:underline">
+                    En savoir plus
+                  </a>
+                  <div className="w-full rounded-lg bg-gray-100 mt-3 py-3 px-2 cursor-pointer ">
+                    <div className="text-sm leading-6 font-medium" onClick={() => setFaq2Open(!Faq2Open)}>
+                      Vous ne souhaitez par réaliser votre JDC ?
+                    </div>
+                    {Faq2Open ? (
+                      <>
+                        <div className="text-xs leading-5 text-gray-500 text-justify mt-1">
+                          Transmettez votre attestation de réalisation de la phase 1 à votre CSNJ pour obtenir votre certificat de participation à la JDC.
+                        </div>
+                        <a
+                          target="_blank"
+                          rel="noreferrer"
+                          href="https://www.service-public.fr/particuliers/vosdroits/F870"
+                          className="text-sm leading-5 cursor-pointer underline text-blue-600 hover:underline mt-1.5">
+                          En savoir plus sur la procédure
+                        </a>
+                      </>
+                    ) : null}
+                  </div>
+                </>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col text-center gap-4 items-center rounded-lg justify-between bg-gray-100 mb-4 px-2 py-5">
+          <div className="w-full lg:w-2/3 text-xl leading-7 font-bold">
+            Et maintenant, votre parcours d’engagement se poursuit désormais avec la phase 2, la mission d’intérêt général
+          </div>
+          <button
+            className="bg-blue-600 border-[1px] border-blue-600 hover:bg-white text-white hover:!text-blue-600 text-sm leading-5 font-medium py-2 px-4 rounded-lg transition duration-100 ease-in-out"
+            onClick={() => history.push("/phase2")}>
+            Je trouve une mission d’intérêt général
+          </button>
+        </div>
+      </div>
+      <InfoConvocation isOpen={modalOpen?.isOpen} onCancel={() => setModalOpen({ isOpen: false })} />
     </>
   );
 }
