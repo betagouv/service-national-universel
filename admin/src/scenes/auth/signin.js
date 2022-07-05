@@ -42,7 +42,7 @@ export default function Signin() {
                     <h5 className="text-yellow-600 text-base">MAINTENANCE</h5>
                   </div>
                   <div className="text-yellow-900  pt-2 text-sm">
-                    Un nombre important de connexion sur la plateforme impacte son bon fonctionnement. Nous faisons notre possible pour rétablir la situation.
+                    Le site est actuellement en maintenance suite à un problème technique sur la plateforme. Nous faisons notre possible pour rétablir la situation.
                   </div>
                 </div>
               </div>
