@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
-const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END } = require("snu-lib");
+const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, TEMPLATES } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 
@@ -25,12 +25,9 @@ function getCertificateTemplate({ cohort } = { cohort: "" }) {
 
 function getCertificateTemplateFromDate(date) {
   if (!date) return;
-
-  let template = "certificates/certificateTemplate_2022.png";
-  if (date < new Date("2020-07-26")) template = "certificates/certificateTemplate-2019.png";
-  else if (date < new Date("2022-05-20")) template = "certificates/certificateTemplate.png";
-
-  return template;
+  for (const item of TEMPLATES) {
+    if (date < new Date(item.date_end)) return item.template;
+  }
 }
 
 const destinataireLabel = ({ firstName, lastName }, template) => {
@@ -68,7 +65,6 @@ const phase1 = async (young) => {
 
 const phase2 = (young) => {
   let d = young.statusPhase2UpdatedAt;
-  const template = getCertificateTemplateFromDate(d) ?? getCertificateTemplate({ cohort: young.cohort });
   if (!d) {
     // 31 mars 2021
     if (young.cohort === "2019") d = new Date(2021, 2, 31);
@@ -76,6 +72,7 @@ const phase2 = (young) => {
     else if (young.cohort === "2020") d = new Date(2021, 5, 17);
     else d = new Date();
   }
+  const template = getCertificateTemplateFromDate(d);
 
   const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
   return html
