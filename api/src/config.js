@@ -1,4 +1,5 @@
 const ENVIRONMENT = getEnvironment();
+const LOCAL = process.env.LOCAL === "true";
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT || 3000;
 const secret = process.env.SECRET || "not-so-secret";
@@ -50,6 +51,7 @@ const EDUCONNECT_IDP_SIGN_CERT = process.env.EDUCONNECT_IDP_SIGN_CERT || " ";
 const EDUCONNECT_IDP_ENCR_CERT = process.env.EDUCONNECT_IDP_ENCR_CERT || " ";
 
 module.exports = {
+  LOCAL,
   PORT,
   MONGO_URL,
   secret,
