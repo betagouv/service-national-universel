@@ -12,7 +12,7 @@ import ModalInProgress from "../../components/modals/ModalInProgress";
 import { toastr } from "react-redux-toastr";
 import PasswordEye from "../../components/PasswordEye";
 import EduConnectButton from "../../components/buttons/EduConnectButton";
-import { educonnectAllowed } from "../../config";
+import { educonnectAllowed, maintenance } from "../../config";
 import { GoTools } from "react-icons/go";
 
 /*
@@ -59,7 +59,7 @@ export default function Signin() {
         <div className="relative text-center text-[0.8rem] md:text-[1rem] font-bold	mb-[1.25rem] after:content-[''] after:block after:h-[1px] after:w-full after:bg-[#d2d6dc] after:absolute after:left-0 after:top-1/2 after:z-[-1] after:translate-y-[-50%]">
           <span className="bg-[#fff] text-[#161E2E] p-2">Mon espace volontaire</span>
         </div>
-        {!ouverturePartielle ? (
+        {!maintenance ? (
           <div className="flex items-center m-4">
             <div className="bg-yellow-50 p-3 rounded-lg shadow-sm ">
               <div className="flex space-x-2 items-center ">
