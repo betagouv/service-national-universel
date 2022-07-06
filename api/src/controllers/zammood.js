@@ -29,6 +29,7 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
   try {
     const { ok, data, token } = await zammood.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    res.cookie("jwtzamoud", token, cookieOptions());
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -37,7 +38,6 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
 });
 router.post("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    return res.status(200).send({ ok: true });
     const { ok, data } = await zammood.api(`/v0/ticket/search`, {
       method: "POST",
       credentials: "include",

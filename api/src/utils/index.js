@@ -24,7 +24,7 @@ const {
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
-const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, COHESION_STAY_END } = require("snu-lib/constants");
+const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, COHESION_STAY_END } = require("snu-lib");
 
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { getQPV, getDensity } = require("../geo");
@@ -351,15 +351,21 @@ const updateStatusPhase2 = async (young) => {
       a.status === APPLICATION_STATUS.WAITING_VERIFICATION,
   );
 
-  // we keep in the doc the date, if we have to display it in the certificate later
   young.set({ statusPhase2UpdatedAt: Date.now() });
 
   if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) {
     // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
-    young.set({ statusPhase2: young.statusPhase2 });
+    young.set({ statusPhase2: young.statusPhase2, statusPhase2ValidatedAt: Date.now() });
   } else if (Number(young.phase2NumberHoursDone) >= 84) {
     // We change young status to DONE if he has 84 hours of phase 2 done.
-    young.set({ statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED });
+    young.set({
+      statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+      statusPhase2ValidatedAt: Date.now(),
+      militaryPreparationFilesIdentity: [],
+      militaryPreparationFilesCensus: [],
+      militaryPreparationFilesAuthorization: [],
+      militaryPreparationFilesCertificate: [],
+    });
     let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
     let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
@@ -587,17 +593,22 @@ async function notifDepartmentChange(department, template, young) {
 
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
   const dateDeValidation = {
+    2019: new Date("06/28/2019"),
+    2020: new Date("07/02/2021"),
+    2021: new Date("07/02/2021"),
     "Juin 2022": new Date(2022, 5, 20, 18), //20 juin 2022 à 18h
     "Juillet 2022": new Date(2022, 6, 11, 18), //11 juillet 2022 à 18h
   };
 
   const dateDeValidationTerminale = {
+    2019: new Date("06/28/2019"),
+    2020: new Date("07/02/2021"),
+    2021: new Date("07/02/2021"),
     "Juin 2022": new Date(2022, 5, 22, 18), //22 juin 2022 à 18h
     "Juillet 2022": new Date(2022, 6, 13, 18), //13 juillet 2022 à 18h
   };
-
   const now = new Date();
-  if ((["true", "false"].includes(young.cohesionStayPresence) && ["true", "false"].includes(young.presenceJDM)) || now > COHESION_STAY_END[sessionPhase1.cohort]) {
+  if ((now >= dateDeValidation[sessionPhase1.cohort] && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale[sessionPhase1.cohort] && young?.grade === "Terminale")) {
     if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
       if (
         (now >= dateDeValidation[sessionPhase1.cohort] &&
@@ -625,8 +636,8 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
     } else {
       young.set({ statusPhase1: "NOT_DONE" });
     }
+    await young.save({ fromUser: req.user });
   }
-  await young.save({ fromUser: req.user });
 }
 
 const ERRORS = {
@@ -660,6 +671,7 @@ const ERRORS = {
   NEW_PASSWORD_IDENTICAL_PASSWORD: "NEW_PASSWORD_IDENTICAL_PASSWORD",
   INVALID_IP: "INVALID_IP",
   ALREADY_EXISTS: "ALREADY_EXISTS",
+  YOUNG_NOT_FOUND: "YOUNG_NOT_FOUND",
 };
 
 const YOUNG_SITUATIONS = {

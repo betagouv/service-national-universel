@@ -64,7 +64,7 @@ export default function ModalFilesPM({ isOpen, onCancel, initialValues, young, n
   const onConfirm = async (file) => {
     setLoading(true);
     try {
-      const f = await api.get(`/referent/youngFile/${young._id}/${nameFiles}/${getFileName(file)}`);
+      const f = await api.get(`/referent/youngFile/${young._id}/military-preparation/${nameFiles}/${getFileName(file)}`);
       FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());

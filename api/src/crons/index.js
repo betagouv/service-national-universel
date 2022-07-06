@@ -12,6 +12,7 @@ const applicationPending = require("./applicationPending");
 const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
 const jeVeuxAiderDaily = require("./JeVeuxAiderDaily");
 const loginAttempts = require("./loginAttempts");
+const syncReferentSupport = require("./syncReferentSupport");
 
 // doubt ? -> https://crontab.guru/
 
@@ -88,5 +89,10 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule(everyHours(1), () => {
     loginAttempts.handler();
+  });
+
+  //every day at 04:15 UTC
+  cron.schedule("15 3 * * *", () => {
+    syncReferentSupport.handler();
   });
 }
