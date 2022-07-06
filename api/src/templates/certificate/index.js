@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
-const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, TEMPLATES } = require("snu-lib");
+const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, MINISTRES } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 
@@ -19,13 +19,14 @@ const getLocationCohesionCenter = (cohesionCenter) => {
 function getCertificateTemplate({ cohort } = { cohort: "" }) {
   if (cohort === "2019") return "certificates/certificateTemplate-2019.png";
   if (["2020", "2021", "Février 2022"].includes(cohort)) return "certificates/certificateTemplate.png";
-  if (["Juin 2022", "Juillet 2022"].includes(cohort)) return "certificates/certificateTemplate_2022.png";
+  if (["Juin 2022"].includes(cohort)) return "certificates/certificateTemplate_2022.png";
+  if (["Juillet 2022"].includes(cohort)) return "certificates/certificateTemplate_juillet_2022.png";
   return "certificates/certificateTemplate.png";
 }
 
 function getCertificateTemplateFromDate(date) {
   if (!date) return;
-  for (const item of TEMPLATES) {
+  for (const item of MINISTRES) {
     if (date < new Date(item.date_end)) return item.template;
   }
 }
@@ -65,6 +66,7 @@ const phase1 = async (young) => {
 
 const phase2 = (young) => {
   let d = young.statusPhase2UpdatedAt;
+  //let d = young.statusPhase2ValidatedAt;
   if (!d) {
     // 31 mars 2021
     if (young.cohort === "2019") d = new Date(2021, 2, 31);
