@@ -66,6 +66,7 @@ const phase1 = async (young) => {
 
 const phase2 = (young) => {
   let d = young.statusPhase2UpdatedAt;
+  const template = getCertificateTemplateFromDate(d);
   if (!d) {
     // 31 mars 2021
     if (young.cohort === "2019") d = new Date(2021, 2, 31);
@@ -73,7 +74,6 @@ const phase2 = (young) => {
     else if (young.cohort === "2020") d = new Date(2021, 5, 17);
     else d = new Date();
   }
-  const template = getCertificateTemplateFromDate(d);
 
   const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
   return html
