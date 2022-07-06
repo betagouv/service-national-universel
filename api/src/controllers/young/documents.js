@@ -184,7 +184,13 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const { object, message } = getMailParams(type, template, young, contract);
 
-    const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
+    const buffer = await fetch(getPdfGeneratorUrl(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+      body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
+    }).then((response) => {
+      return response.buffer();
+    });
     const content = buffer.toString("base64");
 
     let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
