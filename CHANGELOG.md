@@ -1,3 +1,11 @@
+## [1.108.2](https://github.com/betagouv/service-national-universel/compare/v1.108.1...v1.108.2) (2022-07-06)
+
+
+### Bug Fixes
+
+* **admin:** Inviter une structure en rentrant l’adresse manuellement ([905482e](https://github.com/betagouv/service-national-universel/commit/905482e5d2760bec90f9ae7f009880bc5740f440))
+* **admin:** UI doc phase 1 ([624a9b0](https://github.com/betagouv/service-national-universel/commit/624a9b032881983f0571666b9e16cab4cf7a6d23))
+
 ## [1.108.1](https://github.com/betagouv/service-national-universel/compare/v1.108.0...v1.108.1) (2022-07-05)
 
 
