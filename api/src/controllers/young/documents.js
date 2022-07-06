@@ -97,7 +97,7 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
       res.set("Cache-Control", "public, max-age=1");
       res.send(buffer);
     } else {
-      fetch(getPdfGeneratorUrl(), {
+      fetch(config.API_PDF_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/pdf" },
         body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
@@ -197,7 +197,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     if (config.ENVIRONMENT === "production") {
       buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
     } else {
-      buffer = await fetch(getPdfGeneratorUrl(), {
+      buffer = await fetch(config.API_PDF_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/pdf" },
         body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
