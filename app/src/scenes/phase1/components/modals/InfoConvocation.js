@@ -9,7 +9,6 @@ import Loader from "../../../../components/Loader";
 import api from "../../../../services/api";
 import downloadPDF from "../../../../utils/download-pdf";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../../../utils";
 
 const returnMeetingDate = {
   2021: "mardi 02 juillet, 14:00",

@@ -12,7 +12,7 @@ import InfoConvocation from "./components/modals/InfoConvocation";
 import downloadPDF from "../../utils/download-pdf";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../utils";
+import { translate, COHESION_STAY_END } from "../../utils";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -26,6 +26,9 @@ export default function Done() {
 
   const refAttestationButton = React.useRef();
   const history = useHistory();
+  const now = new Date();
+
+  console.log(now > COHESION_STAY_END[young.cohort]);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -74,9 +77,11 @@ export default function Done() {
                     Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
                   </div>
                   <div className="flex gap-5 items-center">
-                    <button className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium" onClick={() => setModalOpen({ isOpen: true })}>
-                      Mes informations de retour de séjour
-                    </button>
+                    {now < COHESION_STAY_END[young.cohort] ? (
+                      <button className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium" onClick={() => setModalOpen({ isOpen: true })}>
+                        Mes informations de retour de séjour
+                      </button>
+                    ) : null}
                     <div className="relative" ref={refAttestationButton}>
                       <button
                         disabled={loading}
@@ -249,7 +254,7 @@ export default function Done() {
                           <a
                             target="_blank"
                             rel="noreferrer"
-                            href="https://www.service-public.fr/particuliers/vosdroits/F870"
+                            href="https://support.snu.gouv.fr/base-de-connaissance/journee-defense-et-citoyennete"
                             className="text-sm leading-5 cursor-pointer underline text-blue-600 hover:underline mt-1.5">
                             En savoir plus sur la procédure
                           </a>
@@ -284,9 +289,13 @@ export default function Done() {
             Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
           </div>
           <div className="flex flex-col gap-3 items-center py-3">
-            <button className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium whitespace-nowrap" onClick={() => setModalOpen({ isOpen: true })}>
-              Mes informations de retour de séjour
-            </button>
+            {now < COHESION_STAY_END[young.cohort] ? (
+              <button
+                className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium whitespace-nowrap"
+                onClick={() => setModalOpen({ isOpen: true })}>
+                Mes informations de retour de séjour
+              </button>
+            ) : null}
             <div className="relative" ref={refAttestationButton}>
               <button
                 disabled={loading}
@@ -453,7 +462,7 @@ export default function Done() {
                         <a
                           target="_blank"
                           rel="noreferrer"
-                          href="https://www.service-public.fr/particuliers/vosdroits/F870"
+                          href="https://support.snu.gouv.fr/base-de-connaissance/journee-defense-et-citoyennete"
                           className="text-sm leading-5 cursor-pointer underline text-blue-600 hover:underline mt-1.5">
                           En savoir plus sur la procédure
                         </a>
