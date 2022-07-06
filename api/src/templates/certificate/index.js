@@ -86,13 +86,14 @@ const phase2 = (young) => {
 
 const phase3 = (young) => {
   const d = new Date();
+  const template = getCertificateTemplateFromDate(d);
   const html = fs.readFileSync(path.resolve(__dirname, "./phase3.html"), "utf8");
   return html
     .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
     .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(getCertificateTemplate())))
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
     .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
