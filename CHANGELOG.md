@@ -1,3 +1,15 @@
+## [1.108.3](https://github.com/betagouv/service-national-universel/compare/v1.108.2...v1.108.3) (2022-07-07)
+
+
+### Bug Fixes
+
+* **api:** certif phase 1 v8 ([4c90bbd](https://github.com/betagouv/service-national-universel/commit/4c90bbdd621be0de961d3f5c4fe9b2dae55ccedc))
+
+
+### Reverts
+
+* Revert "fix(api): cors pdf" ([1fb672f](https://github.com/betagouv/service-national-universel/commit/1fb672f6b1d07058cd6a0e66c5b64aa2aa1dd809))
+
 ## [1.108.2](https://github.com/betagouv/service-national-universel/compare/v1.108.1...v1.108.2) (2022-07-06)
 
 
