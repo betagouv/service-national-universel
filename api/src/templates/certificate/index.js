@@ -4,6 +4,7 @@ const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
 const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, END_DATE_PHASE1, MINISTRES } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
+const MeetingPointModel = require("../../models/meetingPoint");
 
 const getLocationCohesionCenter = (cohesionCenter) => {
   let t = "";
@@ -43,11 +44,18 @@ const phase1 = async (young) => {
   const template = getCertificateTemplateFromDate(END_DATE_PHASE1[young.cohort]);
   if (!template) return;
 
+  let cohesionCenter;
+
   let session = await SessionPhase1Model.findById(young.sessionPhase1Id);
   let cohesionId = session?.cohesionCenterId || young?.cohesionCenterId;
-  if (!cohesionId) return;
-  let cohesionCenter = await CohesionCenterModel.findById(cohesionId);
-  if (!cohesionCenter) return;
+  if (!cohesionId) {
+    const mp = await MeetingPointModel.findById(young.meetingPointId);
+    cohesionCenter = await CohesionCenterModel.findById(mp?.centerId);
+    if (!cohesionCenter) return;
+  } else {
+    cohesionCenter = await CohesionCenterModel.findById(cohesionId);
+    if (!cohesionCenter) return;
+  }
 
   const COHESION_CENTER_LOCATION = getLocationCohesionCenter(cohesionCenter);
 
