@@ -10,7 +10,7 @@ const logger = require("morgan");
 const passport = require("passport");
 require("./mongo");
 
-const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, ENVIRONMENT } = require("./config.js");
+const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, ENVIRONMENT, API_PDF_ENDPOINT } = require("./config.js");
 
 if (process.env.NODE_ENV !== "test") {
   console.log("APP_URL", APP_URL);
@@ -40,7 +40,7 @@ function handleError(err, req, res, next) {
   res.status(statusCode).json(output);
 }
 
-const origin = [APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, "https://inscription.snu.gouv.fr"];
+const origin = [APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, "https://inscription.snu.gouv.fr", API_PDF_ENDPOINT];
 app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json());
 app.use(bodyParser.text({ type: "application/x-ndjson" }));
