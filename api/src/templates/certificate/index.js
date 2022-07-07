@@ -43,9 +43,10 @@ const phase1 = async (young) => {
   const template = getCertificateTemplateFromDate(END_DATE_PHASE1[young.cohort]);
   if (!template) return;
 
-  const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
-  if (!session) return;
-  const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
+  let session = await SessionPhase1Model.findById(young.sessionPhase1Id);
+  let cohesionId = session?.cohesionCenterId || young?.cohesionCenterId;
+  if (!cohesionId) return;
+  let cohesionCenter = await CohesionCenterModel.findById(cohesionId);
   if (!cohesionCenter) return;
 
   const COHESION_CENTER_LOCATION = getLocationCohesionCenter(cohesionCenter);
