@@ -1,3 +1,5 @@
+require("dotenv").config({ path: "./.env" });
+
 const forceProd = false;
 
 const environment = getEnvironment();
@@ -7,7 +9,7 @@ let adminURL = "http://localhost:8082";
 let appURL = "http://localhost:8081";
 let supportURL = "http://localhost:8083";
 let educonnectAllowed = true;
-let maintenance = false;
+let maintenance = process.env.MAINTENANCE || false;
 
 if (environment === "staging") {
   apiURL = "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
