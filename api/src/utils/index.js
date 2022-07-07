@@ -351,16 +351,16 @@ const updateStatusPhase2 = async (young) => {
       a.status === APPLICATION_STATUS.WAITING_VERIFICATION,
   );
 
-  // we keep in the doc the date, if we have to display it in the certificate later
   young.set({ statusPhase2UpdatedAt: Date.now() });
 
   if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) {
     // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
-    young.set({ statusPhase2: young.statusPhase2 });
+    young.set({ statusPhase2: young.statusPhase2, statusPhase2ValidatedAt: Date.now() });
   } else if (Number(young.phase2NumberHoursDone) >= 84) {
     // We change young status to DONE if he has 84 hours of phase 2 done.
     young.set({
       statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+      statusPhase2ValidatedAt: Date.now(),
       militaryPreparationFilesIdentity: [],
       militaryPreparationFilesCensus: [],
       militaryPreparationFilesAuthorization: [],
@@ -603,7 +603,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, req }) {
     "Juillet 2022": new Date(2022, 6, 13, 18), //13 juillet 2022 à 18h
   };
   const now = new Date();
-  if ((["true", "false"].includes(young?.cohesionStayPresence) && ["true", "false"].includes(young.presenceJDM)) || now > COHESION_STAY_END[sessionPhase1.cohort]) {
+  if ((now >= dateDeValidation[sessionPhase1.cohort] && young?.grade !== "Terminale") || (now >= dateDeValidationTerminale[sessionPhase1.cohort] && young?.grade === "Terminale")) {
     if (young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || young.grade === "Terminale")) {
       if (
         (now >= dateDeValidation[sessionPhase1.cohort] &&

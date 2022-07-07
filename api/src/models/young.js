@@ -197,6 +197,12 @@ const Schema = new mongoose.Schema({
       description: "Date de dernière modification du statut lié à la seconde phase",
     },
   },
+  statusPhase2ValidatedAt: {
+    type: Date,
+    documentation: {
+      description: "Date à laquelle la seconde phase est validée",
+    },
+  },
   statusPhase2Contract: {
     type: [String],
     default: [],
@@ -211,6 +217,18 @@ const Schema = new mongoose.Schema({
     enum: ["WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED", "WITHDRAWN"],
     documentation: {
       description: "Statut du volontaire lié à la troisième phase",
+    },
+  },
+  statusPhase3UpdatedAt: {
+    type: Date,
+    documentation: {
+      description: "Date de dernière modification du statut lié à la troisième phase",
+    },
+  },
+  statusPhase3ValidatedAt: {
+    type: Date,
+    documentation: {
+      description: "Date à laquelle la troisième phase est validée",
     },
   },
   lastStatusAt: {

@@ -15,6 +15,21 @@ const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { createSessionPhase1 } = require("./helpers/sessionPhase1");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 
+// We mock node-fetch for PDF generation.
+jest.mock("node-fetch", () =>
+  jest.fn(() =>
+    Promise.resolve({
+      headers: {
+        get: () => "",
+      },
+      body: {
+        pipe: (res) => res.status(200).send({}),
+        on: () => "",
+      },
+    }),
+  ),
+);
+
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),

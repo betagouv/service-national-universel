@@ -22,7 +22,7 @@ const {
   canAssignCohesionCenter,
   canShareSessionPhase1,
 } = require("snu-lib/roles");
-const { START_DATE_PHASE1_TOKEN, END_DATE_PHASE1_TOKEN } = require("snu-lib/constants");
+const { START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib/constants");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
@@ -305,8 +305,8 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
 
     const sessionToken = await sessionPhase1TokenModel.create({
       token: crypto.randomBytes(50).toString("hex"),
-      startAt: START_DATE_PHASE1_TOKEN[sessionPhase1.cohort],
-      expireAt: END_DATE_PHASE1_TOKEN[sessionPhase1.cohort],
+      startAt: START_DATE_PHASE1[sessionPhase1.cohort],
+      expireAt: END_DATE_PHASE1[sessionPhase1.cohort],
       sessionId: sessionPhase1._id,
     });
 

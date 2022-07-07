@@ -61,7 +61,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
             </Link>
             <div className="flex items-center group hover:text-black gap-2 mx-3 cursor-pointer" onClick={() => setSelectSessionOpen((e) => !e)}>
               <div>
-                <div className="text-gray-500 text-xs uppercase font-medium">mon espace chef de centre</div>
+                <div className="text-gray-500 text-xs uppercase font-medium">{sessionPhase1.cohesionCenter?.name || "Mon espace chef de centre"}</div>
                 <div className="text-sm font-normal">{sessionPhase1.cohort}</div>
               </div>
               <div className="ml-4">
@@ -72,7 +72,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
           <div
             className={`${
               selectSessionOpen ? "block" : "hidden"
-            } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute top-[calc(100%+5px)] left-20 border-3 border-red-600 shadow overflow-hidden`}>
+            } group-hover:block min-w-[250px] rounded-lg bg-white transition absolute top-[calc(100%+5px)] left-20 border-3 border-red-600 shadow overflow-hidden divide-y divide-gray-100`}>
             {(sessionsList || [])?.map((session) => (
               <div
                 key={session.cohort}
@@ -84,16 +84,12 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
                   // on retourne au dashboard !
                   history.push("/");
                 }}>
-                <div>
-                  <div className="text-gray-500 text-xs uppercase font-medium">mon espace chef de centre</div>
+                <div className="flex-1">
+                  <div className="text-gray-500 text-xs uppercase font-medium">{session.cohesionCenter?.name || "Mon espace chef de centre"}</div>
                   <div className="text-sm font-normal">{session.cohort}</div>
                 </div>
                 <div className="ml-4">
-                  {sessionPhase1.cohort === session.cohort ? (
-                    <Check className="text-green-500 group-hover:scale-105" />
-                  ) : (
-                    <SwitchHorizontal className="text-gray-500 group-hover:scale-105" />
-                  )}
+                  {sessionPhase1._id.toString() === session._id.toString() ? <Check className="text-green-500" /> : <SwitchHorizontal className="text-gray-500" />}
                 </div>
               </div>
             ))}

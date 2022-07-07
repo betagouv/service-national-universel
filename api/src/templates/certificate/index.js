@@ -1,9 +1,10 @@
 const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
-const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END } = require("snu-lib");
+const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, END_DATE_PHASE1, MINISTRES } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
+const MeetingPointModel = require("../../models/meetingPoint");
 
 const getLocationCohesionCenter = (cohesionCenter) => {
   let t = "";
@@ -19,18 +20,16 @@ const getLocationCohesionCenter = (cohesionCenter) => {
 function getCertificateTemplate({ cohort } = { cohort: "" }) {
   if (cohort === "2019") return "certificates/certificateTemplate-2019.png";
   if (["2020", "2021", "Février 2022"].includes(cohort)) return "certificates/certificateTemplate.png";
-  if (["Juin 2022", "Juillet 2022"].includes(cohort)) return "certificates/certificateTemplate_2022.png";
+  if (["Juin 2022"].includes(cohort)) return "certificates/certificateTemplate_2022.png";
+  if (["Juillet 2022"].includes(cohort)) return "certificates/certificateTemplate_juillet_2022.png";
   return "certificates/certificateTemplate.png";
 }
 
 function getCertificateTemplateFromDate(date) {
   if (!date) return;
-
-  let template = "certificates/certificateTemplate_2022.png";
-  if (date < new Date("2020-07-26")) template = "certificates/certificateTemplate-2019.png";
-  else if (date < new Date("2022-05-20")) template = "certificates/certificateTemplate.png";
-
-  return template;
+  for (const item of MINISTRES) {
+    if (date < new Date(item.date_end)) return item.template;
+  }
 }
 
 const destinataireLabel = ({ firstName, lastName }, template) => {
@@ -42,13 +41,21 @@ const destinataireLabel = ({ firstName, lastName }, template) => {
 const phase1 = async (young) => {
   const now = new Date();
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
-  const template = getCertificateTemplate({ cohort: young.cohort });
+  const template = getCertificateTemplateFromDate(END_DATE_PHASE1[young.cohort]);
   if (!template) return;
 
-  const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
-  if (!session) return;
-  const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
-  if (!cohesionCenter) return;
+  let cohesionCenter;
+
+  let session = await SessionPhase1Model.findById(young.sessionPhase1Id);
+  let cohesionId = session?.cohesionCenterId || young?.cohesionCenterId;
+  if (!cohesionId) {
+    const mp = await MeetingPointModel.findById(young.meetingPointId);
+    cohesionCenter = await CohesionCenterModel.findById(mp?.centerId);
+    if (!cohesionCenter) return;
+  } else {
+    cohesionCenter = await CohesionCenterModel.findById(cohesionId);
+    if (!cohesionCenter) return;
+  }
 
   const COHESION_CENTER_LOCATION = getLocationCohesionCenter(cohesionCenter);
 
@@ -68,7 +75,7 @@ const phase1 = async (young) => {
 
 const phase2 = (young) => {
   let d = young.statusPhase2UpdatedAt;
-  const template = getCertificateTemplateFromDate(d) ?? getCertificateTemplate({ cohort: young.cohort });
+  const template = getCertificateTemplateFromDate(d);
   if (!d) {
     // 31 mars 2021
     if (young.cohort === "2019") d = new Date(2021, 2, 31);
@@ -88,13 +95,14 @@ const phase2 = (young) => {
 
 const phase3 = (young) => {
   const d = new Date();
+  const template = getCertificateTemplateFromDate(d);
   const html = fs.readFileSync(path.resolve(__dirname, "./phase3.html"), "utf8");
   return html
     .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
     .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(getCertificateTemplate())))
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
     .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 

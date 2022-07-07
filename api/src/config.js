@@ -8,6 +8,8 @@ let APP_URL = process.env.APP_URL || "http://localhost:8081";
 let ADMIN_URL = process.env.ADMIN_URL || "http://localhost:8082";
 let SUPPORT_URL = process.env.SUPPORT_URL || "http://localhost:3000";
 let KNOWLEDGEBASE_URL = process.env.KNOWLEDGEBASE_URL || "http://localhost:8084";
+const API_PDF_ENDPOINT = process.env.API_PDF_ENDPOINT || "http://localhost:8087/render";
+
 let ZAMMAD_IP = process.env.ZAMMAD_IP || "";
 let ZAMMAD_PLATEFORME_USER = process.env.ZAMMAD_PLATEFORME_USER || "";
 let ZAMMAD_PLATEFORME_USER_ID = process.env.ZAMMAD_PLATEFORME_USER_ID || "";
@@ -93,6 +95,7 @@ module.exports = {
   EDUCONNECT_SP_KEY,
   EDUCONNECT_IDP_SIGN_CERT,
   EDUCONNECT_IDP_ENCR_CERT,
+  API_PDF_ENDPOINT,
 };
 
 function getEnvironment() {

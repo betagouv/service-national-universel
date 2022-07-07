@@ -25,6 +25,7 @@ import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
 import plausibleEvent from "../../services/pausible";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import { ImQuotesLeft } from "react-icons/im";
 
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -110,6 +111,15 @@ export default function VolontairePanel({ onChange, value }) {
           <Link to={`/user?DEPARTMENT=%5B"${young.department}"%5D&ROLE=%5B"${ROLES.REFERENT_DEPARTMENT}"%5D`}>
             <TextButton>Voir équipe de référents ({young.department}) ›</TextButton>
           </Link>
+          {young.departSejourMotifComment ? (
+            <div className="flex flex-col bg-orange-50 rounded-lg p-2 text-orange-700">
+              <div className="flex-1 text-xs">{young.departSejourMotif}</div>
+              <div className="flex gap-2 p-2">
+                <ImQuotesLeft />
+                <div className="flex-1">{young.departSejourMotifComment}</div>
+              </div>
+            </div>
+          ) : null}
         </div>
         {young.status === YOUNG_STATUS.WITHDRAWN ? (
           <Info title="Motif du désistement">
