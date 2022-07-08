@@ -31,12 +31,13 @@ import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import SessionShareIndex from "./scenes/session-phase1/index";
-import Maintenance from "./components/maintenance";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
 import Footer from "./components/footer";
 import Loader from "./components/Loader";
+
+import { GoTools } from "react-icons/go";
 
 import api from "./services/api";
 
@@ -84,20 +85,14 @@ export default function App() {
   return (
     <Router>
       <div className="main">
-        {maintenance & !localStorage.getItem("override_maintenance") ? (
-          <Maintenance />
-        ) : (
-          <>
-            <Switch>
-              <Route path="/validate" component={Validate} />
-              <Route path="/conditions-generales-utilisation" component={CGU} />
-              <Route path="/auth" component={Auth} />
-              <Route path="/session-phase1-partage" component={SessionShareIndex} />
-              <Route path="/public-besoin-d-aide" component={PublicSupport} />
-              <Route path="/" component={Home} />
-            </Switch>
-          </>
-        )}
+        <Switch>
+          <Route path="/validate" component={Validate} />
+          <Route path="/conditions-generales-utilisation" component={CGU} />
+          <Route path="/auth" component={Auth} />
+          <Route path="/session-phase1-partage" component={SessionShareIndex} />
+          <Route path="/public-besoin-d-aide" component={PublicSupport} />
+          <Route path="/" component={Home} />
+        </Switch>
         <Footer />
       </div>
     </Router>
@@ -230,3 +225,17 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
   }
   return <Route {...rest} render={(props) => <Component {...props} />} />;
 };
+
+const Maintenance = () => (
+  <div className="flex items-center m-4">
+    <div className="bg-yellow-50 p-3 rounded-lg shadow-sm ">
+      <div className="flex space-x-2 items-center ">
+        <GoTools className="text-yellow-600 text-base" />
+        <h5 className="text-yellow-600 text-base">MAINTENANCE</h5>
+      </div>
+      <div className="text-yellow-900  pt-2 text-sm">
+        Le site est actuellement en maintenance suite à un problème technique sur la plateforme. Nous faisons notre possible pour rétablir la situation.
+      </div>
+    </div>
+  </div>
+);
