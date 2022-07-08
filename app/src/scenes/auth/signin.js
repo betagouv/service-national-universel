@@ -49,11 +49,11 @@ export default function Signin() {
 
       {/* Login Box */}
       <LoginBox>
-        educonnectAllowed && (
-        <div className="mb-4 flex justify-center">
-          <EduConnectButton />
-        </div>
-        )
+        {educonnectAllowed && (
+          <div className="mb-4 flex justify-center">
+            <EduConnectButton />
+          </div>
+        )}
         <div className="relative text-center text-[0.8rem] md:text-[1rem] font-bold	mb-[1.25rem] after:content-[''] after:block after:h-[1px] after:w-full after:bg-[#d2d6dc] after:absolute after:left-0 after:top-1/2 after:z-[-1] after:translate-y-[-50%]">
           <span className="bg-[#fff] text-[#161E2E] p-2">Mon espace volontaire</span>
         </div>
