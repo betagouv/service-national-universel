@@ -412,7 +412,7 @@ router.post("/:id/notify/:template/:documentType/:multipleDocument", passport.au
         );
 
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
-        emailTo = [{ name: referentManagerPhase2.firstName, lastName: referentManagerPhase2.lastName, email: "laure@selego.co" }]; //referentManagerPhase2.email
+        emailTo = [{ name: referentManagerPhase2.firstName, lastName: referentManagerPhase2.lastName, email: referentManagerPhase2.email }]; //referentManagerPhase2.email
         params = {
           ...params,
           cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
@@ -421,7 +421,7 @@ router.post("/:id/notify/:template/:documentType/:multipleDocument", passport.au
           type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(documentType) : translateAddFilePhase2(documentType)}`,
         };
       } else {
-        emailTo = [{ name: referent.youngFirstName, lastName: referent.youngLastName, email: "laure@selego.co" }];
+        emailTo = [{ name: referent.youngFirstName, lastName: referent.youngLastName, email: referent.email }];
         params = {
           ...params,
           cta: `${APP_URL}/mission/${mission.structureId}`,
@@ -434,12 +434,12 @@ router.post("/:id/notify/:template/:documentType/:multipleDocument", passport.au
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     let cc = isYoung(req.user) ? getCcOfYoung({ template, young }) : "";
-    //cc,
     const mail = await sendTemplate(
       template,
       {
         emailTo,
         params,
+        cc,
       },
       { force: true },
     );
@@ -463,16 +463,19 @@ router.post(
         .valid(...rootKeys)
         .validate(req.params.key);
       if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
       const { error: bodyError, value: body } = Joi.string().required().validate(req.body.body);
       if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
       const {
         error: namesError,
         value: { names },
       } = Joi.object({ names: Joi.array().items(Joi.string()).required() }).validate(JSON.parse(body), { stripUnknown: true });
       if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       const user = await YoungObject.findById(application.youngId);
-
       if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
+
+      // Validate files with Joi
       const { error: filesError, value: files } = Joi.array()
         .items(
           Joi.alternatives().try(
