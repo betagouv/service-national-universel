@@ -37,11 +37,9 @@ import Header from "./components/header";
 import Footer from "./components/footer";
 import Loader from "./components/Loader";
 
-import { GoTools } from "react-icons/go";
-
 import api from "./services/api";
 
-import { SENTRY_URL, environment, adminURL, maintenance } from "./config";
+import { SENTRY_URL, environment, adminURL } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 
 import "./index.css";
@@ -77,10 +75,6 @@ export default function App() {
   }, []);
 
   if (loading) return <Loader />;
-
-  if (maintenance & !localStorage.getItem("override_maintenance")) {
-    return <Maintenance />;
-  }
 
   return (
     <Router>
