@@ -5,6 +5,7 @@ let apiURL = "http://localhost:8080";
 let appURL = "http://localhost:8081";
 let adminURL = "http://localhost:8082";
 let supportURL = "http://localhost:8083";
+let maintenance = false;
 
 if (environment === "staging") {
   apiURL = "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
@@ -27,4 +28,4 @@ function getEnvironment() {
   return "production";
 }
 
-export { apiURL, appURL, S3PREFIX, SENTRY_URL, environment, adminURL, supportURL };
+export { apiURL, appURL, S3PREFIX, SENTRY_URL, environment, adminURL, supportURL, maintenance };

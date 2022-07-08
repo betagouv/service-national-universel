@@ -1,6 +1,7 @@
 const express = require("express");
 const passport = require("passport");
 const Joi = require("joi");
+const fetch = require("node-fetch");
 const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
 const renderFromHtml = require("../../htmlToPdf");
@@ -14,6 +15,7 @@ const contractPhase2 = require("../../templates/contractPhase2");
 const { sendTemplate, sendEmail } = require("../../sendinblue");
 const { canSendFileByMail, canDownloadYoungDocuments } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const config = require("../../config");
 
 async function getHtmlTemplate(type, template, young, contract) {
   if (type === "certificate" && template === "1") return await certificate.phase1(young);
@@ -73,8 +75,6 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { id, type, template } = value;
 
-    if (type === "convocation") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -90,11 +90,31 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
-    res.contentType("application/pdf");
-    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-    res.set("Cache-Control", "public, max-age=1");
-    res.send(buffer);
+    if (config.ENVIRONMENT === "production") {
+      const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
+      res.contentType("application/pdf");
+      res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+      res.set("Cache-Control", "public, max-age=1");
+      res.send(buffer);
+    } else {
+      fetch(config.API_PDF_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
+      }).then((response) => {
+        res.set({
+          "content-length": response.headers.get("content-length"),
+          "content-disposition": `inline; filename="test.pdf"`,
+          "content-type": "application/pdf",
+          "cache-control": "public, max-age=1",
+        });
+        response.body.pipe(res);
+        response.body.on("error", (e) => {
+          capture(e);
+          res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
+        });
+      });
+    }
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
@@ -173,7 +193,19 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const { object, message } = getMailParams(type, template, young, contract);
 
-    const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
+    let buffer;
+    if (config.ENVIRONMENT === "production") {
+      buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
+    } else {
+      buffer = await fetch(config.API_PDF_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
+      }).then((response) => {
+        return response.buffer();
+      });
+    }
+
     const content = buffer.toString("base64");
 
     let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;

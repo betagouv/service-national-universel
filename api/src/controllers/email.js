@@ -55,7 +55,6 @@ function ipAllowListMiddleware(req, res, next) {
 
 router.post("/", ipAllowListMiddleware, async (req, res) => {
   try {
-    return res.status(200).send({ ok: true });
     const { error, value } = Joi.object()
       .keys({
         event: Joi.string().allow(null, ""),

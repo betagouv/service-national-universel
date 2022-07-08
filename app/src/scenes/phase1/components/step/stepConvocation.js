@@ -97,6 +97,7 @@ export default function StepAgreement({ young }) {
                 </WithTooltip>
               </button>
 
+              {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
               {/* <div onClick={handleDownload}>
                 <DownloadConvocationButton
                   young={young}
@@ -152,6 +153,7 @@ export default function StepAgreement({ young }) {
             <div className="w-full p-4">
               <div className="flex flex-col items-center justify-center">
                 <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
+                {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
                 {/* <div className="w-full" onClick={handleDownload}>
                   <DownloadConvocationButton
                     young={young}

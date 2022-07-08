@@ -171,21 +171,21 @@ describe("Young", () => {
     });
   });
 
-  // describe("GET /young/signin_token", () => {
-  //   it("should return 200", async () => {
-  //     const young = await createYoungHelper(getNewYoungFixture());
-  //     const passport = require("passport");
-  //     const previous = passport.user;
-  //     passport.user = young;
-  //     passport.user.set = jest.fn();
-  //     passport.user.save = jest.fn();
-  //     const res = await request(getAppHelper()).get("/young/signin_token").set("Cookie", ["jwt=blah"]);
-  //     expect(res.status).toBe(200);
-  //     expect(passport.user.set).toHaveBeenCalled();
-  //     expect(passport.user.save).toHaveBeenCalled();
-  //     passport.user = previous;
-  //   });
-  // });
+  describe("GET /young/signin_token", () => {
+    it("should return 200", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      passport.user.set = jest.fn();
+      passport.user.save = jest.fn();
+      const res = await request(getAppHelper()).get("/young/signin_token").set("Cookie", ["jwt=blah"]);
+      expect(res.status).toBe(200);
+      expect(passport.user.set).toHaveBeenCalled();
+      expect(passport.user.save).toHaveBeenCalled();
+      passport.user = previous;
+    });
+  });
 
   describe("POST /young/reset_password", () => {
     it("should return return 400 when missing password", async () => {
