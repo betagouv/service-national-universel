@@ -112,6 +112,40 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
   }
 });
 
+router.post("/convocation/cohesion/send-email", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body, ...req.query }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { id } = value;
+
+    const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // A young can only send to them their own documents.
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    if (isReferent(req.user) && !canSendFileByMail(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    // Create html
+    const html = await getHtmlTemplate("convocation", "cohesion", young);
+    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const { object } = getMailParams("convocation", "cohesion", young);
+
+    const mail = await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: young.email }, object, html);
+    res.status(200).send({ ok: true, data: mail });
+  } catch (e) {
+    capture(e);
+    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 // todo: refacto
 router.post("/:type/:template/send-email", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {

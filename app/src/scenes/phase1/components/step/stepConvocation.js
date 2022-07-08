@@ -46,6 +46,7 @@ export default function StepAgreement({ young }) {
     if (ok) toastr.success(`Document envoyé à ${young.email}`);
     else toastr.error("Erreur lors de l'envoie du document");
     setStateMobil(false);
+    await handleDownload();
     setModal({ isOpen: false, onConfirm: null });
   };
 
@@ -97,7 +98,7 @@ export default function StepAgreement({ young }) {
               </button>
 
               {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
-              <div onClick={handleDownload}>
+              {/* <div onClick={handleDownload}>
                 <DownloadConvocationButton
                   young={young}
                   uri="cohesion"
@@ -107,7 +108,7 @@ export default function StepAgreement({ young }) {
                   <HiOutlineDownload className={`h-5 w-5 ${valid ? "text-blue-700" : "text-blue-300"} mr-2`} />
                   Télécharger
                 </DownloadConvocationButton>
-              </div>
+              </div> */}
             </div>
           </>
         ) : null}
