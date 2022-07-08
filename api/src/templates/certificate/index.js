@@ -74,17 +74,8 @@ const phase1 = async (young) => {
 };
 
 const phase2 = (young) => {
-  let d = young.statusPhase2ValidatedAt || young.statusPhase2UpdatedAt;
+  const d = young.statusPhase2ValidatedAt;
   const template = getCertificateTemplateFromDate(d);
-
-  if (!d) {
-    // 31 mars 2021
-    if (young.cohort === "2019") d = new Date(2021, 2, 31);
-    // 17 juin 2021
-    else if (young.cohort === "2020") d = new Date(2021, 5, 17);
-    else d = new Date();
-    // On vire tout ça ?
-  }
 
   const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
   return html
@@ -97,7 +88,7 @@ const phase2 = (young) => {
 
 const phase3 = (young) => {
   const d = young.statusPhase3ValidatedAt;
-  if (!d) d = new Date();
+  if (!d) return console.error("Pas de date de validation");
   const template = getCertificateTemplateFromDate(d);
   const html = fs.readFileSync(path.resolve(__dirname, "./phase3.html"), "utf8");
   return html
