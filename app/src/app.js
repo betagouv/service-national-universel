@@ -84,29 +84,27 @@ export default function App() {
 
   if (loading) return <Loader />;
 
+  if (maintenance & !localStorage.getItem("override_maintenance")) {
+    return <Maintenance />;
+  }
+
   return (
     <Router>
       <ScrollToTop />
       <GoogleTags />
       <div className="main">
-        {maintenance & !localStorage.getItem("override_maintenance") ? (
-          <Maintenance />
-        ) : (
-          <>
-            <Switch>
-              <Route path="/bug" component={Bug} />
-              <Route path="/conditions-generales-utilisation" component={CGU} />
-              <Route path="/public-besoin-d-aide" component={PublicSupport} />
-              <Route path="/besoin-d-aide" component={SupportCenter} />
-              <Route path="/validate-contract/done" component={ContractDone} />
-              <Route path="/validate-contract" component={Contract} />
-              <Route path="/inscription" component={Inscription} />
-              <Route path="/auth" component={Auth} />
-              <Route path="/" component={Espace} />
-            </Switch>
-            <Footer />
-          </>
-        )}
+        <Switch>
+          <Route path="/bug" component={Bug} />
+          <Route path="/conditions-generales-utilisation" component={CGU} />
+          <Route path="/public-besoin-d-aide" component={PublicSupport} />
+          <Route path="/besoin-d-aide" component={SupportCenter} />
+          <Route path="/validate-contract/done" component={ContractDone} />
+          <Route path="/validate-contract" component={Contract} />
+          <Route path="/inscription" component={Inscription} />
+          <Route path="/auth" component={Auth} />
+          <Route path="/" component={Espace} />
+        </Switch>
+        <Footer />
       </div>
     </Router>
   );

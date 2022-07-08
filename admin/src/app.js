@@ -31,6 +31,7 @@ import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import SessionShareIndex from "./scenes/session-phase1/index";
+import Maintenance from "./components/maintenance";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -39,7 +40,7 @@ import Loader from "./components/Loader";
 
 import api from "./services/api";
 
-import { SENTRY_URL, environment, adminURL } from "./config";
+import { SENTRY_URL, environment, adminURL, maintenance } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 
 import "./index.css";
@@ -76,17 +77,27 @@ export default function App() {
 
   if (loading) return <Loader />;
 
+  if (maintenance & !localStorage.getItem("override_maintenance")) {
+    return <Maintenance />;
+  }
+
   return (
     <Router>
       <div className="main">
-        <Switch>
-          <Route path="/validate" component={Validate} />
-          <Route path="/conditions-generales-utilisation" component={CGU} />
-          <Route path="/auth" component={Auth} />
-          <Route path="/session-phase1-partage" component={SessionShareIndex} />
-          <Route path="/public-besoin-d-aide" component={PublicSupport} />
-          <Route path="/" component={Home} />
-        </Switch>
+        {maintenance & !localStorage.getItem("override_maintenance") ? (
+          <Maintenance />
+        ) : (
+          <>
+            <Switch>
+              <Route path="/validate" component={Validate} />
+              <Route path="/conditions-generales-utilisation" component={CGU} />
+              <Route path="/auth" component={Auth} />
+              <Route path="/session-phase1-partage" component={SessionShareIndex} />
+              <Route path="/public-besoin-d-aide" component={PublicSupport} />
+              <Route path="/" component={Home} />
+            </Switch>
+          </>
+        )}
         <Footer />
       </div>
     </Router>
