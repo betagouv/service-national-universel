@@ -35,6 +35,7 @@ import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import Desistement from "./scenes/desistement";
 import changeSejour from "./scenes/phase1/changeSejour";
+import Maintenance from "./scenes/maintenance";
 
 import api from "./services/api";
 import { SENTRY_URL, environment, appURL, educonnectAllowed, maintenance } from "./config";
@@ -44,7 +45,6 @@ import "./index.css";
 import { YOUNG_STATUS, ENABLE_PM, inscriptionCreationOpenForYoungs } from "./utils";
 import GoogleTags from "./components/GoogleTags";
 import { toastr } from "react-redux-toastr";
-import { GoTools } from "react-icons/go";
 
 import { youngCanChangeSession } from "snu-lib";
 
@@ -84,26 +84,28 @@ export default function App() {
 
   if (loading) return <Loader />;
 
-  if (maintenance & !localStorage.getItem("override_maintenance")) {
-    return <Maintenance />;
-  }
-
   return (
     <Router>
       <ScrollToTop />
       <GoogleTags />
       <div className="main">
-        <Switch>
-          <Route path="/bug" component={Bug} />
-          <Route path="/conditions-generales-utilisation" component={CGU} />
-          <Route path="/public-besoin-d-aide" component={PublicSupport} />
-          <Route path="/besoin-d-aide" component={SupportCenter} />
-          <Route path="/validate-contract/done" component={ContractDone} />
-          <Route path="/validate-contract" component={Contract} />
-          <Route path="/inscription" component={Inscription} />
-          <Route path="/auth" component={Auth} />
-          <Route path="/" component={Espace} />
-        </Switch>
+        {maintenance & !localStorage.getItem("override_maintenance") ? (
+          <Switch>
+            <Route path="/" component={Maintenance} />
+          </Switch>
+        ) : (
+          <Switch>
+            <Route path="/bug" component={Bug} />
+            <Route path="/conditions-generales-utilisation" component={CGU} />
+            <Route path="/public-besoin-d-aide" component={PublicSupport} />
+            <Route path="/besoin-d-aide" component={SupportCenter} />
+            <Route path="/validate-contract/done" component={ContractDone} />
+            <Route path="/validate-contract" component={Contract} />
+            <Route path="/inscription" component={Inscription} />
+            <Route path="/auth" component={Auth} />
+            <Route path="/" component={Espace} />
+          </Switch>
+        )}
         <Footer />
       </div>
     </Router>
@@ -188,20 +190,6 @@ const Espace = () => {
     </>
   );
 };
-
-const Maintenance = () => (
-  <div className="flex items-center m-4">
-    <div className="bg-yellow-50 p-3 rounded-lg shadow-sm ">
-      <div className="flex space-x-2 items-center ">
-        <GoTools className="text-yellow-600 text-base" />
-        <h5 className="text-yellow-600 text-base">MAINTENANCE</h5>
-      </div>
-      <div className="text-yellow-900  pt-2 text-sm">
-        Le site est actuellement en maintenance suite à un problème technique sur la plateforme. Nous faisons notre possible pour rétablir la situation.
-      </div>
-    </div>
-  </div>
-);
 
 function ScrollToTop() {
   const { pathname } = useLocation();
