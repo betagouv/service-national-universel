@@ -119,12 +119,14 @@ export default function Signin() {
             )}
           </div>
           <div className="flex flex-col gap-3 border-t border-gray-200 pt-4">
-            <p className="text-center text-sm text-brand-grey ">
-              Vous êtes une structure ?{" "}
-              <Link to="/auth/signup" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
-                Publiez vos missions
-              </Link>
-            </p>
+            {!maintenance && (
+              <p className="text-center text-sm text-brand-grey ">
+                Vous êtes une structure ?{" "}
+                <Link to="/auth/signup" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
+                  Publiez vos missions
+                </Link>
+              </p>
+            )}
             <p className="text-center text-sm text-brand-grey ">
               Vous avez besoin d&apos;aide ?{" "}
               <Link
