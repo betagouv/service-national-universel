@@ -13,6 +13,7 @@ import Availability from "./Create/stepAvailability";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
 import Desistement from "../../scenes/desistement";
+import { GoTools } from "react-icons/go";
 
 import { useSelector } from "react-redux";
 import { colors, YOUNG_STATUS, inscriptionModificationOpenForYoungs, inscriptionCreationOpenForYoungs, COHORTS } from "../../utils";
@@ -21,7 +22,7 @@ import Closed from "./Home/closed.js";
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
 import HelpButton from "../../components/buttons/HelpButton";
-import { educonnectAllowed } from "../../config";
+import { educonnectAllowed, maintenance } from "../../config";
 
 const Step = ({ step }) => {
   const young = useSelector((state) => state.Auth.young);
@@ -41,16 +42,32 @@ const Step = ({ step }) => {
     <div>
       <Drawer step={step} />
       <Content>
-        <Nav step={step} />
-        <Wrapper>{renderStep(step)}</Wrapper>
-        <div className="help-button-container">
-          <HelpButton to={`/public-besoin-d-aide?from=${window.location.pathname}`} color="#362f78" />
-        </div>
-        {young && ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young?.status) ? (
-          <a className="back-button" onClick={() => history.push("/")}>
-            {"<"} Retour à mon espace
-          </a>
-        ) : null}
+        {maintenance & !localStorage.getItem("override_maintenance") ? (
+          <div className="flex items-center m-4">
+            <div className="bg-yellow-50 p-3 rounded-lg shadow-sm ">
+              <div className="flex space-x-2 items-center ">
+                <GoTools className="text-yellow-600 text-base" />
+                <h5 className="text-yellow-600 text-base">MAINTENANCE</h5>
+              </div>
+              <div className="text-yellow-900  pt-2 text-sm">
+                Le site est actuellement en maintenance suite à un problème technique sur la plateforme. Nous faisons notre possible pour rétablir la situation.
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Nav step={step} />
+            <Wrapper>{renderStep(step)}</Wrapper>
+            <div className="help-button-container">
+              <HelpButton to={`/public-besoin-d-aide?from=${window.location.pathname}`} color="#362f78" />
+            </div>
+            {young && ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young?.status) ? (
+              <a className="back-button" onClick={() => history.push("/")}>
+                {"<"} Retour à mon espace
+              </a>
+            ) : null}
+          </>
+        )}
       </Content>
     </div>
   );
