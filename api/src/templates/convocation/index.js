@@ -123,16 +123,6 @@ const render = async (young) => {
       .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
       .replace(/{{TRANSPORT}}/g, sanitizeAll(bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : ""))
       .replace(
-        /{{MEETING_DATE_TEMPLATE}}/g,
-        sanitizeAll(
-          young?.cohort === "Juillet 2022" && young.deplacementPhase1Autonomous !== "true"
-            ? "Le retour est prévu le <b>vendredi 15 juillet à 18h</b> au même point de rendez-vous.\
-             (Cet horaire est donné à titre indicatif, il vous sera confirmé ultérieurement.)"
-            : "Le retour de votre séjour est prévu le <b>{{MEETING_DATE_RETURN}} à {{MEETING_HOURS_RETURN}}</b>, \
-            au même endroit que le jour du départ en centre.",
-        ),
-      )
-      .replace(
         /{{MEETING_DATE_RETURN}}/g,
         sanitizeAll(
           getReturnMeetingDate(meetingPoint)

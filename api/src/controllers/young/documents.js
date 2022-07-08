@@ -180,7 +180,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     const mail = await sendTemplate(
       emailTemplate,
       {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: "laure@selego.co" }], //young.email
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         attachment: [{ content, name: fileName }],
         params: { object, message },
         cc,
