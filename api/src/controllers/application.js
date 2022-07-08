@@ -32,6 +32,7 @@ const {
   getFile,
   updateYoungStatusPhase2Contract,
 } = require("../utils");
+const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
 const mime = require("mime-types");
 
 const updatePlacesMission = async (app, fromUser) => {
@@ -300,18 +301,20 @@ router.post("/notify/docs-military-preparation/:template", passport.authenticate
   return res.status(200).send({ ok: true, data: mail });
 });
 
-router.post("/:id/notify/:template", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/notify/:template/:documentType/:multipleDocument", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       template: Joi.string().required(),
       message: Joi.string().optional(),
+      documentType: Joi.string().optional(),
+      multipleDocument: Joi.string().optional(),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { id, template: defaultTemplate, message } = value;
+    const { id, template: defaultTemplate, message, documentType, multipleDocument } = value;
 
     const application = await ApplicationObject.findById(id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -388,15 +391,58 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
         params = { ...params, cta: `${ADMIN_URL}/volontaire` };
       }
+    } else if (template === SENDINBLUE_TEMPLATES.referent.ATTACHEMENT_PHASE_2_APPLICATION) {
+      if (isYoung(req.user)) {
+        //second email
+        const emailTo2 = [{ name: referent.youngFirstName + "fer", lastName: referent.youngLastName, email: "laure@selego.co" }];
+        const params2 = {
+          ...params,
+          cta: `${ADMIN_URL}/mission/${mission._id}/youngs`,
+          firstName: application.youngFirstName,
+          lastName: application.youngLastName,
+          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(documentType) : translateAddFilePhase2(documentType)}`,
+        };
+        await sendTemplate(
+          template,
+          {
+            emailTo: emailTo2,
+            params: params2,
+          },
+          { force: true },
+        );
+
+        const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
+        emailTo = [{ name: referentManagerPhase2.firstName, lastName: referentManagerPhase2.lastName, email: "laure@selego.co" }]; //referentManagerPhase2.email
+        params = {
+          ...params,
+          cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
+          firstName: application.youngFirstName,
+          lastName: application.youngLastName,
+          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(documentType) : translateAddFilePhase2(documentType)}`,
+        };
+      } else {
+        emailTo = [{ name: referent.youngFirstName, lastName: referent.youngLastName, email: "laure@selego.co" }];
+        params = {
+          ...params,
+          cta: `${APP_URL}/mission/${mission.structureId}`,
+          firstName: referent.firstName,
+          lastName: referent.lastName,
+          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(documentType) : translateAddFilePhase2(documentType)}`,
+        };
+      }
     } else {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    let cc = getCcOfYoung({ template, young });
-    const mail = await sendTemplate(template, {
-      emailTo,
-      params,
-      cc,
-    });
+    let cc = isYoung(req.user) ? getCcOfYoung({ template, young }) : "";
+    //cc,
+    const mail = await sendTemplate(
+      template,
+      {
+        emailTo,
+        params,
+      },
+      { force: true },
+    );
     return res.status(200).send({ ok: true, data: mail });
   } catch (error) {
     capture(error);
@@ -427,8 +473,28 @@ router.post(
       const user = await YoungObject.findById(application.youngId);
 
       if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
-      const files = Object.keys(req.files || {}).map((e) => req.files[e]);
-
+      const { error: filesError, value: files } = Joi.array()
+        .items(
+          Joi.alternatives().try(
+            Joi.object({
+              name: Joi.string().required(),
+              data: Joi.binary().required(),
+              tempFilePath: Joi.string().allow("").optional(),
+            }).unknown(),
+            Joi.array().items(
+              Joi.object({
+                name: Joi.string().required(),
+                data: Joi.binary().required(),
+                tempFilePath: Joi.string().allow("").optional(),
+              }).unknown(),
+            ),
+          ),
+        )
+        .validate(
+          Object.keys(req.files || {}).map((e) => req.files[e]),
+          { stripUnknown: true },
+        );
+      if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       //const application = await ApplicationObject.find({ youngId: req.user._id });
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.APPLICATION_NOT_FOUND });
 
@@ -464,10 +530,6 @@ router.post(
       }
       application.set({ [key]: names });
       await application.save({ fromUser: req.user });
-      // console.log("contractAvenantFiles    ", application.contractAvenantFiles);
-      // console.log("justificatifsFiles      ", application.justificatifsFiles);
-      // console.log("feedBackExperienceFiles ", application.feedBackExperienceFiles);
-      // console.log("                        ", application.othersFiles);
       return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
     } catch (error) {
       capture(error);
@@ -477,25 +539,27 @@ router.post(
   },
 );
 
-router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const { error, value } = Joi.object({
-      youngId: Joi.string().required(),
+      id: Joi.string().required(),
       key: Joi.string().required(),
-      fileName: Joi.string().required(),
+      name: Joi.string().required(),
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { youngId, key, fileName } = value;
+    const { id, key, name } = value;
 
-    const young = await YoungObject.findById(youngId);
+    const application = await ApplicationObject.findById(id);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const young = await YoungObject.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (req.user._id.toString() !== young._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
+    if (req.user.role === "young" && req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const downloaded = await getFile(`app/young/${young._id}/application/${key}/${name}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
     let mimeFromFile = null;
@@ -508,8 +572,8 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
 
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
-      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
-      fileName: fileName,
+      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(name),
+      fileName: name,
       ok: true,
     });
   } catch (error) {

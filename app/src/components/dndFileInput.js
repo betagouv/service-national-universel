@@ -10,7 +10,18 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default function DndFileInput({ optional, value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", download, onDownload, ...props }) {
+export default function DndFileInput({
+  optional,
+  value,
+  onChange,
+  name,
+  errorMessage = requiredMessage,
+  placeholder = "votre fichier",
+  download,
+  onDownload,
+  setNewFilesList,
+  ...props
+}) {
   const [filesList, setFilesList] = useState(value || []);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
@@ -81,12 +92,9 @@ export default function DndFileInput({ optional, value, onChange, name, errorMes
   }
 
   useEffect(() => {
-    setFilesList(value);
-  }, [name]);
-
-  useEffect(() => {
-    console.log(filesList || []);
+    setNewFilesList && setNewFilesList(filesList);
   }, [filesList]);
+
   return (
     <div style={{}} {...props}>
       <ImageInput id={`file-drop-${name}`}>

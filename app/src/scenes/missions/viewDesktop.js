@@ -15,7 +15,7 @@ import {
   copyToClipboard,
   APPLICATION_STATUS,
   SENDINBLUE_TEMPLATES,
-  translateFilesAddPhase2,
+  translateAddFilePhase2,
 } from "../../utils";
 import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
 import ApplyDoneModal from "./components/ApplyDoneModal";
@@ -41,11 +41,10 @@ export default function viewDesktop() {
   const [disabledPmRefused, setDisabledPmRefused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [modalDocument, setModalDocument] = useState({ isOpen: false });
-  const [openAttachments, setOpenAttachments] = useState({ isOpen: false });
+  const [openAttachments, setOpenAttachments] = useState(false);
   const history = useHistory();
 
   const young = useSelector((state) => state.Auth.young);
-  const dispatch = useDispatch();
   const docRef = useRef();
   let { id } = useParams();
 
@@ -234,22 +233,22 @@ export default function viewDesktop() {
                   onClick={() => {
                     setModalDocument({
                       isOpen: true,
-                      name: "justificatifsFiles",
+                      stepOne: true,
                     });
                   }}>
                   +
                 </div>
               </div>
             </div>
-            {true && (
+            {openAttachments && (
               <div className="flex mt-3 space-x-3 ">
-                {optionsType.map((option, index) => (
-                  <>
-                    {mission.application[option].length !== 0 && (
+                {optionsType.map((option, index) => {
+                  return (
+                    mission.application[option].length !== 0 && (
                       <div key={index} className=" w-1/4 ">
                         <div className="bg-gray-50 rounded-lg p-3  flex flex-col justify-between h-full space-y-3">
                           <div className=" space-y-2">
-                            <div className="font-bold text-center">{translateFilesAddPhase2(option)}</div>
+                            <div className="font-bold text-center">{translateAddFilePhase2(option)}</div>
 
                             {mission.application[option].map((file, index) => (
                               <div className="border flex items-center p-1 rounded-md justify-between bg-white  space-y-3" key={index}>
@@ -265,6 +264,7 @@ export default function viewDesktop() {
                                   setModalDocument({
                                     isOpen: true,
                                     name: option,
+                                    stepOne: false,
                                   })
                                 }>
                                 <HiOutlineAdjustments className="text-white m-2" />
@@ -273,9 +273,9 @@ export default function viewDesktop() {
                           )}
                         </div>
                       </div>
-                    )}
-                  </>
-                ))}
+                    )
+                  );
+                })}
               </div>
             )}
             <ModalPJ
@@ -284,11 +284,24 @@ export default function viewDesktop() {
               young={young}
               application={mission.application}
               optionsType={optionsType}
-              onCancel={() => setModalDocument({ isOpen: false })}
-              onSave={() => {
+              onCancel={async () => {
                 setModalDocument({ isOpen: false });
-                dispatch(setYoung(young));
+                await getMission();
               }}
+              onSave={async (type, multipleDocument) => {
+                setModalDocument({ isOpen: false });
+                try {
+                  const responseNotification = await api.post(
+                    `/application/${mission.application._id}/notify/${SENDINBLUE_TEMPLATES.referent.ATTACHEMENT_PHASE_2_APPLICATION}/${type}/${multipleDocument}`,
+                  );
+                  if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                  toastr.success("L'email a bien été envoyé");
+                } catch (e) {
+                  toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                }
+                await getMission();
+              }}
+              typeChose={modalDocument?.stepOne}
             />
           </div>
         </>
