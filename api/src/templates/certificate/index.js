@@ -75,9 +75,10 @@ const phase1 = async (young) => {
 
 const phase2 = (young) => {
   const d = young.statusPhase2ValidatedAt;
+  if (!d) throw "Date de validation de la phase 2 non trouvée";
   const template = getCertificateTemplateFromDate(d);
-
   const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
+
   return html
     .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, template)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
@@ -88,9 +89,10 @@ const phase2 = (young) => {
 
 const phase3 = (young) => {
   const d = young.statusPhase3ValidatedAt;
-  if (!d) return console.error("Pas de date de validation");
+  if (!d) throw "Date de validation de la phase 3 non trouvée";
   const template = getCertificateTemplateFromDate(d);
   const html = fs.readFileSync(path.resolve(__dirname, "./phase3.html"), "utf8");
+
   return html
     .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
     .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
