@@ -14,7 +14,7 @@ import XCircle from "../../../assets/icons/XCircle";
 import api from "../../../services/api";
 import { copyToClipboard, formatDateFR, translate, translateEquivalenceStatus } from "../../../utils";
 import ModalChangeStatus from "./ModalChangeStatus";
-import ModalFiles from "./ModalFiles";
+import ModalFilesEquivalence from "./ModalFilesEquivalence";
 
 export default function CardEquivalence({ young, equivalence }) {
   const optionsStatus = ["WAITING_CORRECTION", "REFUSED", "VALIDATED"];
@@ -87,7 +87,7 @@ export default function CardEquivalence({ young, equivalence }) {
               <div className="duration-150 flex rounded-full bg-[#FD7A02] p-2 items-center justify-center mr-2">
                 <Bell className="h-4 w-4 text-white" />
               </div>
-              <div className="flex-col items-center ">
+              <div className="flex-col items-center">
                 <div className="text-xs font-normal text-gray-500 leading-4 uppercase">envoyée le {formatDateFR(equivalence.createdAt)}</div>
                 <div className="text-base leading-5 font-bold">Demande de reconnaissance d’engagement déjà réalisé</div>
               </div>
@@ -102,7 +102,7 @@ export default function CardEquivalence({ young, equivalence }) {
             ) : (
               <>
                 {equivalence.status === "WAITING_VERIFICATION" ? (
-                  <div className="flex items-center gap-5 ">
+                  <div className="flex items-center gap-5">
                     <button
                       className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 hover:bg-indigo-400 transition duration-300 ease-in-out"
                       onClick={() => setModalStatus({ isOpen: true, status: "WAITING_CORRECTION", equivalenceId: equivalence._id })}>
@@ -121,7 +121,7 @@ export default function CardEquivalence({ young, equivalence }) {
                       <XCircle className="text-red-500 mr-2 w-5 h-5 hover:bg-red-400" />
                       <span className="text-sm leading-5 font-medium text-white">Refuser</span>
                     </button>
-                    <BsChevronDown className="text-gray-400 h-5 w-5 rotate-180 cursor-pointeur" onClick={() => setCardOpen(false)} />
+                    <BsChevronDown className="text-gray-400 h-5 w-5 rotate-180 cursor-pointer" onClick={() => setCardOpen(false)} />
                   </div>
                 ) : (
                   <div className="flex items-center gap-5 ">
@@ -134,7 +134,7 @@ export default function CardEquivalence({ young, equivalence }) {
                             <GoPrimitiveDot className={theme[equivalence.status]} />
                             <span className="text-sm leading-5 font-normal">{translate(equivalence?.status)}</span>
                           </div>
-                          <ChevronDown className="ml-2 text-gray-400" />
+                          <ChevronDown className="ml-2 text-gray-400 cursor-pointer" />
                         </button>
                         {/* display options */}
                         <div className={`${open ? "block" : "hidden"}  rounded-lg min-w-full bg-white transition absolute left-0 shadow overflow-hidden z-50 top-[35px]`}>
@@ -156,7 +156,7 @@ export default function CardEquivalence({ young, equivalence }) {
                         </div>
                       </div>
                     </div>
-                    <BsChevronDown className="text-gray-400 h-5 w-5 rotate-180 cursor-pointeur" onClick={() => setCardOpen(false)} />
+                    <BsChevronDown className="text-gray-400 h-5 w-5 rotate-180 cursor-pointer" onClick={() => setCardOpen(false)} />
                   </div>
                 )}
               </>
@@ -237,7 +237,7 @@ export default function CardEquivalence({ young, equivalence }) {
           equivalenceId={modalStatus?.equivalenceId}
           young={young}
         />
-        <ModalFiles
+        <ModalFilesEquivalence
           isOpen={modalFiles?.isOpen}
           onCancel={() => setModalFiles({ isOpen: false })}
           initialValues={equivalence?.files ? equivalence.files : []}

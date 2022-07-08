@@ -54,6 +54,12 @@ export default function Create() {
       onSubmit={async (values) => {
         try {
           setIsLoading(true);
+          if (!values.location) {
+            values.location = {
+              lat: null,
+              lon: null,
+            };
+          }
           const { data } = await api.post("/structure", values);
           toastr.success("Structure créée");
 

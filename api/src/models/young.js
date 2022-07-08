@@ -4,7 +4,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
-const zammad = require("../zammad");
+const { ENVIRONMENT } = require("../config");
 
 const MODELNAME = "young";
 
@@ -165,7 +165,6 @@ const Schema = new mongoose.Schema({
   },
   statusPhase1Tmp: {
     type: String,
-    default: "WAITING_AFFECTATION",
     enum: ["AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"],
     documentation: {
       description: "Statut du volontaire lié à la première phase",
@@ -198,6 +197,12 @@ const Schema = new mongoose.Schema({
       description: "Date de dernière modification du statut lié à la seconde phase",
     },
   },
+  statusPhase2ValidatedAt: {
+    type: Date,
+    documentation: {
+      description: "Date à laquelle la seconde phase est validée",
+    },
+  },
   statusPhase2Contract: {
     type: [String],
     default: [],
@@ -212,6 +217,18 @@ const Schema = new mongoose.Schema({
     enum: ["WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED", "WITHDRAWN"],
     documentation: {
       description: "Statut du volontaire lié à la troisième phase",
+    },
+  },
+  statusPhase3UpdatedAt: {
+    type: Date,
+    documentation: {
+      description: "Date de dernière modification du statut lié à la troisième phase",
+    },
+  },
+  statusPhase3ValidatedAt: {
+    type: Date,
+    documentation: {
+      description: "Date à laquelle la troisième phase est validée",
     },
   },
   lastStatusAt: {
@@ -1475,16 +1492,13 @@ Schema.methods.comparePassword = async function (p) {
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
-  sendinblue.sync(doc, MODELNAME);
-  zammad.sync(doc, MODELNAME);
+  // sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
   sendinblue.sync(doc, MODELNAME);
-  zammad.sync(doc, MODELNAME);
 });
 Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
-  zammad.unsync(doc);
 });
 
 Schema.virtual("fromUser").set(function (fromUser) {
@@ -1512,6 +1526,9 @@ Schema.plugin(patchHistory, {
 Schema.plugin(mongooseElastic(esClient, { ignore: ["historic"] }), MODELNAME);
 
 Schema.index({ sessionPhase1Id: 1 });
+Schema.index({ sessionPhase1Id: 1, status: 1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
+if (ENVIRONMENT === "production") OBJ.syncIndexes();
+
 module.exports = OBJ;

@@ -35,6 +35,7 @@ module.exports = {
         base: "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.06)",
         block: "0px 10px 20px rgba(0, 0, 0, 0.1)",
         nina: "0px 2px 10px 1px #00000012",
+        ninaButton: "0px 4px 10px 3px rgba(0, 0, 0, 0.07);",
       },
       fontSize: {
         0: "0px",

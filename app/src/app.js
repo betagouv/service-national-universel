@@ -16,14 +16,12 @@ import Home from "./scenes/home";
 import Inscription from "./scenes/inscription";
 import Phase1 from "./scenes/phase1";
 import Phase2 from "./scenes/phase2";
-import v2Phase2 from "./scenes/phase2v2";
 import Phase3 from "./scenes/phase3";
 import Diagoriente from "./scenes/diagoriente";
 import SupportCenter from "./scenes/support-center";
 import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
-import v2Missions from "./scenes/missionsv2";
-import Applications from "./scenes/applications";
+import Candidature from "./scenes/candidature";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
 import Loader from "./components/Loader";
@@ -44,7 +42,6 @@ import ModalCGU from "./components/modals/ModalCGU";
 
 import "./index.css";
 import { YOUNG_STATUS, ENABLE_PM, inscriptionCreationOpenForYoungs } from "./utils";
-import Zammad from "./components/Zammad";
 import GoogleTags from "./components/GoogleTags";
 import { toastr } from "react-redux-toastr";
 
@@ -89,7 +86,6 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      <Zammad />
       <GoogleTags />
       <div className="main">
         <Switch>
@@ -160,15 +156,15 @@ const Espace = () => {
           <Switch>
             <Route path="/account" component={Account} />
             <Route path="/phase1" component={Phase1} />
-            {environment === "production" ? <Route path="/phase2" component={Phase2} /> : <Route path="/phase2" component={v2Phase2} />}
+            <Route path="/phase2" component={Phase2} />
             <Route path="/phase3" component={Phase3} />
             <Route path="/les-programmes" component={Engagement} />
             <Route path="/preferences" component={Preferences} />
-            {environment === "production" ? <Route path="/mission" component={Missions} /> : <Route path="/mission" component={v2Missions} />}
-            <Route path="/candidature" component={Applications} />
+            <Route path="/mission" component={Missions} />
+            <Route path="/candidature" component={Candidature} />
             <Route path="/desistement" component={Desistement} />
             <Route path="/diagoriente" component={Diagoriente} />
-            {youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 }) ? <Route path="/changer-de-sejour" component={changeSejour} /> : null}
+            {youngCanChangeSession(young) ? <Route path="/changer-de-sejour" component={changeSejour} /> : null}
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>

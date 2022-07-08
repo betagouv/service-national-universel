@@ -4,18 +4,21 @@ import ArrowCircleRight from "../../../../assets/icons/ArrowCircleRight";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../../utils";
+import Trash from "../../../../assets/icons/Trash";
 
 export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young }) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [departSejourMotif, setDepartSejourMotif] = React.useState("");
   const [departSejourAt, setDepartSejourAt] = React.useState("");
   const [departSejourMotifComment, setDepartSejourMotifComment] = React.useState("");
+  const [depart, setDepart] = React.useState("");
 
   React.useEffect(() => {
     if (!young) return;
     setDepartSejourMotif(young.departSejourMotif || "");
     setDepartSejourAt(young.departSejourAt?.substring(0, 10) || "");
     setDepartSejourMotifComment(young.departSejourMotifComment || "");
+    setDepart(young?.departInform || false);
   }, [young]);
 
   const getTitle = () => (
@@ -29,7 +32,23 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    const { data, ok, code } = await api.post(`/young/${young._id}/phase1/depart`, { departSejourMotif, departSejourAt, departSejourMotifComment });
+    try {
+      const { data, ok, code } = await api.post(`/young/${young._id}/phase1/depart`, { departSejourMotif, departSejourAt, departSejourMotifComment });
+      if (!ok) {
+        toastr.error("Oups, une erreur s'est produite", translate(code));
+        setIsLoading(false);
+        return;
+      }
+      await onSubmit(data);
+    } catch (error) {
+      toastr.error("Oups, une erreur s'est produite", translate(error.code));
+    }
+    setIsLoading(false);
+  };
+
+  const handleDelete = async () => {
+    setIsLoading(true);
+    const { data, ok, code } = await api.put(`/young/${young._id}/phase1/depart`);
     if (!ok) {
       toastr.error("Oups, une erreur s'est produite", translate(code));
       setIsLoading(false);
@@ -58,6 +77,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
           <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
             <label className="text-left text-gray-500 w-full">Motif du départ</label>
             <select
+              required
               className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
               value={departSejourMotif}
               onChange={(e) => setDepartSejourMotif(e.target.value)}
@@ -76,6 +96,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
           <div className={`border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
             <label className="text-left text-gray-500 w-full">Date du départ</label>
             <input
+              required
               type="date"
               className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
               value={departSejourAt}
@@ -88,7 +109,8 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
           <div className={`w-full border-[1px] rounded-lg  py-1 px-2 ${isLoading && "bg-gray-200"}`}>
             <label className="text-left text-gray-500 w-full">Commentaire</label>
             <textarea
-              placeholder="Votre commentaire facultatif"
+              required
+              placeholder="Votre commentaire"
               className="w-full bg-inherit disabled:cursor-not-allowed"
               value={departSejourMotifComment}
               onChange={(e) => setDepartSejourMotifComment(e.target.value)}
@@ -96,6 +118,15 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
             />
           </div>
         </div>
+
+        {depart ? (
+          <div className="flex justify-center">
+            <div className="flex items-center gap-2 text-sm text-red-500 hover:underline cursor-pointer mt-4" onClick={() => handleDelete()}>
+              <Trash className="h-4 w-4" />
+              Supprimer
+            </div>
+          </div>
+        ) : null}
         <div className="flex p-4 gap-2">
           <button
             className="flex items-center justify-center flex-1 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
@@ -103,7 +134,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
             onClick={onClickCancel}>
             Annuler
           </button>
-          {departSejourMotif && departSejourAt ? (
+          {departSejourMotif && departSejourAt && departSejourMotifComment ? (
             <button
               className="flex items-center justify-center flex-1 bg-snu-purple-300 text-white rounded-lg py-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
               disabled={isLoading}

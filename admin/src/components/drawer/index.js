@@ -40,12 +40,26 @@ const HelpButton = ({ onClick, to }) => (
       onClick();
     }}>
     <NavLink className=" items-center border rounded flex p-2 hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg" activeClassName="flex bg-snu-purple-300 p-2" to={to}>
-      <QuestionMark className="h-6 w-6 flex mr-2 " />
+      <QuestionMark className="h-6 w-6 flex mr-2" />
       <div>
         <div className=" font-normal text-sm text-center  ">Besoin d&apos;aide&nbsp;?</div>
         <div className="font-light text-xs float-right text-center ">Tutoriels, contacts</div>
       </div>
     </NavLink>
+  </div>
+);
+
+const SupportButton = ({}) => (
+  <div
+    className="justify-center flex p-8"
+    onClick={async () => {
+      const { ok, data } = await api.get(`/zammood/signin`);
+      if (ok) window.location.href = data;
+    }}>
+    <div className=" items-center border rounded flex p-2 hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg" activeClassName="flex bg-snu-purple-300 p-2">
+      <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px", "padding-left": "6px" }} />
+      <div className=" font-normal text-sm text-center  ">Boîte de réception</div>
+    </div>
   </div>
 );
 
@@ -85,7 +99,7 @@ function supervisor({ onClick, from }) {
   );
 }
 
-function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from }) {
+function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -118,6 +132,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
           </>
         )}
       </DrawerTabWithIcons>
+      {ssoSupportStorage === "sso-support" && <SupportButton />}
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -193,6 +208,7 @@ const Drawer = (props) => {
   const [open, setOpen] = useState();
   const [from, setFrom] = useState();
   const history = useHistory();
+  const ssoSupportStorage = localStorage.getItem("sso-support");
 
   useEffect(() => {
     setOpen(props.open);
@@ -242,7 +258,7 @@ const Drawer = (props) => {
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}

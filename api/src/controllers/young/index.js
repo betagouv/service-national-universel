@@ -39,6 +39,7 @@ const {
   getCcOfYoung,
   getFile,
   notifDepartmentChange,
+  autoValidationSessionPhase1Young,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
@@ -185,7 +186,7 @@ router.post(
       user.set({ [key]: names });
       await user.save({ fromUser: req.user });
 
-      return res.status(200).send({ data: names, ok: true });
+      return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
     } catch (error) {
       capture(error);
       if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
@@ -209,7 +210,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     const young = await YoungObject.create({ ...obj, fromUser: req.user });
 
     const toName = `${young.firstName} ${young.lastName}`;
-    const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}`;
+    const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}?utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+166+activer`;
     const fromName = `${req.user.firstName} ${req.user.lastName}`;
     await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_YOUNG, {
       emailTo: [{ name: toName, email: young.email }],
@@ -264,7 +265,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    data.set({ statusPhase3: "VALIDATED", phase3TutorNote: value.phase3TutorNote });
+    data.set({ statusPhase3: "VALIDATED", statusPhase3UpdatedAt: Date.now(), statusPhase3ValidatedAt: Date.now(), phase3TutorNote: value.phase3TutorNote });
     await data.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young.VALIDATE_PHASE3;
@@ -304,7 +305,7 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     delete value.young;
-    data.set(value);
+    data.set({ ...value, statusPhase3UpdatedAt: Date.now() });
     await data.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
@@ -346,7 +347,7 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     const { id, ...values } = value;
     values.phase3Token = crypto.randomBytes(20).toString("hex");
 
-    young.set(values);
+    young.set({ ...values, statusPhase3UpdatedAt: Date.now() });
     await young.save({ fromUser: req.user });
 
     const youngName = `${young.firstName} ${young.lastName}`;
@@ -479,7 +480,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const { id } = req.params;
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-    if (!youngCanChangeSession({ cohort: young.cohort, status: young.statusPhase1 })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!youngCanChangeSession(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // young can only update their own cohort.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
@@ -537,6 +538,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         cohort,
         cohortChangeReason,
         cohortDetailedChangeReason,
+        status: YOUNG_STATUS.VALIDATED,
         statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
         cohesionStayPresence: undefined,
         cohesionStayMedicalFileReceived: undefined,
@@ -669,9 +671,16 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
 
     let buttonCta = cta || config.APP_URL;
     if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
-    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) buttonCta = `${config.APP_URL}/inscription/coordonnees`;
+    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED)
+      buttonCta = `${config.APP_URL}/inscription/coordonnees?utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+219+acceder`;
     if (template === SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION)
       buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+170+acceder`;
+    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED)
+      buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+compte+reactive&utm_source=notifauto&utm_medium=mail+168+seconnecter`;
+    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED)
+      buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+inscription+validee&utm_source=notifauto&utm_medium=mail+167+seconnecter`;
+    if (buttonCta === SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION)
+      buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+dossier+attente+correction&utm_source=notifauto&utm_medium=mail+169+corriger`;
 
     let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
@@ -912,9 +921,16 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
+    if (youngs.some((young) => young.sessionPhase1Id !== youngs[0].sessionPhase1Id)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const sessionPhase1 = await SessionPhase1.findById(youngs[0].sessionPhase1Id);
+
     for (let young of youngs) {
       young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
       await young.save({ fromUser: req.user });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
     }
 
     res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });
@@ -937,7 +953,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     const { value: newValue, key, ids } = value;
 
@@ -948,9 +964,31 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
+    if (youngs.some((young) => young.sessionPhase1Id !== youngs[0].sessionPhase1Id)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const sessionPhase1 = await SessionPhase1.findById(youngs[0].sessionPhase1Id);
+
     for (let young of youngs) {
-      young.set({ [key]: newValue });
+      if ((key === "cohesionStayPresence" && newValue === "false") || (key === "presenceJDM" && young.cohesionStayPresence === "false")) {
+        young.set({ cohesionStayPresence: "false", presenceJDM: "false" });
+      } else {
+        young.set({ [key]: newValue });
+      }
       await young.save({ fromUser: req.user });
+      await autoValidationSessionPhase1Young({ young, sessionPhase1, req });
+      if (key === "cohesionStayPresence" && newValue === "true") {
+        let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
+        if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+        await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
+          emailTo,
+          params: {
+            youngFirstName: young.firstName,
+            youngLastName: young.lastName,
+          },
+        });
+      }
     }
 
     res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });

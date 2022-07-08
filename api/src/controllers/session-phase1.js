@@ -22,7 +22,7 @@ const {
   canAssignCohesionCenter,
   canShareSessionPhase1,
 } = require("snu-lib/roles");
-const { START_DATE_PHASE1_TOKEN, END_DATE_PHASE1_TOKEN } = require("snu-lib/constants");
+const { START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib/constants");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
@@ -137,7 +137,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
   const body = {
     sessionPhase1Id: session._id,
-    cohesionStayPresence: "true",
+    statusPhase1: "DONE",
   };
 
   const youngs = await YoungModel.find(body);
@@ -170,7 +170,9 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" style="min-height:100vh;width:100%;" />
   <div class="container">
     <div class="text-center l4">
-      <p>félicitent <strong>{{FIRST_NAME}} {{LAST_NAME}}</strong>, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
+      <p>${
+        ["Juin 2022", "Juillet 2022"].includes(session.cohort) ? "félicite" : "félicitent"
+      } <strong>{{FIRST_NAME}} {{LAST_NAME}}</strong>, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
       <p>pour la réalisation de son <strong>séjour de cohésion</strong> au centre de :</p>
       <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
       <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
@@ -180,7 +182,11 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   </div>
 </div>`;
 
-  const template = getSignedUrl("certificates/certificateTemplate.png");
+  let template = getSignedUrl("certificates/certificateTemplate.png");
+  if (session.cohort === "2019") template = getSignedUrl("certificates/certificateTemplate-2019.png");
+  if (["2020", "2021", "Février 2022"].includes(session.cohort)) template = getSignedUrl("certificates/certificateTemplate.png");
+  if (["Juin 2022", "Juillet 2022"].includes(session.cohort)) template = getSignedUrl("certificates/certificateTemplate_2022.png");
+
   const d = new Date();
   const data = [];
   for (const young of youngs) {
@@ -240,7 +246,7 @@ router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
 
-    if (!canAssignCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canAssignCohesionCenter(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // update youngs infos
     young.set({
@@ -299,8 +305,8 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
 
     const sessionToken = await sessionPhase1TokenModel.create({
       token: crypto.randomBytes(50).toString("hex"),
-      startAt: START_DATE_PHASE1_TOKEN[sessionPhase1.cohort],
-      expireAt: END_DATE_PHASE1_TOKEN[sessionPhase1.cohort],
+      startAt: START_DATE_PHASE1[sessionPhase1.cohort],
+      expireAt: END_DATE_PHASE1[sessionPhase1.cohort],
       sessionId: sessionPhase1._id,
     });
 

@@ -6,12 +6,12 @@ import { Box, BoxTitle } from "../../../components/box";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import SelectStatus from "../../../components/selectStatus";
-import { environment } from "../../../config";
 import api from "../../../services/api";
 import { colors, ENABLE_PM, translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../utils";
 import CardEquivalence from "../components/Equivalence";
+import Toolbox from "../components/Toolbox";
 import ApplicationList from "./applicationList.js";
-import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
+import Phase2militaryPrepartionV2 from "./phase2MilitaryPreparationV2";
 import WrapperPhase2 from "./wrapper";
 
 export default function Phase2({ young, onChange }) {
@@ -73,8 +73,10 @@ export default function Phase2({ young, onChange }) {
             </Col>
           </Row>
         </Box>
-        {ENABLE_PM && <Phase2MilitaryPreparation young={young} />}
-        {environment !== "production" ? equivalences.map((equivalence, index) => <CardEquivalence key={index} equivalence={equivalence} young={young} />) : null}
+        {ENABLE_PM ? <Phase2militaryPrepartionV2 young={young} /> : null}
+        {equivalences.map((equivalence, index) => (
+          <CardEquivalence key={index} equivalence={equivalence} young={young} />
+        ))}
         <Box>
           <Row>
             <Col md={12}>
@@ -143,6 +145,9 @@ export default function Phase2({ young, onChange }) {
         <Box>
           <ApplicationList young={young} onChangeApplication={onChange} />
         </Box>
+
+        <Toolbox young={young} />
+
         {young.statusPhase2 === "VALIDATED" ? (
           <div style={{ display: "flex", alignItems: "flex-start" }}>
             <div style={{ textAlign: "center" }}>

@@ -120,7 +120,7 @@ export default function UserPanel({ onChange, value }) {
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
             {user.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
-            {canDeleteReferent({ actor: user, originalTarget: value }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
+            {canDeleteReferent({ actor: user, originalTarget: value, structure }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
             {structure ? (
               <Link to={`/structure/${structure._id}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
                 <PanelActionButton icon="eye" title="Voir la structure" />

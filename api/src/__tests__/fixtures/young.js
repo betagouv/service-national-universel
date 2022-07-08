@@ -22,6 +22,7 @@ function getNewYoungFixture(fields = {}) {
     statusPhase2: "IN_PROGRESS",
     statusPhase3: "VALIDATED",
     lastStatusAt: faker.date.past().toISOString(),
+    statusPhase2UpdatedAt: faker.date.past().toISOString(),
     withdrawnReason: "",
     withdrawnMessage: "",
     inscriptionStep: "PROFIL",

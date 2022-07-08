@@ -73,7 +73,7 @@ export default function WaitingList({ center, updateCenter }) {
                     <tr>
                       <th>#</th>
                       <th width="70%">Volontaire</th>
-                      {canAssignCohesionCenter(user) ? <th>Affectation</th> : null}
+                      {canAssignCohesionCenter(user, young) ? <th>Affectation</th> : null}
                     </tr>
                   </thead>
                   <tbody>
@@ -118,7 +118,7 @@ const Hit = ({ index, hit, onSend, onClick, selected }) => {
           </p>
         </MultiLine>
       </td>
-      {canAssignCohesionCenter(user) ? (
+      {canAssignCohesionCenter(user, hit) ? (
         <td onClick={(e) => e.stopPropagation()}>
           <PanelActionButton onClick={onSend} title="Affecter à ce centre" />
         </td>

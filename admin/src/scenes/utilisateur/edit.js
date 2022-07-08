@@ -51,28 +51,37 @@ export default function Edit(props) {
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const dispatch = useDispatch();
-
+  
   useEffect(() => {
     (async () => {
       try {
+        // fetching user info
         const id = props.match && props.match.params && props.match.params.id;
         if (!id) return setUser(null);
-        const { ok, data } = await api.get(`/referent/${id}`);
-        if (!ok) return setUser(null);
-        setDocumentTitle(`${data.firstName} ${data.lastName}`);
-        setUser(data);
-        const { data: d } = await api.get(`/department-service/${data.department}`);
-        setService(d);
-        const responseStructure = await api.get("/structure");
-        const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
-        data.structureId ? setStructure(s.find((struct) => struct._id === data.structureId)) : null;
-        setStructures(s);
+        const userResponse = await api.get(`/referent/${id}`);
+        if (!userResponse.ok) return setUser(null);
+        setUser(userResponse.data);
+        setDocumentTitle(`${userResponse.data.firstName} ${userResponse.data.lastName}`);
+
+        // fetching service info
+        const serviceResponse = await api.get(`/department-service/${userResponse.data.department}`);
+        if (!serviceResponse.ok) return setService(null);
+        setService(serviceResponse.data);
+
+        // fetching structures info
+        const structureResponse = await api.get("/structure");
+        if (!structureResponse.ok) return setStructures(null);
+        setStructures(structureResponse.data);
+        userResponse.data.structureId
+        ? setStructure(structureResponse.data.find(item => item._id == userResponse.data.structureId))
+        : null;
       } catch (e) {
         console.log(e);
         return toastr.error("Une erreur s'est produite lors du chargement de cet utilisateur");
       }
     })();
   }, []);
+
   useEffect(() => {
     (async () => {
       try {
@@ -230,7 +239,7 @@ export default function Edit(props) {
                     </BoxContent>
                   </Box>
                 </Col>
-                {canUpdateReferent({ actor: currentUser, originalTarget: values }) && (
+                {canUpdateReferent({ actor: currentUser, originalTarget: user, structure: structure }) && (
                   <Col md={6} style={{ marginBottom: "20px" }}>
                     <Box>
                       <BoxHeadTitle>Information</BoxHeadTitle>
@@ -257,7 +266,7 @@ export default function Edit(props) {
                           structures ? (
                             <AutocompleteSelectStructure
                               options={structures}
-                              structure={structure}
+                              user={user}
                               setStructure={(e) => {
                                 setStructure(e);
                               }}
@@ -357,15 +366,15 @@ export default function Edit(props) {
           )}
         </Formik>
         <Emails email={user.email} />
-        {currentUser.role === ROLES.ADMIN ? (
+        {currentUser.role === ROLES.ADMIN && (
           <Box>
             <div style={{ fontSize: ".9rem", padding: "1rem", color: colors.darkPurple }}>Historique</div>
             <HistoricComponent model="referent" value={user} />
           </Box>
-        ) : null}
-        {canDeleteReferent({ actor: currentUser, originalTarget: user }) ? (
+        )}
+        {canDeleteReferent({ actor: currentUser, originalTarget: user, structure }) && (
           <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn>
-        ) : null}
+        )}
 
         <ModalConfirm
           isOpen={modal?.isOpen}
@@ -441,7 +450,9 @@ const Select = ({ title, name, values, onChange, disabled, options, allowEmpty =
   );
 };
 
-const AutocompleteSelectStructure = ({ options, structure, setStructure, onClick, disabled, loading }) => {
+const AutocompleteSelectStructure = ({ options, user, setStructure, onClick, disabled, loading }) => {
+  const optionsMap = options.map(e => ({ label: e.name, value: e.name, _id: e._id }));
+  const defaultStructure = optionsMap.find(item => item._id === user.structureId)
   return (
     <>
       <Row className="detail">
@@ -459,8 +470,8 @@ const AutocompleteSelectStructure = ({ options, structure, setStructure, onClick
                 borderColor: "#dedede",
               }),
             }}
-            defaultValue={structure}
-            options={options}
+            defaultValue={defaultStructure}
+            options={optionsMap}
             placeholder="Choisir une structure"
             noOptionsMessage={() => "Aucun structure ne correspond à cette recherche."}
             onChange={(e) => {

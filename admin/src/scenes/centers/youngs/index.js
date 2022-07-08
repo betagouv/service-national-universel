@@ -472,6 +472,7 @@ const transformData = async ({ data, centerId }) => {
       Prénom: data.firstName,
       Nom: data.lastName,
       "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
+      "Ville de naissance": data.birthCity,
       Sexe: translate(data.gender),
       Email: data.email,
       Téléphone: data.phone,

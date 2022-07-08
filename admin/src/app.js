@@ -36,7 +36,6 @@ import Drawer from "./components/drawer";
 import Header from "./components/header";
 import Footer from "./components/footer";
 import Loader from "./components/Loader";
-import Zammad from "./components/Zammad";
 
 import api from "./services/api";
 
@@ -67,8 +66,6 @@ export default function App() {
         if (!res.ok || !res.user) return setLoading(false);
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
-        // const { data } = await api.get(`/zammad-support-center/ticket_overviews`);
-        // dispatch(setTickets(data));
       } catch (e) {
         console.log(e);
       }
@@ -81,7 +78,6 @@ export default function App() {
 
   return (
     <Router>
-      <Zammad />
       <div className="main">
         <Switch>
           <Route path="/validate" component={Validate} />
@@ -146,22 +142,20 @@ const Home = () => {
     if (!user) return;
     if (user.role !== ROLES.HEAD_CENTER) return;
     (async () => {
-      const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1`);
+      const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);
       if (!ok) return console.log(`Error: ${code}`);
 
       const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
 
-      let activeSession;
-      let activeSessionLocalStorage = JSON.parse(localStorage.getItem("active_session_chef_de_centre"));
-
-      if (!activeSessionLocalStorage || activeSessionLocalStorage?.headCenterId !== user._id.toString()) {
-        // si il n y a pas de session dans le local storage
-        // ou si ce n'est pas une session de l'utilisateur connecté
-        activeSession = sessions.find((s) => COHESION_STAY_END[s.cohort] >= Date.now()) || sessions[0];
-        localStorage.setItem("active_session_chef_de_centre", JSON.stringify(activeSession));
-      } else {
-        activeSession = activeSessionLocalStorage;
-      }
+      // on regarde la session la plus proche dans le futur qui ne sait pas terminé il y a plus de 3 jours
+      // i.e. une session est considérée terminée 3 jours après la date de fin du séjour
+      const activeSession =
+        sessions.find((s) => {
+          const limit = COHESION_STAY_END[s.cohort].setDate(COHESION_STAY_END[s.cohort].getDate() + 3);
+          return limit >= now;
+        }) || sessions[0];
 
       setSessionPhase1List(sessions.reverse());
       dispatch(setSessionPhase1(activeSession));
