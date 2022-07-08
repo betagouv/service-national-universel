@@ -35,9 +35,10 @@ import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
 import Desistement from "./scenes/desistement";
 import changeSejour from "./scenes/phase1/changeSejour";
+import Maintenance from "./components/maintenance";
 
 import api from "./services/api";
-import { SENTRY_URL, environment, appURL, educonnectAllowed } from "./config";
+import { SENTRY_URL, environment, appURL, educonnectAllowed, maintenance } from "./config";
 import ModalCGU from "./components/modals/ModalCGU";
 
 import "./index.css";
@@ -88,18 +89,24 @@ export default function App() {
       <ScrollToTop />
       <GoogleTags />
       <div className="main">
-        <Switch>
-          <Route path="/bug" component={Bug} />
-          <Route path="/conditions-generales-utilisation" component={CGU} />
-          <Route path="/public-besoin-d-aide" component={PublicSupport} />
-          <Route path="/besoin-d-aide" component={SupportCenter} />
-          <Route path="/validate-contract/done" component={ContractDone} />
-          <Route path="/validate-contract" component={Contract} />
-          <Route path="/inscription" component={Inscription} />
-          <Route path="/auth" component={Auth} />
-          <Route path="/" component={Espace} />
-        </Switch>
-        <Footer />
+        {maintenance & !localStorage.getItem("override_maintenance") ? (
+          <Maintenance />
+        ) : (
+          <>
+            <Switch>
+              <Route path="/bug" component={Bug} />
+              <Route path="/conditions-generales-utilisation" component={CGU} />
+              <Route path="/public-besoin-d-aide" component={PublicSupport} />
+              <Route path="/besoin-d-aide" component={SupportCenter} />
+              <Route path="/validate-contract/done" component={ContractDone} />
+              <Route path="/validate-contract" component={Contract} />
+              <Route path="/inscription" component={Inscription} />
+              <Route path="/auth" component={Auth} />
+              <Route path="/" component={Espace} />
+            </Switch>
+            <Footer />
+          </>
+        )}
       </div>
     </Router>
   );
