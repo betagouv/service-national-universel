@@ -177,16 +177,12 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
     let cc = getCcOfYoung({ template: emailTemplate, young });
 
-    const mail = await sendTemplate(
-      emailTemplate,
-      {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        attachment: [{ content, name: fileName }],
-        params: { object, message },
-        cc,
-      },
-      { force: true },
-    );
+    const mail = await sendTemplate(emailTemplate, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      attachment: [{ content, name: fileName }],
+      params: { object, message },
+      cc,
+    });
     res.status(200).send({ ok: true, data: mail });
   } catch (e) {
     capture(e);
