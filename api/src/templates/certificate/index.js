@@ -1,10 +1,10 @@
-import { readFileSync } from "fs";
-import { resolve } from "path";
-import { getSignedUrl, getBaseUrl, sanitizeAll } from "../../utils";
-import { COHESION_STAY_LIMIT_DATE, END_DATE_PHASE1, MINISTRES } from "snu-lib";
-import { findById } from "../../models/sessionPhase1";
-import { findById as _findById } from "../../models/cohesionCenter";
-import { findById as __findById } from "../../models/meetingPoint";
+const fs = require("fs");
+const path = require("path");
+const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
+const { COHESION_STAY_LIMIT_DATE, END_DATE_PHASE1, MINISTRES } = require("snu-lib");
+const SessionPhase1Model = require("../../models/sessionPhase1");
+const CohesionCenterModel = require("../../models/cohesionCenter");
+const MeetingPointModel = require("../../models/meetingPoint");
 
 const getLocationCohesionCenter = (cohesionCenter) => {
   let t = "";
@@ -33,18 +33,18 @@ const destinataireLabel = ({ firstName, lastName }, template) => {
 const phase1 = async (young) => {
   const d = END_DATE_PHASE1[young.cohort];
   const template = getTemplate(d);
-  const html = readFileSync(resolve(__dirname, "./phase1.html"), "utf8");
+  const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
 
   let cohesionCenter;
 
-  let session = await findById(young.sessionPhase1Id);
+  let session = await SessionPhase1Model.findById(young.sessionPhase1Id);
   let cohesionId = session?.cohesionCenterId || young?.cohesionCenterId;
   if (!cohesionId) {
-    const mp = await __findById(young.meetingPointId);
-    cohesionCenter = await _findById(mp?.centerId);
+    const mp = await MeetingPointModel.findById(young.meetingPointId);
+    cohesionCenter = await CohesionCenterModel.findById(mp?.centerId);
     if (!cohesionCenter) return;
   } else {
-    cohesionCenter = await _findById(cohesionId);
+    cohesionCenter = await CohesionCenterModel.findById(cohesionId);
     if (!cohesionCenter) return;
   }
 
@@ -65,7 +65,7 @@ const phase2 = (young) => {
   const d = young.statusPhase2ValidatedAt;
   if (!d) throw "Date de validation de la phase 2 non trouvée";
   const template = getTemplate(d);
-  const html = readFileSync(resolve(__dirname, "./phase2.html"), "utf8");
+  const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
   return html
     .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, template)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
@@ -78,7 +78,7 @@ const phase3 = (young) => {
   const d = young.statusPhase3ValidatedAt;
   if (!d) throw "Date de validation de la phase 3 non trouvée";
   const template = getTemplate(d);
-  const html = readFileSync(resolve(__dirname, "./phase3.html"), "utf8");
+  const html = fs.readFileSync(path.resolve(__dirname, "./phase3.html"), "utf8");
   return html
     .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
     .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
@@ -92,7 +92,7 @@ const snu = (young) => {
   const d = young.statusPhase2ValidatedAt;
   if (!d) throw "Date de validation de la phase 2 non trouvée";
   const template = getTemplate(d);
-  const html = readFileSync(resolve(__dirname, "./snu.html"), "utf8");
+  const html = fs.readFileSync(path.resolve(__dirname, "./snu.html"), "utf8");
   return html
     .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
     .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
@@ -102,4 +102,4 @@ const snu = (young) => {
     .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
-export default { phase1, phase2, phase3, snu };
+module.exports = { phase1, phase2, phase3, snu };
