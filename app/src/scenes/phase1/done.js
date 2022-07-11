@@ -2,17 +2,19 @@ import React from "react";
 import { FiChevronDown, FiMail } from "react-icons/fi";
 import { RiErrorWarningFill } from "react-icons/ri";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
+import { Link, useHistory } from "react-router-dom";
+import { youngCanChangeSession } from "snu-lib";
+import edit from "../../assets/editIcon.svg";
 import CheckCircleFill from "../../assets/icons/CheckCircleFill";
 import ChevronDown from "../../assets/icons/ChevronDown";
 import Download from "../../assets/icons/Download";
 import Unlock from "../../assets/icons/Unlock";
 import XCircleFill from "../../assets/icons/XCircleFill";
-import InfoConvocation from "./components/modals/InfoConvocation";
-import downloadPDF from "../../utils/download-pdf";
 import api from "../../services/api";
-import { toastr } from "react-redux-toastr";
-import { translate, COHESION_STAY_END } from "../../utils";
+import { COHESION_STAY_END, translate } from "../../utils";
+import downloadPDF from "../../utils/download-pdf";
+import InfoConvocation from "./components/modals/InfoConvocation";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -27,8 +29,6 @@ export default function Done() {
   const refAttestationButton = React.useRef();
   const history = useHistory();
   const now = new Date();
-
-  console.log(now > COHESION_STAY_END[young.cohort]);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -60,7 +60,7 @@ export default function Done() {
     if (ok) return toastr.success(`Document envoyé à ${young.email}`);
     else return toastr.error("Erreur lors de l'envoie du document", translate(code));
   };
-
+  console.log(youngCanChangeSession(young));
   return (
     <>
       {/* DESKTOP VIEW*/}
@@ -70,8 +70,15 @@ export default function Done() {
             <div className="flex flex-col w-full lg:w-2/3 py-5">
               <div className="flex items-center lg:items-start">
                 <div className="flex flex-col flex-1 gap-5 ml-4">
-                  <div className="text-[44px] leading-tight">
-                    <strong>{young.firstName},</strong> vous avez <br /> validé votre Phase 1 !
+                  <div className="flex items-center gap-2 text-[44px] text-left leading-tight">
+                    <div>
+                      <strong>{young.firstName},</strong> vous avez <br /> validé votre Phase 1 !
+                    </div>
+                    {youngCanChangeSession(young) ? (
+                      <Link to="/changer-de-sejour">
+                        <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
+                      </Link>
+                    ) : null}
                   </div>
                   <div className="text-sm leading-5 font-normal text-gray-500">
                     Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
@@ -282,8 +289,15 @@ export default function Done() {
       {/* MOBILE VIEW*/}
       <div className="flex md:hidden flex-col bg-white mb-4 rounded-lg">
         <div className="px-4 py-4">
-          <div className="text-2xl leading-tight">
-            <strong>{young.firstName},</strong> vous avez <br /> validé votre Phase 1 !
+          <div className="flex items-center gap-2 text-2xl leading-tight">
+            <div>
+              <strong>{young.firstName},</strong> vous avez <br /> validé votre Phase 1 !
+            </div>
+            {youngCanChangeSession(young) ? (
+              <Link to="/changer-de-sejour">
+                <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
+              </Link>
+            ) : null}
           </div>
           <div className="text-xs leading-5 font-normal text-gray-500 mt-2">
             Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
