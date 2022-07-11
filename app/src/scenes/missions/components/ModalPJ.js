@@ -86,7 +86,6 @@ export default function ModalPJ({ isOpen, onCancel, onSave, name, young, applica
                         name={type}
                         download={true}
                         onDownload={async (file) => {
-                          //console.log("ferihn", file[0].name);
                           try {
                             const f = await api.get(`/application/${application._id}/file/${type}/${getFileName(file[0])}`);
                             FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
