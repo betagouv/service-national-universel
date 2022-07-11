@@ -89,6 +89,8 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (html === "Hot Fix Juillet") return res.status(404).send({ ok: false, code: ERRORS.OPERATION_TEMPORARY_NOT_ALLOWED });
+
     fetch(config.API_PDF_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/pdf" },
