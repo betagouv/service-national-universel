@@ -552,7 +552,7 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
     const young = await YoungObject.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (req.user.role === "young" && req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isYoung(req.user) && req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const downloaded = await getFile(`app/young/${young._id}/application/${key}/${name}`);
     const decryptedBuffer = decrypt(downloaded.Body);

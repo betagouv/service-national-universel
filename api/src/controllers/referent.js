@@ -627,47 +627,6 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
   }
 });
 
-router.get("/youngFile/:youngId/application/:key/:fileName", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      youngId: Joi.string().required(),
-      key: Joi.string().required(),
-      fileName: Joi.string().required(),
-    })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { youngId, key, fileName } = value;
-    const young = await YoungModel.findById(youngId);
-    // if they are not admin nor referent, it is not allowed to access this route unless they are from a military preparation structure
-    //if (!canViewYoungMilitaryPreparationFile(req.user, young)) {
-    // const structure = await StructureModel.findById(req.user.structureId);
-    // if (!structure || structure?.isMilitaryPreparation !== "true") return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    // }
-
-    const downloaded = await getFile(`app/young/${youngId}/application/${key}/${fileName}`);
-    const decryptedBuffer = decrypt(downloaded.Body);
-
-    let mimeFromFile = null;
-    try {
-      const { mime } = await FileType.fromBuffer(decryptedBuffer);
-      mimeFromFile = mime;
-    } catch (e) {
-      //
-    }
-
-    return res.status(200).send({
-      data: Buffer.from(decryptedBuffer, "base64"),
-      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
-      fileName: fileName,
-      ok: true,
-    });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post(
   "/file/:key",
   passport.authenticate("referent", { session: false, failWithError: true }),
