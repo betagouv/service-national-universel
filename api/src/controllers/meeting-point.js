@@ -120,8 +120,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
   const meetingPoint = await MeetingPointModel.create(value);
 
-  // add bus to young
-
   return res.status(200).send({ ok: true, data: meetingPoint });
 });
 
