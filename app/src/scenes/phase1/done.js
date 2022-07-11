@@ -20,7 +20,7 @@ export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
   const [openAttestationButton, setOpenAttestationButton] = React.useState(false);
   const [checkOpen, setCheckOpen] = React.useState(false);
-  const [XOpen, setXOpen] = React.useState(false);
+  const [differOpen, setDifferOpen] = React.useState(false);
   const [FaqOpen, setFaqOpen] = React.useState(false);
   const [Faq2Open, setFaq2Open] = React.useState(false);
   const [modalOpen, setModalOpen] = React.useState({ isOpen: false });
@@ -215,9 +215,9 @@ export default function Done() {
               </div>
               <div className="flex flex-col rounded-lg shadow-ninaBlock">
                 <div
-                  className={`flex items-center justify-between cursor-pointer px-4 ${XOpen ? "pt-3" : "py-3"}`}
+                  className={`flex items-center justify-between cursor-pointer px-4 ${differOpen ? "pt-3" : "py-3"}`}
                   onClick={() => {
-                    setXOpen(!XOpen);
+                    setDifferOpen(!differOpen);
                     setFaq2Open(false);
                   }}>
                   <div className="flex items-center gap-3">
@@ -226,9 +226,9 @@ export default function Done() {
                       Je n’ai <strong>pas</strong> effectué mon recensement <br /> citoyen
                     </div>
                   </div>
-                  <FiChevronDown className={`text-gray-400 w-6 h-6 cursor-pointer hover:scale-105 ${XOpen ? "rotate-180" : ""}`} />
+                  <FiChevronDown className={`text-gray-400 w-6 h-6 cursor-pointer hover:scale-105 ${differOpen ? "rotate-180" : ""}`} />
                 </div>
-                {XOpen ? (
+                {differOpen ? (
                   <div className="px-4 pb-3">
                     <div className="text-sm leading-5 font-medium text-gray-800 mt-3 text-justify">
                       Recensez-vous auprès de votre mairie ou en ligne à partir de vos 16 ans, vous recevez votre convocation à la JDC.
@@ -432,7 +432,7 @@ export default function Done() {
               <div
                 className="flex items-center justify-between cursor-pointer"
                 onClick={() => {
-                  setXOpen(!XOpen);
+                  setDifferOpen(!differOpen);
                   setFaq2Open(false);
                 }}>
                 <div className="flex items-center gap-3">
@@ -441,9 +441,9 @@ export default function Done() {
                     Je n’ai <strong>pas</strong> effectué mon recensement citoyen
                   </div>
                 </div>
-                <FiChevronDown className={`text-gray-400 w-6 h-6 cursor-pointer hover:scale-105 ${XOpen ? "rotate-180" : ""}`} />
+                <FiChevronDown className={`text-gray-400 w-6 h-6 cursor-pointer hover:scale-105 ${differOpen ? "rotate-180" : ""}`} />
               </div>
-              {XOpen ? (
+              {differOpen ? (
                 <>
                   <div className="text-sm leading-5 font-medium text-gray-800 mt-3 text-justify">
                     Recensez-vous auprès de votre mairie ou en ligne à partir de vos 16 ans, vous recevez votre convocation à la JDC.
