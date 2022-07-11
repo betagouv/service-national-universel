@@ -83,8 +83,7 @@ const phase3 = (young) => {
   const template = getTemplate(d);
   const html = fs.readFileSync(path.resolve(__dirname, "./phase3.html"), "utf8");
   return html
-    .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
-    .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, template)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
     .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
@@ -97,8 +96,7 @@ const snu = (young) => {
   const template = getTemplate(d);
   const html = fs.readFileSync(path.resolve(__dirname, "./snu.html"), "utf8");
   return html
-    .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
-    .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, template)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
     .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))

@@ -23,7 +23,7 @@ export default () => {
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED && young.cohesion2020Step !== "DONE") return <Cancel />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return <NotDone />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return <WaitingAffectation young={young} />;
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) return <WaitingList young={young}/>;
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) return <WaitingList young={young} />;
     return (
       <>
         <HeroContainer>
