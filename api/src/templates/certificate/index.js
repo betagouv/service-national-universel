@@ -51,7 +51,7 @@ const phase1 = async (young) => {
   const d = END_DATE_PHASE1[young.cohort];
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
   const template = getTemplate(d);
-  const cohesionCenter = getCohesionCenter(young);
+  const cohesionCenter = await getCohesionCenter(young);
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   return html
     .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, template)))
