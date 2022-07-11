@@ -159,11 +159,11 @@ export default function DocumentPhase1(props) {
 
   return (
     <>
-      <article className="flex items-start justify-between flex-wrap">
-        <div className="flex flex-col justify-center items-center">
-          <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
-            <div className="flex row justify-center mx-2 mb-3">
-              <select disabled={loading} className="form-control text-sm" value={statusRules} name="rules" onChange={(e) => needModal(e)}>
+      <article className="flex items-start justify-between gap-6">
+        <div className="flex flex-col justify-center items-center basis-1/4">
+          <section className="bg-gray-50 rounded-lg m-2 flex flex-col items-center justify-start p-4 h-[300px] w-full">
+            <div className="flex row justify-center mx-2 mb-3 w-full">
+              <select disabled={loading} className="form-control text-sm w-full mx-6" value={statusRules} name="rules" onChange={(e) => needModal(e)}>
                 {rulesFileOptions.map((o, i) => (
                   <option key={i} value={o.value} label={o.label}>
                     {o.label}
@@ -184,10 +184,10 @@ export default function DocumentPhase1(props) {
             </ButtonPlain>
           )}
         </div>
-        <div className="flex flex-col justify-center items-center">
-          <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
-            <div className="flex row justify-center mx-2 mb-3">
-              <select disabled={loading} className="form-control text-sm" value={statusCohesionStayMedical} name="cohesionStayMedical" onChange={(e) => needModal(e)}>
+        <div className="flex flex-col justify-center items-center basis-1/4">
+          <section className="bg-gray-50 rounded-lg m-2 flex flex-col items-center justify-start p-4 h-[300px] w-full">
+            <div className="flex row justify-center mx-2 mb-3 w-full">
+              <select disabled={loading} className="form-control text-sm w-full mx-6" value={statusCohesionStayMedical} name="cohesionStayMedical" onChange={(e) => needModal(e)}>
                 {medicalFileOptions.map((o) => (
                   <option key={o.label} data-color="green" value={o.value} label={o.label}>
                     {o.label}
@@ -208,10 +208,10 @@ export default function DocumentPhase1(props) {
             </ButtonPlain>
           )}
         </div>
-        <div className="flex flex-col justify-center items-center">
-          <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
-            <div className="flex row justify-center mx-2 mb-3">
-              <select disabled={loading} className="form-control text-sm" value={statusImageRight} name="imageRight" onChange={(e) => needModal(e)}>
+        <div className="flex flex-col justify-center items-center basis-1/4">
+          <section className="bg-gray-50 rounded-lg m-2 flex flex-col items-center justify-start p-4 h-[300px] w-full">
+            <div className="flex row justify-center mx-2 mb-3 w-full">
+              <select disabled={loading} className="form-control text-sm w-full mx-6" value={statusImageRight} name="imageRight" onChange={(e) => needModal(e)}>
                 {options.map((o, i) => (
                   <option key={i} value={o} label={translateFileStatusPhase1(o)}>
                     {translateFileStatusPhase1(o)}
@@ -247,10 +247,10 @@ export default function DocumentPhase1(props) {
             </ButtonPlain>
           )}
         </div>
-        <div className="flex flex-col justify-center items-center">
-          <section className="bg-gray-50 rounded-lg w-[280px] h-[300px] m-2 flex flex-col items-center justify-start p-4">
-            <div className="flex row justify-center mx-2 mb-3">
-              <select disabled={loading} className="form-control text-sm" value={statusAutoTestPCR} name="autoTestPCR" onChange={(e) => needModal(e)}>
+        <div className="flex flex-col justify-center items-center basis-1/4">
+          <section className="bg-gray-50 rounded-lg m-2 flex flex-col items-center justify-start p-4 h-[300px] w-full">
+            <div className="flex row justify-center mx-2 mb-3 w-full">
+              <select disabled={loading} className="form-control text-sm w-full mx-6" value={statusAutoTestPCR} name="autoTestPCR" onChange={(e) => needModal(e)}>
                 {options.map((o) => (
                   <option key={o} value={o} label={translateFileStatusPhase1(o)}>
                     {translateFileStatusPhase1(o)}

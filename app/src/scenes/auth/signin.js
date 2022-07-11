@@ -141,18 +141,16 @@ export default function Signin() {
             );
           }}
         </Formik>
-        <>
-          <div className="relative text-center text-[0.8rem] md:text-[1rem] font-bold	mb-[1.25rem] after:content-[''] after:block after:h-[1px] after:w-full after:bg-[#d2d6dc] after:absolute after:left-0 after:top-1/2 after:z-[-1] after:translate-y-[-50%]">
-            <span className="bg-[#fff] text-[#161E2E] p-2">Vous n&apos;êtes pas encore inscrit ?</span>
-          </div>
-          {/* Register Button */}
-          <Link
-            className="w-full block text-[#000] text-center text-[18px] font-bold p-[12px] bg-[#fff] mt-[20px] rounded-[10px] border-[1px] border-[#e5e7eb] hover:text-[#000] hover:bg-[#f4f5f7]"
-            to="/inscription/profil">
-            Commencer l&apos;inscription
-          </Link>
-          {/* Register Button */}
-        </>
+        <div className="relative text-center text-[0.8rem] md:text-[1rem] font-bold	mb-[1.25rem] after:content-[''] after:block after:h-[1px] after:w-full after:bg-[#d2d6dc] after:absolute after:left-0 after:top-1/2 after:z-[-1] after:translate-y-[-50%]">
+          <span className="bg-[#fff] text-[#161E2E] p-2">Vous n&apos;êtes pas encore inscrit ?</span>
+        </div>
+        {/* Register Button */}
+        <Link
+          className="w-full block text-[#000] text-center text-[18px] font-bold p-[12px] bg-[#fff] mt-[20px] rounded-[10px] border-[1px] border-[#e5e7eb] hover:text-[#000] hover:bg-[#f4f5f7]"
+          to="/inscription/profil">
+          Commencer l&apos;inscription
+        </Link>
+        {/* Register Button */}
       </LoginBox>
     </div>
   );

@@ -265,7 +265,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    data.set({ statusPhase3: "VALIDATED", phase3TutorNote: value.phase3TutorNote });
+    data.set({ statusPhase3: "VALIDATED", statusPhase3UpdatedAt: Date.now(), statusPhase3ValidatedAt: Date.now(), phase3TutorNote: value.phase3TutorNote });
     await data.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young.VALIDATE_PHASE3;
@@ -305,7 +305,7 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     delete value.young;
-    data.set(value);
+    data.set({ ...value, statusPhase3UpdatedAt: Date.now() });
     await data.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
@@ -347,7 +347,7 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     const { id, ...values } = value;
     values.phase3Token = crypto.randomBytes(20).toString("hex");
 
-    young.set(values);
+    young.set({ ...values, statusPhase3UpdatedAt: Date.now() });
     await young.save({ fromUser: req.user });
 
     const youngName = `${young.firstName} ${young.lastName}`;

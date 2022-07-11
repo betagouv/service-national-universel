@@ -1,3 +1,45 @@
+# [1.109.0](https://github.com/betagouv/service-national-universel/compare/v1.108.3...v1.109.0) (2022-07-08)
+
+
+### Bug Fixes
+
+* **kb:** domain names ([a5fe847](https://github.com/betagouv/service-national-universel/commit/a5fe84714c46dfce3e55e389187329afdedff708))
+
+
+### Features
+
+* **admin:** open modification PDR ref regional ([f2db237](https://github.com/betagouv/service-national-universel/commit/f2db2377f106f2a314df189de95d413abface9e3))
+* **api:** Open new PDF generator 🎉 ([470a838](https://github.com/betagouv/service-national-universel/commit/470a838bf16ad796ef6a54d6bf65cb97594dcb38))
+
+## [1.108.3](https://github.com/betagouv/service-national-universel/compare/v1.108.2...v1.108.3) (2022-07-07)
+
+
+### Bug Fixes
+
+* **api:** certif phase 1 v8 ([4c90bbd](https://github.com/betagouv/service-national-universel/commit/4c90bbdd621be0de961d3f5c4fe9b2dae55ccedc))
+
+
+### Reverts
+
+* Revert "fix(api): cors pdf" ([1fb672f](https://github.com/betagouv/service-national-universel/commit/1fb672f6b1d07058cd6a0e66c5b64aa2aa1dd809))
+
+## [1.108.2](https://github.com/betagouv/service-national-universel/compare/v1.108.1...v1.108.2) (2022-07-06)
+
+
+### Bug Fixes
+
+* **admin:** Inviter une structure en rentrant l’adresse manuellement ([905482e](https://github.com/betagouv/service-national-universel/commit/905482e5d2760bec90f9ae7f009880bc5740f440))
+* **admin:** UI doc phase 1 ([624a9b0](https://github.com/betagouv/service-national-universel/commit/624a9b032881983f0571666b9e16cab4cf7a6d23))
+
+## [1.108.1](https://github.com/betagouv/service-national-universel/compare/v1.108.0...v1.108.1) (2022-07-05)
+
+
+### Bug Fixes
+
+* **api,admin:** ajout nom du centre - espace chef de centre ([07498a1](https://github.com/betagouv/service-national-universel/commit/07498a118acc3f60ad0753e80e3a46d8756c1cbd))
+* condition validation phase 1 ([b8c68d0](https://github.com/betagouv/service-national-universel/commit/b8c68d05c3cfc64a22714e234d2b572065b8887a))
+* **admin:** pointage ([768bc9a](https://github.com/betagouv/service-national-universel/commit/768bc9ac1d38db9d51cb1884ae626826fcad6469))
+
 # [1.108.0](https://github.com/betagouv/service-national-universel/compare/v1.107.3...v1.108.0) (2022-07-04)
 
 

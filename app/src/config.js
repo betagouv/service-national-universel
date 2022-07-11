@@ -7,6 +7,7 @@ let adminURL = "http://localhost:8082";
 let appURL = "http://localhost:8081";
 let supportURL = "http://localhost:8083";
 let educonnectAllowed = true;
+let maintenance = false;
 
 if (environment === "staging") {
   apiURL = "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
@@ -37,4 +38,4 @@ function getEnvironment() {
   return "production";
 }
 
-export { apiURL, S3PREFIX, SENTRY_URL, environment, franceConnectUrl, adminURL, appURL, supportURL, educonnectAllowed };
+export { apiURL, S3PREFIX, SENTRY_URL, environment, franceConnectUrl, adminURL, appURL, supportURL, educonnectAllowed, maintenance };

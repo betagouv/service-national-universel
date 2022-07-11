@@ -80,7 +80,7 @@ export default function Edit(props) {
                 </div>
               </Link>
             ) : null}
-            {user.role === ROLES.ADMIN ? (
+            {[ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) ? (
               <>
                 <button
                   className="group border-[1px] border-blue-700 rounded-lg hover:bg-blue-700"

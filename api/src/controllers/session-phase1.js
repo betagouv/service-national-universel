@@ -22,7 +22,7 @@ const {
   canAssignCohesionCenter,
   canShareSessionPhase1,
 } = require("snu-lib/roles");
-const { START_DATE_PHASE1_TOKEN, END_DATE_PHASE1_TOKEN } = require("snu-lib/constants");
+const { START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib/constants");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
@@ -305,8 +305,8 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
 
     const sessionToken = await sessionPhase1TokenModel.create({
       token: crypto.randomBytes(50).toString("hex"),
-      startAt: START_DATE_PHASE1_TOKEN[sessionPhase1.cohort],
-      expireAt: END_DATE_PHASE1_TOKEN[sessionPhase1.cohort],
+      startAt: START_DATE_PHASE1[sessionPhase1.cohort],
+      expireAt: END_DATE_PHASE1[sessionPhase1.cohort],
       sessionId: sessionPhase1._id,
     });
 
@@ -398,83 +398,6 @@ router.post("/check-token/:token", async (req, res) => {
     } else {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/:sessionId/transport-data", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      sessionId: Joi.string().required(),
-    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
-
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const sessionPhase1 = await SessionPhase1Model.findById(value.sessionId);
-    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    let result = {
-      noMeetingPoint: {
-        youngs: [],
-        meetingPoint: [],
-      },
-    };
-    const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
-    const meetingPoints = await MeetingPointObject.find({ centerId: sessionPhase1.cohesionCenterId });
-
-    for (const young of youngs) {
-      const tempYoung = {
-        _id: young._id,
-        cohort: young.cohort,
-        firstName: young.firstName,
-        lastName: young.lastName,
-        email: young.email,
-        phone: young.phone,
-        address: young.address,
-        zip: young.zip,
-        city: young.city,
-        department: young.department,
-        region: young.region,
-        birthdateAt: young.birthdateAt,
-        gender: young.gender,
-        parent1FirstName: young.parent1FirstName,
-        parent1LastName: young.parent1LastName,
-        parent1Email: young.parent1Email,
-        parent1Phone: young.parent1Phone,
-        parent1Status: young.parent1Status,
-        parent2FirstName: young.parent2FirstName,
-        parent2LastName: young.parent2LastName,
-        parent2Email: young.parent2Email,
-        parent2Phone: young.parent2Phone,
-        parent2Status: young.parent2Status,
-        statusPhase1: young.statusPhase1,
-        meetingPointId: young.meetingPointId,
-      };
-
-      if (young.deplacementPhase1Autonomous === "true") {
-        result.noMeetingPoint.youngs.push(tempYoung);
-      } else {
-        const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
-
-        if (youngMeetingPoint) {
-          if (!result[youngMeetingPoint.busExcelId]) {
-            result[youngMeetingPoint.busExcelId] = {};
-            result[youngMeetingPoint.busExcelId]["youngs"] = [];
-            result[youngMeetingPoint.busExcelId]["meetingPoint"] = [];
-          }
-
-          if (!result[youngMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
-            result[youngMeetingPoint.busExcelId]["meetingPoint"].push(youngMeetingPoint);
-          }
-
-          result[youngMeetingPoint.busExcelId]["youngs"].push(tempYoung);
-        }
-      }
-    }
-
-    res.status(200).send({ ok: true, data: result });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
