@@ -159,6 +159,11 @@ export default function viewDesktop() {
       </div>
       {/* END HEADER */}
 
+      <div className="bg-gray-50 rounded-lg mx-10 px-10 py-6">
+        <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
+        <div className="text-sm">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
+      </div>
+
       <div className="flex flex-col lg:flex-row my-8 ">
         <div className="flex flex-col w-full lg:w-1/2 px-12">
           <div className="text-lg font-bold mb-2">La mission en quelques mots</div>
