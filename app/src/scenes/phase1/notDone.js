@@ -19,9 +19,7 @@ export default function NotDone() {
             <b>Votre phase 1 n&apos;est donc pas validée.</b>
           </p>
           <p>Nous vous invitons à vous rapprocher de votre référent déparemental pour la suite de votre parcours.</p>
-          {youngCanChangeSession({ cohort: young.cohort, statusPhase1: young.statusPhase1 }) ? (
-            <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button>
-          ) : null}
+          {youngCanChangeSession(young) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
         </div>
         <div className="thumb" />
       </Hero>
