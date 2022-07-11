@@ -43,7 +43,7 @@ function handleError(err, req, res, next) {
 const origin = [APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, "https://inscription.snu.gouv.fr"];
 app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json({ limit: "50mb" }));
-app.use(bodyParser.text({ type: "application/x-ndjson" }));
+app.use(bodyParser.text({ limit: "50mb", type: "application/x-ndjson" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 require("./crons");
