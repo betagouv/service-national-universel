@@ -32,7 +32,7 @@ import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import ModalPJ from "../../volontaires/components/ModalPJ";
-import { HiOutlineAdjustments } from "react-icons/hi";
+import { HiOutlineAdjustments, HiPlus } from "react-icons/hi";
 import { MdOutlineAttachFile } from "react-icons/md";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
@@ -349,14 +349,10 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType }) => {
       </td>
       <td>
         {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
-          <div className="bg-blue-600  rounded-full  w-8 h-8 m-auto" onClick={() => setOpenModalPJ(true)}>
-            {optionsType.reduce((sum, option) => sum + hit[option].length, 0) !== 0 ? (
-              <div className="bg-blue-600 p-2 rounded-full">
-                <HiOutlineAdjustments className="text-white " />
-              </div>
-            ) : (
-              <div className="text-xl text-center text-white ">+</div>
-            )}
+          <div className="flex justify-center">
+            <div className="bg-blue-600  rounded-full text-white p-2 " onClick={() => setOpenModalPJ(true)}>
+              {optionsType.reduce((sum, option) => sum + hit[option].length, 0) !== 0 ? <HiOutlineAdjustments /> : <HiPlus />}
+            </div>
           </div>
         )}
         <ModalPJ
@@ -370,9 +366,10 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType }) => {
           }}
           onSave={async (type, multipleDocument) => {
             try {
-              const responseNotification = await api.post(
-                `/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.young.ATTACHEMENT_PHASE_2_APPLICATION}/${type}/${multipleDocument}`,
-              );
+              const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.young.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+                type,
+                multipleDocument,
+              });
               if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
               toastr.success("L'email a bien été envoyé");
             } catch (e) {

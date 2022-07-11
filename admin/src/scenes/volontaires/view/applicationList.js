@@ -8,14 +8,13 @@ import ExportComponent from "../../../components/ExportXlsx";
 import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalPJ from "../components/ModalPJ";
-import { HiOutlineAdjustments } from "react-icons/hi";
+import { HiOutlineAdjustments, HiPlus } from "react-icons/hi";
 import { MdOutlineAttachFile } from "react-icons/md";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
-
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
@@ -46,7 +45,9 @@ export default function ApplicationList({ young, onChangeApplication }) {
             <th className="w-1/12">Places</th>
             <th className="w-3/12">Statut</th>
             <th className="w-1/12">
-              <MdOutlineAttachFile className="w-full" />
+              <div className="flex justify-center">
+                <MdOutlineAttachFile />
+              </div>
             </th>
           </tr>
         </thead>
@@ -277,14 +278,10 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
       </td>
       <td>
         {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
-          <div className="bg-blue-600  rounded-full w-8 h-8 m-auto" onClick={() => setOpenModalPJ(true)}>
-            {optionsType.reduce((sum, option) => sum + hit[option].length, 0) !== 0 ? (
-              <div className="pt-2 pl-2">
-                <HiOutlineAdjustments className="text-white " />
-              </div>
-            ) : (
-              <div className="text-xl text-white pl-2.5">+</div>
-            )}
+          <div className=" flex justify-center ">
+            <div className="bg-blue-600  rounded-full p-2 text-white" onClick={() => setOpenModalPJ(true)}>
+              {optionsType.reduce((sum, option) => sum + hit[option].length, 0) !== 0 ? <HiOutlineAdjustments /> : <HiPlus />}
+            </div>
           </div>
         )}
         <ModalPJ
@@ -297,9 +294,10 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
           }}
           onSave={async (type, multipleDocument) => {
             try {
-              const responseNotification = await api.post(
-                `/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.ATTACHEMENT_PHASE_2_APPLICATION}/${type}/${multipleDocument}`,
-              );
+              const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+                type,
+                multipleDocument,
+              });
               if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
               toastr.success("L'email a bien été envoyé");
             } catch (e) {

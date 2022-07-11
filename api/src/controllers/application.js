@@ -301,20 +301,20 @@ router.post("/notify/docs-military-preparation/:template", passport.authenticate
   return res.status(200).send({ ok: true, data: mail });
 });
 
-router.post("/:id/notify/:template/:documentType/:multipleDocument", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/notify/:template", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       template: Joi.string().required(),
       message: Joi.string().optional(),
-      documentType: Joi.string().optional(),
+      type: Joi.string().optional(),
       multipleDocument: Joi.string().optional(),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { id, template: defaultTemplate, message, documentType, multipleDocument } = value;
+    const { id, template: defaultTemplate, message, type, multipleDocument } = value;
 
     const application = await ApplicationObject.findById(id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -394,31 +394,27 @@ router.post("/:id/notify/:template/:documentType/:multipleDocument", passport.au
     } else if (template === SENDINBLUE_TEMPLATES.referent.ATTACHEMENT_PHASE_2_APPLICATION) {
       if (isYoung(req.user)) {
         //second email
-        const emailTo2 = [{ name: referent.youngFirstName + "fer", lastName: referent.youngLastName, email: "laure@selego.co" }];
+        const emailTo2 = [{ name: referent.youngFirstName, lastName: referent.youngLastName, email: referent.email }];
         const params2 = {
           ...params,
           cta: `${ADMIN_URL}/mission/${mission._id}/youngs`,
           firstName: application.youngFirstName,
           lastName: application.youngLastName,
-          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(documentType) : translateAddFilePhase2(documentType)}`,
+          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
         };
-        await sendTemplate(
-          template,
-          {
-            emailTo: emailTo2,
-            params: params2,
-          },
-          { force: true },
-        );
+        await sendTemplate(template, {
+          emailTo: emailTo2,
+          params: params2,
+        });
 
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
-        emailTo = [{ name: referentManagerPhase2.firstName, lastName: referentManagerPhase2.lastName, email: referentManagerPhase2.email }]; //referentManagerPhase2.email
+        emailTo = [{ name: referentManagerPhase2.firstName, lastName: referentManagerPhase2.lastName, email: referentManagerPhase2.email }];
         params = {
           ...params,
           cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
           firstName: application.youngFirstName,
           lastName: application.youngLastName,
-          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(documentType) : translateAddFilePhase2(documentType)}`,
+          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
         };
       } else {
         emailTo = [{ name: referent.youngFirstName, lastName: referent.youngLastName, email: referent.email }];
@@ -427,22 +423,18 @@ router.post("/:id/notify/:template/:documentType/:multipleDocument", passport.au
           cta: `${APP_URL}/mission/${mission.structureId}`,
           firstName: referent.firstName,
           lastName: referent.lastName,
-          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(documentType) : translateAddFilePhase2(documentType)}`,
+          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
         };
       }
     } else {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    let cc = isYoung(req.user) ? getCcOfYoung({ template, young }) : "";
-    const mail = await sendTemplate(
-      template,
-      {
-        emailTo,
-        params,
-        cc,
-      },
-      { force: true },
-    );
+    let cc = isYoung(req.user) ? getCcOfYoung({ template, young }) : [];
+    const mail = await sendTemplate(template, {
+      emailTo,
+      params,
+      cc,
+    });
     return res.status(200).send({ ok: true, data: mail });
   } catch (error) {
     capture(error);

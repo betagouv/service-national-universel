@@ -28,10 +28,8 @@ import XCircle from "../../assets/icons/XCircle";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import ModalPJ from "./components/ModalPJ";
 import { BsChevronDown } from "react-icons/bs";
-import Download from "../../assets/icons/Download";
-import ModalFiles from "../phase2/desktop/components/ModalFiles";
-import { setYoung } from "../../redux/auth/actions";
-import { HiOutlineAdjustments } from "react-icons/hi";
+import { HiPlus } from "react-icons/hi";
+import FileCard from "./../../scenes/militaryPreparation/components/FileCard";
 
 export default function viewDesktop() {
   const [mission, setMission] = useState();
@@ -229,53 +227,39 @@ export default function viewDesktop() {
                   </div>
                 )}
                 <div
-                  className="text-xl text-center text-white bg-blue-600  rounded-full  w-8 h-8"
+                  className="text-white bg-blue-600  rounded-full p-2 "
                   onClick={() => {
                     setModalDocument({
                       isOpen: true,
                       stepOne: true,
                     });
                   }}>
-                  +
+                  <HiPlus />
                 </div>
               </div>
             </div>
             {openAttachments && (
-              <div className="flex mt-3 space-x-3 ">
-                {optionsType.map((option, index) => {
-                  return (
-                    mission.application[option].length !== 0 && (
-                      <div key={index} className=" w-1/4 ">
-                        <div className="bg-gray-50 rounded-lg p-3  flex flex-col justify-between h-full space-y-3">
-                          <div className=" space-y-2">
-                            <div className="font-bold text-center">{translateAddFilePhase2(option)}</div>
-
-                            {mission.application[option].map((file, index) => (
-                              <div className="border flex items-center p-1 rounded-md justify-between bg-white  space-y-3" key={index}>
-                                <div>{file}</div>
-                              </div>
-                            ))}
-                          </div>
-                          {mission.application[option].length > 0 && (
-                            <div className="flex justify-center mb-0">
-                              <div
-                                className="text-white bg-blue-600  rounded-full"
-                                onClick={() =>
-                                  setModalDocument({
-                                    isOpen: true,
-                                    name: option,
-                                    stepOne: false,
-                                  })
-                                }>
-                                <HiOutlineAdjustments className="text-white m-2" />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  );
-                })}
+              <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full ">
+                {optionsType.map(
+                  (option, index) =>
+                    mission.application[option].length > 0 && (
+                      <FileCard
+                        key={index}
+                        name={translateAddFilePhase2(option)[3].toUpperCase() + translateAddFilePhase2(option).slice(4)}
+                        icon="reglement"
+                        filled={mission.application[option].length}
+                        color="text-blue-600 bg-white"
+                        status="Modifier"
+                        onClick={() =>
+                          setModalDocument({
+                            isOpen: true,
+                            name: option,
+                            stepOne: false,
+                          })
+                        }
+                      />
+                    ),
+                )}
               </div>
             )}
             <ModalPJ
@@ -291,9 +275,10 @@ export default function viewDesktop() {
               onSave={async (type, multipleDocument) => {
                 setModalDocument({ isOpen: false });
                 try {
-                  const responseNotification = await api.post(
-                    `/application/${mission.application._id}/notify/${SENDINBLUE_TEMPLATES.referent.ATTACHEMENT_PHASE_2_APPLICATION}/${type}/${multipleDocument}`,
-                  );
+                  const responseNotification = await api.post(`/application/${mission.application._id}/notify/${SENDINBLUE_TEMPLATES.referent.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+                    type,
+                    multipleDocument,
+                  });
                   if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
                   toastr.success("L'email a bien été envoyé");
                 } catch (e) {
