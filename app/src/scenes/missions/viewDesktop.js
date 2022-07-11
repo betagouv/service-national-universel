@@ -17,6 +17,8 @@ import { MdOutlineContentCopy } from "react-icons/md";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import { AiOutlineClockCircle } from "react-icons/ai";
+import rubberStampValided from "../../assets/rubberStampValided.svg";
+import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
 
 export default function viewDesktop() {
   const [mission, setMission] = useState();
@@ -26,7 +28,6 @@ export default function viewDesktop() {
   const [disabledPmRefused, setDisabledPmRefused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [contract, setContract] = useState(null);
-  const [application, setApplication] = useState();
   const history = useHistory();
 
   const young = useSelector((state) => state.Auth.young);
@@ -41,14 +42,14 @@ export default function viewDesktop() {
 
   useEffect(() => {
     const getContract = async () => {
-      if (application.contractId) {
-        const { ok, data, code } = await api.get(`/contract/${application.contractId}`);
+      if (mission?.application?.contractId) {
+        const { ok, data, code } = await api.get(`/contract/${mission.application.contractId}`);
         if (!ok) return toastr.error("Oups, une erreur est survenue", code);
         setContract(data);
       }
     };
     getContract();
-  }, [application]);
+  }, [mission?.application]);
 
   useEffect(() => {
     getMission();
@@ -78,7 +79,6 @@ export default function viewDesktop() {
         setDisabledIncomplete(false);
       }
     }
-    getContract();
   }, [mission, young]);
 
   const getTags = () => {
@@ -110,6 +110,8 @@ export default function viewDesktop() {
     history.go(0);
   };
 
+
+  
   if (!mission) return <Loader />;
 
   return (
@@ -175,7 +177,22 @@ export default function viewDesktop() {
 
       <div className="bg-gray-50 rounded-lg mx-10 px-10 py-6">
         <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
-        <div className="text-sm">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
+        <div className="text-sm mt-1">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
+        <div className="flex space-x-20 mt-4">
+          <StatusContractPeople
+            value={contract?.projectManagerStatus}
+            description="Représentant de l’État"
+            firstName={contract?.projectManagerFirstName}
+            lastName={contract?.projectManagerLastName}
+          />
+          <StatusContractPeople
+            value={contract?.structureManagerStatus}
+            description="Représentant de la structure"
+            firstName={contract?.structureManagerFirstName}
+            lastName={contract?.structureManagerLastName}
+          />
+          <StatusContractPeople value={contract?.parent1Status} description="Représentant légal 1" firstName={contract?.parent1FirstName} lastName={contract?.parent1LastName} />
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row my-8 ">
@@ -198,7 +215,6 @@ export default function viewDesktop() {
               mission.startAt && mission.endAt ? `Du ${formatStringDateTimezoneUTC(mission.startAt)} au ${formatStringDateTimezoneUTC(mission.endAt)}` : "Aucune date renseignée"
             }
           />
-
           <Detail title="Fréquence" content={mission.frequence} />
           {mission.duration ? <Detail title="Durée estimée" content={`${mission.duration} heure(s)`} /> : null}
           <Detail title="Période pour réaliser la mission" content={mission.period} />
@@ -467,3 +483,18 @@ const InfoStructure = ({ title, structure }) => {
     <div />
   );
 };
+
+const StatusContractPeople = ({ value, description, firstName, lastName }) => (
+  <div className="flex items-center">
+    <div className="mr-2">
+      {value === "VALIDATED" ? <img src={rubberStampValided} alt="rubberStampValided" /> : <img src={rubberStampNotValided} alt="rubberStampNotValided" />}
+    </div>
+    <div>
+      <div className="flex font-semibold space-x-2">
+        <div>{firstName}</div>
+        <div>{lastName?.toUpperCase()}</div>
+      </div>
+      <div>{description}</div>
+    </div>
+  </div>
+);
