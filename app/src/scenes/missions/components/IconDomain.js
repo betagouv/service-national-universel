@@ -12,7 +12,6 @@ import PreparationMilitaire from "../../../assets/mission-domaines/preparation-m
 
 export default function IconDomain({ domain, bgStyle = null, iconStyle = "text-white h-8 w-8" }) {
   const [icon, setIcon] = React.useState(null);
-  console.log(domain);
 
   React.useEffect(() => {
     switch (domain) {

@@ -25,6 +25,8 @@ export default function viewDesktop() {
   const [disabledIncomplete, setDisabledIncomplete] = useState(false);
   const [disabledPmRefused, setDisabledPmRefused] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [contract, setContract] = useState(null);
+  const [application, setApplication] = useState();
   const history = useHistory();
 
   const young = useSelector((state) => state.Auth.young);
@@ -36,6 +38,17 @@ export default function viewDesktop() {
     const { data } = await api.get(`/mission/${id}`);
     return setMission(data);
   };
+
+  useEffect(() => {
+    const getContract = async () => {
+      if (application.contractId) {
+        const { ok, data, code } = await api.get(`/contract/${application.contractId}`);
+        if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+        setContract(data);
+      }
+    };
+    getContract();
+  }, [application]);
 
   useEffect(() => {
     getMission();
@@ -65,6 +78,7 @@ export default function viewDesktop() {
         setDisabledIncomplete(false);
       }
     }
+    getContract();
   }, [mission, young]);
 
   const getTags = () => {
