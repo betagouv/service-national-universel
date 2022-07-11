@@ -294,10 +294,9 @@ export default function viewMobile() {
                 setModalDocument({ isOpen: false });
                 await getMission();
               }}
-              onSave={async (type, multipleDocument) => {
-                setModalDocument({ isOpen: false });
+              onSend={async (type, multipleDocument) => {
                 try {
-                  const responseNotification = await api.post(`/application/${mission.application._id}/notify/${SENDINBLUE_TEMPLATES.referent.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+                  const responseNotification = await api.post(`/application/${mission.application._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
                     type,
                     multipleDocument,
                   });
@@ -306,6 +305,9 @@ export default function viewMobile() {
                 } catch (e) {
                   toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
                 }
+              }}
+              onSave={async () => {
+                setModalDocument({ isOpen: false });
                 await getMission();
               }}
               typeChose={modalDocument?.stepOne}

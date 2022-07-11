@@ -292,9 +292,9 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
           onCancel={() => {
             setOpenModalPJ(false);
           }}
-          onSave={async (type, multipleDocument) => {
+          onSend={async (type, multipleDocument) => {
             try {
-              const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+              const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
                 type,
                 multipleDocument,
               });
@@ -303,6 +303,8 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
             } catch (e) {
               toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
             }
+          }}
+          onSave={() => {
             setOpenModalPJ(false);
             onChangeApplication();
           }}

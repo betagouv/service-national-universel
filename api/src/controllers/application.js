@@ -391,7 +391,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
         params = { ...params, cta: `${ADMIN_URL}/volontaire` };
       }
-    } else if (template === SENDINBLUE_TEMPLATES.referent.ATTACHEMENT_PHASE_2_APPLICATION) {
+    } else if (template === SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION) {
       if (isYoung(req.user)) {
         //second email
         const emailTo2 = [{ name: referent.youngFirstName, lastName: referent.youngLastName, email: referent.email }];
@@ -417,7 +417,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
           type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
         };
       } else {
-        emailTo = [{ name: referent.youngFirstName, lastName: referent.youngLastName, email: referent.email }];
+        emailTo = [{ name: young.firstName, lastName: young.lastName, email: young.email }];
         params = {
           ...params,
           cta: `${APP_URL}/mission/${mission.structureId}`,

@@ -14,7 +14,7 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default function ModalPJ({ isOpen, onCancel, onSave, name, young, application, optionsType, typeChose }) {
+export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young, application, optionsType, typeChose }) {
   const [type, setType] = useState();
   const [stepOne, setStepOne] = useState();
   const [disabledSave, setDisabledSave] = useState(true);
@@ -22,7 +22,8 @@ export default function ModalPJ({ isOpen, onCancel, onSave, name, young, applica
   const [numberNewFile, setNumberNewFile] = useState();
 
   const handleSave = (type) => {
-    onSave(type, numberNewFile > 1 ? "true" : "false");
+    onSave();
+    onSend(type, numberNewFile > 1 ? "true" : "false");
     setStepOne(true);
   };
 
@@ -48,7 +49,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, name, young, applica
   useEffect(() => {
     let newNumberNewFile = 0;
     newFilesList.forEach((file) => (application[type].includes(file) ? null : (newNumberNewFile += 1)));
-    !stepOne && newNumberNewFile >= 1 ? setDisabledSave(false) : setDisabledSave(true);
+    !stepOne ? setDisabledSave(false) : setDisabledSave(true);
     setNumberNewFile(newNumberNewFile);
   }, [newFilesList]);
 
@@ -120,10 +121,10 @@ export default function ModalPJ({ isOpen, onCancel, onSave, name, young, applica
               Annuler
             </button>
             <button
-              className={` my-4 border-[1px] border-gray-300 text-white rounded-lg py-2 cursor-pointer w-full bg-blue-600 ${disabledSave && "bg-blue-400"}`}
-              onClick={() => handleSave(type)}
+              className={` my-4 border-[1px] border-gray-300 text-white rounded-lg py-2 px-1 cursor-pointer w-full bg-blue-600 ${disabledSave && "bg-blue-400"}`}
+              onClick={() => (numberNewFile >= 1 ? handleSave(type) : onSave())}
               disabled={disabledSave}>
-              Enregistrer et avertir les parties-prenantes.
+              {numberNewFile >= 1 || disabledSave ? "Enregistrer et avertir les parties-prenantes" : "Enregistrer"}
             </button>
           </div>
         </div>

@@ -11,7 +11,7 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default function ModalPJ({ isOpen, onCancel, onSave, young, application, optionsType }) {
+export default function ModalPJ({ isOpen, onCancel, onSave, onSend, young, application, optionsType }) {
   const [type, setType] = useState();
   const [stepOne, setStepOne] = useState(true);
   const [disabledSave, setDisabledSave] = useState(true);
@@ -32,15 +32,16 @@ export default function ModalPJ({ isOpen, onCancel, onSave, young, application, 
     setStepOne(true);
   };
 
-  const handleSave = (type) => {
-    onSave(type, numberNewFile > 1 ? "true" : "false");
+  const handleSend = (type) => {
+    onSave();
+    onSend(type, numberNewFile > 1 ? "true" : "false");
     setStepOne(true);
   };
 
   useEffect(() => {
     let newNumberNewFile = 0;
     newFilesList.forEach((file) => (application[type].includes(file) ? null : (newNumberNewFile += 1)));
-    !stepOne && newNumberNewFile >= 1 ? setDisabledSave(false) : setDisabledSave(true);
+    !stepOne ? setDisabledSave(false) : setDisabledSave(true);
     setNumberNewFile(newNumberNewFile);
   }, [newFilesList]);
 
@@ -110,9 +111,9 @@ export default function ModalPJ({ isOpen, onCancel, onSave, young, application, 
             </button>
             <button
               className={`my-4 border-[1px] border-gray-300 text-white rounded-lg py-2  w-full  ${disabledSave ? "bg-blue-300" : "bg-blue-600 cursor-pointer"}`}
-              onClick={() => handleSave(type)}
+              onClick={() => (numberNewFile >= 1 ? handleSend(type) : onSave())}
               disabled={disabledSave}>
-              Enregistrer et avertir les parties-prenantes.
+              {numberNewFile >= 1 || disabledSave ? "Enregistrer et avertir les parties-prenantes" : "Enregistrer"}
             </button>
           </div>
         </div>
