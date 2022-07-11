@@ -60,7 +60,7 @@ export default function Done() {
     if (ok) return toastr.success(`Document envoyé à ${young.email}`);
     else return toastr.error("Erreur lors de l'envoie du document", translate(code));
   };
-  console.log(youngCanChangeSession(young));
+
   return (
     <>
       {/* DESKTOP VIEW*/}
