@@ -85,14 +85,16 @@ export default function Done() {
                   </div>
                   <div className="flex gap-5 items-center">
                     {now < COHESION_STAY_END[young.cohort] ? (
-                      <button className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium" onClick={() => setModalOpen({ isOpen: true })}>
+                      <button
+                        className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium hover:border-gray-500"
+                        onClick={() => setModalOpen({ isOpen: true })}>
                         Mes informations de retour de séjour
                       </button>
                     ) : null}
                     <div className="relative" ref={refAttestationButton}>
                       <button
                         disabled={loading}
-                        className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
+                        className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 hover:bg-blue-500 hover:border-blue-500 disabled:opacity-50 disabled:cursor-wait w-full"
                         onClick={() => setOpenAttestationButton((e) => !e)}>
                         <div className="flex items-center gap-2">
                           <span className="text-white leading-4 text-xs font-medium">Attestation de réalisation phase 1</span>
@@ -160,9 +162,9 @@ export default function Done() {
                 Obtenez votre certificat <br /> de participation à la JDC !
               </div>
               <div className="text-xs leading-4 font-medium text-gray-500 text-center w-full">grâce à la validation de votre phase 1</div>
-              <div className="flex flex-col p-4 rounded-lg shadow-ninaBlock">
+              <div className="flex flex-col rounded-lg shadow-ninaBlock">
                 <div
-                  className="flex items-center justify-between cursor-pointer"
+                  className={`flex items-center justify-between cursor-pointer px-4 ${checkOpen ? "pt-4" : "py-4"}`}
                   onClick={() => {
                     setCheckOpen(!checkOpen);
                     setFaqOpen(false);
@@ -176,7 +178,7 @@ export default function Done() {
                   <FiChevronDown className={`text-gray-400 w-6 h-6 cursor-pointer hover:scale-105 ${checkOpen ? "rotate-180" : ""}`} />
                 </div>
                 {checkOpen ? (
-                  <>
+                  <div className="px-4 pb-4">
                     <div className="text-sm leading-5 font-medium text-gray-800 mt-3 text-justify">
                       Vous recevrez automatiquement votre certificat individuel de participation après le séjour. Vous n’avez rien à faire.
                     </div>
@@ -208,12 +210,12 @@ export default function Done() {
                         </>
                       ) : null}
                     </div>
-                  </>
+                  </div>
                 ) : null}
               </div>
-              <div className="flex flex-col px-4 py-3 rounded-lg shadow-ninaBlock">
+              <div className="flex flex-col rounded-lg shadow-ninaBlock">
                 <div
-                  className="flex items-center justify-between cursor-pointer"
+                  className={`flex items-center justify-between cursor-pointer px-4 ${XOpen ? "pt-3" : "py-3"}`}
                   onClick={() => {
                     setXOpen(!XOpen);
                     setFaq2Open(false);
@@ -227,7 +229,7 @@ export default function Done() {
                   <FiChevronDown className={`text-gray-400 w-6 h-6 cursor-pointer hover:scale-105 ${XOpen ? "rotate-180" : ""}`} />
                 </div>
                 {XOpen ? (
-                  <>
+                  <div className="px-4 pb-3">
                     <div className="text-sm leading-5 font-medium text-gray-800 mt-3 text-justify">
                       Recensez-vous auprès de votre mairie ou en ligne à partir de vos 16 ans, vous recevez votre convocation à la JDC.
                     </div>
@@ -268,7 +270,7 @@ export default function Done() {
                         </>
                       ) : null}
                     </div>
-                  </>
+                  </div>
                 ) : null}
               </div>
             </div>
