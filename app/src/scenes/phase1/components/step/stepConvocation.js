@@ -172,7 +172,7 @@ export default function StepAgreement({ young }) {
                       Voir
                     </span>
                   </button>
-                  <button
+                  {/* <button
                     onClick={() =>
                       setModal({
                         isOpen: true,
@@ -188,7 +188,7 @@ export default function StepAgreement({ young }) {
                     <span young={young} uri="cohesion" className="text-blue-700 text-sm">
                       Recevoir par mail
                     </span>
-                  </button>
+                  </button> */}
                 </div>
               </div>
               {showConvocation ? (
