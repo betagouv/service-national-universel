@@ -7,7 +7,16 @@ import Loader from "../../components/Loader";
 import WithTooltip from "../../components/WithTooltip";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
-import { formatStringDateTimezoneUTC, htmlCleaner, translate, translateApplication, copyToClipboard, APPLICATION_STATUS, SENDINBLUE_TEMPLATES } from "../../utils";
+import {
+  formatStringDateTimezoneUTC,
+  htmlCleaner,
+  translate,
+  translateApplication,
+  copyToClipboard,
+  APPLICATION_STATUS,
+  SENDINBLUE_TEMPLATES,
+  COHESION_STAY_END,
+} from "../../utils";
 import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
 import ApplyDoneModal from "./components/ApplyDoneModal";
 import ApplyModal from "./components/ApplyModal";
@@ -153,6 +162,7 @@ export default function viewDesktop() {
               disabledIncomplete={disabledIncomplete}
               disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
+              young={young}
             />
           )}
         </div>
@@ -211,7 +221,20 @@ export default function viewDesktop() {
   );
 }
 
-const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom }) => {
+const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young }) => {
+  const now = new Date();
+  if (now < COHESION_STAY_END[young.cohort])
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <WithTooltip tooltipText="Pour candidater, vous devez avoir terminé votre séjour de cohésion">
+          <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
+            Candidater
+          </button>
+        </WithTooltip>
+        <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
+      </div>
+    );
+
   if (disabledAge)
     return (
       <div className="flex flex-col items-center gap-2">

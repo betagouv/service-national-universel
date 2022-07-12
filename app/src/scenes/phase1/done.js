@@ -91,45 +91,47 @@ export default function Done() {
                         Mes informations de retour de séjour
                       </button>
                     ) : null}
-                    <div className="relative" ref={refAttestationButton}>
-                      <button
-                        disabled={loading}
-                        className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 hover:bg-blue-500 hover:border-blue-500 disabled:opacity-50 disabled:cursor-wait w-full"
-                        onClick={() => setOpenAttestationButton((e) => !e)}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-white leading-4 text-xs font-medium">Attestation de réalisation phase 1</span>
-                        </div>
-                        <ChevronDown className="text-white font-medium" />
-                      </button>
-                      {/* display options */}
-                      <div
-                        className={`${
-                          openAttestationButton ? "block" : "hidden"
-                        }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
-                        <div
-                          key="download"
-                          onClick={() => {
-                            viewAttestation({ uri: "1" });
-                            setOpenAttestationButton(false);
-                          }}>
-                          <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                            <Download className="text-gray-400 w-4 h-4" />
-                            <div>Télécharger</div>
+                    {young.cohort !== "Juillet 2022" ? (
+                      <div className="relative" ref={refAttestationButton}>
+                        <button
+                          disabled={loading}
+                          className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 hover:bg-blue-500 hover:border-blue-500 disabled:opacity-50 disabled:cursor-wait w-full"
+                          onClick={() => setOpenAttestationButton((e) => !e)}>
+                          <div className="flex items-center gap-2">
+                            <span className="text-white leading-4 text-xs font-medium">Attestation de réalisation phase 1</span>
                           </div>
-                        </div>
+                          <ChevronDown className="text-white font-medium" />
+                        </button>
+                        {/* display options */}
                         <div
-                          key="email"
-                          onClick={() => {
-                            sendAttestation({ type: "1", template: "certificate" });
-                            setOpenAttestationButton(false);
-                          }}>
-                          <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                            <FiMail className="text-gray-400 w-4 h-4" />
-                            <div>Envoyer par mail</div>
+                          className={`${
+                            openAttestationButton ? "block" : "hidden"
+                          }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+                          <div
+                            key="download"
+                            onClick={() => {
+                              viewAttestation({ uri: "1" });
+                              setOpenAttestationButton(false);
+                            }}>
+                            <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                              <Download className="text-gray-400 w-4 h-4" />
+                              <div>Télécharger</div>
+                            </div>
+                          </div>
+                          <div
+                            key="email"
+                            onClick={() => {
+                              sendAttestation({ type: "1", template: "certificate" });
+                              setOpenAttestationButton(false);
+                            }}>
+                            <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                              <FiMail className="text-gray-400 w-4 h-4" />
+                              <div>Envoyer par mail</div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
