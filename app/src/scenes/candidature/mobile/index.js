@@ -13,6 +13,7 @@ import Eye from "../../../assets/icons/Eye";
 export default function IndexPhase2Mobile() {
   const young = useSelector((state) => state.Auth.young);
   const [applications, setApplications] = React.useState();
+  const [applicationsTotal, setApplicationsTotal] = React.useState();
   const [toggleButtonDisplayHidden, setToggleButtonDisplayHidden] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
@@ -28,9 +29,24 @@ export default function IndexPhase2Mobile() {
     }
   };
 
+  const getApplicationsTotal = (young) => {
+    const count = young.phase2ApplicationStatus.filter((obj) => {
+      if (obj.includes("WAITING")) {
+        return true;
+      }
+
+      return false;
+    }).length;
+    return setApplicationsTotal(count);
+  };
+
   React.useEffect(() => {
     getApplications();
   }, []);
+
+  React.useEffect(() => {
+    getApplicationsTotal(young);
+  }, [young]);
 
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
@@ -63,6 +79,7 @@ export default function IndexPhase2Mobile() {
           <div className="text-gray-300 text-sm mt-2 mb-2 font-normal">
             <div>L&apos;ordre de vos choix de missions sera pris en compte pour l&apos;attribution de votre MIG.</div>
             <div>Pour modifier l&apos;ordre, attrapez la droite du bloc et déplacez-le.</div>
+            <div>Vous candidatez actuellement à {applicationsTotal} missions (limite : 15).</div>
           </div>
           <div className="flex space-x-2 mt-4 items-center">
             <ToggleVisibility value={toggleButtonDisplayHidden} onClick={() => setToggleButtonDisplayHidden((e) => !e)} />

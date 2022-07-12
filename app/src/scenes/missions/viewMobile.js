@@ -342,7 +342,7 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
 );
 
 const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young }) => {
-  const getApplicationNumber = (young) => {
+  const getApplicationsTotal = (young) => {
     const count = young.phase2ApplicationStatus.filter((obj) => {
       if (obj.includes("WAITING")) {
         return true;
@@ -352,7 +352,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
     }).length;
     return count;
   };
-  if (getApplicationNumber(young) > 15)
+  if (getApplicationsTotal(young) > 15)
     return (
       <div className="flex flex-col items-center justify-center gap-2">
         <div className="text-red-500 text-xs text-center">Vous ne pouvez candidater qu'à 15 missions différentes.</div>
