@@ -22,7 +22,7 @@ const {
   canAssignCohesionCenter,
   canShareSessionPhase1,
 } = require("snu-lib/roles");
-const { START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib/constants");
+const { START_DATE_PHASE1, END_DATE_PHASE1, COHESION_STAY_END } = require("snu-lib/constants");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
@@ -189,7 +189,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       </div>
     </div>`;
 
-  const d = END_DATE_PHASE1[youngs[0].cohort];
+  const d = COHESION_STAY_END[youngs[0].cohort];
   const ministresData = getMinistres(d);
   const template = ministresData.template;
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);

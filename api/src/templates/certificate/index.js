@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
-const { COHESION_STAY_LIMIT_DATE, END_DATE_PHASE1, MINISTRES } = require("snu-lib");
+const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, MINISTRES } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
@@ -46,7 +46,7 @@ const destinataireLabel = ({ firstName, lastName }, ministres) => {
 };
 
 const phase1 = async (young) => {
-  const d = END_DATE_PHASE1[young.cohort];
+  const d = COHESION_STAY_END[young.cohort];
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
   const ministresData = getMinistres(d);
   const template = ministresData.template;
