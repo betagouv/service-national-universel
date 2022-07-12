@@ -348,39 +348,41 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType }) => {
         )}
       </td>
       <td>
-        {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
-          <div className="flex justify-center">
-            <div className="bg-blue-600  rounded-full text-white p-2 " onClick={() => setOpenModalPJ(true)}>
-              {optionsType.reduce((sum, option) => sum + hit[option].length, 0) !== 0 ? <HiOutlineAdjustments /> : <HiPlus />}
+        {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit?.status) && (
+          <>
+            <div className="flex justify-center">
+              <div className="bg-blue-600  rounded-full text-white p-2 " onClick={() => setOpenModalPJ(true)}>
+                {optionsType.reduce((sum, option) => sum + hit[option].length, 0) !== 0 ? <HiOutlineAdjustments /> : <HiPlus />}
+              </div>
             </div>
-          </div>
+            <ModalPJ
+              isOpen={openModalPJ}
+              application={hit}
+              young={hit}
+              optionsType={optionsType}
+              onCancel={() => {
+                setOpenModalPJ(false);
+                onChangeApplication();
+              }}
+              onSend={async (type, multipleDocument) => {
+                try {
+                  const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+                    type,
+                    multipleDocument,
+                  });
+                  if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                  toastr.success("L'email a bien été envoyé");
+                } catch (e) {
+                  toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                }
+              }}
+              onSave={() => {
+                setOpenModalPJ(false);
+                onChangeApplication();
+              }}
+            />
+          </>
         )}
-        <ModalPJ
-          isOpen={openModalPJ}
-          application={hit}
-          young={hit}
-          optionsType={optionsType}
-          onCancel={() => {
-            setOpenModalPJ(false);
-            onChangeApplication();
-          }}
-          onSend={async (type, multipleDocument) => {
-            try {
-              const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
-                type,
-                multipleDocument,
-              });
-              if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-              toastr.success("L'email a bien été envoyé");
-            } catch (e) {
-              toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-            }
-          }}
-          onSave={() => {
-            setOpenModalPJ(false);
-            onChangeApplication();
-          }}
-        />
       </td>
     </tr>
   );
