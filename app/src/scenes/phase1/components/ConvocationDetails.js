@@ -83,7 +83,6 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
     return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = () => {
-    if (young.cohort === "Juillet 2022" && !isAutonomous) return "vendredi 15 juillet, 18:00";
     if (isAutonomous || !meetingPoint) return returnMeetingDate[young.cohort]; // new Date("2021-07-02T12:00:00.000+00:00");
     return meetingPoint.returnAtString;
   };
@@ -148,11 +147,6 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
                 <div className="flex flex-col">
                   <div className="flex gap-x-1">
                     <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
-                    {young.cohort === "Juillet 2022" && !isAutonomous && (
-                      <WithTooltip tooltipText="Cet horaire est donné à titre indicatif. Il vous sera confirmé ultérieurement">
-                        <IoMdInformationCircleOutline />
-                      </WithTooltip>
-                    )}
                   </div>
                   <div className="text-sm text-gray-600 whitespace-nowrap">
                     {getReturnMeetingDate()
