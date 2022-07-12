@@ -213,7 +213,7 @@ export default function viewDesktop() {
           </div>
         </>
       ) : null}
-      {mission.application.status === "VALIDATED" && (
+      {mission?.application?.status === "VALIDATED" && (
         <>
           <hr className="text-gray-100" />
           <div className="mx-8 mt-8">

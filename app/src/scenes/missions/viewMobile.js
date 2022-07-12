@@ -235,7 +235,7 @@ export default function viewMobile() {
           </div>
         </>
       ) : null}
-      {mission.application.status === "VALIDATED" && (
+      {mission?.application?.status === "VALIDATED" && (
         <>
           <hr className="text-gray-100" />
           <div className="mt-8 ml-3">
