@@ -148,7 +148,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
 
   const onChangeFiles = async ({ data, name }) => {
     try {
-      const { ok } = await api.put(`/referent/young/${young._id.toString()}/updateMilitaryListFile/${name}`, { files: data });
+      const { ok } = await api.put(`/referent/young/${young._id.toString()}/removeMilitaryFile/${name}`, { files: data });
       if (!ok) {
         toastr.error("Oups, une erreur est survenue");
         return;

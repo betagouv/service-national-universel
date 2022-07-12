@@ -1045,7 +1045,7 @@ router.put("/young/:id/phase1Files/:document", passport.authenticate("referent",
   }
 });
 
-router.put("/young/:id/updateMilitaryListFile/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
     const { error, value } = Joi.object({
