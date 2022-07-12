@@ -61,6 +61,7 @@ export default function ModalFilesPM({ isOpen, onCancel, initialValues, young, n
     setFilesList(res.data);
     setUploading(false);
   };
+
   const onConfirm = async (file) => {
     setLoading(true);
     try {
@@ -100,7 +101,7 @@ export default function ModalFilesPM({ isOpen, onCancel, initialValues, young, n
                         onClick={async () => {
                           setLoading(true);
                           setFilesList(filesList?.filter((f) => file !== f));
-                          await onChange();
+                          await onChange({ data: filesList?.filter((f) => file !== f), name: nameFiles });
                           setLoading(false);
                         }}>
                         Supprimer
