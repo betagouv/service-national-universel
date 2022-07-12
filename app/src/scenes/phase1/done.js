@@ -314,7 +314,7 @@ export default function Done() {
                 Mes informations de retour de séjour
               </button>
             ) : null}
-            <div className="relative" ref={refAttestationButton}>
+            {/* <div className="relative" ref={refAttestationButton}>
               <button
                 disabled={loading}
                 className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
@@ -324,7 +324,7 @@ export default function Done() {
                 </div>
                 <ChevronDown className="text-white font-medium" />
               </button>
-              {/* display options */}
+              
               <div
                 className={`${
                   openAttestationButton ? "block" : "hidden"
@@ -352,7 +352,7 @@ export default function Done() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
           <div className="flex flex-col items-center gap-3 mt-4">
             <Unlock />
