@@ -633,6 +633,7 @@ router.post(
   fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req, res) => {
     try {
+      const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
       const { error, value } = Joi.object({
         key: Joi.string().required(),
         body: Joi.string().required(),
@@ -706,7 +707,11 @@ router.post(
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-        await uploadFile(`app/young/${young._id}/${key}/${name}`, resultingFile);
+        if (militaryKeys.includes(key)) {
+          await uploadFile(`app/young/${young._id}/military-preparation/${key}/${name}`, resultingFile);
+        } else {
+          await uploadFile(`app/young/${young._id}/${key}/${name}`, resultingFile);
+        }
         fs.unlinkSync(tempFilePath);
       }
       young.set({ [key]: names });
@@ -1033,6 +1038,33 @@ router.put("/young/:id/phase1Files/:document", passport.authenticate("referent",
     young.set(value);
     await young.save({ fromUser: req.user });
 
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/young/:id/updateMilitaryListFile/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      key: Joi.string()
+        .required()
+        .valid(...militaryKeys),
+      filesList: Joi.array().items(Joi.string()),
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungModel.findById(value.id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set({ [value.key]: value.filesList });
+    await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
