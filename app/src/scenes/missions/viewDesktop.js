@@ -312,7 +312,18 @@ export default function viewDesktop() {
 }
 
 const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young }) => {
-  if (young.phase2ApplicationStatus.length > 15)
+  const getApplicationNumber = (young) => {
+    const count = young.phase2ApplicationStatus.filter((obj) => {
+      if (obj.includes("WAITING")) {
+        return true;
+      }
+
+      return false;
+    }).length;
+    return count;
+  };
+
+  if (getApplicationNumber(young) > 15)
     return (
       <div className="flex flex-col items-center gap-2">
         <WithTooltip tooltipText="Vous ne pouvez candidater qu'à 15 missions différentes.">
