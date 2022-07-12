@@ -166,8 +166,6 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
   const youngs = await YoungModel.find(body);
 
-  if (youngs[0].cohort === "Juillet 2022") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_TEMPORARY_NOT_ALLOWED });
-
   let html = `<!DOCTYPE html>
   <html lang="en">
     <head>
