@@ -15,7 +15,13 @@ import { IoMdInformationCircleOutline } from "react-icons/io";
 import { MdOutlineContentCopy } from "react-icons/md";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
-import { AiOutlineClockCircle } from "react-icons/ai";
+import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
+import { HiChevronDown, HiOutlineEye, HiOutlineMail, HiOutlineDownload } from "react-icons/hi";
+import ModalConfirm from "../../components/modals/ModalConfirm";
+import downloadPDF from "../../utils/download-pdf";
+import WithTooltip from "../../components/WithTooltip";
+import rubberStampValided from "../../assets/rubberStampValided.svg";
+import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
 
 export default function viewMobile() {
   const [mission, setMission] = useState();
@@ -25,6 +31,8 @@ export default function viewMobile() {
   const [disabledPmRefused, setDisabledPmRefused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState("mots");
+  const [contract, setContract] = useState(null);
+  const [openPeopleContract, setOpenPeopleContract] = useState(false);
   const history = useHistory();
 
   const young = useSelector((state) => state.Auth.young);
@@ -40,6 +48,17 @@ export default function viewMobile() {
   useEffect(() => {
     getMission();
   }, []);
+
+  useEffect(() => {
+    const getContract = async () => {
+      if (mission?.application?.contractId) {
+        const { ok, data, code } = await api.get(`/contract/${mission.application.contractId}`);
+        if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+        setContract(data);
+      }
+    };
+    getContract();
+  }, [mission?.application]);
 
   useEffect(() => {
     function getDiffYear(a, b) {
@@ -96,6 +115,16 @@ export default function viewMobile() {
     history.go(0);
   };
 
+  const contractHasAllValidation = (contract, young) => {
+    const isYoungAdult = contract.isYoungAdult === "true";
+    return (
+      contract.projectManagerStatus === "VALIDATED" &&
+      contract.structureManagerStatus === "VALIDATED" &&
+      ((isYoungAdult && contract.youngContractStatus === "VALIDATED") ||
+        (!isYoungAdult && contract.parent1Status === "VALIDATED" && (!young.parent2Email || contract.parent2Status === "VALIDATED")))
+    );
+  };
+
   if (!mission) return <Loader />;
   return (
     <div className="bg-white rounded-xl w-full p-3 mb-4">
@@ -115,7 +144,7 @@ export default function viewMobile() {
             </div>
           </div>
         </div>
-        <div className="flex gap-2 flex-wrap justify-center">
+        <div className="flex  flex-wrap space-x-2">
           {getTags()?.map((e, i) => (
             <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full p-1 text-xs">
               {e}
@@ -137,6 +166,9 @@ export default function viewMobile() {
               disabledIncomplete={disabledIncomplete}
               disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
+              contract={contract}
+              contractHasAllValidation={contractHasAllValidation}
+              young={young}
             />
           ) : (
             <ApplyButton
@@ -152,6 +184,68 @@ export default function viewMobile() {
         </div>
       </div>
       {/* END HEADER */}
+      {contract && !contractHasAllValidation(contract, young) && (
+        <div className="bg-gray-50 rounded-lg  p-3">
+          <div className="flex">
+            <div
+              className={`text-xs font-normal px-2 py-1 ${
+                contract?.invitationSent ? "bg-sky-100 text-sky-500" : "bg-gray-200 text-gray-600"
+              } rounded-sm items-center flex space-x-1`}>
+              {contract?.invitationSent && <AiFillClockCircle className="text-sky-500" />}
+              <div>Contrat {contract?.invitationSent ? "envoyé" : "en brouillon"}</div>
+            </div>
+          </div>
+          <div
+            className="flex justify-between"
+            onClick={() => {
+              setOpenPeopleContract(!openPeopleContract);
+            }}>
+            <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
+            {contract?.invitationSent && <HiChevronDown />}
+          </div>
+          {openPeopleContract && (
+            <>
+              <div className="text-sm mt-1 ">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
+              {contract?.invitationSent && (
+                <div className="flex flex-col my-4 space-y-3">
+                  <StatusContractPeople
+                    value={contract?.projectManagerStatus}
+                    description="Représentant de l’État"
+                    firstName={contract?.projectManagerFirstName}
+                    lastName={contract?.projectManagerLastName}
+                  />
+                  <StatusContractPeople
+                    value={contract?.structureManagerStatus}
+                    description="Représentant de la structure"
+                    firstName={contract?.structureManagerFirstName}
+                    lastName={contract?.structureManagerLastName}
+                  />
+                  {contract?.isYoungAdult === "true" ? (
+                    <StatusContractPeople value={contract?.youngContractStatus} description="Volontaire" firstName={contract?.youngFirstName} lastName={contract?.youngLastName} />
+                  ) : (
+                    <>
+                      <StatusContractPeople
+                        value={contract?.parent1Status}
+                        description="Représentant légal 1"
+                        firstName={contract?.parent1FirstName}
+                        lastName={contract?.parent1LastName}
+                      />
+                      {!young.parent2Email && !contract?.parent2Status && (
+                        <StatusContractPeople
+                          value={contract?.parent2Status}
+                          description="Représentant légal 2"
+                          firstName={contract?.parent2FirstName}
+                          lastName={contract?.parent2LastName}
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       <div className="flex flex-row mt-3 gap-2">
         <TabItem name="mots" setCurrentTab={setCurrentTab} active={currentTab === "mots"}>
@@ -292,8 +386,23 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
   );
 };
 
-const ApplicationStatus = ({ application, tutor, mission, updateApplication, loading, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom }) => {
+const ApplicationStatus = ({
+  application,
+  tutor,
+  mission,
+  updateApplication,
+  loading,
+  disabledAge,
+  disabledIncomplete,
+  disabledPmRefused,
+  scrollToBottom,
+  contract,
+  contractHasAllValidation,
+  young,
+}) => {
   const [message, setMessage] = React.useState(null);
+
+  const [openContractDropdown, setOpenContractDropdown] = useState();
 
   useEffect(() => {
     if (disabledIncomplete) setMessage("Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page");
@@ -340,10 +449,40 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
   if (["IN_PROGRESS", "VALIDATED", "DONE", "ABANDON"].includes(application.status)) {
     return (
       <div className="flex flex-col justify-center items-center gap-4">
-        <div className="flex items-center gap-6">
+        <div className="flex align-items justify-between gap-6">
           <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
             {translateApplication(application.status)}
           </div>
+          {contract && contractHasAllValidation(contract, young) && (
+            <div className="relative">
+              <div className="flex ">
+                <div className="bg-blue-600 rounded-xl px-2 py-1 flex items-center text-white text-xs " onClick={() => setOpenContractDropdown(!openContractDropdown)}>
+                  <div className=" ">Contrat d’engagement</div>
+                  <HiChevronDown />
+                </div>
+              </div>
+              <div
+                className={`${openContractDropdown ? "block" : "hidden"}  rounded-lg bg-white transition absolute top-[calc(100%+8px)] shadow overflow-hidden z-20 
+                 divide-y divide-slate-200 `}>
+                <div
+                  className="flex items-center space-x-2   text-gray-600 p-2 "
+                  onClick={async (contractId) => {
+                    await downloadPDF({
+                      url: `/contract/${contract._id}/download`,
+                      fileName: `${young.firstName} ${young.lastName} - contrat ${contractId}.pdf`,
+                    });
+                  }}>
+                  <HiOutlineDownload />
+                  <div className="text-sm">Télécharger</div>
+                </div>
+                <SendContractByMail young={young} contractId={contract._id} missionName={contract.missionName} />
+                {/* <div className="flex items-center space-x-2   text-gray-600 p-2">
+                  <HiOutlineEye />
+                  <div className="text-sm">Voir</div>
+                </div> */}
+              </div>
+            </div>
+          )}
         </div>
         {tutor ? (
           <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6">
@@ -471,5 +610,68 @@ const HoursAndPlaces = ({ duration, placesLeft }) => {
       ) : null}
       <div className="text-xs leading-none font-normal text-gray-500">{placesLeft} places disponibles</div>
     </div>
+  );
+};
+
+const StatusContractPeople = ({ value, description, firstName, lastName }) => (
+  <div className="flex justify-between">
+    <div className="flex items-center">
+      <div className="mr-2">
+        {value === "VALIDATED" ? <img src={rubberStampValided} alt="rubberStampValided" /> : <img src={rubberStampNotValided} alt="rubberStampNotValided" />}
+      </div>
+      <div>
+        <div className="flex font-semibold space-x-2">
+          <div>{firstName}</div>
+          <div>{lastName?.toUpperCase()}</div>
+        </div>
+        <div className="text-gray-500 text-xs">{description}</div>
+      </div>
+    </div>
+    {value === "VALIDATED" && <div className="text-center text-gray-500 text-xs border-l-2 border-gray-500 w-1/4 px-1">En attente de signature</div>}
+  </div>
+);
+
+const SendContractByMail = ({ young, contractId, missionName }) => {
+  const [modalMail, setModalMail] = useState({ isOpen: false, onConfirm: null });
+
+  const onConfirm = async () => {
+    try {
+      const { ok, code } = await api.post(`/young/${young._id}/documents/contract/2/send-email?contract_id=${contractId}`, {
+        fileName: `contrat ${young.firstName} ${young.lastName} - ${missionName}.pdf`,
+      });
+      if (ok) return toastr.success(`Document envoyé à ${young.email}`);
+      else return toastr.error("Erreur lors de l'envoie du document", translate(code));
+    } catch (e) {
+      toastr.error("Erreur lors de l'envoie du document");
+      console.log(e);
+    }
+  };
+
+  return (
+    <>
+      <div
+        className="flex items-center space-x-2   text-gray-600 p-2"
+        onClick={() =>
+          setModalMail({
+            isOpen: true,
+            onConfirm,
+            title: "Envoie du document par mail",
+            message: `Vous allez recevoir le document par mail à l'adresse ${young.email}.`,
+          })
+        }>
+        <HiOutlineMail />
+        <div className="text-sm">Envoyer par mail</div>
+      </div>
+      <ModalConfirm
+        isOpen={modalMail?.isOpen}
+        title={modalMail?.title}
+        message={modalMail?.message}
+        onCancel={() => setModalMail({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modalMail?.onConfirm();
+          setModalMail({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </>
   );
 };
