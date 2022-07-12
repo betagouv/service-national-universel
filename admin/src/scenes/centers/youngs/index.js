@@ -403,7 +403,7 @@ export default function CenterYoungIndex() {
               <button
                 disabled={true}
                 // onClick={() => viewAttestation()}
-                className="flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 bg-blue-600 text-white font-medium text-sm">
+                className="flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait bg-blue-600 text-white font-medium text-sm">
                 Exporter les attestations
               </button>
             </WithTooltip>
