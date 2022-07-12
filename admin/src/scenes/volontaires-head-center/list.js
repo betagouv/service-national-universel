@@ -32,6 +32,7 @@ import Select from "./components/Select";
 import { toastr } from "react-redux-toastr";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import WithTooltip from "../../components/WithTooltip";
 
 const FILTERS = [
   "SEARCH",
@@ -183,9 +184,11 @@ export default function List() {
                     });
                   }}
                 />
-                <DownloadAllAttestation sessionPhase1={user.sessionPhase1Id}>
-                  <div>Exporter les attestations</div>
-                </DownloadAllAttestation>
+                <WithTooltip tooltipText="Suite au remaniement ministériel du 4 juillet 2022, les nouvelles attestations ne sont pas encore disponibles. Elles le seront très prochainement">
+                  <DownloadAllAttestation sessionPhase1={user.sessionPhase1Id}>
+                    <div>Exporter les attestations</div>
+                  </DownloadAllAttestation>
+                </WithTooltip>
               </div>
             </Header>
             <Filter>
