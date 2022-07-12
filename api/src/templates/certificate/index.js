@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
-const { COHESION_STAY_LIMIT_DATE, END_DATE_PHASE1, MINISTRES } = require("snu-lib");
+const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, MINISTRES } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
@@ -34,28 +34,26 @@ const getCohesionCenterLocation = (cohesionCenter) => {
   return t;
 };
 
-const getTemplate = (date) => {
+const getMinistres = (date) => {
   if (!date) return;
   for (const item of MINISTRES) {
-    if (date < new Date(item.date_end)) return item.template;
+    if (date < new Date(item.date_end)) return item;
   }
 };
 
-const destinataireLabel = ({ firstName, lastName }, template) => {
-  const isPluriel = template !== "certificates/certificateTemplate_2022.png";
-
-  return `félicite${isPluriel ? "nt" : ""} <strong>${firstName} ${lastName}</strong>`;
+const destinataireLabel = ({ firstName, lastName }, ministres) => {
+  return `félicite${ministres.length > 1 ? "nt" : ""} <strong>${firstName} ${lastName}</strong>`;
 };
 
 const phase1 = async (young) => {
-  if (young.cohort === "Juillet 2022") return "Hot Fix Juillet";
-  const d = END_DATE_PHASE1[young.cohort];
+  const d = COHESION_STAY_END[young.cohort];
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
-  const template = getTemplate(d);
+  const ministresData = getMinistres(d);
+  const template = ministresData.template;
   const cohesionCenter = await getCohesionCenter(young);
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   return html
-    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, template)))
+    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort].toLowerCase()))
     .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
@@ -68,10 +66,11 @@ const phase1 = async (young) => {
 const phase2 = (young) => {
   const d = young.statusPhase2ValidatedAt;
   if (!d) throw "Date de validation de la phase 2 non trouvée";
-  const template = getTemplate(d);
+  const ministresData = getMinistres(d);
+  const template = ministresData.template;
   const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
   return html
-    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, template)))
+    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
     .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
@@ -81,10 +80,11 @@ const phase2 = (young) => {
 const phase3 = (young) => {
   const d = young.statusPhase3ValidatedAt;
   if (!d) throw "Date de validation de la phase 3 non trouvée";
-  const template = getTemplate(d);
+  const ministresData = getMinistres(d);
+  const template = ministresData.template;
   const html = fs.readFileSync(path.resolve(__dirname, "./phase3.html"), "utf8");
   return html
-    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, template)))
+    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
     .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
@@ -94,10 +94,11 @@ const phase3 = (young) => {
 const snu = (young) => {
   const d = young.statusPhase2ValidatedAt;
   if (!d) throw "Date de validation de la phase 2 non trouvée";
-  const template = getTemplate(d);
+  const ministresData = getMinistres(d);
+  const template = ministresData.template;
   const html = fs.readFileSync(path.resolve(__dirname, "./snu.html"), "utf8");
   return html
-    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, template)))
+    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
     .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
