@@ -185,15 +185,9 @@ export default function List() {
                   }}
                 />
                 <WithTooltip tooltipText="Suite au remaniement ministériel du 4 juillet 2022, les nouvelles attestations ne sont pas encore disponibles. Elles le seront très prochainement">
-                  {/* <DownloadAllAttestation sessionPhase1={user.sessionPhase1Id}>
+                  <DownloadAllAttestation sessionPhase1={user.sessionPhase1Id}>
                     <div>Exporter les attestations</div>
-                  </DownloadAllAttestation> */}
-                  <button
-                    disabled={true}
-                    // onClick={() => viewAttestation()}
-                    className="flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait bg-blue-600 text-white font-medium text-sm">
-                    Exporter les attestations
-                  </button>
+                  </DownloadAllAttestation>
                 </WithTooltip>
               </div>
             </Header>
