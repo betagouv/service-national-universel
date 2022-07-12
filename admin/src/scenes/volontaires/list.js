@@ -273,7 +273,7 @@ export default function VolontaireList() {
                         "Créé lé": formatLongDateFR(data.createdAt),
                         "Mis à jour le": formatLongDateFR(data.updatedAt),
                         "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                        Statut: translate(data.status),
+                        "Statut général": translate(data.status),
                         "Statut Phase 1": translatePhase1(data.statusPhase1),
                         "Statut Phase 2": translatePhase2(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
