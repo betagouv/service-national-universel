@@ -223,7 +223,6 @@ export default function VolontaireList() {
                         "Autotest PCR - Statut": translateFileStatusPhase1(data.autoTestPCRFilesStatus) || "Non Renseigné",
                         "Règlement intérieur": translate(data.rulesYoung),
                         "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
-                        "Présent au séjour de cohésion": translate(data.cohesionStayPresence) || "Non Renseigné",
                         "Statut représentant légal 1": translate(data.parent1Status),
                         "Prénom représentant légal 1": data.parent1FirstName,
                         "Nom représentant légal 1": data.parent1LastName,
@@ -728,7 +727,7 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion", "Participations au séjour de cohésion")}
+                  renderLabel={(items) => getFilterLabel(items, "Présence à l’arrivée", "Présence à l’arrivée")}
                   showMissing
                   missingLabel="Non renseigné"
                 />
