@@ -126,7 +126,7 @@ export default function InfoConvocation({ isOpen, onCancel }) {
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="">
       <div className="flex flex-col items-center justify-center p-4">
         <div className="text-xl leading-7 font-medium text-gray-900 text-center">Mes informations de retour de séjour</div>
-        <div className="relative mt-4" ref={refSelect}>
+        {/* <div className="relative mt-4" ref={refSelect}>
           <button
             disabled={loadingConvocation}
             className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-4 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
@@ -136,7 +136,7 @@ export default function InfoConvocation({ isOpen, onCancel }) {
             </div>
             <ChevronDown className="text-white font-medium" />
           </button>
-          {/* display options */}
+          
           <div className={`${selectOpen ? "block" : "hidden"}  rounded-lg !min-w-full bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
             <div
               key="download"
@@ -161,7 +161,7 @@ export default function InfoConvocation({ isOpen, onCancel }) {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
         <div className="flex flex-col md:flex-row items-center mt-4 gap-6">
           <div className="flex items-center justify-center gap-2 pr-4 md:border-r-[1px]">
             <Calendar date={getReturnMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-ninaBlock mx-3 w-7 h-10 md:w-11 md:h-12" />

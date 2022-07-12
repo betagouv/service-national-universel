@@ -80,7 +80,7 @@ export default function StepAgreement({ young }) {
                   {showConvocation ? <AiOutlineEyeInvisible className="h-5 w-5 text-gray-600" /> : <AiOutlineEye className="h-5 w-5 text-gray-600" />}
                 </WithTooltip>
               </button>
-              <button
+              {/* <button
                 type="button"
                 className="flex items-center justify-center bg-gray-100 h-8 w-8 rounded-full mr-4 cursor-pointer hover:scale-110"
                 onClick={() =>
@@ -94,10 +94,10 @@ export default function StepAgreement({ young }) {
                 <WithTooltip tooltipText="Recevoir par email">
                   <HiOutlineMail className="h-5 w-5 text-gray-600" />
                 </WithTooltip>
-              </button>
+              </button> */}
 
               {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
-              <div onClick={handleDownload}>
+              {/* <div onClick={handleDownload}>
                 <DownloadConvocationButton
                   young={young}
                   uri="cohesion"
@@ -107,7 +107,7 @@ export default function StepAgreement({ young }) {
                   <HiOutlineDownload className={`h-5 w-5 ${valid ? "text-blue-700" : "text-blue-300"} mr-2`} />
                   Télécharger
                 </DownloadConvocationButton>
-              </div>
+              </div> */}
             </div>
           </>
         ) : null}
