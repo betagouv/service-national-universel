@@ -38,7 +38,7 @@ export default function AssignMeetingPoint({ young, onAffect, onClick }) {
   });
 
   const handleAffectation = async (meetingPoint) => {
-    const { ok, code } = await api.put(`/young/${young._id}/meeting-point`, { meetingPointId: meetingPoint._id });
+    const { ok, code } = await api.put(`/young/${young._id}/meeting-point`, { meetingPointId: meetingPoint._id, busExcelId: meetingPoint.busExcelId });
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la sélection du point de rassemblement", code);
     toastr.success(`${young.firstName} a choisi le point de rassemblement affecté(e) au centre ${meetingPoint.departureAddress}, ${meetingPoint.departureAtString}`);
     setSearchedValue("");

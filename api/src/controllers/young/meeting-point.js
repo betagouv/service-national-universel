@@ -64,13 +64,14 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
   try {
     const { error, value } = Joi.object({
       meetingPointId: Joi.string().optional(),
+      busExcelId: Joi.string().optional(),
       deplacementPhase1Autonomous: Joi.string().optional(),
       id: Joi.string().required(),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { id, meetingPointId, deplacementPhase1Autonomous } = value;
+    const { id, meetingPointId, busExcelId, deplacementPhase1Autonomous } = value;
 
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -97,11 +98,7 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
     const oldMeetingPoint = await MeetingPointModel.findById(young.meetingPointId);
     const oldBus = await BusModel.findById(oldMeetingPoint?.busId);
 
-    young.set({ meetingPointId, deplacementPhase1Autonomous });
-    const busExcelId = meetingPointId.busExcelId;
-    if (busExcelId) {
-      young.set({ busExcelId: busExcelId });
-    }
+    young.set({ meetingPointId, busExcelId, deplacementPhase1Autonomous });
     await young.save({ fromUser: req.user });
 
     if (bus) await updatePlacesBus(bus);
