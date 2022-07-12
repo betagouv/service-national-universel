@@ -7,6 +7,9 @@ import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
 import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ModalPJ from "../components/ModalPJ";
+import { HiOutlineAdjustments, HiPlus } from "react-icons/hi";
+import { MdOutlineAttachFile } from "react-icons/md";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
 import { apiURL } from "../../../config";
@@ -16,6 +19,7 @@ import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLU
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
   const getExportQuery = () => ({ query: { bool: { filter: { term: { "youngId.keyword": young._id } } } }, sort: [{ "priority.keyword": "asc" }], size: ES_NO_LIMIT });
+  const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
   useEffect(() => {
     getApplications();
@@ -36,16 +40,21 @@ export default function ApplicationList({ young, onChangeApplication }) {
       <Table>
         <thead>
           <tr>
-            <th>Missions candidatées</th>
-            <th style={{ width: "200px" }}>Dates</th>
-            <th style={{ width: "90px" }}>Places</th>
-            <th style={{ width: "250px" }}>Statut</th>
+            <th className="w-5/12">Missions candidatées</th>
+            <th className="w-2/12">Dates</th>
+            <th className="w-1/12">Places</th>
+            <th className="w-3/12">Statut</th>
+            <th className="w-1/12">
+              <div className="flex justify-center">
+                <MdOutlineAttachFile />
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
           <>
             {applications.map((hit, i) => (
-              <Hit key={hit._id} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} />
+              <Hit key={hit._id} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} optionsType={optionsType} />
             ))}
           </>
         </tbody>
@@ -88,6 +97,7 @@ export default function ApplicationList({ young, onChangeApplication }) {
                   "Candidature mise à jour le": data.updatedAt,
                   "Statut de la candidature": translate(data.status),
                   Tuteur: data.tutorName,
+                  "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option].length, 0) !== 0}`),
                 };
               });
             }}
@@ -98,7 +108,7 @@ export default function ApplicationList({ young, onChangeApplication }) {
   );
 }
 
-const Hit = ({ hit, index, young, onChangeApplication }) => {
+const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
   const [mission, setMission] = useState();
   const [modalDurationOpen, setModalDurationOpen] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -112,6 +122,8 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
       return setMission(data);
     })();
   }, []);
+
+  const [openModalPJ, setOpenModalPJ] = useState(false);
 
   if (!mission) return null;
   return (
@@ -263,6 +275,40 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             />
           </React.Fragment>
         ) : null}
+      </td>
+      <td>
+        {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
+          <div className=" flex justify-center ">
+            <div className="bg-blue-600  rounded-full p-2 text-white" onClick={() => setOpenModalPJ(true)}>
+              {optionsType.reduce((sum, option) => sum + hit[option].length, 0) !== 0 ? <HiOutlineAdjustments /> : <HiPlus />}
+            </div>
+          </div>
+        )}
+        <ModalPJ
+          isOpen={openModalPJ}
+          young={young}
+          application={hit}
+          optionsType={optionsType}
+          onCancel={() => {
+            setOpenModalPJ(false);
+          }}
+          onSend={async (type, multipleDocument) => {
+            try {
+              const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+                type,
+                multipleDocument,
+              });
+              if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+              toastr.success("L'email a bien été envoyé");
+            } catch (e) {
+              toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+            }
+          }}
+          onSave={() => {
+            setOpenModalPJ(false);
+            onChangeApplication();
+          }}
+        />
       </td>
     </tr>
   );

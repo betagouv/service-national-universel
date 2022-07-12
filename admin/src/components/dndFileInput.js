@@ -1,5 +1,5 @@
 import { Field } from "formik";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { requiredMessage } from "./errorMessage";
 import DownloadButton from "./buttons/DownloadButton";
@@ -12,7 +12,7 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default function DndFileInput({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required, tw }) {
+export default function DndFileInput({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required, tw, setNewFilesList }) {
   const [filesList, setFilesList] = useState(value || []);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
@@ -33,11 +33,15 @@ export default function DndFileInput({ value, onChange, name, errorMessage = req
     onChange({ target: { files, name } });
   }
 
+  useEffect(() => {
+    setNewFilesList && setNewFilesList(filesList);
+  }, [filesList]);
+
   return (
     <>
       <div className={tw}>
         {filesList.map((e, i) => (
-          <File key={e} className="mx-1 justify-between">
+          <File key={i} className="mx-1 justify-between">
             <FileName className="mr-2">{getFileName(e)}</FileName>
             <div>
               <IconButton
