@@ -394,6 +394,7 @@ router.post("/:id/deplacementPhase1Autonomous", passport.authenticate(["referent
     young.set({
       deplacementPhase1Autonomous: "true",
       meetingPointId: null,
+      busExcelId: null,
     });
     await young.save({ fromUser: req.user });
 
@@ -492,9 +493,10 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldMeetingPointId = young.meetingPointId;
     const oldCohort = young.cohort;
-    if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
+    if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId || young.busExcelId)) {
       young.set({ sessionPhase1Id: undefined });
       young.set({ meetingPointId: undefined });
+      young.set({ busExcelId: undefined });
     }
 
     let inscriptionGoal = await InscriptionGoalModel.findOne({ department: young.department, cohort });
@@ -605,6 +607,7 @@ router.post("/:id/session-phase1/cancel", passport.authenticate("referent", { se
     const oldMeetingPointId = young.meetingPointId;
     young.set({ sessionPhase1Id: undefined });
     young.set({ meetingPointId: undefined });
+    young.set({ busExcelId: undefined });
 
     await young.save({ fromUser: req.user });
 

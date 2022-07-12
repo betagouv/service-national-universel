@@ -119,7 +119,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   if (!canCreateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
   const meetingPoint = await MeetingPointModel.create(value);
-
   return res.status(200).send({ ok: true, data: meetingPoint });
 });
 
