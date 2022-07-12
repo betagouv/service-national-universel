@@ -48,7 +48,6 @@ const destinataireLabel = ({ firstName, lastName }, template) => {
 };
 
 const phase1 = async (young) => {
-  if (young.cohort === "Juillet 2022") return "Hot Fix Juillet";
   const d = END_DATE_PHASE1[young.cohort];
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
   const template = getTemplate(d);
