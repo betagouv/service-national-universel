@@ -342,6 +342,19 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
 );
 
 const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young }) => {
+  if (young.phase2ApplicationStatus.length > 15)
+    return (
+      <div className="flex flex-col items-center justify-center gap-2">
+        <div className="text-red-500 text-xs text-center">Vous ne pouvez candidater qu'à 15 missions différentes.</div>
+        <div className="flex flex-col items-stretch gap-4">
+          <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
+            Candidater
+          </button>
+          <HoursAndPlaces duration={duration} placesLeft={placesLeft} />
+        </div>
+      </div>
+    );
+
   const now = new Date();
   if (now < COHESION_STAY_END[young.cohort])
     return (
