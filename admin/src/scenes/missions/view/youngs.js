@@ -352,7 +352,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType }) => {
           <>
             <div className="flex justify-center">
               <div className="bg-blue-600  rounded-full text-white p-2 " onClick={() => setOpenModalPJ(true)}>
-                {optionsType.reduce((sum, option) => sum + hit[option].length, 0) !== 0 ? <HiOutlineAdjustments /> : <HiPlus />}
+                {optionsType.reduce((sum, option) => sum + hit[option]?.length, 0) !== 0 ? <HiOutlineAdjustments /> : <HiPlus />}
               </div>
             </div>
             <ModalPJ
