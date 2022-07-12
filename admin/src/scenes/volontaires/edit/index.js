@@ -149,7 +149,7 @@ export default function VolontaireEdit(props) {
             <Row>
               <InterTitle>Séjour de cohésion</InterTitle>
             </Row>
-            {values.statusPhase1 === "AFFECTED" ? (
+            {values.statusPhase1 === "AFFECTED" || (young.cohort === "Juillet 2022" && ["DONE", "NOT_DONE"].includes(values.statusPhase1)) ? (
               <Row>
                 <CohesionCenter values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
                 <MeetingPoint values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
