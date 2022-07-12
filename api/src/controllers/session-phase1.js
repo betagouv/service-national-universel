@@ -40,17 +40,15 @@ const getCohesionCenterLocation = (cohesionCenter) => {
   return t;
 };
 
-const getTemplate = (date) => {
+const getMinistres = (date) => {
   if (!date) return;
   for (const item of MINISTRES) {
-    if (date < new Date(item.date_end)) return item.template;
+    if (date < new Date(item.date_end)) return item;
   }
 };
 
-const destinataireLabel = ({ firstName, lastName }, template) => {
-  const isPluriel = template !== "certificates/certificateTemplate_2022.png";
-
-  return `félicite${isPluriel ? "nt" : ""} <strong>${firstName} ${lastName}</strong>`;
+const destinataireLabel = ({ firstName, lastName }, ministres) => {
+  return `félicite${ministres.length > 1 ? "nt" : ""} <strong>${firstName} ${lastName}</strong>`;
 };
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -192,13 +190,14 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     </div>`;
 
   const d = END_DATE_PHASE1[youngs[0].cohort];
-  const template = getTemplate(d);
+  const ministresData = getMinistres(d);
+  const template = ministresData.template;
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   const data = [];
   for (const young of youngs) {
     data.push(
       subHtml
-        .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, template)))
+        .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
         .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
         .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort].toLowerCase()))
         .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
