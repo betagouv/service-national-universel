@@ -1455,6 +1455,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  busExcelId: {
+    type: String,
+    documentation: {
+      description: "Nom du bus pour Metabase",
+    },
+  },
+
   // TODO : clean interests
   defenseInterest: { type: String },
   defenseTypeInterest: { type: String },
