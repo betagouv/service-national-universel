@@ -38,10 +38,10 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
 
   return (
     <>
-      <div className="w-full mb-4" ref={docRef}>
+      <div className="w-full mb-4 " ref={docRef}>
         {showHelp ? (
           <>
-            <div className="hidden md:flex items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4 w-full">
+            <div className="hidden md:flex items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4 w-full ">
               {!showFolder ? (
                 <>
                   <div className="flex flex-col items-center lg:items-start">
@@ -60,7 +60,7 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
               ) : (
                 <>
                   <div className="flex items-center gap-4">
-                    <div className="text-lg leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>
+                    <div className="text-lg leading-6 font-semibold ">Dossier d&apos;éligibilité aux préparations militaires</div>
                     <div
                       className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
                         theme.text[young.statusMilitaryPreparationFiles]
@@ -79,7 +79,7 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
                 </>
               )}
             </div>
-            <div className="flex md:hidden items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4" ref={docRef}>
+            <div className="flex md:hidden items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4 " ref={docRef}>
               {!showFolder ? (
                 <>
                   <div className="flex flex-col items-start">
@@ -119,7 +119,7 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
           </>
         ) : null}
         {open ? (
-          <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full justify-between">
+          <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full justify-between ">
             <FileCard
               name="Pièce d’identité"
               icon="reglement"

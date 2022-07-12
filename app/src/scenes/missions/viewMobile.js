@@ -6,7 +6,17 @@ import DoubleDayTile from "../../components/DoubleDayTile";
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
-import { formatStringDateTimezoneUTC, htmlCleaner, translate, translateApplication, copyToClipboard, APPLICATION_STATUS, SENDINBLUE_TEMPLATES } from "../../utils";
+import {
+  formatStringDateTimezoneUTC,
+  htmlCleaner,
+  translate,
+  translateApplication,
+  copyToClipboard,
+  APPLICATION_STATUS,
+  SENDINBLUE_TEMPLATES,
+  translateAddFilePhase2,
+  COHESION_STAY_END,
+} from "../../utils";
 import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
 import ApplyDoneModal from "./components/ApplyDoneModal";
 import ApplyModal from "./components/ApplyModal";
@@ -16,12 +26,16 @@ import { MdOutlineContentCopy } from "react-icons/md";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
-import { HiChevronDown, HiOutlineEye, HiOutlineMail, HiOutlineDownload } from "react-icons/hi";
+import { HiChevronDown, HiOutlineEye, HiOutlineMail, HiOutlineDownload, HiPlus} from "react-icons/hi";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import downloadPDF from "../../utils/download-pdf";
 import WithTooltip from "../../components/WithTooltip";
 import rubberStampValided from "../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
+import { BsChevronDown } from "react-icons/bs";
+import ModalPJ from "./components/ModalPJ";
+import FileCard from "../militaryPreparation/components/FileCard";
+
 
 export default function viewMobile() {
   const [mission, setMission] = useState();
@@ -33,6 +47,9 @@ export default function viewMobile() {
   const [currentTab, setCurrentTab] = useState("mots");
   const [contract, setContract] = useState(null);
   const [openPeopleContract, setOpenPeopleContract] = useState(false);
+  const [modalDocument, setModalDocument] = useState({ isOpen: false });
+  const [openAttachments, setOpenAttachments] = useState(false);
+
   const history = useHistory();
 
   const young = useSelector((state) => state.Auth.young);
@@ -44,6 +61,8 @@ export default function viewMobile() {
     const { data } = await api.get(`/mission/${id}`);
     return setMission(data);
   };
+
+  const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
   useEffect(() => {
     getMission();
@@ -174,6 +193,7 @@ export default function viewMobile() {
             <ApplyButton
               placesLeft={mission.placesLeft}
               setModal={setModal}
+              young={young}
               disabledAge={disabledAge}
               disabledIncomplete={disabledIncomplete}
               disabledPmRefused={disabledPmRefused}
@@ -310,6 +330,88 @@ export default function viewMobile() {
           </div>
         </>
       ) : null}
+      {mission?.application?.status === "VALIDATED" && (
+        <>
+          <hr className="text-gray-100" />
+          <div className="mt-8 ml-3">
+            <div className="flex justify-between">
+              <div className="text-[15px] leading-6 font-semibold">Pièces jointes</div>
+              <div className="flex space-x-4 items-center">
+                {optionsType.reduce((nmb, option) => nmb + mission.application[option].length, 0) !== 0 && (
+                  <div
+                    className="group flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-4 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
+                    onClick={() => setOpenAttachments(!openAttachments)}>
+                    {openAttachments ? "Masquer" : "Voir"}
+                    <BsChevronDown className={`ml-3 text-blue-600 group-hover:text-white h-5 w-5 ${openAttachments ? "rotate-180" : ""}`} />
+                  </div>
+                )}
+                <div
+                  className="text-white bg-blue-600  rounded-full p-2 "
+                  onClick={() => {
+                    setModalDocument({
+                      isOpen: true,
+                      stepOne: true,
+                    });
+                  }}>
+                  <HiPlus />
+                </div>
+              </div>
+            </div>
+            {openAttachments && (
+              <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full ">
+                {optionsType.map(
+                  (option, index) =>
+                    mission.application[option].length > 0 && (
+                      <FileCard
+                        key={index}
+                        name={translateAddFilePhase2(option)[3].toUpperCase() + translateAddFilePhase2(option).slice(4)}
+                        icon="reglement"
+                        filled={mission.application[option].length}
+                        color="text-blue-600 bg-white"
+                        status="Modifier"
+                        onClick={() =>
+                          setModalDocument({
+                            isOpen: true,
+                            name: option,
+                            stepOne: false,
+                          })
+                        }
+                      />
+                    ),
+                )}
+              </div>
+            )}
+            <ModalPJ
+              isOpen={modalDocument?.isOpen}
+              name={modalDocument?.name}
+              young={young}
+              application={mission.application}
+              optionsType={optionsType}
+              onCancel={async () => {
+                setModalDocument({ isOpen: false });
+                await getMission();
+              }}
+              onSend={async (type, multipleDocument) => {
+                try {
+                  const responseNotification = await api.post(`/application/${mission.application._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+                    type,
+                    multipleDocument,
+                  });
+                  if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                  toastr.success("L'email a bien été envoyé");
+                } catch (e) {
+                  toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                }
+              }}
+              onSave={async () => {
+                setModalDocument({ isOpen: false });
+                await getMission();
+              }}
+              typeChose={modalDocument?.stepOne}
+            />
+          </div>
+        </>
+      )}
       {modal === "APPLY" && (
         <ApplyModal
           value={mission}
@@ -334,7 +436,21 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
   </div>
 );
 
-const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration }) => {
+const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young }) => {
+  const now = new Date();
+  if (now < COHESION_STAY_END[young.cohort])
+    return (
+      <div className="flex flex-col items-center justify-center gap-2">
+        <div className="text-red-500 text-xs text-center">Pour candidater, vous devez avoir terminé votre séjour de cohésion</div>
+        <div className="flex flex-col items-stretch gap-4">
+          <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
+            Candidater
+          </button>
+          <HoursAndPlaces duration={duration} placesLeft={placesLeft} />
+        </div>
+      </div>
+    );
+
   if (disabledAge)
     return (
       <div className="flex flex-col items-center justify-center gap-2">

@@ -2,14 +2,39 @@ import { Field } from "formik";
 import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
+import Download from "../assets/icons/Download";
 import { requiredMessage } from "../scenes/inscription/components/errorMessage";
+import ModalConfirm from "./modals/ModalConfirm";
 
 function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default function DndFileInput({ optional, value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", ...props }) {
+export default function DndFileInput({
+  optional,
+  value,
+  onChange,
+  name,
+  errorMessage = requiredMessage,
+  placeholder = "votre fichier",
+  download,
+  onDownload,
+  setNewFilesList,
+  ...props
+}) {
   const [filesList, setFilesList] = useState(value || []);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
+  const handleClick = (e) => {
+    setModal({
+      isOpen: true,
+      onConfirm: () => onDownload(e),
+      title: "Téléchargement de document",
+      message:
+        "En téléchargeant cette pièce jointe, vous vous engagez à la supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)",
+      value: e,
+    });
+  };
 
   useEffect(() => {
     const dropArea = document.getElementById(`file-drop-${name}`);
@@ -66,6 +91,10 @@ export default function DndFileInput({ optional, value, onChange, name, errorMes
     onChange({ target: { files, name } });
   }
 
+  useEffect(() => {
+    setNewFilesList && setNewFilesList(filesList);
+  }, [filesList]);
+
   return (
     <div style={{}} {...props}>
       <ImageInput id={`file-drop-${name}`}>
@@ -77,7 +106,9 @@ export default function DndFileInput({ optional, value, onChange, name, errorMes
           name={name}
           value={[]}
           validate={(v) => (!optional && (!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
-          onChange={(e) => onAdd(e.target.files)}
+          onChange={(e) => {
+            onAdd(e.target.files);
+          }}
         />
         <img src={require("../assets/image.svg")} />
         <>
@@ -87,9 +118,24 @@ export default function DndFileInput({ optional, value, onChange, name, errorMes
       </ImageInput>
       {filesList.map((e, i) => (
         <File key={i}>
-          {getFileName(e)} <span onClick={() => handleChange(filesList.filter((n, j) => i !== j))}>Retirer</span>
+          {getFileName(e)} <span onClick={() => handleChange(filesList.filter((n, j) => i !== j))}>Retirer </span>
+          {download && (
+            <span>
+              <Download onClick={() => handleClick(filesList.filter((n, j) => i === j))} />
+            </span>
+          )}
         </File>
       ))}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null, value: null })}
+        onConfirm={async () => {
+          await modal?.onConfirm(modal?.value);
+          setModal({ isOpen: false, onConfirm: null, value: null });
+        }}
+      />
     </div>
   );
 }

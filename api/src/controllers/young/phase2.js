@@ -114,7 +114,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       }),
       contactFullName: Joi.string().trim(),
       contactEmail: Joi.string().trim(),
-      files: Joi.array().items(Joi.string().required()).min(1),
+      files: Joi.array().items(Joi.string()),
       message: Joi.string().trim(),
     }).validate({ ...req.params, ...req.body });
 

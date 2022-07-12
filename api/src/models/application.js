@@ -161,6 +161,27 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  //files
+  contractAvenantFiles: {
+    type: [String],
+    default: [],
+  },
+
+  justificatifsFiles: {
+    type: [String],
+    default: [],
+  },
+
+  feedBackExperienceFiles: {
+    type: [String],
+    default: [],
+  },
+
+  othersFiles: {
+    type: [String],
+    default: [],
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
