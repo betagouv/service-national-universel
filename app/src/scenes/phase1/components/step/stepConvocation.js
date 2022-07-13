@@ -80,7 +80,7 @@ export default function StepAgreement({ young }) {
                   {showConvocation ? <AiOutlineEyeInvisible className="h-5 w-5 text-gray-600" /> : <AiOutlineEye className="h-5 w-5 text-gray-600" />}
                 </WithTooltip>
               </button>
-              {/* <button
+              <button
                 type="button"
                 className="flex items-center justify-center bg-gray-100 h-8 w-8 rounded-full mr-4 cursor-pointer hover:scale-110"
                 onClick={() =>
@@ -94,10 +94,10 @@ export default function StepAgreement({ young }) {
                 <WithTooltip tooltipText="Recevoir par email">
                   <HiOutlineMail className="h-5 w-5 text-gray-600" />
                 </WithTooltip>
-              </button> */}
+              </button>
 
               {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
-              {/* <div onClick={handleDownload}>
+              <div onClick={handleDownload}>
                 <DownloadConvocationButton
                   young={young}
                   uri="cohesion"
@@ -107,7 +107,7 @@ export default function StepAgreement({ young }) {
                   <HiOutlineDownload className={`h-5 w-5 ${valid ? "text-blue-700" : "text-blue-300"} mr-2`} />
                   Télécharger
                 </DownloadConvocationButton>
-              </div> */}
+              </div>
             </div>
           </>
         ) : null}
@@ -153,7 +153,7 @@ export default function StepAgreement({ young }) {
               <div className="flex flex-col items-center justify-center">
                 <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
                 {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
-                {/* <div className="w-full" onClick={handleDownload}>
+                <div className="w-full" onClick={handleDownload}>
                   <DownloadConvocationButton
                     young={young}
                     uri="cohesion"
@@ -161,7 +161,7 @@ export default function StepAgreement({ young }) {
                     <HiOutlineDownload className="h-5 w-5 text-blue-300 mr-2" />
                     Télécharger
                   </DownloadConvocationButton>
-                </div> */}
+                </div>
                 <div className="flex w-full flex-row flex-shrink items-center py-2">
                   <button
                     type="button"
@@ -172,7 +172,7 @@ export default function StepAgreement({ young }) {
                       Voir
                     </span>
                   </button>
-                  {/* <button
+                  <button
                     onClick={() =>
                       setModal({
                         isOpen: true,
@@ -188,7 +188,7 @@ export default function StepAgreement({ young }) {
                     <span young={young} uri="cohesion" className="text-blue-700 text-sm">
                       Recevoir par mail
                     </span>
-                  </button> */}
+                  </button>
                 </div>
               </div>
               {showConvocation ? (

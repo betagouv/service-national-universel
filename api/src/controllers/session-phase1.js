@@ -22,12 +22,13 @@ const {
   canAssignCohesionCenter,
   canShareSessionPhase1,
 } = require("snu-lib/roles");
-const { START_DATE_PHASE1, END_DATE_PHASE1, COHESION_STAY_END } = require("snu-lib/constants");
+const { START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib/constants");
 const { serializeSessionPhase1, serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
+const { COHESION_STAY_END } = require("snu-lib");
 
 const getCohesionCenterLocation = (cohesionCenter) => {
   let t = "";
