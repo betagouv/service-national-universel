@@ -350,7 +350,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
     return false;
   }).length;
 
-  if (applicationsCount > 15)
+  if (applicationsCount >= 15)
     return (
       <div className="flex flex-col items-center justify-center gap-2">
         <div className="text-red-500 text-xs text-center">Vous ne pouvez candidater qu'à 15 missions différentes.</div>

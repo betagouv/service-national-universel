@@ -320,7 +320,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
     return false;
   }).length;
 
-  if (applicationsCount > 15)
+  if (applicationsCount >= 15)
     return (
       <div className="flex flex-col items-center gap-2">
         <WithTooltip tooltipText="Vous ne pouvez candidater qu'à 15 missions différentes.">
