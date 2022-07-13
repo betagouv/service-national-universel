@@ -178,15 +178,18 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     </body>
 </html>`;
 
-  const subHtml = `<img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" />
-    <div class="container">
-      <div class="text-center l4">
-        <p>{{TO}}, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
-        <p>pour la réalisation de son <strong>séjour de cohésion</strong>, {{COHESION_DATE}}, au centre de :</p>
-        <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
-        <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
-        <br />
-        <p class="text-date">Fait le {{DATE}}</p>
+  const subHtml = `
+  <div style="position: relative; margin: 0;min-height:100vh;width:100%;max-height:100vh;">
+    <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" />
+      <div class="container">
+        <div class="text-center l4">
+          <p>{{TO}}, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
+          <p>pour la réalisation de son <strong>séjour de cohésion</strong>, {{COHESION_DATE}}, au centre de :</p>
+          <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
+          <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
+          <br />
+          <p class="text-date">Fait le {{DATE}}</p>
+        </div>
       </div>
     </div>`;
 
@@ -200,7 +203,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       subHtml
         .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
         .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
-        .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort].toLowerCase()))
+        .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort]?.toLowerCase()))
         .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
         .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
         .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
