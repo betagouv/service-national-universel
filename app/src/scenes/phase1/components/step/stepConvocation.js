@@ -153,7 +153,7 @@ export default function StepAgreement({ young }) {
               <div className="flex flex-col items-center justify-center">
                 <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
                 {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
-                {/* <div className="w-full" onClick={handleDownload}>
+                <div className="w-full" onClick={handleDownload}>
                   <DownloadConvocationButton
                     young={young}
                     uri="cohesion"
@@ -161,7 +161,7 @@ export default function StepAgreement({ young }) {
                     <HiOutlineDownload className="h-5 w-5 text-blue-300 mr-2" />
                     Télécharger
                   </DownloadConvocationButton>
-                </div> */}
+                </div>
                 <div className="flex w-full flex-row flex-shrink items-center py-2">
                   <button
                     type="button"

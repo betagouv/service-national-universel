@@ -38,7 +38,7 @@ export default function ApplyModal({ value, onChange, onSend, onCancel }) {
     };
 
     if (ENABLE_PM && value.isMilitaryPreparation === "true") {
-      if (!["WAITING_VALIDATION", "WAITING_CORRECTION"].includes(young.statusMilitaryPreparationFiles)) {
+      if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
         application.status = APPLICATION_STATUS.WAITING_VALIDATION;
       } else {
         application.status = APPLICATION_STATUS.WAITING_VERIFICATION;

@@ -62,7 +62,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, young, appli
                   }}
                   className="p-2 border rounded-lg hover:bg-blue-600 hover:text-white flex justify-between space-x-2">
                   <div>{translateModelFields("mission", option)}</div>
-                  {application[option]?.length !== 0 && <div className="font-bold">{application[option].length}</div>}
+                  {application[option]?.length !== 0 && <div className="font-bold">{application[option]?.length}</div>}
                 </div>
               ))}
             </div>

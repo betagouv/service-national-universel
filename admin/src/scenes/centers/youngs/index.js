@@ -399,14 +399,12 @@ export default function CenterYoungIndex() {
         <div className="flex items-center justify-between">
           <div className="font-bold text-2xl mb-4">Volontaires</div>
           <div className="flex items-center gap-2">
-            <WithTooltip tooltipText="Suite au remaniement ministériel du 4 juillet 2022, les nouvelles attestations ne sont pas encore disponibles. Elles le seront très prochainement">
-              <button
-                disabled={true}
-                // onClick={() => viewAttestation()}
-                className="flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 bg-blue-600 text-white font-medium text-sm">
-                Exporter les attestations
-              </button>
-            </WithTooltip>
+            <button
+              disabled={loading}
+              onClick={() => viewAttestation()}
+              className="flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-wait bg-blue-600 text-white font-medium text-sm">
+              Exporter les attestations
+            </button>
             <SelectAction
               title="Exporter les volontaires"
               alignItems="right"

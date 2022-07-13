@@ -28,6 +28,7 @@ const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
+const { COHESION_STAY_END } = require("snu-lib");
 
 const getCohesionCenterLocation = (cohesionCenter) => {
   let t = "";
@@ -40,17 +41,15 @@ const getCohesionCenterLocation = (cohesionCenter) => {
   return t;
 };
 
-const getTemplate = (date) => {
+const getMinistres = (date) => {
   if (!date) return;
   for (const item of MINISTRES) {
-    if (date < new Date(item.date_end)) return item.template;
+    if (date < new Date(item.date_end)) return item;
   }
 };
 
-const destinataireLabel = ({ firstName, lastName }, template) => {
-  const isPluriel = template !== "certificates/certificateTemplate_2022.png";
-
-  return `félicite${isPluriel ? "nt" : ""} <strong>${firstName} ${lastName}</strong>`;
+const destinataireLabel = ({ firstName, lastName }, ministres) => {
+  return `félicite${ministres.length > 1 ? "nt" : ""} <strong>${firstName} ${lastName}</strong>`;
 };
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -166,8 +165,6 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
   const youngs = await YoungModel.find(body);
 
-  if (youngs[0].cohort === "Juillet 2022") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_TEMPORARY_NOT_ALLOWED });
-
   let html = `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -181,28 +178,32 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     </body>
 </html>`;
 
-  const subHtml = `<img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" />
-    <div class="container">
-      <div class="text-center l4">
-        <p>{{TO}}, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
-        <p>pour la réalisation de son <strong>séjour de cohésion</strong>, {{COHESION_DATE}}, au centre de :</p>
-        <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
-        <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
-        <br />
-        <p class="text-date">Fait le {{DATE}}</p>
+  const subHtml = `
+  <div style="position: relative; margin: 0;min-height:100vh;width:100%;max-height:100vh;">
+    <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" />
+      <div class="container">
+        <div class="text-center l4">
+          <p>{{TO}}, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
+          <p>pour la réalisation de son <strong>séjour de cohésion</strong>, {{COHESION_DATE}}, au centre de :</p>
+          <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
+          <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
+          <br />
+          <p class="text-date">Fait le {{DATE}}</p>
+        </div>
       </div>
     </div>`;
 
-  const d = END_DATE_PHASE1[youngs[0].cohort];
-  const template = getTemplate(d);
+  const d = COHESION_STAY_END[youngs[0].cohort];
+  const ministresData = getMinistres(d);
+  const template = ministresData.template;
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   const data = [];
   for (const young of youngs) {
     data.push(
       subHtml
-        .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, template)))
+        .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
         .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
-        .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort].toLowerCase()))
+        .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort]?.toLowerCase()))
         .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
         .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
         .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))

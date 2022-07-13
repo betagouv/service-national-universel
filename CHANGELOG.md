@@ -1,3 +1,25 @@
+# [1.111.0](https://github.com/betagouv/service-national-universel/compare/v1.110.0...v1.111.0) (2022-07-12)
+
+
+### Bug Fixes
+
+* **app:** hide attestation jeune mobile ([d07661d](https://github.com/betagouv/service-national-universel/commit/d07661d6a85b9d50b50bcf19bea78126a1df4feb))
+* (admin) hide button attestations phase1 ([6fc7c2c](https://github.com/betagouv/service-national-universel/commit/6fc7c2ce1c2fe9f9d142ef723b358078b1bc261c))
+* **admin:** blank page view mission ([0207290](https://github.com/betagouv/service-national-universel/commit/0207290c2ae2c8c2bd3fae0d52d4c36b41990c53))
+* **admin:** file PM ([#1668](https://github.com/betagouv/service-national-universel/issues/1668)) ([b892a3d](https://github.com/betagouv/service-national-universel/commit/b892a3dfced54bddb82d10d870d8a751be9dbe41))
+* **app:** blank page view mission ([1535bdd](https://github.com/betagouv/service-national-universel/commit/1535bdda16ec61904b83d9e1c01413b296b7ce0d))
+* **app:** hide mail convocation mobile ([1e76f00](https://github.com/betagouv/service-national-universel/commit/1e76f00fdf591bbf1fce650dac5bd408c4477bef))
+* **app:** ouverture des heures retour sur les convocations ([#1670](https://github.com/betagouv/service-national-universel/issues/1670)) ([7e47b50](https://github.com/betagouv/service-national-universel/commit/7e47b50317f480f6d3d01d11016a6f040bb9a495))
+* **app:** status candidature/PM ([a4e871b](https://github.com/betagouv/service-national-universel/commit/a4e871be6668ec27a56d00a8c45a98ca6c63f1e4))
+* (admin)  Block download attestation loading-effect ([238543e](https://github.com/betagouv/service-national-universel/commit/238543ee645b6b96fad0c5a6ae8c28d4cfb15fe4))
+* (admin)  Block download for head centers ([7725d95](https://github.com/betagouv/service-national-universel/commit/7725d95c783928784bf9df0005cc54feefba272d))
+* Téléchargement par centre ([#1665](https://github.com/betagouv/service-national-universel/issues/1665)) ([7fe722a](https://github.com/betagouv/service-national-universel/commit/7fe722a7b288f90f1ee142e6a586712779c6d0a6))
+
+
+### Features
+
+* **app, admin, api:** Televersement fichier phase2  ([#1661](https://github.com/betagouv/service-national-universel/issues/1661)) ([4bfabbf](https://github.com/betagouv/service-national-universel/commit/4bfabbfb582ca4cb8833a0b0f452291cb89a51b5))
+
 # [1.110.0](https://github.com/betagouv/service-national-universel/compare/v1.109.0...v1.110.0) (2022-07-11)
 
 

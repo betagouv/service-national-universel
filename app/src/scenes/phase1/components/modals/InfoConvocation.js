@@ -136,7 +136,7 @@ export default function InfoConvocation({ isOpen, onCancel }) {
             </div>
             <ChevronDown className="text-white font-medium" />
           </button>
-          {/* display options */}
+
           <div className={`${selectOpen ? "block" : "hidden"}  rounded-lg !min-w-full bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
             <div
               key="download"

@@ -91,7 +91,6 @@ export default function Convocation() {
     return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = () => {
-    if (young.cohort === "Juillet 2022" && young.deplacementPhase1Autonomous !== "true") return "vendredi 15 juillet, 18:00";
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return returnMeetingDate[young.cohort]; // new Date("2021-07-02T12:00:00.000+00:00");
     return meetingPoint.returnAtString;
   };
@@ -199,9 +198,6 @@ export default function Convocation() {
               .slice(0, 3)
               .join(" ")}
             , au même endroit que le jour du départ en centre.
-            {young?.cohort === "Juillet 2022" && young?.deplacementPhase1Autonomous !== "true"
-              ? "(Cet horaire est donné à titre indicatif, il vous sera confirmé ultérieurement.)"
-              : null}
           </ConvocText>
         ) : null}
         <ConvocText>
