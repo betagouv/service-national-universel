@@ -13,7 +13,6 @@ import Eye from "../../../assets/icons/Eye";
 export default function IndexPhase2Mobile() {
   const young = useSelector((state) => state.Auth.young);
   const [applications, setApplications] = React.useState();
-  const [applicationsTotal, setApplicationsTotal] = React.useState();
   const [toggleButtonDisplayHidden, setToggleButtonDisplayHidden] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
