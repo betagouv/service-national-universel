@@ -313,7 +313,7 @@ export default function viewDesktop() {
 
 const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young }) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
-    if (obj.includes("WAITING")) {
+    if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
       return true;
     }
 

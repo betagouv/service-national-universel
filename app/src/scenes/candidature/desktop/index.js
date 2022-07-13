@@ -28,14 +28,6 @@ export default function IndexDesktop() {
     }
   };
 
-  const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
-    if (obj.includes("WAITING")) {
-      return true;
-    }
-
-    return false;
-  }).length;
-
   React.useEffect(() => {
     getApplications();
   }, []);
@@ -71,7 +63,6 @@ export default function IndexDesktop() {
           <div className="text-gray-300 text-sm mt-2 mb-4">
             <div>L&apos;ordre de vos choix de missions sera pris en compte pour l&apos;attribution de votre MIG.</div>
             <div>Pour modifier l&apos;ordre, attrapez la droite du bloc et déplacez-le.</div>
-            <div>Vous candidatez actuellement à {applicationsCount} missions (limite : 15).</div>
           </div>
           <div className="flex space-x-2 items-center">
             <ToggleVisibility value={toggleButtonDisplayHidden} onClick={() => setToggleButtonDisplayHidden((e) => !e)} />

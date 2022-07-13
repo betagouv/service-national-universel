@@ -343,7 +343,7 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
 
 const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young }) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
-    if (obj.includes("WAITING")) {
+    if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
       return true;
     }
 
