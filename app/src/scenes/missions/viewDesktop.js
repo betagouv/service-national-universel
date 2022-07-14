@@ -29,15 +29,12 @@ import XCircle from "../../assets/icons/XCircle";
 import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
 import rubberStampValided from "../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
-import { HiChevronDown, HiOutlineEye, HiOutlineMail, HiOutlineDownload } from "react-icons/hi";
+import { HiChevronDown, HiOutlineMail, HiOutlineDownload, HiPlus } from "react-icons/hi";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import downloadPDF from "../../utils/download-pdf";
-import { AiOutlineClockCircle } from "react-icons/ai";
 import ModalPJ from "./components/ModalPJ";
 import { BsChevronDown } from "react-icons/bs";
-import { HiPlus } from "react-icons/hi";
 import FileCard from "./../../scenes/militaryPreparation/components/FileCard";
-
 
 export default function viewDesktop() {
   const [mission, setMission] = useState();
