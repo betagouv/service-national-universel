@@ -8,7 +8,6 @@ export default function Item({ title, subtitle, to, status, handleClick, disable
   const [color, setColor] = useState();
   const [strokeColor, setStrokeColor] = useState();
   const [icon, setIcon] = useState();
-  //console.log(status);
 
   const translator = (el) => {
     if (to === "/phase1") {
