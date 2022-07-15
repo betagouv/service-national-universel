@@ -12,7 +12,7 @@ import Download from "../../assets/icons/Download";
 import Unlock from "../../assets/icons/Unlock";
 import XCircleFill from "../../assets/icons/XCircleFill";
 import api from "../../services/api";
-import { END_DATE_PHASE, translate } from "../../utils";
+import { COHESION_STAY_END, translate } from "../../utils";
 import downloadPDF from "../../utils/download-pdf";
 import InfoConvocation from "./components/modals/InfoConvocation";
 
@@ -84,7 +84,7 @@ export default function Done() {
                     Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
                   </div>
                   <div className="flex gap-5 items-center">
-                    {now < END_DATE_PHASE[young.cohort] ? (
+                    {now < COHESION_STAY_END[young.cohort] ? (
                       <button
                         className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium hover:border-gray-500"
                         onClick={() => setModalOpen({ isOpen: true })}>
@@ -306,7 +306,7 @@ export default function Done() {
             Vous avez réalisé votre séjour de cohésion. <br /> Bravo pour votre participation à cette aventure unique !
           </div>
           <div className="flex flex-col gap-3 items-center py-3">
-            {now < END_DATE_PHASE[young.cohort] ? (
+            {now < COHESION_STAY_END[young.cohort] ? (
               <button
                 className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs leading-4 font-medium whitespace-nowrap"
                 onClick={() => setModalOpen({ isOpen: true })}>
