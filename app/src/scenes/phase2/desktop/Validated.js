@@ -13,6 +13,8 @@ import CardMission from "./components/CardMission";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import { FiMail } from "react-icons/fi";
 import Download from "../../../assets/icons/Download";
+/* import Car from "../../../assets/icons/car"; */
+import Voiture from "../../../assets/Voiture";
 
 export default function ValidatedDesktop() {
   const young = useSelector((state) => state.Auth.young);
@@ -103,7 +105,7 @@ export default function ValidatedDesktop() {
         </div>
       </div>
       <div className="mx-10 mb-14">
-        <div className="text-xl leading-7 font-bold text-center lg:!text-left mt-10 lg:!mt-0">Mes attestations</div>
+        {/* <div className="text-xl leading-7 font-bold text-center lg:!text-left mt-10 lg:!mt-0">Mes attestations</div> */}
         <div className="flex gap-7 mt-6 flex-col items-center  lg:!flex-row">
           {/* Bouton attestation phase 2 */}
 
@@ -230,14 +232,26 @@ export default function ValidatedDesktop() {
           </div>
 
           {/* Lien code de la route */}
-
-          <div className="flex flex-col w-full border-[1px] border-gray-200 hover:border-gray-300 rounded-lg py-2 px-3 cursor-pointer">
-            <div className="flex flex-1 items-start justify-between">
-              <div className="font-bold flex-1 text-gray-800">N'oubliez pas !</div>
-            </div>
-            <div className="text-sm text-gray-600">
-              Vous bénéficiez d'une première présentation <strong>gratuite</strong> à l'examen du code de la route <i>(sous condition d'avoir également validé votre phase 1)</i>.
-            </div>
+          <div className="w-full border-[1px] border-gray-200 hover:border-gray-300 rounded-lg cursor-pointer">
+            <a
+              href={`https://support.snu.gouv.fr/base-de-connaissance/permis-et-code-de-la-route`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex flex-row flex-1 gap-1 items-start p-3">
+              <div className="self-center mr-2">
+                <Voiture />
+              </div>
+              <div className="w-full flex-row">
+                <div className="flex flex-1 items-start justify-around">
+                  <div className="font-bold flex-1 text-gray-800">N'oubliez pas !</div>
+                  <ArrowUpRight className="text-gray-400 text-2xl group-hover:scale-105" />
+                </div>
+                <div className="text-sm text-gray-600">
+                  Vous bénéficiez d'une première présentation <strong>gratuite</strong> à l'examen du code de la route{" "}
+                  <i>(sous condition d'avoir également validé votre phase 1)</i>.
+                </div>
+              </div>
+            </a>
           </div>
         </div>
       </div>
