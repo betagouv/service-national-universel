@@ -228,6 +228,17 @@ export default function ValidatedDesktop() {
               </a>
             </div>
           </div>
+
+          {/* Lien code de la route */}
+
+          <div className="flex flex-col w-full border-[1px] border-gray-200 hover:border-gray-300 rounded-lg py-2 px-3 cursor-pointer">
+            <div className="flex flex-1 items-start justify-between">
+              <div className="font-bold flex-1 text-gray-800">N'oubliez pas !</div>
+            </div>
+            <div className="text-sm text-gray-600">
+              Vous bénéficiez d'une première présentation <strong>gratuite</strong> à l'examen du code de la route <i>(sous condition d'avoir également validé votre phase 1)</i>.
+            </div>
+          </div>
         </div>
       </div>
     </div>
