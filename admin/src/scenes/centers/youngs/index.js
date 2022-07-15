@@ -605,7 +605,7 @@ const transformData = async ({ data, centerId }) => {
       "Département représentant légal 2": data.parent2Department,
       "Région représentant légal 2": data.parent2Region,
       "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-      Statut: translate(data.status),
+      "Statut général": translate(data.status),
       "Statut Phase 1": translatePhase1(data.statusPhase1),
       "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
       "Message de desistement": data.withdrawnMessage,

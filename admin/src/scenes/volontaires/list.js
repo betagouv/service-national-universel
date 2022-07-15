@@ -336,7 +336,7 @@ export default function VolontaireList() {
                           "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
                           "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
                           "UAI de l'établissement": data.esSchool?.uai,
-                          Statut: translate(data.status),
+                          "Statut général": translate(data.status),
                           "Statut Phase 1": translate(data.statusPhase1),
                         };
                       });
@@ -379,7 +379,7 @@ export default function VolontaireList() {
                           "Région de l'établissement": department2region[departmentLookUp[data.esSchool?.region]] || department2region[data.schoolDepartment],
                           "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
                           "UAI de l'établissement": data.esSchool?.uai,
-                          Statut: translate(data.status),
+                          "Statut général": translate(data.status),
                           "Statut Phase 1": translate(data.statusPhase1),
                         };
                       });

@@ -122,7 +122,7 @@ export default function List() {
                       Ville: data.city,
                       Département: data.department,
                       Région: data.region,
-                      Statut: translate(data.status),
+                      "Statut général": translate(data.status),
                       Motif: data.statusComment,
                       "Créé lé": formatLongDateFR(data.createdAt),
                       "Mis à jour le": formatLongDateFR(data.updatedAt),
