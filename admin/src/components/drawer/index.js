@@ -61,11 +61,12 @@ const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   );
 };
 
-const DrawerConnectToZammood = ({ title, children }) => {
+const DrawerConnectToZammood = ({ title, children, history }) => {
   async function connectToZammood() {
     try {
       const { ok, data } = await api.get(`/zammood/signin`);
       if (ok) window.open(data, "_blank", "noopener,noreferrer");
+      else history.push("/boite-de-reception");
     } catch (e) {
       console.log(e);
     }
@@ -167,7 +168,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
   );
 }
 
-function referent({ user, onClick, newTickets, openedTickets, closedTickets, tickets, from }) {
+function referent({ user, onClick, newTickets, openedTickets, closedTickets, tickets, from, history }) {
   return (
     <>
       <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} />
@@ -202,7 +203,7 @@ function referent({ user, onClick, newTickets, openedTickets, closedTickets, tic
           )}
         </DrawerTabWithIcons>
       ) : (
-        <DrawerConnectToZammood title="Boîte de réception">
+        <DrawerConnectToZammood title="Boîte de réception" history={history}>
           {!tickets ? (
             <div />
           ) : (
@@ -312,7 +313,7 @@ const Drawer = (props) => {
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
               {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
+                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
             </ul>
           </div>
@@ -327,7 +328,7 @@ const Drawer = (props) => {
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
               {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-                referent({ onClick: handleClick, user, newTickets, openedTickets, closedTickets, tickets, from })}
+                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
             </ul>
           </div>
