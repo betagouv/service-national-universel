@@ -1,3 +1,10 @@
+## [1.111.2](https://github.com/betagouv/service-national-universel/compare/v1.111.1...v1.111.2) (2022-07-15)
+
+
+### Bug Fixes
+
+* (admin) Replace statut with statut général in excel génération ([7c52aa7](https://github.com/betagouv/service-national-universel/commit/7c52aa7058d52b273da0bca30a2f4e000f9edfe2))
+
 ## [1.111.1](https://github.com/betagouv/service-national-universel/compare/v1.111.0...v1.111.1) (2022-07-13)
 
 
