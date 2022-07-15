@@ -217,15 +217,17 @@ export default function viewDesktop() {
           {contractHasAllValidation(contract, young) ? (
             <div className="relative">
               <div className="flex ">
-                <div className="bg-blue-600 rounded-xl px-2 py-1 flex items-center text-white text-xs " onClick={() => setOpenContractDropdown(!openContractDropdown)}>
+                <div
+                  className="bg-blue-600 rounded-full px-2 py-2 flex items-center text-white text-xs cursor-pointer"
+                  onClick={() => setOpenContractDropdown(!openContractDropdown)}>
                   <div className=" ">Contrat d’engagement</div>
                   <HiChevronDown />
                 </div>
               </div>
               <div
-                className={`${openContractDropdown ? "block" : "hidden"}  rounded-lg bg-white transition absolute top-[calc(100%+8px)] shadow overflow-hidden z-20 
-                 divide-y divide-slate-200 `}>
-                <div className="flex items-center space-x-2   text-gray-600 p-2 " onClick={() => viewContract(contract._id)}>
+                className={`${openContractDropdown ? "block" : "hidden"} rounded-lg bg-white transition absolute top-[calc(100%+8px)] shadow overflow-hidden z-20 
+                 divide-y divide-slate-200 cursor-pointer`}>
+                <div className="flex items-center space-x-2 text-gray-600 p-2" onClick={() => viewContract(contract._id)}>
                   <HiOutlineDownload />
                   <div className="text-sm">Télécharger</div>
                 </div>
@@ -553,7 +555,7 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
           </div>
         </div>
         {tutor ? (
-          <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6">
+          <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6 mb-4">
             <div className="flex flex-col gap-1">
               <div className="text-sm font-bold">Contacter mon tuteur</div>
               <div className="text-xs text-gray-600">

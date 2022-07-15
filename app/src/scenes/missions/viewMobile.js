@@ -26,7 +26,7 @@ import { MdOutlineContentCopy } from "react-icons/md";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
-import { HiChevronDown, HiOutlineEye, HiOutlineMail, HiOutlineDownload, HiPlus} from "react-icons/hi";
+import { HiChevronDown, HiOutlineEye, HiOutlineMail, HiOutlineDownload, HiPlus } from "react-icons/hi";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import downloadPDF from "../../utils/download-pdf";
 import WithTooltip from "../../components/WithTooltip";
@@ -35,7 +35,6 @@ import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
 import { BsChevronDown } from "react-icons/bs";
 import ModalPJ from "./components/ModalPJ";
 import FileCard from "../militaryPreparation/components/FileCard";
-
 
 export default function viewMobile() {
   const [mission, setMission] = useState();
@@ -601,7 +600,7 @@ const ApplicationStatus = ({
           )}
         </div>
         {tutor ? (
-          <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6">
+          <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6 mb-4">
             <div className="flex flex-col gap-1">
               <div className="text-sm font-bold">Contacter mon tuteur</div>
               <div className="text-xs text-gray-600">
