@@ -13,7 +13,6 @@ import CardMission from "./components/CardMission";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import { FiMail } from "react-icons/fi";
 import Download from "../../../assets/icons/Download";
-/* import Car from "../../../assets/icons/car"; */
 import Voiture from "../../../assets/Voiture";
 
 export default function ValidatedDesktop() {
