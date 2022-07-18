@@ -550,15 +550,44 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     const { youngId, key, fileName } = value;
 
     const young = await YoungModel.findById(youngId);
-    let center = null;
-    const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-    if (sessionPhase1) center = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (req.user.role === ROLES.HEAD_CENTER) {
-      if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (sessionPhase1.headCenterId !== req.user.id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    } else if (!canViewYoungFile(req.user, young, center)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    switch (req.user.role) {
+      case ROLES.HEAD_CENTER: {
+        const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+        if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const center = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
+        if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (sessionPhase1.headCenterId !== req.user.id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        break;
+      }
+      case ROLES.SUPERVISOR:
+      case ROLES.RESPONSIBLE: {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] }).cursor();
+        if (!structures) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (!structures.reduce((acc, curr) => acc || canViewYoungFile(req.user, young, curr), false))
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+        // ? Use better check link between structure and young ! + Check for tutorId as well ?
+        // const test = await new Promise().any(
+        //   structures.eachAsync(async (structure) => {
+        //     // console.log("🚀 ~ file: referent.js ~ line 570 ~ test ~ structure", structure);
+        //     const applications = await ApplicationModel.find({ structureId: structure._id.toString(), youngId: youngId });
+        //     return applications.length > 0 ? true : false;
+        //   }),
+        // );
+        // if (!test) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        break;
+      }
+      case ROLES.REFERENT_DEPARTMENT:
+      case ROLES.REFERENT_REGION: {
+        if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        break;
+      }
+      default:
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
