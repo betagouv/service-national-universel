@@ -38,6 +38,7 @@ export default function Contract({ young, admin }) {
     saveButton: false,
     submitButton: false,
   });
+
   useEffect(() => {
     const getApplication = async () => {
       if (!young) return;
@@ -56,6 +57,7 @@ export default function Contract({ young, admin }) {
     };
     getApplication();
   }, []);
+
   useEffect(() => {
     const getMission = async () => {
       if (!application) return;
@@ -65,6 +67,7 @@ export default function Contract({ young, admin }) {
     };
     getMission();
   }, [application]);
+
   useEffect(() => {
     const getTutor = async () => {
       try {
@@ -81,6 +84,7 @@ export default function Contract({ young, admin }) {
     };
     getTutor();
   }, [application]);
+
   useEffect(() => {
     const getManagerDepartment = async () => {
       try {
@@ -98,6 +102,7 @@ export default function Contract({ young, admin }) {
     };
     getManagerDepartment();
   }, [young]);
+
   useEffect(() => {
     const getStructure = async () => {
       if (!application) return;
@@ -265,7 +270,7 @@ export default function Contract({ young, admin }) {
               firstName={contract?.structureManagerFirstName}
               validationDate={contract?.structureManagerValidationDate}
             />
-            {!isYoungAdult ? (
+            {contract.isYoungAdult === "false" || isYoungAdult === "false" ? (
               <>
                 <ContractStatusBadge
                   title="Représentant légal 1"
