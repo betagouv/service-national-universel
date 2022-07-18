@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import { useSelector, connect } from "react-redux";
-import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors } from "../../utils";
+import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors, department2region } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
 import SuccessIcon from "../SuccessIcon";
@@ -107,7 +107,7 @@ function supervisor({ onClick, from }) {
   );
 }
 
-function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage }) {
+function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage, history }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -121,88 +121,6 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
       {ssoSupportStorage === "sso-support" ? (
-        <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
-          {!tickets ? (
-            <div />
-          ) : (
-            <>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-                <div>{newTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-                <div>{openedTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
-                <div>{closedTickets}</div>
-              </div>
-            </>
-          )}
-        </DrawerTabWithIcons>
-      ) : (
-        <DrawerConnectToZammood title="Boîte de réception">
-          {!tickets ? (
-            <div />
-          ) : (
-            <>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-                <div>{newTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-                <div>{openedTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
-                <div>{closedTickets}</div>
-              </div>
-            </>
-          )}
-        </DrawerConnectToZammood>
-      )}
-      <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
-    </>
-  );
-}
-
-function referent({ user, onClick, newTickets, openedTickets, closedTickets, tickets, from, history }) {
-  return (
-    <>
-      <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} />
-      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
-      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
-      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
-      <DrawerTab to="/centre" title="Centres" onClick={onClick} />
-      <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
-      <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
-      <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      {user.region !== "Normandie" ? (
-        <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={connectToZammood}>
-          {!tickets ? (
-            <div />
-          ) : (
-            <>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-                <div>{newTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-                <div>{openedTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
-                <div>{closedTickets}</div>
-              </div>
-            </>
-          )}
-        </DrawerTabWithIcons>
-      ) : (
         <DrawerConnectToZammood title="Boîte de réception" history={history}>
           {!tickets ? (
             <div />
@@ -223,6 +141,88 @@ function referent({ user, onClick, newTickets, openedTickets, closedTickets, tic
             </>
           )}
         </DrawerConnectToZammood>
+      ) : (
+        <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
+          {!tickets ? (
+            <div />
+          ) : (
+            <>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{newTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{openedTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+                <div>{closedTickets}</div>
+              </div>
+            </>
+          )}
+        </DrawerTabWithIcons>
+      )}
+      <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
+    </>
+  );
+}
+
+function referent({ user, onClick, newTickets, openedTickets, closedTickets, tickets, from, history }) {
+  return (
+    <>
+      <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} />
+      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
+      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
+      <DrawerTab to="/centre" title="Centres" onClick={onClick} />
+      <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
+      <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
+      <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
+      {department2region[user.department] === "Normandie" || user.region === "Normandie" || user.email === "helene.dubourdieu@gmail.com" ? (
+        <DrawerConnectToZammood title="Boîte de réception" history={history}>
+          {!tickets ? (
+            <div />
+          ) : (
+            <>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{newTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{openedTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+                <div>{closedTickets}</div>
+              </div>
+            </>
+          )}
+        </DrawerConnectToZammood>
+      ) : (
+        <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
+          {!tickets ? (
+            <div />
+          ) : (
+            <>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{newTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{openedTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+                <div>{closedTickets}</div>
+              </div>
+            </>
+          )}
+        </DrawerTabWithIcons>
       )}
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
@@ -281,7 +281,7 @@ const Drawer = (props) => {
       let query = undefined;
       if (user.role === ROLES.ADMIN) query = {};
       else if (user.role === ROLES.REFERENT_DEPARTMENT) query = { department: user.department, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
-      else if (user.role === ROLES.REFERENT_REGION) query = { region: department2region[user.region], subject: "J'ai une question", role: "young", canal: "PLATFORM" };
+      else if (user.role === ROLES.REFERENT_REGION) query = { region: department2region[user.department], subject: "J'ai une question", role: "young", canal: "PLATFORM" };
 
       const getTickets = async (query) => {
         const { ok, data } = await api.post(`/zammood/tickets`, query);
@@ -311,7 +311,7 @@ const Drawer = (props) => {
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage, history })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
@@ -326,7 +326,7 @@ const Drawer = (props) => {
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, history })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
                 referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
