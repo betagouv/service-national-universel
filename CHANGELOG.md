@@ -1,3 +1,10 @@
+# [1.112.0](https://github.com/betagouv/service-national-universel/compare/v1.111.2...v1.112.0) (2022-07-18)
+
+
+### Features
+
+* **admin:** open sso support ([#1674](https://github.com/betagouv/service-national-universel/issues/1674)) ([3226c9d](https://github.com/betagouv/service-national-universel/commit/3226c9dc0914bff1b0b10eba817cb236f3923c6b))
+
 ## [1.111.2](https://github.com/betagouv/service-national-universel/compare/v1.111.1...v1.111.2) (2022-07-15)
 
 
