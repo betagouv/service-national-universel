@@ -104,7 +104,6 @@ export default function ValidatedDesktop() {
         </div>
       </div>
       <div className="mx-10 mb-14">
-        {/* <div className="text-xl leading-7 font-bold text-center lg:!text-left mt-10 lg:!mt-0">Mes attestations</div> */}
         <div className="flex gap-7 mt-6 flex-col items-center  lg:!flex-row">
           {/* Bouton attestation phase 2 */}
 

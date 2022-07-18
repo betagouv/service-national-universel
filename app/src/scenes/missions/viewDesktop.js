@@ -272,7 +272,7 @@ export default function viewDesktop() {
                         firstName={contract?.parent1FirstName}
                         lastName={contract?.parent1LastName}
                       />
-                      {contract?.parent2Status && !contract?.parent2Status && (
+                      {contract?.parent2Email && (
                         <StatusContractPeople
                           value={contract?.parent2Status}
                           description="Représentant légal 2"
@@ -698,9 +698,9 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
         fileName: `contrat ${young.firstName} ${young.lastName} - ${missionName}.pdf`,
       });
       if (ok) return toastr.success(`Document envoyé à ${young.email}`);
-      else return toastr.error("Erreur lors de l'envoie du document", translate(code));
+      else return toastr.error("Erreur lors de l'envoi du document", translate(code));
     } catch (e) {
-      toastr.error("Erreur lors de l'envoie du document");
+      toastr.error("Erreur lors de l'envoi du document");
       console.log(e);
     }
   };
@@ -713,7 +713,7 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
           setModalMail({
             isOpen: true,
             onConfirm,
-            title: "Envoie du document par mail",
+            title: "Envoi du document par mail",
             message: `Vous allez recevoir le document par mail à l'adresse ${young.email}.`,
           })
         }>

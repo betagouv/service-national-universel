@@ -100,7 +100,6 @@ export default function ValidatedMobile() {
         </div>
       </div>
       <div className="mx-4 my-5">
-        {/* <div className="text-lg leading-7 font-bold text-left">Mes attestations</div> */}
         <div className="flex gap-7 mt-6 flex-col w-full">
           {/* Bouton attestation phase 2 */}
 
