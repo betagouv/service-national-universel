@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import { useSelector, connect } from "react-redux";
-import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors } from "../../utils";
+import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors, department2region } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
 import SuccessIcon from "../SuccessIcon";
@@ -48,20 +48,6 @@ const HelpButton = ({ onClick, to }) => (
   </div>
 );
 
-const SupportButton = ({}) => (
-  <div
-    className="justify-center flex p-8"
-    onClick={async () => {
-      const { ok, data } = await api.get(`/zammood/signin`);
-      if (ok) window.location.href = data;
-    }}>
-    <div className=" items-center border rounded flex p-2 hover:!text-white hover:bg-snu-purple-800 hover:shadow-lg" activeClassName="flex bg-snu-purple-300 p-2">
-      <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px", "padding-left": "6px" }} />
-      <div className=" font-normal text-sm text-center  ">Boîte de réception</div>
-    </div>
-  </div>
-);
-
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
     <div onClick={onClick} className="hover:bg-snu-purple-800 hover:shadow-lg block">
@@ -71,6 +57,29 @@ const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
           <div className="flex content-center">{children}</div>
         </div>
       </NavLink>
+    </div>
+  );
+};
+
+const DrawerConnectToZammood = ({ title, children, history }) => {
+  async function connectToZammood() {
+    try {
+      const { ok, data } = await api.get(`/zammood/signin`);
+      if (ok) window.open(data, "_blank", "noopener,noreferrer");
+      else history.push("/boite-de-reception");
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  return (
+    <div onClick={connectToZammood} className="hover:bg-snu-purple-800 hover:shadow-lg block cursor-pointer">
+      <div className=" py-3 pl-3 text-base block hover:!text-white">
+        <div>
+          <div>{title}</div>
+          <div className="flex content-center">{children}</div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -98,7 +107,7 @@ function supervisor({ onClick, from }) {
   );
 }
 
-function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage }) {
+function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage, history }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -111,33 +120,55 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets, fro
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
-        {!tickets ? (
-          <div />
-        ) : (
-          <>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-              <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-              <div>{newTickets}</div>
-            </div>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-              <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-              <div>{openedTickets}</div>
-            </div>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-              <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
-              <div>{closedTickets}</div>
-            </div>
-          </>
-        )}
-      </DrawerTabWithIcons>
-      {ssoSupportStorage === "sso-support" && <SupportButton />}
+      {ssoSupportStorage === "sso-support" ? (
+        <DrawerConnectToZammood title="Boîte de réception" history={history}>
+          {!tickets ? (
+            <div />
+          ) : (
+            <>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{newTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{openedTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+                <div>{closedTickets}</div>
+              </div>
+            </>
+          )}
+        </DrawerConnectToZammood>
+      ) : (
+        <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
+          {!tickets ? (
+            <div />
+          ) : (
+            <>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{newTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{openedTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+                <div>{closedTickets}</div>
+              </div>
+            </>
+          )}
+        </DrawerTabWithIcons>
+      )}
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
 
-function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, from }) {
+function referent({ user, onClick, newTickets, openedTickets, closedTickets, tickets, from, history }) {
   return (
     <>
       <DrawerTab to="/equipe" title="Mon équipe" onClick={onClick} />
@@ -150,26 +181,49 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets, 
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
-        {!tickets ? (
-          <div />
-        ) : (
-          <>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-              <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-              <div>{newTickets}</div>
-            </div>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-              <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-              <div>{openedTickets}</div>
-            </div>
-            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-              <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
-              <div>{closedTickets}</div>
-            </div>
-          </>
-        )}
-      </DrawerTabWithIcons>
+      {user.email === "helene.dubourdieu@gmail.com" ? (
+        <DrawerConnectToZammood title="Boîte de réception" history={history}>
+          {!tickets ? (
+            <div />
+          ) : (
+            <>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{newTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{openedTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+                <div>{closedTickets}</div>
+              </div>
+            </>
+          )}
+        </DrawerConnectToZammood>
+      ) : (
+        <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
+          {!tickets ? (
+            <div />
+          ) : (
+            <>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{newTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+                <div>{openedTickets}</div>
+              </div>
+              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+                <div>{closedTickets}</div>
+              </div>
+            </>
+          )}
+        </DrawerTabWithIcons>
+      )}
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
@@ -227,7 +281,7 @@ const Drawer = (props) => {
       let query = undefined;
       if (user.role === ROLES.ADMIN) query = {};
       else if (user.role === ROLES.REFERENT_DEPARTMENT) query = { department: user.department, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
-      else if (user.role === ROLES.REFERENT_REGION) query = { region: department2region[user.region], subject: "J'ai une question", role: "young", canal: "PLATFORM" };
+      else if (user.role === ROLES.REFERENT_REGION) query = { region: user.region, subject: "J'ai une question", role: "young", canal: "PLATFORM" };
 
       const getTickets = async (query) => {
         const { ok, data } = await api.post(`/zammood/tickets`, query);
@@ -257,9 +311,9 @@ const Drawer = (props) => {
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, ssoSupportStorage, history })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
+                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
             </ul>
           </div>
@@ -272,9 +326,9 @@ const Drawer = (props) => {
               {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick, sessionPhase1, from })}
               {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick, from })}
               {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick, from })}
-              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
+              {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, history })}
               {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from })}
+                referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets, from, user, history })}
               {user.role === ROLES.VISITOR && visitor({ user, onClick: handleClick, from })}
             </ul>
           </div>
