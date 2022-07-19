@@ -182,26 +182,6 @@ export default function ValidatedMobile() {
               </div>
             </div>
           </div>
-
-          <div className="rounded-lg bg-gray-50 px-4 py-8">
-            <div className="flex flex-col">
-              <div className="text-sm leading-none font-normal text-gray-800 whitespace-nowrap">Attestation SNU</div>
-              <div className="flex items-center flex-1 mt-2 gap-x-4">
-                <button
-                  disabled={loading.attestationSNU}
-                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end bg-blue-600 text-white disabled:opacity-50 disabled:cursor-wait text-sm"
-                  onClick={() => viewAttestation({ uri: "snu", button: "attestationSNU" })}>
-                  {loading.attestationSNU ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Télécharger
-                </button>
-                <button
-                  disabled={loading.mailSNU}
-                  className="flex gap-2 items-center border-[1px] border-blue-600 rounded-md px-4 py-1.5 mt-3 justify-self-end text-blue-600 bg-white whitespace-nowrap disabled:opacity-50 disabled:cursor-wait text-sm"
-                  onClick={() => sendAttestation({ type: "snu", template: "certificate", button: "mailSNU" })}>
-                  {loading.mailSNU ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : null} Envoyer par mail
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
         <div className="text-lg leading-7 font-bold text-left my-4">Mes missions réalisées</div>
         <div className="flex flex-col gap-4 mt-12">
