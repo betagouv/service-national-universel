@@ -273,7 +273,7 @@ export default function Index() {
                 </>
               ) : null}
             </PreferenceItem>
-            <PreferenceItem title="Avez-vous déjà une idée de là où vous voudriez réaliser votre mission d'intérêt général ? (Optionel)">
+            <PreferenceItem title="Avez-vous déjà une idée de là où vous voudriez réaliser votre mission d'intérêt général ? (Optionnel)">
               <Input
                 type="textarea"
                 rows={3}
