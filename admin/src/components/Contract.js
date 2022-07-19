@@ -270,7 +270,7 @@ export default function Contract({ young, admin }) {
               firstName={contract?.structureManagerFirstName}
               validationDate={contract?.structureManagerValidationDate}
             />
-            {contract.isYoungAdult === "false" || isYoungAdult === "false" ? (
+            {contract?.isYoungAdult === "false" || isYoungAdult === "false" ? (
               <>
                 <ContractStatusBadge
                   title="Représentant légal 1"
