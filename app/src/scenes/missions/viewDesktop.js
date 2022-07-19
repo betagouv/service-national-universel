@@ -26,10 +26,14 @@ import { IoMdInformationCircleOutline } from "react-icons/io";
 import { MdOutlineContentCopy } from "react-icons/md";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
-import { AiOutlineClockCircle } from "react-icons/ai";
+import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
+import rubberStampValided from "../../assets/rubberStampValided.svg";
+import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
+import { HiChevronDown, HiOutlineMail, HiOutlineDownload, HiPlus } from "react-icons/hi";
+import ModalConfirm from "../../components/modals/ModalConfirm";
+import downloadPDF from "../../utils/download-pdf";
 import ModalPJ from "./components/ModalPJ";
 import { BsChevronDown } from "react-icons/bs";
-import { HiPlus } from "react-icons/hi";
 import FileCard from "./../../scenes/militaryPreparation/components/FileCard";
 
 export default function viewDesktop() {
@@ -39,8 +43,11 @@ export default function viewDesktop() {
   const [disabledIncomplete, setDisabledIncomplete] = useState(false);
   const [disabledPmRefused, setDisabledPmRefused] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [contract, setContract] = useState(null);
+  const [openContractDropdown, setOpenContractDropdown] = useState();
   const [modalDocument, setModalDocument] = useState({ isOpen: false });
   const [openAttachments, setOpenAttachments] = useState(false);
+
   const history = useHistory();
 
   const young = useSelector((state) => state.Auth.young);
@@ -54,6 +61,17 @@ export default function viewDesktop() {
   };
 
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
+
+  useEffect(() => {
+    const getContract = async () => {
+      if (mission?.application?.contractId) {
+        const { ok, data, code } = await api.get(`/contract/${mission.application.contractId}`);
+        if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+        setContract(data);
+      }
+    };
+    getContract();
+  }, [mission?.application]);
 
   useEffect(() => {
     getMission();
@@ -114,12 +132,29 @@ export default function viewDesktop() {
     history.go(0);
   };
 
+  const contractHasAllValidation = (contract, young) => {
+    const isYoungAdult = contract.isYoungAdult === "true";
+    return (
+      contract.projectManagerStatus === "VALIDATED" &&
+      contract.structureManagerStatus === "VALIDATED" &&
+      ((isYoungAdult && contract.youngContractStatus === "VALIDATED") ||
+        (!isYoungAdult && contract.parent1Status === "VALIDATED" && (!young.parent2Email || contract.parent2Status === "VALIDATED")))
+    );
+  };
+
+  const viewContract = async (contractId) => {
+    await downloadPDF({
+      url: `/contract/${contractId}/download`,
+      fileName: `${young.firstName} ${young.lastName} - contrat ${contractId}.pdf`,
+    });
+  };
+
   if (!mission) return <Loader />;
 
   return (
     <div className="bg-white mx-4 pb-12 my-4 rounded-xl w-full">
       {/* BEGIN HEADER */}
-      <div className="flex flex-col lg:flex-row justify-between py-8 px-12 border-b-[1px] border-gray-100 gap-4">
+      <div className="flex flex-col lg:flex-row justify-between pt-8 px-12  border-gray-100 gap-4">
         <div className="flex gap-4">
           {/* icon */}
           <div className="flex items-center">
@@ -177,6 +212,82 @@ export default function viewDesktop() {
         </div>
       </div>
       {/* END HEADER */}
+      {contract && (
+        <div className=" mx-12 ">
+          {contractHasAllValidation(contract, young) ? (
+            <div className="relative">
+              <div className="flex ">
+                <div
+                  className="bg-blue-600 rounded-full px-2 py-2 flex items-center text-white text-xs cursor-pointer"
+                  onClick={() => setOpenContractDropdown(!openContractDropdown)}>
+                  <div className=" ">Contrat d’engagement</div>
+                  <HiChevronDown />
+                </div>
+              </div>
+              <div
+                className={`${openContractDropdown ? "block" : "hidden"} rounded-lg bg-white transition absolute top-[calc(100%+8px)] shadow overflow-hidden z-20 
+                 divide-y divide-slate-200 cursor-pointer`}>
+                <div className="flex items-center space-x-2 text-gray-600 p-2" onClick={() => viewContract(contract._id)}>
+                  <HiOutlineDownload />
+                  <div className="text-sm">Télécharger</div>
+                </div>
+                <SendContractByMail young={young} contractId={contract._id} missionName={contract.missionName} />
+                {/* <div className="flex items-center space-x-2   text-gray-600 p-2">
+                  <HiOutlineEye />
+                  <div className="text-sm">Voir</div>
+                </div> */}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-lg  px-10 py-6">
+              <div className="flex justify-between">
+                <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
+                <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
+                  <AiFillClockCircle className="text-sky-500" />
+                  <div>Contrat {contract?.invitationSent ? "envoyé" : "en brouillon"}</div>
+                </div>
+              </div>
+              <div className="text-sm mt-1">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
+              {contract?.invitationSent && (
+                <div className="grid gap-4 grid-cols-4   mt-4">
+                  <StatusContractPeople
+                    value={contract?.projectManagerStatus}
+                    description="Représentant de l’État"
+                    firstName={contract?.projectManagerFirstName}
+                    lastName={contract?.projectManagerLastName}
+                  />
+                  <StatusContractPeople
+                    value={contract?.structureManagerStatus}
+                    description="Représentant de la structure"
+                    firstName={contract?.structureManagerFirstName}
+                    lastName={contract?.structureManagerLastName}
+                  />
+                  {contract?.isYoungAdult === "true" ? (
+                    <StatusContractPeople value={contract?.youngContractStatus} description="Volontaire" firstName={contract?.youngFirstName} lastName={contract?.youngLastName} />
+                  ) : (
+                    <>
+                      <StatusContractPeople
+                        value={contract?.parent1Status}
+                        description="Représentant légal 1"
+                        firstName={contract?.parent1FirstName}
+                        lastName={contract?.parent1LastName}
+                      />
+                      {contract?.parent2Email && (
+                        <StatusContractPeople
+                          value={contract?.parent2Status}
+                          description="Représentant légal 2"
+                          firstName={contract?.parent2FirstName}
+                          lastName={contract?.parent2LastName}
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="flex flex-col lg:flex-row my-8 ">
         <div className="flex flex-col w-full lg:w-1/2 px-12">
@@ -198,7 +309,6 @@ export default function viewDesktop() {
               mission.startAt && mission.endAt ? `Du ${formatStringDateTimezoneUTC(mission.startAt)} au ${formatStringDateTimezoneUTC(mission.endAt)}` : "Aucune date renseignée"
             }
           />
-
           <Detail title="Fréquence" content={mission.frequence} />
           {mission.duration ? <Detail title="Durée estimée" content={`${mission.duration} heure(s)`} /> : null}
           <Detail title="Période pour réaliser la mission" content={mission.period} />
@@ -465,7 +575,7 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
           </div>
         </div>
         {tutor ? (
-          <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6">
+          <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6 mb-4">
             <div className="flex flex-col gap-1">
               <div className="text-sm font-bold">Contacter mon tuteur</div>
               <div className="text-xs text-gray-600">
@@ -579,5 +689,67 @@ const InfoStructure = ({ title, structure }) => {
     </div>
   ) : (
     <div />
+  );
+};
+
+const StatusContractPeople = ({ value, description, firstName, lastName }) => (
+  <div className="flex items-center ">
+    <WithTooltip tooltipText={`${value === "VALIDATED" ? "" : "En attente de signature"}`}>
+      <div className="mr-2">
+        {value === "VALIDATED" ? <img src={rubberStampValided} alt="rubberStampValided" /> : <img src={rubberStampNotValided} alt="rubberStampNotValided" />}
+      </div>
+    </WithTooltip>
+    <div>
+      <div className="flex font-semibold space-x-2">
+        <div>{firstName}</div>
+        <div>{lastName?.toUpperCase()}</div>
+      </div>
+      <div className="text-gray-500 text-xs">{description}</div>
+    </div>
+  </div>
+);
+
+const SendContractByMail = ({ young, contractId, missionName }) => {
+  const [modalMail, setModalMail] = useState({ isOpen: false, onConfirm: null });
+
+  const onConfirm = async () => {
+    try {
+      const { ok, code } = await api.post(`/young/${young._id}/documents/contract/2/send-email?contract_id=${contractId}`, {
+        fileName: `contrat ${young.firstName} ${young.lastName} - ${missionName}.pdf`,
+      });
+      if (ok) return toastr.success(`Document envoyé à ${young.email}`);
+      else return toastr.error("Erreur lors de l'envoi du document", translate(code));
+    } catch (e) {
+      toastr.error("Erreur lors de l'envoi du document");
+      console.log(e);
+    }
+  };
+
+  return (
+    <>
+      <div
+        className="flex items-center space-x-2   text-gray-600 p-2"
+        onClick={() =>
+          setModalMail({
+            isOpen: true,
+            onConfirm,
+            title: "Envoi du document par mail",
+            message: `Vous allez recevoir le document par mail à l'adresse ${young.email}.`,
+          })
+        }>
+        <HiOutlineMail />
+        <div className="text-sm">Envoyer par mail</div>
+      </div>
+      <ModalConfirm
+        isOpen={modalMail?.isOpen}
+        title={modalMail?.title}
+        message={modalMail?.message}
+        onCancel={() => setModalMail({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modalMail?.onConfirm();
+          setModalMail({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </>
   );
 };
