@@ -130,7 +130,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
 
     if (["WAITING_CORRECTION", "VALIDATED", "REFUSED"].includes(value.status) && req.user?.role) {
       if (young.statusPhase2 !== "VALIDATED" && value.status === "VALIDATED") {
-        young.set({ statusPhase2: "VALIDATED" });
+        young.set({ statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
       }
       if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
         const applications = await ApplicationModel.find({ youngId: young._id });
