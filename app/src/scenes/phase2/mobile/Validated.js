@@ -10,7 +10,6 @@ import { copyToClipboard, translate } from "../../../utils";
 import downloadPDF from "../../../utils/download-pdf";
 import CardEquivalence from "./components/CardEquivalence";
 import CardMission from "./components/CardMission";
-import { Spinner } from "reactstrap";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import Download from "../../../assets/icons/Download";
 import { FiMail } from "react-icons/fi";

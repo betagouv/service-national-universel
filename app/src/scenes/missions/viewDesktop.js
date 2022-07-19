@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import DoubleDayTile from "../../components/DoubleDayTile";
@@ -29,12 +29,14 @@ import XCircle from "../../assets/icons/XCircle";
 import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
 import rubberStampValided from "../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
-import { HiChevronDown, HiOutlineMail, HiOutlineDownload, HiPlus } from "react-icons/hi";
+import { HiOutlineMail, HiPlus } from "react-icons/hi";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import downloadPDF from "../../utils/download-pdf";
 import ModalPJ from "./components/ModalPJ";
 import { BsChevronDown } from "react-icons/bs";
 import FileCard from "./../../scenes/militaryPreparation/components/FileCard";
+import ChevronDown from "../../assets/icons/ChevronDown";
+import Download from "../../assets/icons/Download";
 
 export default function viewDesktop() {
   const [mission, setMission] = useState();
@@ -44,9 +46,11 @@ export default function viewDesktop() {
   const [disabledPmRefused, setDisabledPmRefused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [contract, setContract] = useState(null);
-  const [openContractDropdown, setOpenContractDropdown] = useState();
+  const [openContractButton, setOpenContractButton] = useState();
   const [modalDocument, setModalDocument] = useState({ isOpen: false });
   const [openAttachments, setOpenAttachments] = useState(false);
+
+  const refContractButton = React.useRef();
 
   const history = useHistory();
 
@@ -103,6 +107,18 @@ export default function viewDesktop() {
     }
   }, [mission, young]);
 
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (refContractButton.current && !refContractButton.current.contains(event.target)) {
+        setOpenContractButton(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
   const getTags = () => {
     const tags = [];
     mission.city && tags.push(mission.city + (mission.zip ? ` - ${mission.zip}` : ""));
@@ -154,6 +170,7 @@ export default function viewDesktop() {
   return (
     <div className="bg-white mx-4 pb-12 my-4 rounded-xl w-full">
       {/* BEGIN HEADER */}
+
       <div className="flex flex-col lg:flex-row justify-between pt-8 px-12  border-gray-100 gap-4">
         <div className="flex gap-4">
           {/* icon */}
@@ -212,30 +229,39 @@ export default function viewDesktop() {
         </div>
       </div>
       {/* END HEADER */}
+
+      {/* Bouton de contrat */}
+
       {contract && (
-        <div className=" mx-12 ">
+        <div className="flex gap-7 mt-6 ml-12 flex-col w-1/6">
           {contractHasAllValidation(contract, young) ? (
-            <div className="relative">
-              <div className="flex ">
-                <div
-                  className="bg-blue-600 rounded-full px-2 py-2 flex items-center text-white text-xs cursor-pointer"
-                  onClick={() => setOpenContractDropdown(!openContractDropdown)}>
-                  <div className=" ">Contrat d’engagement</div>
-                  <HiChevronDown />
+            <div className="relative" ref={refContractButton}>
+              <button
+                disabled={loading}
+                className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 hover:border-blue-500 hover:bg-blue-500 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
+                onClick={() => setOpenContractButton((e) => !e)}>
+                <div className="flex items-center gap-2">
+                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d'engagement</span>
                 </div>
-              </div>
+                <ChevronDown className="text-white font-medium" />
+              </button>
+              {/* display options */}
               <div
-                className={`${openContractDropdown ? "block" : "hidden"} rounded-lg bg-white transition absolute top-[calc(100%+8px)] shadow overflow-hidden z-20 
-                 divide-y divide-slate-200 cursor-pointer`}>
-                <div className="flex items-center space-x-2 text-gray-600 p-2" onClick={() => viewContract(contract._id)}>
-                  <HiOutlineDownload />
-                  <div className="text-sm">Télécharger</div>
+                className={`${
+                  openContractButton ? "block" : "hidden"
+                }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+                <div
+                  key="download"
+                  onClick={() => {
+                    viewContract(contract._id);
+                    setOpenContractButton(false);
+                  }}>
+                  <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                    <Download className="text-gray-400 w-4 h-4" />
+                    <div>Télécharger</div>
+                  </div>
                 </div>
                 <SendContractByMail young={young} contractId={contract._id} missionName={contract.missionName} />
-                {/* <div className="flex items-center space-x-2   text-gray-600 p-2">
-                  <HiOutlineEye />
-                  <div className="text-sm">Voir</div>
-                </div> */}
               </div>
             </div>
           ) : (
@@ -728,7 +754,7 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
   return (
     <>
       <div
-        className="flex items-center space-x-2   text-gray-600 p-2"
+        className="ml-2 flex items-center space-x-2 text-gray-800 p-2 hover:bg-gray-50 cursor-pointer"
         onClick={() =>
           setModalMail({
             isOpen: true,
