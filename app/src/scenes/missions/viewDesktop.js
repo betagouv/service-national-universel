@@ -756,7 +756,7 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
   return (
     <>
       <div
-        className="ml-2 flex items-center space-x-2 text-gray-800 p-2 hover:bg-gray-50 cursor-pointer"
+        className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer"
         onClick={() =>
           setModalMail({
             isOpen: true,

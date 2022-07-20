@@ -636,7 +636,7 @@ const ApplicationStatus = ({
                     setOpenContractButton(false);
                     setLoading(false);
                   }}>
-                  <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                  <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 cursor-pointer">
                     <Download className="text-gray-400 w-4 h-4" />
                     <div>Télécharger</div>
                   </div>
@@ -812,7 +812,7 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
   return (
     <>
       <div
-        className="flex px-3 items-center space-x-2 text-gray-600 p-2 cursor-pointer"
+        className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 cursor-pointer"
         onClick={() =>
           setModalMail({
             isOpen: true,
