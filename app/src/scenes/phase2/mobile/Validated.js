@@ -187,7 +187,7 @@ export default function ValidatedMobile() {
           {equivalences.map((equivalence, index) => (
             <CardEquivalence key={index} equivalence={equivalence} young={young} />
           ))}
-          <div className="flex gap-8 w-full overflow-auto">
+          <div className="flex gap-8 w-full flex-wrap">
             {applications
               .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)) // afficher d'abord les candidatures mis a jour récemment
               .map((application) => (
