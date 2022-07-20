@@ -1,3 +1,10 @@
+# [1.114.0](https://github.com/betagouv/service-national-universel/compare/v1.113.0...v1.114.0) (2022-07-20)
+
+
+### Features
+
+* **admin:** open support sso Normandie ([#1679](https://github.com/betagouv/service-national-universel/issues/1679)) ([3b49537](https://github.com/betagouv/service-national-universel/commit/3b4953761bb3f6f4a57c21ef21cc364ebd7bd487))
+
 # [1.113.0](https://github.com/betagouv/service-national-universel/compare/v1.112.0...v1.113.0) (2022-07-19)
 
 
