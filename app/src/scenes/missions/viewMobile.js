@@ -631,8 +631,10 @@ const ApplicationStatus = ({
                 <div
                   key="download"
                   onClick={() => {
+                    setLoading(true);
                     viewContract(contract._id);
                     setOpenContractButton(false);
+                    setLoading(false);
                   }}>
                   <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
                     <Download className="text-gray-400 w-4 h-4" />
@@ -810,7 +812,7 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
   return (
     <>
       <div
-        className="flex items-center space-x-2 text-gray-600 p-2 cursor-pointer"
+        className="flex px-3 items-center space-x-2 text-gray-600 p-2 cursor-pointer"
         onClick={() =>
           setModalMail({
             isOpen: true,
@@ -819,8 +821,8 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
             message: `Vous allez recevoir le document par mail à l'adresse ${young.email}.`,
           })
         }>
-        <HiOutlineMail />
-        <div className="text-sm">Envoyer par mail</div>
+        <HiOutlineMail className="text-gray-400 w-4 h-4" />
+        <div className="text-sm text-gray-800">Envoyer par mail</div>
       </div>
       <ModalConfirm
         isOpen={modalMail?.isOpen}
