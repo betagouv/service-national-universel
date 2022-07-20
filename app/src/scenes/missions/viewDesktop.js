@@ -505,6 +505,17 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
 
 const ApplicationStatus = ({ application, tutor, mission, updateApplication, loading, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom }) => {
   const [message, setMessage] = React.useState(null);
+  const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
+
+  const cancelApp = async () => {
+    !loading;
+    updateApplication(APPLICATION_STATUS.CANCEL);
+  };
+
+  const cancelMission = async () => {
+    !loading;
+    updateApplication(APPLICATION_STATUS.ABANDON);
+  };
 
   useEffect(() => {
     if (disabledIncomplete) setMessage("Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page");
@@ -536,62 +547,101 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
       ABANDON: "text-gray-400",
     },
   };
+
   if (["WAITING_VALIDATION", "WAITING_VERIFICATION", "REFUSED", "CANCEL"].includes(application.status)) {
     return (
-      <div className="flex flex-col justify-center items-center lg:items-end gap-4">
-        <div className="flex items-center gap-6">
-          {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? (
-            <div
-              className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
-              onClick={() => !loading && updateApplication(APPLICATION_STATUS.CANCEL)}>
-              <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
-              <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Annuler cette candidature</div>
+      <>
+        <div className="flex flex-col justify-center items-center lg:items-end gap-4">
+          <div className="flex items-center gap-6">
+            {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? (
+              <div
+                className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
+                onClick={() =>
+                  setCancelModal({
+                    isOpen: true,
+                    onConfirm: cancelApp,
+                    title: "Êtes-vous sûr ?",
+                    message: "Vous vous apprêtez à annuler votre candidature. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
+                  })
+                }>
+                <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
+                <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Annuler cette candidature</div>
+              </div>
+            ) : null}
+            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+              {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
             </div>
-          ) : null}
-          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
-            {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
+          </div>
+          <div className="text-xs leading-none font-normal text-gray-500">
+            Places disponibles : {mission.placesLeft}/{mission.placesTotal}{" "}
           </div>
         </div>
-        <div className="text-xs leading-none font-normal text-gray-500">
-          Places disponibles : {mission.placesLeft}/{mission.placesTotal}{" "}
-        </div>
-      </div>
+        <ModalConfirm
+          isOpen={cancelModal?.isOpen}
+          title={cancelModal?.title}
+          message={cancelModal?.message}
+          onCancel={() => setCancelModal({ isOpen: false, onConfirm: null })}
+          onConfirm={() => {
+            cancelModal?.onConfirm();
+            setCancelModal({ isOpen: false, onConfirm: null });
+          }}
+        />
+      </>
     );
   }
   if (["IN_PROGRESS", "VALIDATED", "DONE", "ABANDON"].includes(application.status)) {
     return (
-      <div className="flex flex-col justify-center items-center lg:items-end gap-4">
-        <div className="flex items-center gap-6">
-          {["IN_PROGRESS", "VALIDATED"].includes(application.status) ? (
-            <div
-              className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
-              onClick={() => !loading && updateApplication(APPLICATION_STATUS.ABANDON)}>
-              <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
-              <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Abandonner la mission</div>
+      <>
+        <div className="flex flex-col justify-center items-center lg:items-end gap-4">
+          <div className="flex items-center gap-6">
+            {["IN_PROGRESS", "VALIDATED"].includes(application.status) ? (
+              <div
+                className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
+                onClick={() => {
+                  setCancelModal({
+                    isOpen: true,
+                    onConfirm: cancelMission,
+                    title: "Êtes-vous sûr ?",
+                    message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
+                  });
+                }}>
+                <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
+                <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Abandonner la mission</div>
+              </div>
+            ) : null}
+            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+              {translateApplication(application.status)}
+            </div>
+          </div>
+          {tutor ? (
+            <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6 mb-4">
+              <div className="flex flex-col gap-1">
+                <div className="text-sm font-bold">Contacter mon tuteur</div>
+                <div className="text-xs text-gray-600">
+                  {tutor.firstName} {tutor.lastName} - {tutor.email}
+                </div>
+              </div>
+              <MdOutlineContentCopy
+                className="text-gray-400 hover:text-blue-600 cursor-pointer h-4 w-4"
+                onClick={() => {
+                  copyToClipboard(tutor.email);
+                  toastr.info("L'email de votre tuteur a été copié dans le presse-papier");
+                }}
+              />
             </div>
           ) : null}
-          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
-            {translateApplication(application.status)}
-          </div>
         </div>
-        {tutor ? (
-          <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6 mb-4">
-            <div className="flex flex-col gap-1">
-              <div className="text-sm font-bold">Contacter mon tuteur</div>
-              <div className="text-xs text-gray-600">
-                {tutor.firstName} {tutor.lastName} - {tutor.email}
-              </div>
-            </div>
-            <MdOutlineContentCopy
-              className="text-gray-400 hover:text-blue-600 cursor-pointer h-4 w-4"
-              onClick={() => {
-                copyToClipboard(tutor.email);
-                toastr.info("L'email de votre tuteur a été copié dans le presse-papier");
-              }}
-            />
-          </div>
-        ) : null}
-      </div>
+        <ModalConfirm
+          isOpen={cancelModal?.isOpen}
+          title={cancelModal?.title}
+          message={cancelModal?.message}
+          onCancel={() => setCancelModal({ isOpen: false, onConfirm: null })}
+          onConfirm={() => {
+            cancelModal?.onConfirm();
+            setCancelModal({ isOpen: false, onConfirm: null });
+          }}
+        />
+      </>
     );
   }
 
