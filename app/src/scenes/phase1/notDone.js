@@ -18,7 +18,7 @@ export default function NotDone() {
           <p>
             <b>Votre phase 1 n&apos;est donc pas validée.</b>
           </p>
-          <p>Nous vous invitons à vous rapprocher de votre référent déparemental pour la suite de votre parcours.</p>
+          <p>Nous vous invitons à vous rapprocher de votre référent départemental pour la suite de votre parcours.</p>
           {youngCanChangeSession(young) ? <Button to="/changer-de-sejour">Changer mes dates de séjour de cohésion</Button> : null}
         </div>
         <div className="thumb" />
