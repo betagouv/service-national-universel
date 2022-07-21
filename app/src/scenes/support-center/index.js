@@ -1,9 +1,10 @@
 import React from "react";
-import { Switch, Route, Redirect } from "react-router-dom";
+import { Switch, Redirect } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import Dashboard from "./dashboard";
 import Ticket from "./ticket";
+import { SentryRoute } from "../../sentry";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
@@ -15,8 +16,8 @@ export default function Index() {
 
   return (
     <Switch>
-      <Route path="/besoin-d-aide/ticket" component={Ticket} />
-      <Route path="/besoin-d-aide" component={Dashboard} />
+      <SentryRoute path="/besoin-d-aide/ticket" component={Ticket} />
+      <SentryRoute path="/besoin-d-aide" component={Dashboard} />
     </Switch>
   );
 }

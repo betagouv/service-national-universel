@@ -1,4 +1,5 @@
 require("dotenv").config({ path: "./.env-staging" });
+const { initSentry } = require("./sentry");
 
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -21,6 +22,7 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 const app = express();
+const registerSentryErrorHandler = initSentry(app);
 app.use(helmet());
 
 // if (ENVIRONMENT === "development") {
@@ -41,7 +43,13 @@ function handleError(err, req, res, next) {
 }
 
 const origin = [APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, "https://inscription.snu.gouv.fr"];
-app.use(cors({ credentials: true, origin }));
+app.use(
+  cors({
+    credentials: true,
+    origin,
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Referer", "User-Agent", "sentry-trace", "baggage"],
+  }),
+);
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.text({ limit: "50mb", type: "application/x-ndjson" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
@@ -82,8 +90,6 @@ app.use("/educonnect", require("./controllers/educonnect"));
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));
 
-app.use(handleError);
-
 app.get("/", async (req, res) => {
   // ! Memory usage
   // const formatMemoryUsage = (data) => `${Math.round((data / 1024 / 1024) * 100) / 100} MB`;
@@ -100,6 +106,9 @@ app.get("/", async (req, res) => {
   const d = new Date();
   res.status(200).send("SNU " + d.toLocaleString());
 });
+
+registerSentryErrorHandler();
+app.use(handleError);
 
 require("./passport")();
 
