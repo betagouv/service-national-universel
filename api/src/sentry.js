@@ -4,8 +4,10 @@ const { Integrations: TracingIntegrations } = require("@sentry/tracing");
 const { SENTRY_URL } = require("./config");
 
 function initSentry(app) {
+  console.log(SENTRY_URL);
   init({
     enabled: Boolean(SENTRY_URL),
+    debug: true,
     dsn: SENTRY_URL,
     environment: "api",
     normalizeDepth: 16,
