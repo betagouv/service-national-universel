@@ -5,6 +5,7 @@ import styled from "styled-components";
 import Download from "../assets/icons/Download";
 import { requiredMessage } from "../scenes/inscription/components/errorMessage";
 import ModalConfirm from "./modals/ModalConfirm";
+import latinize from "latinize";
 
 function getFileName(file) {
   return (file && file.name) || file;
@@ -59,7 +60,8 @@ export default function DndFileInput({
           if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
           if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
           const fileName = files[i].name.match(/(.*)(\..*)/);
-          const newName = `${fileName[1]}-${filesList.length + i}${fileName[2]}`;
+          const safeName = latinize(fileName[1]).replace(/[^A-Z0-9]/gi, "_");
+          const newName = `${safeName}-${filesList.length + i}${fileName[2]}`;
           Object.defineProperty(files[i], "name", {
             writable: true,
             value: newName,
@@ -77,7 +79,8 @@ export default function DndFileInput({
       if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
       if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
       const fileName = files[i].name.match(/(.*)(\..*)/);
-      const newName = `${fileName[1]}-${filesList.length + index}${fileName[2]}`;
+      const safeName = latinize(fileName[1]).replace(/[^A-Z0-9]/gi, "_");
+      const newName = `${safeName}-${filesList.length + index}${fileName[2]}`;
       Object.defineProperty(files[i], "name", {
         writable: true,
         value: newName,
