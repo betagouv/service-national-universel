@@ -652,7 +652,6 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
     });
   } catch (error) {
     capture(error);
-    console.log(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
