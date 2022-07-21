@@ -1,5 +1,5 @@
-const { captureException: sentryCaptureException, captureMessage: sentryCaptureMessage, ExtraErrorData, RewriteFrames } = require("@sentry/integrations");
-const { Integrations: NodeIntegrations, init, Handlers } = require("@sentry/node");
+const { ExtraErrorData, RewriteFrames } = require("@sentry/integrations");
+const { captureException: sentryCaptureException, captureMessage: sentryCaptureMessage, Integrations: NodeIntegrations, init, Handlers } = require("@sentry/node");
 const { Integrations: TracingIntegrations } = require("@sentry/tracing");
 const { SENTRY_URL } = require("./config");
 
