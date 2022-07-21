@@ -19,7 +19,7 @@ function initSentry(app) {
       new TracingIntegrations.Mongo({ useMongoose: true }),
       new TracingIntegrations.Express({ app }),
     ],
-    tracesSampleRate: Number(1.0),
+    tracesSampleRate: Number(0.5),
   });
 
   // The request handler must be the first middleware on the app
