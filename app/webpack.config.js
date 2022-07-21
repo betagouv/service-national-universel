@@ -29,7 +29,7 @@ module.exports = () => {
       // sentry-cli configuration - can also be done directly through sentry-cli
       // see https://docs.sentry.io/product/cli/configuration/ for details
       authToken: process.env.SENTRY_AUTH_TOKEN,
-      org: "selego",
+      org: "sentry",
       project: process.env.STAGING !== "true" ? "snu-production-app" : "snu-staging-app",
       url: "https://sentry.selego.co/",
       // release: process.env.SENTRY_RELEASE,
