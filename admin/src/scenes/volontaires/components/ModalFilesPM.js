@@ -9,6 +9,7 @@ import ModalButton from "../../../components/buttons/ModalButton";
 import { Footer, ModalContainer } from "../../../components/modals/Modal";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
+import latinize from "latinize";
 
 function getFileName(file) {
   return (file && file.name) || file;
@@ -44,7 +45,8 @@ export default function ModalFilesPM({ isOpen, onCancel, initialValues, young, n
       if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
       if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
       const fileName = files[i].name.match(/(.*)(\..*)/);
-      const newName = `${fileName[1]}-${filesList.length + index}${fileName[2]}`;
+      const safeName = latinize(fileName[1]).replace(/[^A-Z0-9]/gi, "_");
+      const newName = `${safeName}-${filesList.length + index}${fileName[2]}`;
       Object.defineProperty(files[i], "name", {
         writable: true,
         value: newName,
