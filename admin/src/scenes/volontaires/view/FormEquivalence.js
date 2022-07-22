@@ -10,7 +10,6 @@ import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import validator from "validator";
 import InformationCircle from "../../../assets/icons/InformationCircle";
-import { slugifyFileName } from "../../../utils";
 
 export default function FormEquivalence({ young, onChange }) {
   const optionsType = ["Service Civique", "BAFA", "Jeune Sapeur Pompier"];
@@ -50,7 +49,7 @@ export default function FormEquivalence({ young, onChange }) {
       if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
       if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
       const fileName = files[i].name.match(/(.*)(\..*)/);
-      const newName = `${slugifyFileName(fileName[1])}-${filesList.length + index}${fileName[2]}`;
+      const newName = `${fileName[1]}-${filesList.length + index}${fileName[2]}`;
       Object.defineProperty(files[i], "name", {
         writable: true,
         value: newName,
