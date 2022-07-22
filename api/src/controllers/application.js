@@ -165,7 +165,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     }
 
     // On vérifie que la candidature n'existe pas déjà en base de donnée.
-    const doublon = await ApplicationObject.findOne({ youngId: req.body.youngId, missionId: req.body.missionId });
+    const doublon = await ApplicationObject.findOne({ youngId: value.youngId, missionId: value.missionId });
     if (doublon) {
       console.error("Candidature déjà existante trouvée :", doublon);
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
