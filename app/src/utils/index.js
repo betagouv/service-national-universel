@@ -2,6 +2,7 @@ import passwordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
 export * from "snu-lib";
 import sanitizeHtml from "sanitize-html";
+import slugify from "slugify";
 
 export function getPasswordErrorMessage(v) {
   if (!v) return "Ce champ est obligatoire";
