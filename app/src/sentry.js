@@ -1,7 +1,7 @@
 import { ExtraErrorData, Offline, ReportingObserver } from "@sentry/integrations";
 import { init, reactRouterV5Instrumentation, withSentryRouting, captureException as sentryCaptureException, captureMessage as sentryCaptureMessage } from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
-import { SENTRY_URL, apiURL } from "./config";
+import { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
@@ -27,7 +27,7 @@ function initSentry() {
         types: ["crash", "deprecation", "intervention"],
       }),
     ],
-    tracesSampleRate: Number(process?.env?.SENTRY_TRACING_SAMPLE_RATE || 1.0),
+    tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE),
   });
 }
 
