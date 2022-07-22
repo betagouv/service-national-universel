@@ -25,7 +25,7 @@
     "@elastic/elasticsearch": "^7.14.0",
     "@selego/mongoose-elastic": "^1.4.0",
     "@sentry/integrations": "^7.7.0",
-    "@sentry/node": "^5.30.0",
+    "@sentry/node": "^7.7.0",
     "@sentry/tracing": "^7.7.0",
     "aws-sdk": "^2.1046.0",
     "aws4": "^1.10.1",
