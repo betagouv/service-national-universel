@@ -90,3 +90,7 @@ export const copyToClipboard = (text) => {
     });
   }
 };
+
+export function slugifyFileName(str) {
+  return slugify(str, { remove: /[^A-Z0-9]/gi });
+}

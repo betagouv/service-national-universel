@@ -7,7 +7,7 @@ import RoundDownloadButton from "./buttons/RoundDownloadButton";
 import IconButton from "./buttons/IconButton";
 import ModalConfirm from "./modals/ModalConfirm";
 import deleteIcon from "../assets/delete.svg";
-import slugify from "slugify";
+import { slugifyFileName } from "../utils";
 
 function getFileName(file) {
   return (file && file.name) || file;
@@ -20,8 +20,7 @@ export default function DndFileInput({ value, onChange, name, errorMessage = req
   function onAdd(files) {
     Object.keys(files).forEach((i) => {
       const fileName = files[i].name.match(/(.*)(\..*)/);
-      const safeName = slugify(fileName[1], { remove: /[^A-Z0-9]/gi });
-      const newName = `${safeName[1]}-${filesList.length}${fileName[2]}`;
+      const newName = `${slugifyFileName(fileName[1])}-${filesList.length}${fileName[2]}`;
       Object.defineProperty(files[i], "name", {
         writable: true,
         value: newName,
