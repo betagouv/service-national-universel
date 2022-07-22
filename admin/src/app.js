@@ -47,12 +47,12 @@ import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
 
 if (environment === "production") {
-  Sentry.init({
-    dsn: SENTRY_URL,
-    environment: "admin",
-    integrations: [new Integrations.BrowserTracing()],
-    tracesSampleRate: 1.0,
-  });
+  // Sentry.init({
+  //   dsn: SENTRY_URL,
+  //   environment: "admin",
+  //   integrations: [new Integrations.BrowserTracing()],
+  //   tracesSampleRate: 1.0,
+  // });
 }
 
 export default function App() {
