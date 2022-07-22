@@ -5,6 +5,7 @@ export * from "snu-lib";
 export * from "./translateFieldsModel";
 import { environment } from "../config";
 import sanitizeHtml from "sanitize-html";
+import slugify from "slugify";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
@@ -191,4 +192,8 @@ export const htmlCleaner = (text) => {
 export function urlWithScheme(url) {
   if (!/^https?:\/\//i.test(url)) return `http://${url}`;
   return url;
+}
+
+export function slugifyFileName(str) {
+  return slugify(str, { remove: /[^A-Z0-9]/gi });
 }
