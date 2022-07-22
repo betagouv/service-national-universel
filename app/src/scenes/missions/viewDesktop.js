@@ -648,7 +648,11 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
                 if (mission.isMilitaryPreparation === "true") {
                   const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
                   if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
-                  updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
+                  if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
+                    updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                  } else {
+                    updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
+                  }
                 } else {
                   updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
                 }
