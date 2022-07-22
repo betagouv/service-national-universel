@@ -1,13 +1,11 @@
 const { ExtraErrorData, RewriteFrames } = require("@sentry/integrations");
 const { captureException: sentryCaptureException, captureMessage: sentryCaptureMessage, Integrations: NodeIntegrations, init, Handlers } = require("@sentry/node");
 const { Integrations: TracingIntegrations } = require("@sentry/tracing");
-const { SENTRY_URL } = require("./config");
+const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE } = require("./config");
 
 function initSentry(app) {
-  console.log(SENTRY_URL);
   init({
     enabled: Boolean(SENTRY_URL),
-    debug: true,
     dsn: SENTRY_URL,
     environment: "api",
     normalizeDepth: 16,
@@ -19,7 +17,7 @@ function initSentry(app) {
       new TracingIntegrations.Mongo({ useMongoose: true }),
       new TracingIntegrations.Express({ app }),
     ],
-    tracesSampleRate: Number(0.5),
+    tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE || 0.5),
   });
 
   // The request handler must be the first middleware on the app

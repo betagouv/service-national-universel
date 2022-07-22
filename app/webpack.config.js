@@ -30,7 +30,7 @@ module.exports = () => {
       // see https://docs.sentry.io/product/cli/configuration/ for details
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: "sentry",
-      project: process.env.STAGING !== "true" ? "snu-production-app" : "snu-staging-app",
+      project: process.env.STAGING !== "true" ? "snu-production" : "snu-staging",
       url: "https://sentry.selego.co/",
       // release: process.env.SENTRY_RELEASE,
       environment: "app",

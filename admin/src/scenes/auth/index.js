@@ -1,6 +1,7 @@
 import React from "react";
-import { Route, Switch } from "react-router-dom";
+import { Switch } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { SentryRoute } from "../../sentry";
 
 import Reset from "./reset";
 import Forgot from "./forgot";
@@ -15,12 +16,12 @@ export default function AuthIndex() {
   return (
     <div className="flex flex-1 bg-white">
       <Switch>
-        <Route path="/auth/reset" component={Reset} />
-        <Route path="/auth/forgot" component={Forgot} />
-        <Route path="/auth/signup/invite" component={SignupInvite} />
-        <Route path="/auth/signup" component={Signup} />
-        <Route path="/auth/invitationexpired" component={InvitationExpired} />
-        <Route path="/auth" component={Signin} />
+        <SentryRoute path="/auth/reset" component={Reset} />
+        <SentryRoute path="/auth/forgot" component={Forgot} />
+        <SentryRoute path="/auth/signup/invite" component={SignupInvite} />
+        <SentryRoute path="/auth/signup" component={Signup} />
+        <SentryRoute path="/auth/invitationexpired" component={InvitationExpired} />
+        <SentryRoute path="/auth" component={Signin} />
       </Switch>
     </div>
   );
