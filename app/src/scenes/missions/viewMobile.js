@@ -685,7 +685,21 @@ const ApplicationStatus = ({
             <button
               className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
               disabled={loading}
-              onClick={() => updateApplication(APPLICATION_STATUS.WAITING_VALIDATION)}>
+              onClick={async () => {
+                if (mission.isMilitaryPreparation === "true") {
+                  if (!["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+                    const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
+                    if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
+                  }
+                  if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
+                    updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                  } else {
+                    updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
+                  }
+                } else {
+                  updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                }
+              }}>
               <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
               <span className="text-sm leading-5 font-medium text-white">Accepter</span>
             </button>
