@@ -10,6 +10,7 @@ import InformationCircle from "../../../assets/icons/InformationCircle";
 import PaperClip from "../../../assets/icons/PaperClip";
 import api from "../../../services/api";
 import validator from "validator";
+import slugify from "slugify";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -46,7 +47,8 @@ export default function EditEquivalence() {
       if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
       if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
       const fileName = files[i].name.match(/(.*)(\..*)/);
-      const newName = `${fileName[1]}-${filesList.length + index}${fileName[2]}`;
+      const safeName = slugify(fileName[1], { remove: /[^A-Z0-9]/gi });
+      const newName = `${safeName}-${filesList.length + index}${fileName[2]}`;
       Object.defineProperty(files[i], "name", {
         writable: true,
         value: newName,

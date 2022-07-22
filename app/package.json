@@ -62,7 +62,6 @@
     "hsts": "2.2.0",
     "i18n-iso-countries": "7.2.0",
     "isomorphic-fetch": "3.0.0",
-    "latinize": "^0.5.0",
     "less": "4.1.2",
     "less-loader": "7.3.0",
     "password-validator": "5.1.1",
@@ -88,6 +87,7 @@
     "redux": "4.1.2",
     "regenerator-runtime": "0.13.9",
     "sanitize-html": "^2.7.0",
+    "slugify": "^1.6.5",
     "snu-lib": "file:../lib",
     "styled-components": "5.3.3",
     "validator": "13.7.0"
