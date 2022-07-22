@@ -25,7 +25,7 @@ module.exports = () => {
         removeEmptyAttributes: true,
       },
     }),
-    process.env.STAGING !== "true" &&
+    false &&
       new SentryWebpackPlugin({
         // sentry-cli configuration - can also be done directly through sentry-cli
         // see https://docs.sentry.io/product/cli/configuration/ for details
