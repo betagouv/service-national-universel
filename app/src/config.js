@@ -7,6 +7,7 @@ let supportURL = "http://localhost:8083";
 let educonnectAllowed = true;
 let maintenance = false;
 let SENTRY_URL = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14";
+let SENTRY_TRACING_SAMPLE_RATE = 1.0;
 
 if (environment === "staging") {
   apiURL = "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
@@ -14,6 +15,7 @@ if (environment === "staging") {
   appURL = "https://app-66aba4d6-e5fc-4c74-b252-f55fb0e9d37f.cleverapps.io";
   supportURL = "https://app-9266b532-ff6e-4a6a-aeeb-e6ff7bb67f60.cleverapps.io";
   SENTRY_URL = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14";
+  SENTRY_TRACING_SAMPLE_RATE = 0.5;
 }
 if (environment === "production") {
   apiURL = "https://api.snu.gouv.fr";
@@ -22,6 +24,7 @@ if (environment === "production") {
   supportURL = "https://support.snu.gouv.fr";
   educonnectAllowed = false;
   SENTRY_URL = "https://d09670865360498e9567369808de4064@sentry.selego.co/13";
+  SENTRY_TRACING_SAMPLE_RATE = 0.5;
 }
 
 const S3PREFIX = "";
@@ -38,4 +41,4 @@ function getEnvironment() {
   return "production";
 }
 
-export { apiURL, S3PREFIX, SENTRY_URL, environment, franceConnectUrl, adminURL, appURL, supportURL, educonnectAllowed, maintenance };
+export { apiURL, S3PREFIX, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, environment, franceConnectUrl, adminURL, appURL, supportURL, educonnectAllowed, maintenance };
