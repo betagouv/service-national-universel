@@ -508,12 +508,10 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
   const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
 
   const cancelApp = async () => {
-    !loading;
     updateApplication(APPLICATION_STATUS.CANCEL);
   };
 
   const cancelMission = async () => {
-    !loading;
     updateApplication(APPLICATION_STATUS.ABANDON);
   };
 
@@ -557,6 +555,7 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
               <div
                 className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
                 onClick={() =>
+                  !loading &&
                   setCancelModal({
                     isOpen: true,
                     onConfirm: cancelApp,
@@ -597,14 +596,15 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
             {["IN_PROGRESS", "VALIDATED"].includes(application.status) ? (
               <div
                 className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
-                onClick={() => {
+                onClick={() =>
+                  !loading &&
                   setCancelModal({
                     isOpen: true,
                     onConfirm: cancelMission,
                     title: "Êtes-vous sûr ?",
                     message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
-                  });
-                }}>
+                  })
+                }>
                 <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
                 <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Abandonner la mission</div>
               </div>

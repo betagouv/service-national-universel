@@ -145,12 +145,10 @@ export default function viewMobile() {
   };
 
   const cancelApp = async () => {
-    !loading;
     updateApplication(APPLICATION_STATUS.CANCEL);
   };
 
   const cancelMission = async () => {
-    !loading;
     updateApplication(APPLICATION_STATUS.ABANDON);
   };
 
@@ -321,6 +319,7 @@ export default function viewMobile() {
               <button
                 className="group flex items-center gap-1 border-[1px] px-10 py-2 rounded-lg"
                 onClick={() =>
+                  !loading &&
                   setCancelModal({
                     isOpen: true,
                     onConfirm: cancelApp,
@@ -336,14 +335,15 @@ export default function viewMobile() {
             {["IN_PROGRESS", "VALIDATED"].includes(mission?.application.status) ? (
               <button
                 className="group flex items-center gap-1 border-[1px] px-10 py-2 rounded-lg"
-                onClick={() => {
+                onClick={() =>
+                  !loading &&
                   setCancelModal({
                     isOpen: true,
                     onConfirm: cancelMission,
                     title: "Êtes-vous sûr ?",
                     message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
-                  });
-                }}
+                  })
+                }
                 disabled={loading}>
                 <IoMdInformationCircleOutline className="h-5 w-5 group-disabled:text-red-300 text-red-400" />
                 <div className="text-sm leading-5 font-medium group-disabled:text-gray-400 text-gray-800">Abandonner la mission</div>
