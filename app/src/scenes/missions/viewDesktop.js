@@ -118,7 +118,7 @@ export default function viewDesktop() {
     });
   };
 
-  const updateApplication = async (status) => {
+  const updateApplicationStatus = async (status) => {
     setLoading(true);
     const { ok } = await api.put(`/application`, { _id: mission.application._id, status });
     if (!ok) toastr.error("Une erreur s'est produite lors de la mise à jour de  votre candidature");
@@ -191,7 +191,7 @@ export default function viewDesktop() {
               application={mission.application}
               tutor={mission?.tutor}
               mission={mission}
-              updateApplication={updateApplication}
+              updateApplicationStatus={updateApplicationStatus}
               loading={loading}
               disabledAge={disabledAge}
               disabledIncomplete={disabledIncomplete}
@@ -503,17 +503,9 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
   );
 };
 
-const ApplicationStatus = ({ application, tutor, mission, updateApplication, loading, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom }) => {
+const ApplicationStatus = ({ application, tutor, mission, updateApplicationStatus, loading, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom }) => {
   const [message, setMessage] = React.useState(null);
   const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
-
-  const cancelApp = async () => {
-    updateApplication(APPLICATION_STATUS.CANCEL);
-  };
-
-  const cancelMission = async () => {
-    updateApplication(APPLICATION_STATUS.ABANDON);
-  };
 
   useEffect(() => {
     if (disabledIncomplete) setMessage("Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page");
@@ -552,20 +544,20 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
         <div className="flex flex-col justify-center items-center lg:items-end gap-4">
           <div className="flex items-center gap-6">
             {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? (
-              <div
+              <button
                 className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
+                disabled={loading}
                 onClick={() =>
-                  !loading &&
                   setCancelModal({
                     isOpen: true,
-                    onConfirm: cancelApp,
+                    onConfirm: () => updateApplicationStatus(APPLICATION_STATUS.CANCEL),
                     title: "Êtes-vous sûr ?",
                     message: "Vous vous apprêtez à annuler votre candidature. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
                   })
                 }>
                 <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
                 <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Annuler cette candidature</div>
-              </div>
+              </button>
             ) : null}
             <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
               {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
@@ -594,20 +586,20 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
         <div className="flex flex-col justify-center items-center lg:items-end gap-4">
           <div className="flex items-center gap-6">
             {["IN_PROGRESS", "VALIDATED"].includes(application.status) ? (
-              <div
+              <button
                 className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
+                disabled={loading}
                 onClick={() =>
-                  !loading &&
                   setCancelModal({
                     isOpen: true,
-                    onConfirm: cancelMission,
+                    onConfirm: () => updateApplicationStatus(APPLICATION_STATUS.ABANDON),
                     title: "Êtes-vous sûr ?",
                     message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
                   })
                 }>
                 <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
                 <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Abandonner la mission</div>
-              </div>
+              </button>
             ) : null}
             <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
               {translateApplication(application.status)}
@@ -665,7 +657,7 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
             <button
               className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
               disabled={loading}
-              onClick={() => updateApplication(APPLICATION_STATUS.WAITING_VALIDATION)}>
+              onClick={() => updateApplicationStatus(APPLICATION_STATUS.WAITING_VALIDATION)}>
               <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
               <span className="text-sm leading-5 font-medium text-white">Accepter</span>
             </button>
@@ -674,7 +666,7 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
           <button
             className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 transition duration-300 ease-in-out border-[1px] border-[#fff] hover:border-gray-200 disabled:shadow-none disabled:border-gray-200"
             disabled={loading}
-            onClick={() => updateApplication(APPLICATION_STATUS.CANCEL)}>
+            onClick={() => updateApplicationStatus(APPLICATION_STATUS.CANCEL)}>
             <XCircle className="text-red-500 mr-2 w-5 h-5" />
             <span className="text-sm leading-5 font-medium text-black">Décliner</span>
           </button>
