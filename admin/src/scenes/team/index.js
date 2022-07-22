@@ -1,7 +1,6 @@
 import React from "react";
-import { Switch } from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { SentryRoute } from "../../sentry";
 
 import List from "./list";
 
@@ -10,7 +9,7 @@ export default function Team() {
 
   return (
     <Switch>
-      <SentryRoute path="/equipe" component={List} />
+      <Route path="/equipe" component={List} />
     </Switch>
   );
 }

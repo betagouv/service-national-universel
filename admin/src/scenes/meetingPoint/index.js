@@ -1,7 +1,6 @@
 import React from "react";
-import { Switch } from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { SentryRoute } from "../../sentry";
 
 import Edit from "./Edit";
 import List from "./List";
@@ -14,11 +13,11 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/point-de-rassemblement/nouveau" component={Create} />
-      <SentryRoute path="/point-de-rassemblement/nouveau-transport" component={CreateTransport} />
-      <SentryRoute path="/point-de-rassemblement/:id/historique" component={History} />
-      <SentryRoute path="/point-de-rassemblement/:id" component={Edit} />
-      <SentryRoute path="/point-de-rassemblement" component={List} />
+      <Route path="/point-de-rassemblement/nouveau" component={Create} />
+      <Route path="/point-de-rassemblement/nouveau-transport" component={CreateTransport} />
+      <Route path="/point-de-rassemblement/:id/historique" component={History} />
+      <Route path="/point-de-rassemblement/:id" component={Edit} />
+      <Route path="/point-de-rassemblement" component={List} />
     </Switch>
   );
 }

@@ -13,9 +13,6 @@ module.exports = (env) => {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new ReactRefreshWebpackPlugin(),
-    new webpack.ProvidePlugin({
-      process: "process/browser",
-    }),
   ].filter(Boolean);
 
   return {

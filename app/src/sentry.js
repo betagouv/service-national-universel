@@ -27,7 +27,7 @@ function initSentry() {
         types: ["crash", "deprecation", "intervention"],
       }),
     ],
-    tracesSampleRate: Number(process?.env?.SENTRY_TRACING_SAMPLE_RATE || 1.0),
+    tracesSampleRate: Number(0.5),
   });
 }
 

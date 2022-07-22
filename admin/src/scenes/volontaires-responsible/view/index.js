@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Switch } from "react-router-dom";
-import { SentryRoute } from "../../../sentry";
-
+import { Switch, Route } from "react-router-dom";
 import Phase2Contract from "./phase2Contract";
 import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
 
@@ -27,9 +25,9 @@ export default function VolontaireResponsible({ ...props }) {
   if (!young) return <div />;
   return (
     <Switch>
-      <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
+      <Route path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
       {ENABLE_PM && (
-        <SentryRoute
+        <Route
           path="/volontaire/:id/preparation-militaire"
           component={() => (
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -40,7 +38,7 @@ export default function VolontaireResponsible({ ...props }) {
           )}
         />
       )}
-      <SentryRoute
+      <Route
         path="/volontaire/:id"
         component={() => (
           <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>

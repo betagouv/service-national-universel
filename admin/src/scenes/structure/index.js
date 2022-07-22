@@ -1,7 +1,6 @@
 import React from "react";
-import { Switch } from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { SentryRoute } from "../../sentry";
 
 import View from "./view";
 import Edit from "./edit";
@@ -13,10 +12,10 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/structure/create" component={Create} />
-      <SentryRoute path="/structure/:id/edit" component={Edit} />
-      <SentryRoute path="/structure/:id" component={View} />
-      <SentryRoute path="/structure" component={List} />
+      <Route path="/structure/create" component={Create} />
+      <Route path="/structure/:id/edit" component={Edit} />
+      <Route path="/structure/:id" component={View} />
+      <Route path="/structure" component={List} />
     </Switch>
   );
 }

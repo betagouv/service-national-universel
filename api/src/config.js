@@ -18,7 +18,6 @@ const ES_ENDPOINT = process.env.ES_ENDPOINT || "";
 
 const SENDINBLUEKEY = process.env.SENDINBLUEKEY || "";
 const SENTRY_URL = process.env.SENTRY_URL || "";
-const SENTRY_TRACING_SAMPLE_RATE = process.env.SENTRY_TRACING_SAMPLE_RATE || "";
 
 const CELLAR_ENDPOINT = process.env.CELLAR_ENDPOINT || "";
 const CELLAR_KEYID = process.env.CELLAR_KEYID || "";
@@ -73,7 +72,6 @@ module.exports = {
   BUCKET_NAME,
   PUBLIC_BUCKET_NAME,
   SENTRY_URL,
-  SENTRY_TRACING_SAMPLE_RATE,
   QPV_USERNAME,
   QPV_PASSWORD,
   API_ENGAGEMENT_KEY,
