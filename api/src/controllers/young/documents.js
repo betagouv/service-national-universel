@@ -6,7 +6,7 @@ const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
 const YoungObject = require("../../models/young");
 const ContractObject = require("../../models/contract");
-const { ERRORS, isYoung, isReferent, getCcOfYoung } = require("../../utils");
+const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout } = require("../../utils");
 const certificate = require("../../templates/certificate");
 const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
@@ -66,6 +66,7 @@ function getMailParams(type, template, young, contract) {
   // if (type === "convocation" && template === "cohesion") return { object: "", message: "" };
 }
 
+const TIMEOUT_PDF_SERVICE = 15000;
 router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
@@ -89,26 +90,34 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    fetch(config.API_PDF_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-      body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
-    }).then((response) => {
-      res.set({
-        "content-length": response.headers.get("content-length"),
-        "content-disposition": `inline; filename="test.pdf"`,
-        "content-type": "application/pdf",
-        "cache-control": "public, max-age=1",
+    const getPDF = async () =>
+      await fetch(config.API_PDF_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
+      }).then((response) => {
+        if (response.status !== 200) throw new Error("Error with PDF service");
+        res.set({
+          "content-length": response.headers.get("content-length"),
+          "content-disposition": `inline; filename="test.pdf"`,
+          "content-type": "application/pdf",
+          "cache-control": "public, max-age=1",
+        });
+        response.body.pipe(res);
+        response.body.on("error", (e) => {
+          capture(e);
+          res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+        });
       });
-      response.body.pipe(res);
-      response.body.on("error", (e) => {
-        capture(e);
-        res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
-      });
-    });
+    try {
+      await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
+    } catch (e) {
+      res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
+      capture(e);
+    }
   } catch (e) {
     capture(e);
-    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -150,13 +159,23 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const { object, message } = getMailParams(type, template, young, contract);
 
-    const buffer = await fetch(config.API_PDF_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-      body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
-    }).then((response) => {
-      return response.buffer();
-    });
+    const getPDF = async () =>
+      await fetch(config.API_PDF_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
+      }).then((response) => {
+        if (response.status !== 200) throw new Error("Error with PDF service");
+        return response.buffer();
+      });
+
+    let buffer;
+    try {
+      buffer = await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
+    } catch (e) {
+      res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
+      capture(e);
+    }
 
     const content = buffer.toString("base64");
 

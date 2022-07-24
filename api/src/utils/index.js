@@ -29,6 +29,12 @@ const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS,
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { getQPV, getDensity } = require("../geo");
 
+// Timeout a promise in ms
+const timeout = (prom, time) => {
+  let timer;
+  return Promise.race([prom, new Promise((_r, rej) => (timer = setTimeout(rej, time)))]).finally(() => clearTimeout(timer));
+};
+
 function sanitizeAll(text) {
   return sanitizeHtml(text || "", { allowedTags: ["li", "br", "b"], allowedAttributes: {} });
 }
@@ -652,6 +658,7 @@ const ERRORS = {
   UNSUPPORTED_TYPE: "UNSUPPORTED_TYPE",
   USER_NOT_FOUND: "USER_NOT_FOUND",
   LINKED_OBJECT: "LINKED_OBJECT",
+  PDF_ERROR: "PDF_ERROR",
   NO_TEMPLATE_FOUND: "NO_TEMPLATE_FOUND",
   INVALID_BODY: "INVALID_BODY",
   INVALID_PARAMS: "INVALID_PARAMS",
@@ -697,6 +704,7 @@ const STEPS = {
 };
 
 module.exports = {
+  timeout,
   uploadFile,
   uploadPublicPicture,
   getFile,
