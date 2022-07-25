@@ -13,7 +13,7 @@ function initSentry() {
   init({
     enabled: Boolean(SENTRY_URL),
     dsn: SENTRY_URL,
-    environment: "app",
+    environment: "admin",
     normalizeDepth: 16,
     integrations: [
       new ExtraErrorData({ depth: 16 }),
