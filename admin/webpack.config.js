@@ -25,20 +25,24 @@ module.exports = () => {
         removeEmptyAttributes: true,
       },
     }),
-    false &&
-      new SentryWebpackPlugin({
-        // sentry-cli configuration - can also be done directly through sentry-cli
-        // see https://docs.sentry.io/product/cli/configuration/ for details
-        authToken: process.env.SENTRY_AUTH_TOKEN,
-        org: "selego",
-        project: "snu",
-        // release: process.env.SENTRY_RELEASE,
-        environment: "admin",
+    new SentryWebpackPlugin({
+      // sentry-cli configuration - can also be done directly through sentry-cli
+      // see https://docs.sentry.io/product/cli/configuration/ for details
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "sentry",
+      project: process.env.STAGING !== "true" ? "snu-production" : "snu-staging",
+      url: "https://sentry.selego.co/",
+      // release: process.env.SENTRY_RELEASE,
+      environment: "admin",
+      deploy: {
+        env: "admin",
+      },
+      validate: true,
 
-        // other SentryWebpackPlugin configuration
-        include: ".",
-        ignore: ["node_modules", "webpack.config.js"],
-      }),
+      // other SentryWebpackPlugin configuration
+      include: ".",
+      ignore: ["node_modules", "webpack.config.js"],
+    }),
     new webpack.DefinePlugin({ "process.env": JSON.stringify(mode) }),
   ].filter((e) => e);
 

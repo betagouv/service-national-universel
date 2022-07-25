@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Switch, Route } from "react-router-dom";
+import { Switch } from "react-router-dom";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
+import { SentryRoute } from "../../../sentry";
 
 import api from "../../../services/api";
 import Details from "./details";
@@ -27,9 +28,9 @@ export default function Index({ ...props }) {
     <>
       <Breadcrumbs items={[{ label: "Structures", to: "/structure" }, { label: "Fiche de la structure" }]} />
       <Switch>
-        <Route path="/structure/:id/missions" component={() => <Missions structure={structure} />} />
-        <Route path="/structure/:id/historique" component={() => <Historic structure={structure} />} />
-        <Route path="/structure/:id" component={() => <Details structure={structure} />} />
+        <SentryRoute path="/structure/:id/missions" component={() => <Missions structure={structure} />} />
+        <SentryRoute path="/structure/:id/historique" component={() => <Historic structure={structure} />} />
+        <SentryRoute path="/structure/:id" component={() => <Details structure={structure} />} />
       </Switch>
     </>
   );
