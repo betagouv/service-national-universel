@@ -195,5 +195,5 @@ export function urlWithScheme(url) {
 }
 
 export function slugifyFileName(str) {
-  return slugify(str, { remove: /[^A-Z0-9]/gi });
+  return slugify(str, { replacement: "-", remove: /[*+~.()'"!:@]/g });
 }
