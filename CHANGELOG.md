@@ -1,3 +1,21 @@
+# [1.116.0](https://github.com/betagouv/service-national-universel/compare/v1.115.1...v1.116.0) (2022-07-25)
+
+
+### Bug Fixes
+
+* **api:** mongodb poolSize to 100 ([ab8fd82](https://github.com/betagouv/service-national-universel/commit/ab8fd820ba17bd3be072735dcd0490b3d64165ec))
+
+
+### Features
+
+* **app:** add event tracking phase2 plausible ([#1689](https://github.com/betagouv/service-national-universel/issues/1689)) ([87b5696](https://github.com/betagouv/service-national-universel/commit/87b56961c5c06bf249e6503fdad8ec20218741e3))
+
+
+### Reverts
+
+* Revert "feat: (all) sentry setup (#1685)" ([13b8764](https://github.com/betagouv/service-national-universel/commit/13b8764f6c1c6067af19aa939e01462940e1de57)), closes [#1685](https://github.com/betagouv/service-national-universel/issues/1685)
+* Revert "fix: (admin) Send events to admin sentry" ([2b5a655](https://github.com/betagouv/service-national-universel/commit/2b5a655fa7f080f4b8f9022ccd5c878df8736d8f))
+
 ## [1.115.1](https://github.com/betagouv/service-national-universel/compare/v1.115.0...v1.115.1) (2022-07-22)
 
 
