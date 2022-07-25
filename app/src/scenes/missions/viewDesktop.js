@@ -225,6 +225,7 @@ export default function viewDesktop() {
               disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
               young={young}
+              isMilitaryPreparation={mission?.isMilitaryPreparation}
             />
           )}
         </div>
@@ -450,7 +451,7 @@ export default function viewDesktop() {
   );
 }
 
-const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young }) => {
+const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young, isMilitaryPreparation }) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
     if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
       return true;
@@ -522,8 +523,12 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
       <button
         className="px-12 py-2 rounded-lg text-white bg-blue-600 text-sm cursor-pointer "
         onClick={() => {
+          if (isMilitaryPreparation === "true") {
+            plausibleEvent("Phase 2/CTA - PM - Candidater");
+          } else {
+            plausibleEvent("Phase2/CTA missions - Candidater");
+          }
           setModal("APPLY");
-          plausibleEvent("Phase2/CTA missions - Candidater");
         }}>
         Candidater
       </button>

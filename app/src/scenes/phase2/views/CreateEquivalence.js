@@ -10,6 +10,7 @@ import InformationCircle from "../../../assets/icons/InformationCircle";
 import PaperClip from "../../../assets/icons/PaperClip";
 import api from "../../../services/api";
 import validator from "validator";
+import plausibleEvent from "../../../services/plausible";
 
 export default function CreateEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -128,6 +129,7 @@ export default function CreateEquivalence() {
           setLoading(false);
           return;
         }
+        plausibleEvent("Phase 2/ CTA - EquivalenceMIGvalider");
         toastr.success("Votre demande d'équivalence a bien été envoyée");
         history.push("/phase2");
       }

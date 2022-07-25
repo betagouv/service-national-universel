@@ -170,7 +170,7 @@ export default function viewMobile() {
               {e}
             </div>
           ))}
-          {mission.isMilitaryPreparation === "true" ? (
+          {mission?.isMilitaryPreparation === "true" ? (
             <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
           ) : null}
         </div>
@@ -200,6 +200,7 @@ export default function viewMobile() {
               disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
               duration={mission?.duration}
+              isMilitaryPreparation={mission?.isMilitaryPreparation}
             />
           )}
         </div>
@@ -437,7 +438,7 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
   </div>
 );
 
-const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young }) => {
+const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young, isMilitaryPreparation }) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
     if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
       return true;
@@ -514,8 +515,12 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
       <button
         className="py-2 rounded-lg text-white bg-blue-600 text-sm cursor-pointer "
         onClick={() => {
+          if (isMilitaryPreparation === "true") {
+            plausibleEvent("Phase 2/CTA - PM - Candidater");
+          } else {
+            plausibleEvent("Phase2/CTA missions - Candidater");
+          }
           setModal("APPLY");
-          plausibleEvent("Phase2/CTA missions - Candidater");
         }}>
         Candidater
       </button>

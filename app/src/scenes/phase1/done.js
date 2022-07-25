@@ -15,6 +15,7 @@ import api from "../../services/api";
 import { COHESION_STAY_END, translate } from "../../utils";
 import downloadPDF from "../../utils/download-pdf";
 import InfoConvocation from "./components/modals/InfoConvocation";
+import plausibleEvent from "../../services/plausible";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -283,7 +284,10 @@ export default function Done() {
           </div>
           <button
             className="bg-blue-600 border-[1px] border-blue-600 hover:bg-white text-white hover:!text-blue-600 text-sm leading-5 font-medium py-2 px-4 rounded-lg transition duration-100 ease-in-out"
-            onClick={() => history.push("/phase2")}>
+            onClick={() => {
+              plausibleEvent("Phase 2/CTA - Realiser ma mission");
+              history.push("/phase2");
+            }}>
             Je trouve une mission d’intérêt général
           </button>
         </div>
@@ -497,7 +501,10 @@ export default function Done() {
           </div>
           <button
             className="bg-blue-600 border-[1px] border-blue-600 hover:bg-white text-white hover:!text-blue-600 text-sm leading-5 font-medium py-2 px-4 rounded-lg transition duration-100 ease-in-out"
-            onClick={() => history.push("/phase2")}>
+            onClick={() => {
+              plausibleEvent("Phase2/CTA - Realiser ma mission");
+              history.push("/phase2");
+            }}>
             Je trouve une mission d’intérêt général
           </button>
         </div>
