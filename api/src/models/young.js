@@ -1458,7 +1458,7 @@ const Schema = new mongoose.Schema({
   equivalenceStatus: {
     type: String,
     documentation: {
-      description: "Statuts de la dernière demamde d'équivalence phase 2",
+      description: "Statuts de la dernière demande d'équivalence phase 2",
     },
   },
 

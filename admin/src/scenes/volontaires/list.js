@@ -854,6 +854,20 @@ export default function VolontaireList() {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut documents Préparation Militaire", "Statut documents Préparation Militaire")}
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="EQUIVALENCE_STATUS"
+                  dataField="equivalenceStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "EQUIVALENCE_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut demande d'équivalence", "Statut demande déquivalence")}
+                />
               </FilterRow>
               <FilterRow visible={filterVisible}>
                 <div className="uppercase text-xs text-snu-purple-800">Phase 3</div>
