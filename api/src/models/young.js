@@ -1455,6 +1455,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  equivalenceStatus: {
+    type: String,
+    documentation: {
+      description: "Statuts de la dernière demamde d'équivalence phase 2",
+    },
+  },
+
   // TODO : clean interests
   defenseInterest: { type: String },
   defenseTypeInterest: { type: String },
