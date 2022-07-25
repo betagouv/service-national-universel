@@ -33,6 +33,7 @@ export default function StatusIndex({ filter }) {
   const [cohesionStayPresence, setCohesionStayPresence] = useState({});
   const [youngPhase1Agreement, setYoungPhase1Agreement] = useState({});
   const [statusApplication, setStatusApplication] = useState({});
+  const [statusEquivalence, setStatusEquivalence] = useState({});
   const [departInform, setDepartInform] = useState({});
   const [departSejourMotif, setDepartSejourMotif] = useState({});
   const [presenceJDM, setPresenceJDM] = useState({});
@@ -262,6 +263,15 @@ export default function StatusIndex({ filter }) {
               filterName="APPLICATION_STATUS"
               colors={APPLICATION_STATUS_COLORS}
               data={statusApplication}
+              filter={filter}
+              getLink={getLink}
+            />
+            <StatusMap
+              title="Statut des demandes d'équivalences de MIG"
+              obj={APPLICATION_STATUS}
+              filterName="APPLICATION_STATUS"
+              colors={APPLICATION_STATUS_COLORS}
+              data={statusEquivalence}
               filter={filter}
               getLink={getLink}
             />
