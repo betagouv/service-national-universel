@@ -1,10 +1,9 @@
 import "isomorphic-fetch";
 import fetchRetry from "fetch-retry";
+const fetch = fetchRetry(window.fetch);
 
 import { apiURL } from "../config";
 import * as Sentry from "@sentry/react";
-
-let fetch = window.fetch;
 
 function jsonOrRedirectToSignIn(response) {
   if (response.ok === false && response.status === 401) {
@@ -72,6 +71,9 @@ class api {
 
   setToken(token) {
     this.token = token;
+  }
+  getToken() {
+    return this.token;
   }
 
   openpdf(path, body) {
@@ -267,11 +269,6 @@ class api {
     });
   }
 }
-function initApi() {
-  fetch = fetchRetry(window.fetch);
-}
 
 const API = new api();
 export default API;
-
-export { initApi };

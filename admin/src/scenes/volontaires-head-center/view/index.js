@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Switch } from "react-router-dom";
-import { SentryRoute } from "../../../sentry";
+import { Switch, Route } from "react-router-dom";
 
 import api from "../../../services/api";
 import Details from "../../../components/volontaires-view/Details";
@@ -22,8 +21,8 @@ export default function VolontaireHeadCenter({ ...props }) {
   if (!young) return <div />;
   return (
     <Switch>
-      <SentryRoute path="/volontaire/:id/phase1" component={() => <Phase1 young={young} />} />
-      <SentryRoute
+      <Route path="/volontaire/:id/phase1" component={() => <Phase1 young={young} />} />
+      <Route
         path="/volontaire/:id"
         component={() => (
           <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
