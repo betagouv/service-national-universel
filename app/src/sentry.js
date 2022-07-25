@@ -27,7 +27,7 @@ function initSentry() {
         types: ["crash", "deprecation", "intervention"],
       }),
     ],
-    tracesSampleRate: Number(0.5),
+    tracesSampleRate: Number(0.01),
   });
 }
 
