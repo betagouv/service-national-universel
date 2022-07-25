@@ -572,8 +572,8 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplicationStatu
           title={cancelModal?.title}
           message={cancelModal?.message}
           onCancel={() => setCancelModal({ isOpen: false, onConfirm: null })}
-          onConfirm={() => {
-            cancelModal?.onConfirm();
+          onConfirm={async () => {
+            await cancelModal?.onConfirm();
             setCancelModal({ isOpen: false, onConfirm: null });
           }}
         />
@@ -628,8 +628,8 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplicationStatu
           title={cancelModal?.title}
           message={cancelModal?.message}
           onCancel={() => setCancelModal({ isOpen: false, onConfirm: null })}
-          onConfirm={() => {
-            cancelModal?.onConfirm();
+          onConfirm={async () => {
+            await cancelModal?.onConfirm();
             setCancelModal({ isOpen: false, onConfirm: null });
           }}
         />

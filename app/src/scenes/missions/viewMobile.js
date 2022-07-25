@@ -318,16 +318,15 @@ export default function viewMobile() {
             {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(mission?.application.status) ? (
               <button
                 className="group flex items-center gap-1 border-[1px] px-10 py-2 rounded-lg"
+                disabled={loading}
                 onClick={() =>
-                  !loading &&
                   setCancelModal({
                     isOpen: true,
-                    onConfirm: cancelApp,
+                    onConfirm: () => updateApplication(APPLICATION_STATUS.CANCEL),
                     title: "Êtes-vous sûr ?",
                     message: "Vous vous apprêtez à annuler votre candidature. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
                   })
-                }
-                disabled={loading}>
+                }>
                 <IoMdInformationCircleOutline className="h-5 w-5 group-disabled:text-red-300 text-red-400" />
                 <div className="text-sm leading-5 font-medium group-disabled:text-gray-400 text-gray-800">Annuler cette candidature</div>
               </button>
@@ -335,16 +334,15 @@ export default function viewMobile() {
             {["IN_PROGRESS", "VALIDATED"].includes(mission?.application.status) ? (
               <button
                 className="group flex items-center gap-1 border-[1px] px-10 py-2 rounded-lg"
+                disabled={loading}
                 onClick={() =>
-                  !loading &&
                   setCancelModal({
                     isOpen: true,
-                    onConfirm: cancelMission,
+                    onConfirm: updateApplication(APPLICATION_STATUS.ABANDON),
                     title: "Êtes-vous sûr ?",
                     message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
                   })
-                }
-                disabled={loading}>
+                }>
                 <IoMdInformationCircleOutline className="h-5 w-5 group-disabled:text-red-300 text-red-400" />
                 <div className="text-sm leading-5 font-medium group-disabled:text-gray-400 text-gray-800">Abandonner la mission</div>
               </button>
@@ -355,8 +353,8 @@ export default function viewMobile() {
             title={cancelModal?.title}
             message={cancelModal?.message}
             onCancel={() => setCancelModal({ isOpen: false, onConfirm: null })}
-            onConfirm={() => {
-              cancelModal?.onConfirm();
+            onConfirm={async () => {
+              await cancelModal?.onConfirm();
               setCancelModal({ isOpen: false, onConfirm: null });
             }}
           />
