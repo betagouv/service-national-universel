@@ -1,3 +1,26 @@
+# [1.117.0](https://github.com/betagouv/service-national-universel/compare/v1.116.0...v1.117.0) (2022-07-26)
+
+
+### Bug Fixes
+
+* **admin:** Differencier missions liées et seul responsable sur la structure ([#1693](https://github.com/betagouv/service-national-universel/issues/1693)) ([ae26b21](https://github.com/betagouv/service-national-universel/commit/ae26b21964300558bc44e9e14d29ae0a9fad9c99))
+* **admin:** Proposition de mission : liste des volontaires ([#1698](https://github.com/betagouv/service-national-universel/issues/1698)) ([bc1b13c](https://github.com/betagouv/service-national-universel/commit/bc1b13cd57b14c88c698373561be79c1092c2c0d))
+* **api:** on delete structure update referent structureId ([#1694](https://github.com/betagouv/service-national-universel/issues/1694)) ([35b1af8](https://github.com/betagouv/service-national-universel/commit/35b1af8f9f773dcb155ea443e2e40df51e276c31))
+* **api:** sync sendinblue referent ([95905c1](https://github.com/betagouv/service-national-universel/commit/95905c105bef8315d9f2666f99efffc3a81d972c))
+* **api:** sync young ([4662e58](https://github.com/betagouv/service-national-universel/commit/4662e585d45622acf88ef6ba4ecd4226ee38a944))
+* **lib:** Add translation ([4d1fbe7](https://github.com/betagouv/service-national-universel/commit/4d1fbe76277125a6398d8025907af49d6538eab3))
+
+
+### Features
+
+* **admin/app:** favicon for dev ([#1691](https://github.com/betagouv/service-national-universel/issues/1691)) ([b6638fa](https://github.com/betagouv/service-national-universel/commit/b6638fa5c87a266c80f91bb1be4b2eb883662215))
+* **api, admin:** add equivalence status filter ([#1688](https://github.com/betagouv/service-national-universel/issues/1688)) ([21e8b0a](https://github.com/betagouv/service-national-universel/commit/21e8b0a4306847ce1cddae519467d212ac846219))
+* **app:** ajout modal annulation de candidature ([#1680](https://github.com/betagouv/service-national-universel/issues/1680)) ([ba3a290](https://github.com/betagouv/service-national-universel/commit/ba3a290dde81a77db33ffcb30545c8ca62763744))
+* **app:** new home phase 2 ([#1690](https://github.com/betagouv/service-national-universel/issues/1690)) ([59ede43](https://github.com/betagouv/service-national-universel/commit/59ede4312d56f243cb0cf9d741f37feecc73c407))
+* **app:** vérifier l’adresse du proche  ([#1692](https://github.com/betagouv/service-national-universel/issues/1692)) ([6fb9817](https://github.com/betagouv/service-national-universel/commit/6fb9817f59dac83a7ab7ea694e14ee61afd7c03f))
+* **pdf:** Handle timeout and pdf service down ([#1686](https://github.com/betagouv/service-national-universel/issues/1686)) ([dc1fe00](https://github.com/betagouv/service-national-universel/commit/dc1fe00070b5be7b9a91f0373c52bc6b89a453bd))
+* (all) sentry setup ([#1685](https://github.com/betagouv/service-national-universel/issues/1685)) ([c1d5411](https://github.com/betagouv/service-national-universel/commit/c1d5411a796f45ba18dc0e029278e7b8b875464c))
+
 # [1.116.0](https://github.com/betagouv/service-national-universel/compare/v1.115.1...v1.116.0) (2022-07-25)
 
 
