@@ -922,19 +922,14 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   try {
     const referent = await ReferentModel.findById(req.params.id);
     if (!referent) return res.status(404).send({ ok: false });
-    let structure;
-    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(referent.role)) {
-      structure = await StructureModel.findById(referent.structureId);
-    }
+    const structure = await StructureModel.findById(referent.structureId);
 
     if (!canDeleteReferent({ actor: req.user, originalTarget: referent, structure })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(referent.role)) {
-      const referents = await ReferentModel.find({ structureId: referent.structureId });
-      const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
-      if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
-      if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
-    }
+    const referents = await ReferentModel.find({ structureId: referent.structureId });
+    const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
+    if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
+    if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
 
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);
