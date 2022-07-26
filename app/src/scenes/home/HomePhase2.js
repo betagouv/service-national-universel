@@ -11,7 +11,7 @@ export default function HomePhase2() {
       {/* DESKTOP */}
       <div className="hidden lg:flex">
         <div className="my-12 mx-10 w-full">
-          <div className="flex justify-between rounded-lg bg-white ">
+          <div className="flex justify-between items-center rounded-lg bg-white ">
             <div className="w-1/2 pl-10 py-12">
               <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-800">
                 <strong>{young.firstName},</strong>
