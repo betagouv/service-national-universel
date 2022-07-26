@@ -87,12 +87,12 @@ class api {
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
-        if (response.status !== 200) return reject({});
+        if (response.status !== 200) return reject(await response.json());
         const file = await response.blob();
         resolve(file);
       } catch (e) {
         console.log(e);
-        reject();
+        reject(e);
       }
     });
   }
