@@ -24,7 +24,7 @@ if (environment === "production") {
   supportURL = "https://support.snu.gouv.fr";
   educonnectAllowed = false;
   SENTRY_URL = "https://d09670865360498e9567369808de4064@sentry.selego.co/13";
-  SENTRY_TRACING_SAMPLE_RATE = 0.1;
+  SENTRY_TRACING_SAMPLE_RATE = 0.01;
 }
 
 const S3PREFIX = "";
