@@ -267,7 +267,7 @@ export default function Phase1(props) {
                   </div>
                 ) : null}
                 <div className="mt-4">
-                  {young.statusPhase1 === "DONE" && cohesionCenter?.name ? (
+                  {young.statusPhase1 === "DONE" ? (
                     <>
                       <p className="text-gray-500">Attestation de réalisation phase 1 :</p>
                       <section className="flex mt-3">
