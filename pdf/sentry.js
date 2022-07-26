@@ -23,7 +23,7 @@ function initSentry(app) {
       new TracingIntegrations.Mongo({ useMongoose: true }),
       new TracingIntegrations.Express({ app }),
     ],
-    tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE || 0.5),
+    tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE),
   });
 
   // The request handler must be the first middleware on the app

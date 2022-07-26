@@ -1,3 +1,5 @@
+require("dotenv").config({ path: "./.env" });
+
 const express = require("express");
 const puppeteer = require("puppeteer");
 const bodyParser = require("body-parser");
@@ -62,7 +64,6 @@ app.post("/render", async (req, res) => {
     console.log(req.body.html);
     console.log(buffer);
     res.contentType("application/pdf");
-    // ! CORS sentry ? allowedHeaders: ["sentry-trace", "baggage"],
     res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
     res.set("Cache-Control", "public, max-age=1");
     res.send(buffer);
