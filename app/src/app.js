@@ -46,9 +46,16 @@ import { toastr } from "react-redux-toastr";
 
 import { youngCanChangeSession } from "snu-lib";
 import { initSentry, SentryRoute, history } from "./sentry";
+import * as Sentry from "@sentry/react";
 
 initSentry();
 initApi();
+
+function FallbackComponent() {
+  return <div>An error has occurred</div>;
+}
+
+const myFallback = <FallbackComponent />;
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -78,30 +85,32 @@ export default function App() {
   if (loading) return <Loader />;
 
   return (
-    <Router history={history}>
-      <ScrollToTop />
-      <GoogleTags />
-      <div className="main">
-        {maintenance & !localStorage.getItem("override_maintenance") ? (
-          <Switch>
-            <SentryRoute path="/" component={Maintenance} />
-          </Switch>
-        ) : (
-          <Switch>
-            <SentryRoute path="/bug" component={Bug} />
-            <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-            <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-            <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
-            <SentryRoute path="/validate-contract/done" component={ContractDone} />
-            <SentryRoute path="/validate-contract" component={Contract} />
-            <SentryRoute path="/inscription" component={Inscription} />
-            <SentryRoute path="/auth" component={Auth} />
-            <SentryRoute path="/" component={Espace} />
-          </Switch>
-        )}
-        <Footer />
-      </div>
-    </Router>
+    <Sentry.ErrorBoundary fallback={myFallback} showDialog>
+      <Router history={history}>
+        <ScrollToTop />
+        <GoogleTags />
+        <div className="main">
+          {maintenance & !localStorage.getItem("override_maintenance") ? (
+            <Switch>
+              <SentryRoute path="/" component={Maintenance} />
+            </Switch>
+          ) : (
+            <Switch>
+              <SentryRoute path="/bug" component={Bug} />
+              <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+              <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+              <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
+              <SentryRoute path="/validate-contract/done" component={ContractDone} />
+              <SentryRoute path="/validate-contract" component={Contract} />
+              <SentryRoute path="/inscription" component={Inscription} />
+              <SentryRoute path="/auth" component={Auth} />
+              <SentryRoute path="/" component={Espace} />
+            </Switch>
+          )}
+          <Footer />
+        </div>
+      </Router>
+    </Sentry.ErrorBoundary>
   );
 }
 
