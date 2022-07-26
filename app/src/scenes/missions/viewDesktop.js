@@ -243,7 +243,7 @@ export default function viewDesktop() {
                 className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 hover:border-blue-500 hover:bg-blue-500 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
                 onClick={() => setOpenContractButton((e) => !e)}>
                 <div className="flex items-center gap-2">
-                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d&apos;engagement</span>
+                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d&quot;engagement</span>
                 </div>
                 <ChevronDown className="text-white font-medium" />
               </button>
