@@ -4,7 +4,7 @@ const { MONGO_URL } = require("./config.js");
 //Set up default mongoose connection
 
 if (MONGO_URL) {
-  mongoose.connect(MONGO_URL, { useCreateIndex: true, useNewUrlParser: true, useUnifiedTopology: true });
+  mongoose.connect(MONGO_URL, { useCreateIndex: true, useNewUrlParser: true, useUnifiedTopology: true, poolSize: 100 });
 } else {
   console.log("ERROR CONNEXION. MONGO URL EMPTY");
 }

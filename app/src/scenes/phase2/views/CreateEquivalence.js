@@ -10,6 +10,8 @@ import InformationCircle from "../../../assets/icons/InformationCircle";
 import PaperClip from "../../../assets/icons/PaperClip";
 import api from "../../../services/api";
 import validator from "validator";
+import { slugifyFileName } from "../../../utils";
+import plausibleEvent from "../../../services/plausible";
 
 export default function CreateEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -49,7 +51,7 @@ export default function CreateEquivalence() {
       if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
       if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
       const fileName = files[i].name.match(/(.*)(\..*)/);
-      const newName = `${fileName[1]}-${filesList.length + index}${fileName[2]}`;
+      const newName = `${slugifyFileName(fileName[1])}-${filesList.length + index}${fileName[2]}`;
       Object.defineProperty(files[i], "name", {
         writable: true,
         value: newName,
@@ -128,6 +130,7 @@ export default function CreateEquivalence() {
           setLoading(false);
           return;
         }
+        plausibleEvent("Phase 2/ CTA - EquivalenceMIGvalider");
         toastr.success("Votre demande d'équivalence a bien été envoyée");
         history.push("/phase2");
       }
