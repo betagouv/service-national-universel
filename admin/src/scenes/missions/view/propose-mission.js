@@ -27,7 +27,7 @@ export default function ProposeMission({ mission }) {
         bool: {
           filter: [
             { terms: { "status.keyword": ["VALIDATED"] } },
-            { terms: { "statusPhase1.keyword": ["DONE", "EXEMTED"] } },
+            { terms: { "statusPhase1.keyword": ["DONE", "EXEMPTED"] } },
             { terms: { "statusPhase2.keyword": ["IN_PROGRESS", "WAITING_REALISATION"] } },
           ],
         },
