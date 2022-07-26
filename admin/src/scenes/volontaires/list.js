@@ -868,7 +868,7 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut demande d'équivalence", "Statut demande déquivalence")}
+                  renderLabel={(items) => getFilterLabel(items, "Statut demande d'équivalence", "Statut demande d'équivalence")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>
