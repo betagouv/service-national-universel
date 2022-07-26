@@ -1499,7 +1499,7 @@ Schema.methods.comparePassword = async function (p) {
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
-  // sendinblue.sync(doc, MODELNAME);
+  sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
   sendinblue.sync(doc, MODELNAME);
