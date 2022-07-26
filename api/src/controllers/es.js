@@ -446,39 +446,6 @@ router.post("/application/:action(_msearch|export)", passport.authenticate(["ref
   }
 });
 
-router.post("/missionequivalence/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { user, body } = req;
-    const filter = [];
-
-    if (!canSearchInElasticSearch(user, "missionequivalence")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // A responsible can only see their structure's equivalence.
-    if (user.role === ROLES.RESPONSIBLE) {
-      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      filter.push({ terms: { "structureId.keyword": [user.structureId] } });
-    }
-
-    // A supervisor can only see their structures' equivalence.
-    if (user.role === ROLES.SUPERVISOR) {
-      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
-      filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
-    }
-
-    if (req.params.action === "export") {
-      const response = await allRecords("missionequivalence", applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: serializeApplications(response) });
-    } else {
-      const response = await esClient.msearch({ index: "missionequivalence", body: withFilterForMSearch(body, filter) });
-      return res.status(200).send(serializeApplications(response.body));
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/cohesioncenter/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;

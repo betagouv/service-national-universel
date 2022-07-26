@@ -150,9 +150,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
           young.set({ statusPhase2: "WAITING_REALISATION" });
         }
       }
-      if (young.statusPhase2 !== "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
-        young.set({ status_equivalence: value.status });
-      }
+    }
+
+    if (young.statusPhase2 !== "VALIDATED" && !["VALIDATED"].includes(value.status)) {
+      young.set({ status_equivalence: value.status });
     }
 
     delete value.id;
