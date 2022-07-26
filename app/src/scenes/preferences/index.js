@@ -1,21 +1,22 @@
-import React from "react";
-import styled from "styled-components";
-import { Row, Col, Input } from "reactstrap";
-import { useDispatch, useSelector } from "react-redux";
+import * as Sentry from "@sentry/react";
 import { Field, Formik } from "formik";
-import api from "../../services/api";
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { setYoung } from "../../redux/auth/actions";
-import DomainItem from "./domainItem";
-import Button from "./button";
-import RankingPeriod from "./rankingPeriod";
-import MobilityCard from "./mobilityCard";
-import TransportCard from "./transportCard";
-import ErrorMessage, { requiredMessage } from "./errorMessage";
-import { translate, MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "../../utils";
-import { HeroContainer, Hero, Content } from "../../components/Content";
-import plausibleEvent from "../../services/plausible";
+import { Col, Input, Row } from "reactstrap";
+import styled from "styled-components";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import { Content, Hero, HeroContainer } from "../../components/Content";
+import { setYoung } from "../../redux/auth/actions";
+import api from "../../services/api";
+import plausibleEvent from "../../services/plausible";
+import { MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION, translate } from "../../utils";
+import Button from "./button";
+import DomainItem from "./domainItem";
+import ErrorMessage, { requiredMessage } from "./errorMessage";
+import MobilityCard from "./mobilityCard";
+import RankingPeriod from "./rankingPeriod";
+import TransportCard from "./transportCard";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
@@ -54,6 +55,7 @@ export default function Index() {
             return toastr.success("Mis à jour !");
           } catch (e) {
             console.log(e);
+            Sentry.captureException(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);
             setLoading(false);
           }
