@@ -22,7 +22,18 @@ export default function ProposeMission({ mission }) {
   const [search, setSearch] = useState(undefined);
 
   const getDefaultQuery = () => {
-    let defaultQuery = { query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED"] } }] } }, track_total_hits: true };
+    let defaultQuery = {
+      query: {
+        bool: {
+          filter: [
+            { terms: { "status.keyword": ["VALIDATED"] } },
+            { terms: { "statusPhase1.keyword": ["DONE", "EXEMTED"] } },
+            { terms: { "statusPhase2.keyword": ["IN_PROGRESS", "WAITING_REALISATION"] } },
+          ],
+        },
+      },
+      track_total_hits: true,
+    };
     if (user.role === ROLES.REFERENT_DEPARTMENT) defaultQuery.query.bool.filter.push({ term: { "department.keyword": user.department } });
     if (user.role === ROLES.REFERENT_REGION) defaultQuery.query.bool.filter.push({ term: { "region.keyword": user.region } });
 
