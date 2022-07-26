@@ -26,10 +26,9 @@ import { MdOutlineContentCopy } from "react-icons/md";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
-import { HiChevronDown, HiOutlineEye, HiOutlineMail, HiOutlineDownload, HiPlus } from "react-icons/hi";
+import { HiChevronDown, HiOutlineMail, HiPlus } from "react-icons/hi";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import downloadPDF from "../../utils/download-pdf";
-import WithTooltip from "../../components/WithTooltip";
 import rubberStampValided from "../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
 import { BsChevronDown } from "react-icons/bs";
@@ -146,14 +145,6 @@ export default function viewMobile() {
     );
   };
 
-  const cancelApp = async () => {
-    updateApplication(APPLICATION_STATUS.CANCEL);
-  };
-
-  const cancelMission = async () => {
-    updateApplication(APPLICATION_STATUS.ABANDON);
-  };
-
   if (!mission) return <Loader />;
   return (
     <div className="bg-white rounded-xl w-full p-3 mb-4">
@@ -191,6 +182,7 @@ export default function viewMobile() {
               mission={mission}
               updateApplication={updateApplication}
               loading={loading}
+              setLoading={setLoading}
               disabledAge={disabledAge}
               disabledIncomplete={disabledIncomplete}
               disabledPmRefused={disabledPmRefused}
@@ -341,7 +333,7 @@ export default function viewMobile() {
                 onClick={() =>
                   setCancelModal({
                     isOpen: true,
-                    onConfirm: updateApplication(APPLICATION_STATUS.ABANDON),
+                    onConfirm: () => updateApplication(APPLICATION_STATUS.ABANDON),
                     title: "Êtes-vous sûr ?",
                     message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
                   })
@@ -489,7 +481,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
   if (applicationsCount >= 15)
     return (
       <div className="flex flex-col items-center justify-center gap-2">
-        <div className="text-red-500 text-xs text-center">Vous ne pouvez candidater qu'à 15 missions différentes.</div>
+        <div className="text-red-500 text-xs text-center">Vous ne pouvez candidater qu&apos;à 15 missions différentes.</div>
         <div className="flex flex-col items-stretch gap-4">
           <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
             Candidater
@@ -574,6 +566,7 @@ const ApplicationStatus = ({
   mission,
   updateApplication,
   loading,
+  setLoading,
   disabledAge,
   disabledIncomplete,
   disabledPmRefused,
@@ -663,7 +656,7 @@ const ApplicationStatus = ({
                 className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
                 onClick={() => setOpenContractButton((e) => !e)}>
                 <div className="flex items-center gap-2">
-                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d'engagement</span>
+                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d&apos;engagement</span>
                 </div>
                 <ChevronDown className="text-white font-medium" />
               </button>
