@@ -22,19 +22,21 @@ export default function HomePhase2() {
                 Mettez votre énergie au service d’une société plus solidaire et découvrez <strong>votre talent pour l’engagement</strong> en réalisant une mission d’intérêt général
                 !
               </div>
-              <button
-                className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
-                onClick={() => {
-                  plausibleEvent("Phase 2/CTA - Realiser ma mission");
-                  history.push("/phase2");
-                }}>
-                Réaliser ma mission d’intérêt général
-              </button>
-              <button
-                className="rounded-[10px] border-[1px] py-2.5 px-3  hover:!bg-blue-600 bg-white border-blue-600 mt-3 hover:!text-white text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
-                onClick={() => history.push("/phase1")}>
-                Réaliser ma mission d’intérêt général
-              </button>
+              <div className="flex flex-col items-stretch w-fit">
+                <button
+                  className="rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                  onClick={() => {
+                    plausibleEvent("Phase 2/CTA - Realiser ma mission");
+                    history.push("/phase2");
+                  }}>
+                  Réaliser ma mission d’intérêt général
+                </button>
+                <button
+                  className="rounded-[10px] border-[1px] py-2.5 px-3  hover:!bg-blue-600 bg-white border-blue-600 mt-3 hover:!text-white text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
+                  onClick={() => history.push("/phase1")}>
+                  Voir les détails de ma phase 1
+                </button>
+              </div>
             </div>
             <img className="w-1/2 object-fill" src={require("../../assets/homePhase2Desktop.png")} />
           </div>
@@ -63,7 +65,7 @@ export default function HomePhase2() {
             <button
               className="w-full rounded-[10px] border-[1px] py-2.5 px-3  hover:!bg-blue-600 bg-white border-blue-600 mt-3 hover:!text-white text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
               onClick={() => history.push("/phase1")}>
-              Réaliser ma mission d’intérêt général
+              Voir les détails de ma phase 1
             </button>
           </div>
           <img src={require("../../assets/homePhase2Mobile.png")} />
