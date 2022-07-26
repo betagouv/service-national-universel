@@ -1,12 +1,13 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Route, Switch, useHistory } from "react-router-dom";
+import { Switch, useHistory } from "react-router-dom";
 import { permissionPhase2, YOUNG_STATUS_PHASE2 } from "../../utils";
 import View from "./view";
 import CreateEquivalence from "./views/CreateEquivalence";
 import EditEquivalence from "./views/EditEquivalence";
 import ValidatedDesktop from "./desktop/Validated";
 import ValidatedMobile from "./mobile/Validated";
+import { SentryRoute } from "../../sentry";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
@@ -28,9 +29,9 @@ export default function Index() {
 
   return (
     <Switch>
-      <Route path="/phase2/equivalence/:equivalenceId" component={EditEquivalence} />
-      <Route path="/phase2/equivalence" component={CreateEquivalence} />
-      <Route path="/phase2" component={View} />
+      <SentryRoute path="/phase2/equivalence/:equivalenceId" component={EditEquivalence} />
+      <SentryRoute path="/phase2/equivalence" component={CreateEquivalence} />
+      <SentryRoute path="/phase2" component={View} />
     </Switch>
   );
 }

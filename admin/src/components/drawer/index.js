@@ -181,7 +181,7 @@ function referent({ user, onClick, newTickets, openedTickets, closedTickets, tic
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      {user.email === "helene.dubourdieu@gmail.com" ? (
+      {user.email === "helene.dubourdieu@gmail.com" || user.region === "Normandie" || department2region[user.department] === "Normandie" ? (
         <DrawerConnectToZammood title="Boîte de réception" history={history}>
           {!tickets ? (
             <div />

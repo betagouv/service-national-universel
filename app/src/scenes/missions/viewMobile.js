@@ -35,6 +35,8 @@ import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
 import { BsChevronDown } from "react-icons/bs";
 import ModalPJ from "./components/ModalPJ";
 import FileCard from "../militaryPreparation/components/FileCard";
+import ChevronDown from "../../assets/icons/ChevronDown";
+import Download from "../../assets/icons/Download";
 
 export default function viewMobile() {
   const [mission, setMission] = useState();
@@ -177,7 +179,7 @@ export default function viewMobile() {
               {e}
             </div>
           ))}
-          {mission.isMilitaryPreparation === "true" ? (
+          {mission?.isMilitaryPreparation === "true" ? (
             <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
           ) : null}
         </div>
@@ -207,6 +209,7 @@ export default function viewMobile() {
               disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
               duration={mission?.duration}
+              isMilitaryPreparation={mission?.isMilitaryPreparation}
             />
           )}
         </div>
@@ -474,7 +477,7 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
   </div>
 );
 
-const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young }) => {
+const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young, isMilitaryPreparation }) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
     if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
       return true;
@@ -551,8 +554,12 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
       <button
         className="py-2 rounded-lg text-white bg-blue-600 text-sm cursor-pointer "
         onClick={() => {
+          if (isMilitaryPreparation === "true") {
+            plausibleEvent("Phase 2/CTA - PM - Candidater");
+          } else {
+            plausibleEvent("Phase2/CTA missions - Candidater");
+          }
           setModal("APPLY");
-          plausibleEvent("Phase2/CTA missions - Candidater");
         }}>
         Candidater
       </button>
@@ -577,13 +584,34 @@ const ApplicationStatus = ({
 }) => {
   const [message, setMessage] = React.useState(null);
 
-  const [openContractDropdown, setOpenContractDropdown] = useState();
+  const refContractButton = React.useRef();
+
+  const [openContractButton, setOpenContractButton] = useState();
+
+  const viewContract = async (contractId) => {
+    await downloadPDF({
+      url: `/contract/${contractId}/download`,
+      fileName: `${young.firstName} ${young.lastName} - contrat ${contractId}.pdf`,
+    });
+  };
 
   useEffect(() => {
     if (disabledIncomplete) setMessage("Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page");
     if (disabledPmRefused) setMessage("Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater");
     if (disabledAge) setMessage("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
   }, [disabledAge, disabledIncomplete, disabledPmRefused]);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (refContractButton.current && !refContractButton.current.contains(event.target)) {
+        setOpenContractButton(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
 
   const theme = {
     background: {
@@ -629,32 +657,35 @@ const ApplicationStatus = ({
             {translateApplication(application.status)}
           </div>
           {contract && contractHasAllValidation(contract, young) && (
-            <div className="relative">
-              <div className="flex ">
-                <div className="bg-blue-600 rounded-xl px-2 py-1 flex items-center text-white text-xs " onClick={() => setOpenContractDropdown(!openContractDropdown)}>
-                  <div className=" ">Contrat d’engagement</div>
-                  <HiChevronDown />
+            <div className="relative" ref={refContractButton}>
+              <button
+                disabled={loading}
+                className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
+                onClick={() => setOpenContractButton((e) => !e)}>
+                <div className="flex items-center gap-2">
+                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d'engagement</span>
                 </div>
-              </div>
+                <ChevronDown className="text-white font-medium" />
+              </button>
+              {/* display options */}
               <div
-                className={`${openContractDropdown ? "block" : "hidden"}  rounded-lg bg-white transition absolute top-[calc(100%+8px)] shadow overflow-hidden z-20 
-                 divide-y divide-slate-200 `}>
+                className={`${
+                  openContractButton ? "block" : "hidden"
+                }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
                 <div
-                  className="flex items-center space-x-2   text-gray-600 p-2 "
-                  onClick={async (contractId) => {
-                    await downloadPDF({
-                      url: `/contract/${contract._id}/download`,
-                      fileName: `${young.firstName} ${young.lastName} - contrat ${contractId}.pdf`,
-                    });
+                  key="download"
+                  onClick={() => {
+                    setLoading(true);
+                    viewContract(contract._id);
+                    setOpenContractButton(false);
+                    setLoading(false);
                   }}>
-                  <HiOutlineDownload />
-                  <div className="text-sm">Télécharger</div>
+                  <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 cursor-pointer">
+                    <Download className="text-gray-400 w-4 h-4" />
+                    <div>Télécharger</div>
+                  </div>
                 </div>
                 <SendContractByMail young={young} contractId={contract._id} missionName={contract.missionName} />
-                {/* <div className="flex items-center space-x-2   text-gray-600 p-2">
-                  <HiOutlineEye />
-                  <div className="text-sm">Voir</div>
-                </div> */}
               </div>
             </div>
           )}
@@ -698,7 +729,28 @@ const ApplicationStatus = ({
             <button
               className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
               disabled={loading}
-              onClick={() => updateApplication(APPLICATION_STATUS.WAITING_VALIDATION)}>
+              onClick={async () => {
+                try {
+                  if (mission.isMilitaryPreparation === "true") {
+                    if (!["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+                      const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
+                        statusMilitaryPreparationFiles: "WAITING_VALIDATION",
+                      });
+                      if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
+                    }
+                    if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
+                      updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                    } else {
+                      updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
+                    }
+                  } else {
+                    updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                  }
+                } catch (e) {
+                  console.log(e);
+                  toastr.error("Oups, une erreur est survenue lors de la candidature.");
+                }
+              }}>
               <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
               <span className="text-sm leading-5 font-medium text-white">Accepter</span>
             </button>
@@ -825,7 +877,7 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
   return (
     <>
       <div
-        className="flex items-center space-x-2   text-gray-600 p-2"
+        className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 cursor-pointer"
         onClick={() =>
           setModalMail({
             isOpen: true,
@@ -834,8 +886,8 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
             message: `Vous allez recevoir le document par mail à l'adresse ${young.email}.`,
           })
         }>
-        <HiOutlineMail />
-        <div className="text-sm">Envoyer par mail</div>
+        <HiOutlineMail className="text-gray-400 w-4 h-4" />
+        <div className="text-sm text-gray-800">Envoyer par mail</div>
       </div>
       <ModalConfirm
         isOpen={modalMail?.isOpen}

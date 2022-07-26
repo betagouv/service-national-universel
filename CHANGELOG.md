@@ -1,3 +1,59 @@
+# [1.116.0](https://github.com/betagouv/service-national-universel/compare/v1.115.1...v1.116.0) (2022-07-25)
+
+
+### Bug Fixes
+
+* **api:** mongodb poolSize to 100 ([ab8fd82](https://github.com/betagouv/service-national-universel/commit/ab8fd820ba17bd3be072735dcd0490b3d64165ec))
+
+
+### Features
+
+* **app:** add event tracking phase2 plausible ([#1689](https://github.com/betagouv/service-national-universel/issues/1689)) ([87b5696](https://github.com/betagouv/service-national-universel/commit/87b56961c5c06bf249e6503fdad8ec20218741e3))
+
+
+### Reverts
+
+* Revert "feat: (all) sentry setup (#1685)" ([13b8764](https://github.com/betagouv/service-national-universel/commit/13b8764f6c1c6067af19aa939e01462940e1de57)), closes [#1685](https://github.com/betagouv/service-national-universel/issues/1685)
+* Revert "fix: (admin) Send events to admin sentry" ([2b5a655](https://github.com/betagouv/service-national-universel/commit/2b5a655fa7f080f4b8f9022ccd5c878df8736d8f))
+
+## [1.115.1](https://github.com/betagouv/service-national-universel/compare/v1.115.0...v1.115.1) (2022-07-22)
+
+
+### Bug Fixes
+
+* **app:** PM propose mission ([#1684](https://github.com/betagouv/service-national-universel/issues/1684)) ([af6f629](https://github.com/betagouv/service-national-universel/commit/af6f629c2b849d5c4042e5272d9584ee279c299e))
+* (api) Disable sentry logs ([86f9cc8](https://github.com/betagouv/service-national-universel/commit/86f9cc802dc263fba37f28716a0f1b7c7c906d8c))
+* force deploy ([32cc122](https://github.com/betagouv/service-national-universel/commit/32cc1227d3ae18a058612945451d4bc500882284))
+
+
+### Reverts
+
+* Revert "fix (app, admin): safe names for PM uploads (#1681)" ([893373c](https://github.com/betagouv/service-national-universel/commit/893373cb4e1f9ba6bec7614c8597cf0a3fcad2ac)), closes [#1681](https://github.com/betagouv/service-national-universel/issues/1681)
+
+# [1.115.0](https://github.com/betagouv/service-national-universel/compare/v1.114.0...v1.115.0) (2022-07-21)
+
+
+### Bug Fixes
+
+* (api) Fix for download pdf for admin ([07ac900](https://github.com/betagouv/service-national-universel/commit/07ac9001ca488af3ff62830ccd6866c5766f15f0))
+* (api) Import from sentry ([86289e0](https://github.com/betagouv/service-national-universel/commit/86289e0bde5c20cfa144763b7e5b9e8d25560bd8))
+* (app) fixup org sentry ([fa6e841](https://github.com/betagouv/service-national-universel/commit/fa6e84114025b629f62d54abedeed5d8d186a09f))
+* (Sentry) Reduce sample rate ([fcabd76](https://github.com/betagouv/service-national-universel/commit/fcabd762ba9492713674b3dfd602f792843fba8e))
+* Sentry logs ([b647110](https://github.com/betagouv/service-national-universel/commit/b647110274967b87be28716cb2744dd8a1f0c79f))
+* **api:** mail equivalence validée ([6b2e61e](https://github.com/betagouv/service-national-universel/commit/6b2e61ecd3e12fdbc5a7525e07ceb60887f8c916))
+
+
+### Features
+
+* Add new sentry to repo ([1235192](https://github.com/betagouv/service-national-universel/commit/12351921f1931a506252ddd4d369c70291ba320a))
+
+# [1.114.0](https://github.com/betagouv/service-national-universel/compare/v1.113.0...v1.114.0) (2022-07-20)
+
+
+### Features
+
+* **admin:** open support sso Normandie ([#1679](https://github.com/betagouv/service-national-universel/issues/1679)) ([3b49537](https://github.com/betagouv/service-national-universel/commit/3b4953761bb3f6f4a57c21ef21cc364ebd7bd487))
+
 # [1.113.0](https://github.com/betagouv/service-national-universel/compare/v1.112.0...v1.113.0) (2022-07-19)
 
 

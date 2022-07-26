@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import DoubleDayTile from "../../components/DoubleDayTile";
@@ -29,12 +29,14 @@ import XCircle from "../../assets/icons/XCircle";
 import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
 import rubberStampValided from "../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
-import { HiChevronDown, HiOutlineMail, HiOutlineDownload, HiPlus } from "react-icons/hi";
+import { HiOutlineMail, HiPlus } from "react-icons/hi";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import downloadPDF from "../../utils/download-pdf";
 import ModalPJ from "./components/ModalPJ";
 import { BsChevronDown } from "react-icons/bs";
 import FileCard from "./../../scenes/militaryPreparation/components/FileCard";
+import ChevronDown from "../../assets/icons/ChevronDown";
+import Download from "../../assets/icons/Download";
 
 export default function viewDesktop() {
   const [mission, setMission] = useState();
@@ -44,9 +46,11 @@ export default function viewDesktop() {
   const [disabledPmRefused, setDisabledPmRefused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [contract, setContract] = useState(null);
-  const [openContractDropdown, setOpenContractDropdown] = useState();
+  const [openContractButton, setOpenContractButton] = useState();
   const [modalDocument, setModalDocument] = useState({ isOpen: false });
   const [openAttachments, setOpenAttachments] = useState(false);
+
+  const refContractButton = React.useRef();
 
   const history = useHistory();
 
@@ -103,6 +107,18 @@ export default function viewDesktop() {
     }
   }, [mission, young]);
 
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (refContractButton.current && !refContractButton.current.contains(event.target)) {
+        setOpenContractButton(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
   const getTags = () => {
     const tags = [];
     mission.city && tags.push(mission.city + (mission.zip ? ` - ${mission.zip}` : ""));
@@ -118,7 +134,7 @@ export default function viewDesktop() {
     });
   };
 
-  const updateApplicationStatus = async (status) => {
+  const updateApplication = async (status) => {
     setLoading(true);
     const { ok } = await api.put(`/application`, { _id: mission.application._id, status });
     if (!ok) toastr.error("Une erreur s'est produite lors de la mise à jour de  votre candidature");
@@ -154,6 +170,7 @@ export default function viewDesktop() {
   return (
     <div className="bg-white mx-4 pb-12 my-4 rounded-xl w-full">
       {/* BEGIN HEADER */}
+
       <div className="flex flex-col lg:flex-row justify-between pt-8 px-12  border-gray-100 gap-4">
         <div className="flex gap-4">
           {/* icon */}
@@ -191,12 +208,13 @@ export default function viewDesktop() {
               application={mission.application}
               tutor={mission?.tutor}
               mission={mission}
-              updateApplicationStatus={updateApplicationStatus}
+              updateApplication={updateApplication}
               loading={loading}
               disabledAge={disabledAge}
               disabledIncomplete={disabledIncomplete}
               disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
+              young={young}
             />
           ) : (
             <ApplyButton
@@ -207,35 +225,47 @@ export default function viewDesktop() {
               disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
               young={young}
+              isMilitaryPreparation={mission?.isMilitaryPreparation}
             />
           )}
         </div>
       </div>
       {/* END HEADER */}
+
+      {/* Bouton de contrat */}
+
       {contract && (
-        <div className=" mx-12 ">
+        <div className="flex gap-7 mt-6 mx-12 flex-col">
           {contractHasAllValidation(contract, young) ? (
-            <div className="relative">
-              <div className="flex ">
-                <div
-                  className="bg-blue-600 rounded-full px-2 py-2 flex items-center text-white text-xs cursor-pointer"
-                  onClick={() => setOpenContractDropdown(!openContractDropdown)}>
-                  <div className=" ">Contrat d’engagement</div>
-                  <HiChevronDown />
+            <div className="relative w-1/6" ref={refContractButton}>
+              <button
+                disabled={loading}
+                className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 hover:border-blue-500 hover:bg-blue-500 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
+                onClick={() => setOpenContractButton((e) => !e)}>
+                <div className="flex items-center gap-2">
+                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d'engagement</span>
                 </div>
-              </div>
+                <ChevronDown className="text-white font-medium" />
+              </button>
+              {/* display options */}
               <div
-                className={`${openContractDropdown ? "block" : "hidden"} rounded-lg bg-white transition absolute top-[calc(100%+8px)] shadow overflow-hidden z-20 
-                 divide-y divide-slate-200 cursor-pointer`}>
-                <div className="flex items-center space-x-2 text-gray-600 p-2" onClick={() => viewContract(contract._id)}>
-                  <HiOutlineDownload />
-                  <div className="text-sm">Télécharger</div>
+                className={`${
+                  openContractButton ? "block" : "hidden"
+                }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+                <div
+                  key="download"
+                  onClick={() => {
+                    setLoading(true);
+                    viewContract(contract._id);
+                    setOpenContractButton(false);
+                    setLoading(false);
+                  }}>
+                  <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                    <Download className="text-gray-400 w-4 h-4" />
+                    <div>Télécharger</div>
+                  </div>
                 </div>
                 <SendContractByMail young={young} contractId={contract._id} missionName={contract.missionName} />
-                {/* <div className="flex items-center space-x-2   text-gray-600 p-2">
-                  <HiOutlineEye />
-                  <div className="text-sm">Voir</div>
-                </div> */}
               </div>
             </div>
           ) : (
@@ -421,7 +451,7 @@ export default function viewDesktop() {
   );
 }
 
-const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young }) => {
+const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young, isMilitaryPreparation }) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
     if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
       return true;
@@ -493,8 +523,12 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
       <button
         className="px-12 py-2 rounded-lg text-white bg-blue-600 text-sm cursor-pointer "
         onClick={() => {
+          if (isMilitaryPreparation === "true") {
+            plausibleEvent("Phase 2/CTA - PM - Candidater");
+          } else {
+            plausibleEvent("Phase2/CTA missions - Candidater");
+          }
           setModal("APPLY");
-          plausibleEvent("Phase2/CTA missions - Candidater");
         }}>
         Candidater
       </button>
@@ -503,7 +537,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
   );
 };
 
-const ApplicationStatus = ({ application, tutor, mission, updateApplicationStatus, loading, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom }) => {
+const ApplicationStatus = ({ application, tutor, mission, updateApplication, loading, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young }) => {
   const [message, setMessage] = React.useState(null);
   const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
 
@@ -550,7 +584,7 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplicationStatu
                 onClick={() =>
                   setCancelModal({
                     isOpen: true,
-                    onConfirm: () => updateApplicationStatus(APPLICATION_STATUS.CANCEL),
+                    onConfirm: () => updateApplication(APPLICATION_STATUS.CANCEL),
                     title: "Êtes-vous sûr ?",
                     message: "Vous vous apprêtez à annuler votre candidature. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
                   })
@@ -592,7 +626,7 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplicationStatu
                 onClick={() =>
                   setCancelModal({
                     isOpen: true,
-                    onConfirm: () => updateApplicationStatus(APPLICATION_STATUS.ABANDON),
+                    onConfirm: () => updateApplication(APPLICATION_STATUS.ABANDON),
                     title: "Êtes-vous sûr ?",
                     message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
                   })
@@ -657,7 +691,28 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplicationStatu
             <button
               className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
               disabled={loading}
-              onClick={() => updateApplicationStatus(APPLICATION_STATUS.WAITING_VALIDATION)}>
+              onClick={async () => {
+                try {
+                  if (mission.isMilitaryPreparation === "true") {
+                    if (!["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+                      const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
+                        statusMilitaryPreparationFiles: "WAITING_VALIDATION",
+                      });
+                      if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
+                    }
+                    if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
+                      updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                    } else {
+                      updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
+                    }
+                  } else {
+                    updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                  }
+                } catch (e) {
+                  console.log(e);
+                  toastr.error("Oups, une erreur est survenue lors de la candidature.");
+                }
+              }}>
               <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
               <span className="text-sm leading-5 font-medium text-white">Accepter</span>
             </button>
@@ -666,7 +721,7 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplicationStatu
           <button
             className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 transition duration-300 ease-in-out border-[1px] border-[#fff] hover:border-gray-200 disabled:shadow-none disabled:border-gray-200"
             disabled={loading}
-            onClick={() => updateApplicationStatus(APPLICATION_STATUS.CANCEL)}>
+            onClick={() => updateApplication(APPLICATION_STATUS.CANCEL)}>
             <XCircle className="text-red-500 mr-2 w-5 h-5" />
             <span className="text-sm leading-5 font-medium text-black">Décliner</span>
           </button>
@@ -770,7 +825,7 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
   return (
     <>
       <div
-        className="flex items-center space-x-2   text-gray-600 p-2"
+        className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer"
         onClick={() =>
           setModalMail({
             isOpen: true,
@@ -779,7 +834,7 @@ const SendContractByMail = ({ young, contractId, missionName }) => {
             message: `Vous allez recevoir le document par mail à l'adresse ${young.email}.`,
           })
         }>
-        <HiOutlineMail />
+        <HiOutlineMail className="text-gray-400 w-4 h-4" />
         <div className="text-sm">Envoyer par mail</div>
       </div>
       <ModalConfirm

@@ -580,6 +580,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
         // if (!test) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         break;
       }
+      case ROLES.ADMIN:
       case ROLES.REFERENT_DEPARTMENT:
       case ROLES.REFERENT_REGION: {
         if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
