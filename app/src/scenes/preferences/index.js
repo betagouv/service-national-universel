@@ -390,23 +390,3 @@ const PreferenceContent = styled(Content)`
   padding: 2rem;
   padding-top: 0.5rem;
 `;
-
-const ContinueButton = styled.button`
-  color: #fff;
-  background-color: #5145cd;
-  padding: 9px 20px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 1rem;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  display: block;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  :hover {
-    opacity: 0.9;
-  }
-`;
