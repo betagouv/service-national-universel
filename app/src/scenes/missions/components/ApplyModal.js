@@ -9,6 +9,7 @@ import api from "../../../services/api";
 import { APPLICATION_STATUS, ENABLE_PM, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 
 import { toastr } from "react-redux-toastr";
+import plausibleEvent from "../../../services/plausible";
 
 export default function ApplyModal({ value, onChange, onSend, onCancel }) {
   const [sending, setSending] = useState(false);
@@ -67,7 +68,7 @@ export default function ApplyModal({ value, onChange, onSend, onCancel }) {
       onCancel();
       return toastr.error("Oups, une erreur est survenue lors de la candidature");
     }
-
+    plausibleEvent("Phase2/CTA - Confirmer candidature");
     onSend();
   };
 

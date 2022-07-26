@@ -133,6 +133,7 @@ export default function Signin() {
                 <button
                   className="w-full block text-[18px] text-lg text-white font-bold p-[12px] bg-[#5145cd] mt-[30px] mb-[30px] cursor-pointer shadow-xl rounded-[10px] hover:bg-[#42389d]"
                   loading={isSubmitting}
+                  disabled={isSubmitting}
                   type="submit">
                   Connexion
                 </button>

@@ -14,6 +14,7 @@ import { copyToClipboard } from "../../../utils";
 import Loader from "../../../components/Loader";
 import CardEquivalence from "./components/CardEquivalence";
 import CardPM from "./components/CardPM";
+import plausibleEvent from "../../../services/plausible";
 
 export default function IndexDesktop() {
   const young = useSelector((state) => state.Auth.young);
@@ -60,21 +61,21 @@ export default function IndexDesktop() {
             Mettez votre énergie au service d’une société plus solidaire et découvrez {"\n"} votre talent pour l’engagement en réalisant une mission d’intérêt général !
           </div>
           <div className="flex gap-4">
-            <Link to="/preferences">
+            <Link to="/preferences" onClick={() => plausibleEvent("Phase2/CTA - Renseigner mes préférences")}>
               <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center hover:bg-white hover:text-gray-800">
                 <HiOutlineAdjustments className="text-[#ffffff] group-hover:text-gray-800" />
                 <div className="text-[#ffffff] group-hover:text-gray-800 text-sm flex-1">Renseigner mes préférences</div>
               </div>
             </Link>
             {applications.length > 0 ? (
-              <Link to="/mission">
+              <Link to="/mission" onClick={() => plausibleEvent("Phase2/CTA - Trouver une mission")}>
                 <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center hover:bg-white hover:text-gray-800">
                   <HiOutlineSearch className="text-[#ffffff] group-hover:text-gray-800" />
                   <div className="text-[#ffffff] group-hover:text-gray-800 text-sm flex-1">Trouver une mission</div>
                 </div>
               </Link>
             ) : (
-              <Link to="/mission">
+              <Link to="/mission" onClick={() => plausibleEvent("Phase2/CTA - Trouver une mission")}>
                 <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center border-blue-600 hover:border-[#4881FF] bg-blue-600 hover:bg-[#4881FF]">
                   <HiOutlineSearch className="text-blue-300" />
                   <div className="text-blue-100 group-hover:text-white text-sm flex-1">Trouver une mission</div>
@@ -163,7 +164,7 @@ export default function IndexDesktop() {
             </a>
           </div>
         </div>
-        <Link to="/ma-preparation-militaire">
+        <Link to="/ma-preparation-militaire" onClick={() => plausibleEvent("Phase2/CTA - PM - PartezPM")}>
           <div className="group border-[1px] border-gray-200 hover:border-gray-300 rounded-lg mt-3 p-3 flex items-center gap-4">
             <Medaille className="text-gray-400" />
             <div className="w-full">
@@ -188,7 +189,7 @@ export default function IndexDesktop() {
               </div>
               <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
               <div className="flex justify-start">
-                <Link to="phase2/equivalence">
+                <Link to="phase2/equivalence" onClick={() => plausibleEvent("Phase 2/ CTA - EquivalenceMIGdemande")}>
                   <div className="rounded-lg text-blue-600 text-center text-sm py-1.5 px-16 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out">
                     Faire ma demande
                   </div>
