@@ -45,6 +45,9 @@ app.get("/", (req, res) => {
 
 app.post("/render", async (req, res) => {
   try {
+    // ! For testing purpose. To delete !
+    // throw new Error("Test error");
+    // await new Promise((resolve) => setTimeout(resolve, 4000));
     const buffer = await renderFromHtml(
       req.body.html.replace(
         /http(.*?)\/css\/style\.css/,
@@ -61,7 +64,7 @@ app.post("/render", async (req, res) => {
     res.send(buffer);
   } catch (error) {
     console.log(error);
-    res.status(500).send(error);
+    res.status(500).send({ ok: false, error });
   }
 });
 
