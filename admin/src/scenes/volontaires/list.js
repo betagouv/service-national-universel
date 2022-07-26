@@ -859,7 +859,7 @@ export default function VolontaireList() {
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="EQUIVALENCE_STATUS"
-                  dataField="equivalenceStatus.keyword"
+                  dataField="status_equivalence.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "EQUIVALENCE_STATUS") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;

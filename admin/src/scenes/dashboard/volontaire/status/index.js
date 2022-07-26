@@ -7,6 +7,8 @@ import {
   CONTRACT_STATUS,
   APPLICATION_STATUS,
   APPLICATION_STATUS_COLORS,
+  EQUIVALENCE_STATUS,
+  EQUIVALENCE_STATUS_COLORS,
   YOUNG_STATUS_COLORS,
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE2,
@@ -116,6 +118,21 @@ export default function StatusIndex({ filter }) {
       const { responses } = await api.esQuery("application", body);
       if (responses.length) {
         setStatusApplication(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      }
+    })();
+
+    (async () => {
+      const body = {
+        query: { bool: { must: { match_all: {} }, filter: [] } },
+        aggs: {
+          status: { terms: { field: "status.keyword" } },
+        },
+        size: 0,
+      };
+
+      const { responses } = await api.esQuery("missionequivalence", body);
+      if (responses.length) {
+        setStatusEquivalence(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       }
     })();
   }, [JSON.stringify(filter)]);
@@ -268,9 +285,9 @@ export default function StatusIndex({ filter }) {
             />
             <StatusMap
               title="Statut des demandes d'équivalences de MIG"
-              obj={APPLICATION_STATUS}
-              filterName="APPLICATION_STATUS"
-              colors={APPLICATION_STATUS_COLORS}
+              obj={EQUIVALENCE_STATUS}
+              filterName="EQUIVALENCE_STATUS"
+              colors={EQUIVALENCE_STATUS_COLORS}
               data={statusEquivalence}
               filter={filter}
               getLink={getLink}
