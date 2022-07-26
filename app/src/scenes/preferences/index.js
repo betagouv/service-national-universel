@@ -1,23 +1,26 @@
-import React from "react";
-import styled from "styled-components";
-import { Row, Col, Input } from "reactstrap";
-import { useDispatch, useSelector } from "react-redux";
+import * as Sentry from "@sentry/react";
 import { Field, Formik } from "formik";
-import api from "../../services/api";
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { Col, Input, Row } from "reactstrap";
+import styled from "styled-components";
+import LoadingButton from "../../components/buttons/LoadingButton";
+import { Content, Hero, HeroContainer } from "../../components/Content";
 import { setYoung } from "../../redux/auth/actions";
-import DomainItem from "./domainItem";
-import Button from "./button";
-import RankingPeriod from "./rankingPeriod";
-import MobilityCard from "./mobilityCard";
-import TransportCard from "./transportCard";
-import ErrorMessage, { requiredMessage } from "./errorMessage";
-import { translate, MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "../../utils";
-import { HeroContainer, Hero, Content } from "../../components/Content";
+import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
+import { MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION, translate } from "../../utils";
+import Button from "./button";
+import DomainItem from "./domainItem";
+import ErrorMessage, { requiredMessage } from "./errorMessage";
+import MobilityCard from "./mobilityCard";
+import RankingPeriod from "./rankingPeriod";
+import TransportCard from "./transportCard";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
+  const [loading, setLoading] = React.useState(false);
   const dispatch = useDispatch();
 
   return (
@@ -40,6 +43,7 @@ export default function Index() {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
+            setLoading(true);
             console.log(values);
             plausibleEvent("Phase2/CTA préférences missions - Enregistrer préférences");
             const { ok, code, data: young } = await api.put("/young", values);
@@ -47,13 +51,16 @@ export default function Index() {
             if (young) {
               dispatch(setYoung(young));
             }
+            setLoading(false);
             return toastr.success("Mis à jour !");
           } catch (e) {
             console.log(e);
+            Sentry.captureException(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);
+            setLoading(false);
           }
         }}>
-        {({ values, handleChange, handleSubmit, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
           <>
             <PreferenceItem title="Sélectionnez 3 thématiques qui vous intéressent le plus parmi les domaines d'action disponibles">
               <Field
@@ -230,7 +237,7 @@ export default function Index() {
               subtitle="Les frais de transport et d'hébergement sont à votre charge pour la réalisation de votre mission de phase 2.">
               <Row style={{ width: "100%" }}>
                 <Col md={6}>
-                  <MobilityCard title="MISSION À PROXIMITÉ DE" handleChange={handleChange} values={values} errors={errors} touched={touched} />
+                  <MobilityCard title="MISSION À PROXIMITÉ DE" handleChange={handleChange} values={values} errors={errors} touched={touched} validateField={validateField} />
                 </Col>
                 <Col md={6}>
                   <TransportCard title="MOYEN(S) DE TRANSPORT PRIVILÉGIÉ(S)" handleChange={handleChange} values={values} errors={errors} touched={touched} />
@@ -284,7 +291,9 @@ export default function Index() {
               />
             </PreferenceItem>
             <Footer>
-              <ContinueButton onClick={handleSubmit}>Enregistrer mes préférences</ContinueButton>
+              <LoadingButton onClick={handleSubmit} loading={loading}>
+                Enregistrer mes préférences
+              </LoadingButton>
               {Object.keys(errors).length ? <h3>Vous ne pouvez pas enregistrer votre avancée car tous les champs ne sont pas correctement renseignés.</h3> : null}
             </Footer>
           </>
@@ -382,24 +391,4 @@ const Title = styled.div`
 const PreferenceContent = styled(Content)`
   padding: 2rem;
   padding-top: 0.5rem;
-`;
-
-const ContinueButton = styled.button`
-  color: #fff;
-  background-color: #5145cd;
-  padding: 9px 20px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 1rem;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  display: block;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  :hover {
-    opacity: 0.9;
-  }
 `;
