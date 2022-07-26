@@ -44,9 +44,16 @@ import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 import "./index.css";
 import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
+import * as Sentry from "@sentry/react";
 
 initSentry();
 initApi();
+
+function FallbackComponent() {
+  return <div>An error has occurred</div>;
+}
+
+const myFallback = <FallbackComponent />;
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -70,19 +77,21 @@ export default function App() {
   if (loading) return <Loader />;
 
   return (
-    <Router history={history}>
-      <div className="main">
-        <Switch>
-          <SentryRoute path="/validate" component={Validate} />
-          <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-          <SentryRoute path="/auth" component={Auth} />
-          <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
-          <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-          <SentryRoute path="/" component={Home} />
-        </Switch>
-        <Footer />
-      </div>
-    </Router>
+    <Sentry.ErrorBoundary fallback={myFallback} showDialog>
+      <Router history={history}>
+        <div className="main">
+          <Switch>
+            <SentryRoute path="/validate" component={Validate} />
+            <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+            <SentryRoute path="/auth" component={Auth} />
+            <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
+            <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+            <SentryRoute path="/" component={Home} />
+          </Switch>
+          <Footer />
+        </div>
+      </Router>
+    </Sentry.ErrorBoundary>
   );
 }
 
