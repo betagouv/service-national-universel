@@ -16,7 +16,8 @@ export default function HomePhase2() {
               <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-800">
                 <strong>{young.firstName},</strong>
                 <br />
-                prête pour la phase 2 ?
+                {young.gender === "female" ? "prête " : "prêt "}
+                pour la phase 2 ?
               </div>
               <div className="text-base left-7 text-gray-800 mt-5">
                 Mettez votre énergie au service d’une société plus solidaire et découvrez <strong>votre talent pour l’engagement</strong> en réalisant une mission d’intérêt général
