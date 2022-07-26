@@ -3,9 +3,11 @@ require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const puppeteer = require("puppeteer");
 const bodyParser = require("body-parser");
-const { initSentry } = require("./sentry");
+const { initSentry, capture } = require("./sentry");
+
+const { PORT: port } = require("./config.js");
+
 const app = express();
-const port = process.env.PORT || 8087;
 
 const registerSentryErrorHandler = initSentry(app);
 
@@ -50,9 +52,6 @@ app.get("/", (req, res) => {
 
 app.post("/render", async (req, res) => {
   try {
-    // ! For testing purpose. To delete !
-    // throw new Error("Test error");
-    // await new Promise((resolve) => setTimeout(resolve, 4000));
     const buffer = await renderFromHtml(
       req.body.html.replace(
         /http(.*?)\/css\/style\.css/,
@@ -69,6 +68,7 @@ app.post("/render", async (req, res) => {
     res.send(buffer);
   } catch (error) {
     console.log(error);
+    capture(error);
     res.status(500).send({ ok: false, error });
   }
 });
