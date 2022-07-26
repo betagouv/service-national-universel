@@ -33,6 +33,7 @@ import {
   translatePhase2,
   translateApplication,
   translateEngagement,
+  translateEquivalenceStatus,
   department2region,
   translateFileStatusPhase1,
 } from "../../utils";
@@ -862,7 +863,7 @@ export default function VolontaireList() {
                   dataField="status_equivalence.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "EQUIVALENCE_STATUS") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translateEquivalenceStatus(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
