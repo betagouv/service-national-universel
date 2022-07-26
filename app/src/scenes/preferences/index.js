@@ -15,9 +15,11 @@ import ErrorMessage, { requiredMessage } from "./errorMessage";
 import { translate, MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "../../utils";
 import { HeroContainer, Hero, Content } from "../../components/Content";
 import plausibleEvent from "../../services/plausible";
+import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
+  const [loading, setLoading] = React.useState(false);
   const dispatch = useDispatch();
 
   return (
@@ -40,6 +42,7 @@ export default function Index() {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
+            setLoading(true);
             console.log(values);
             plausibleEvent("Phase2/CTA préférences missions - Enregistrer préférences");
             const { ok, code, data: young } = await api.put("/young", values);
@@ -47,13 +50,15 @@ export default function Index() {
             if (young) {
               dispatch(setYoung(young));
             }
+            setLoading(false);
             return toastr.success("Mis à jour !");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);
+            setLoading(false);
           }
         }}>
-        {({ values, handleChange, handleSubmit, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
           <>
             <PreferenceItem title="Sélectionnez 3 thématiques qui vous intéressent le plus parmi les domaines d'action disponibles">
               <Field
@@ -230,7 +235,7 @@ export default function Index() {
               subtitle="Les frais de transport et d'hébergement sont à votre charge pour la réalisation de votre mission de phase 2.">
               <Row style={{ width: "100%" }}>
                 <Col md={6}>
-                  <MobilityCard title="MISSION À PROXIMITÉ DE" handleChange={handleChange} values={values} errors={errors} touched={touched} />
+                  <MobilityCard title="MISSION À PROXIMITÉ DE" handleChange={handleChange} values={values} errors={errors} touched={touched} validateField={validateField} />
                 </Col>
                 <Col md={6}>
                   <TransportCard title="MOYEN(S) DE TRANSPORT PRIVILÉGIÉ(S)" handleChange={handleChange} values={values} errors={errors} touched={touched} />
@@ -284,7 +289,9 @@ export default function Index() {
               />
             </PreferenceItem>
             <Footer>
-              <ContinueButton onClick={handleSubmit}>Enregistrer mes préférences</ContinueButton>
+              <LoadingButton onClick={handleSubmit} loading={loading}>
+                Enregistrer mes préférences
+              </LoadingButton>
               {Object.keys(errors).length ? <h3>Vous ne pouvez pas enregistrer votre avancée car tous les champs ne sont pas correctement renseignés.</h3> : null}
             </Footer>
           </>
