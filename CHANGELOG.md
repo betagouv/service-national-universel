@@ -1,3 +1,35 @@
+# [1.116.0](https://github.com/betagouv/service-national-universel/compare/v1.115.1...v1.116.0) (2022-07-25)
+
+
+### Bug Fixes
+
+* **api:** mongodb poolSize to 100 ([ab8fd82](https://github.com/betagouv/service-national-universel/commit/ab8fd820ba17bd3be072735dcd0490b3d64165ec))
+
+
+### Features
+
+* **app:** add event tracking phase2 plausible ([#1689](https://github.com/betagouv/service-national-universel/issues/1689)) ([87b5696](https://github.com/betagouv/service-national-universel/commit/87b56961c5c06bf249e6503fdad8ec20218741e3))
+
+
+### Reverts
+
+* Revert "feat: (all) sentry setup (#1685)" ([13b8764](https://github.com/betagouv/service-national-universel/commit/13b8764f6c1c6067af19aa939e01462940e1de57)), closes [#1685](https://github.com/betagouv/service-national-universel/issues/1685)
+* Revert "fix: (admin) Send events to admin sentry" ([2b5a655](https://github.com/betagouv/service-national-universel/commit/2b5a655fa7f080f4b8f9022ccd5c878df8736d8f))
+
+## [1.115.1](https://github.com/betagouv/service-national-universel/compare/v1.115.0...v1.115.1) (2022-07-22)
+
+
+### Bug Fixes
+
+* **app:** PM propose mission ([#1684](https://github.com/betagouv/service-national-universel/issues/1684)) ([af6f629](https://github.com/betagouv/service-national-universel/commit/af6f629c2b849d5c4042e5272d9584ee279c299e))
+* (api) Disable sentry logs ([86f9cc8](https://github.com/betagouv/service-national-universel/commit/86f9cc802dc263fba37f28716a0f1b7c7c906d8c))
+* force deploy ([32cc122](https://github.com/betagouv/service-national-universel/commit/32cc1227d3ae18a058612945451d4bc500882284))
+
+
+### Reverts
+
+* Revert "fix (app, admin): safe names for PM uploads (#1681)" ([893373c](https://github.com/betagouv/service-national-universel/commit/893373cb4e1f9ba6bec7614c8597cf0a3fcad2ac)), closes [#1681](https://github.com/betagouv/service-national-universel/issues/1681)
+
 # [1.115.0](https://github.com/betagouv/service-national-universel/compare/v1.114.0...v1.115.0) (2022-07-21)
 
 

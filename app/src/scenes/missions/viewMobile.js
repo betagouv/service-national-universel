@@ -26,10 +26,9 @@ import { MdOutlineContentCopy } from "react-icons/md";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
-import { HiChevronDown, HiOutlineEye, HiOutlineMail, HiOutlineDownload, HiPlus } from "react-icons/hi";
+import { HiChevronDown, HiOutlineMail, HiPlus } from "react-icons/hi";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import downloadPDF from "../../utils/download-pdf";
-import WithTooltip from "../../components/WithTooltip";
 import rubberStampValided from "../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
 import { BsChevronDown } from "react-icons/bs";
@@ -50,6 +49,7 @@ export default function viewMobile() {
   const [openPeopleContract, setOpenPeopleContract] = useState(false);
   const [modalDocument, setModalDocument] = useState({ isOpen: false });
   const [openAttachments, setOpenAttachments] = useState(false);
+  const [cancelModal, setCancelModal] = useState({ isOpen: false, onConfirm: null });
 
   const history = useHistory();
 
@@ -170,7 +170,7 @@ export default function viewMobile() {
               {e}
             </div>
           ))}
-          {mission.isMilitaryPreparation === "true" ? (
+          {mission?.isMilitaryPreparation === "true" ? (
             <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
           ) : null}
         </div>
@@ -182,6 +182,7 @@ export default function viewMobile() {
               mission={mission}
               updateApplication={updateApplication}
               loading={loading}
+              setLoading={setLoading}
               disabledAge={disabledAge}
               disabledIncomplete={disabledIncomplete}
               disabledPmRefused={disabledPmRefused}
@@ -200,6 +201,7 @@ export default function viewMobile() {
               disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
               duration={mission?.duration}
+              isMilitaryPreparation={mission?.isMilitaryPreparation}
             />
           )}
         </div>
@@ -309,18 +311,48 @@ export default function viewMobile() {
         <>
           <div className="flex items-center justify-center mx-6 my-4">
             {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(mission?.application.status) ? (
-              <button className="group flex items-center gap-1 border-[1px] px-10 py-2 rounded-lg" onClick={() => updateApplication(APPLICATION_STATUS.CANCEL)} disabled={loading}>
+              <button
+                className="group flex items-center gap-1 border-[1px] px-10 py-2 rounded-lg"
+                disabled={loading}
+                onClick={() =>
+                  setCancelModal({
+                    isOpen: true,
+                    onConfirm: () => updateApplication(APPLICATION_STATUS.CANCEL),
+                    title: "Êtes-vous sûr ?",
+                    message: "Vous vous apprêtez à annuler votre candidature. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
+                  })
+                }>
                 <IoMdInformationCircleOutline className="h-5 w-5 group-disabled:text-red-300 text-red-400" />
                 <div className="text-sm leading-5 font-medium group-disabled:text-gray-400 text-gray-800">Annuler cette candidature</div>
               </button>
             ) : null}
             {["IN_PROGRESS", "VALIDATED"].includes(mission?.application.status) ? (
-              <button className="group flex items-center gap-1 border-[1px] px-10 py-2 rounded-lg" onClick={() => updateApplication(APPLICATION_STATUS.ABANDON)} disabled={loading}>
+              <button
+                className="group flex items-center gap-1 border-[1px] px-10 py-2 rounded-lg"
+                disabled={loading}
+                onClick={() =>
+                  setCancelModal({
+                    isOpen: true,
+                    onConfirm: () => updateApplication(APPLICATION_STATUS.ABANDON),
+                    title: "Êtes-vous sûr ?",
+                    message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
+                  })
+                }>
                 <IoMdInformationCircleOutline className="h-5 w-5 group-disabled:text-red-300 text-red-400" />
                 <div className="text-sm leading-5 font-medium group-disabled:text-gray-400 text-gray-800">Abandonner la mission</div>
               </button>
             ) : null}
           </div>
+          <ModalConfirm
+            isOpen={cancelModal?.isOpen}
+            title={cancelModal?.title}
+            message={cancelModal?.message}
+            onCancel={() => setCancelModal({ isOpen: false, onConfirm: null })}
+            onConfirm={async () => {
+              await cancelModal?.onConfirm();
+              setCancelModal({ isOpen: false, onConfirm: null });
+            }}
+          />
         </>
       ) : null}
       {mission.isMilitaryPreparation === "true" ? (
@@ -437,7 +469,7 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
   </div>
 );
 
-const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young }) => {
+const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young, isMilitaryPreparation }) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
     if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
       return true;
@@ -449,7 +481,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
   if (applicationsCount >= 15)
     return (
       <div className="flex flex-col items-center justify-center gap-2">
-        <div className="text-red-500 text-xs text-center">Vous ne pouvez candidater qu'à 15 missions différentes.</div>
+        <div className="text-red-500 text-xs text-center">Vous ne pouvez candidater qu&apos;à 15 missions différentes.</div>
         <div className="flex flex-col items-stretch gap-4">
           <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
             Candidater
@@ -514,8 +546,12 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
       <button
         className="py-2 rounded-lg text-white bg-blue-600 text-sm cursor-pointer "
         onClick={() => {
+          if (isMilitaryPreparation === "true") {
+            plausibleEvent("Phase 2/CTA - PM - Candidater");
+          } else {
+            plausibleEvent("Phase2/CTA missions - Candidater");
+          }
           setModal("APPLY");
-          plausibleEvent("Phase2/CTA missions - Candidater");
         }}>
         Candidater
       </button>
@@ -530,6 +566,7 @@ const ApplicationStatus = ({
   mission,
   updateApplication,
   loading,
+  setLoading,
   disabledAge,
   disabledIncomplete,
   disabledPmRefused,
@@ -619,7 +656,7 @@ const ApplicationStatus = ({
                 className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
                 onClick={() => setOpenContractButton((e) => !e)}>
                 <div className="flex items-center gap-2">
-                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d'engagement</span>
+                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d&apos;engagement</span>
                 </div>
                 <ChevronDown className="text-white font-medium" />
               </button>
@@ -685,7 +722,28 @@ const ApplicationStatus = ({
             <button
               className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
               disabled={loading}
-              onClick={() => updateApplication(APPLICATION_STATUS.WAITING_VALIDATION)}>
+              onClick={async () => {
+                try {
+                  if (mission.isMilitaryPreparation === "true") {
+                    if (!["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+                      const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
+                        statusMilitaryPreparationFiles: "WAITING_VALIDATION",
+                      });
+                      if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
+                    }
+                    if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
+                      updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                    } else {
+                      updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
+                    }
+                  } else {
+                    updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                  }
+                } catch (e) {
+                  console.log(e);
+                  toastr.error("Oups, une erreur est survenue lors de la candidature.");
+                }
+              }}>
               <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
               <span className="text-sm leading-5 font-medium text-white">Accepter</span>
             </button>

@@ -214,6 +214,7 @@ export default function viewDesktop() {
               disabledIncomplete={disabledIncomplete}
               disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
+              young={young}
             />
           ) : (
             <ApplyButton
@@ -224,6 +225,7 @@ export default function viewDesktop() {
               disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
               young={young}
+              isMilitaryPreparation={mission?.isMilitaryPreparation}
             />
           )}
         </div>
@@ -241,7 +243,7 @@ export default function viewDesktop() {
                 className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 hover:border-blue-500 hover:bg-blue-500 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
                 onClick={() => setOpenContractButton((e) => !e)}>
                 <div className="flex items-center gap-2">
-                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d'engagement</span>
+                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d&apos;engagement</span>
                 </div>
                 <ChevronDown className="text-white font-medium" />
               </button>
@@ -449,7 +451,7 @@ export default function viewDesktop() {
   );
 }
 
-const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young }) => {
+const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young, isMilitaryPreparation }) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
     if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
       return true;
@@ -521,8 +523,12 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
       <button
         className="px-12 py-2 rounded-lg text-white bg-blue-600 text-sm cursor-pointer "
         onClick={() => {
+          if (isMilitaryPreparation === "true") {
+            plausibleEvent("Phase 2/CTA - PM - Candidater");
+          } else {
+            plausibleEvent("Phase2/CTA missions - Candidater");
+          }
           setModal("APPLY");
-          plausibleEvent("Phase2/CTA missions - Candidater");
         }}>
         Candidater
       </button>
@@ -531,8 +537,9 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
   );
 };
 
-const ApplicationStatus = ({ application, tutor, mission, updateApplication, loading, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom }) => {
+const ApplicationStatus = ({ application, tutor, mission, updateApplication, loading, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young }) => {
   const [message, setMessage] = React.useState(null);
+  const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
 
   useEffect(() => {
     if (disabledIncomplete) setMessage("Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page");
@@ -564,62 +571,103 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
       ABANDON: "text-gray-400",
     },
   };
+
   if (["WAITING_VALIDATION", "WAITING_VERIFICATION", "REFUSED", "CANCEL"].includes(application.status)) {
     return (
-      <div className="flex flex-col justify-center items-center lg:items-end gap-4">
-        <div className="flex items-center gap-6">
-          {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? (
-            <div
-              className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
-              onClick={() => !loading && updateApplication(APPLICATION_STATUS.CANCEL)}>
-              <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
-              <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Annuler cette candidature</div>
+      <>
+        <div className="flex flex-col justify-center items-center lg:items-end gap-4">
+          <div className="flex items-center gap-6">
+            {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? (
+              <button
+                className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
+                disabled={loading}
+                onClick={() =>
+                  setCancelModal({
+                    isOpen: true,
+                    onConfirm: () => updateApplication(APPLICATION_STATUS.CANCEL),
+                    title: "Êtes-vous sûr ?",
+                    message: "Vous vous apprêtez à annuler votre candidature. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
+                  })
+                }>
+                <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
+                <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Annuler cette candidature</div>
+              </button>
+            ) : null}
+            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+              {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
             </div>
-          ) : null}
-          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
-            {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
+          </div>
+          <div className="text-xs leading-none font-normal text-gray-500">
+            Places disponibles : {mission.placesLeft}/{mission.placesTotal}{" "}
           </div>
         </div>
-        <div className="text-xs leading-none font-normal text-gray-500">
-          Places disponibles : {mission.placesLeft}/{mission.placesTotal}{" "}
-        </div>
-      </div>
+        <ModalConfirm
+          isOpen={cancelModal?.isOpen}
+          title={cancelModal?.title}
+          message={cancelModal?.message}
+          onCancel={() => setCancelModal({ isOpen: false, onConfirm: null })}
+          onConfirm={async () => {
+            await cancelModal?.onConfirm();
+            setCancelModal({ isOpen: false, onConfirm: null });
+          }}
+        />
+      </>
     );
   }
   if (["IN_PROGRESS", "VALIDATED", "DONE", "ABANDON"].includes(application.status)) {
     return (
-      <div className="flex flex-col justify-center items-center lg:items-end gap-4">
-        <div className="flex items-center gap-6">
-          {["IN_PROGRESS", "VALIDATED"].includes(application.status) ? (
-            <div
-              className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
-              onClick={() => !loading && updateApplication(APPLICATION_STATUS.ABANDON)}>
-              <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
-              <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Abandonner la mission</div>
+      <>
+        <div className="flex flex-col justify-center items-center lg:items-end gap-4">
+          <div className="flex items-center gap-6">
+            {["IN_PROGRESS", "VALIDATED"].includes(application.status) ? (
+              <button
+                className={`group flex items-center gap-1 ${loading ? "hover:scale-100 cursor-wait" : "cursor-pointer hover:scale-105"}`}
+                disabled={loading}
+                onClick={() =>
+                  setCancelModal({
+                    isOpen: true,
+                    onConfirm: () => updateApplication(APPLICATION_STATUS.ABANDON),
+                    title: "Êtes-vous sûr ?",
+                    message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
+                  })
+                }>
+                <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
+                <div className={`text-xs leading-none font-normal underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Abandonner la mission</div>
+              </button>
+            ) : null}
+            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
+              {translateApplication(application.status)}
+            </div>
+          </div>
+          {tutor ? (
+            <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6 mb-4">
+              <div className="flex flex-col gap-1">
+                <div className="text-sm font-bold">Contacter mon tuteur</div>
+                <div className="text-xs text-gray-600">
+                  {tutor.firstName} {tutor.lastName} - {tutor.email}
+                </div>
+              </div>
+              <MdOutlineContentCopy
+                className="text-gray-400 hover:text-blue-600 cursor-pointer h-4 w-4"
+                onClick={() => {
+                  copyToClipboard(tutor.email);
+                  toastr.info("L'email de votre tuteur a été copié dans le presse-papier");
+                }}
+              />
             </div>
           ) : null}
-          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
-            {translateApplication(application.status)}
-          </div>
         </div>
-        {tutor ? (
-          <div className="border border-gray-200 rounded-lg py-2 px-3 flex gap-6 mb-4">
-            <div className="flex flex-col gap-1">
-              <div className="text-sm font-bold">Contacter mon tuteur</div>
-              <div className="text-xs text-gray-600">
-                {tutor.firstName} {tutor.lastName} - {tutor.email}
-              </div>
-            </div>
-            <MdOutlineContentCopy
-              className="text-gray-400 hover:text-blue-600 cursor-pointer h-4 w-4"
-              onClick={() => {
-                copyToClipboard(tutor.email);
-                toastr.info("L'email de votre tuteur a été copié dans le presse-papier");
-              }}
-            />
-          </div>
-        ) : null}
-      </div>
+        <ModalConfirm
+          isOpen={cancelModal?.isOpen}
+          title={cancelModal?.title}
+          message={cancelModal?.message}
+          onCancel={() => setCancelModal({ isOpen: false, onConfirm: null })}
+          onConfirm={async () => {
+            await cancelModal?.onConfirm();
+            setCancelModal({ isOpen: false, onConfirm: null });
+          }}
+        />
+      </>
     );
   }
 
@@ -643,7 +691,28 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
             <button
               className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
               disabled={loading}
-              onClick={() => updateApplication(APPLICATION_STATUS.WAITING_VALIDATION)}>
+              onClick={async () => {
+                try {
+                  if (mission.isMilitaryPreparation === "true") {
+                    if (!["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+                      const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
+                        statusMilitaryPreparationFiles: "WAITING_VALIDATION",
+                      });
+                      if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
+                    }
+                    if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
+                      updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                    } else {
+                      updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
+                    }
+                  } else {
+                    updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                  }
+                } catch (e) {
+                  console.log(e);
+                  toastr.error("Oups, une erreur est survenue lors de la candidature.");
+                }
+              }}>
               <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
               <span className="text-sm leading-5 font-medium text-white">Accepter</span>
             </button>
