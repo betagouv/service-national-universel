@@ -929,9 +929,13 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     if (!canDeleteReferent({ actor: req.user, originalTarget: referent, structure })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const referents = await ReferentModel.find({ structureId: referent.structureId });
-    const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
-    if (missionsLinkedToReferent || referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
+    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(referent.role)) {
+      const referents = await ReferentModel.find({ structureId: referent.structureId });
+      const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
+      if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
+      if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
+    }
+
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });

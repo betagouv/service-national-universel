@@ -51,7 +51,7 @@ export default function Edit(props) {
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const dispatch = useDispatch();
-  
+
   useEffect(() => {
     (async () => {
       try {
@@ -72,9 +72,7 @@ export default function Edit(props) {
         const structureResponse = await api.get("/structure");
         if (!structureResponse.ok) return setStructures(null);
         setStructures(structureResponse.data);
-        userResponse.data.structureId
-        ? setStructure(structureResponse.data.find(item => item._id == userResponse.data.structureId))
-        : null;
+        userResponse.data.structureId ? setStructure(structureResponse.data.find((item) => item._id == userResponse.data.structureId)) : null;
       } catch (e) {
         console.log(e);
         return toastr.error("Une erreur s'est produite lors du chargement de cet utilisateur");
@@ -163,7 +161,8 @@ export default function Edit(props) {
     try {
       const { ok, code } = await api.remove(`/referent/${user._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_OBJECT") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
+      if (!ok && code === "LINKED_MISSION") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
+      if (!ok && code === "LINKED_STRUCTURE") return toastr.error(translate(code), "Ce responsable est le dernier responsable de la structure.");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");
       return history.push(`/user`);
@@ -451,8 +450,8 @@ const Select = ({ title, name, values, onChange, disabled, options, allowEmpty =
 };
 
 const AutocompleteSelectStructure = ({ options, user, setStructure, onClick, disabled, loading }) => {
-  const optionsMap = options.map(e => ({ label: e.name, value: e.name, _id: e._id }));
-  const defaultStructure = optionsMap.find(item => item._id === user.structureId)
+  const optionsMap = options.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+  const defaultStructure = optionsMap.find((item) => item._id === user.structureId);
   return (
     <>
       <Row className="detail">
