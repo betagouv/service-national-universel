@@ -2,7 +2,7 @@ import React from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 
-import { translate, translatePhase1, translatePhase2, translateApplication, translateEngagement } from "../../../../utils";
+import { translate, translatePhase1, translatePhase2, translateApplication, translateEngagement, translateEquivalenceStatus } from "../../../../utils";
 import { CardArrow, Card, CardTitle, CardSection, CardValueWrapper, CardValue, CardPercentage, Subtitle } from "../../../../components/dashboard";
 
 export default function StatusMap({ sectionTitle, title, obj, filterName, colors, data, getLink, filter }) {
@@ -16,6 +16,8 @@ export default function StatusMap({ sectionTitle, title, obj, filterName, colors
       return translatePhase2(el);
     } else if (filterName === "CONTRACT_STATUS") {
       return translateEngagement(el);
+    } else if (filterName === "EQUIVALENCE_STATUS") {
+      return translateEquivalenceStatus(el);
     } else {
       return translate(el);
     }

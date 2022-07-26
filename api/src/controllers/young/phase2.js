@@ -52,6 +52,13 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
     const youngId = value.id;
     delete value.id;
     await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
+    if (isYoung) {
+      young.set({ status_equivalence: "WAITING_VERIFICATION" });
+    }
+    if (!isYoung) {
+      young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
+    }
+    await young.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young.EQUIVALENCE_WAITING_VERIFICATION;
     let cc = getCcOfYoung({ template, young });
@@ -130,7 +137,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
 
     if (["WAITING_CORRECTION", "VALIDATED", "REFUSED"].includes(value.status) && req.user?.role) {
       if (young.statusPhase2 !== "VALIDATED" && value.status === "VALIDATED") {
-        young.set({ statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
+        young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
       }
       if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
         const applications = await ApplicationModel.find({ youngId: young._id });
@@ -143,6 +150,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
           young.set({ statusPhase2: "WAITING_REALISATION" });
         }
       }
+    }
+
+    if (young.statusPhase2 !== "VALIDATED" && !["VALIDATED"].includes(value.status)) {
+      young.set({ status_equivalence: value.status });
     }
 
     delete value.id;

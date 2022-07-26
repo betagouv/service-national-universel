@@ -33,6 +33,7 @@ import {
   translatePhase2,
   translateApplication,
   translateEngagement,
+  translateEquivalenceStatus,
   department2region,
   translateFileStatusPhase1,
 } from "../../utils";
@@ -60,6 +61,7 @@ const FILTERS = [
   "MEDICAL_FILE_RECEIVED",
   "COHESION_PRESENCE",
   "MILITARY_PREPARATION_FILES_STATUS",
+  "EQUIVALENCE_STATUS",
   "PPS",
   "PAI",
   "QPV",
@@ -853,6 +855,20 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut documents Préparation Militaire", "Statut documents Préparation Militaire")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="EQUIVALENCE_STATUS"
+                  dataField="status_equivalence.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "EQUIVALENCE_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translateEquivalenceStatus(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut demande d'équivalence", "Statut demande déquivalence")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>

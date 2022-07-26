@@ -7,6 +7,8 @@ import {
   CONTRACT_STATUS,
   APPLICATION_STATUS,
   APPLICATION_STATUS_COLORS,
+  EQUIVALENCE_STATUS,
+  EQUIVALENCE_STATUS_COLORS,
   YOUNG_STATUS_COLORS,
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE2,
@@ -33,6 +35,7 @@ export default function StatusIndex({ filter }) {
   const [cohesionStayPresence, setCohesionStayPresence] = useState({});
   const [youngPhase1Agreement, setYoungPhase1Agreement] = useState({});
   const [statusApplication, setStatusApplication] = useState({});
+  const [statusEquivalence, setStatusEquivalence] = useState({});
   const [departInform, setDepartInform] = useState({});
   const [departSejourMotif, setDepartSejourMotif] = useState({});
   const [presenceJDM, setPresenceJDM] = useState({});
@@ -58,6 +61,7 @@ export default function StatusIndex({ filter }) {
           presenceJDM: { terms: { field: "presenceJDM.keyword" } },
           departInform: { terms: { field: "departInform.keyword" } },
           departSejourMotif: { terms: { field: "departSejourMotif.keyword" } },
+          statusEquivalence: { terms: { field: "status_equivalence.keyword" } },
         },
         track_total_hits: true,
         size: 0,
@@ -92,6 +96,7 @@ export default function StatusIndex({ filter }) {
         setPresenceJDM(responses[0].aggregations.presenceJDM.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setDepartInform(responses[0].aggregations.departInform.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setDepartSejourMotif(responses[0].aggregations.departSejourMotif.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setStatusEquivalence(responses[0].aggregations.statusEquivalence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
         setTotalHit(responses[0].hits.total.value);
       }
     })();
@@ -262,6 +267,15 @@ export default function StatusIndex({ filter }) {
               filterName="APPLICATION_STATUS"
               colors={APPLICATION_STATUS_COLORS}
               data={statusApplication}
+              filter={filter}
+              getLink={getLink}
+            />
+            <StatusMap
+              title="Statut des demandes d'équivalences de MIG"
+              obj={EQUIVALENCE_STATUS}
+              filterName="EQUIVALENCE_STATUS"
+              colors={EQUIVALENCE_STATUS_COLORS}
+              data={statusEquivalence}
               filter={filter}
               getLink={getLink}
             />
