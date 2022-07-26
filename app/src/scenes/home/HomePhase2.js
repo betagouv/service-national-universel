@@ -20,8 +20,8 @@ export default function HomePhase2() {
                 pour la phase 2 ?
               </div>
               <div className="text-base left-7 text-gray-800 mt-5">
-                Mettez votre énergie au service d’une société plus solidaire et découvrez <strong>votre talent pour l’engagement</strong> en réalisant une mission d’intérêt général
-                !
+                Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
+                d&apos;intérêt général !
               </div>
               <div className="flex flex-col items-stretch w-fit">
                 <button
@@ -30,7 +30,7 @@ export default function HomePhase2() {
                     plausibleEvent("Phase 2/CTA - Realiser ma mission");
                     history.push("/phase2");
                   }}>
-                  Réaliser ma mission d’intérêt général
+                  Réaliser ma mission d&apos;intérêt général
                 </button>
                 <button
                   className="rounded-[10px] border-[1px] py-2.5 px-3  hover:!bg-blue-600 bg-white border-blue-600 mt-3 hover:!text-white text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
@@ -54,7 +54,8 @@ export default function HomePhase2() {
               pour la phase 2 ?
             </div>
             <div className="text-sm left-7 text-gray-800 mt-5">
-              Mettez votre énergie au service d’une société plus solidaire et découvrez <strong>votre talent pour l’engagement</strong> en réalisant une mission d’intérêt général !
+              Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
+              d&apos;intérêt général !
             </div>
             <button
               className="w-full rounded-[10px] border-[1px] py-2.5 px-3  bg-blue-600 hover:bg-white border-blue-600 mt-5 text-white hover:!text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
@@ -62,7 +63,7 @@ export default function HomePhase2() {
                 plausibleEvent("Phase 2/CTA - Realiser ma mission");
                 history.push("/phase2");
               }}>
-              Réaliser ma mission d’intérêt général
+              Réaliser ma mission d&apos;intérêt général
             </button>
             <button
               className="w-full rounded-[10px] border-[1px] py-2.5 px-3  hover:!bg-blue-600 bg-white border-blue-600 mt-3 hover:!text-white text-blue-600 text-sm leading-5 font-medium transition ease-in-out duration-150"
