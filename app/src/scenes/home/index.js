@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 
-import { YOUNG_STATUS } from "../../utils";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "../../utils";
 import WaitingValidation from "./waitingValidation";
 import WaitingCorrection from "./waitingCorrection";
 import Refused from "./refused";
@@ -10,6 +10,7 @@ import Withdrawn from "./withdrawn";
 import WaitingList from "./waitingList";
 import Validated from "./validated";
 import Banner from "./components/banner";
+import HomePhase2 from "./HomePhase2";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -49,6 +50,13 @@ export default () => {
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
       if (young.status === YOUNG_STATUS.VALIDATED) return <Validated />;
     }
+    if (
+      young.status === YOUNG_STATUS.VALIDATED &&
+      [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) &&
+      [YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.WAITING_REALISATION].includes(young.statusPhase2)
+    )
+      return <HomePhase2 />;
+
     return <Default />;
   };
 

@@ -1,41 +1,41 @@
 import React, { useEffect, useRef, useState } from "react";
+import { AiFillClockCircle, AiOutlineClockCircle } from "react-icons/ai";
+import { BsChevronDown } from "react-icons/bs";
+import { HiChevronDown, HiOutlineMail, HiPlus } from "react-icons/hi";
+import { IoMdInformationCircleOutline } from "react-icons/io";
+import { MdOutlineContentCopy } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
+import CheckCircle from "../../assets/icons/CheckCircle";
+import ChevronDown from "../../assets/icons/ChevronDown";
+import Download from "../../assets/icons/Download";
+import XCircle from "../../assets/icons/XCircle";
+import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
+import rubberStampValided from "../../assets/rubberStampValided.svg";
 import DoubleDayTile from "../../components/DoubleDayTile";
 import Loader from "../../components/Loader";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import {
+  APPLICATION_STATUS,
+  COHESION_STAY_END,
+  copyToClipboard,
   formatStringDateTimezoneUTC,
   htmlCleaner,
-  translate,
-  translateApplication,
-  copyToClipboard,
-  APPLICATION_STATUS,
   SENDINBLUE_TEMPLATES,
+  translate,
   translateAddFilePhase2,
-  COHESION_STAY_END,
+  translateApplication,
 } from "../../utils";
+import downloadPDF from "../../utils/download-pdf";
 import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
+import FileCard from "../militaryPreparation/components/FileCard";
 import ApplyDoneModal from "./components/ApplyDoneModal";
 import ApplyModal from "./components/ApplyModal";
 import IconDomain from "./components/IconDomain";
-import { IoMdInformationCircleOutline } from "react-icons/io";
-import { MdOutlineContentCopy } from "react-icons/md";
-import CheckCircle from "../../assets/icons/CheckCircle";
-import XCircle from "../../assets/icons/XCircle";
-import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
-import { HiChevronDown, HiOutlineMail, HiPlus } from "react-icons/hi";
-import ModalConfirm from "../../components/modals/ModalConfirm";
-import downloadPDF from "../../utils/download-pdf";
-import rubberStampValided from "../../assets/rubberStampValided.svg";
-import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
-import { BsChevronDown } from "react-icons/bs";
 import ModalPJ from "./components/ModalPJ";
-import FileCard from "../militaryPreparation/components/FileCard";
-import ChevronDown from "../../assets/icons/ChevronDown";
-import Download from "../../assets/icons/Download";
 
 export default function viewMobile() {
   const [mission, setMission] = useState();
@@ -481,7 +481,7 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
   if (applicationsCount >= 15)
     return (
       <div className="flex flex-col items-center justify-center gap-2">
-        <div className="text-red-500 text-xs text-center">Vous ne pouvez candidater qu&apos;à 15 missions différentes.</div>
+        <div className="text-red-500 text-xs text-center">Vous ne pouvez candidater qu&quot;à 15 missions différentes.</div>
         <div className="flex flex-col items-stretch gap-4">
           <button disabled className="px-12 py-2 rounded-lg text-white bg-blue-600 disabled:bg-blue-600/60 text-sm cursor-pointer">
             Candidater
@@ -656,7 +656,7 @@ const ApplicationStatus = ({
                 className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
                 onClick={() => setOpenContractButton((e) => !e)}>
                 <div className="flex items-center gap-2">
-                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d&apos;engagement</span>
+                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d&quot;engagement</span>
                 </div>
                 <ChevronDown className="text-white font-medium" />
               </button>
