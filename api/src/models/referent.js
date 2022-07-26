@@ -187,7 +187,7 @@ Schema.methods.comparePassword = async function (p) {
 
 //Sync with Sendinblue
 Schema.post("save", function (doc) {
-  // sendinblue.sync(doc, MODELNAME);
+  sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
   sendinblue.sync(doc, MODELNAME);

@@ -155,7 +155,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     let cc = getCcOfYoung({ template, young });
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { message: value?.message },
+      params: { message: value?.message ? value.message : "" },
       cc,
     });
 

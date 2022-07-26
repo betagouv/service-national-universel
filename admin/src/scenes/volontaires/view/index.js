@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Switch, Route } from "react-router-dom";
+import { Switch } from "react-router-dom";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
+import { SentryRoute } from "../../../sentry";
 
 import api from "../../../services/api";
 import Details from "./details";
@@ -50,14 +51,14 @@ export default function Index({ ...props }) {
     <>
       <Breadcrumbs items={[{ label: "Volontaires", to: "/volontaire" }, { label: "Fiche du volontaire" }]} />
       <Switch>
-        <Route path="/volontaire/:id/phase1" component={() => <Phase1 young={young} getYoung={getYoung} onChange={getYoung} />} />
-        <Route path="/volontaire/:id/phase2/equivalence" component={() => <FormEquivalence young={young} onChange={getYoung} />} />
-        <Route path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
-        <Route path="/volontaire/:id/phase2" component={() => <Phase2 young={young} onChange={getYoung} />} />
-        <Route path="/volontaire/:id/phase3" component={() => <Phase3 young={young} onChange={getYoung} />} />
-        <Route path="/volontaire/:id/historique" component={() => <History young={young} onChange={getYoung} />} />
-        <Route path="/volontaire/:id/notifications" component={() => <Notifications young={young} onChange={getYoung} />} />
-        <Route path="/volontaire/:id" component={getDetail} />
+        <SentryRoute path="/volontaire/:id/phase1" component={() => <Phase1 young={young} getYoung={getYoung} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id/phase2/equivalence" component={() => <FormEquivalence young={young} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id/phase2" component={() => <Phase2 young={young} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id/phase3" component={() => <Phase3 young={young} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id/historique" component={() => <History young={young} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id/notifications" component={() => <Notifications young={young} onChange={getYoung} />} />
+        <SentryRoute path="/volontaire/:id" component={getDetail} />
       </Switch>
     </>
   );

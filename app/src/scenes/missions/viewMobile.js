@@ -170,7 +170,7 @@ export default function viewMobile() {
               {e}
             </div>
           ))}
-          {mission.isMilitaryPreparation === "true" ? (
+          {mission?.isMilitaryPreparation === "true" ? (
             <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
           ) : null}
         </div>
@@ -200,6 +200,7 @@ export default function viewMobile() {
               disabledPmRefused={disabledPmRefused}
               scrollToBottom={scrollToBottom}
               duration={mission?.duration}
+              isMilitaryPreparation={mission?.isMilitaryPreparation}
             />
           )}
         </div>
@@ -437,7 +438,7 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
   </div>
 );
 
-const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young }) => {
+const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, duration, young, isMilitaryPreparation }) => {
   const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
     if (obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION")) {
       return true;
@@ -514,8 +515,12 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
       <button
         className="py-2 rounded-lg text-white bg-blue-600 text-sm cursor-pointer "
         onClick={() => {
+          if (isMilitaryPreparation === "true") {
+            plausibleEvent("Phase 2/CTA - PM - Candidater");
+          } else {
+            plausibleEvent("Phase2/CTA missions - Candidater");
+          }
           setModal("APPLY");
-          plausibleEvent("Phase2/CTA missions - Candidater");
         }}>
         Candidater
       </button>
@@ -685,7 +690,28 @@ const ApplicationStatus = ({
             <button
               className="group flex items-center justify-center rounded-lg px-4 py-2 bg-blue-600 hover:bg-blue-500 transition duration-300 ease-in-out disabled:bg-blue-400"
               disabled={loading}
-              onClick={() => updateApplication(APPLICATION_STATUS.WAITING_VALIDATION)}>
+              onClick={async () => {
+                try {
+                  if (mission.isMilitaryPreparation === "true") {
+                    if (!["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+                      const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
+                        statusMilitaryPreparationFiles: "WAITING_VALIDATION",
+                      });
+                      if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
+                    }
+                    if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
+                      updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                    } else {
+                      updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
+                    }
+                  } else {
+                    updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+                  }
+                } catch (e) {
+                  console.log(e);
+                  toastr.error("Oups, une erreur est survenue lors de la candidature.");
+                }
+              }}>
               <CheckCircle className="text-blue-600 mr-2 w-5 h-5 hover:text-blue-500 group-disabled:text-blue-400" />
               <span className="text-sm leading-5 font-medium text-white">Accepter</span>
             </button>
