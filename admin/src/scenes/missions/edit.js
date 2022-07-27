@@ -36,7 +36,7 @@ export default function Edit(props) {
   const [structure, setStructure] = useState();
   const [structures, setStructures] = useState();
   const [referents, setReferents] = useState([]);
-  const [applications, setApplications] = useState([]);
+  const [applicationsCount, setApplicationsCount] = useState([]);
   const [showTutor, setShowTutor] = useState();
   const [invited, setInvited] = useState();
   const [isJvaMission, setIsJvaMission] = useState(false);
@@ -61,12 +61,18 @@ export default function Edit(props) {
   }
 
   async function initApplications() {
+    // On va chercher le nb de candidatures actives.
     const id = props.match && props.match.params && props.match.params.id;
     try {
-      const { data, error } = await api.get(`/applications/${id}`);
-      if (error) return console.error(error);
-      console.log("Candidatures :", data);
-      setApplications(data);
+      const res = await api.get(`/mission/${id}/application`);
+      console.log("Candidatures :", res);
+      const count = res.data.filter((obj) => {
+        if (obj.status.includes("WAITING" || "IN_PROGRESS")) {
+          return true;
+        }
+        return false;
+      }).length;
+      setApplicationsCount(count);
     } catch (e) {
       console.error(e);
       toastr.error("Impossible de trouver les candidatures associés à cette mission.");
@@ -283,6 +289,7 @@ export default function Edit(props) {
                         <label className="uppercase">
                           <span>*</span>visibilité pour les candidats
                         </label>
+                        <div className="ml-2">Nombre de candidatures actives : {applicationsCount}.</div>
                         <div className="flex items-center">
                           <div
                             onClick={() => {

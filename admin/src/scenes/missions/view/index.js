@@ -18,7 +18,6 @@ export default function Index({ ...props }) {
   const [tutor, setTutor] = useState();
   const [structure, setStructure] = useState();
   const [applications, setApplications] = useState();
-  const [pendingApplications, setPendingApplications] = useState();
   const history = useHistory();
 
   useEffect(() => {
@@ -55,10 +54,6 @@ export default function Index({ ...props }) {
     if (mission) fetchApplication();
   }, [mission]);
 
-  /* if (mission & pendingApplications) {
-    const applicationSlots = mission.placesLeft * 5 - pendingApplications;
-  } */
-
   async function fetchApplication() {
     const applicationResponse = await api.get(`/mission/${mission._id}/application`);
     if (!applicationResponse.ok) {
@@ -66,16 +61,6 @@ export default function Index({ ...props }) {
       return history.push("/mission");
     }
     setApplications(applicationResponse.data);
-
-    // on set le nombre de candidatures en attente
-    const count = applicationResponse.data.filter((obj) => {
-      if (obj.status.includes("WAITING" || "IN_PROGRESS")) {
-        return true;
-      }
-
-      return false;
-    }).length;
-    setPendingApplications(count);
   }
 
   if (!mission) return <div />;
