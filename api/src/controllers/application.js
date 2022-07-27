@@ -65,7 +65,7 @@ async function updateMissionVisibility(app, fromUser) {
 
 const getReferentManagerPhase2 = async (department) => {
   // get the referent_department manager_phase2
-  let toReferent = await ReferentObject.findOne({
+  let toReferent = await ReferentObject.find({
     subRole: SUB_ROLES.manager_phase2,
     role: ROLES.REFERENT_DEPARTMENT,
     department,
@@ -306,15 +306,18 @@ router.post("/notify/docs-military-preparation/:template", passport.authenticate
   const { error, value: template } = Joi.string().required().validate(req.params.template);
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-  const toReferent = await getReferentManagerPhase2(req.user.department);
-  if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  const toReferents = await getReferentManagerPhase2(req.user.department);
+  if (!toReferents) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
   if (SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED !== template) {
     return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
   }
 
   const mail = await sendTemplate(parseInt(template), {
-    emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
+    emailTo: toReferents.map((referent) => ({
+      name: `${referent.firstName} ${referent.lastName}`,
+      email: referent.email,
+    })),
     params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
   });
   return res.status(200).send({ ok: true, data: mail });
@@ -394,15 +397,14 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     } else if (template === SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION) {
       emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
       params = { ...params, message, cta: `${APP_URL}/mission?utm_campaign=transactionnel+mig+candidature+nonretenue&utm_source=notifauto&utm_medium=mail+152+candidater` };
-    } else if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER) {
-      emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
-    } else if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER_RENOTIFY) {
-      emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
     } else if (template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION) {
       // when it is a new application, there are 2 possibilities
       if (mission.isMilitaryPreparation === "true") {
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
-        emailTo = [{ name: `${referentManagerPhase2.firstName} ${referentManagerPhase2.lastName}`, email: referentManagerPhase2.email }];
+        emailTo = referentManagerPhase2.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        }));
         template = SENDINBLUE_TEMPLATES.referent.NEW_MILITARY_PREPARATION_APPLICATION;
         params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}` };
       } else {
