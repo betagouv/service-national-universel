@@ -112,12 +112,10 @@ async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
     email: contract.projectManagerEmail,
     name: `${contract.projectManagerFirstName} ${contract.projectManagerLastName}`,
     token: contract.projectManagerToken,
-    cc: departmentReferentPhase2.map((referent) => {
-      return {
-        name: `${referent.firstName} ${referent.lastName}`,
-        email: referent.email,
-      };
-    }),
+    cc: departmentReferentPhase2.map((referent) => ({
+      name: `${referent.firstName} ${referent.lastName}`,
+      email: referent.email,
+    })),
     isValidateAgainMail,
   });
 }

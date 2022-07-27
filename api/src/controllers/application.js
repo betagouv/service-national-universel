@@ -294,20 +294,18 @@ router.post("/notify/docs-military-preparation/:template", passport.authenticate
   const { error, value: template } = Joi.string().required().validate(req.params.template);
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-  const toReferent = await getReferentManagerPhase2(req.user.department);
-  if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  const toReferents = await getReferentManagerPhase2(req.user.department);
+  if (!toReferents) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
   if (SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED !== template) {
     return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
   }
 
   const mail = await sendTemplate(parseInt(template), {
-    emailTo: toReferent.map((referent) => {
-      return {
-        name: `${referent.firstName} ${referent.lastName}`,
-        email: referent.email,
-      };
-    }),
+    emailTo: toReferents.map((referent) => ({
+      name: `${referent.firstName} ${referent.lastName}`,
+      email: referent.email,
+    })),
     params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
   });
   return res.status(200).send({ ok: true, data: mail });
@@ -391,13 +389,10 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       // when it is a new application, there are 2 possibilities
       if (mission.isMilitaryPreparation === "true") {
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
-        emailTo = referentManagerPhase2.map((referent) => {
-          return {
-            name: `${referent.firstName} ${referent.lastName}`,
-            email: referent.email,
-          };
-        });
-        console.log(emailTo);
+        emailTo = referentManagerPhase2.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        }));
         template = SENDINBLUE_TEMPLATES.referent.NEW_MILITARY_PREPARATION_APPLICATION;
         params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}` };
       } else {
