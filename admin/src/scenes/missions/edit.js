@@ -65,14 +65,14 @@ export default function Edit(props) {
     const id = props.match && props.match.params && props.match.params.id;
     try {
       const res = await api.get(`/mission/${id}/application`);
-      console.log("Candidatures :", res);
-      const count = res.data.filter((obj) => {
-        if (obj.status.includes("WAITING" || "IN_PROGRESS")) {
-          return true;
-        }
-        return false;
-      }).length;
-      setApplicationsCount(count);
+      setApplicationsCount(
+        res.data.filter((obj) => {
+          if (obj.status.includes("WAITING" || "IN_PROGRESS")) {
+            return true;
+          }
+          return false;
+        }).length,
+      );
     } catch (e) {
       console.error(e);
       toastr.error("Impossible de trouver les candidatures associés à cette mission.");
