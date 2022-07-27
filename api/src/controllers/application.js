@@ -54,6 +54,15 @@ const updatePlacesMission = async (app, fromUser) => {
   }
 };
 
+async function updateMissionVisibility(app, fromUser) {
+  const mission = await MissionObject.findById(app.missionId);
+  const nb = await ApplicationObject.countDocuments({
+    $and: [{ missionId: mission._id }, { status: "WAITING_VERIFICATION" || "WAITING_VALIDATION" || "WAITING_ACCEPTATION" }],
+  });
+  mission.set({ visibility: nb >= mission.placesLeft * 5 ? "HIDDEN" : "VISIBLE" });
+  await mission.save({ fromUser });
+}
+
 const getReferentManagerPhase2 = async (department) => {
   // get the referent_department manager_phase2
   let toReferent = await ReferentObject.findOne({
@@ -175,7 +184,9 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     await updateYoungPhase2Hours(young);
     await updateStatusPhase2(young);
     await updatePlacesMission(data, req.user);
+    await updateMissionVisibility(data, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
+
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
@@ -228,6 +239,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     await updateStatusPhase2(young);
     await updateYoungStatusPhase2Contract(young, req.user);
     await updatePlacesMission(application, req.user);
+    await updateMissionVisibility(application, req.user);
 
     res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {

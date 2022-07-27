@@ -36,6 +36,7 @@ export default function Edit(props) {
   const [structure, setStructure] = useState();
   const [structures, setStructures] = useState();
   const [referents, setReferents] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [showTutor, setShowTutor] = useState();
   const [invited, setInvited] = useState();
   const [isJvaMission, setIsJvaMission] = useState(false);
@@ -58,6 +59,20 @@ export default function Edit(props) {
     setDefaultValue(data);
     setIsJvaMission(data.isJvaMission === "true");
   }
+
+  async function initApplications() {
+    const id = props.match && props.match.params && props.match.params.id;
+    try {
+      const { data, error } = await api.get(`/applications/${id}`);
+      if (error) return console.error(error);
+      console.log("Candidatures :", data);
+      setApplications(data);
+    } catch (e) {
+      console.error(e);
+      toastr.error("Impossible de trouver les candidatures associés à cette mission.");
+    }
+  }
+
   async function initReferents() {
     if (!structure) return;
     const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } }, size: ES_NO_LIMIT };
@@ -121,6 +136,7 @@ export default function Edit(props) {
   useEffect(() => {
     initMission();
     initStructures();
+    initApplications();
   }, []);
   useEffect(() => {
     initStructure();
