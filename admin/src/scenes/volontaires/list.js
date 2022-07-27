@@ -868,7 +868,7 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut demande d'équivalence", "Statut demande d'équivalence")}
+                  renderLabel={(items) => getFilterLabel(items, "Equivalence de MIG", "Equivalence de MIG")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>

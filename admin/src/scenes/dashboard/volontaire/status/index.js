@@ -271,7 +271,7 @@ export default function StatusIndex({ filter }) {
               getLink={getLink}
             />
             <StatusMap
-              title="Statut des demandes d'équivalences de MIG"
+              title="Statut sur des demandes d'équivalence de MIG"
               obj={EQUIVALENCE_STATUS}
               filterName="EQUIVALENCE_STATUS"
               colors={EQUIVALENCE_STATUS_COLORS}
