@@ -122,7 +122,7 @@ export default function Youngs({ mission, applications, updateApplications }) {
                         "Candidature créée lé": formatLongDateUTC(data.createdAt),
                         "Candidature mise à jour le": formatLongDateUTC(data.updatedAt),
                         "Statut de la candidature": translate(data.status),
-                        "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option].length, 0) !== 0}`),
+                        "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option]?.length, 0) !== 0}`),
                       };
                     });
                   }}
