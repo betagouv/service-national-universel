@@ -5,7 +5,9 @@ import styled from "styled-components";
 import { HeroContainer } from "../../components/Content";
 import { supportURL } from "../../config";
 import { colors, urlWithScheme } from "../../utils";
-import ZammadForm from "./form";
+import { Modal } from "reactstrap";
+import CloseSvg from "../../assets/Close";
+import ZammoodForm from "./form";
 
 const articles = [
   {
@@ -23,7 +25,7 @@ const articles = [
   {
     title: "Les documents à fournir",
     emoji: "📋",
-    body: `Les documents du formulaire d’inscription, ...`,
+    body: `Les documents du formulaire d'inscription, ...`,
     url: `${supportURL}/base-de-connaissance/les-documents-a-fournir`,
   },
   {
@@ -53,7 +55,7 @@ const articles = [
   {
     title: "Pourrais-je quitter le centre pendant le séjour ?",
     emoji: "🏃",
-    body: `Pour des soucis d’organisation, il n’est pas possible de déroger aux dates prévues pour le séjour de cohésion...`,
+    body: `Pour des soucis d'organisation, il n'est pas possible de déroger aux dates prévues pour le séjour de cohésion...`,
     url: `${supportURL}/base-de-connaissance/pourrais-je-quitter-le-centre-pendant-le-sejour`,
   },
   {
@@ -139,7 +141,7 @@ export default function Index(props) {
             </div>
           </div>
         </div>
-        {open && <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
+        {open && <ZammoodForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
         {successMessage && <p style={{ color: "#6B7280" }}>{successMessage}</p>}
       </Container>
     </HeroContainer>

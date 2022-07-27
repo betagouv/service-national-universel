@@ -488,6 +488,14 @@ const translateFieldMission = (f) => {
       return "Dernière synchronisation avec JVA";
     case "isJvaMission":
       return "Mission JVA";
+    case "contractAvenantFiles":
+      return "Avenant au contrat d’engagement";
+    case "justificatifsFiles":
+      return "Documents justificatifs";
+    case "feedBackExperienceFiles":
+      return "Retour d’expérience (rapport de MIG)";
+    case "othersFiles":
+      return "Autre";
     default:
       return f;
   }
@@ -619,6 +627,7 @@ const translateFieldContract = (f) => {
       return "Date de validation du représentant légal 2";
     case "youngContractValidationDate":
       return "Date de validation du volontaire";
+
     default:
       return f;
   }

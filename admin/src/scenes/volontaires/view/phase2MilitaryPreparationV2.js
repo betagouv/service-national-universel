@@ -146,6 +146,20 @@ export default function Phase2militaryPrepartionV2({ young }) {
     history.go(0);
   };
 
+  const onChangeFiles = async ({ data, name }) => {
+    try {
+      const { ok } = await api.put(`/referent/young/${young._id.toString()}/removeMilitaryFile/${name}`, { files: data });
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue");
+        return;
+      }
+      toastr.success("Fichiers mises à jour");
+    } catch (error) {
+      toastr.error("Oups, une erreur est survenue");
+      return;
+    }
+  };
+
   return (
     <>
       <ModalConfirm
@@ -181,6 +195,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
         young={young}
         nameFiles={modalFiles?.nameFiles}
         title={modalFiles?.title}
+        onChange={onChangeFiles}
       />
       <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
         <div className="mb-3">

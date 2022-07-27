@@ -241,7 +241,7 @@ export default function FicheSanitaire({ updateFilter }) {
                       title=""
                       URLParams={true}
                       showSearch={false}
-                      renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                      renderLabel={(items) => getFilterLabel(items, "Statut phase 1", "Statut phase 1")}
                       onValueChange={(e) => updateFilter({ STATUS_PHASE_1: e })}
                     />
                     <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} onValueChange={(e) => updateFilter({ REGION: e })} />
@@ -520,6 +520,7 @@ export default function FicheSanitaire({ updateFilter }) {
                     sortBy="asc"
                     paginationAt="bottom"
                     showTopResultStats={false}
+                    pageSize={50}
                     onData={async ({ rawData }) => {
                       if (rawData?.hits?.hits) setYoungsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, firstName: h._source.firstName, lastName: h._source.lastName })));
                     }}

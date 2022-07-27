@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Redirect } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import * as Sentry from "@sentry/react";
-import { Integrations } from "@sentry/tracing";
 
 import { setUser, setSessionPhase1 } from "./redux/auth/actions";
 import Auth from "./scenes/auth";
@@ -36,25 +34,19 @@ import Drawer from "./components/drawer";
 import Header from "./components/header";
 import Footer from "./components/footer";
 import Loader from "./components/Loader";
-import Zammad from "./components/Zammad";
 
-import api from "./services/api";
+import api, { initApi } from "./services/api";
+import { initSentry, SentryRoute, history } from "./sentry";
 
-import { SENTRY_URL, environment, adminURL } from "./config";
+import { adminURL } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 
 import "./index.css";
 import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
 
-if (environment === "production") {
-  Sentry.init({
-    dsn: SENTRY_URL,
-    environment: "admin",
-    integrations: [new Integrations.BrowserTracing()],
-    tracesSampleRate: 1.0,
-  });
-}
+initSentry();
+initApi();
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -67,8 +59,6 @@ export default function App() {
         if (!res.ok || !res.user) return setLoading(false);
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
-        // const { data } = await api.get(`/zammad-support-center/ticket_overviews`);
-        // dispatch(setTickets(data));
       } catch (e) {
         console.log(e);
       }
@@ -80,16 +70,15 @@ export default function App() {
   if (loading) return <Loader />;
 
   return (
-    <Router>
-      <Zammad />
+    <Router history={history}>
       <div className="main">
         <Switch>
-          <Route path="/validate" component={Validate} />
-          <Route path="/conditions-generales-utilisation" component={CGU} />
-          <Route path="/auth" component={Auth} />
-          <Route path="/session-phase1-partage" component={SessionShareIndex} />
-          <Route path="/public-besoin-d-aide" component={PublicSupport} />
-          <Route path="/" component={Home} />
+          <SentryRoute path="/validate" component={Validate} />
+          <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+          <SentryRoute path="/auth" component={Auth} />
+          <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
+          <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+          <SentryRoute path="/" component={Home} />
         </Switch>
         <Footer />
       </div>
@@ -146,22 +135,20 @@ const Home = () => {
     if (!user) return;
     if (user.role !== ROLES.HEAD_CENTER) return;
     (async () => {
-      const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1`);
+      const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);
       if (!ok) return console.log(`Error: ${code}`);
 
       const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
 
-      let activeSession;
-      let activeSessionLocalStorage = JSON.parse(localStorage.getItem("active_session_chef_de_centre"));
-
-      if (!activeSessionLocalStorage || activeSessionLocalStorage?.headCenterId !== user._id.toString()) {
-        // si il n y a pas de session dans le local storage
-        // ou si ce n'est pas une session de l'utilisateur connecté
-        activeSession = sessions.find((s) => COHESION_STAY_END[s.cohort] >= Date.now()) || sessions[0];
-        localStorage.setItem("active_session_chef_de_centre", JSON.stringify(activeSession));
-      } else {
-        activeSession = activeSessionLocalStorage;
-      }
+      // on regarde la session la plus proche dans le futur qui ne sait pas terminé il y a plus de 3 jours
+      // i.e. une session est considérée terminée 3 jours après la date de fin du séjour
+      const activeSession =
+        sessions.find((s) => {
+          const limit = COHESION_STAY_END[s.cohort].setDate(COHESION_STAY_END[s.cohort].getDate() + 3);
+          return limit >= now;
+        }) || sessions[0];
 
       setSessionPhase1List(sessions.reverse());
       dispatch(setSessionPhase1(activeSession));
@@ -175,7 +162,7 @@ const Home = () => {
         <Drawer open={drawerVisible} onOpen={setDrawerVisible} />
         <div className={drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`}>
           <Switch>
-            <Route path="/auth" component={Auth} />
+            <SentryRoute path="/auth" component={Auth} />
             <RestrictedRoute path="/structure" component={Structure} />
             <RestrictedRoute path="/settings" component={Settings} />
             <RestrictedRoute path="/profil" component={Profil} />
@@ -223,5 +210,5 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
   if (!roles.includes(user.role)) {
     return <Redirect to="/dashboard" />;
   }
-  return <Route {...rest} render={(props) => <Component {...props} />} />;
+  return <SentryRoute {...rest} render={(props) => <Component {...props} />} />;
 };

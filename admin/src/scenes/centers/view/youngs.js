@@ -179,7 +179,7 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                         "Créé lé": formatLongDateFR(data.createdAt),
                         "Mis à jour le": formatLongDateFR(data.updatedAt),
                         "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                        Statut: translate(data.status),
+                        "Statut général": translate(data.status),
                         "Statut Phase 1": translatePhase1(data.statusPhase1),
                         "Statut Phase 2": translatePhase2(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
@@ -250,7 +250,7 @@ export default function Youngs({ center, updateCenter, focusedCohort, focusedSes
                       title=""
                       URLParams={true}
                       showSearch={false}
-                      renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                      renderLabel={(items) => getFilterLabel(items, "Statut phase 1", "Statut phase 1")}
                     />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}

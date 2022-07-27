@@ -1,12 +1,15 @@
 const ENVIRONMENT = getEnvironment();
+const LOCAL = process.env.LOCAL === "true";
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT || 3000;
 const secret = process.env.SECRET || "not-so-secret";
 
 let APP_URL = process.env.APP_URL || "http://localhost:8081";
 let ADMIN_URL = process.env.ADMIN_URL || "http://localhost:8082";
-let SUPPORT_URL = process.env.SUPPORT_URL || "http://localhost:8083";
+let SUPPORT_URL = process.env.SUPPORT_URL || "http://localhost:3000";
 let KNOWLEDGEBASE_URL = process.env.KNOWLEDGEBASE_URL || "http://localhost:8084";
+const API_PDF_ENDPOINT = process.env.API_PDF_ENDPOINT || "http://localhost:8087/render";
+
 let ZAMMAD_IP = process.env.ZAMMAD_IP || "";
 let ZAMMAD_PLATEFORME_USER = process.env.ZAMMAD_PLATEFORME_USER || "";
 let ZAMMAD_PLATEFORME_USER_ID = process.env.ZAMMAD_PLATEFORME_USER_ID || "";
@@ -15,6 +18,7 @@ const ES_ENDPOINT = process.env.ES_ENDPOINT || "";
 
 const SENDINBLUEKEY = process.env.SENDINBLUEKEY || "";
 const SENTRY_URL = process.env.SENTRY_URL || "";
+const SENTRY_TRACING_SAMPLE_RATE = process.env.SENTRY_TRACING_SAMPLE_RATE || "";
 
 const CELLAR_ENDPOINT = process.env.CELLAR_ENDPOINT || "";
 const CELLAR_KEYID = process.env.CELLAR_KEYID || "";
@@ -50,6 +54,7 @@ const EDUCONNECT_IDP_SIGN_CERT = process.env.EDUCONNECT_IDP_SIGN_CERT || " ";
 const EDUCONNECT_IDP_ENCR_CERT = process.env.EDUCONNECT_IDP_ENCR_CERT || " ";
 
 module.exports = {
+  LOCAL,
   PORT,
   MONGO_URL,
   secret,
@@ -68,6 +73,7 @@ module.exports = {
   BUCKET_NAME,
   PUBLIC_BUCKET_NAME,
   SENTRY_URL,
+  SENTRY_TRACING_SAMPLE_RATE,
   QPV_USERNAME,
   QPV_PASSWORD,
   API_ENGAGEMENT_KEY,
@@ -91,6 +97,7 @@ module.exports = {
   EDUCONNECT_SP_KEY,
   EDUCONNECT_IDP_SIGN_CERT,
   EDUCONNECT_IDP_ENCR_CERT,
+  API_PDF_ENDPOINT,
 };
 
 function getEnvironment() {

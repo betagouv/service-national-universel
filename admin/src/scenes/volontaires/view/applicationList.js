@@ -1,28 +1,25 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
-import { Row } from "reactstrap";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
-
-import { apiURL } from "../../../config";
-import api from "../../../services/api";
-import SelectStatusApplication from "../../../components/selectStatusApplication";
-import { APPLICATION_STATUS, formatStringDateTimezoneUTC, ES_NO_LIMIT, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
+import React, { useEffect, useState } from "react";
+import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import ProposalMission from "./proposalMission";
-import CreateMission from "./createMission";
-import PlusSVG from "../../../assets/plus.svg";
-import CrossSVG from "../../../assets/cross.svg";
-import Loader from "../../../components/Loader";
+import styled from "styled-components";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
-import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
+import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ModalPJ from "../components/ModalPJ";
+import { HiOutlineAdjustments, HiPlus } from "react-icons/hi";
+import { MdOutlineAttachFile } from "react-icons/md";
+import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
+import SelectStatusApplication from "../../../components/selectStatusApplication";
+import { apiURL } from "../../../config";
+import api from "../../../services/api";
+import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
-  const [createMissionVisible, setCreateMissionVisible] = useState(false);
   const getExportQuery = () => ({ query: { bool: { filter: { term: { "youngId.keyword": young._id } } } }, sort: [{ "priority.keyword": "asc" }], size: ES_NO_LIMIT });
+  const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
   useEffect(() => {
     getApplications();
@@ -43,23 +40,28 @@ export default function ApplicationList({ young, onChangeApplication }) {
       <Table>
         <thead>
           <tr>
-            <th>Missions candidatées</th>
-            <th style={{ width: "200px" }}>Dates</th>
-            <th style={{ width: "90px" }}>Places</th>
-            <th style={{ width: "250px" }}>Statut</th>
+            <th className="w-5/12">Missions candidatées</th>
+            <th className="w-2/12">Dates</th>
+            <th className="w-1/12">Places</th>
+            <th className="w-3/12">Statut</th>
+            <th className="w-1/12">
+              <div className="flex justify-center">
+                <MdOutlineAttachFile />
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
           <>
             {applications.map((hit, i) => (
-              <Hit key={hit._id} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} />
+              <Hit key={hit._id} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} optionsType={optionsType} />
             ))}
           </>
         </tbody>
       </Table>
       {applications.length ? null : <NoResult>Aucune candidature n&apos;est liée à ce volontaire.</NoResult>}
       <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div style={{ marginTop: "1rem" }}>
+        <div className="px-4 py-2">
           <ExportComponent
             defaultQuery={getExportQuery}
             title="Exporter les candidatures"
@@ -95,35 +97,18 @@ export default function ApplicationList({ young, onChangeApplication }) {
                   "Candidature mise à jour le": data.updatedAt,
                   "Statut de la candidature": translate(data.status),
                   Tuteur: data.tutorName,
+                  "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option].length, 0) !== 0}`),
                 };
               });
             }}
           />
         </div>
       </ReactiveBase>
-      <Wrapper style={{ borderBottom: "2px solid #f4f5f7" }}>
-        <Legend>Proposer une mission existante au volontaire</Legend>
-        <ProposalMission young={young} onSend={getApplications} />
-      </Wrapper>
-      <ToggleBloc
-        visible={createMissionVisible}
-        title="Créer une mission personnalisée pour le volontaire"
-        onClick={() => {
-          setCreateMissionVisible(!createMissionVisible);
-        }}>
-        <CreateMission
-          young={young}
-          onSend={() => {
-            getApplications();
-            setCreateMissionVisible(false);
-          }}
-        />
-      </ToggleBloc>
     </>
   );
 }
 
-const Hit = ({ hit, index, young, onChangeApplication }) => {
+const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
   const [mission, setMission] = useState();
   const [modalDurationOpen, setModalDurationOpen] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -137,6 +122,8 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
       return setMission(data);
     })();
   }, []);
+
+  const [openModalPJ, setOpenModalPJ] = useState(false);
 
   if (!mission) return null;
   return (
@@ -289,37 +276,43 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
           </React.Fragment>
         ) : null}
       </td>
+      <td>
+        {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
+          <div className=" flex justify-center ">
+            <div className="bg-blue-600  rounded-full p-2 text-white" onClick={() => setOpenModalPJ(true)}>
+              {optionsType.reduce((sum, option) => sum + hit[option].length, 0) !== 0 ? <HiOutlineAdjustments /> : <HiPlus />}
+            </div>
+          </div>
+        )}
+        <ModalPJ
+          isOpen={openModalPJ}
+          young={young}
+          application={hit}
+          optionsType={optionsType}
+          onCancel={() => {
+            setOpenModalPJ(false);
+          }}
+          onSend={async (type, multipleDocument) => {
+            try {
+              const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+                type,
+                multipleDocument,
+              });
+              if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+              toastr.success("L'email a bien été envoyé");
+            } catch (e) {
+              toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+            }
+          }}
+          onSave={() => {
+            setOpenModalPJ(false);
+            onChangeApplication();
+          }}
+        />
+      </td>
     </tr>
   );
 };
-
-const ToggleBloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled, onClick, visible }) => {
-  return (
-    <Row
-      style={{
-        borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
-        borderRight: borderRight ? "2px solid #f4f5f7" : 0,
-        borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
-        backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}>
-      <Wrapper>
-        <div onClick={onClick} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
-          <Legend>{title}</Legend>
-          <div style={{}}>
-            <Icon src={visible ? CrossSVG : PlusSVG} />
-          </div>
-        </div>
-        {visible ? children : null}
-      </Wrapper>
-    </Row>
-  );
-};
-
-const Icon = styled.img`
-  height: 18px;
-  font-size: 18px;
-  cursor: pointer;
-`;
 
 const CopyLink = styled.button`
   background: none;
@@ -372,35 +365,6 @@ const Table = styled.table`
       background-color: #e6ebfa;
     }
   }
-`;
-
-const Wrapper = styled.div`
-  padding: 3rem;
-  width: 100%;
-  .detail {
-    display: flex;
-    align-items: flex-start;
-    font-size: 14px;
-    text-align: left;
-    margin-top: 1rem;
-    &-title {
-      color: #798399;
-    }
-    &-text {
-      color: rgba(26, 32, 44);
-    }
-  }
-  p {
-    font-size: 13px;
-    color: #798399;
-    margin-top: 1rem;
-  }
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  font-size: 1.3rem;
-  font-weight: 500;
 `;
 
 const ModifyDurationLink = styled.span`

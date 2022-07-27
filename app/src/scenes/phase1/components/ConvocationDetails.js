@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
+import { IoMdInformationCircleOutline } from "react-icons/io";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import Calendar from "../../../assets/calendar";
 import LinearMap from "../../../assets/Linear-map.js";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import WithTooltip from "../../../components/WithTooltip";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
@@ -16,6 +18,14 @@ const departureMeetingDate = {
   "Juin 2022": "dimanche 12 juin, 16:00",
   "Juillet 2022": "dimanche 03 juillet, 16:00",
 };
+
+const departureMeetingDateException = {
+  2021: "lundi 20 février, 14:00",
+  "Février 2022": "dimanche 13 février, 16:00",
+  "Juin 2022": "mercredi 15 juin, 10:00",
+  "Juillet 2022": "mercredi 06 juillet, 10:00",
+};
+
 const returnMeetingDate = {
   2021: "mardi 02 juillet, 14:00",
   "Février 2022": "vendredi 25 février, 11:00",
@@ -66,8 +76,10 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
     );
   };
 
+  console.log("isFromDOMTOM", isFromDOMTOM());
+
   const getDepartureMeetingDate = () => {
-    if (isAutonomous || !meetingPoint) return departureMeetingDate[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
+    if (isAutonomous || !meetingPoint) return young.grade !== "Terminale" ? departureMeetingDate[young.cohort] : departureMeetingDateException[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
     return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = () => {
@@ -106,7 +118,7 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
               <div className="flex flex-col flex-1">
                 <div className="text-sm leading-7 font-bold">Lieu de rassemblement</div>
                 <div className="text-sm text-gray-800 leading-5 italic">
-                  Les informations sur les modalités d'acheminement vers le centre et de retour vous seront transmises par e-mail par les services académiques.
+                  Les informations sur les modalités d&apos;acheminement vers le centre et de retour vous seront transmises par e-mail par les services académiques.
                 </div>
               </div>
             </div>
@@ -130,9 +142,12 @@ export default function ConvocationDetails({ young, center, meetingPoint }) {
                       .join(" ")}
                   </div>
                 </div>
+                {/* FIXME Hot fix sale pour juillet */}
                 <Calendar date={getReturnMeetingDate().split(" ")[1]} month={cohortToMonth[young.cohort]} className="shadow-sm mx-3 w-7 h-10 md:w-11 md:h-12" />
                 <div className="flex flex-col">
-                  <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
+                  <div className="flex gap-x-1">
+                    <div className="font-bold text-sm whitespace-nowrap">Retour à{getReturnMeetingDate().split(",")[1]}</div>
+                  </div>
                   <div className="text-sm text-gray-600 whitespace-nowrap">
                     {getReturnMeetingDate()
                       .split(/[,\s]+/)
@@ -194,7 +209,7 @@ const changeAffectation = ({ center, young, isLoading, handleAutonomousClick }) 
     <>
       <div className="flex flex-col lg:flex-row items-center lg:pb-4">
         <div className=" flex flex-col pr-6 pb-3 lg:!pb-0">
-          <div className="text-sm md:text-base font-bold pb-1 text-center md:!text-left">Rendez vous directement à votre lieu d'affectation</div>
+          <div className="text-sm md:text-base font-bold pb-1 text-center md:!text-left">Rendez vous directement à votre lieu d&apos;affectation</div>
           <div className="text-sm leading-5 text-gray-800 text-center md:!text-left">
             {[center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ")}
           </div>

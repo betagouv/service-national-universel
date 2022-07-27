@@ -1,9 +1,10 @@
 import "isomorphic-fetch";
 import fetchRetry from "fetch-retry";
-const fetch = fetchRetry(window.fetch);
 
 import { apiURL } from "../config";
 import * as Sentry from "@sentry/react";
+
+let fetch = window.fetch;
 
 function jsonOrRedirectToSignIn(response) {
   if (response.ok === false && response.status === 401) {
@@ -72,9 +73,6 @@ class api {
   setToken(token) {
     this.token = token;
   }
-  getToken() {
-    return this.token;
-  }
 
   openpdf(path, body) {
     return new Promise(async (resolve, reject) => {
@@ -89,12 +87,12 @@ class api {
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
-        if (response.status !== 200) return reject({});
+        if (response.status !== 200) return reject(await response.json());
         const file = await response.blob();
         resolve(file);
       } catch (e) {
         console.log(e);
-        reject();
+        reject(e);
       }
     });
   }
@@ -269,6 +267,11 @@ class api {
     });
   }
 }
+function initApi() {
+  fetch = fetchRetry(window.fetch);
+}
 
 const API = new api();
 export default API;
+
+export { initApi };

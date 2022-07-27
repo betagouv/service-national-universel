@@ -59,6 +59,14 @@ export default function Convocation() {
     "Juin 2022": "dimanche 12 juin, 16:00",
     "Juillet 2022": "dimanche 03 juillet, 16:00",
   };
+
+  const departureMeetingDateException = {
+    2021: "lundi 20 février, 14:00",
+    "Février 2022": "dimanche 13 février, 16:00",
+    "Juin 2022": "mercredi 15 juin, 10:00",
+    "Juillet 2022": "mercredi 06 juillet, 10:00",
+  };
+
   const returnMeetingDate = {
     2021: "mardi 02 juillet, 14:00",
     "Février 2022": "vendredi 25 février, 11:00",
@@ -78,7 +86,8 @@ export default function Convocation() {
     return meetingPoint.departureAddress;
   };
   const getDepartureMeetingDate = () => {
-    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return departureMeetingDate[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
+    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint)
+      return young.grade !== "Terminale" ? departureMeetingDate[young.cohort] : departureMeetingDateException[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
     return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = () => {
@@ -126,10 +135,10 @@ export default function Convocation() {
         {isFromDOMTOM() ? (
           <>
             <ConvocText className="italic">
-              Les informations sur les modalités d'acheminement vers le centre et de retour Vous seront transmises par e-mail par les services académiques.
+              Les informations sur les modalités d&apos;acheminement vers le centre et de retour Vous seront transmises par e-mail par les services académiques.
             </ConvocText>
             <ConvocText style={{ border: "solid 1px #666", padding: "1rem", margin: "1rem" }}>
-              Attention ! votre représentant légal doit rester jusqu'à votre prise en charge par l'équipe encadrant le séjour de cohésion.
+              Attention ! votre représentant légal doit rester jusqu&apos;à votre prise en charge par l&apos;équipe encadrant le séjour de cohésion.
             </ConvocText>
           </>
         ) : (

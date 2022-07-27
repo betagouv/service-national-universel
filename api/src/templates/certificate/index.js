@@ -1,11 +1,29 @@
 const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
-const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END } = require("snu-lib");
+const { COHESION_STAY_LIMIT_DATE, COHESION_STAY_END, MINISTRES } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
+const MeetingPointModel = require("../../models/meetingPoint");
 
-const getLocationCohesionCenter = (cohesionCenter) => {
+const getCohesionCenter = async (young) => {
+  let cohesionCenter;
+
+  let session = await SessionPhase1Model.findById(young.sessionPhase1Id);
+  let cohesionId = session?.cohesionCenterId || young?.cohesionCenterId;
+  if (!cohesionId) {
+    const mp = await MeetingPointModel.findById(young.meetingPointId);
+    cohesionCenter = await CohesionCenterModel.findById(mp?.centerId);
+    if (!cohesionCenter) return;
+  } else {
+    cohesionCenter = await CohesionCenterModel.findById(cohesionId);
+    if (!cohesionCenter) return;
+  }
+
+  return cohesionCenter;
+};
+
+const getCohesionCenterLocation = (cohesionCenter) => {
   let t = "";
   if (cohesionCenter.city) {
     t = `à ${cohesionCenter.city}`;
@@ -16,81 +34,74 @@ const getLocationCohesionCenter = (cohesionCenter) => {
   return t;
 };
 
-function getBgUrl({ cohort } = { cohort: "" }) {
-  if (cohort === "2019") return getSignedUrl("certificates/certificateTemplate-2019.png");
-  if (["2020", "2021", "Février 2022"].includes(cohort)) return getSignedUrl("certificates/certificateTemplate.png");
-  if (["Juin 2022", "Juillet 2022"].includes(cohort)) return getSignedUrl("certificates/certificateTemplate_2022.png");
-  return getSignedUrl("certificates/certificateTemplate.png");
-}
+const getMinistres = (date) => {
+  if (!date) return;
+  for (const item of MINISTRES) {
+    if (date < new Date(item.date_end)) return item;
+  }
+};
+
+const destinataireLabel = ({ firstName, lastName }, ministres) => {
+  return `félicite${ministres.length > 1 ? "nt" : ""} <strong>${firstName} ${lastName}</strong>`;
+};
 
 const phase1 = async (young) => {
-  const now = new Date();
+  const d = COHESION_STAY_END[young.cohort];
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
-  const template = getBgUrl({ cohort: young.cohort });
-  if (!template) return;
-
-  const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
-  if (!session) return;
-  const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
-  if (!cohesionCenter) return;
-
-  const COHESION_CENTER_LOCATION = getLocationCohesionCenter(cohesionCenter);
-
-  // on prend la date de fin de séjour si on édite l'attestation après la date de fin de séjour
-  const date = COHESION_STAY_END[young.cohort].getTime() < now.getTime() ? COHESION_STAY_END[young.cohort] : now;
-
+  const ministresData = getMinistres(d);
+  const template = ministresData.template;
+  const cohesionCenter = await getCohesionCenter(young);
+  const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   return html
-    .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
-    .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort].toLowerCase()))
     .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
-    .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(COHESION_CENTER_LOCATION))
+    .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-    .replace(/{{GENERAL_BG}}/g, sanitizeAll(template))
-    .replace(/{{DATE}}/g, sanitizeAll(date.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
+    .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
 const phase2 = (young) => {
-  let d = young.statusPhase2UpdatedAt;
-  if (!d) {
-    // 31 mars 2021
-    if (young.cohort === "2019") d = new Date(2021, 2, 31);
-    // 17 juin 2021
-    else if (young.cohort === "2020") d = new Date(2021, 5, 17);
-    else d = new Date();
-  }
+  const d = young.statusPhase2ValidatedAt;
+  if (!d) throw "Date de validation de la phase 2 non trouvée";
+  const ministresData = getMinistres(d);
+  const template = ministresData.template;
   const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
   return html
-    .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
-    .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBgUrl()))
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
     .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
 const phase3 = (young) => {
-  const d = new Date();
+  const d = young.statusPhase3ValidatedAt;
+  if (!d) throw "Date de validation de la phase 3 non trouvée";
+  const ministresData = getMinistres(d);
+  const template = ministresData.template;
   const html = fs.readFileSync(path.resolve(__dirname, "./phase3.html"), "utf8");
   return html
-    .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
-    .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBgUrl()))
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
     .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
 const snu = (young) => {
-  const d = new Date();
+  const d = young.statusPhase2ValidatedAt;
+  if (!d) throw "Date de validation de la phase 2 non trouvée";
+  const ministresData = getMinistres(d);
+  const template = ministresData.template;
   const html = fs.readFileSync(path.resolve(__dirname, "./snu.html"), "utf8");
   return html
-    .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
-    .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+    .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
     .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBgUrl()))
+    .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
     .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 

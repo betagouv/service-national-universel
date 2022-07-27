@@ -62,11 +62,12 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
       .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canAssignCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const { youngId, centerId } = value;
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canAssignCohesionCenter(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const center = await CohesionCenterModel.findById(centerId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (center.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
@@ -133,11 +134,12 @@ router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authentica
       .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canAssignCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const { youngId, centerId } = value;
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canAssignCohesionCenter(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const center = await CohesionCenterModel.findById(centerId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -256,9 +258,11 @@ router.post("/export-presence", passport.authenticate("referent", { session: fal
             if (!young.cohesionStayPresence) previous.nonRenseigneArrive++;
             if (young.departSejourAt) previous.depart++;
             if (young.presenceJDM === "true") previous.presenceJDM++;
-            if (young.absenceJDM === "false") previous.absenceJDM++;
+            if (young.presenceJDM === "false") previous.absenceJDM++;
+            if (!young.presenceJDM) previous.nonRenseigneJDM++;
             if (young.departSejourMotif === "Exclusion") previous.departSejourMotif_exclusion++;
             if (young.departSejourMotif === "Cas de force majeure pour le volontaire") previous.departSejourMotif_forcemajeure++;
+            if (young.departSejourMotif === "Annulation du séjour ou mesure d’éviction sanitaire") previous.departSejourMotif_sanitaire++;
             if (young.departSejourMotif === "Autre") previous.departSejourMotif_autre++;
             return previous;
           },
@@ -269,8 +273,10 @@ router.post("/export-presence", passport.authenticate("referent", { session: fal
             depart: 0,
             presenceJDM: 0,
             absenceJDM: 0,
+            nonRenseigneJDM: 0,
             departSejourMotif_exclusion: 0,
             departSejourMotif_forcemajeure: 0,
+            departSejourMotif_sanitaire: 0,
             departSejourMotif_autre: 0,
           },
         );
@@ -293,9 +299,11 @@ router.post("/export-presence", passport.authenticate("referent", { session: fal
           // 'Nombre de motif "abandon"': "",
           'Nombre de motif "exclusion"': stats.departSejourMotif_exclusion,
           'Nombre de motif "cas de force majeur"': stats.departSejourMotif_forcemajeure,
+          'Nombre de motif "Annulation séjour/éviction sanitaire"': stats.departSejourMotif_sanitaire,
           'Nombre de motif "autre"': stats.departSejourMotif_autre,
-          "Nombre de présent à la JDC": stats.presenceJDM,
-          "Nombre d’absent à la JDC": stats.absenceJDM,
+          "Nombre de présent à la JDM": stats.presenceJDM,
+          "Nombre d’absent à la JDM": stats.absenceJDM,
+          "Nombre de présence non renseigné à la JDM": stats.nonRenseigneJDM,
         });
       }
     });
@@ -429,9 +437,14 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
+
+    const youngsInSessions = await YoungModel.find({ sessionPhase1Id: sessionsPhase1.map((session) => session._id.toString()) });
+
+    if (youngsInSessions.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
+
     await center.remove();
     await deleteCenterDependencies({ _id: id });
-    const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
     for (let sessionPhase1 of sessionsPhase1) {
       await sessionPhase1.remove();
     }

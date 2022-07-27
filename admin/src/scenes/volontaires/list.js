@@ -33,6 +33,7 @@ import {
   translatePhase2,
   translateApplication,
   translateEngagement,
+  translateEquivalenceStatus,
   department2region,
   translateFileStatusPhase1,
 } from "../../utils";
@@ -60,6 +61,7 @@ const FILTERS = [
   "MEDICAL_FILE_RECEIVED",
   "COHESION_PRESENCE",
   "MILITARY_PREPARATION_FILES_STATUS",
+  "EQUIVALENCE_STATUS",
   "PPS",
   "PAI",
   "QPV",
@@ -80,6 +82,7 @@ const FILTERS = [
   "COHESION_PRESENCE",
   "DEPART",
   "DEPART_MOTIF",
+  "SAME_DEPARTMENT_SPORT",
 ];
 
 export default function VolontaireList() {
@@ -222,7 +225,6 @@ export default function VolontaireList() {
                         "Autotest PCR - Statut": translateFileStatusPhase1(data.autoTestPCRFilesStatus) || "Non Renseigné",
                         "Règlement intérieur": translate(data.rulesYoung),
                         "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
-                        "Présent au séjour de cohésion": translate(data.cohesionStayPresence) || "Non Renseigné",
                         "Statut représentant légal 1": translate(data.parent1Status),
                         "Prénom représentant légal 1": data.parent1FirstName,
                         "Nom représentant légal 1": data.parent1LastName,
@@ -273,7 +275,7 @@ export default function VolontaireList() {
                         "Créé lé": formatLongDateFR(data.createdAt),
                         "Mis à jour le": formatLongDateFR(data.updatedAt),
                         "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                        Statut: translate(data.status),
+                        "Statut général": translate(data.status),
                         "Statut Phase 1": translatePhase1(data.statusPhase1),
                         "Statut Phase 2": translatePhase2(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
@@ -336,7 +338,7 @@ export default function VolontaireList() {
                           "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
                           "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
                           "UAI de l'établissement": data.esSchool?.uai,
-                          Statut: translate(data.status),
+                          "Statut général": translate(data.status),
                           "Statut Phase 1": translate(data.statusPhase1),
                         };
                       });
@@ -379,7 +381,7 @@ export default function VolontaireList() {
                           "Région de l'établissement": department2region[departmentLookUp[data.esSchool?.region]] || department2region[data.schoolDepartment],
                           "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
                           "UAI de l'établissement": data.esSchool?.uai,
-                          Statut: translate(data.status),
+                          "Statut général": translate(data.status),
                           "Statut Phase 1": translate(data.statusPhase1),
                         };
                       });
@@ -674,7 +676,7 @@ export default function VolontaireList() {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  placeholder="Affectation dans son département"
+                  placeholder="Affectation dans son département (handicap)"
                   componentId="SAME_DEPARTMENT"
                   dataField="handicapInSameDepartment.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "SAME_DEPARTMENT") }}
@@ -683,7 +685,21 @@ export default function VolontaireList() {
                   }}
                   title=""
                   URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département", "Affectation dans son département")}
+                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département (handicap)", "Affectation dans son département (handicap)")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Affectation dans son département (sport)"
+                  componentId="SAME_DEPARTMENT_SPORT"
+                  dataField="highSkilledActivityInSameDepartment.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SAME_DEPARTMENT_SPORT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Affectation dans son département (sport)", "Affectation dans son département (sport)")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -713,7 +729,7 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion", "Participations au séjour de cohésion")}
+                  renderLabel={(items) => getFilterLabel(items, "Présence à l’arrivée", "Présence à l’arrivée")}
                   showMissing
                   missingLabel="Non renseigné"
                 />
@@ -839,6 +855,20 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut documents Préparation Militaire", "Statut documents Préparation Militaire")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="EQUIVALENCE_STATUS"
+                  dataField="status_equivalence.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "EQUIVALENCE_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translateEquivalenceStatus(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Equivalence de MIG", "Equivalence de MIG")}
                 />
               </FilterRow>
               <FilterRow visible={filterVisible}>

@@ -192,7 +192,7 @@ export default function Inscription() {
                         "Créé lé": formatLongDateFR(data.createdAt),
                         "Mis à jour le": formatLongDateFR(data.updatedAt),
                         "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                        Statut: translate(data.status),
+                        "Statut général": translate(data.status),
                         "Dernier statut le": formatLongDateFR(data.lastStatusAt),
                       };
                     });
@@ -233,7 +233,7 @@ export default function Inscription() {
                           "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
                           "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
                           "UAI de l'établissement": data.esSchool?.uai,
-                          Statut: translate(data.status),
+                          "Statut général": translate(data.status),
                           "Statut Phase 1": translate(data.statusPhase1),
                         };
                       });
@@ -276,7 +276,7 @@ export default function Inscription() {
                           "Région de l'établissement": department2region[departmentLookUp[data.esSchool?.region]] || department2region[data.schoolDepartment],
                           "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
                           "UAI de l'établissement": data.esSchool?.uai,
-                          Statut: translate(data.status),
+                          "Statut général": translate(data.status),
                           "Statut Phase 1": translate(data.statusPhase1),
                         };
                       });

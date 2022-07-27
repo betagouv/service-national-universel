@@ -36,6 +36,7 @@ export default function InformationsComplementaires({ values, handleChange }) {
               { value: "2021", label: "2021" },
               { value: "2020", label: "2020" },
               { value: "2019", label: "2019" },
+              { value: "à venir", label: "à venir" },
             ]}
           />
           <Select name="phase" values={values} handleChange={handleChange} title="Phase" options={Object.keys(YOUNG_PHASE).map((s) => ({ value: s, label: translate(s) }))} />

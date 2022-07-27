@@ -155,7 +155,9 @@ export default function StepDone() {
 
               toastr.success("Enregistré");
               dispatch(setYoung(data));
-              await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_VALIDATION}`, { cta: `${appURL}/auth` });
+              await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_VALIDATION}`, {
+                cta: `${appURL}/auth?utm_campaign=transactionnel+dossier+attente+validation&utm_source=notifauto&utm_medium=mail+65+acceder`,
+              });
               history.push("/");
             } catch (e) {
               console.log(e);

@@ -32,6 +32,7 @@ import Select from "./components/Select";
 import { toastr } from "react-redux-toastr";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import WithTooltip from "../../components/WithTooltip";
 
 const FILTERS = [
   "SEARCH",
@@ -166,7 +167,7 @@ export default function List() {
                         "Créé lé": formatLongDateFR(data.createdAt),
                         "Mis à jour le": formatLongDateFR(data.updatedAt),
                         "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                        Statut: translate(data.status),
+                        "Statut général": translate(data.status),
                         "Statut Phase 1": translatePhase1(data.statusPhase1),
                         "Statut Phase 2": translatePhase2(data.statusPhase2),
                         "Statut Phase 3": translate(data.statusPhase3),
@@ -183,9 +184,17 @@ export default function List() {
                     });
                   }}
                 />
-                <DownloadAllAttestation sessionPhase1={user.sessionPhase1Id}>
-                  <div>Exporter les attestations</div>
-                </DownloadAllAttestation>
+                <WithTooltip tooltipText="Suite au remaniement ministériel du 4 juillet 2022, les nouvelles attestations ne sont pas encore disponibles. Elles le seront très prochainement">
+                  {/* <DownloadAllAttestation sessionPhase1={user.sessionPhase1Id}>
+                    <div>Exporter les attestations</div>
+                  </DownloadAllAttestation> */}
+                  <button
+                    disabled={true}
+                    // onClick={() => viewAttestation()}
+                    className="flex justify-between items-center gap-3 px-3 py-2 rounded-lg cursor-pointer disabled:opacity-50 bg-blue-600 text-white font-medium text-sm">
+                    Exporter les attestations
+                  </button>
+                </WithTooltip>
               </div>
             </Header>
             <Filter>
@@ -248,7 +257,7 @@ export default function List() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                  renderLabel={(items) => getFilterLabel(items, "Statut phase 1", "Statut Phase 1")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}

@@ -50,10 +50,8 @@ export default function MailAttestationButton({ young, children, type, template,
 
 export const PrimaryStyle = styled.div`
   font-size: 0.9rem;
-  color: ${colors.purple};
   cursor: pointer;
   :hover {
-    color: ${colors.darkPurple};
     text-decoration: underline;
   }
 `;

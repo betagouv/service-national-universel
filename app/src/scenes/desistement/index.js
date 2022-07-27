@@ -96,7 +96,7 @@ export default function Desistement() {
               ) : null}
             </>
           }
-          placeholder={`Précisez en quelques mots la raison de votre ${stopSNU}`}
+          placeholder={`Précisez en quelques mots la raison de votre ${stopSNU} (obligatoire)`}
           onConfirm={(values) => {
             setConfirm({ state: true, onConfirm: () => onConfirm(status, values) });
           }}
@@ -168,17 +168,11 @@ function ComponentWithdrawn({ title, message, onConfirm, placeholder = "Votre me
             ))}
           </select>
           {withdrawnReason ? (
-            <textarea
-              className="form-control"
-              placeholder={placeholder + (withdrawnReason === "other" ? " (obligatoire)" : " (facultatif)")}
-              rows="8"
-              value={withdrawnMessage}
-              onChange={(e) => setWithdrawnMessage(e.target.value)}
-            />
+            <textarea className="form-control" placeholder={placeholder} rows="8" value={withdrawnMessage} onChange={(e) => setWithdrawnMessage(e.target.value)} />
           ) : null}
         </Content>
         <footer>
-          <ModalButton loading={sending} disabled={sending || !withdrawnReason || (withdrawnReason === "other" && !withdrawnMessage)} onClick={submit} primary>
+          <ModalButton loading={sending} disabled={sending || !withdrawnReason || !withdrawnMessage} onClick={submit} primary>
             Confirmer
           </ModalButton>
           <ModalButton>

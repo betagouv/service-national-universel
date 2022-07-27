@@ -40,11 +40,11 @@ export default function StepAgreement({ young }) {
   const handleMail = async () => {
     let template = "cohesion";
     let type = "convocation";
-    const { ok, code } = await api.post(`/young/${young._id}/documents/${type}/${template}/send-email`, {
+    const { ok } = await api.post(`/young/${young._id}/documents/${type}/${template}/send-email`, {
       fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
     });
     if (ok) toastr.success(`Document envoyé à ${young.email}`);
-    else toastr.error("Erreur lors de l'envoie du document", translate(code));
+    else toastr.error("Erreur lors de l'envoie du document");
     setStateMobil(false);
     setModal({ isOpen: false, onConfirm: null });
   };
@@ -64,7 +64,7 @@ export default function StepAgreement({ young }) {
           <div className="flex flex-1 flex-col mx-3">
             <h1 className={`text-base leading-7 ${enabled ? "text-gray-900" : "text-gray-400"}`}>Téléchargez votre convocation</h1>
             <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>
-              Votre convocation sera à présenter à l'arrivée munie d'une pièce d'identité valide.
+              Votre convocation sera à présenter à l&apos;arrivée munie d&apos;une pièce d&apos;identité valide.
             </p>
           </div>
         </div>
@@ -96,6 +96,7 @@ export default function StepAgreement({ young }) {
                 </WithTooltip>
               </button>
 
+              {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
               <div onClick={handleDownload}>
                 <DownloadConvocationButton
                   young={young}
@@ -126,7 +127,7 @@ export default function StepAgreement({ young }) {
           <div className="flex flex-1 flex-col ml-3">
             <div className={`text-sm ${valid && "text-green-600"} ${enabled ? "text-gray-900" : "text-gray-400"}`}>Téléchargez votre convocation</div>
             <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
-              Votre convocation sera à présenter à l'arrivée munie d'une pièce d'identité valide.
+              Votre convocation sera à présenter à l&apos;arrivée munie d&apos;une pièce d&apos;identité valide.
             </div>
             {enabled ? <div className={` text-sm text-right leading-5 ${valid ? "text-green-500" : "text-blue-600"}`}>Télécharger</div> : null}
           </div>
@@ -151,6 +152,7 @@ export default function StepAgreement({ young }) {
             <div className="w-full p-4">
               <div className="flex flex-col items-center justify-center">
                 <h1 className="text-gray-900 text-xl text-center pb-3">Choisissez une option de téléchargement</h1>
+                {/* FIXME - Remettre le téléchargement quand le service pdf sera de nouveau actif */}
                 <div className="w-full" onClick={handleDownload}>
                   <DownloadConvocationButton
                     young={young}

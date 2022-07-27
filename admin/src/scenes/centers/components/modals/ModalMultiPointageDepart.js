@@ -7,7 +7,7 @@ import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../../utils";
 
-export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, values, value }) {
+export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, values }) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [viewList, setViewList] = React.useState(false);
   const isPlural = values?.length > 1;
@@ -25,12 +25,16 @@ renseigner le motif et la date de départ.`;
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    const { ok, code } = await api.post(`/young/phase1/multiaction/depart`, { departSejourMotif, departSejourAt, departSejourMotifComment, ids: values.map((y) => y._id) });
-    if (!ok) {
-      toastr.error("Oups, une erreur s'est produite", translate(code));
-      return;
+    try {
+      const { ok, code } = await api.post(`/young/phase1/multiaction/depart`, { departSejourMotif, departSejourAt, departSejourMotifComment, ids: values.map((y) => y._id) });
+      if (!ok) {
+        toastr.error("Oups, une erreur s'est produite", translate(code));
+        return;
+      }
+      onSubmit();
+    } catch (e) {
+      toastr.error("Oups, une erreur s'est produite", translate(e.code));
     }
-    onSubmit();
     setIsLoading(false);
   };
 

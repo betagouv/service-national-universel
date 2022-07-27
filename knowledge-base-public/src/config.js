@@ -14,10 +14,10 @@ if (environment === "staging") {
 }
 if (environment === "production") {
   snuApiUrl = "https://api.snu.gouv.fr";
-  supportApiUrl = "https://support-snu-api.cleverapps.io";
+  supportApiUrl = "https://api-support.snu.gouv.fr";
   adminURL = "https://admin.snu.gouv.fr";
   appURL = "https://moncompte.snu.gouv.fr";
-  supportURL = "https://support-snu-app.cleverapps.io";
+  supportURL = "https://admin-support.snu.gouv.fr";
   baseDeConnaissanceURL = "https://support.snu.gouv.fr";
 }
 

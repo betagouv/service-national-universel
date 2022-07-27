@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Switch, Redirect, useHistory } from "react-router-dom";
+import { Switch, Redirect, useHistory } from "react-router-dom";
 import styled from "styled-components";
 import Nav from "./components/Nav";
 import FranceConnectCallback from "./components/FranceConnectCallback";
@@ -22,6 +22,7 @@ import Home from "./Home/index.js";
 import { STEPS } from "./utils";
 import HelpButton from "../../components/buttons/HelpButton";
 import { educonnectAllowed } from "../../config";
+import { SentryRoute } from "../../sentry";
 
 const Step = ({ step }) => {
   const young = useSelector((state) => state.Auth.young);
@@ -74,21 +75,21 @@ export default function Index() {
       {inscriptionCreationOpenForYoungs(young?.cohort, educonnectAllowed) ||
       (inscriptionModificationOpenForYoungs(young?.cohort) && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young?.status)) ? (
         <>
-          <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
-          <Route path="/inscription/coordonnees" component={() => <Step step={STEPS.COORDONNEES} />} />
-          <Route path="/inscription/particulieres" component={() => <Step step={STEPS.PARTICULIERES} />} />
-          <Route path="/inscription/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
-          <Route path="/inscription/consentements" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
-          <Route path="/inscription/documents" component={() => <Step step={STEPS.DOCUMENTS} />} />
-          <Route path="/inscription/availability" component={() => <Step step={STEPS.AVAILABILITY} />} />
-          <Route path="/inscription/done" component={() => <Step step={STEPS.DONE} />} />
-          <Route path="/inscription/france-connect-callback" component={() => <FranceConnectCallback />} />
-          <Route path="/inscription/desistement" component={Desistement} />
-          <Route path="/inscription" exact component={Home} />
+          <SentryRoute path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
+          <SentryRoute path="/inscription/coordonnees" component={() => <Step step={STEPS.COORDONNEES} />} />
+          <SentryRoute path="/inscription/particulieres" component={() => <Step step={STEPS.PARTICULIERES} />} />
+          <SentryRoute path="/inscription/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
+          <SentryRoute path="/inscription/consentements" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
+          <SentryRoute path="/inscription/documents" component={() => <Step step={STEPS.DOCUMENTS} />} />
+          <SentryRoute path="/inscription/availability" component={() => <Step step={STEPS.AVAILABILITY} />} />
+          <SentryRoute path="/inscription/done" component={() => <Step step={STEPS.DONE} />} />
+          <SentryRoute path="/inscription/france-connect-callback" component={() => <FranceConnectCallback />} />
+          <SentryRoute path="/inscription/desistement" component={Desistement} />
+          <SentryRoute path="/inscription" exact component={Home} />
         </>
       ) : (
         <>
-          <Route path="/inscription" component={Home} />
+          <SentryRoute path="/inscription" component={Home} />
         </>
       )}
     </Switch>

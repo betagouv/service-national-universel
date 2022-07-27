@@ -22,6 +22,12 @@ const isFromDOMTOM = (young) => {
 function getBg() {
   return getSignedUrl("convocation/convocation_template_base.png");
 }
+function getTop() {
+  return getSignedUrl("convocation/top.png");
+}
+function getBottom() {
+  return getSignedUrl("convocation/bottom.png");
+}
 
 // ! WARNING : Change date also in app/src/scenes/phase1/components/Convocation.js
 const departureMeetingDate = {
@@ -30,6 +36,14 @@ const departureMeetingDate = {
   "Juin 2022": "dimanche 12 juin, 16:00",
   "Juillet 2022": "dimanche 03 juillet, 16:00",
 };
+
+const departureMeetingDateException = {
+  2021: "lundi 20 février, 14:00",
+  "Février 2022": "dimanche 13 février, 16:00",
+  "Juin 2022": "mercredi 15 juin, 10:00",
+  "Juillet 2022": "mercredi 06 juillet, 10:00",
+};
+
 const returnMeetingDate = {
   2021: "mardi 02 juillet, 14:00",
   "Février 2022": "vendredi 25 février, 11:00",
@@ -46,7 +60,8 @@ const COHESION_STAY_DATE_STRING = {
 
 const render = async (young) => {
   const getDepartureMeetingDate = (meetingPoint) => {
-    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return departureMeetingDate[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
+    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint)
+      return young.grade !== "Terminale" ? departureMeetingDate[young.cohort] : departureMeetingDateException[young.cohort]; //new Date("2021-06-20T14:30:00.000+00:00");
     return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = (meetingPoint) => {
@@ -59,7 +74,7 @@ const render = async (young) => {
   };
 
   try {
-    if (young.statusPhase1 !== "AFFECTED") throw `young ${young.id} not affected`;
+    if (!["AFFECTED", "DONE"].includes(young.statusPhase1)) throw `young ${young.id} not affected`;
     if (!young.sessionPhase1Id || (!young.meetingPointId && young.deplacementPhase1Autonomous !== "true")) throw `young ${young.id} unauthorized`;
     const session = await SessionPhase1.findById(young.sessionPhase1Id);
     if (!session) throw `session ${young.sessionPhase1Id} not found for young ${young._id}`;
@@ -78,7 +93,7 @@ const render = async (young) => {
         sanitizeAll(
           contacts
             .map((contact) => {
-              return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
+              return `<li>${contact.contactName} - ${contact.contactPhone || ""} - ${contact.contactMail || ""}</li>`;
             })
             .join(""),
         ),
@@ -106,7 +121,7 @@ const render = async (young) => {
       )
       .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${getDepartureMeetingDate(meetingPoint).split(",")[1]}`))
       .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
-      .replace(/{{TRANPORT}}/g, sanitizeAll(bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : ""))
+      .replace(/{{TRANSPORT}}/g, sanitizeAll(bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : ""))
       .replace(
         /{{MEETING_DATE_RETURN}}/g,
         sanitizeAll(
@@ -119,6 +134,8 @@ const render = async (young) => {
       .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(getReturnMeetingDate(meetingPoint).split(",")[1]))
 
       .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+      .replace(/{{TOP}}/g, sanitizeAll(getTop()))
+      .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
       .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()));
   } catch (e) {
     throw e;

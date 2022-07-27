@@ -99,7 +99,8 @@ export default function UserPanel({ onChange, value }) {
     try {
       const { ok, code } = await api.remove(`/referent/${value._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_OBJECT") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
+      if (!ok && code === "LINKED_MISSION") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
+      if (!ok && code === "LINKED_STRUCTURE") return toastr.error(translate(code), "Ce responsable est le dernier responsable de la structure.");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");
       return history.go(0);
@@ -121,7 +122,7 @@ export default function UserPanel({ onChange, value }) {
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
             {user.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
-            {canDeleteReferent({ actor: user, originalTarget: value }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
+            {canDeleteReferent({ actor: user, originalTarget: value, structure }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
             {structure ? (
               <Link to={`/structure/${structure._id}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
                 <PanelActionButton icon="eye" title="Voir la structure" />

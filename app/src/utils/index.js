@@ -2,6 +2,7 @@ import passwordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
 export * from "snu-lib";
 import sanitizeHtml from "sanitize-html";
+import slugify from "slugify";
 
 export function getPasswordErrorMessage(v) {
   if (!v) return "Ce champ est obligatoire";
@@ -42,7 +43,8 @@ export function permissionPhase2(y) {
   return (
     (y.status !== YOUNG_STATUS.WITHDRAWN &&
       (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "DONE" || y.statusPhase1 === "EXEMPTED")) ||
-    y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED
+    y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ||
+    y.cohesionStayPresence === "true"
   );
 }
 
@@ -89,3 +91,7 @@ export const copyToClipboard = (text) => {
     });
   }
 };
+
+export function slugifyFileName(str) {
+  return slugify(str, { replacement: "-", remove: /[*+~.()'"!:@]/g });
+}

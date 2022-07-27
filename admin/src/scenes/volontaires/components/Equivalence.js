@@ -87,7 +87,7 @@ export default function CardEquivalence({ young, equivalence }) {
               <div className="duration-150 flex rounded-full bg-[#FD7A02] p-2 items-center justify-center mr-2">
                 <Bell className="h-4 w-4 text-white" />
               </div>
-              <div className="flex-col items-center ">
+              <div className="flex-col items-center">
                 <div className="text-xs font-normal text-gray-500 leading-4 uppercase">envoyée le {formatDateFR(equivalence.createdAt)}</div>
                 <div className="text-base leading-5 font-bold">Demande de reconnaissance d’engagement déjà réalisé</div>
               </div>
@@ -102,7 +102,7 @@ export default function CardEquivalence({ young, equivalence }) {
             ) : (
               <>
                 {equivalence.status === "WAITING_VERIFICATION" ? (
-                  <div className="flex items-center gap-5 ">
+                  <div className="flex items-center gap-5">
                     <button
                       className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 hover:bg-indigo-400 transition duration-300 ease-in-out"
                       onClick={() => setModalStatus({ isOpen: true, status: "WAITING_CORRECTION", equivalenceId: equivalence._id })}>

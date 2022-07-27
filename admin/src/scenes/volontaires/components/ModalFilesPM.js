@@ -9,6 +9,7 @@ import ModalButton from "../../../components/buttons/ModalButton";
 import { Footer, ModalContainer } from "../../../components/modals/Modal";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
+import { slugifyFileName } from "../../../utils";
 
 function getFileName(file) {
   return (file && file.name) || file;
@@ -44,7 +45,7 @@ export default function ModalFilesPM({ isOpen, onCancel, initialValues, young, n
       if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
       if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
       const fileName = files[i].name.match(/(.*)(\..*)/);
-      const newName = `${fileName[1]}-${filesList.length + index}${fileName[2]}`;
+      const newName = `${slugifyFileName(fileName[1])}-${filesList.length + index}${fileName[2]}`;
       Object.defineProperty(files[i], "name", {
         writable: true,
         value: newName,
@@ -61,10 +62,11 @@ export default function ModalFilesPM({ isOpen, onCancel, initialValues, young, n
     setFilesList(res.data);
     setUploading(false);
   };
+
   const onConfirm = async (file) => {
     setLoading(true);
     try {
-      const f = await api.get(`/referent/youngFile/${young._id}/${nameFiles}/${getFileName(file)}`);
+      const f = await api.get(`/referent/youngFile/${young._id}/military-preparation/${nameFiles}/${getFileName(file)}`);
       FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
@@ -100,7 +102,7 @@ export default function ModalFilesPM({ isOpen, onCancel, initialValues, young, n
                         onClick={async () => {
                           setLoading(true);
                           setFilesList(filesList?.filter((f) => file !== f));
-                          await onChange();
+                          await onChange({ data: filesList?.filter((f) => file !== f), name: nameFiles });
                           setLoading(false);
                         }}>
                         Supprimer

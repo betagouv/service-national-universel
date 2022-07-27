@@ -9,13 +9,31 @@ const MissionObject = require("../models/mission");
 const StructureObject = require("../models/structure");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
+const { decrypt, encrypt } = require("../cryptoUtils");
+const NodeClam = require("clamscan");
+const fs = require("fs");
+const FileType = require("file-type");
+const fileUpload = require("express-fileupload");
 const { sendTemplate } = require("../sendinblue");
-const { ERRORS, isYoung, isReferent } = require("../utils");
 const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
-const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications } = require("snu-lib");
-const { serializeApplication } = require("../utils/serializer");
-const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, getCcOfYoung } = require("../utils");
+const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
+const { serializeApplication, serializeYoung } = require("../utils/serializer");
+const { config } = require("dotenv");
+const {
+  uploadFile,
+  ERRORS,
+  isYoung,
+  isReferent,
+  // updateApplicationsWithYoungOrMission,
+  getCcOfYoung,
+  updateYoungPhase2Hours,
+  updateStatusPhase2,
+  getFile,
+  updateYoungStatusPhase2Contract,
+} = require("../utils");
+const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
+const mime = require("mime-types");
 
 const updatePlacesMission = async (app, fromUser) => {
   try {
@@ -62,6 +80,45 @@ const getReferentManagerPhase2 = async (department) => {
   return toReferent;
 };
 
+router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const JoiId = Joi.string().required().validate(req.params.id);
+    if (JoiId.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const JoiRank = Joi.string().required().validate(req.params.rank);
+    if (JoiRank.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const application = await ApplicationObject.findById(JoiId.value);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const young = await YoungObject.findById(application.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // A young can only update his own application.
+    if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const allApplications = await ApplicationObject.find({ youngId: young._id.toString() });
+    const allApplicationsSorted = allApplications.sort((a, b) => Number(a.priority) - Number(b.priority));
+    const currentIndex = allApplicationsSorted.findIndex((app) => app._id.toString() === application._id.toString());
+
+    // on l'enlève de sa position initiale
+    allApplicationsSorted.splice(currentIndex, 1);
+    // et on l'insère au nouveau rang
+    allApplicationsSorted.splice(JoiRank.value, 0, application);
+
+    for (const i in allApplicationsSorted) {
+      const applicationTemp = allApplicationsSorted[i];
+      applicationTemp.set({ priority: Number(i) + 1 });
+      await applicationTemp.save({ fromUser: req.user });
+    }
+    return res.status(200).send({ ok: true, data: allApplicationsSorted.map(serializeApplication) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateNewApplication(req.body, req.user);
@@ -78,6 +135,8 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
@@ -103,6 +162,13 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
+    }
+
+    // On vérifie que la candidature n'existe pas déjà en base de donnée.
+    const doublon = await ApplicationObject.findOne({ youngId: value.youngId, missionId: value.missionId });
+    if (doublon) {
+      console.error("Candidature déjà existante trouvée :", doublon);
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     const data = await ApplicationObject.create(value);
@@ -248,12 +314,14 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       id: Joi.string().required(),
       template: Joi.string().required(),
       message: Joi.string().optional(),
+      type: Joi.string().optional(),
+      multipleDocument: Joi.string().optional(),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { id, template: defaultTemplate, message } = value;
+    const { id, template: defaultTemplate, message, type, multipleDocument } = value;
 
     const application = await ApplicationObject.findById(id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -330,10 +398,45 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
         params = { ...params, cta: `${ADMIN_URL}/volontaire` };
       }
+    } else if (template === SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION) {
+      if (isYoung(req.user)) {
+        //second email
+        const emailTo2 = [{ name: referent.youngFirstName, lastName: referent.youngLastName, email: referent.email }];
+        const params2 = {
+          ...params,
+          cta: `${ADMIN_URL}/mission/${mission._id}/youngs`,
+          firstName: application.youngFirstName,
+          lastName: application.youngLastName,
+          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
+        };
+        await sendTemplate(template, {
+          emailTo: emailTo2,
+          params: params2,
+        });
+
+        const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
+        emailTo = [{ name: referentManagerPhase2.firstName, lastName: referentManagerPhase2.lastName, email: referentManagerPhase2.email }];
+        params = {
+          ...params,
+          cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2`,
+          firstName: application.youngFirstName,
+          lastName: application.youngLastName,
+          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
+        };
+      } else {
+        emailTo = [{ name: young.firstName, lastName: young.lastName, email: young.email }];
+        params = {
+          ...params,
+          cta: `${APP_URL}/mission/${mission.structureId}`,
+          firstName: referent.firstName,
+          lastName: referent.lastName,
+          type_document: `${multipleDocument === "true" ? translateAddFilesPhase2(type) : translateAddFilePhase2(type)}`,
+        };
+      }
     } else {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    let cc = getCcOfYoung({ template, young });
+    let cc = isYoung(req.user) ? getCcOfYoung({ template, young }) : [];
     const mail = await sendTemplate(template, {
       emailTo,
       params,
@@ -343,6 +446,141 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post(
+  "/:id/file/:key",
+  passport.authenticate(["referent", "young"], { session: false, failWithError: true }),
+  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  async (req, res) => {
+    try {
+      const application = await ApplicationObject.findById(req.params.id);
+      const rootKeys = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
+      const { error: keyError, value: key } = Joi.string()
+        .required()
+        .valid(...rootKeys)
+        .validate(req.params.key);
+      if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+      const { error: bodyError, value: body } = Joi.string().required().validate(req.body.body);
+      if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+      const {
+        error: namesError,
+        value: { names },
+      } = Joi.object({ names: Joi.array().items(Joi.string()).required() }).validate(JSON.parse(body), { stripUnknown: true });
+      if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      const user = await YoungObject.findById(application.youngId);
+      if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
+
+      // Validate files with Joi
+      const { error: filesError, value: files } = Joi.array()
+        .items(
+          Joi.alternatives().try(
+            Joi.object({
+              name: Joi.string().required(),
+              data: Joi.binary().required(),
+              tempFilePath: Joi.string().allow("").optional(),
+            }).unknown(),
+            Joi.array().items(
+              Joi.object({
+                name: Joi.string().required(),
+                data: Joi.binary().required(),
+                tempFilePath: Joi.string().allow("").optional(),
+              }).unknown(),
+            ),
+          ),
+        )
+        .validate(
+          Object.keys(req.files || {}).map((e) => req.files[e]),
+          { stripUnknown: true },
+        );
+      if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      //const application = await ApplicationObject.find({ youngId: req.user._id });
+      if (!application) return res.status(404).send({ ok: false, code: ERRORS.APPLICATION_NOT_FOUND });
+
+      for (let i = 0; i < files.length; i++) {
+        let currentFile = files[i];
+        // If multiple file with same names are provided, currentFile is an array. We just take the latest.
+        if (Array.isArray(currentFile)) {
+          currentFile = currentFile[currentFile.length - 1];
+        }
+        const { name, tempFilePath, mimetype } = currentFile;
+        const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+        const validTypes = ["image/jpeg", "image/png", "application/pdf"];
+        if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
+          fs.unlinkSync(tempFilePath);
+          return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+        }
+        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
+          const clamscan = await new NodeClam().init({
+            removeInfected: true,
+          });
+          const { isInfected } = await clamscan.isInfected(tempFilePath);
+          if (isInfected) {
+            fs.unlinkSync(tempFilePath);
+            return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+          }
+        }
+        const data = fs.readFileSync(tempFilePath);
+        const encryptedBuffer = encrypt(data);
+        const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+        await uploadFile(`app/young/${user._id}/application/${key}/${name}`, resultingFile);
+        //get application et get j eunes
+        fs.unlinkSync(tempFilePath);
+      }
+      application.set({ [key]: names });
+      await application.save({ fromUser: req.user });
+      return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
+    } catch (error) {
+      capture(error);
+      if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
+
+router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      key: Joi.string().required(),
+      name: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { id, key, name } = value;
+
+    const application = await ApplicationObject.findById(id);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const young = await YoungObject.findById(application.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (isYoung(req.user) && req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const downloaded = await getFile(`app/young/${young._id}/application/${key}/${name}`);
+    const decryptedBuffer = decrypt(downloaded.Body);
+
+    let mimeFromFile = null;
+    try {
+      const { mime } = await FileType.fromBuffer(decryptedBuffer);
+      mimeFromFile = mime;
+    } catch (e) {
+      //
+    }
+
+    return res.status(200).send({
+      data: Buffer.from(decryptedBuffer, "base64"),
+      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(name),
+      fileName: name,
+      ok: true,
+    });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
