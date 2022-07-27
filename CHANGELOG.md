@@ -1,3 +1,17 @@
+# [1.118.0](https://github.com/betagouv/service-national-universel/compare/v1.117.0...v1.118.0) (2022-07-27)
+
+
+### Bug Fixes
+
+* **admin:** Fermeture de mission à la candidature ([#1703](https://github.com/betagouv/service-national-universel/issues/1703)) ([7b7d9c4](https://github.com/betagouv/service-national-universel/commit/7b7d9c48e73ce1221f34ff20e96e26fdc6f22455))
+* **api:** Communication à destination de plusieurs référents phase 2 ([#1705](https://github.com/betagouv/service-national-universel/issues/1705)) ([cb3fd0f](https://github.com/betagouv/service-national-universel/commit/cb3fd0ff843c954d04f11391d3f72f52ddaf4ee2))
+* **app/admin:** disabled template 201 - 228 SIB ([#1702](https://github.com/betagouv/service-national-universel/issues/1702)) ([403ee5b](https://github.com/betagouv/service-national-universel/commit/403ee5bd25e9e40eb55a1268cb169e8fdb823de5))
+
+
+### Features
+
+* **pdf:** Branch to sentry ([#1696](https://github.com/betagouv/service-national-universel/issues/1696)) ([1dcddf9](https://github.com/betagouv/service-national-universel/commit/1dcddf9e163100c1d6080d1fe88842eef99c2dac))
+
 # [1.117.0](https://github.com/betagouv/service-national-universel/compare/v1.116.0...v1.117.0) (2022-07-26)
 
 
