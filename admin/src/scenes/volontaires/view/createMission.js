@@ -515,6 +515,7 @@ const AutocompleteSelectStructure = ({ values, handleChange, placeholder, option
     </div>
   );
 
+  // Change la maniere de rendu de l'option une fois selectionne
   const SingleValue = (props) => <components.SingleValue {...props}>{props.data.label}</components.SingleValue>;
 
   return (
