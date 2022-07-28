@@ -101,6 +101,30 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
+router.get("/by-role", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  console.log("coucou");
+  try {
+    if (!canViewStructures(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const referent = await ReferentObject.findById(req.user._id);
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    let data;
+    if (referent.role === ROLES.REFERENT_DEPARTMENT) {
+      data = await StructureObject.find({ department: referent.department });
+    } else if (referent.role === ROLES.REFERENT_REGION) {
+      data = await StructureObject.find({ region: referent.region });
+    } else if (referent.role === ROLES.ADMIN) {
+      data = await StructureObject.find();
+    } else {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/networks", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await StructureObject.find({ isNetwork: "true" }).sort("name");

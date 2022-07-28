@@ -20,7 +20,11 @@ export default function Create() {
   const [networks, setNetworks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const redirect = new URLSearchParams(window.location.search).get("redirect");
+  console.log(redirect);
+
   useEffect(() => {
+    window.scrollTo(0, 0);
     (async () => {
       const { data } = await api.get(`/structure/networks`);
       setNetworks(data);
@@ -77,7 +81,8 @@ export default function Create() {
           if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
           toastr.success("Invitation envoyée");
           setIsLoading(false);
-          history.push(`/structure/${data._id}`);
+          if (redirect) history.push(redirect);
+          else history.push(`/structure/${data._id}`);
         } catch (e) {
           console.log(e);
           toastr.error("Erreur!");
