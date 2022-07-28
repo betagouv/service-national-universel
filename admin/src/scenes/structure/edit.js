@@ -20,11 +20,13 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import { canDeleteReferent } from "snu-lib/roles";
 import DeleteBtnComponent from "./components/DeleteBtnComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Structures");
   const [defaultValue, setDefaultValue] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalTutor, setModalTutor] = useState({ isOpen: true, onConfirm: null });
   const [networks, setNetworks] = useState([]);
   const [referents, setReferents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,12 +42,22 @@ export default function Edit(props) {
     });
   };
 
+  const onDeleteTutorLinked = (target) => {
+    console.log("🚀 ~ file: edit.js ~ line 46 ~ onDeleteTutorLinked ~ target", target);
+    setModalTutor({
+      isOpen: true,
+      onConfirm: () => onConfirmDelete(target),
+    });
+  };
+
   const onConfirmDelete = async (target) => {
     try {
       const { ok, code } = await api.remove(`/referent/${target._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_MISSIONS") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
       if (!ok && code === "LINKED_STRUCTURE") return toastr.error(translate(code), "Ce responsable est le dernier responsable de la structure.");
+      if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(target);
+      // toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
+
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");
       setReferents(referents.filter((referent) => referent._id !== target._id));
@@ -422,6 +434,16 @@ export default function Edit(props) {
               {defaultValue ? "Enregistrer les modifications" : "Créer la structure"}
             </LoadingButton>
           </Header>
+          <ModalChangeTutor
+            isOpen={modalTutor?.isOpen}
+            title={modalTutor?.title}
+            message={modalTutor?.message}
+            onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
+            onConfirm={() => {
+              modalTutor?.onConfirm();
+              setModalTutor({ isOpen: false, onConfirm: null });
+            }}
+          />
         </Wrapper>
       )}
     </Formik>
