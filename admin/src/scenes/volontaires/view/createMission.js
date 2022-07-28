@@ -547,7 +547,6 @@ const AutocompleteSelectStructure = ({ values, handleChange, placeholder, option
 const AutocompleteSelectTutor = ({ values, handleChange, placeholder, options, refTutor }) => {
   return (
     <>
-      {console.log(values.tutorId)}
       <Field hidden validate={(v) => !v && requiredMessage} name="tutorId" value={values.tutorId} />
       <Select
         ref={refTutor}
