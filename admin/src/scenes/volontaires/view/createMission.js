@@ -535,7 +535,7 @@ const AutocompleteSelectStructure = ({ values, handleChange, placeholder, option
           handleChange({ target: { value: e.value, name: "structureName" } });
           handleChange({ target: { value: e._id, name: "structureId" } });
           handleChange({ target: { value: undefined, name: "tutorId" } });
-          if (values.tutorId) refTutor.current.onChange("null");
+          if (values.tutorId) refTutor.current.onChange("");
           onSelect(e);
         }}
       />
@@ -551,7 +551,7 @@ const AutocompleteSelectTutor = ({ values, handleChange, placeholder, options, r
         ref={refTutor}
         options={options}
         placeholder={placeholder}
-        noOptionsMessage={() => "Aucune structure ne correspond à cette recherche."}
+        noOptionsMessage={() => "Aucune tuteur n'est affecté à cette structure."}
         onChange={(e) => {
           handleChange({ target: { value: e.value, name: "tutorId" } });
         }}
