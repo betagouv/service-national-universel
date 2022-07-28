@@ -36,7 +36,7 @@ export default function CreateMission({ young, onSend }) {
 
   useEffect(() => {
     (async () => {
-      const { data, ok } = await api.get("/structure/by-role");
+      const { data, ok } = await api.get("/structure");
       if (ok) {
         const res = data.map((s) => ({ label: s.name, value: s.name, _id: s._id, detail: s.department + " - " + s.city + " - " + s.zip }));
         if (data) setStructures(res);
