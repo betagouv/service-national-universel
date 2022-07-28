@@ -3,6 +3,7 @@ import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
 import { Spinner } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
@@ -47,7 +48,7 @@ export default function ProposeMission({ mission }) {
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <MissionView mission={mission} tab="propose-mission">
         <div style={{}}>
-          {mission.visibility === "VISIBLE" ? (
+          {mission.visibility === "HIDDEN" ? (
             <div>
               Cette mission est <strong>fermée</strong> aux candidatures.
             </div>
@@ -92,6 +93,7 @@ const SearchBox = ({ getDefaultQuery, setSearch }) => {
 
 const ResultBox = ({ getDefaultQuery, search, mission }) => {
   const [applicationsToTheMission, setApplicationsToTheMission] = useState([]);
+  const history = useHistory();
 
   useEffect(() => {
     getApplicationsToTheMission();
@@ -137,6 +139,17 @@ const ResultBox = ({ getDefaultQuery, search, mission }) => {
     if (!okMail) return toastr.error("Oups, une erreur est survenue lors de l'envoi du mail", codeMail);
     toastr.success("Email envoyé !");
     await getApplicationsToTheMission();
+
+    // On vérifie qu'il reste des places de candidature, sinon on redirige.
+    try {
+      const res = await api.get(`/mission/${mission._id}/`);
+      if (res.data.visibility === "HIDDEN") {
+        history.push(`/mission/${mission._id}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     return;
   };
 
