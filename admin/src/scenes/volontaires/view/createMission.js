@@ -551,9 +551,6 @@ const AutocompleteSelectTutor = ({ values, handleChange, placeholder, options, r
         onChange={(e) => {
           handleChange({ target: { value: e.value, name: "tutorId" } });
         }}
-        onBlur={() => {
-          handleChange({ target: { value: values.tutorId, name: "tutorId" } });
-        }}
       />
     </>
   );

@@ -23,7 +23,7 @@ export default function Create() {
   const redirect = new URLSearchParams(window.location.search).get("redirect");
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (redirect) window.scrollTo(0, 0);
     (async () => {
       const { data } = await api.get(`/structure/networks`);
       setNetworks(data);
