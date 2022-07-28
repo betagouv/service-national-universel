@@ -69,23 +69,30 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 
     if (isYoung) {
       // get the manager_phase2
-      let data = await ReferentModel.findOne({
+      let data = await ReferentModel.find({
         subRole: SUB_ROLES.manager_phase2,
         role: ROLES.REFERENT_DEPARTMENT,
         department: young.department,
       });
+
       // if not found, get the manager_department
       if (!data) {
-        data = await ReferentModel.findOne({
-          subRole: SUB_ROLES.manager_department,
-          role: ROLES.REFERENT_DEPARTMENT,
-          department: young.department,
-        });
+        data = [];
+        data.push(
+          await ReferentModel.findOne({
+            subRole: SUB_ROLES.manager_department,
+            role: ROLES.REFERENT_DEPARTMENT,
+            department: young.department,
+          }),
+        );
       }
 
       template = SENDINBLUE_TEMPLATES.referent.EQUIVALENCE_WAITING_VERIFICATION;
       await sendTemplate(template, {
-        emailTo: [{ name: `${data.firstName} ${data.lastName}`, email: data.email }],
+        emailTo: data.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
         params: {
           cta: `${config.ADMIN_URL}/volontaire/${young._id}/phase2`,
           youngFirstName: young.firstName,
