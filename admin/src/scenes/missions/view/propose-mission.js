@@ -47,10 +47,16 @@ export default function ProposeMission({ mission }) {
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <MissionView mission={mission} tab="propose-mission">
         <div style={{}}>
-          <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-            <SearchBox getDefaultQuery={getDefaultQuery} setSearch={setSearch} />
-            <ResultBox getDefaultQuery={getDefaultQuery} search={search} mission={mission} />
-          </ReactiveBase>
+          {mission.visibility === "VISIBLE" ? (
+            <div>
+              Cette mission est <strong>fermée</strong> aux candidatures.
+            </div>
+          ) : (
+            <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+              <SearchBox getDefaultQuery={getDefaultQuery} setSearch={setSearch} />
+              <ResultBox getDefaultQuery={getDefaultQuery} search={search} mission={mission} />
+            </ReactiveBase>
+          )}
         </div>
       </MissionView>
     </div>

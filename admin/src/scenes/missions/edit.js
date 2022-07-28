@@ -36,7 +36,7 @@ export default function Edit(props) {
   const [structure, setStructure] = useState();
   const [structures, setStructures] = useState();
   const [referents, setReferents] = useState([]);
-  const [applicationsCount, setApplicationsCount] = useState([]);
+  const [pendingApplications, setPendingApplications] = useState([]);
   const [showTutor, setShowTutor] = useState();
   const [invited, setInvited] = useState();
   const [isJvaMission, setIsJvaMission] = useState(false);
@@ -65,13 +65,8 @@ export default function Edit(props) {
     const id = props.match && props.match.params && props.match.params.id;
     try {
       const res = await api.get(`/mission/${id}/application`);
-      const count = res.data.filter((obj) => {
-        if (obj.status.includes("WAITING")) {
-          return true;
-        }
-        return false;
-      }).length;
-      setApplicationsCount(count);
+      const count = res.data.filter((obj) => obj.status.includes("WAITING")).length;
+      setPendingApplications(count);
     } catch (e) {
       console.error(e);
       toastr.error("Impossible de trouver les candidatures associés à cette mission.");
@@ -288,27 +283,39 @@ export default function Edit(props) {
                         <label className="uppercase">
                           <span>*</span>visibilité pour les candidats
                         </label>
-                        <div className="ml-2">Nombre de candidatures actives : {applicationsCount}.</div>
-                        <div className="flex items-center">
-                          <div
-                            onClick={() => {
-                              handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDDEN" : "VISIBLE", name: "visibility" } });
-                            }}
-                            name="visibility"
-                            className={`flex items-center w-9 h-4 rounded-full ${
-                              values.visibility === "VISIBLE" ? "bg-blue-600" : "bg-red-500"
-                            } cursor-pointer transition duration-100 ease-in`}>
-                            <div
-                              className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] ${
-                                values.visibility === "VISIBLE" ? "translate-x-[16px]" : "translate-x-0"
-                              } transition duration-100 ease-in shadow-nina`}>
-                              {values.visibility === "VISIBLE" ? null : <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />}
+                        {pendingApplications >= values.placesLeft * 5 ? (
+                          <div className="flex items-center">
+                            <div className={"flex items-center w-9 h-4 rounded-full bg-gray-300"}>
+                              <div className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] shadow-nina`}>
+                                {values.visibility === "VISIBLE" ? null : <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />}
+                              </div>
+                            </div>
+                            <div className="ml-2">
+                              Seuil de candidatures en attente atteint : la mission est <strong>fermée</strong> aux candidatures.
                             </div>
                           </div>
-                          <div className="ml-2 ">
-                            La mission est <label className="font-bold">{values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</label> aux candidatures
+                        ) : (
+                          <div className="flex items-center">
+                            <div
+                              onClick={() => {
+                                handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDDEN" : "VISIBLE", name: "visibility" } });
+                              }}
+                              name="visibility"
+                              className={`flex items-center w-9 h-4 rounded-full ${
+                                values.visibility === "VISIBLE" ? "bg-blue-600" : "bg-red-500"
+                              } cursor-pointer transition duration-100 ease-in`}>
+                              <div
+                                className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] ${
+                                  values.visibility === "VISIBLE" ? "translate-x-[16px]" : "translate-x-0"
+                                } transition duration-100 ease-in shadow-nina`}>
+                                {values.visibility === "VISIBLE" ? null : <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />}
+                              </div>
+                            </div>
+                            <div className="ml-2 ">
+                              La mission est <label className="font-bold">{values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</label> aux candidatures
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </FormGroup>
                     ) : null}
                     <FormGroup>

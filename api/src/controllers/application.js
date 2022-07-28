@@ -35,31 +35,24 @@ const {
 const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
 const mime = require("mime-types");
 
-const updatePlacesMission = async (app, fromUser) => {
-  try {
-    // Get all application for the mission
-    const mission = await MissionObject.findById(app.missionId);
-    const applications = await ApplicationObject.find({ missionId: mission._id });
-    const placesTaken = applications.filter((application) => {
-      return ["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status);
-    }).length;
-    const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
-    if (mission.placesLeft !== placesLeft) {
-      console.log(`Mission ${mission.id}: total ${mission.placesTotal}, left from ${mission.placesLeft} to ${placesLeft}`);
-      mission.set({ placesLeft });
-      await mission.save({ fromUser });
-    }
-  } catch (e) {
-    console.log(e);
-  }
-};
-
-async function updateMissionVisibility(app, fromUser) {
+async function updateMission(app, fromUser) {
+  // Get all application for the mission
   const mission = await MissionObject.findById(app.missionId);
-  const nb = await ApplicationObject.countDocuments({
-    $and: [{ missionId: mission._id }, { status: "WAITING_VERIFICATION" || "WAITING_VALIDATION" || "WAITING_ACCEPTATION" }],
+  const placesTaken = await ApplicationObject.countDocuments({
+    $and: [{ missionId: mission._id }, { status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } }],
   });
-  mission.set({ visibility: nb >= mission.placesLeft * 5 ? "HIDDEN" : "VISIBLE" });
+  const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
+  if (mission.placesLeft !== placesLeft) {
+    console.log(`Mission ${mission.id}: total ${mission.placesTotal}, left from ${mission.placesLeft} to ${placesLeft}`);
+    mission.set({ placesLeft });
+  }
+
+  // On met à jour la visibilité de la mission en fonction du nb de candidatures en attente et de places restantes.
+  const pendingApplications = await ApplicationObject.countDocuments({
+    $and: [{ missionId: mission._id }, { status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION", "WAITING_ACCEPTATION"] } }],
+  });
+  mission.set({ visibility: pendingApplications >= placesLeft * 5 ? "HIDDEN" : "VISIBLE" });
+
   await mission.save({ fromUser });
 }
 
@@ -140,6 +133,9 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const mission = await MissionObject.findById(value.missionId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // On vérifie si les candidatures sont ouvertes.
+    if (mission.visibility === "HIDDEN") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
     value.isJvaMission = mission.isJvaMission;
 
     const young = await YoungObject.findById(value.youngId);
@@ -183,8 +179,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const data = await ApplicationObject.create(value);
     await updateYoungPhase2Hours(young);
     await updateStatusPhase2(young);
-    await updatePlacesMission(data, req.user);
-    await updateMissionVisibility(data, req.user);
+    await updateMission(data, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
 
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
@@ -238,8 +233,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     await updateYoungPhase2Hours(young);
     await updateStatusPhase2(young);
     await updateYoungStatusPhase2Contract(young, req.user);
-    await updatePlacesMission(application, req.user);
-    await updateMissionVisibility(application, req.user);
+    await updateMission(application, req.user);
 
     res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {
