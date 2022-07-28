@@ -96,16 +96,6 @@ export default function List() {
           ],
         },
       },
-      sort: [
-        {
-          _geo_distance: {
-            location: filter?.LOCATION,
-            order: "asc",
-            unit: "km",
-            mode: "min",
-          },
-        },
-      ],
       track_total_hits: true,
       size: 20,
     };
@@ -144,12 +134,24 @@ export default function List() {
       });
     }
 
-    if (filter?.DISTANCE) {
+    if (filter?.DISTANCE && filter?.LOCATION) {
       body.query.bool.filter.push({
         geo_distance: {
           distance: `${filter?.DISTANCE}km`,
           location: filter?.LOCATION,
         },
+      });
+      body.push({
+        sort: [
+          {
+            _geo_distance: {
+              location: filter?.LOCATION,
+              order: "asc",
+              unit: "km",
+              mode: "min",
+            },
+          },
+        ],
       });
     }
 
