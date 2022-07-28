@@ -1,3 +1,16 @@
+# [1.119.0](https://github.com/betagouv/service-national-universel/compare/v1.118.0...v1.119.0) (2022-07-28)
+
+
+### Bug Fixes
+
+* **admin:** Fix toastr message for linked_mission ([ca125b3](https://github.com/betagouv/service-national-universel/commit/ca125b3a996165ad229d8829452eef431f830870))
+* **app:** échec recherche de mission si pas de location ([#1708](https://github.com/betagouv/service-national-universel/issues/1708)) ([c7cb4ef](https://github.com/betagouv/service-national-universel/commit/c7cb4ef49acc375a550c65f3fc7343558367d3f5))
+
+
+### Features
+
+* **admin:** Rajouter lien BDC sur la toolbox ([2ad3d5b](https://github.com/betagouv/service-national-universel/commit/2ad3d5b39a3e8ab82bd03ff82d4b2f149ab9d39d))
+
 # [1.118.0](https://github.com/betagouv/service-national-universel/compare/v1.117.0...v1.118.0) (2022-07-27)
 
 
