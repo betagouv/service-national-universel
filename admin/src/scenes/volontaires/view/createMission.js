@@ -32,7 +32,6 @@ export default function CreateMission({ young, onSend }) {
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
   const [createTutorVisible, setCreateTutorVisible] = useState(false);
-  const [tutor, setTutor] = useState(null);
   const refTutor = useRef();
 
   useEffect(() => {
@@ -190,7 +189,6 @@ export default function CreateMission({ young, onSend }) {
                           onSelect={(e) => {
                             setStructure(e);
                           }}
-                          setTutor={setTutor}
                         />
                         <ErrorMessage errors={errors} touched={touched} name="structureId" />
                       </>
@@ -437,8 +435,6 @@ export default function CreateMission({ young, onSend }) {
                                     })
                                   : []
                               }
-                              setTutor={setTutor}
-                              tutor={tutor}
                             />
                           </div>
                           <ErrorMessage errors={errors} touched={touched} name="tutorId" />
@@ -511,7 +507,7 @@ export default function CreateMission({ young, onSend }) {
   );
 }
 
-const AutocompleteSelectStructure = ({ values, handleChange, placeholder, options, onSelect, setFieldValue, refTutor }) => {
+const AutocompleteSelectStructure = ({ values, handleChange, placeholder, options, onSelect, refTutor }) => {
   const formatOptionLabel = ({ label, detail }) => (
     <div className="flex flex-col">
       <div>{label}</div>
