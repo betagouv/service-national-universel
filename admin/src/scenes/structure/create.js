@@ -21,7 +21,6 @@ export default function Create() {
   const [isLoading, setIsLoading] = useState(false);
 
   const redirect = new URLSearchParams(window.location.search).get("redirect");
-  console.log(redirect);
 
   useEffect(() => {
     window.scrollTo(0, 0);

@@ -102,7 +102,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 router.get("/by-role", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  console.log("coucou");
   try {
     if (!canViewStructures(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const referent = await ReferentObject.findById(req.user._id);
