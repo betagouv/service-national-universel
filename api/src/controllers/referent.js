@@ -564,7 +564,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
       case ROLES.SUPERVISOR:
       case ROLES.RESPONSIBLE: {
         if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] }).cursor();
+        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
         if (!structures) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         if (!structures.reduce((acc, curr) => acc || canViewYoungFile(req.user, young, curr), false))
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
