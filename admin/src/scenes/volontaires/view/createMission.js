@@ -551,7 +551,7 @@ const AutocompleteSelectTutor = ({ values, handleChange, placeholder, options, r
         ref={refTutor}
         options={options}
         placeholder={placeholder}
-        noOptionsMessage={() => "Aucune tuteur n'est affecté à cette structure."}
+        noOptionsMessage={() => "Aucun tuteur trouvé."}
         onChange={(e) => {
           handleChange({ target: { value: e.value, name: "tutorId" } });
         }}
