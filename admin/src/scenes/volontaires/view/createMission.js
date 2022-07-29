@@ -131,6 +131,12 @@ export default function CreateMission({ young, onSend }) {
         try {
           // create the responsible if it is a new one
           if (createTutorVisible) {
+            const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "email.keyword": values.tutorEmail } }] } } };
+            const { responses } = await api.esQuery("referent", body);
+            if (responses.length && responses[0].hits.hits.length) {
+              toastr.warning("Utilisateur déjà inscrit", "Merci de vérifier si la structure existe déjà sur la plateforme");
+              return;
+            }
             const responseResponsible = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[ROLES.RESPONSIBLE]}`, {
               role: ROLES.RESPONSIBLE,
               structureId: values.structureId,
