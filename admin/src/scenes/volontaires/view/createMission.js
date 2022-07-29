@@ -1,44 +1,48 @@
-import React, { useEffect, useState } from "react";
-import { Col, Row, Input } from "reactstrap";
-import styled from "styled-components";
+import { Field, Formik } from "formik";
+import React, { useEffect, useState, useRef } from "react";
 import { toastr } from "react-redux-toastr";
-import { Formik, Field } from "formik";
-import Select from "react-select";
 import { useHistory } from "react-router-dom";
+import Select, { components } from "react-select";
+import { Col, Input, Row } from "reactstrap";
+import styled from "styled-components";
 import plausibleEvent from "../../../services/pausible";
 
-import MultiSelect from "../../../components/Multiselect";
-import LoadingButton from "../../../components/buttons/LoadingButton";
+import CrossSVG from "../../../assets/cross.svg";
+import PlusSVG from "../../../assets/plus.svg";
 import AddressInput from "../../../components/addressInputV2";
+import LoadingButton from "../../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
+import MultiSelect from "../../../components/Multiselect";
+import api from "../../../services/api";
 import {
-  translate,
+  dateForDatePicker,
+  MISSION_DOMAINS,
   MISSION_PERIOD_DURING_HOLIDAYS,
   MISSION_PERIOD_DURING_SCHOOL,
-  MISSION_DOMAINS,
-  dateForDatePicker,
+  PERIOD,
   ROLES,
   SENDINBLUE_TEMPLATES,
-  PERIOD,
+  translate,
   translateApplication,
 } from "../../../utils";
-import api from "../../../services/api";
-import PlusSVG from "../../../assets/plus.svg";
-import CrossSVG from "../../../assets/cross.svg";
 
 export default function CreateMission({ young, onSend }) {
   const history = useHistory();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
-  const [createStructureVisible, setCreateStructureVisible] = useState(false);
   const [createTutorVisible, setCreateTutorVisible] = useState(false);
+  const refTutor = useRef();
 
   useEffect(() => {
     (async () => {
-      const { data } = await api.get("/structure");
-      const res = data.map((s) => ({ label: s.name, value: s.name, _id: s._id }));
-      if (data) setStructures(res);
+      const { data, ok } = await api.get("/structure");
+      if (ok) {
+        const res = data.map((s) => ({ label: s.name, value: s.name, _id: s._id, detail: s.department + " - " + s.city + " - " + s.zip }));
+        if (data) setStructures(res);
+      } else {
+        setStructures(null);
+      }
     })();
   }, []);
 
@@ -116,23 +120,6 @@ export default function CreateMission({ young, onSend }) {
         if (values.duration) values.duration = values.duration.toString();
         if (!values.location) values.location = {};
         try {
-          // create the strucutre if it is a new one
-          if (createStructureVisible) {
-            const responseStructure = await api.post("/structure", {
-              status: "VALIDATED",
-              name: values.structureName,
-              legalStatus: values.structureLegalStatus,
-              description: values.structureDescription,
-              address: values.address,
-              city: values.city,
-              zip: values.zip,
-              department: values.department,
-              region: values.region,
-              location: values.location,
-            });
-            if (!responseStructure.ok) return toastr.error("Une erreur s'est produite lors de la creation de la strucutre", translate(responseStructure.code));
-            values.structureId = responseStructure.data._id;
-          }
           // create the responsible if it is a new one
           if (createTutorVisible) {
             const responseResponsible = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[ROLES.RESPONSIBLE]}`, {
@@ -191,9 +178,10 @@ export default function CreateMission({ young, onSend }) {
                   </FormGroup>
                   <FormGroup>
                     <label>STRUCTURE RATTACHÉE</label>
-                    {structures && !createStructureVisible ? (
+                    {structures ? (
                       <>
                         <AutocompleteSelectStructure
+                          refTutor={refTutor}
                           values={values}
                           handleChange={handleChange}
                           placeholder="Choisir une structure"
@@ -205,55 +193,14 @@ export default function CreateMission({ young, onSend }) {
                         <ErrorMessage errors={errors} touched={touched} name="structureId" />
                       </>
                     ) : null}
-                    <ToggleBloc
-                      visible={createStructureVisible}
-                      onClick={() => {
-                        setCreateStructureVisible(!createStructureVisible);
-                        setCreateTutorVisible(!createStructureVisible);
-                        setStructure(null);
-                      }}
-                      title="Créer une nouvelle structure">
-                      <FormGroup>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          value={values.structureName}
-                          onChange={handleChange}
-                          name="structureName"
-                          placeholder="Nom de la structure"
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="structureName" />
-                      </FormGroup>
-                      <FormGroup>
-                        <Field validate={(v) => !v && requiredMessage} component="select" name="structureLegalStatus" value={values.structureLegalStatus} onChange={handleChange}>
-                          <option key="null"></option>
-                          <option key="PUBLIC" value="PUBLIC">
-                            {translate("PUBLIC")}
-                          </option>
-                          <option key="PRIVATE" value="PRIVATE">
-                            {translate("PRIVATE")}
-                          </option>
-                          <option key="ASSOCIATION" value="ASSOCIATION">
-                            {translate("ASSOCIATION")}
-                          </option>
-                          <option key="OTHER" value="OTHER">
-                            {translate("OTHER")}
-                          </option>
-                        </Field>
-                        <ErrorMessage errors={errors} touched={touched} name="structureLegalStatus" />
-                      </FormGroup>
-                      <FormGroup>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          name="structureDescription"
-                          component="textarea"
-                          rows={4}
-                          value={values.structureDescription}
-                          onChange={handleChange}
-                          placeholder="Présentez en quelques mots la structure"
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="structureDescription" />
-                      </FormGroup>
-                    </ToggleBloc>
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="text-gray-500">Vous ne trouvez pas votre structure ?</div>
+                      <button
+                        className=" text-gray-600  hover:scale-105 hover:underline"
+                        onClick={() => history.push(`/structure/create?redirect=/volontaire/${young._id.toString()}/phase2`)}>
+                        Créer une structure
+                      </button>
+                    </div>
                   </FormGroup>
                   <FormGroup>
                     <label>
@@ -447,9 +394,9 @@ export default function CreateMission({ young, onSend }) {
                     </FormGroup>
                   </Wrapper>
                 </Row>
-                <Wrapper>
-                  <Legend>Tuteur de la mission</Legend>
-                  {structure ? (
+                {structure ? (
+                  <Wrapper>
+                    <Legend>Tuteur de la mission</Legend>
                     <FormGroup>
                       <label>
                         <span>*</span>TUTEUR
@@ -475,38 +422,47 @@ export default function CreateMission({ young, onSend }) {
                       </p>
                       {!createTutorVisible ? (
                         <>
-                          <Field validate={(v) => !v && requiredMessage} component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
-                            <option value="">Sélectionner un tuteur</option>
-                            {referents &&
-                              referents.map((referent) => {
-                                return <option key={referent._id} value={referent._id}>{`${referent.firstName} ${referent.lastName}`}</option>;
-                              })}
-                          </Field>
+                          <div className="mt-3">
+                            <AutocompleteSelectTutor
+                              refTutor={refTutor}
+                              values={values}
+                              handleChange={handleChange}
+                              placeholder="Sélectionner un tuteur"
+                              options={
+                                referents
+                                  ? referents.map((referent) => {
+                                      return { value: referent._id, label: `${referent.firstName} ${referent.lastName}` };
+                                    })
+                                  : []
+                              }
+                            />
+                          </div>
                           <ErrorMessage errors={errors} touched={touched} name="tutorId" />
                         </>
                       ) : null}
                     </FormGroup>
-                  ) : null}
-                  <ToggleBloc
-                    visible={createTutorVisible || createStructureVisible}
-                    onClick={() => {
-                      setCreateTutorVisible(!createTutorVisible);
-                    }}
-                    title="Ajouter un nouveau tuteur">
-                    <FormGroup>
-                      <Field validate={(v) => !v && requiredMessage} value={values.tutorFirstName} onChange={handleChange} name="tutorFirstName" placeholder="Prénom" />
-                      <ErrorMessage errors={errors} touched={touched} name="tutorFirstName" />
-                    </FormGroup>
-                    <FormGroup>
-                      <Field validate={(v) => !v && requiredMessage} value={values.tutorLastName} onChange={handleChange} name="tutorLastName" placeholder="Nom" />
-                      <ErrorMessage errors={errors} touched={touched} name="tutorLastName" />
-                    </FormGroup>
-                    <FormGroup>
-                      <Field validate={(v) => !v && requiredMessage} value={values.tutorEmail} onChange={handleChange} name="tutorEmail" placeholder="E-mail" />
-                      <ErrorMessage errors={errors} touched={touched} name="tutorEmail" />
-                    </FormGroup>
-                  </ToggleBloc>
-                </Wrapper>
+
+                    <ToggleBloc
+                      visible={createTutorVisible}
+                      onClick={() => {
+                        setCreateTutorVisible(!createTutorVisible);
+                      }}
+                      title="Ajouter un nouveau tuteur">
+                      <FormGroup>
+                        <Field validate={(v) => !v && requiredMessage} value={values.tutorFirstName} onChange={handleChange} name="tutorFirstName" placeholder="Prénom" />
+                        <ErrorMessage errors={errors} touched={touched} name="tutorFirstName" />
+                      </FormGroup>
+                      <FormGroup>
+                        <Field validate={(v) => !v && requiredMessage} value={values.tutorLastName} onChange={handleChange} name="tutorLastName" placeholder="Nom" />
+                        <ErrorMessage errors={errors} touched={touched} name="tutorLastName" />
+                      </FormGroup>
+                      <FormGroup>
+                        <Field validate={(v) => !v && requiredMessage} value={values.tutorEmail} onChange={handleChange} name="tutorEmail" placeholder="E-mail" />
+                        <ErrorMessage errors={errors} touched={touched} name="tutorEmail" />
+                      </FormGroup>
+                    </ToggleBloc>
+                  </Wrapper>
+                ) : null}
                 <Wrapper>
                   <Legend>Statut de la candidature</Legend>
                   <FormGroup>
@@ -551,19 +507,50 @@ export default function CreateMission({ young, onSend }) {
   );
 }
 
-const AutocompleteSelectStructure = ({ values, handleChange, placeholder, options, onSelect }) => {
+const AutocompleteSelectStructure = ({ values, handleChange, placeholder, options, onSelect, refTutor }) => {
+  const formatOptionLabel = ({ label, detail }) => (
+    <div className="flex flex-col">
+      <div>{label}</div>
+      <div className="text-gray-600 text-xs">{detail}</div>
+    </div>
+  );
+
+  // Change la maniere de rendu de l'option une fois selectionne
+  const SingleValue = (props) => <components.SingleValue {...props}>{props.data.label}</components.SingleValue>;
+
   return (
     <>
       <Field hidden name="structureName" value={values.structureName} validate={(v) => !v && requiredMessage} />
       <Field hidden name="structureId" value={values.structureId} validate={(v) => !v && requiredMessage} />
       <Select
         options={options}
+        formatOptionLabel={formatOptionLabel}
+        components={{ SingleValue }}
         placeholder={placeholder}
         noOptionsMessage={() => "Aucune structure ne correspond à cette recherche."}
         onChange={(e) => {
           handleChange({ target: { value: e.value, name: "structureName" } });
           handleChange({ target: { value: e._id, name: "structureId" } });
+          handleChange({ target: { value: undefined, name: "tutorId" } });
+          if (values.tutorId) refTutor.current.onChange("");
           onSelect(e);
+        }}
+      />
+    </>
+  );
+};
+
+const AutocompleteSelectTutor = ({ values, handleChange, placeholder, options, refTutor }) => {
+  return (
+    <>
+      <Field hidden validate={(v) => !v && requiredMessage} name="tutorId" value={values.tutorId} />
+      <Select
+        ref={refTutor}
+        options={options}
+        placeholder={placeholder}
+        noOptionsMessage={() => "Aucun tuteur trouvé."}
+        onChange={(e) => {
+          handleChange({ target: { value: e.value, name: "tutorId" } });
         }}
       />
     </>
