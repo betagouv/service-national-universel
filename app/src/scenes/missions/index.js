@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Switch, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -14,16 +14,18 @@ export default function Index() {
   if (!young || !permissionPhase2(young)) history.push("/");
 
   const getMissionView = () => {
-    return (
-      <>
-        <div className="hidden md:flex flex-1">
-          <ViewDesktop />
-        </div>
-        <div className="flex md:hidden ">
-          <ViewMobile />
-        </div>
-      </>
-    );
+    const [isDesktop, setDesktop] = useState(window.innerWidth > 650);
+
+    function updateMedia() {
+      setDesktop(window.innerWidth > 650);
+    }
+
+    useEffect(() => {
+      window.addEventListener("resize", updateMedia);
+      return () => window.removeEventListener("resize", updateMedia);
+    });
+
+    return <>{isDesktop ? <ViewDesktop /> : <ViewMobile />}</>;
   };
 
   return (
