@@ -23,6 +23,7 @@ import {
   ROLES,
   SENDINBLUE_TEMPLATES,
   translate,
+  ES_NO_LIMIT,
   translateApplication,
 } from "../../../utils";
 
@@ -57,7 +58,7 @@ export default function CreateMission({ young, onSend }) {
   useEffect(() => {
     (async () => {
       if (!structure) return;
-      const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } } };
+      const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } }, size: ES_NO_LIMIT };
       const { responses } = await api.esQuery("referent", body);
       if (responses.length) {
         if (responses) setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
