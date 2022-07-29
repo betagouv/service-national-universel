@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { Formik, Field } from "formik";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
@@ -283,7 +283,7 @@ export default function Edit(props) {
                         <label className="uppercase">
                           <span>*</span>visibilité pour les candidats
                         </label>
-                        {pendingApplications >= values.placesLeft * 5 ? (
+                        {values.placesLeft > 0 && pendingApplications >= values.placesLeft * 5 ? (
                           <div className="flex items-center">
                             <div className={"flex items-center w-9 h-4 rounded-full bg-gray-300"}>
                               <div className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] shadow-nina`}>
@@ -291,7 +291,27 @@ export default function Edit(props) {
                               </div>
                             </div>
                             <div className="ml-2">
-                              Seuil de candidatures en attente atteint : la mission est <strong>fermée</strong> aux candidatures.
+                              La mission est <strong>fermée</strong> aux candidatures. Vous avez atteint le seuil des{" "}
+                              <Link to="youngs" className="underline text-blue-800">
+                                candidatures à traiter
+                              </Link>
+                              .
+                            </div>
+                          </div>
+                        ) : values.visibility == "VISIBLE" ? (
+                          <div className="flex items-center">
+                            <div
+                              onClick={() => {
+                                handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDDEN" : "VISIBLE", name: "visibility" } });
+                              }}
+                              name="visibility"
+                              className="flex items-center w-9 h-4 rounded-full bg-blue-600 cursor-pointer transition duration-100 ease-in">
+                              <div className="flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] translate-x-[16px] transition duration-100 ease-in shadow-nina"></div>
+                            </div>
+                            <div className="flex ml-2 items-center">
+                              <div>
+                                La mission est <strong>ouverte</strong> aux candidatures.
+                              </div>
                             </div>
                           </div>
                         ) : (
@@ -301,18 +321,15 @@ export default function Edit(props) {
                                 handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDDEN" : "VISIBLE", name: "visibility" } });
                               }}
                               name="visibility"
-                              className={`flex items-center w-9 h-4 rounded-full ${
-                                values.visibility === "VISIBLE" ? "bg-blue-600" : "bg-red-500"
-                              } cursor-pointer transition duration-100 ease-in`}>
-                              <div
-                                className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] ${
-                                  values.visibility === "VISIBLE" ? "translate-x-[16px]" : "translate-x-0"
-                                } transition duration-100 ease-in shadow-nina`}>
-                                {values.visibility === "VISIBLE" ? null : <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />}
+                              className="flex items-center w-9 h-4 rounded-full bg-red-500 cursor-pointer transition duration-100 ease-in">
+                              <div className="flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] translate-x-0 transition duration-100 ease-in shadow-nina">
+                                <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />
                               </div>
                             </div>
-                            <div className="ml-2 ">
-                              La mission est <label className="font-bold">{values.visibility === "VISIBLE" ? "ouverte" : "fermée"}</label> aux candidatures
+                            <div className="flex ml-2 items-center">
+                              <div>
+                                La mission est <strong>fermée</strong> aux candidatures.
+                              </div>
                             </div>
                           </div>
                         )}

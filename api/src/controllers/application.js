@@ -36,24 +36,26 @@ const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/tra
 const mime = require("mime-types");
 
 async function updateMission(app, fromUser) {
-  // Get all application for the mission
-  const mission = await MissionObject.findById(app.missionId);
-  const placesTaken = await ApplicationObject.countDocuments({
-    $and: [{ missionId: mission._id }, { status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } }],
-  });
-  const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
-  if (mission.placesLeft !== placesLeft) {
-    console.log(`Mission ${mission.id}: total ${mission.placesTotal}, left from ${mission.placesLeft} to ${placesLeft}`);
-    mission.set({ placesLeft });
+  try {
+    // Get all application for the mission
+    const mission = await MissionObject.findById(app.missionId);
+    const placesTaken = await ApplicationObject.countDocuments({ missionId: mission._id }, { status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
+    const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
+    if (mission.placesLeft !== placesLeft) {
+      mission.set({ placesLeft });
+    }
+
+    // On met à jour la visibilité de la mission en fonction du nb de candidatures en attente et de places restantes.
+    const pendingApplications = await ApplicationObject.countDocuments(
+      { missionId: mission._id },
+      { status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION", "WAITING_ACCEPTATION"] } },
+    );
+    mission.set({ visibility: pendingApplications >= placesLeft * 5 ? "HIDDEN" : "VISIBLE" });
+
+    await mission.save({ fromUser });
+  } catch (e) {
+    console.error(e);
   }
-
-  // On met à jour la visibilité de la mission en fonction du nb de candidatures en attente et de places restantes.
-  const pendingApplications = await ApplicationObject.countDocuments({
-    $and: [{ missionId: mission._id }, { status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION", "WAITING_ACCEPTATION"] } }],
-  });
-  mission.set({ visibility: pendingApplications >= placesLeft * 5 ? "HIDDEN" : "VISIBLE" });
-
-  await mission.save({ fromUser });
 }
 
 const getReferentManagerPhase2 = async (department) => {
