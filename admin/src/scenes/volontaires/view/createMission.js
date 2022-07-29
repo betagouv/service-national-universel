@@ -44,8 +44,6 @@ export default function CreateMission({ young, onSend }) {
     return result.join(" - ");
   };
 
-  console.log(structure);
-
   useEffect(() => {
     (async () => {
       const { data, ok } = await api.get("/structure");
@@ -125,6 +123,7 @@ export default function CreateMission({ young, onSend }) {
         domains: [],
         period: [],
         subPeriod: [],
+        isMilitaryPreparation: "false",
       }}
       onSubmit={async (values) => {
         plausibleEvent("Volontaires/profil/phase2 CTA - Créer mission personnalisée");

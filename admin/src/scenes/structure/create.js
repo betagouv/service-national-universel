@@ -53,7 +53,7 @@ export default function Create() {
         twitter: "",
         instagram: "",
         legalStatus: "",
-        isMilitaryPreparation: false,
+        isMilitaryPreparation: "false",
       }}
       onSubmit={async (values) => {
         try {
