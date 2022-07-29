@@ -57,6 +57,15 @@ export default function Create() {
       onSubmit={async (values) => {
         try {
           setIsLoading(true);
+
+          const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "email.keyword": values.email } }] } } };
+          const { responses } = await api.esQuery("referent", body);
+          if (responses.length && responses[0].hits.hits.length) {
+            toastr.warning("Utilisateur déjà inscrit", "Merci de vérifier si la structure existe déjà sur la plateforme");
+            setIsLoading(false);
+            return;
+          }
+
           if (!values.location) {
             values.location = {
               lat: null,
@@ -85,6 +94,7 @@ export default function Create() {
         } catch (e) {
           console.log(e);
           toastr.error("Erreur!");
+          setIsLoading(false);
         }
       }}>
       {({ values, handleChange, handleSubmit, errors, touched }) => (
