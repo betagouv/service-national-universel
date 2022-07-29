@@ -135,7 +135,7 @@ export default function List() {
       });
     }
 
-    if (filter?.DISTANCE) {
+    if (filter?.DISTANCE && filter?.LOCATION) {
       body.query.bool.filter.push({
         geo_distance: {
           distance: `${filter?.DISTANCE}km`,
