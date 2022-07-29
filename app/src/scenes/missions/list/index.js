@@ -1,18 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useWindowSize } from "usehooks-ts";
+import tailwindConfig from "../../../../tailwind.config";
 import DesktopView from "./desktop";
 import MobileView from "./mobile";
 
 export default function View() {
-  const [isDesktop, setDesktop] = useState(window.innerWidth > 768);
+  console.log("md:", parseInt(tailwindConfig.theme.screens.md));
+  const { width } = useWindowSize();
+  const isDesktop = width > parseInt(tailwindConfig.theme.screens.md);
+  console.log("isDesktop:", isDesktop);
 
-  function updateMedia() {
-    setDesktop(window.innerWidth > 768);
-  }
-
-  useEffect(() => {
-    window.addEventListener("resize", updateMedia);
-    return () => window.removeEventListener("resize", updateMedia);
-  });
-
-  return <>{isDesktop ? <DesktopView /> : <MobileView />}</>;
+  return (
+    <>
+      {isDesktop ? (
+        <div className="md:flex flex-1">
+          <DesktopView />
+        </div>
+      ) : (
+        <div className="flex w-screen">
+          <MobileView />
+        </div>
+      )}
+    </>
+  );
 }
