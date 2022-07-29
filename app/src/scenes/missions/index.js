@@ -14,10 +14,10 @@ export default function Index() {
   if (!young || !permissionPhase2(young)) history.push("/");
 
   const getMissionView = () => {
-    const [isDesktop, setDesktop] = useState(window.innerWidth > 650);
+    const [isDesktop, setDesktop] = useState(window.innerWidth > 768);
 
     function updateMedia() {
-      setDesktop(window.innerWidth > 650);
+      setDesktop(window.innerWidth > 768);
     }
 
     useEffect(() => {

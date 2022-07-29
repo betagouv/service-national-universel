@@ -3,10 +3,10 @@ import DesktopView from "./desktop";
 import MobileView from "./mobile";
 
 export default function View() {
-  const [isDesktop, setDesktop] = useState(window.innerWidth > 650);
+  const [isDesktop, setDesktop] = useState(window.innerWidth > 768);
 
   function updateMedia() {
-    setDesktop(window.innerWidth > 650);
+    setDesktop(window.innerWidth > 768);
   }
 
   useEffect(() => {
