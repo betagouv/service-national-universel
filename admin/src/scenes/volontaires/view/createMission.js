@@ -34,11 +34,19 @@ export default function CreateMission({ young, onSend }) {
   const [createTutorVisible, setCreateTutorVisible] = useState(false);
   const refTutor = useRef();
 
+  const getStructureDetail = (s) => {
+    let result = [];
+    if (s.department) result.push(s.department);
+    if (s.city) result.push(s.city);
+    if (s.zip) result.push(s.zip);
+    return result.join(" - ");
+  };
+
   useEffect(() => {
     (async () => {
       const { data, ok } = await api.get("/structure");
       if (ok) {
-        const res = data.map((s) => ({ label: s.name, value: s.name, _id: s._id, detail: s.department + " - " + s.city + " - " + s.zip }));
+        const res = data.map((s) => ({ label: s.name, value: s.name, _id: s._id, detail: getStructureDetail(s) }));
         if (data) setStructures(res);
       } else {
         setStructures(null);
