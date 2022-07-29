@@ -25,6 +25,7 @@ import {
   translate,
   ES_NO_LIMIT,
   translateApplication,
+  ENABLE_PM,
 } from "../../../utils";
 
 export default function CreateMission({ young, onSend }) {
@@ -47,7 +48,7 @@ export default function CreateMission({ young, onSend }) {
     (async () => {
       const { data, ok } = await api.get("/structure");
       if (ok) {
-        const res = data.map((s) => ({ label: s.name, value: s.name, _id: s._id, detail: getStructureDetail(s) }));
+        const res = data.map((s) => ({ label: s.name, value: s.name, _id: s._id, detail: getStructureDetail(s), isMilitaryPreparation: s.isMilitaryPreparation }));
         if (data) setStructures(res);
       } else {
         setStructures(null);
@@ -122,6 +123,7 @@ export default function CreateMission({ young, onSend }) {
         domains: [],
         period: [],
         subPeriod: [],
+        isMilitaryPreparation: "false",
       }}
       onSubmit={async (values) => {
         plausibleEvent("Volontaires/profil/phase2 CTA - Créer mission personnalisée");
@@ -258,6 +260,21 @@ export default function CreateMission({ young, onSend }) {
                     </Field>
                     <ErrorMessage errors={errors} touched={touched} name="format" />
                   </FormGroup>
+                  {ENABLE_PM && structure && structure.isMilitaryPreparation === "true" ? (
+                    <FormGroup>
+                      <label>PRÉPARATION MILITAIRE</label>
+                      <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
+                        <option key="false" value="false">
+                          Non
+                        </option>
+                        <option key="true" value="true">
+                          Oui
+                        </option>
+                      </Field>
+                      <ErrorMessage errors={errors} touched={touched} name="isMilitaryPreparation" />
+                    </FormGroup>
+                  ) : null}
+
                   <FormGroup>
                     <label>Durée de la mission</label>
                     <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</p>

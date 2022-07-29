@@ -346,21 +346,21 @@ export default function Edit(props) {
                           </option>
                         </Field>
                       </FormGroup>
-                      {ENABLE_PM ? (
-                        <FormGroup>
-                          <label>PRÉPARATION MILITAIRE</label>
-                          <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
-                            <option key="false" value="false">
-                              Non
-                            </option>
-                            <option key="true" value="true">
-                              Oui
-                            </option>
-                          </Field>
-                        </FormGroup>
-                      ) : null}
                     </>
                   )}
+                  {ENABLE_PM && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
+                    <FormGroup>
+                      <label>PRÉPARATION MILITAIRE</label>
+                      <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
+                        <option key="false" value="false">
+                          Non
+                        </option>
+                        <option key="true" value="true">
+                          Oui
+                        </option>
+                      </Field>
+                    </FormGroup>
+                  ) : null}
                 </Wrapper>
               </Col>
               <Col md={6}>

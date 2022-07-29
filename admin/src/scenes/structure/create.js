@@ -10,7 +10,7 @@ import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { Box, BoxTitle } from "../../components/box";
-import { translate, ROLES, SENDINBLUE_TEMPLATES, legalStatus, typesStructure, sousTypesStructure } from "../../utils";
+import { translate, ROLES, SENDINBLUE_TEMPLATES, legalStatus, typesStructure, sousTypesStructure, ENABLE_PM } from "../../utils";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 
@@ -53,6 +53,7 @@ export default function Create() {
         twitter: "",
         instagram: "",
         legalStatus: "",
+        isMilitaryPreparation: "false",
       }}
       onSubmit={async (values) => {
         try {
@@ -312,6 +313,19 @@ export default function Create() {
                         </Field>
                       </div>
                     )}
+                    {ENABLE_PM && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
+                      <FormGroup>
+                        <label>PRÉPARATION MILITAIRE</label>
+                        <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
+                          <option key="false" value="false">
+                            Non
+                          </option>
+                          <option key="true" value="true">
+                            Oui
+                          </option>
+                        </Field>
+                      </FormGroup>
+                    ) : null}
                   </FormGroup>
                 </Wrapper>
               </Col>
