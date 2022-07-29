@@ -136,6 +136,20 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       checkedMission.status = "WAITING_VALIDATION";
     }
 
+    // Si le nombre total de places a changé, on vérifie s'il y a lieu de fermer ou de rouvrir la mission aux candidatures.
+    if (checkedMission.placesTotal !== mission.placesTotal) {
+      const placesLeft = Math.max(0, checkedMission.placesTotal - checkedMission.placesTaken);
+      if (placesLeft < 1) {
+        mission.set({ visibility: "HIDDEN" });
+      } else {
+        const pendingApplications = await ApplicationObject.countDocuments(
+          { missionId: mission._id },
+          { status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION", "WAITING_ACCEPTATION"] } },
+        );
+        mission.set({ visibility: pendingApplications >= placesLeft * 5 ? "HIDDEN" : "VISIBLE" });
+      }
+    }
+
     const oldStatus = mission.status;
     mission.set(checkedMission);
     await mission.save({ fromUser: req.user });

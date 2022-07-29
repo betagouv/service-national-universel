@@ -46,11 +46,15 @@ async function updateMission(app, fromUser) {
     }
 
     // On met à jour la visibilité de la mission en fonction du nb de candidatures en attente et de places restantes.
-    const pendingApplications = await ApplicationObject.countDocuments(
-      { missionId: mission._id },
-      { status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION", "WAITING_ACCEPTATION"] } },
-    );
-    mission.set({ visibility: pendingApplications >= placesLeft * 5 ? "HIDDEN" : "VISIBLE" });
+    if (mission.placesLeft < 1) {
+      mission.set({ visibility: "HIDDEN" });
+    } else {
+      const pendingApplications = await ApplicationObject.countDocuments(
+        { missionId: mission._id },
+        { status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION", "WAITING_ACCEPTATION"] } },
+      );
+      mission.set({ visibility: pendingApplications >= placesLeft * 5 ? "HIDDEN" : "VISIBLE" });
+    }
 
     await mission.save({ fromUser });
   } catch (e) {
