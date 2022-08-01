@@ -1,3 +1,41 @@
+## [1.119.1](https://github.com/betagouv/service-national-universel/compare/v1.119.0...v1.119.1) (2022-07-29)
+
+
+### Bug Fixes
+
+* **admin:** Ajout champs PM pour structure/mission personnalisée ([#1712](https://github.com/betagouv/service-national-universel/issues/1712)) ([5641f6d](https://github.com/betagouv/service-national-universel/commit/5641f6db9296b7a748caeecf529f807d86e7ff25))
+* **admin:** erreur creation tuteur si il existe deja ([#1711](https://github.com/betagouv/service-national-universel/issues/1711)) ([ce14ed5](https://github.com/betagouv/service-national-universel/commit/ce14ed5019710d5e546e3b4b65241bd58188b7ea))
+* **admin:** process mission personnalisé ([#1707](https://github.com/betagouv/service-national-universel/issues/1707)) ([82b6bc2](https://github.com/betagouv/service-national-universel/commit/82b6bc23cb62c21895a4b65590f428ddf5e9749a))
+* **api:** template 341 add all referent to email ([#1709](https://github.com/betagouv/service-national-universel/issues/1709)) ([0175ccb](https://github.com/betagouv/service-national-universel/commit/0175ccb9787a2d0fa73d037c73d44d3571e2dc1b))
+* **app:** notif referent PM ([#1713](https://github.com/betagouv/service-national-universel/issues/1713)) ([a4caaff](https://github.com/betagouv/service-national-universel/commit/a4caaff889d54271d0c5600776f146c677d5d029))
+
+# [1.119.0](https://github.com/betagouv/service-national-universel/compare/v1.118.0...v1.119.0) (2022-07-28)
+
+
+### Bug Fixes
+
+* **admin:** Fix toastr message for linked_mission ([ca125b3](https://github.com/betagouv/service-national-universel/commit/ca125b3a996165ad229d8829452eef431f830870))
+* **app:** échec recherche de mission si pas de location ([#1708](https://github.com/betagouv/service-national-universel/issues/1708)) ([c7cb4ef](https://github.com/betagouv/service-national-universel/commit/c7cb4ef49acc375a550c65f3fc7343558367d3f5))
+
+
+### Features
+
+* **admin:** Rajouter lien BDC sur la toolbox ([2ad3d5b](https://github.com/betagouv/service-national-universel/commit/2ad3d5b39a3e8ab82bd03ff82d4b2f149ab9d39d))
+
+# [1.118.0](https://github.com/betagouv/service-national-universel/compare/v1.117.0...v1.118.0) (2022-07-27)
+
+
+### Bug Fixes
+
+* **admin:** Fermeture de mission à la candidature ([#1703](https://github.com/betagouv/service-national-universel/issues/1703)) ([7b7d9c4](https://github.com/betagouv/service-national-universel/commit/7b7d9c48e73ce1221f34ff20e96e26fdc6f22455))
+* **api:** Communication à destination de plusieurs référents phase 2 ([#1705](https://github.com/betagouv/service-national-universel/issues/1705)) ([cb3fd0f](https://github.com/betagouv/service-national-universel/commit/cb3fd0ff843c954d04f11391d3f72f52ddaf4ee2))
+* **app/admin:** disabled template 201 - 228 SIB ([#1702](https://github.com/betagouv/service-national-universel/issues/1702)) ([403ee5b](https://github.com/betagouv/service-national-universel/commit/403ee5bd25e9e40eb55a1268cb169e8fdb823de5))
+
+
+### Features
+
+* **pdf:** Branch to sentry ([#1696](https://github.com/betagouv/service-national-universel/issues/1696)) ([1dcddf9](https://github.com/betagouv/service-national-universel/commit/1dcddf9e163100c1d6080d1fe88842eef99c2dac))
+
 # [1.117.0](https://github.com/betagouv/service-national-universel/compare/v1.116.0...v1.117.0) (2022-07-26)
 
 

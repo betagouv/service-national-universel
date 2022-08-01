@@ -122,7 +122,7 @@ export default function Youngs({ mission, applications, updateApplications }) {
                         "Candidature créée lé": formatLongDateUTC(data.createdAt),
                         "Candidature mise à jour le": formatLongDateUTC(data.updatedAt),
                         "Statut de la candidature": translate(data.status),
-                        "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option].length, 0) !== 0}`),
+                        "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option]?.length, 0) !== 0}`),
                       };
                     });
                   }}
@@ -300,39 +300,6 @@ const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType }) => {
                 });
               }}>
               ✉️ Renvoyer un mail à la structure
-            </CopyLink>
-            <ModalConfirm
-              isOpen={modal?.isOpen}
-              title={modal?.title}
-              message={modal?.message}
-              onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-              onConfirm={() => {
-                modal?.onConfirm();
-                setModal({ isOpen: false, onConfirm: null });
-              }}
-            />
-          </React.Fragment>
-        )}
-        {hit.status === "WAITING_VERIFICATION" && (
-          <React.Fragment>
-            <CopyLink
-              onClick={async () => {
-                setModal({
-                  isOpen: true,
-                  title: "Envoyer un rappel",
-                  message: "Souhaitez-vous envoyer un mail au volontaire pour lui rappeler de remplir les documents pour la préparation militaire ?",
-                  onConfirm: async () => {
-                    try {
-                      const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER_RENOTIFY}`);
-                      if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                      toastr.success("L'email a bien été envoyé");
-                    } catch (e) {
-                      toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                    }
-                  },
-                });
-              }}>
-              ✉️ Envoyer un rappel au volontaire
             </CopyLink>
             <ModalConfirm
               isOpen={modal?.isOpen}

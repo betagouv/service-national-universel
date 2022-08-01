@@ -70,7 +70,7 @@ export default function Index({ ...props }) {
       <Switch>
         <SentryRoute path="/mission/:id/youngs" component={() => <Youngs mission={mission} applications={applications} updateApplications={fetchApplication} />} />
         <SentryRoute path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
-        <SentryRoute path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} />} />
+        {mission.visibility === "VISIBLE" && <SentryRoute path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} />} />}
         <SentryRoute path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />
       </Switch>
     </>

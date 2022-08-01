@@ -6,6 +6,7 @@ import AdjustableWrench from "../../../assets/icons/AdjustableWrench";
 import ProposalMission from "../view/proposalMission";
 import CreateMission from "../view/createMission";
 import { useHistory } from "react-router-dom";
+import { supportURL } from "../../../config";
 
 export default function Toolbox({ young }) {
   const [openProposalMission, setOpenProposalMission] = React.useState(false);
@@ -22,6 +23,13 @@ export default function Toolbox({ young }) {
             <div className="flex flex-col gap-2 flex-1">
               <div className="text-lg font-bold">Proposer une mission existante</div>
               <div className="text-gray-600">Trouvez une mission existante et proposez-là au volontaire.</div>
+              <a
+                className="text-gray-500 underline cursor-pointer"
+                href={`${supportURL}/base-de-connaissance/je-propose-une-mission-a-un-volontaire`}
+                target="_blank"
+                rel="noopener noreferrer">
+                En savoir plus.
+              </a>
             </div>
           </div>
           <button
@@ -40,6 +48,13 @@ export default function Toolbox({ young }) {
             <div className="flex flex-col gap-2 flex-1">
               <div className="text-lg font-bold">Déclarer une équivalence MIG</div>
               <div className="text-gray-600">Reconnaissez l’engagement externe du volontaire comme équivalence MIG.</div>
+              <a
+                className="text-gray-500 underline cursor-pointer"
+                href={`${supportURL}/base-de-connaissance/valider-ou-declarer-une-equivalence-mig`}
+                target="_blank"
+                rel="noopener noreferrer">
+                En savoir plus.
+              </a>
             </div>
           </div>
           <button
@@ -54,6 +69,13 @@ export default function Toolbox({ young }) {
             <div className="flex flex-col gap-2 flex-1">
               <div className="text-lg font-bold">Créer une mission personnalisée</div>
               <div className="text-gray-600">Renseignez une mission non existante pour le volontaire.</div>
+              <a
+                className="text-gray-500 underline cursor-pointer"
+                href={`${supportURL}/base-de-connaissance/je-cree-une-mig-depuis-le-profil-dun-volontaire`}
+                target="_blank"
+                rel="noopener noreferrer">
+                En savoir plus.
+              </a>
             </div>
           </div>
           <button

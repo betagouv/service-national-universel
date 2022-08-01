@@ -103,7 +103,7 @@ async function updateContract(id, data, fromUser) {
 }
 
 async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
-  const departmentReferentPhase2 = await ReferentObject.findOne({
+  const departmentReferentPhase2 = await ReferentObject.find({
     department: contract.youngDepartment,
     subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
   });
@@ -112,8 +112,10 @@ async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
     email: contract.projectManagerEmail,
     name: `${contract.projectManagerFirstName} ${contract.projectManagerLastName}`,
     token: contract.projectManagerToken,
-    cc: departmentReferentPhase2 ? departmentReferentPhase2.email : null,
-    ccName: departmentReferentPhase2 ? `${departmentReferentPhase2.firstName} ${departmentReferentPhase2.lastName}` : null,
+    cc: departmentReferentPhase2.map((referent) => ({
+      name: `${referent.firstName} ${referent.lastName}`,
+      email: referent.email,
+    })),
     isValidateAgainMail,
   });
 }
@@ -170,8 +172,8 @@ async function sendContractEmail(contract, options) {
     cta: `${APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
   };
   const emailTo = [{ name: options.name, email: options.email }];
-  if (options.cc) {
-    cc = [{ name: options.ccName, email: options.cc }];
+  if (options?.cc?.length) {
+    cc = options.cc;
   }
   await sendTemplate(template, {
     emailTo,

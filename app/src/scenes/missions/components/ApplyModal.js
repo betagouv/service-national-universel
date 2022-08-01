@@ -46,21 +46,22 @@ export default function ApplyModal({ value, onChange, onSend, onCancel }) {
       }
     }
     try {
+      let needPMnotif = false;
       const { ok, data, code } = await api.post(`/application`, application);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
       const responseNotification = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
       if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
       if (ENABLE_PM && value.isMilitaryPreparation === "true") {
         if (!["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+          needPMnotif = true;
           const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
           if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
           else dispatch(setYoung(responseChangeStatsPM.data));
         }
-        const responseNotificationYoung = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER}`);
-        if (!responseNotificationYoung?.ok) return toastr.error(translate(responseNotificationYoung?.code), "Une erreur s'est produite avec le service de notification.");
-        if (young.statusMilitaryPreparationFiles === "WAITING_VALIDATION") {
+
+        if (needPMnotif || young.statusMilitaryPreparationFiles === "WAITING_VALIDATION") {
           const responseReminderReferent = await api.post(`/application/notify/docs-military-preparation/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED}`);
-          if (!responseReminderReferent?.ok) return toastr.error(translate(responseNotificationYoung?.code), "Une erreur s'est produite avec le service de notification.");
+          if (!responseReminderReferent?.ok) return toastr.error(translate(responseReminderReferent?.code), "Une erreur s'est produite avec le service de notification.");
         }
       }
     } catch (e) {
