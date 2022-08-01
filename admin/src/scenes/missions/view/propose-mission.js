@@ -143,7 +143,7 @@ const ResultBox = ({ getDefaultQuery, search, mission }) => {
     // On vérifie qu'il reste des places de candidature, sinon on redirige.
     try {
       const res = await api.get(`/mission/${mission._id}/`);
-      if (res.data.visibility === "HIDDEN") {
+      if (res.data.pendingApplications >= res.data.placesLeft * 5) {
         history.push(`/mission/${mission._id}`);
       }
     } catch (e) {
