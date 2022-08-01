@@ -37,23 +37,22 @@ const mime = require("mime-types");
 
 async function updateMission(app, fromUser) {
   try {
-    // Get all application for the mission
     const mission = await MissionObject.findById(app.missionId);
-    const placesTaken = await ApplicationObject.countDocuments({ missionId: mission._id }, { status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
+
+    // Get all applications for the mission
+    const placesTaken = await ApplicationObject.countDocuments({ missionId: mission._id, status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
     const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
     if (mission.placesLeft !== placesLeft) {
       mission.set({ placesLeft });
     }
 
-    // On met à jour la visibilité de la mission en fonction du nb de candidatures en attente et de places restantes.
-    if (mission.placesLeft < 1) {
-      mission.set({ visibility: "HIDDEN" });
-    } else {
-      const pendingApplications = await ApplicationObject.countDocuments(
-        { missionId: mission._id },
-        { status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION", "WAITING_ACCEPTATION"] } },
-      );
-      mission.set({ visibility: pendingApplications >= placesLeft * 5 ? "HIDDEN" : "VISIBLE" });
+    // On met à jour le nb de candidatures en attente.
+    const pendingApplications = await ApplicationObject.countDocuments({
+      missionId: mission._id,
+      status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION", "WAITING_ACCEPTATION"] },
+    });
+    if (mission.pendingApplications !== pendingApplications) {
+      mission.set({ pendingApplications });
     }
 
     await mission.save({ fromUser });

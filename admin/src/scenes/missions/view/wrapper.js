@@ -14,6 +14,7 @@ import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import Badge from "../../../components/Badge";
 import Title from "../../../components/views/Title";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 
 export default function Wrapper({ mission, tab, children }) {
   const history = useHistory();
@@ -67,9 +68,12 @@ export default function Wrapper({ mission, tab, children }) {
               Détails
             </Tab>
             <Tab isActive={tab === "youngs"} onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
+              {mission.pendingApplications >= mission.placesLeft * 5 && <ExclamationCircle className="text-red-600 mb-1 mr-2 inline-block" />}
               Candidatures
             </Tab>
-            {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && mission.visibility === "VISIBLE" ? (
+            {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) &&
+            mission.visibility === "VISIBLE" &&
+            mission.pendingApplications < mission.placesLeft * 5 ? (
               <Tab isActive={tab === "propose-mission"} onClick={() => history.push(`/mission/${mission._id}/propose-mission`)}>
                 Proposer cette mission
               </Tab>

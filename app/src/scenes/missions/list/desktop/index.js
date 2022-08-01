@@ -623,13 +623,15 @@ export default function List() {
                 return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
               }}
               render={({ data }) => {
-                return data.map((e) => {
-                  const tags = [];
-                  e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
-                  // tags.push(e.remote ? "À distance" : "En présentiel");
-                  e.domains.forEach((d) => tags.push(translate(d)));
-                  return <CardMission key={e._id} mission={e} />;
-                });
+                return data
+                  .filter((m) => m.pendingApplications < m.placesLeft * 5)
+                  .map((e) => {
+                    const tags = [];
+                    e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
+                    // tags.push(e.remote ? "À distance" : "En présentiel");
+                    e.domains.forEach((d) => tags.push(translate(d)));
+                    return <CardMission key={e._id} mission={e} />;
+                  });
               }}
               renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
             />

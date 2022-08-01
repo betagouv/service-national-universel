@@ -36,7 +36,6 @@ export default function Edit(props) {
   const [structure, setStructure] = useState();
   const [structures, setStructures] = useState();
   const [referents, setReferents] = useState([]);
-  const [pendingApplications, setPendingApplications] = useState([]);
   const [showTutor, setShowTutor] = useState();
   const [invited, setInvited] = useState();
   const [isJvaMission, setIsJvaMission] = useState(false);
@@ -58,19 +57,6 @@ export default function Edit(props) {
     setDocumentTitle(`${data.name}`);
     setDefaultValue(data);
     setIsJvaMission(data.isJvaMission === "true");
-  }
-
-  async function initApplications() {
-    // On va chercher le nb de candidatures actives.
-    const id = props.match && props.match.params && props.match.params.id;
-    try {
-      const res = await api.get(`/mission/${id}/application`);
-      const count = res.data.filter((obj) => obj.status.includes("WAITING")).length;
-      setPendingApplications(count);
-    } catch (e) {
-      console.error(e);
-      toastr.error("Impossible de trouver les candidatures associés à cette mission.");
-    }
   }
 
   async function initReferents() {
@@ -136,7 +122,6 @@ export default function Edit(props) {
   useEffect(() => {
     initMission();
     initStructures();
-    initApplications();
   }, []);
   useEffect(() => {
     initStructure();
@@ -283,7 +268,21 @@ export default function Edit(props) {
                         <label className="uppercase">
                           <span>*</span>visibilité pour les candidats
                         </label>
-                        {values.placesLeft > 0 && pendingApplications >= values.placesLeft * 5 ? (
+
+                        {values.placesLeft < 1 ? (
+                          // Si les places sont toutes attribuées, on l'indique.
+                          <div className="flex items-center">
+                            <div className={"flex items-center w-9 h-4 rounded-full bg-gray-300"}>
+                              <div className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] shadow-nina`}>
+                                <HiOutlineLockClosed className="text-gray-400" width={10} height={10} />
+                              </div>
+                            </div>
+                            <div className="ml-2">
+                              La mission est <strong>fermée</strong> aux candidatures. Toutes les places sont attribuées.
+                            </div>
+                          </div>
+                        ) : values.pendingApplications >= values.placesLeft * 5 ? (
+                          // Si il y a trop de candidatures en attente, on l'indique.
                           <div className="flex items-center">
                             <div className={"flex items-center w-9 h-4 rounded-full bg-gray-300"}>
                               <div className={`flex justify-center items-center h-5 w-5 rounded-full border-[1px] border-gray-200 bg-[#ffffff] shadow-nina`}>
@@ -299,10 +298,11 @@ export default function Edit(props) {
                             </div>
                           </div>
                         ) : values.visibility == "VISIBLE" ? (
+                          // Toggle de visibilité
                           <div className="flex items-center">
                             <div
                               onClick={() => {
-                                handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDDEN" : "VISIBLE", name: "visibility" } });
+                                handleChange({ target: { value: "HIDDEN", name: "visibility" } });
                               }}
                               name="visibility"
                               className="flex items-center w-9 h-4 rounded-full bg-blue-600 cursor-pointer transition duration-100 ease-in">
@@ -318,7 +318,7 @@ export default function Edit(props) {
                           <div className="flex items-center">
                             <div
                               onClick={() => {
-                                handleChange({ target: { value: values.visibility === "VISIBLE" ? "HIDDEN" : "VISIBLE", name: "visibility" } });
+                                handleChange({ target: { value: "VISIBLE", name: "visibility" } });
                               }}
                               name="visibility"
                               className="flex items-center w-9 h-4 rounded-full bg-red-500 cursor-pointer transition duration-100 ease-in">
