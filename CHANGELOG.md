@@ -1,3 +1,10 @@
+## [1.119.2](https://github.com/betagouv/service-national-universel/compare/v1.119.1...v1.119.2) (2022-08-01)
+
+
+### Bug Fixes
+
+* **admin:** canCreateOrModifyMission for responsible ([a4d890e](https://github.com/betagouv/service-national-universel/commit/a4d890ea306e7c22ec68163a261b0d1546779a1d))
+
 ## [1.119.1](https://github.com/betagouv/service-national-universel/compare/v1.119.0...v1.119.1) (2022-07-29)
 
 
