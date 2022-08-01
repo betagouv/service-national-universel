@@ -71,12 +71,16 @@ export default function Wrapper({ mission, tab, children }) {
               {mission.pendingApplications >= mission.placesLeft * 5 && <ExclamationCircle className="text-red-600 mb-1 mr-2 inline-block" />}
               Candidatures
             </Tab>
-            {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) &&
-            mission.visibility === "VISIBLE" &&
-            mission.pendingApplications < mission.placesLeft * 5 ? (
-              <Tab isActive={tab === "propose-mission"} onClick={() => history.push(`/mission/${mission._id}/propose-mission`)}>
-                Proposer cette mission
-              </Tab>
+            {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
+              mission.visibility === "HIDDEN" || mission.pendingApplications >= mission.placesLeft * 5 ? (
+                <Tab isActive={tab === "propose-mission"} disabled>
+                  Proposer cette mission
+                </Tab>
+              ) : (
+                <Tab isActive={tab === "propose-mission"} onClick={() => history.push(`/mission/${mission._id}/propose-mission`)}>
+                  Proposer cette mission
+                </Tab>
+              )
             ) : null}
             {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
               <Tab isActive={tab === "historique"} onClick={() => history.push(`/mission/${mission._id}/historique`)}>
