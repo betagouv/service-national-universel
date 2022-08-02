@@ -323,6 +323,12 @@ const Schema = new mongoose.Schema({
       description: "Date de dernière connexion",
     },
   },
+  nextLoginAttemptIn: {
+    type: Date,
+    documentation: {
+      description: "Date pour autoriser la prochaine tentative de connexion",
+    },
+  },
   forgotPasswordResetToken: {
     type: String,
     default: "",
@@ -1528,12 +1534,32 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
-  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/phase3Token", "/loginAttempts"],
+  excludes: [
+    "/password",
+    "/lastLoginAt",
+    "/nextLoginAttemptIn",
+    "/forgotPasswordResetToken",
+    "/forgotPasswordResetExpires",
+    "/invitationToken",
+    "/invitationExpires",
+    "/phase3Token",
+    "/loginAttempts",
+  ],
 });
 
 Schema.plugin(
   mongooseElastic(esClient, {
-    ignore: ["historic", "missionsInMail", "password", "forgotPasswordResetToken", "forgotPasswordResetExpires", "invitationExpires", "phase3Token", "loginAttempts"],
+    ignore: [
+      "historic",
+      "missionsInMail",
+      "password",
+      "nextLoginAttemptIn",
+      "forgotPasswordResetToken",
+      "forgotPasswordResetExpires",
+      "invitationExpires",
+      "phase3Token",
+      "loginAttempts",
+    ],
   }),
   MODELNAME,
 );
