@@ -112,12 +112,25 @@ class Auth {
     try {
       const user = await this.model.findOne({ email });
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
-      if (user.loginAttempts > 15) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
+      if (user.loginAttempts > 25) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
 
-      const match = config.ENVIRONMENT === "development" || (await user.comparePassword(password));
+      const match = await user.comparePassword(password);
       if (!match) {
+        const now = new Date();
+
+        console.log({ user });
+
+        if (user.loginAttempts > 5 && user.nextLoginAttemptIn > now) {
+          return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
+        }
         const loginAttempts = (user.loginAttempts || 0) + 1;
-        user.set({ loginAttempts });
+
+        let date = now;
+        if (loginAttempts > 5) {
+          date = new Date(now.getTime() + loginAttempts * 60 * 1000);
+        }
+
+        user.set({ loginAttempts, nextLoginAttemptIn: date });
         await user.save();
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }

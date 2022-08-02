@@ -90,7 +90,7 @@ export default function Signin() {
                 {tooManyRequests && (
                   <div className="mb-[20px]">
                     <div className="w-full block p-[15px] mt-[3px] text-[#c73738] bg-[#fff5f5] rounded-[5px] leading-tight border-[1px] border-[#fc8180]">
-                      Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure.{" "}
+                      Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez demain.{" "}
                     </div>
                   </div>
                 )}
