@@ -181,7 +181,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  // ! Deprecated
   tutorName: {
     type: String,
     documentation: {

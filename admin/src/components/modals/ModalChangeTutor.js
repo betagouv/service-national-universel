@@ -171,7 +171,7 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
                         label: r.firstName + " " + r.lastName,
                         onSubmit: async () => {
                           for (const mission of missionsSelected) {
-                            const { ok, code } = await api.put(`/mission/${mission._id}`, { ...mission, tutorId: r._id });
+                            const { ok, code } = await api.put(`/mission/${mission._id}`, { ...mission, tutorId: r._id, tutorName: r.firstName + " " + r.lastName });
                             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
                           }
                           setModalConfirmationReattributionTutor({
@@ -246,8 +246,8 @@ const Line = ({ hit, opened, onSelect, onChange, selected, responsables }) => {
   const mainTextColor = selected ? "text-white" : "text-[#242526]";
   const secondTextColor = selected ? "text-blue-100" : "text-[#738297]";
 
-  const onSubmit = async (newValue) => {
-    const { ok, code } = await api.put(`/mission/${hit._id}`, { ...hit, tutorId: newValue });
+  const onSubmit = async (id, name) => {
+    const { ok, code } = await api.put(`/mission/${hit._id}`, { ...hit, tutorId: id, tutorName: name });
     if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
     await onChange();
@@ -307,7 +307,7 @@ const Line = ({ hit, opened, onSelect, onChange, selected, responsables }) => {
         title={`Réattribution de la mission ${hit.name}`}
         message={`Veuillez confirmer la réattribution à ${modalConfirmationReattributionTutor.label}.`}
         onChange={() => setModalConfirmationReattributionTutor({ isOpen: false, onConfirm: null })}
-        onConfirm={() => onSubmit(modalConfirmationReattributionTutor.value)}
+        onConfirm={() => onSubmit(modalConfirmationReattributionTutor.value, modalConfirmationReattributionTutor.label)}
       />
     </>
   );
