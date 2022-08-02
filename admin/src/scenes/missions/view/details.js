@@ -27,14 +27,32 @@ export default function DetailsView({ mission, structure, tutor }) {
           <Row style={rowStyle}>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7", padding: 0 }}>
               <Bloc title="La mission">
+                {/* Message sur le statut des candidatures de la mission. */}
                 {mission.visibility === "HIDDEN" ? (
                   <div className="flex flex-row items-center gap-2">
                     <VscWarning className="w-6 h-6 text-red-500" />
                     <div>
-                      La mission est <strong>fermée</strong> aux candidatures
+                      La mission est <strong>fermée</strong> aux candidatures par l&apos;action d&apos;un administrateur.
                     </div>
                   </div>
                 ) : null}
+                {mission.placesLeft < 1 ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <VscWarning className="w-6 h-6 text-red-500" />
+                    <div>
+                      La mission est <strong>fermée</strong> aux candidatures de manière automatique : aucune place disponible.
+                    </div>
+                  </div>
+                ) : null}
+                {mission.pendingApplications < mission.placesLeft * 5 ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <VscWarning className="w-6 h-6 text-red-500" />
+                    <div>
+                      La mission est <strong>fermée</strong> aux candidatures : trop de candidatures en attente.
+                    </div>
+                  </div>
+                ) : null}
+
                 <Details title="Format" value={translate(mission.format)} />
                 {mission.mainDomain ? <Details title="Domaine principal" value={translate(mission.mainDomain)} /> : null}
                 {mission.domains ? <Details title="Domaine(s)" value={domains.map((d) => translate(d)).join(", ")} /> : null}
