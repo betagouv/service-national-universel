@@ -180,6 +180,8 @@ const Schema = new mongoose.Schema({
       description: "Identifiant de l'utilisateur tuteur de la mission",
     },
   },
+
+  // ! Deprecated
   tutorName: {
     type: String,
     documentation: {
