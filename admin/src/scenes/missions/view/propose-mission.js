@@ -17,7 +17,7 @@ import PinLocation from "../../../assets/PinLocation";
 
 const FILTERS = ["SEARCH"];
 
-export default function ProposeMission({ mission }) {
+export default function ProposeMission({ mission, updateMission }) {
   const user = useSelector((state) => state.Auth.user);
 
   const [search, setSearch] = useState(undefined);
@@ -55,7 +55,7 @@ export default function ProposeMission({ mission }) {
           ) : (
             <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
               <SearchBox getDefaultQuery={getDefaultQuery} setSearch={setSearch} />
-              <ResultBox getDefaultQuery={getDefaultQuery} search={search} mission={mission} />
+              <ResultBox getDefaultQuery={getDefaultQuery} search={search} mission={mission} updateMission={updateMission} />
             </ReactiveBase>
           )}
         </div>
@@ -91,7 +91,7 @@ const SearchBox = ({ getDefaultQuery, setSearch }) => {
   );
 };
 
-const ResultBox = ({ getDefaultQuery, search, mission }) => {
+const ResultBox = ({ getDefaultQuery, search, mission, updateMission }) => {
   const [applicationsToTheMission, setApplicationsToTheMission] = useState([]);
   const history = useHistory();
 
@@ -140,6 +140,7 @@ const ResultBox = ({ getDefaultQuery, search, mission }) => {
     toastr.success("Email envoyé !");
     await getApplicationsToTheMission();
 
+    updateMission();
     // On vérifie qu'il reste des places de candidature, sinon on redirige.
     try {
       const res = await api.get(`/mission/${mission._id}/`);
