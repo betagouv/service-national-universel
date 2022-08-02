@@ -11,6 +11,7 @@ import Panel, { Info, Details } from "../../components/Panel";
 import styled from "styled-components";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import plausibleEvent from "../../services/pausible";
+import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 
 export default function UserPanel({ onChange, value }) {
   if (!value) return <div />;
@@ -22,6 +23,7 @@ export default function UserPanel({ onChange, value }) {
   const dispatch = useDispatch();
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
 
   useEffect(() => {
     setStructure(null);
@@ -95,11 +97,19 @@ export default function UserPanel({ onChange, value }) {
     });
   };
 
+  const onDeleteTutorLinked = (target) => {
+    setModalTutor({
+      isOpen: true,
+      value: target,
+      onConfirm: () => onConfirmDelete(target),
+    });
+  };
+
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${value._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_MISSIONS") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
+      if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(value);
       if (!ok && code === "LINKED_STRUCTURE") return toastr.error(translate(code), "Ce responsable est le dernier responsable de la structure.");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");
@@ -222,6 +232,17 @@ export default function UserPanel({ onChange, value }) {
         onConfirm={() => {
           modal?.onConfirm();
           setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalChangeTutor
+        isOpen={modalTutor?.isOpen}
+        title={modalTutor?.title}
+        message={modalTutor?.message}
+        tutor={modalTutor?.value}
+        onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modalTutor?.onConfirm();
+          setModalTutor({ isOpen: false, onConfirm: null });
         }}
       />
     </Panel>

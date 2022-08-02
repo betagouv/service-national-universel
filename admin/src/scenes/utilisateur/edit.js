@@ -38,6 +38,7 @@ import {
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { MdOutlineOpenInNew } from "react-icons/md";
 import Badge from "../../components/Badge";
+import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Utilisateurs");
@@ -48,6 +49,7 @@ export default function Edit(props) {
   const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
   const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -157,11 +159,19 @@ export default function Edit(props) {
     });
   };
 
+  const onDeleteTutorLinked = (target) => {
+    setModalTutor({
+      isOpen: true,
+      value: target,
+      onConfirm: () => onConfirmDelete(target),
+    });
+  };
+
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${user._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_MISSIONS") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
+      if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(user);
       if (!ok && code === "LINKED_STRUCTURE") return toastr.error(translate(code), "Ce responsable est le dernier responsable de la structure.");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");
@@ -386,6 +396,17 @@ export default function Edit(props) {
           }}
         />
       </div>
+      <ModalChangeTutor
+        isOpen={modalTutor?.isOpen}
+        title={modalTutor?.title}
+        message={modalTutor?.message}
+        tutor={modalTutor?.value}
+        onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modalTutor?.onConfirm();
+          setModalTutor({ isOpen: false, onConfirm: null });
+        }}
+      />
     </>
   );
 }
