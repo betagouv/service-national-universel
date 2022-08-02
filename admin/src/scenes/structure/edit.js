@@ -26,7 +26,7 @@ export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Structures");
   const [defaultValue, setDefaultValue] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const [modalTutor, setModalTutor] = useState({ isOpen: true, onConfirm: null });
+  const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const [networks, setNetworks] = useState([]);
   const [referents, setReferents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -46,6 +46,7 @@ export default function Edit(props) {
     console.log("🚀 ~ file: edit.js ~ line 46 ~ onDeleteTutorLinked ~ target", target);
     setModalTutor({
       isOpen: true,
+      value: target,
       onConfirm: () => onConfirmDelete(target),
     });
   };
@@ -438,6 +439,7 @@ export default function Edit(props) {
             isOpen={modalTutor?.isOpen}
             title={modalTutor?.title}
             message={modalTutor?.message}
+            tutor={modalTutor?.value}
             onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
             onConfirm={() => {
               modalTutor?.onConfirm();
