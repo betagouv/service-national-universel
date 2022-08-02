@@ -68,8 +68,10 @@ export default function Wrapper({ mission, tab, children }) {
               Détails
             </Tab>
             <Tab isActive={tab === "youngs"} onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
-              {mission.pendingApplications >= mission.placesLeft * 5 && !mission.placesLeft < 1 && <ExclamationCircle className="text-red-600 mb-1 mr-2 inline-block" />}
-              Candidatures
+              <div className="flex items-center flex-nowrap">
+                {mission.pendingApplications >= mission.placesLeft * 5 && mission.placesLeft > 0 && <ExclamationCircle className="text-red-600 mr-2" />}
+                <span>Candidatures</span>
+              </div>
             </Tab>
             {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
               mission.visibility === "HIDDEN" || mission.pendingApplications >= mission.placesLeft * 5 || mission.placesLeft < 1 ? (
