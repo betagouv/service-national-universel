@@ -107,6 +107,13 @@ const Schema = new mongoose.Schema({
       description: "Nombre de places encore disponibles pour cette mission",
     },
   }, // OK
+  pendingApplications: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Le nombre de candidatures en attente.",
+    },
+  },
 
   actions: {
     type: String,
