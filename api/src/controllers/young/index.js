@@ -176,14 +176,21 @@ router.post(
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+
+        // On génère un UUID pour remplacer le nom du fichier.
+        const uuid = crypto.randomUUID();
+
         if (militaryKeys.includes(key)) {
-          await uploadFile(`app/young/${user._id}/military-preparation/${key}/${name}`, resultingFile);
+          await uploadFile(`app/young/${user._id}/military-preparation/${key}/${uuid}`, resultingFile);
         } else {
-          await uploadFile(`app/young/${user._id}/${key}/${name}`, resultingFile);
+          await uploadFile(`app/young/${user._id}/${key}/${uuid}`, resultingFile);
+
+          // On enregistre en db l'uuid et le nom d'origine du fichier.
+          user.set({ [key]: { name: uuid } });
         }
         fs.unlinkSync(tempFilePath);
       }
-      user.set({ [key]: names });
+      // user.set({ [key]: names });
       await user.save({ fromUser: req.user });
 
       return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
@@ -1015,7 +1022,7 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (req.user._id.toString() !== young._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
+    const downloaded = await getFile(`app/young/${youngId}/${key}/${young.key.fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
     let mimeFromFile = null;
