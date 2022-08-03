@@ -12,6 +12,8 @@ import styled from "styled-components";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import plausibleEvent from "../../services/pausible";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
+import ModalUniqueResponsable from "../../components/modals/ModalUniqueResponsable";
+import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 
 export default function UserPanel({ onChange, value }) {
   if (!value) return <div />;
@@ -24,6 +26,8 @@ export default function UserPanel({ onChange, value }) {
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
+  const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
   useEffect(() => {
     setStructure(null);
@@ -105,15 +109,27 @@ export default function UserPanel({ onChange, value }) {
     });
   };
 
+  const onUniqueResponsible = (target) => {
+    setModalUniqueResponsable({
+      isOpen: true,
+      responsable: target,
+    });
+  };
+
+  const onReferentDeleted = () => {
+    setModalReferentDeleted({
+      isOpen: true,
+    });
+  };
+
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${value._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_STRUCTURE") return toastr.error(translate(code), "Ce responsable est le dernier responsable de la structure.");
+      if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(value);
       if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(value);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce profil a été supprimé.");
-      return history.go(0);
+      return onReferentDeleted();
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
@@ -245,6 +261,12 @@ export default function UserPanel({ onChange, value }) {
           setModalTutor({ isOpen: false, onConfirm: null });
         }}
       />
+      <ModalUniqueResponsable
+        isOpen={modalUniqueResponsable?.isOpen}
+        responsable={modalUniqueResponsable?.responsable}
+        onConfirm={() => setModalUniqueResponsable({ isOpen: false })}
+      />
+      <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.go(0)} />
     </Panel>
   );
 }

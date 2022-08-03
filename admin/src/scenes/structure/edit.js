@@ -21,12 +21,14 @@ import { canDeleteReferent } from "snu-lib/roles";
 import DeleteBtnComponent from "./components/DeleteBtnComponent";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
+import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Structures");
   const [defaultValue, setDefaultValue] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
   const [networks, setNetworks] = useState([]);
   const [referents, setReferents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -50,6 +52,12 @@ export default function Edit(props) {
     });
   };
 
+  const onReferentDeleted = () => {
+    setModalReferentDeleted({
+      isOpen: true,
+    });
+  };
+
   const onConfirmDelete = async (target) => {
     try {
       const { ok, code } = await api.remove(`/referent/${target._id}`);
@@ -57,9 +65,9 @@ export default function Edit(props) {
       if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(target);
 
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce profil a été supprimé.");
       setReferents(referents.filter((referent) => referent._id !== target._id));
-      return true;
+
+      return onReferentDeleted();
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la suppression du profil :", translate(e.code));
@@ -443,6 +451,7 @@ export default function Edit(props) {
               setModalTutor({ isOpen: false, onConfirm: null });
             }}
           />
+          <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => setModalReferentDeleted({ isOpen: false })} />
         </Wrapper>
       )}
     </Formik>

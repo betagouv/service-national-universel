@@ -40,6 +40,7 @@ import { MdOutlineOpenInNew } from "react-icons/md";
 import Badge from "../../components/Badge";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalUniqueResponsable from "../../components/modals/ModalUniqueResponsable";
+import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Utilisateurs");
@@ -52,6 +53,7 @@ export default function Edit(props) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -176,6 +178,12 @@ export default function Edit(props) {
     });
   };
 
+  const onReferentDeleted = () => {
+    setModalReferentDeleted({
+      isOpen: true,
+    });
+  };
+
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${user._id}`);
@@ -183,8 +191,7 @@ export default function Edit(props) {
       if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(user);
       if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(user);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce profil a été supprimé.");
-      return history.push(`/user`);
+      return onReferentDeleted();
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
@@ -421,6 +428,7 @@ export default function Edit(props) {
         responsable={modalUniqueResponsable?.responsable}
         onConfirm={() => setModalUniqueResponsable({ isOpen: false })}
       />
+      <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.push("/user")} />
     </>
   );
 }
