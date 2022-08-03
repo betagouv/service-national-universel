@@ -1,3 +1,16 @@
+# [1.120.0](https://github.com/betagouv/service-national-universel/compare/v1.119.2...v1.120.0) (2022-08-03)
+
+
+### Bug Fixes
+
+* **api:** save updatedAt correctly ([#1717](https://github.com/betagouv/service-national-universel/issues/1717)) ([7b982e6](https://github.com/betagouv/service-national-universel/commit/7b982e66fa043cf0db4955362d364e7aa4e79af3))
+* **app:** message fermeture inscription ([5c2fe0d](https://github.com/betagouv/service-national-universel/commit/5c2fe0d49cde4f87309ccd2775621f680a9b249c))
+
+
+### Features
+
+* **pdf:** Add a way to generate pdf locally ([#1704](https://github.com/betagouv/service-national-universel/issues/1704)) ([97cf4bf](https://github.com/betagouv/service-national-universel/commit/97cf4bfede4b579a49995d3b886788fd95742ea0))
+
 ## [1.119.2](https://github.com/betagouv/service-national-universel/compare/v1.119.1...v1.119.2) (2022-08-01)
 
 
