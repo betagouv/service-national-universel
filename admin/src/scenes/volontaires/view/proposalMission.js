@@ -112,9 +112,11 @@ export default function xxxxxxx({ young, onSend }) {
                 render={({ data }) => (
                   <Table>
                     <tbody>
-                      {data.map((hit, i) => (
-                        <HitMission key={i} hit={hit} onSend={() => handleProposal(hit)} />
-                      ))}
+                      {data
+                        .filter((e) => e.pendingApplications < e.placesLeft * 5)
+                        .map((hit, i) => (
+                          <HitMission key={i} hit={hit} onSend={() => handleProposal(hit)} />
+                        ))}
                     </tbody>
                   </Table>
                 )}

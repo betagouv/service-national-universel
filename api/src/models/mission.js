@@ -107,6 +107,13 @@ const Schema = new mongoose.Schema({
       description: "Nombre de places encore disponibles pour cette mission",
     },
   }, // OK
+  pendingApplications: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Le nombre de candidatures en attente.",
+    },
+  },
 
   actions: {
     type: String,
@@ -292,6 +299,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
+  this.updatedAt = Date.now();
   next();
 });
 
