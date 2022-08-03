@@ -1517,6 +1517,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
+  this.updatedAt = Date.now();
   next();
 });
 

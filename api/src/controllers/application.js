@@ -70,19 +70,25 @@ const getReferentManagerPhase2 = async (department) => {
   });
   // if not found, get the referent_region manager_phase2
   if (!toReferent) {
-    toReferent = await ReferentObject.findOne({
-      subRole: SUB_ROLES.manager_phase2,
-      role: ROLES.REFERENT_REGION,
-      region: department2region[department],
-    });
+    toReferent = [];
+    toReferent.push(
+      await ReferentObject.findOne({
+        subRole: SUB_ROLES.manager_phase2,
+        role: ROLES.REFERENT_REGION,
+        region: department2region[department],
+      }),
+    );
   }
   // if not found, get the manager_department
   if (!toReferent) {
-    toReferent = await ReferentObject.findOne({
-      subRole: SUB_ROLES.manager_department,
-      role: ROLES.REFERENT_DEPARTMENT,
-      department,
-    });
+    toReferent = [];
+    toReferent.push(
+      await ReferentObject.findOne({
+        subRole: SUB_ROLES.manager_department,
+        role: ROLES.REFERENT_DEPARTMENT,
+        department,
+      }),
+    );
   }
   return toReferent;
 };

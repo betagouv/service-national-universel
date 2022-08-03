@@ -5,14 +5,7 @@ const getAppHelper = require("./helpers/app");
 const getNewMissionFixture = require("./fixtures/mission");
 const getNewStructureFixture = require("./fixtures/structure");
 const { dbConnect, dbClose } = require("./helpers/db");
-const {
-  getMissionsHelper,
-  getMissionByIdHelper,
-  deleteMissionByIdHelper,
-  createMissionHelper,
-  expectMissionToEqual,
-  notExisitingMissionId,
-} = require("./helpers/mission");
+const { getMissionsHelper, getMissionByIdHelper, deleteMissionByIdHelper, createMissionHelper, expectMissionToEqual, notExisitingMissionId } = require("./helpers/mission");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
 const { deleteStructureByIdHelper, createStructureHelper, expectStructureToEqual, notExistingStructureId } = require("./helpers/structure");
 const getNewReferentFixture = require("./fixtures/referent");
@@ -57,13 +50,13 @@ describe("Mission", () => {
       expect(res.statusCode).toEqual(404);
     });
     it("should return 403 if user can not update mission", async () => {
-      const mission = await createMissionHelper({ ...getNewMissionFixture(), department: "hop", region: "hop" });
+      const mission = await createMissionHelper({ ...getNewMissionFixture() });
       const passport = require("passport");
-      passport.user.role = ROLES.REFERENT_DEPARTMENT;
+      passport.user.role = ROLES.VISITOR;
       let res = await request(getAppHelper()).put("/mission/" + mission._id);
       expect(res.statusCode).toEqual(403);
 
-      passport.user.role = ROLES.REFERENT_REGION;
+      passport.user.role = ROLES.HEAD_CENTER;
       res = await request(getAppHelper()).put("/mission/" + mission._id);
       expect(res.statusCode).toEqual(403);
 
@@ -216,7 +209,7 @@ describe("Mission", () => {
           expect.objectContaining({
             ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/name", value: "MY NEW NAME" })]),
           }),
-        ])
+        ]),
       );
     });
   });
