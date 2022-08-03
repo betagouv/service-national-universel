@@ -5,7 +5,9 @@ const puppeteer = require("puppeteer");
 const bodyParser = require("body-parser");
 const { initSentry, capture } = require("./sentry");
 
-const { PORT: port } = require("./config.js");
+const fs = require("fs");
+
+const { PORT: port, GENERATE_LOCALLY } = require("./config.js");
 
 const app = express();
 
@@ -62,6 +64,11 @@ app.post("/render", async (req, res) => {
     );
     console.log(req.body.html);
     console.log(buffer);
+    if (GENERATE_LOCALLY)
+      fs.writeFileSync(
+        `generated/${new Date().toISOString()}_test.pdf`,
+        buffer
+      );
     res.contentType("application/pdf");
     res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
     res.set("Cache-Control", "public, max-age=1");
