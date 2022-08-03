@@ -19,6 +19,13 @@ export default function xxxxxxx({ young, onSend }) {
     return {
       query: {
         bool: {
+          must: [
+            {
+              script: {
+                script: "doc['pendingApplications'].value < doc['placesLeft'].value * 5",
+              },
+            },
+          ],
           filter: [
             {
               range: {
@@ -112,11 +119,9 @@ export default function xxxxxxx({ young, onSend }) {
                 render={({ data }) => (
                   <Table>
                     <tbody>
-                      {data
-                        .filter((e) => e.pendingApplications < e.placesLeft * 5)
-                        .map((hit, i) => (
-                          <HitMission key={i} hit={hit} onSend={() => handleProposal(hit)} />
-                        ))}
+                      {data.map((hit, i) => (
+                        <HitMission key={i} hit={hit} onSend={() => handleProposal(hit)} />
+                      ))}
                     </tbody>
                   </Table>
                 )}
