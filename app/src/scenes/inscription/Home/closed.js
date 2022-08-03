@@ -116,14 +116,14 @@ export default function Closed({ location }) {
           {/* Start Button Desktop View */}
           <div className="z-50  hidden md:block">
             <button disabled className="uppercase p-3 pr-4 mt-[3px] lg:mt-[2rem] text-white bg-[#acaaba] font-medium	text-base	cursor-not-allowed tracking-wider	rounded-full">
-              Inscriptions&nbsp;terminées
+              inscriptions à venir
             </button>
           </div>
         </div>
         <Container>
           <Text>
-            Les inscriptions sont malheureusement closes pour l&apos;<b>édition 2022</b>.<br /> Vous pouvez cependant nous laisser vos coordonnées pour être recontacté(e) par
-            l’administration lors de la prochaine campagne d&apos;inscription du SNU.
+            Envie de vivre le <strong>SNU</strong> ? Pour ne pas rater les prochaines éditions, laissez vos coordonnées pour être recontacté(e) par l’administration lors de
+            l’ouverture des inscriptions.
           </Text>
           <input
             type="email"
