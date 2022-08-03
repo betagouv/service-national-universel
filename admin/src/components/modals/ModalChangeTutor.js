@@ -104,10 +104,10 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
                     defaultQuery={getDefaultQuery}
                     dataField="name.keyword"
                     sortBy="asc"
-                    pagination={false}
-                    renderPagination={false}
-                    renderResultStats={() => null}
+                    pagination={true}
+                    paginationAt="bottom"
                     showTopResultStats={false}
+                    pageSize={50}
                     onData={async ({ rawData }) => {
                       if (rawData?.hits?.hits) setMissionsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, name: h._source.name })));
                     }}
