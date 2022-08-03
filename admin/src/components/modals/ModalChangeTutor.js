@@ -14,6 +14,7 @@ import { formatStringDateTimezoneUTC } from "snu-lib/date";
 import { toastr } from "react-redux-toastr";
 import SelectAction from "../../components/SelectAction";
 import CursorClick from "../../assets/icons/CursorClick";
+import { GrStatusGood } from "react-icons/gr";
 
 import ModalConfirm from "./ModalConfirm";
 
@@ -113,14 +114,21 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
                     render={({ data }) =>
                       Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissionsSelected, forceUpdate, missionsSelected, setModalConfirmationReattributionTutor)
                     }
-                    renderNoResults={() => <h1 className="text-center text-gray-600">Toutes les missions ont bien été redistribuées</h1>}
+                    renderNoResults={() => {
+                      return (
+                        <div className="flex gap-2 justify-center items-center">
+                          <GrStatusGood className="w-10 h-10" />
+                          <h1 className="text-center text-gray-600 font-normal">Toutes les missions ont bien été redistribuées</h1>
+                        </div>
+                      );
+                    }}
                   />
                 </ResultTable>
               </div>
             </div>
           </ReactiveBase>
         </Content>
-        <div className="flex gap-2 justify-center">
+        <div className="flex gap-2 justify-center mb-4">
           <ModalButton disabled={sending} onClick={onCancel || onChange}>
             {cancelText}
           </ModalButton>
@@ -197,12 +205,12 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
       <table className="w-full">
         <thead className="">
           <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-10">
-            <th className="py-3 pl-4">
-              <input ref={checkboxRef} className="cursor-pointer flex items-center justify-between mb-2" type="checkbox" onChange={onClickMainCheckBox} />
+            <th className="py-3 px-4">
+              <input ref={checkboxRef} className="cursor-pointer m-auto" type="checkbox" onChange={onClickMainCheckBox} />
             </th>
-            <th className="py-3 text-left pl-4">Mission</th>
-            <th className="py-3 text-left">Date</th>
-            <th className="py-3 text-left">Action</th>
+            <th className="py-3 pl-2 text-left">Mission</th>
+            <th className="py-3 pl-2 text-left">Date</th>
+            <th className="py-3 pl-2 text-left">Action</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
@@ -257,51 +265,49 @@ const Line = ({ hit, opened, onSelect, onChange, selected, responsables }) => {
   const responsablesOptions = responsables.map((e) => ({ label: `${e.firstName} ${e.lastName}`, value: e._id }));
 
   return (
-    <>
-      <tr className={`${!opened && "hover:!bg-gray-100"}`}>
-        <td className={`${bgColor} pl-4 ml-2 py-3 rounded-l-lg`}>
-          <div onClick={(e) => e.stopPropagation()}>
-            <input className="cursor-pointer" type="checkbox" checked={selected} onChange={() => onSelect(value)} />
-          </div>
-        </td>
-        <td className={`${bgColor} py-3 text-left pl-4`}>
-          <div>
-            <div className={`font-bold ${mainTextColor} text-[15px]`}>{`${hit.name}`}</div>
-            <div className={`font-normal text-xs ${secondTextColor}`}>{`${hit.structureName}`}</div>
-            <div className={`font-normal text-xs ${secondTextColor}`}>{`${hit.city || ""} • (${hit.department || ""})`}</div>
-          </div>
-        </td>
-        <td className={`${bgColor} py-3 text-left`}>
-          <div>
-            <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDateTimezoneUTC(hit.startAt)}
-          </div>
-          <div>
-            <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDateTimezoneUTC(hit.endAt)}
-          </div>
-        </td>
-        <td className={`${bgColor} rounded-r-lg text-left`}>
-          <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
-            <select
-              className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer`}
-              value={value.tutorId}
-              onChange={(e) => {
-                setModalConfirmationReattributionTutor({
-                  isOpen: true,
-                  value: e.target.value,
-                  label: e.target.options[e.target.options.selectedIndex].innerHTML,
-                });
-              }}
-              style={{ fontFamily: "Marianne" }}>
-              <option default key="" value="" />
-              {responsablesOptions.map((option, i) => (
-                <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </td>
-      </tr>
+    <tr className={`${!opened && "hover:!bg-gray-100"}`}>
+      <td className={`${bgColor} px-4 rounded-l-lg`}>
+        <div onClick={(e) => e.stopPropagation()}>
+          <input className="cursor-pointer m-auto" type="checkbox" checked={selected} onChange={() => onSelect(value)} />
+        </div>
+      </td>
+      <td className={`${bgColor} py-3 text-left`}>
+        <div>
+          <div className={`font-bold ${mainTextColor} text-[15px]`}>{`${hit.name}`}</div>
+          <div className={`font-normal text-xs ${secondTextColor}`}>{`${hit.structureName}`}</div>
+          <div className={`font-normal text-xs ${secondTextColor}`}>{`${hit.city || ""} • (${hit.department || ""})`}</div>
+        </div>
+      </td>
+      <td className={`${bgColor} py-3 text-left`}>
+        <div>
+          <span className={"text-[#cbd5e0] mr-1"}>Du</span> {formatStringDateTimezoneUTC(hit.startAt)}
+        </div>
+        <div>
+          <span className={"text-[#cbd5e0] mr-1"}>Au</span> {formatStringDateTimezoneUTC(hit.endAt)}
+        </div>
+      </td>
+      <td className={`${bgColor} rounded-r-lg text-left`}>
+        <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
+          <select
+            className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer`}
+            value={value.tutorId}
+            onChange={(e) => {
+              setModalConfirmationReattributionTutor({
+                isOpen: true,
+                value: e.target.value,
+                label: e.target.options[e.target.options.selectedIndex].innerHTML,
+              });
+            }}
+            style={{ fontFamily: "Marianne" }}>
+            <option default key="" value="" />
+            {responsablesOptions.map((option, i) => (
+              <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </td>
       <ModalConfirm
         isOpen={modalConfirmationReattributionTutor.isOpen}
         title={`Réattribution de la mission ${hit.name}`}
@@ -309,6 +315,6 @@ const Line = ({ hit, opened, onSelect, onChange, selected, responsables }) => {
         onChange={() => setModalConfirmationReattributionTutor({ isOpen: false, onConfirm: null })}
         onConfirm={() => onSubmit(modalConfirmationReattributionTutor.value, modalConfirmationReattributionTutor.label)}
       />
-    </>
+    </tr>
   );
 };
