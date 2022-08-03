@@ -928,8 +928,8 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     const referents = await ReferentModel.find({ structureId: referent.structureId });
     const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
-    if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
     if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
+    if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
 
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);

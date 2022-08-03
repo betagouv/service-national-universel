@@ -296,8 +296,8 @@ const Action = ({ hit, structure }) => {
     try {
       const { ok, code } = await api.remove(`/referent/${hit._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(hit);
       if (!ok && code === "LINKED_STRUCTURE") return toastr.error(translate(code), "Ce responsable est le dernier responsable de la structure.");
+      if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(hit);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce profil a été supprimé.");
       return history.go(0);
