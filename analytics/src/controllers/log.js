@@ -5,6 +5,7 @@ const Joi = require("joi");
 const LogYoungModel = require("../models/log_youngs");
 const LogStructureModel = require("../models/log_structures");
 const LogMissionModel = require("../models/log_missions");
+const LogApplicationModel = require("../models/log_applications");
 
 router.get("/", async (req, res) => {
   const logs = await LogModel.findAll();
@@ -106,6 +107,33 @@ router.post("/mission", async (req, res) => {
   value.date = new Date(value.date);
 
   const log = await LogMissionModel.create(value);
+  return res.status(200).send({ ok: true, data: log });
+});
+
+//Rajouter authentification
+router.post("/application", async (req, res) => {
+  console.log(req.body);
+  const { error, value } = Joi.object({
+    evenement_nom: Joi.string().trim().required(),
+    evenement_type: Joi.string().trim().required(),
+    evenement_valeur: Joi.string().allow(null, ""),
+    candidature_id: Joi.string().allow(null, ""),
+    user_id: Joi.string().allow(null, ""),
+    mission_id: Joi.string().allow(null, ""),
+    structure_id: Joi.string().allow(null, ""),
+    status: Joi.string().allow(null, ""),
+    date: Joi.string(),
+    raw_data: Joi.object(),
+  }).validate(req.body);
+
+  if (error) {
+    console.log(error);
+    return res.status(400).send({ ok: false, code: "INVALID_PARAMS" });
+  }
+
+  value.date = new Date(value.date);
+
+  const log = await LogApplicationModel.create(value);
   return res.status(200).send({ ok: true, data: log });
 });
 
