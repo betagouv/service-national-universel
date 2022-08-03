@@ -1,7 +1,9 @@
 const { Sequelize } = require("sequelize");
 const { POSTGRESQL } = require("./config");
 
-const db = new Sequelize(POSTGRESQL, { logging: false });
+const db = new Sequelize(POSTGRESQL, {
+  logging: false,
+});
 
 db.authenticate()
   .then(() => {
