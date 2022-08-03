@@ -16,11 +16,13 @@ import Badge from "../../../components/Badge";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import DeleteBtnComponent from "../components/DeleteBtnComponent";
 import ModalChangeTutor from "../../../components/modals/ModalChangeTutor";
+import ModalReferentDeleted from "../../../components/modals/ModalReferentDeleted";
 
 export default function DetailsView({ structure }) {
   const [referents, setReferents] = useState([]);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
   const [parentStructure, setParentStructure] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
@@ -41,15 +43,20 @@ export default function DetailsView({ structure }) {
     });
   };
 
+  const onReferentDeleted = () => {
+    setModalReferentDeleted({
+      isOpen: true,
+    });
+  };
+
   const onConfirmDelete = async (target) => {
     try {
       const { ok, code } = await api.remove(`/referent/${target._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(target);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce profil a été supprimé.");
       setReferents(referents.filter((referent) => referent._id !== target._id));
-      return true;
+      return onReferentDeleted();
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la suppression du profil :", translate(e.code));
@@ -161,6 +168,7 @@ export default function DetailsView({ structure }) {
           setModalTutor({ isOpen: false, onConfirm: null });
         }}
       />
+      <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => setModalReferentDeleted({ isOpen: false })} />
     </div>
   );
 }
