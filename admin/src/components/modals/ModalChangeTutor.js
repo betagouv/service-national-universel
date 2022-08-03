@@ -178,9 +178,14 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
                         value: r._id,
                         label: r.firstName + " " + r.lastName,
                         onSubmit: async () => {
-                          for (const mission of missionsSelected) {
-                            const { ok, code } = await api.put(`/mission/${mission._id}`, { ...mission, tutorId: r._id, tutorName: r.firstName + " " + r.lastName });
-                            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+                          const { ok, code } = await api.post(`/mission/multiaction/change-tutor`, {
+                            ids: missionsSelected.map((m) => m._id),
+                            tutorId: r._id,
+                            tutorName: r.firstName + " " + r.lastName,
+                          });
+                          if (!ok) {
+                            toastr.error("Oups, une erreur s'est produite", translate(code));
+                            return;
                           }
                           setModalConfirmationReattributionTutor({
                             isOpen: false,
