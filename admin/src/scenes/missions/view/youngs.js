@@ -37,8 +37,7 @@ import { MdOutlineAttachFile } from "react-icons/md";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
-export default function Youngs({ mission, applications, updateApplications }) {
-  const [missionTemp, setMissionTemp] = useState(mission);
+export default function Youngs({ mission, applications, updateMission }) {
   const [young, setYoung] = useState();
 
   const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
@@ -59,20 +58,12 @@ export default function Youngs({ mission, applications, updateApplications }) {
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
-  const updateMission = async () => {
-    const { data, ok } = await api.get(`/mission/${mission._id}`);
-    if (ok) {
-      setMissionTemp(data);
-      updateApplications();
-    }
-  };
-
   if (!applications) return <Loader />;
 
   return (
     <div>
       <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-        <MissionView mission={missionTemp} tab="youngs">
+        <MissionView mission={mission} tab="youngs">
           <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ float: "right", marginBottom: "1.5rem", marginRight: "1.5rem" }}>
               <div style={{ display: "flex" }}>
