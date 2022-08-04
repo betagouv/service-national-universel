@@ -1,3 +1,11 @@
+## [1.120.1](https://github.com/betagouv/service-national-universel/compare/v1.120.0...v1.120.1) (2022-08-04)
+
+
+### Bug Fixes
+
+* **admin/api:** Sentry capture only once ([b2b96e3](https://github.com/betagouv/service-national-universel/commit/b2b96e3cc5d8fc79b2c1ca777605d6c683828d70))
+* **app, admin:** correctly display the nb of results when searching for a mission ([d758f70](https://github.com/betagouv/service-national-universel/commit/d758f7018f7396548987c0b90f4d276f67d003a3))
+
 # [1.120.0](https://github.com/betagouv/service-national-universel/compare/v1.119.2...v1.120.0) (2022-08-03)
 
 
