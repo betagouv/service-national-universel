@@ -20,7 +20,6 @@ export default async function downloadPDF({
       return (window.location.href = redirectUrl);
     }
     // We need more info to understand download issues.
-    Sentry.captureMessage("PDF error for URL: " + url);
     Sentry.captureException(e);
     toastr.error(errorTitle, e?.message, { timeOut: 10000 });
   }
