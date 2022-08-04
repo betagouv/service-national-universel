@@ -19,7 +19,6 @@ export default function Signin() {
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
   const [tooManyRequests, setTooManyRequests] = useState({ status: false, date: null });
-  console.log("🚀 ~ file: signin.js ~ line 22 ~ Signin ~ tooManyRequests", tooManyRequests);
   const params = queryString.parse(location.search);
   const { redirect, unauthorized } = params;
 
