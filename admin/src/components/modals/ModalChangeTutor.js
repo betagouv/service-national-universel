@@ -1,22 +1,21 @@
 import React, { useEffect, useReducer, useState } from "react";
 import { Modal } from "reactstrap";
-import { translate, colors } from "../../utils";
-import styled from "styled-components";
+import { translate } from "../../utils";
 
-import ModalButton from "../buttons/ModalButton";
-import CloseSvg from "../../assets/Close";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
+import { toastr } from "react-redux-toastr";
+import { formatStringDateTimezoneUTC } from "snu-lib/date";
+import CloseSvg from "../../assets/Close";
+import CheckCircle from "../../assets/icons/CheckCircle";
 import { apiURL } from "../../config";
 import api from "../../services/api";
+import ModalButton from "../buttons/ModalButton";
 import { ResultTable } from "../list";
 import ReactiveListComponent from "../ReactiveListComponent";
-import { formatStringDateTimezoneUTC } from "snu-lib/date";
-import { toastr } from "react-redux-toastr";
 import CursorClick from "../../assets/icons/CursorClick";
-import { GrStatusGood } from "react-icons/gr";
 
+import ReactSelect, { components } from "react-select";
 import ModalConfirm from "./ModalConfirm";
-import ReactSelect from "react-select";
 
 export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, onConfirm, size = "xl", cancelText = "Annuler" }) {
   if (!tutor) return null;
@@ -30,15 +29,17 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
 
   const checkboxRef = React.useRef();
 
-  useEffect(async () => {
-    const { responses } = await api.esQuery("referent", {
-      query: {
-        bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": tutor.structureId } }] },
-      },
-    });
-    if (responses.length) {
-      setResponsables(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })).filter((e) => e._id.toString() !== tutor._id.toString()));
-    }
+  useEffect(() => {
+    (async () => {
+      const { responses } = await api.esQuery("referent", {
+        query: {
+          bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": tutor.structureId } }] },
+        },
+      });
+      if (responses.length) {
+        setResponsables(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })).filter((e) => e._id.toString() !== tutor._id.toString()));
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -113,9 +114,9 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
                     render={({ data }) => Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissionsSelected, forceUpdate, missionsSelected)}
                     renderNoResults={() => {
                       return (
-                        <div className="flex gap-2 justify-center items-center">
-                          <GrStatusGood className="w-10 h-10" />
-                          <h1 className="text-center text-green-800 font-normal">Toutes les missions ont bien été redistribuées</h1>
+                        <div className="flex gap-2 justify-center items-center ">
+                          <CheckCircle className="w-10 h-10 text-green-600" />
+                          <h1 className="text-center text-gray-600 font-normal">Toutes les missions ont bien été redistribuées</h1>
                         </div>
                       );
                     }}
@@ -142,8 +143,19 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
   if (data.length === 0) return null;
 
   const [modalConfirmationReattributionTutor, setModalConfirmationReattributionTutor] = useState({ isOpen: false });
+  const [loading, setLoading] = useState(false);
 
   const responsablesOptions = responsables.map((e) => ({ label: e.firstName + " " + e.lastName, value: e._id.toString() }));
+
+  // Change la maniere de rendu de l'option une fois selectionne
+  const SingleValue = (props) => (
+    <components.SingleValue {...props}>
+      <div className="flex items-center gap-2">
+        <CursorClick className="text-gray-400" />
+        {loading ? <span className={`font-medium text-sm text-gray-400`}>Chargement...</span> : <span className={`font-medium text-sm`}>Actions groupée</span>}
+      </div>
+    </components.SingleValue>
+  );
 
   return (
     <>
@@ -157,12 +169,19 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
         </div>
         <ReactSelect
           key={`Reset_depending_on_${data.length}`}
-          className="w-[300px] text-sm"
+          className="min-w-[200px] text-sm"
           options={responsablesOptions}
-          placeholder="Choisissez un nouveau tuteur"
+          placeholder={
+            <div className="flex items-center gap-2">
+              <CursorClick className="text-gray-400" />
+              {loading ? <span className={`font-medium text-sm text-gray-400`}>Chargement...</span> : <span className={`font-medium text-sm`}>Actions groupée</span>}
+            </div>
+          }
           isDisabled={missionsSelected.length === 0}
           noOptionsMessage={() => "Pas de tuteur trouvé"}
+          components={{ SingleValue }}
           onChange={(newValue) => {
+            setLoading(true);
             const value = newValue.value;
             const label = newValue.label;
             setModalConfirmationReattributionTutor({
@@ -178,10 +197,12 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
                   toastr.error("Oups, une erreur s'est produite", translate(code));
                   return;
                 }
+
                 setModalConfirmationReattributionTutor({
                   isOpen: false,
                 });
                 setMissionsSelected([]);
+                setLoading(false);
                 forceUpdate();
               },
             });
@@ -229,7 +250,10 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
         isOpen={modalConfirmationReattributionTutor.isOpen}
         title={`Réattribution de plusieurs missions`}
         message={`Veuillez confirmer la réattribution à ${modalConfirmationReattributionTutor.label}.`}
-        onChange={() => setModalConfirmationReattributionTutor({ isOpen: false, onConfirm: null })}
+        onChange={() => {
+          setModalConfirmationReattributionTutor({ isOpen: false, onConfirm: null });
+          setLoading(false);
+        }}
         onConfirm={modalConfirmationReattributionTutor?.onSubmit}
       />
     </>
@@ -282,7 +306,7 @@ const Line = ({ hit, opened, onSelect, onChange, selected, responsables }) => {
       <td className={`${bgColor} rounded-r-lg text-left`}>
         <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
           <ReactSelect
-            className="w-[300px] text-sm"
+            className="text-sm w-[260px]"
             options={responsablesOptions}
             placeholder="Choisissez un nouveau tuteur"
             noOptionsMessage={() => "Pas de tuteur trouvé"}
