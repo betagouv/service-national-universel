@@ -1,3 +1,16 @@
+# [1.121.0](https://github.com/betagouv/service-national-universel/compare/v1.120.1...v1.121.0) (2022-08-05)
+
+
+### Bug Fixes
+
+* **api:** stats-young-center - young_cohort: `à venir` is not a valid enum ([8c32959](https://github.com/betagouv/service-national-universel/commit/8c32959e9daed5173efb72245f0a72ed9c73e996))
+* **api:** webhooks SIB error ([#1722](https://github.com/betagouv/service-national-universel/issues/1722)) ([9ec33c6](https://github.com/betagouv/service-national-universel/commit/9ec33c653349d5c717b9f1329d37b6d143d6dfec))
+
+
+### Features
+
+* **secu:** Renouveau de la politique de mot de passe ([#1718](https://github.com/betagouv/service-national-universel/issues/1718)) ([35ec95b](https://github.com/betagouv/service-national-universel/commit/35ec95bf1800ee18064bd9a81c30152067e3c6e4))
+
 ## [1.120.1](https://github.com/betagouv/service-national-universel/compare/v1.120.0...v1.120.1) (2022-08-04)
 
 
