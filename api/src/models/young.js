@@ -1434,6 +1434,69 @@ const Schema = new mongoose.Schema({
     enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
   },
 
+  uuids: {
+    cniFiles: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    highSkilledActivityProofFiles: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    dataProcessingConsentmentFiles: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    parentConsentmentFiles: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    imageRightFiles: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    autoTestPCRFiles: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    rulesFiles: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    militaryPreparationFilesIdentity: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    militaryPreparationFilesCensus: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    militaryPreparationFilesAuthorization: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    militaryPreparationFilesCertificate: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+  },
+
+  // uuids: {
+  //   type: Map,
+  //   of: String,
+  // },
+
   missionsInMail: {
     type: [
       {

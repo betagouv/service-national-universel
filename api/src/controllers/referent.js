@@ -93,6 +93,14 @@ async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   }
 }
 
+async function getUUID(young, key, filename) {
+  const map = young.uuids[key];
+  console.log("map:", map);
+  for (let [key, value] of map.entries()) {
+    if (value === filename) return key;
+  }
+}
+
 router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
 router.post("/logout", (req, res) => ReferentAuth.logout(req, res));
 router.post("/signup", async (req, res) => {
@@ -590,7 +598,8 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
+    const uuid = await getUUID(young, key, fileName);
+    const downloaded = await getFile(`app/young/${youngId}/${key}/${uuid}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
     let mimeFromFile = null;
@@ -634,7 +643,8 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
       if (!structure || structure?.isMilitaryPreparation !== "true") return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const downloaded = await getFile(`app/young/${youngId}/military-preparation/${key}/${fileName}`);
+    const uuid = await getUUID(young, key, fileName);
+    const downloaded = await getFile(`app/young/${youngId}/military-preparation/${key}/${uuid}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
     let mimeFromFile = null;
@@ -710,6 +720,8 @@ router.post(
         );
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+      let uuids = young.uuids[key];
+
       for (let currentFile of files) {
         // If multiple file with same names are provided, currentFile is an array. We just take the latest.
         if (Array.isArray(currentFile)) {
@@ -737,14 +749,27 @@ router.post(
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+
+        // Find UUID if exists or generate if not to use as file name on s3.
+        let uuid = await getUUID(young, key, name);
+        if (!uuid) {
+          uuid = crypto.randomUUID();
+          uuids.set(uuid, name);
+        }
+
+        // Upload.
         if (militaryKeys.includes(key)) {
-          await uploadFile(`app/young/${young._id}/military-preparation/${key}/${name}`, resultingFile);
+          await uploadFile(`app/young/${young._id}/military-preparation/${key}/${uuid}`, resultingFile);
         } else {
-          await uploadFile(`app/young/${young._id}/${key}/${name}`, resultingFile);
+          await uploadFile(`app/young/${young._id}/${key}/${uuid}`, resultingFile);
         }
         fs.unlinkSync(tempFilePath);
       }
+
+      // Save both original file names and uuids in db.
       young.set({ [key]: names });
+      young.set({ uuids: { [key]: uuids } });
+
       await young.save({ fromUser: req.user });
       return res.status(200).send({ data: names, ok: true });
     } catch (error) {
