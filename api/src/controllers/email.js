@@ -51,7 +51,7 @@ function ipAllowListMiddleware(req, res, next) {
     "51.159.58.36",
     "51.159.58.214",
   ];
-  if (ip && (block.contains(ip) || blockFebruary2022.contains(ip) ||allowedIpList.includes(ip))) return next();
+  if (ip && (block.contains(ip) || blockFebruary2022.contains(ip) || allowedIpList.includes(ip))) return next();
   return res.status(403).send({ ok: false, code: ERRORS.INVALID_IP, message: "Invalid IP" });
 }
 
