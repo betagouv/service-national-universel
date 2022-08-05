@@ -83,8 +83,8 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
 
   return (
     <Modal size={size} centered isOpen={isOpen} toggle={onCancel || onChange}>
-      <ModalContainer className="pb-0">
-        <CloseSvg className="close-icon" height={10} width={10} onClick={onCancel || onChange} />
+      <div className="flex justify-center items-center flex-col rounded-2xl overflow-hidden pt-8">
+        <CloseSvg className="absolute right-0 top-0 m-4 cursor-pointer text-gray-500" height={10} width={10} onClick={onCancel || onChange} />
         <div className="mx-6">
           <div className="flex items-center justify-center text-gray-900 text-xl text-center mb-3">Nommer un nouveau tuteur</div>
           <div className="flex flex-col items-center justify-center text-gray-500 text-sm font-normal text-center mb-3">
@@ -94,7 +94,7 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
             <div>Afin de supprimer son compte, veuillez rattacher cette/ces missions à un nouveau tuteur.</div>
           </div>
         </div>
-        <Content className="pb-0">
+        <div className="flex flex-col items-center justify-center text-center px-8 w-full ">
           <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
               <div style={{ flex: 1, position: "relative" }}>
@@ -114,7 +114,7 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
                     renderNoResults={() => {
                       return (
                         <div className="flex gap-2 justify-center items-center">
-                          <GrStatusGood size={40} />
+                          <GrStatusGood className="w-10 h-10" />
                           <h1 className="text-center text-green-800 font-normal">Toutes les missions ont bien été redistribuées</h1>
                         </div>
                       );
@@ -124,7 +124,7 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
               </div>
             </div>
           </ReactiveBase>
-        </Content>
+        </div>
         <div className="flex gap-2 justify-center mb-4">
           <ModalButton disabled={sending} onClick={onCancel || onChange}>
             {cancelText}
@@ -133,7 +133,7 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
             Confirmer la suppression de ce compte
           </ModalButton>
         </div>
-      </ModalContainer>
+      </div>
     </Modal>
   );
 }
@@ -306,41 +306,3 @@ const Line = ({ hit, opened, onSelect, onChange, selected, responsables }) => {
     </tr>
   );
 };
-
-const ModalContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  background-color: #fff;
-  padding-top: 2rem;
-  border-radius: 1rem;
-  overflow: hidden;
-  .close-icon {
-    position: absolute;
-    right: 0;
-    top: 0;
-    margin: 1rem;
-    cursor: pointer;
-    color: ${colors.grey};
-  }
-`;
-
-const Content = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 2rem;
-  padding-top: 0;
-  h1 {
-    font-size: 1.4rem;
-  }
-  p {
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    color: ${colors.grey};
-  }
-`;
