@@ -41,7 +41,6 @@ class api {
     })
       .then((r) => jsonOrRedirectToSignIn(r))
       .catch((e) => {
-        Sentry.captureMessage("Error caught in esQuery");
         Sentry.captureException(e);
         console.error(e);
         return { responses: [] };

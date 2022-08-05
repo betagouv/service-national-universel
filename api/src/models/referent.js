@@ -72,6 +72,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  nextLoginAttemptIn: {
+    type: Date,
+    documentation: {
+      description: "Date pour autoriser la prochaine tentative de connexion",
+    },
+  },
+
   forgotPasswordResetToken: {
     type: String,
     default: "",
@@ -205,6 +212,7 @@ Schema.virtual("user").set(function (user) {
 
 Schema.pre("save", function (next, params) {
   this.user = params?.fromUser;
+  this.updatedAt = Date.now();
   next();
 });
 
@@ -216,9 +224,24 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
-  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/loginAttempts"],
+  excludes: [
+    "/password",
+    "/lastLoginAt",
+    "/nextLoginAttemptIn",
+    "/forgotPasswordResetToken",
+    "/forgotPasswordResetExpires",
+    "/invitationToken",
+    "/invitationExpires",
+    "/loginAttempts",
+  ],
 });
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
+
+Schema.plugin(
+  mongooseElastic(esClient, {
+    ignore: ["password", "lastLoginAt", "nextLoginAttemptIn", "forgotPasswordResetToken", "forgotPasswordResetExpires", "invitationToken", "invitationExpires", "loginAttempts"],
+  }),
+  MODELNAME,
+);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 

@@ -75,7 +75,13 @@ export default function List() {
     let body = {
       query: {
         bool: {
-          must: [],
+          must: [
+            {
+              script: {
+                script: "doc['pendingApplications'].value < doc['placesLeft'].value * 5",
+              },
+            },
+          ],
           filter: [
             {
               range: {
@@ -96,16 +102,7 @@ export default function List() {
           ],
         },
       },
-      sort: [
-        {
-          _geo_distance: {
-            location: filter?.LOCATION,
-            order: "asc",
-            unit: "km",
-            mode: "min",
-          },
-        },
-      ],
+      sort: [],
       track_total_hits: true,
       size: 20,
     };
@@ -144,11 +141,19 @@ export default function List() {
       });
     }
 
-    if (filter?.DISTANCE) {
+    if (filter?.DISTANCE && filter?.LOCATION) {
       body.query.bool.filter.push({
         geo_distance: {
           distance: `${filter?.DISTANCE}km`,
           location: filter?.LOCATION,
+        },
+      });
+      body.sort.push({
+        _geo_distance: {
+          location: filter?.LOCATION,
+          order: "asc",
+          unit: "km",
+          mode: "min",
         },
       });
     }

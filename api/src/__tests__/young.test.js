@@ -86,7 +86,7 @@ describe("Young", () => {
       //Check that the fields deleted are deleted
       for (const key in updatedYoung) {
         if (!fieldToKeep.find((val) => val === key)) {
-          expect(updatedYoung[key]).toEqual(undefined);
+          if (key !== "updatedAt") expect(updatedYoung[key]).toEqual(undefined);
         }
       }
 
