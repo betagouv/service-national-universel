@@ -1,8 +1,8 @@
 import React, { useEffect, useReducer, useState } from "react";
 import { Modal } from "reactstrap";
-import { translate } from "../../utils";
+import { translate, colors } from "../../utils";
+import styled from "styled-components";
 
-import { ModalContainer, Content } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 import CloseSvg from "../../assets/Close";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
@@ -12,11 +12,11 @@ import { ResultTable } from "../list";
 import ReactiveListComponent from "../ReactiveListComponent";
 import { formatStringDateTimezoneUTC } from "snu-lib/date";
 import { toastr } from "react-redux-toastr";
-import SelectAction from "../../components/SelectAction";
 import CursorClick from "../../assets/icons/CursorClick";
 import { GrStatusGood } from "react-icons/gr";
 
 import ModalConfirm from "./ModalConfirm";
+import ReactSelect from "react-select";
 
 export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, onConfirm, size = "xl", cancelText = "Annuler" }) {
   if (!tutor) return null;
@@ -26,7 +26,6 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
   const [responsables, setResponsables] = useState([]);
   const [missionsSelected, setMissionsSelected] = useState([]);
   const [missionsInPage, setMissionsInPage] = useState([]);
-  const [modalConfirmationReattributionTutor, setModalConfirmationReattributionTutor] = useState({ isOpen: false });
   const [sending, setSending] = useState(false);
 
   const checkboxRef = React.useRef();
@@ -111,13 +110,11 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
                     onData={async ({ rawData }) => {
                       if (rawData?.hits?.hits) setMissionsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, name: h._source.name })));
                     }}
-                    render={({ data }) =>
-                      Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissionsSelected, forceUpdate, missionsSelected, setModalConfirmationReattributionTutor)
-                    }
+                    render={({ data }) => Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissionsSelected, forceUpdate, missionsSelected)}
                     renderNoResults={() => {
                       return (
                         <div className="flex gap-2 justify-center items-center">
-                          <GrStatusGood className="w-10 h-10" />
+                          <GrStatusGood size={40} />
                           <h1 className="text-center text-gray-600 font-normal">Toutes les missions ont bien été redistribuées</h1>
                         </div>
                       );
@@ -137,75 +134,59 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
           </ModalButton>
         </div>
       </ModalContainer>
-      <ModalConfirm
-        isOpen={modalConfirmationReattributionTutor.isOpen}
-        title={`Réattribution de plusieurs missions`}
-        message={`Veuillez confirmer la réattribution à ${modalConfirmationReattributionTutor.label}.`}
-        onChange={() => setModalConfirmationReattributionTutor({ isOpen: false, onConfirm: null })}
-        onConfirm={modalConfirmationReattributionTutor?.onSubmit}
-      />
     </Modal>
   );
 }
 
-function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissionsSelected, forceUpdate, missionsSelected, setModalConfirmationReattributionTutor) {
+function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissionsSelected, forceUpdate, missionsSelected) {
   if (data.length === 0) return null;
+
+  const [modalConfirmationReattributionTutor, setModalConfirmationReattributionTutor] = useState({ isOpen: false });
+
+  const responsablesOptions = responsables.map((e) => ({ label: e.firstName + " " + e.lastName, value: e._id.toString() }));
 
   return (
     <>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex justify-between mb-2">
         <div className="flex items-center mb-2 gap-2">
           <div>
             <div className="text-gray-600 font-normal text-sm">
-              <span className="font-bold">{missionsSelected?.length}</span>&nbsp;sélectionné{missionsSelected?.length > 1 ? "s" : ""}
+              <span className="font-bold">{missionsSelected?.length}</span> &nbsp;sélectionné{missionsSelected?.length > 1 ? "s" : ""}
             </div>
           </div>
         </div>
-        <div>
-          <SelectAction
-            Icon={<CursorClick className="text-gray-400" />}
-            title="Action groupée"
-            alignItems="right"
-            disabled={missionsSelected?.length === 0}
-            optionsGroup={[
-              {
-                items: responsables.map((r) => {
-                  return {
-                    action: async () => {
-                      if (missionsSelected.length === 0) return;
-                      setModalConfirmationReattributionTutor({
-                        isOpen: true,
-                        value: r._id,
-                        label: r.firstName + " " + r.lastName,
-                        onSubmit: async () => {
-                          const { ok, code } = await api.post(`/mission/multiaction/change-tutor`, {
-                            ids: missionsSelected.map((m) => m._id),
-                            tutorId: r._id,
-                            tutorName: r.firstName + " " + r.lastName,
-                          });
-                          if (!ok) {
-                            toastr.error("Oups, une erreur s'est produite", translate(code));
-                            return;
-                          }
-                          setModalConfirmationReattributionTutor({
-                            isOpen: false,
-                          });
-                          setMissionsSelected([]);
-                          forceUpdate();
-                        },
-                      });
-                    },
-                    render: (
-                      <div className="group flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                        <div>{`${r.firstName} ${r.lastName}`}</div>
-                      </div>
-                    ),
-                  };
-                }),
+        <ReactSelect
+          key={`Reset_depending_on_${data.length}`}
+          className="w-[300px] text-sm"
+          options={responsablesOptions}
+          placeholder="Choisissez un nouveau tuteur"
+          isDisabled={missionsSelected.length === 0}
+          noOptionsMessage={() => "Pas de tuteur trouvé"}
+          onChange={(newValue) => {
+            const value = newValue.value;
+            const label = newValue.label;
+            setModalConfirmationReattributionTutor({
+              isOpen: true,
+              label: label,
+              onSubmit: async () => {
+                const { ok, code } = await api.post(`/mission/multiaction/change-tutor`, {
+                  ids: missionsSelected.map((m) => m._id),
+                  tutorId: value,
+                  tutorName: label,
+                });
+                if (!ok) {
+                  toastr.error("Oups, une erreur s'est produite", translate(code));
+                  return;
+                }
+                setModalConfirmationReattributionTutor({
+                  isOpen: false,
+                });
+                setMissionsSelected([]);
+                forceUpdate();
               },
-            ]}
-          />
-        </div>
+            });
+          }}
+        />
       </div>
       <table className="w-full">
         <thead className="">
@@ -244,6 +225,13 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
           ))}
         </tbody>
       </table>
+      <ModalConfirm
+        isOpen={modalConfirmationReattributionTutor.isOpen}
+        title={`Réattribution de plusieurs missions`}
+        message={`Veuillez confirmer la réattribution à ${modalConfirmationReattributionTutor.label}.`}
+        onChange={() => setModalConfirmationReattributionTutor({ isOpen: false, onConfirm: null })}
+        onConfirm={modalConfirmationReattributionTutor?.onSubmit}
+      />
     </>
   );
 }
@@ -293,24 +281,19 @@ const Line = ({ hit, opened, onSelect, onChange, selected, responsables }) => {
       </td>
       <td className={`${bgColor} rounded-r-lg text-left`}>
         <div className="font-normal text-xs text-[#242526]" onClick={(e) => e.stopPropagation()}>
-          <select
-            className={`border-[1px] border-gray-200 rounded-lg text-black py-2 px-3 cursor-pointer`}
-            value={value.tutorId}
-            onChange={(e) => {
+          <ReactSelect
+            className="w-[300px] text-sm"
+            options={responsablesOptions}
+            placeholder="Choisissez un nouveau tuteur"
+            noOptionsMessage={() => "Pas de tuteur trouvé"}
+            onChange={(newValue) => {
               setModalConfirmationReattributionTutor({
                 isOpen: true,
-                value: e.target.value,
-                label: e.target.options[e.target.options.selectedIndex].innerHTML,
+                label: newValue.label,
+                value: newValue.value,
               });
             }}
-            style={{ fontFamily: "Marianne" }}>
-            <option default key="" value="" />
-            {responsablesOptions.map((option, i) => (
-              <option key={i} value={option.value} label={option.label} disabled={option.disabled} hidden={option.hidden}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       </td>
       <ModalConfirm
@@ -323,3 +306,42 @@ const Line = ({ hit, opened, onSelect, onChange, selected, responsables }) => {
     </tr>
   );
 };
+
+const ModalContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: #fff;
+  padding-top: 2rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  .close-icon {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 1rem;
+    cursor: pointer;
+    color: ${colors.grey};
+  }
+`;
+
+const Content = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  padding-top: 0;
+  h1 {
+    font-size: 1.4rem;
+    color: #000;
+  }
+  p {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: ${colors.grey};
+  }
+`;
