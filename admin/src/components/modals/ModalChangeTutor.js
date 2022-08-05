@@ -168,7 +168,6 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
           </div>
         </div>
         <ReactSelect
-          key={`Reset_depending_on_${data.length}`}
           className="min-w-[200px] text-sm"
           options={responsablesOptions}
           placeholder={
