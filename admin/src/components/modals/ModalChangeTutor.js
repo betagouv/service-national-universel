@@ -152,7 +152,7 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
     <components.SingleValue {...props}>
       <div className="flex items-center gap-2">
         <CursorClick className="text-gray-400" />
-        {loading ? <span className={`font-medium text-sm text-gray-400`}>Chargement...</span> : <span className={`font-medium text-sm`}>Actions groupée</span>}
+        {loading ? <span className={`font-medium text-sm text-gray-400`}>Chargement...</span> : <span className={`font-medium text-sm text-gray-400`}>Actions groupée</span>}
       </div>
     </components.SingleValue>
   );
@@ -174,7 +174,7 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
           placeholder={
             <div className="flex items-center gap-2">
               <CursorClick className="text-gray-400" />
-              {loading ? <span className={`font-medium text-sm text-gray-400`}>Chargement...</span> : <span className={`font-medium text-sm`}>Actions groupée</span>}
+              {loading ? <span className={`font-medium text-sm text-gray-400`}>Chargement...</span> : <span className={`font-medium text-sm text-gray-400`}>Actions groupée</span>}
             </div>
           }
           isDisabled={missionsSelected.length === 0}
