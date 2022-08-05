@@ -194,7 +194,7 @@ router.post("/multiaction/change-tutor", passport.authenticate("referent", { ses
     }
 
     for (let mission of missions) {
-      mission.set({ ...mission, tutorId, tutorName });
+      mission.set({ tutorId, tutorName });
       await mission.save({ fromUser: req.user });
 
       // ! update application ne met pas à jour le tutorId. Faire cette tache pour corriger : https://www.notion.so/jeveuxaider/Model-Supprimer-tutorId-de-applications-et-contrats-5dae140ba40745e69dde7029baecdabd
