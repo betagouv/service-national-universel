@@ -115,7 +115,7 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
                       return (
                         <div className="flex gap-2 justify-center items-center">
                           <GrStatusGood size={40} />
-                          <h1 className="text-center text-gray-600 font-normal">Toutes les missions ont bien été redistribuées</h1>
+                          <h1 className="text-center text-green-800 font-normal">Toutes les missions ont bien été redistribuées</h1>
                         </div>
                       );
                     }}
@@ -337,7 +337,6 @@ const Content = styled.div`
   padding-top: 0;
   h1 {
     font-size: 1.4rem;
-    color: #000;
   }
   p {
     font-size: 1rem;
