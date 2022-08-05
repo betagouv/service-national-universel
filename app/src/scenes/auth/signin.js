@@ -13,6 +13,7 @@ import { toastr } from "react-redux-toastr";
 import PasswordEye from "../../components/PasswordEye";
 import EduConnectButton from "../../components/buttons/EduConnectButton";
 import { educonnectAllowed } from "../../config";
+import { formatToActualTime } from "snu-lib/date";
 
 /*
 About Redirect after signin
@@ -28,7 +29,7 @@ export default function Signin() {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [userIsValid, setUserIsValid] = useState(true);
-  const [tooManyRequests, settooManyRequests] = useState(false);
+  const [tooManyRequests, setTooManyRequests] = useState({ status: false, date: null });
   const params = queryString.parse(location.search);
   const { redirect, disconnected } = params;
 
@@ -72,7 +73,7 @@ export default function Signin() {
               console.log("e", e);
               setUserIsValid(false);
               if (e.code === "TOO_MANY_REQUESTS") {
-                settooManyRequests(true);
+                setTooManyRequests({ status: true, date: formatToActualTime(e?.data?.nextLoginAttemptIn) });
               }
             }
             actions.setSubmitting(false);
@@ -87,10 +88,10 @@ export default function Signin() {
                     </div>
                   </div>
                 )}
-                {tooManyRequests && (
+                {tooManyRequests?.status && (
                   <div className="mb-[20px]">
                     <div className="w-full block p-[15px] mt-[3px] text-[#c73738] bg-[#fff5f5] rounded-[5px] leading-tight border-[1px] border-[#fc8180]">
-                      Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure.{" "}
+                      Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez {tooManyRequests.date !== "-" ? `à ${tooManyRequests.date}.` : "demain."}
                     </div>
                   </div>
                 )}
