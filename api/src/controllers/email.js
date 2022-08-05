@@ -17,6 +17,8 @@ function ipAllowListMiddleware(req, res, next) {
   const ip = req.headers["x-forwarded-for"];
   // See: https://developers.sendinblue.com/docs/how-to-use-webhooks#securing-your-webhooks
   const block = new Netmask("185.107.232.0/24");
+  //New block since february 2022
+  const blockFebruary2022 = new Netmask("1.179.112.0/20");
   // See: https://developers.sendinblue.com/docs/additional-ips-to-be-whitelisted
   const allowedIpList = [
     "195.154.31.153",
@@ -49,7 +51,7 @@ function ipAllowListMiddleware(req, res, next) {
     "51.159.58.36",
     "51.159.58.214",
   ];
-  if (ip && (block.contains(ip) || allowedIpList.includes(ip))) return next();
+  if (ip && (block.contains(ip) || blockFebruary2022.contains(ip) ||allowedIpList.includes(ip))) return next();
   return res.status(403).send({ ok: false, code: ERRORS.INVALID_IP, message: "Invalid IP" });
 }
 
