@@ -64,7 +64,7 @@ router.post("/", ipAllowListMiddleware, async (req, res) => {
         subject: Joi.string().allow(null, ""),
         "message-id": Joi.string().allow(null, ""),
         template_id: Joi.number().allow(null),
-        tags: Joi.array().items(Joi.string().allow(null, "")),
+        tags: Joi.array().items(Joi.string().allow(null, "")).allow(null),
         reason: Joi.string().allow(null, ""),
         date: Joi.string().allow(null, ""),
       })
