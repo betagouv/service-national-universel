@@ -9,10 +9,11 @@ const MeetingPointModel = require("../models/meetingPoint");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const { ERRORS } = require("../utils");
 const { serializeBus, serializeCohesionCenter } = require("../utils/serializer");
+const { validateId } = require("../utils/validator");
 
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canViewBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -27,7 +28,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 router.get("/:id/cohesion-center", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canViewBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -47,7 +48,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     idExcel: Joi.string().required(),
     cohort: Joi.string().required(),
     capacity: Joi.number().required(),
-  }).validate({ ...req.params, ...req.body });
+  }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
   if (!canCreateBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -66,7 +67,7 @@ router.put("/:id/capacity", passport.authenticate("referent", { session: false, 
   const { error, value } = Joi.object({
     id: Joi.string().required(),
     capacity: Joi.number().required(),
-  }).validate({ ...req.params, ...req.body });
+  }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
   if (!canUpdateBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
