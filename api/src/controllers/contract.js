@@ -422,7 +422,7 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
       await fetch(config.API_PDF_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-        body: JSON.stringify({ newhtml, options: { format: "A4", margin: 0 } }),
+        body: JSON.stringify({ html: newhtml, options: { format: "A4", margin: 0 } }),
       }).then((response) => {
         // ! On a retravaillé pour faire passer les tests
         if (response.status && response.status !== 200) throw new Error("Error with PDF service");
