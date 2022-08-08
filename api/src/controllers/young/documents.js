@@ -6,12 +6,13 @@ const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
 const YoungObject = require("../../models/young");
 const ContractObject = require("../../models/contract");
+const ApplicationObject = require("../../models/application");
 const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout } = require("../../utils");
 const certificate = require("../../templates/certificate");
 const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
 const contractPhase2 = require("../../templates/contractPhase2");
-const { sendTemplate, sendEmail } = require("../../sendinblue");
+const { sendTemplate } = require("../../sendinblue");
 const { canSendFileByMail, canDownloadYoungDocuments } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const config = require("../../config");
@@ -82,7 +83,9 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
-    if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young)) {
+
+    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
+    if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
