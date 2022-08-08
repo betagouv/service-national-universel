@@ -55,13 +55,13 @@ function initSentry(app) {
 function capture(err) {
   console.log("capture", err);
   if (err) {
-    sentryCaptureException(err);
+    if (!process.env.JEST_WORKER_ID) sentryCaptureException(err);
   }
 }
 function captureMessage(mess) {
   console.log("captureMessage", mess);
   if (mess) {
-    sentryCaptureMessage(mess);
+    if (!process.env.JEST_WORKER_ID) sentryCaptureMessage(mess);
   }
 }
 
