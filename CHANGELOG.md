@@ -1,3 +1,19 @@
+# [1.122.0](https://github.com/betagouv/service-national-universel/compare/v1.121.0...v1.122.0) (2022-08-08)
+
+
+### Bug Fixes
+
+* **admin:** fix download mp files from young edit page ([3bb8492](https://github.com/betagouv/service-national-universel/commit/3bb8492bf77e757e018fd90b2278d5ec85439f82))
+* **api:** download pdf file for responsible ([#1727](https://github.com/betagouv/service-national-universel/issues/1727)) ([eeb4f18](https://github.com/betagouv/service-national-universel/commit/eeb4f18f54524ba0588402a4e95f5a664c07c7cc))
+* **api:** Hide data at serialization ([5e1700c](https://github.com/betagouv/service-national-universel/commit/5e1700c1f7e1688b03bc33d365f04f16a04c64e6))
+* **api:** webhook mails ([c96b8ac](https://github.com/betagouv/service-national-universel/commit/c96b8ac819191ab4181855e72f00e4e71d08421a))
+* **sentry:** Group transactions into sentry ([#1726](https://github.com/betagouv/service-national-universel/issues/1726)) ([71bf79b](https://github.com/betagouv/service-national-universel/commit/71bf79b78a9dbb5be1cb4ab20112e8ed7e126b93))
+
+
+### Features
+
+* **send-in-blue:** New app for webhook send in blue ([#1723](https://github.com/betagouv/service-national-universel/issues/1723)) ([21c8313](https://github.com/betagouv/service-national-universel/commit/21c83139f29066bd670f541084a99c6725f09aa0))
+
 # [1.121.0](https://github.com/betagouv/service-national-universel/compare/v1.120.1...v1.121.0) (2022-08-05)
 
 
