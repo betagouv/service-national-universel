@@ -479,10 +479,8 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { id } = req.params;
-    // TODO - JOI - Add id validation?
-    // const { error: idError, value: id } = validateId(req.params.id);
-    // if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { error: idError, value: id } = validateId(req.params.id);
+    if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const young = await YoungObject.findById(id);
 

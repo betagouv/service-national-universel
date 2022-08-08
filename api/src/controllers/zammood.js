@@ -50,7 +50,7 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
     });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // TODO - JOI - no verif for support + verrif body
+    // TODO - JOI - no verif for support + verif body
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
