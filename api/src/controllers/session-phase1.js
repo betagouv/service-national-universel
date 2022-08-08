@@ -69,7 +69,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
 router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const session = await SessionPhase1Model.findById(id);
@@ -93,7 +93,7 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
 
 router.get("/:id", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const session = await SessionPhase1Model.findById(id);
@@ -145,7 +145,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value: id } = Joi.string().required().validate(req.params.id);
+  const { error, value: id } = validateId(req.params.id);
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
   const session = await SessionPhase1Model.findById(id);
@@ -216,6 +216,8 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
   const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
 
+  // TODO - JOI - no check of req.body + This route should use the pdf service
+
   res.contentType("application/pdf");
   res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
   res.set("Cache-Control", "public, max-age=1");
@@ -224,7 +226,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const sessionPhase1 = await SessionPhase1Model.findById(id);

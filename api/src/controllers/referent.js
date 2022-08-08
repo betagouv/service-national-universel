@@ -236,6 +236,8 @@ router.post("/signup_retry", async (req, res) => {
     const department = referent.department;
     const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId)).name : "";
 
+    // TODO - JOI - no verif of req.user (passport)
+
     await referent.save({ fromUser: req.user });
     await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role], {
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
@@ -297,6 +299,8 @@ router.post("/signup_invite", async (req, res) => {
 
     const token = jwt.sign({ _id: referent.id }, config.secret, { expiresIn: "30d" });
     res.cookie("jwt", token, cookieOptions());
+
+    // TODO - JOI - no verif of req.user (passport)
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
@@ -497,6 +501,8 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // TODO - JOI - Check into app
 
     // eslint-disable-next-line no-unused-vars
     const { tutorId, template, subject, message, app, missionName } = value;
@@ -891,6 +897,7 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     res.status(200).send({ ok: true, data: user });
   } catch (error) {
     capture(error);
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });

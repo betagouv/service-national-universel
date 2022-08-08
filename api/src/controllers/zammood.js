@@ -18,6 +18,9 @@ router.get("/tickets", passport.authenticate(["referent", "young"], { session: f
   try {
     const { ok, data } = await zammood.api(`/v0/ticket?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // TODO - JOI - no verif for support + verif mail
+
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -29,6 +32,8 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
   try {
     const { ok, data, token } = await zammood.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // TODO - JOI - no verif for support + verif mail
     res.cookie("jwtzamoud", token, cookieOptions());
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -44,6 +49,9 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
       body: JSON.stringify(req.body),
     });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // TODO - JOI - no verif for support + verrif body
+
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -56,6 +64,8 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
   try {
     const messages = await zammood.api(`/v0/ticket/withMessages?ticketId=${req.params.id}`, { method: "GET", credentials: "include" });
     if (!messages.ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // TODO - JOI - verif req.param.id
     return res.status(200).send({ ok: true, data: messages.data });
   } catch (error) {
     capture(error);
@@ -182,6 +192,8 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
   const { status } = req.body;
   try {
     const email = req.user.email;
+
+    // TODO - JOI - no verif
     const response = await zammood.api(`/v0/ticket/${req.params.id}`, {
       method: "PUT",
       credentials: "include",
@@ -199,6 +211,8 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 
 router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO - JOI - no verif
+
     const userAttributes = await getUserAttributes(req.user);
     const response = await zammood.api("/v0/message", {
       method: "POST",
