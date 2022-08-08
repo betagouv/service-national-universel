@@ -226,6 +226,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
 });
 
 router.get("/validate_phase3/:young/:token", async (req, res) => {
+  // TODO - PASSPORT - add authenticate() ?
   try {
     const { error, value } = Joi.object({
       young: Joi.string().required(),
@@ -248,6 +249,7 @@ router.get("/validate_phase3/:young/:token", async (req, res) => {
 });
 
 router.put("/validate_phase3/:young/:token", async (req, res) => {
+  // TODO - PASSPORT - add authenticate() ? Maybe use same logic as validate mission phase 3 below.
   try {
     const { error, value } = Joi.object({
       young: Joi.string().required(),
@@ -478,7 +480,12 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { id } = req.params;
+    // TODO - JOI - Add id validation?
+    // const { error: idError, value: id } = validateId(req.params.id);
+    // if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
     const young = await YoungObject.findById(id);
+
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     if (!youngCanChangeSession(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -784,6 +791,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 });
 
 // Delete one user (only admin can delete user)
+// And apparently referent in same geography as well (see canDeleteYoung())
 router.put("/:id/soft-delete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
@@ -1015,6 +1023,7 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (req.user._id.toString() !== young._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    // add UUID logic here
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 

@@ -615,6 +615,7 @@ router.put("/representant/:type", passport.authenticate("young", { session: fals
 router.put("/representant-fromFranceConnect/:id", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const id = req.params.id;
+    // TODO - JOI - validate id ?
     const { error, value } = Joi.object({
       [`parent${id}FirstName`]: validateFirstName().trim().required(),
       [`parent${id}LastName`]: Joi.string().uppercase().trim().required(),
