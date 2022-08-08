@@ -1492,11 +1492,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  // uuids: {
-  //   type: Map,
-  //   of: String,
-  // },
-
   missionsInMail: {
     type: [
       {

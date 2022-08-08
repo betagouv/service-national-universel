@@ -29,11 +29,13 @@ const {
   getCcOfYoung,
   updateYoungPhase2Hours,
   updateStatusPhase2,
+  getUUID,
   getFile,
   updateYoungStatusPhase2Contract,
 } = require("../utils");
 const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
 const mime = require("mime-types");
+const crypto = require("crypto");
 
 const updatePlacesMission = async (app, fromUser) => {
   try {
@@ -463,7 +465,12 @@ router.post(
   fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req, res) => {
     try {
-      const application = await ApplicationObject.findById(req.params.id);
+      const { error: idError, value: id } = Joi.object({
+        id: Joi.string().required(),
+      }).validate(req.params.id);
+      if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+      const application = await ApplicationObject.findById(id);
       const rootKeys = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
       const { error: keyError, value: key } = Joi.string()
         .required()
@@ -508,6 +515,8 @@ router.post(
       //const application = await ApplicationObject.find({ youngId: req.user._id });
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.APPLICATION_NOT_FOUND });
 
+      let uuids = application.uuids[key];
+
       for (let i = 0; i < files.length; i++) {
         let currentFile = files[i];
         // If multiple file with same names are provided, currentFile is an array. We just take the latest.
@@ -531,14 +540,26 @@ router.post(
             return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
           }
         }
-        const data = fs.readFileSync(tempFilePath);
-        const encryptedBuffer = encrypt(data);
-        const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-        await uploadFile(`app/young/${user._id}/application/${key}/${name}`, resultingFile);
-        //get application et get j eunes
-        fs.unlinkSync(tempFilePath);
+
+        // Check if file is a new upload or already there
+        if (!application[key].includes(name)) {
+          // If it's a new file, generate uuid, upload file and add uuid key/value pair to db
+          const uuid = crypto.randomUUID();
+          uuids.set(uuid, name);
+
+          // Upload
+          const data = fs.readFileSync(tempFilePath);
+          const encryptedBuffer = encrypt(data);
+          const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+          await uploadFile(`app/young/${user._id}/application/${key}/${uuid}`, resultingFile);
+          fs.unlinkSync(tempFilePath);
+        }
       }
+
+      // Save filenames et uuids in db
       application.set({ [key]: names });
+      application.set({ uuids: { [key]: uuids } });
+
       await application.save({ fromUser: req.user });
       return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
     } catch (error) {
@@ -569,7 +590,8 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
 
     if (isYoung(req.user) && req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const downloaded = await getFile(`app/young/${young._id}/application/${key}/${name}`);
+    const uuid = await getUUID(young, key, name);
+    const downloaded = await getFile(`app/young/${young._id}/application/${key}/${uuid || name}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
     let mimeFromFile = null;

@@ -182,6 +182,32 @@ const Schema = new mongoose.Schema({
     default: [],
   },
 
+  uuids: {
+    contractAvenantFiles: {
+      type: [Map],
+      of: String,
+      default: {},
+    },
+
+    justificatifsFiles: {
+      type: [Map],
+      of: String,
+      default: {},
+    },
+
+    feedBackExperienceFiles: {
+      type: [Map],
+      of: String,
+      default: {},
+    },
+
+    othersFiles: {
+      type: [Map],
+      of: String,
+      default: {},
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
