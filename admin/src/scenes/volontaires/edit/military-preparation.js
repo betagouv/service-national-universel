@@ -29,7 +29,7 @@ export default function MilitaryPreparation({ values, handleChange, handleSubmit
                     placeholder="un document justificatif"
                     errorMessage="Vous devez téléverser le document"
                     value={values[file.name]}
-                    source={(e) => api.get(`/referent/youngFile/${values._id}/${file.name}/${e}`)}
+                    source={(e) => api.get(`/referent/youngFile/${values._id}/military-preparation/${file.name}/${e}`)}
                     name={file.name}
                     onChange={async (e) => {
                       const res = await api.uploadFile(`/referent/file/${file.name}`, e.target.files, { youngId: values._id });
