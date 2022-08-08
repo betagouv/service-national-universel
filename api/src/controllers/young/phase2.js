@@ -3,6 +3,7 @@ const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const config = require("../../config");
+const { configureScope } = require("@sentry/node");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
@@ -12,6 +13,9 @@ const ApplicationModel = require("../../models/application");
 const { ERRORS, getCcOfYoung } = require("../../utils");
 const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
+
+// ! Do not work. Same name for all
+configureScope((scope) => scope.setTransactionName(`/young/:id/phase2/`));
 
 router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
