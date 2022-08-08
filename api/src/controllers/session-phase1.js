@@ -29,7 +29,7 @@ const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
 const { COHESION_STAY_END } = require("snu-lib");
 const { getHtmlTemplate } = require("../templates/utils");
-const { default: fetch } = require("node-fetch");
+const fetch = require("node-fetch");
 const config = require("../config");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {

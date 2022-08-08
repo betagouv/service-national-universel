@@ -5,27 +5,13 @@ const { capture } = require("../sentry");
 
 const CohesionCenterModel = require("../models/cohesionCenter");
 const SessionPhase1 = require("../models/sessionPhase1");
-const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
-const {
-  ERRORS,
-  updatePlacesCenter,
-  updatePlacesBus,
-  sendAutoCancelMeetingPoint,
-  getSignedUrl,
-  updateCenterDependencies,
-  deleteCenterDependencies,
-  isYoung,
-  getBaseUrl,
-  sanitizeAll,
-  YOUNG_STATUS,
-} = require("../utils");
-const renderFromHtml = require("../htmlToPdf");
-const { ROLES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1 } = require("snu-lib/roles");
+const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, updateCenterDependencies, deleteCenterDependencies, isYoung, YOUNG_STATUS } = require("../utils");
+const { canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1 } = require("snu-lib/roles");
 const Joi = require("joi");
-const { serializeCohesionCenter, serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
+const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateNewCohesionCenter, validateUpdateCohesionCenter, validateId } = require("../utils/validator");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
