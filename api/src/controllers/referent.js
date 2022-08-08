@@ -409,7 +409,7 @@ router.post("/young/:id/refuse-military-preparation-files", passport.authenticat
     const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
     for (let key of militaryKeys) {
       young[key].forEach(async (file) => {
-        const uuid = await getUUID(young, key, file);
+        const uuid = getUUID(young, key, file);
         deleteFile(`app/young/${young._id}/military-preparation/${key}/${uuid || file}`);
       });
       newYoung[key] = [];
@@ -595,7 +595,8 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const uuid = await getUUID(young, key, fileName);
+    const uuid = getUUID(young, key, fileName);
+    console.log("UUID:", uuid);
     const downloaded = await getFile(`app/young/${youngId}/${key}/${uuid || fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
@@ -640,7 +641,7 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
       if (!structure || structure?.isMilitaryPreparation !== "true") return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const uuid = await getUUID(young, key, fileName);
+    const uuid = getUUID(young, key, fileName);
     const downloaded = await getFile(`app/young/${youngId}/military-preparation/${key}/${uuid || fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
@@ -784,7 +785,7 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
       .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canViewYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const data = await YoungModel.findById(value.id);
+    const data = await YoungModel.findById(value.id).select("-uuids");
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const applicationsFromDb = await ApplicationModel.find({ youngId: data._id });
     let applications = [];
@@ -1114,17 +1115,14 @@ router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent
     if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Get list of deleted files
-    let deletedFiles = [];
     for (const filename of young[value.key]) {
       if (!value.files.includes(filename)) {
-        deletedFiles.push(filename);
+        const uuid = getUUID(young, value.key, filename);
+        deleteFile(`app/young/${young._id}/military-preparation/${value.key}/${uuid || filename}`);
+        if (uuid) {
+          delete young.uuids[value.key][uuid];
+        }
       }
-    }
-
-    // Remove files from s3
-    for (const file in deletedFiles) {
-      const uuid = await getUUID(young, value.key, file);
-      deleteFile(`app/young/${young._id}/military-preparation/${value.key}/${uuid || file}`);
     }
 
     // Update young document

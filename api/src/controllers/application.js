@@ -590,7 +590,7 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
 
     if (isYoung(req.user) && req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const uuid = await getUUID(young, key, name);
+    const uuid = getUUID(young, key, name);
     const downloaded = await getFile(`app/young/${young._id}/application/${key}/${uuid || name}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 

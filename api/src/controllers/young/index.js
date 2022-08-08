@@ -27,6 +27,7 @@ const BusModel = require("../../models/bus");
 const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
+  deleteFile,
   validatePassword,
   ERRORS,
   inSevenDays,
@@ -147,10 +148,22 @@ router.post(
 
       const user = await YoungObject.findById(req.user._id);
       if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
-
-      const files = Object.keys(req.files || {}).map((e) => req.files[e]);
       let uuids = user.uuids[key];
 
+      const files = Object.keys(req.files || {}).map((e) => req.files[e]);
+
+      // Delete files: iterate over the list of files from the young record for the given key,
+      // if a file is not in the list from the request, delete it from s3 and remove it from the record.
+      for (const filename of user[key]) {
+        if (!files.includes(filename)) {
+          const uuid = getUUID(user, key, filename);
+          deleteFile(`app/young/${user._id}/military-preparation/${key}/${uuid || filename}`);
+          if (uuid) uuids.delete(uuid);
+        }
+      }
+
+      // Upload files: iterate over the list of files from the request,
+      // if one of them is not in the list from young record, upload it to s3 and add it to the record.
       for (let i = 0; i < files.length; i++) {
         let currentFile = files[i];
         // If multiple file with same names are provided, currentFile is an array. We just take the latest.
@@ -180,13 +193,11 @@ router.post(
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
 
-        // Check if file is new
+        // If file is new then generate uuid, upload file and save uuid and name in db
         if (!user[key].includes(name)) {
-          // If so, generate uuid and save it with file name in db
           const uuid = crypto.randomUUID();
           uuids.set(uuid, name);
 
-          // Upload
           if (militaryKeys.includes(key)) {
             await uploadFile(`app/young/${user._id}/military-preparation/${key}/${uuid}`, resultingFile);
           } else {
@@ -839,6 +850,12 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
       }
     }
 
+    for (const key in young.uuids._doc) {
+      if (!fieldToKeep.find((val) => val === key)) {
+        young.uuids.set({ [key]: undefined });
+      }
+    }
+
     young.set({ location: { lat: undefined, lon: undefined } });
     young.set({ schoolLocation: { lat: undefined, lon: undefined } });
     young.set({ parent1Location: { lat: undefined, lon: undefined } });
@@ -1030,8 +1047,7 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (req.user._id.toString() !== young._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    let uuid = await getUUID(young, key, fileName);
-
+    const uuid = getUUID(young, key, fileName);
     const downloaded = await getFile(`app/young/${youngId}/${key}/${uuid || young.key.fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 

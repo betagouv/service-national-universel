@@ -44,7 +44,7 @@ function getReq(url, cb) {
   return http.get(url, cb);
 }
 
-async function getUUID(doc, key, filename) {
+function getUUID(doc, key, filename) {
   const map = doc.uuids[key];
   for (let [key, value] of map.entries()) {
     if (value === filename) return key;
