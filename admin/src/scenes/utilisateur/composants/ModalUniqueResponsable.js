@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { Modal } from "reactstrap";
 
-import { ModalContainer } from "./Modal";
-import ModalButton from "../buttons/ModalButton";
 import { IoWarningOutline } from "react-icons/io5";
+import { ModalContainer } from "../../../components/modals/Modal";
+import ModalButton from "../../../components/buttons/ModalButton";
 
 export default function ModalUniqueResponsable({ isOpen, onConfirm, responsable }) {
   if (!responsable) return null;

@@ -39,8 +39,8 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import { MdOutlineOpenInNew } from "react-icons/md";
 import Badge from "../../components/Badge";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
-import ModalUniqueResponsable from "../../components/modals/ModalUniqueResponsable";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
+import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Utilisateurs");

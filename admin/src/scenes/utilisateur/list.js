@@ -25,7 +25,7 @@ import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
-import ModalUniqueResponsable from "../../components/modals/ModalUniqueResponsable";
+import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);

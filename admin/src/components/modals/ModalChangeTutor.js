@@ -111,7 +111,31 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
                     onData={async ({ rawData }) => {
                       if (rawData?.hits?.hits) setMissionsInPage(rawData.hits.hits.map((h) => ({ _id: h._id, name: h._source.name })));
                     }}
-                    render={({ data }) => Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissionsSelected, forceUpdate, missionsSelected)}
+                    render={({ data }) => {
+                      if (data.length === 0) return null;
+
+                      const responsablesOptions = responsables.map((e) => ({ label: e.firstName + " " + e.lastName, value: e._id.toString() }));
+
+                      return (
+                        <>
+                          <Header
+                            missionsSelected={missionsSelected}
+                            setMissionsSelected={setMissionsSelected}
+                            responsablesOptions={responsablesOptions}
+                            forceUpdate={forceUpdate}
+                          />
+                          <Table
+                            data={data}
+                            checkboxRef={checkboxRef}
+                            onClickMainCheckBox={onClickMainCheckBox}
+                            responsablesOptions={responsablesOptions}
+                            missionsSelected={missionsSelected}
+                            setMissionsSelected={setMissionsSelected}
+                            forceUpdate={forceUpdate}
+                          />
+                        </>
+                      );
+                    }}
                     renderNoResults={() => {
                       return (
                         <div className="flex gap-2 justify-center items-center ">
@@ -139,15 +163,11 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
   );
 }
 
-function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissionsSelected, forceUpdate, missionsSelected) {
-  if (data.length === 0) return null;
-
+const Header = ({ missionsSelected, setMissionsSelected, responsablesOptions, forceUpdate }) => {
   const [modalConfirmationReattributionTutor, setModalConfirmationReattributionTutor] = useState({ isOpen: false });
   const [loading, setLoading] = useState(false);
 
-  const responsablesOptions = responsables.map((e) => ({ label: e.firstName + " " + e.lastName, value: e._id.toString() }));
-
-  // Change la maniere de rendu de l'option une fois selectionne
+  // Change la manière de rendu de l'option une fois sélectionnée
   const SingleValue = (props) => (
     <components.SingleValue {...props}>
       <div className="flex items-center gap-2">
@@ -158,93 +178,54 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
   );
 
   return (
-    <>
-      <div className="flex justify-between mb-2">
-        <div className="flex items-center mb-2 gap-2">
-          <div>
-            <div className="text-gray-600 font-normal text-sm">
-              <span className="font-bold">{missionsSelected?.length}</span> &nbsp;sélectionné{missionsSelected?.length > 1 ? "s" : ""}
-            </div>
+    <div className="flex justify-between mb-2">
+      <div className="flex items-center mb-2 gap-2">
+        <div>
+          <div className="text-gray-600 font-normal text-sm">
+            <span className="font-bold">{missionsSelected?.length}</span> &nbsp;sélectionné{missionsSelected?.length > 1 ? "s" : ""}
           </div>
         </div>
-        <ReactSelect
-          className="min-w-[200px] text-sm"
-          options={responsablesOptions}
-          placeholder={
-            <div className="flex items-center gap-2">
-              <CursorClick className="text-gray-400" />
-              {loading ? <span className={`font-medium text-sm text-gray-400`}>Chargement...</span> : <span className={`font-medium text-sm text-gray-400`}>Actions groupée</span>}
-            </div>
-          }
-          isDisabled={missionsSelected.length === 0}
-          noOptionsMessage={() => "Pas de tuteur trouvé"}
-          components={{ SingleValue }}
-          onChange={(newValue) => {
-            setLoading(true);
-            const value = newValue.value;
-            const label = newValue.label;
-            setModalConfirmationReattributionTutor({
-              isOpen: true,
-              label: label,
-              onSubmit: async () => {
-                const { ok, code } = await api.post(`/mission/multiaction/change-tutor`, {
-                  ids: missionsSelected.map((m) => m._id),
-                  tutorId: value,
-                  tutorName: label,
-                });
-                if (!ok) {
-                  toastr.error("Oups, une erreur s'est produite", translate(code));
-                  return;
-                }
-
-                setModalConfirmationReattributionTutor({
-                  isOpen: false,
-                });
-                setMissionsSelected([]);
-                setLoading(false);
-                forceUpdate();
-              },
-            });
-          }}
-        />
       </div>
-      <table className="w-full">
-        <thead className="">
-          <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-10">
-            <th className="py-3 px-4">
-              <input ref={checkboxRef} className="cursor-pointer m-auto" type="checkbox" onChange={onClickMainCheckBox} />
-            </th>
-            <th className="py-3 pl-2 text-left">Mission</th>
-            <th className="py-3 pl-2 text-left">Date</th>
-            <th className="py-3 pl-2 text-left">Action</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100">
-          {data.map((hit) => (
-            <Line
-              key={hit._id}
-              hit={hit}
-              opened={false}
-              responsables={responsables}
-              onSelect={(newItem) =>
-                setMissionsSelected((prev) => {
-                  if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
-                    return prev.filter((e) => e._id.toString() !== newItem._id.toString());
-                  }
-                  return [...prev, { _id: newItem._id, name: newItem.name }];
-                })
+      <ReactSelect
+        className="min-w-[200px] text-sm"
+        options={responsablesOptions}
+        placeholder={
+          <div className="flex items-center gap-2">
+            <CursorClick className="text-gray-400" />
+            {loading ? <span className={`font-medium text-sm text-gray-400`}>Chargement...</span> : <span className={`font-medium text-sm text-gray-400`}>Actions groupée</span>}
+          </div>
+        }
+        isDisabled={missionsSelected.length === 0}
+        noOptionsMessage={() => "Pas de tuteur trouvé"}
+        components={{ SingleValue }}
+        onChange={(newValue) => {
+          setLoading(true);
+          const value = newValue.value;
+          const label = newValue.label;
+          setModalConfirmationReattributionTutor({
+            isOpen: true,
+            label: label,
+            onSubmit: async () => {
+              const { ok, code } = await api.post(`/mission/multiaction/change-tutor`, {
+                ids: missionsSelected.map((m) => m._id),
+                tutorId: value,
+                tutorName: label,
+              });
+              if (!ok) {
+                toastr.error("Oups, une erreur s'est produite", translate(code));
+                return;
               }
-              onChange={() => {
-                setMissionsSelected((prev) => {
-                  return prev.filter((e) => e._id.toString() !== hit._id.toString());
-                });
-                forceUpdate();
-              }}
-              selected={missionsSelected.find((e) => e._id.toString() === hit._id.toString())}
-            />
-          ))}
-        </tbody>
-      </table>
+
+              setModalConfirmationReattributionTutor({
+                isOpen: false,
+              });
+              setMissionsSelected([]);
+              setLoading(false);
+              forceUpdate();
+            },
+          });
+        }}
+      />
       <ModalConfirm
         isOpen={modalConfirmationReattributionTutor.isOpen}
         title={`Réattribution de plusieurs missions`}
@@ -255,11 +236,60 @@ function Table(checkboxRef, onClickMainCheckBox, data, responsables, setMissions
         }}
         onConfirm={modalConfirmationReattributionTutor?.onSubmit}
       />
-    </>
+    </div>
+  );
+};
+
+function Table({ data, checkboxRef, onClickMainCheckBox, responsablesOptions, missionsSelected, setMissionsSelected, forceUpdate }) {
+  return (
+    <table className="w-full">
+      <thead className="">
+        <tr className="text-xs uppercase text-gray-400 border-y-[1px] border-gray-10">
+          <th className="py-3 px-4">
+            <input ref={checkboxRef} className="cursor-pointer m-auto" type="checkbox" onChange={onClickMainCheckBox} />
+          </th>
+          <th className="py-3 pl-2 text-left">Mission</th>
+          <th className="py-3 pl-2 text-left">Date</th>
+          <th className="py-3 pl-2 text-left">Action</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-100">
+        {data.map((hit) => (
+          <Line
+            key={hit._id}
+            hit={hit}
+            opened={false}
+            responsablesOptions={responsablesOptions}
+            onSelect={(newItem) =>
+              setMissionsSelected((prev) => {
+                if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
+                  return prev.filter((e) => e._id.toString() !== newItem._id.toString());
+                }
+
+                return [
+                  ...prev,
+                  {
+                    _id: newItem._id,
+                    name: newItem.name,
+                  },
+                ];
+              })
+            }
+            onChange={() => {
+              setMissionsSelected((prev) => {
+                return prev.filter((e) => e._id.toString() !== hit._id.toString());
+              });
+              forceUpdate();
+            }}
+            selected={missionsSelected.find((e) => e._id.toString() === hit._id.toString())}
+          />
+        ))}
+      </tbody>
+    </table>
   );
 }
 
-const Line = ({ hit, opened, onSelect, onChange, selected, responsables }) => {
+const Line = ({ hit, opened, onSelect, onChange, selected, responsablesOptions }) => {
   const [modalConfirmationReattributionTutor, setModalConfirmationReattributionTutor] = useState({ isOpen: false });
 
   const value = hit;
@@ -277,8 +307,6 @@ const Line = ({ hit, opened, onSelect, onChange, selected, responsables }) => {
     await onChange();
     setModalConfirmationReattributionTutor({ isOpen: false });
   };
-
-  const responsablesOptions = responsables.map((e) => ({ label: `${e.firstName} ${e.lastName}`, value: e._id }));
 
   return (
     <tr className={`${!opened && "hover:!bg-gray-100"}`}>

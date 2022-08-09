@@ -12,8 +12,8 @@ import styled from "styled-components";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import plausibleEvent from "../../services/pausible";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
-import ModalUniqueResponsable from "../../components/modals/ModalUniqueResponsable";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
+import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 
 export default function UserPanel({ onChange, value }) {
   if (!value) return <div />;
