@@ -306,335 +306,343 @@ export default function List() {
   }, [filter?.DISTANCE]);
 
   return (
-    <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14 w-full">
-      {/* BEGIN HEADER */}
-      <div className="flex justify-between mb-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-3">Trouvez une mission d&apos;intérêt général</h1>
-          <div className="text-sm font-normal text-gray-700">
-            Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.
-            <br />
-            Pour plus d&apos;informations,{" "}
-            <a
-              className="underline hover:underline font-medium hover:text-gray-700"
-              href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
-              target="_blank"
-              rel="noreferrer">
-              cliquez-ici
-            </a>
-            .
+    <div className="flex">
+      <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14 w-full">
+        {/* BEGIN HEADER */}
+        <div className="flex justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-3">Trouvez une mission d&apos;intérêt général</h1>
+            <div className="text-sm font-normal text-gray-700">
+              Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.
+              <br />
+              Pour plus d&apos;informations,{" "}
+              <a
+                className="underline hover:underline font-medium hover:text-gray-700"
+                href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
+                target="_blank"
+                rel="noreferrer">
+                cliquez-ici
+              </a>
+              .
+            </div>
           </div>
+          <Link to="/preferences">
+            <div className="group flex gap-1 rounded-[10px] border-[1px] border-blue-700 py-2.5 px-3 items-center hover:bg-blue-700 hover:text-[#ffffff]">
+              <HiOutlineAdjustments className="text-blue-700 group-hover:text-[#ffffff]" />
+              <div className="text-blue-700 group-hover:text-[#ffffff] text-sm flex-1">Renseigner mes préférences</div>
+            </div>
+          </Link>
         </div>
-        <Link to="/preferences">
-          <div className="group flex gap-1 rounded-[10px] border-[1px] border-blue-700 py-2.5 px-3 items-center hover:bg-blue-700 hover:text-[#ffffff]">
-            <HiOutlineAdjustments className="text-blue-700 group-hover:text-[#ffffff]" />
-            <div className="text-blue-700 group-hover:text-[#ffffff] text-sm flex-1">Renseigner mes préférences</div>
-          </div>
-        </Link>
-      </div>
-      {/* END HEADER */}
+        {/* END HEADER */}
 
-      {/* BEGIN CONTROL */}
-      <div className="bg-gray-50 p-10 rounded-lg space-y-6">
-        {/* search bar recherche */}
-        <div className="relative">
-          <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-1.5 items-center">
-            <input
-              value={filter?.SEARCH}
-              onChange={(e) => {
-                e.persist();
-                setFilter((prev) => ({ ...prev, SEARCH: e.target.value }));
-              }}
-              className="flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm"
-              type="text"
-              placeholder="Rechercher une mission..."
-            />
+        {/* BEGIN CONTROL */}
+        <div className="bg-gray-50 p-10 rounded-lg space-y-6">
+          {/* search bar recherche */}
+          <div className="relative">
+            <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-1.5 items-center">
+              <input
+                value={filter?.SEARCH}
+                onChange={(e) => {
+                  e.persist();
+                  setFilter((prev) => ({ ...prev, SEARCH: e.target.value }));
+                }}
+                className="flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm"
+                type="text"
+                placeholder="Rechercher une mission..."
+              />
+              <div
+                className="flex items-center flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer border-l-[1px] border-gray-300"
+                onClick={() => setDropdownControlDistanceOpen((e) => !e)}>
+                Distance max. {filter?.DISTANCE}km
+              </div>
+              <div
+                className="flex items-center flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer border-l-[1px] border-gray-300"
+                onClick={() => setDropdownControlWhenOpen((e) => !e)}>
+                {getLabelWhen(filter?.PERIOD_PARENT)}
+              </div>
+              <div className="w-[34px] h-[34px] rounded-full bg-blue-600 flex justify-center items-center cursor-pointer hover:bg-blue-500">
+                <Search className="text-white" />
+              </div>
+            </div>
+            {/* BEGIN MODAL CONTROL DISTANCE */}
             <div
-              className="flex items-center flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer border-l-[1px] border-gray-300"
-              onClick={() => setDropdownControlDistanceOpen((e) => !e)}>
-              Distance max. {filter?.DISTANCE}km
-            </div>
-            <div
-              className="flex items-center flex-1 p-1 px-3 w-full placeholder:text-gray-400 text-gray-700 text-sm cursor-pointer border-l-[1px] border-gray-300"
-              onClick={() => setDropdownControlWhenOpen((e) => !e)}>
-              {getLabelWhen(filter?.PERIOD_PARENT)}
-            </div>
-            <div className="w-[34px] h-[34px] rounded-full bg-blue-600 flex justify-center items-center cursor-pointer hover:bg-blue-500">
-              <Search className="text-white" />
-            </div>
-          </div>
-          {/* BEGIN MODAL CONTROL DISTANCE */}
-          <div
-            ref={refDropdownControlDistance}
-            className={`${
-              dropdownControlDistanceOpen ? "block" : "hidden"
-            } w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 shadow overflow-hidden p-3 z-20`}>
-            <div className="font-bold text-sm text-gray-00 text-center">Distance maximum</div>
-            <div className="flex w-full flex-col space-y-2 py-2 px-4">
-              <div className="flex justify-around my-3">
-                <div className="flex items-center gap-2">
-                  <input
-                    id="main-address"
-                    name="main-address"
-                    type="radio"
-                    checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
-                    onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
-                  />
-                  <label htmlFor="main-address" className="cursor-pointer">
-                    <span className="text-xs text-gray-700">Autours de mon adresse principale</span>
-                    <br />
-                    <span className="text-sm text-gray-700">{young.city}</span>
-                  </label>
-                </div>
-                {young?.mobilityNearRelativeCity ? (
+              ref={refDropdownControlDistance}
+              className={`${
+                dropdownControlDistanceOpen ? "block" : "hidden"
+              } w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 shadow overflow-hidden p-3 z-20`}>
+              <div className="font-bold text-sm text-gray-00 text-center">Distance maximum</div>
+              <div className="flex w-full flex-col space-y-2 py-2 px-4">
+                <div className="flex justify-around my-3">
                   <div className="flex items-center gap-2">
                     <input
-                      id="second-address"
-                      name="address"
+                      id="main-address"
+                      name="main-address"
                       type="radio"
-                      checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
-                      onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
+                      checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
+                      onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
                     />
-                    <label htmlFor="second-address" className="cursor-pointer">
-                      <span className="text-xs text-gray-700">Autours de l&apos;adresse de mon proche</span>
+                    <label htmlFor="main-address" className="cursor-pointer">
+                      <span className="text-xs text-gray-700">Autours de mon adresse principale</span>
                       <br />
-                      <span className="text-sm text-gray-700">{young?.mobilityNearRelativeCity}</span>
+                      <span className="text-sm text-gray-700">{young.city}</span>
                     </label>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <input id="second-address" name="address" type="radio" value={young.city} disabled />
-                    <label htmlFor="second-address">
-                      <span className="text-xs text-gray-400">Autours de l&apos;adresse de mon proche</span>
-                      <br />
-                      <Link to="/preferences" className="text-sm text-blue-600 underline hover:underline">
-                        Renseigner une adresse
-                      </Link>
-                    </label>
-                  </div>
-                )}
-              </div>
-              <div className="relative">
-                <input
-                  list="distance-list"
-                  type="range"
-                  className="w-full distanceKm appearance-none h-2 bg-gray-200 items-center  rounded-full cursor-pointer"
-                  min="1"
-                  max={DISTANCE_MAX}
-                  step="1"
-                  onChange={(e) => {
-                    e.persist();
-                    setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
-                  }}
-                />
-                <div className={`absolute -ml-2 -mt-10 font-bold w-full ${!marginDistance && " flex justify-center ml-1"} `} style={{ left: `${marginDistance}px` }}>
-                  {filter?.DISTANCE}km
+                  {young?.mobilityNearRelativeCity ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="second-address"
+                        name="address"
+                        type="radio"
+                        checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
+                        onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
+                      />
+                      <label htmlFor="second-address" className="cursor-pointer">
+                        <span className="text-xs text-gray-700">Autours de l&apos;adresse de mon proche</span>
+                        <br />
+                        <span className="text-sm text-gray-700">{young?.mobilityNearRelativeCity}</span>
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <input id="second-address" name="address" type="radio" value={young.city} disabled />
+                      <label htmlFor="second-address">
+                        <span className="text-xs text-gray-400">Autours de l&apos;adresse de mon proche</span>
+                        <br />
+                        <Link to="/preferences" className="text-sm text-blue-600 underline hover:underline">
+                          Renseigner une adresse
+                        </Link>
+                      </label>
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div className="flex justify-between w-full mt-4 px-[10px] text-gray-200 items-center">
-                <PietonSvg />
-                <VeloSvg />
-                <VoitureSvg />
-                <TrainSvg />
-                <FuseeSvg />
+                <div className="relative">
+                  <input
+                    list="distance-list"
+                    type="range"
+                    className="w-full distanceKm appearance-none h-2 bg-gray-200 items-center  rounded-full cursor-pointer"
+                    min="1"
+                    max={DISTANCE_MAX}
+                    step="1"
+                    onChange={(e) => {
+                      e.persist();
+                      setFilter((prev) => ({ ...prev, DISTANCE: e.target.value }));
+                    }}
+                  />
+                  <div className={`absolute -ml-2 -mt-10 font-bold w-full ${!marginDistance && " flex justify-center ml-1"} `} style={{ left: `${marginDistance}px` }}>
+                    {filter?.DISTANCE}km
+                  </div>
+                </div>
+                <div className="flex justify-between w-full mt-4 px-[10px] text-gray-200 items-center">
+                  <PietonSvg />
+                  <VeloSvg />
+                  <VoitureSvg />
+                  <TrainSvg />
+                  <FuseeSvg />
+                </div>
               </div>
             </div>
-          </div>
-          {/* END MODAL CONTROL DISTANCE */}
+            {/* END MODAL CONTROL DISTANCE */}
 
-          {/* BEGIN MODAL CONTROL WHEN */}
-          <div
-            ref={refDropdownControlWhen}
-            className={`${
-              dropdownControlWhenOpen ? "block" : "hidden"
-            } w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 shadow overflow-hidden p-3 z-20`}>
-            <div className="font-bold text-sm text-gray-00 text-center">Période de réalisation de la mission</div>
-            <div className="flex w-full flex-col py-2 px-4">
-              <div className="flex justify-between w-full mt-4 px-[10px] font-medium text-gray-700 text-sm gap-2">
-                <PeriodeTab label={getLabelWhen("")} active={!filter?.PERIOD_PARENT} name="" onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: undefined }))} />
-                <PeriodeTab
-                  Icon={AcademicCap}
-                  label={getLabelWhen("SCOLAIRE")}
-                  active={filter?.PERIOD_PARENT === "SCOLAIRE"}
-                  name="SCOLAIRE"
-                  onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "SCOLAIRE" }))}
-                />
-                <PeriodeTab
-                  Icon={Sun}
-                  label={getLabelWhen("VACANCES")}
-                  active={filter?.PERIOD_PARENT === "VACANCES"}
-                  name="VACANCES"
-                  onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "VACANCES" }))}
-                />
-                <PeriodeTab
-                  Icon={Calendar}
-                  label={getLabelWhen("CUSTOM")}
-                  active={filter?.PERIOD_PARENT === "CUSTOM"}
-                  name="CUSTOM"
-                  onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "CUSTOM" }))}
-                />
+            {/* BEGIN MODAL CONTROL WHEN */}
+            <div
+              ref={refDropdownControlWhen}
+              className={`${
+                dropdownControlWhenOpen ? "block" : "hidden"
+              } w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 shadow overflow-hidden p-3 z-20`}>
+              <div className="font-bold text-sm text-gray-00 text-center">Période de réalisation de la mission</div>
+              <div className="flex w-full flex-col py-2 px-4">
+                <div className="flex justify-between w-full mt-4 px-[10px] font-medium text-gray-700 text-sm gap-2">
+                  <PeriodeTab label={getLabelWhen("")} active={!filter?.PERIOD_PARENT} name="" onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: undefined }))} />
+                  <PeriodeTab
+                    Icon={AcademicCap}
+                    label={getLabelWhen("SCOLAIRE")}
+                    active={filter?.PERIOD_PARENT === "SCOLAIRE"}
+                    name="SCOLAIRE"
+                    onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "SCOLAIRE" }))}
+                  />
+                  <PeriodeTab
+                    Icon={Sun}
+                    label={getLabelWhen("VACANCES")}
+                    active={filter?.PERIOD_PARENT === "VACANCES"}
+                    name="VACANCES"
+                    onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "VACANCES" }))}
+                  />
+                  <PeriodeTab
+                    Icon={Calendar}
+                    label={getLabelWhen("CUSTOM")}
+                    active={filter?.PERIOD_PARENT === "CUSTOM"}
+                    name="CUSTOM"
+                    onClick={() => setFilter((prev) => ({ ...prev, PERIOD_PARENT: "CUSTOM" }))}
+                  />
+                </div>
+                {filter?.PERIOD_PARENT === "SCOLAIRE" ? (
+                  <div className="flex flex-col gap-2 justify-center items-center mt-6">
+                    <div className="flex flex-wrap gap-2 justify-center items-center">
+                      <PeriodeItem
+                        name={MISSION_PERIOD_DURING_SCHOOL.EVENING}
+                        onClick={handleToggleChangePeriod}
+                        active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.EVENING)}
+                      />
+                      <PeriodeItem
+                        name={MISSION_PERIOD_DURING_SCHOOL.END_DAY}
+                        onClick={handleToggleChangePeriod}
+                        active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.END_DAY)}
+                      />
+                      <PeriodeItem
+                        name={MISSION_PERIOD_DURING_SCHOOL.WEEKEND}
+                        onClick={handleToggleChangePeriod}
+                        active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.WEEKEND)}
+                      />
+                    </div>
+                    {filter?.PERIOD?.length ? (
+                      <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
+                        Effacer
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+                {filter?.PERIOD_PARENT === "VACANCES" ? (
+                  <div className="flex flex-col gap-2 justify-center items-center mt-6">
+                    <div className="flex flex-wrap gap-2 justify-center items-center">
+                      <PeriodeItem
+                        name={MISSION_PERIOD_DURING_HOLIDAYS.SUMMER}
+                        onClick={handleToggleChangePeriod}
+                        active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SUMMER)}
+                      />
+                      <PeriodeItem
+                        name={MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN}
+                        onClick={handleToggleChangePeriod}
+                        active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN)}
+                      />
+                      <PeriodeItem
+                        name={MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER}
+                        onClick={handleToggleChangePeriod}
+                        active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER)}
+                      />
+                      <PeriodeItem
+                        name={MISSION_PERIOD_DURING_HOLIDAYS.WINTER}
+                        onClick={handleToggleChangePeriod}
+                        active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.WINTER)}
+                      />
+                      <PeriodeItem
+                        name={MISSION_PERIOD_DURING_HOLIDAYS.SPRING}
+                        onClick={handleToggleChangePeriod}
+                        active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SPRING)}
+                      />
+                    </div>
+                    {filter?.PERIOD?.length ? (
+                      <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
+                        Effacer
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+                {filter?.PERIOD_PARENT === "CUSTOM" ? (
+                  <div className="flex flex-col gap-2 justify-center items-center mt-6">
+                    <div className="flex flex-wrap gap-2 justify-center items-center">
+                      <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
+                        <label className="text-left text-gray-500 w-full m-0">Du</label>
+                        <input
+                          required
+                          type="date"
+                          className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                          value={filter?.FROM}
+                          onChange={(e) => {
+                            e.persist();
+                            setFilter((prev) => ({ ...prev, FROM: e.target.value }));
+                          }}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
+                        <label className="text-left text-gray-500 w-full m-0">Au</label>
+                        <input
+                          required
+                          type="date"
+                          className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
+                          value={filter?.TO}
+                          onChange={(e) => {
+                            e.persist();
+                            setFilter((prev) => ({ ...prev, TO: e.target.value }));
+                          }}
+                        />
+                      </div>
+                    </div>
+                    {filter?.FROM || filter?.TO ? (
+                      <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, TO: "", FROM: "" }))}>
+                        Effacer
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
-              {filter?.PERIOD_PARENT === "SCOLAIRE" ? (
-                <div className="flex flex-col gap-2 justify-center items-center mt-6">
-                  <div className="flex flex-wrap gap-2 justify-center items-center">
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_SCHOOL.EVENING}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.EVENING)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_SCHOOL.END_DAY}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.END_DAY)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_SCHOOL.WEEKEND}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_SCHOOL.WEEKEND)}
-                    />
-                  </div>
-                  {filter?.PERIOD?.length ? (
-                    <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
-                      Effacer
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-              {filter?.PERIOD_PARENT === "VACANCES" ? (
-                <div className="flex flex-col gap-2 justify-center items-center mt-6">
-                  <div className="flex flex-wrap gap-2 justify-center items-center">
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_HOLIDAYS.SUMMER}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SUMMER)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.AUTUMN)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.DECEMBER)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_HOLIDAYS.WINTER}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.WINTER)}
-                    />
-                    <PeriodeItem
-                      name={MISSION_PERIOD_DURING_HOLIDAYS.SPRING}
-                      onClick={handleToggleChangePeriod}
-                      active={(filter?.PERIOD || []).includes(MISSION_PERIOD_DURING_HOLIDAYS.SPRING)}
-                    />
-                  </div>
-                  {filter?.PERIOD?.length ? (
-                    <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, PERIOD: [] }))}>
-                      Effacer
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-              {filter?.PERIOD_PARENT === "CUSTOM" ? (
-                <div className="flex flex-col gap-2 justify-center items-center mt-6">
-                  <div className="flex flex-wrap gap-2 justify-center items-center">
-                    <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
-                      <label className="text-left text-gray-500 w-full m-0">Du</label>
-                      <input
-                        required
-                        type="date"
-                        className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
-                        value={filter?.FROM}
-                        onChange={(e) => {
-                          e.persist();
-                          setFilter((prev) => ({ ...prev, FROM: e.target.value }));
-                        }}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2 border-[1px] rounded-lg  py-1 px-2">
-                      <label className="text-left text-gray-500 w-full m-0">Au</label>
-                      <input
-                        required
-                        type="date"
-                        className="w-full bg-inherit cursor-pointer disabled:cursor-not-allowed"
-                        value={filter?.TO}
-                        onChange={(e) => {
-                          e.persist();
-                          setFilter((prev) => ({ ...prev, TO: e.target.value }));
-                        }}
-                      />
-                    </div>
-                  </div>
-                  {filter?.FROM || filter?.TO ? (
-                    <div className="text-xs text-gray-600 cursor-pointer hover:underline" onClick={() => setFilter((prev) => ({ ...prev, TO: "", FROM: "" }))}>
-                      Effacer
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
             </div>
+            {/* END MODAL CONTROL WHEN */}
           </div>
-          {/* END MODAL CONTROL WHEN */}
-        </div>
-        <div className="flex justify-between gap-2 flex-wrap">
-          <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("HEALTH")} />
-          <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SOLIDARITY")} />
-          <DomainFilter Icon={Citoyennete} name="CITIZENSHIP" label="Citoyenneté" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("CITIZENSHIP")} />
-          <DomainFilter Icon={Education} name="EDUCATION" label="Éducation" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("EDUCATION")} />
-          <DomainFilter Icon={Sport} name="SPORT" label="Sport" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SPORT")} />
-          <DomainFilter Icon={DefenseEtMemoire} name="DEFENSE" label="Défense et mémoire" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("DEFENSE")} />
-          <DomainFilter Icon={Environment} name="ENVIRONMENT" label="Environment" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("ENVIRONMENT")} />
-          <DomainFilter Icon={Securite} name="SECURITY" label="Sécurité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SECURITY")} />
-          <DomainFilter Icon={Culture} name="CULTURE" label="Culture" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("CULTURE")} />
-          <DomainFilter
-            Icon={PreparationMilitaire}
-            label="Préparations militaires"
-            active={filter?.MILITARY_PREPARATION === "true"}
-            onClick={() =>
-              setFilter((prev) => {
-                const newFilter = { ...prev };
-                if (newFilter?.MILITARY_PREPARATION === "true") newFilter.MILITARY_PREPARATION = "false";
-                else newFilter.MILITARY_PREPARATION = "true";
-                return newFilter;
-              })
-            }
-          />
-        </div>
-      </div>
-      {/* END CONTROL */}
-
-      {filter?.LOCATION && (
-        <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          <Missions>
-            <ReactiveList
-              defaultQuery={getDefaultQuery}
-              componentId="result"
-              react={{ and: FILTERS }}
-              pagination={true}
-              paginationAt="bottom"
-              size={25}
-              showLoader={true}
-              loader="Chargement..."
-              innerClass={{ pagination: "pagination" }}
-              dataField="created_at"
-              renderResultStats={({ numberOfResults }) => {
-                return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
-              }}
-              render={({ data }) => {
-                return data.map((e) => {
-                  const tags = [];
-                  e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
-                  // tags.push(e.remote ? "À distance" : "En présentiel");
-                  e.domains.forEach((d) => tags.push(translate(d)));
-                  return <CardMission key={e._id} mission={e} />;
-                });
-              }}
-              renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
+          <div className="flex justify-between gap-2 flex-wrap">
+            <DomainFilter Icon={Sante} name="HEALTH" label="Santé" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("HEALTH")} />
+            <DomainFilter Icon={Solidarite} name="SOLIDARITY" label="Solidarité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SOLIDARITY")} />
+            <DomainFilter Icon={Citoyennete} name="CITIZENSHIP" label="Citoyenneté" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("CITIZENSHIP")} />
+            <DomainFilter Icon={Education} name="EDUCATION" label="Éducation" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("EDUCATION")} />
+            <DomainFilter Icon={Sport} name="SPORT" label="Sport" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SPORT")} />
+            <DomainFilter
+              Icon={DefenseEtMemoire}
+              name="DEFENSE"
+              label="Défense et mémoire"
+              onClick={handleToggleChangeDomain}
+              active={(filter?.DOMAINS || []).includes("DEFENSE")}
             />
-          </Missions>
-        </ReactiveBase>
-      )}
+            <DomainFilter Icon={Environment} name="ENVIRONMENT" label="Environment" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("ENVIRONMENT")} />
+            <DomainFilter Icon={Securite} name="SECURITY" label="Sécurité" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("SECURITY")} />
+            <DomainFilter Icon={Culture} name="CULTURE" label="Culture" onClick={handleToggleChangeDomain} active={(filter?.DOMAINS || []).includes("CULTURE")} />
+            <DomainFilter
+              Icon={PreparationMilitaire}
+              label="Préparations militaires"
+              active={filter?.MILITARY_PREPARATION === "true"}
+              onClick={() =>
+                setFilter((prev) => {
+                  const newFilter = { ...prev };
+                  if (newFilter?.MILITARY_PREPARATION === "true") newFilter.MILITARY_PREPARATION = "false";
+                  else newFilter.MILITARY_PREPARATION = "true";
+                  return newFilter;
+                })
+              }
+            />
+          </div>
+        </div>
+        {/* END CONTROL */}
+
+        {filter?.LOCATION && (
+          <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+            <Missions>
+              <ReactiveList
+                defaultQuery={getDefaultQuery}
+                componentId="result"
+                react={{ and: FILTERS }}
+                pagination={true}
+                paginationAt="bottom"
+                size={25}
+                showLoader={true}
+                loader="Chargement..."
+                innerClass={{ pagination: "pagination" }}
+                dataField="created_at"
+                renderResultStats={({ numberOfResults }) => {
+                  return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
+                }}
+                render={({ data }) => {
+                  return data.map((e) => {
+                    const tags = [];
+                    e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
+                    // tags.push(e.remote ? "À distance" : "En présentiel");
+                    e.domains.forEach((d) => tags.push(translate(d)));
+                    return <CardMission key={e._id} mission={e} />;
+                  });
+                }}
+                renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
+              />
+            </Missions>
+          </ReactiveBase>
+        )}
+      </div>
     </div>
   );
 }
