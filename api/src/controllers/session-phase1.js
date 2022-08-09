@@ -124,7 +124,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-const TIMEOUT_PDF_SERVICE = 100000;
+const TIMEOUT_PDF_SERVICE = 200000;
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);

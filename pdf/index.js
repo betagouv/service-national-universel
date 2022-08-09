@@ -63,8 +63,7 @@ app.post("/render", async (req, res) => {
       ),
       req.body.options || {}
     );
-    console.log(req.body.html);
-    console.log(buffer);
+    console.log(`${req.body.html} generated`);
     if (GENERATE_LOCALLY)
       fs.writeFileSync(
         `generated/${new Date().toISOString()}_test.pdf`,
@@ -93,8 +92,7 @@ app.post("/render_and_merge", async (req, res) => {
         ),
         req.body.options || {}
       );
-      console.log(template);
-      console.log(temp_buffer);
+      console.log(`${template} generated`);
       merger.add(temp_buffer);
     }
 
