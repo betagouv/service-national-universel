@@ -1,7 +1,7 @@
 const { ExtraErrorData, RewriteFrames } = require("@sentry/integrations");
 const {
   addGlobalEventProcessor,
-  CaptureException: sentryCaptureException,
+  captureException: sentryCaptureException,
   captureMessage: sentryCaptureMessage,
   Integrations: NodeIntegrations,
   init,
@@ -55,13 +55,13 @@ function initSentry(app) {
 function capture(err) {
   console.log("capture", err);
   if (err) {
-    if (!process.env.JEST_WORKER_ID) sentryCaptureException(err);
+    sentryCaptureException(err);
   }
 }
 function captureMessage(mess) {
   console.log("captureMessage", mess);
   if (mess) {
-    if (!process.env.JEST_WORKER_ID) sentryCaptureMessage(mess);
+    sentryCaptureMessage(mess);
   }
 }
 
