@@ -1,3 +1,18 @@
+# [1.123.0](https://github.com/betagouv/service-national-universel/compare/v1.122.0...v1.123.0) (2022-08-09)
+
+
+### Bug Fixes
+
+* **api:** Fix error sentry ([ac453e3](https://github.com/betagouv/service-national-universel/commit/ac453e36f47c7d262d8593ceb70a6aa60a9ab194))
+* **kb:** Sentry fix ([5999df7](https://github.com/betagouv/service-national-universel/commit/5999df7f37336c25420b8044f9887e8ae89a33ac))
+
+
+### Features
+
+* **admin:** Add a modal to reattribute missions in case of delete ([#1716](https://github.com/betagouv/service-national-universel/issues/1716)) ([f8fc173](https://github.com/betagouv/service-national-universel/commit/f8fc17319638c50572f089515b8cd0992b2d1e98))
+* **pdf:** use new pdf service for contracts ([#1728](https://github.com/betagouv/service-national-universel/issues/1728)) ([7c09afa](https://github.com/betagouv/service-national-universel/commit/7c09afaecf3b529da3e993c84cf3e123be4b7510))
+* **sentry:** Add kb to new sentry ([#1719](https://github.com/betagouv/service-national-universel/issues/1719)) ([1b854c5](https://github.com/betagouv/service-national-universel/commit/1b854c554a76e6dc4d248127560279e33e888625))
+
 # [1.122.0](https://github.com/betagouv/service-national-universel/compare/v1.121.0...v1.122.0) (2022-08-08)
 
 
