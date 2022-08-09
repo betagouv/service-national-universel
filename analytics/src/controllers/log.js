@@ -14,7 +14,6 @@ router.get("/", async (req, res) => {
 
 //Rajouter authentification
 router.post("/young", async (req, res) => {
-  console.log(req.body);
   const { error, value } = Joi.object({
     evenement_nom: Joi.string().trim().required(),
     evenement_type: Joi.string().trim().required(),
@@ -41,12 +40,12 @@ router.post("/young", async (req, res) => {
   value.date = new Date(value.date);
 
   const log = await LogYoungModel.create(value);
+  console.log(log.id);
   return res.status(200).send({ ok: true, data: log });
 });
 
 //Rajouter authentification
 router.post("/structure", async (req, res) => {
-  console.log(req.body);
   const { error, value } = Joi.object({
     evenement_nom: Joi.string().trim().required(),
     evenement_type: Joi.string().trim().required(),
@@ -73,12 +72,12 @@ router.post("/structure", async (req, res) => {
   value.date = new Date(value.date);
 
   const log = await LogStructureModel.create(value);
+  console.log(log.id);
   return res.status(200).send({ ok: true, data: log });
 });
 
 //Rajouter authentification
 router.post("/mission", async (req, res) => {
-  console.log(req.body);
   const { error, value } = Joi.object({
     evenement_nom: Joi.string().trim().required(),
     evenement_type: Joi.string().trim().required(),
@@ -107,12 +106,12 @@ router.post("/mission", async (req, res) => {
   value.date = new Date(value.date);
 
   const log = await LogMissionModel.create(value);
+  console.log(log.id);
   return res.status(200).send({ ok: true, data: log });
 });
 
 //Rajouter authentification
 router.post("/application", async (req, res) => {
-  console.log(req.body);
   const { error, value } = Joi.object({
     evenement_nom: Joi.string().trim().required(),
     evenement_type: Joi.string().trim().required(),
@@ -134,6 +133,7 @@ router.post("/application", async (req, res) => {
   value.date = new Date(value.date);
 
   const log = await LogApplicationModel.create(value);
+  console.log(log.id);
   return res.status(200).send({ ok: true, data: log });
 });
 
