@@ -16,8 +16,6 @@ jest.mock("../utils", () => ({
   getSignedUrl: () => "",
 }));
 
-jest.mock("../htmlToPdf", () => jest.fn());
-
 jest.setTimeout(10_000);
 
 beforeAll(dbConnect);

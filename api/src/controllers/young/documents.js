@@ -8,25 +8,15 @@ const YoungObject = require("../../models/young");
 const ContractObject = require("../../models/contract");
 const ApplicationObject = require("../../models/application");
 const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout } = require("../../utils");
+const { sendTemplate, sendEmail } = require("../../sendinblue");
 const certificate = require("../../templates/certificate");
 const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
 const contractPhase2 = require("../../templates/contractPhase2");
-const { sendTemplate } = require("../../sendinblue");
 const { canSendFileByMail, canDownloadYoungDocuments } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const config = require("../../config");
-
-async function getHtmlTemplate(type, template, young, contract) {
-  if (type === "certificate" && template === "1") return await certificate.phase1(young);
-  if (type === "certificate" && template === "2") return certificate.phase2(young);
-  if (type === "certificate" && template === "3") return certificate.phase3(young);
-  if (type === "certificate" && template === "snu") return certificate.snu(young);
-  if (type === "form" && template === "imageRight") return form.imageRight(young);
-  if (type === "form" && template === "autotestPCR") return form.autotestPCR(young);
-  if (type === "convocation" && template === "cohesion") return convocation.cohesion(young);
-  if (type === "contract" && template === "2" && contract) return contractPhase2.render(contract);
-}
+const { getHtmlTemplate } = require("../../templates/utils");
 
 function getMailParams(type, template, young, contract) {
   if (type === "certificate" && template === "1")
@@ -159,7 +149,6 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    // Create html
     const html = await getHtmlTemplate(type, template, young, contract);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const { object, message } = getMailParams(type, template, young, contract);

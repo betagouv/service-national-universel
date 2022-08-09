@@ -589,7 +589,7 @@ const ApplicationStatus = ({
   };
 
   useEffect(() => {
-    if (disabledIncomplete) setMessage("Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page");
+    if (disabledIncomplete) setMessage("Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page");
     if (disabledPmRefused) setMessage("Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater");
     if (disabledAge) setMessage("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
   }, [disabledAge, disabledIncomplete, disabledPmRefused]);
