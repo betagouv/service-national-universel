@@ -6,10 +6,12 @@ import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ModalReferentDeleted from "../../../components/modals/ModalReferentDeleted";
 
 export default function DeleteButton({ young }) {
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
   const onClick = () => {
     setModal({
@@ -20,16 +22,21 @@ export default function DeleteButton({ young }) {
     });
   };
 
+  const onReferentDeleted = () => {
+    setModalReferentDeleted({
+      isOpen: true,
+    });
+  };
+
   const onConfirm = async () => {
     try {
       const { ok, code } = await api.put(`/young/${young._id}/soft-delete`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce profil a été supprimé.");
-      return history.push(`/volontaire`);
+      return onReferentDeleted();
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
+      return toastr.error("Oups, une erreur est survenue pendant la suppression du profil :", translate(e.code));
     }
   };
   return (
@@ -45,6 +52,7 @@ export default function DeleteButton({ young }) {
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
+      <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.push("/volontaire")} />
     </>
   );
 }
