@@ -184,25 +184,25 @@ const Schema = new mongoose.Schema({
 
   uuids: {
     contractAvenantFiles: {
-      type: [Map],
+      type: Map,
       of: String,
       default: {},
     },
 
     justificatifsFiles: {
-      type: [Map],
+      type: Map,
       of: String,
       default: {},
     },
 
     feedBackExperienceFiles: {
-      type: [Map],
+      type: Map,
       of: String,
       default: {},
     },
 
     othersFiles: {
-      type: [Map],
+      type: Map,
       of: String,
       default: {},
     },

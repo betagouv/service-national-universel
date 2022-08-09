@@ -850,12 +850,6 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
       }
     }
 
-    for (const key in young.uuids._doc) {
-      if (!fieldToKeep.find((val) => val === key)) {
-        young.uuids.set({ [key]: undefined });
-      }
-    }
-
     young.set({ location: { lat: undefined, lon: undefined } });
     young.set({ schoolLocation: { lat: undefined, lon: undefined } });
     young.set({ parent1Location: { lat: undefined, lon: undefined } });
