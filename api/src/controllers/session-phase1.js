@@ -31,6 +31,7 @@ const { COHESION_STAY_END } = require("snu-lib");
 const { getHtmlTemplate } = require("../templates/utils");
 const fetch = require("node-fetch");
 const config = require("../config");
+const JSZip = require("jszip");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -124,7 +125,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-const TIMEOUT_PDF_SERVICE = 200000;
+const TIMEOUT_PDF_SERVICE = 100000;
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
@@ -148,20 +149,11 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     const type = "certificate";
     const template = "1";
 
-    let htmls = [];
-
-    // Create html
-    for (const young of youngs) {
-      const html = await getHtmlTemplate(type, template, young);
-      if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      htmls.push(html);
-    }
-
-    const getPDF = async () =>
-      await fetch(config.API_PDF_ENDPOINT + "_and_merge", {
+    const getPDF = async (template) =>
+      await fetch(config.API_PDF_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-        body: JSON.stringify({ htmls, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
+        body: JSON.stringify({ template, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
       }).then((response) => {
         // ! On a retravaillé pour faire passer les tests
         if (response.status && response.status !== 200) throw new Error("Error with PDF service");
@@ -178,8 +170,40 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
           res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
         });
       });
+
+    const getZipPDF = async () => {
+      const zip = new JSZip();
+
+      // Create html
+      for (const young of youngs) {
+        const html = await getHtmlTemplate(type, template, young);
+        if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const file = await getPDF();
+        zip.file(`${type}_${template}_${young}`, file);
+      }
+
+      res.set({
+        "content-length": response.headers.get("content-length"),
+        "content-disposition": `inline; filename="test.pdf"`,
+        "content-type": "application/pdf",
+        "cache-control": "public, max-age=1",
+      });
+      res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
+      response.body.pipe(res);
+
+      zip.generateAsync({ type: "blob", compression: "DEFLATE" }).then(function (content) {
+        // see FileSaver.js
+        saveAs(content, "example.zip");
+      });
+
+      res.contentType("application/pdf");
+      res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+      res.set("Cache-Control", "public, max-age=1");
+      res.send(buffer);
+    };
+
     try {
-      await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
+      await timeout(getZipPDF(), TIMEOUT_PDF_SERVICE);
     } catch (e) {
       res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
       capture(e);
