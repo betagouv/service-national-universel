@@ -82,6 +82,8 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
     }
   };
 
+  const responsablesOptions = responsables.map((e) => ({ label: e.firstName + " " + e.lastName, value: e._id.toString() }));
+
   return (
     <Modal size={size} centered isOpen={isOpen} toggle={onCancel || onChange}>
       <div className="flex justify-center items-center flex-col rounded-2xl overflow-hidden pt-8">
@@ -113,8 +115,6 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
                     }}
                     render={({ data }) => {
                       if (data.length === 0) return null;
-
-                      const responsablesOptions = responsables.map((e) => ({ label: e.firstName + " " + e.lastName, value: e._id.toString() }));
 
                       return (
                         <>
