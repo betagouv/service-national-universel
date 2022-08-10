@@ -551,6 +551,8 @@ const updateApplication = async (mission, fromUser = null) => {
     application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
     await application.save({ fromUser });
 
+    // ! Should update contract too if it exists
+
     if (sendinblueTemplate) {
       const young = await YoungModel.findById(application.youngId);
       let cc = getCcOfYoung({ template: sendinblueTemplate, young });

@@ -145,6 +145,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+
   const { error, value: id } = validateId(req.params.id);
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -156,16 +157,16 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   const session = await SessionPhase1Model.findById(id);
   if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
-  if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
+    if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
-    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-  }
+    if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
   const body = {
-    sessionPhase1Id: session._id,
-    statusPhase1: "DONE",
+      sessionPhase1Id: session._id,
+      statusPhase1: "DONE",
   };
 
   const youngs = await YoungModel.find(body);
@@ -203,7 +204,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   const template = ministresData.template;
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   const data = [];
-  for (const young of youngs) {
+    for (const young of youngs) {
     data.push(
       subHtml
         .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
@@ -215,7 +216,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
         .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
         .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))),
     );
-  }
+    }
 
   const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
 
