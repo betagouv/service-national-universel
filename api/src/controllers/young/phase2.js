@@ -130,7 +130,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       contactEmail: Joi.string().trim(),
       files: Joi.array().items(Joi.string()),
       message: Joi.string().trim(),
-    }).validate({ ...req.params, ...req.body });
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
@@ -186,7 +186,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
 
 router.get("/equivalences", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() }).validate({ ...req.params });
+    const { error, value } = Joi.object({ id: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
     const young = await YoungModel.findById(value.id);
@@ -202,7 +202,7 @@ router.get("/equivalences", passport.authenticate(["referent", "young"], { sessi
 
 router.get("/equivalence/:idEquivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required(), idEquivalence: Joi.string().required() }).validate({ ...req.params });
+    const { error, value } = Joi.object({ id: Joi.string().required(), idEquivalence: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
     const young = await YoungModel.findById(value.id);
@@ -221,10 +221,13 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       statusMilitaryPreparationFiles: Joi.string().required().valid("VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"),
-    }).validate({
-      ...req.params,
-      ...req.body,
-    });
+    }).validate(
+      {
+        ...req.params,
+        ...req.body,
+      },
+      { stripUnknown: true },
+    );
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
     const young = await YoungModel.findById(value.id);

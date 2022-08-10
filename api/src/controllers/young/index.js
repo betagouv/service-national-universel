@@ -132,7 +132,7 @@ router.post(
       const { error: keyError, value: key } = Joi.string()
         .required()
         .valid(...[...rootKeys, ...militaryKeys])
-        .validate(req.params.key);
+        .validate(req.params.key, { stripUnknown: true });
       if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const { error: bodyError, value: body } = Joi.string().required().validate(req.body.body);
@@ -142,7 +142,7 @@ router.post(
         error: namesError,
         value: { names },
       } = Joi.object({ names: Joi.array().items(Joi.string()).required() }).validate(JSON.parse(body), { stripUnknown: true });
-      if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
       const user = await YoungObject.findById(req.user._id);
       if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
@@ -295,7 +295,7 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
       phase3TutorLastName: Joi.string().required(),
       phase3TutorEmail: Joi.string().lowercase().trim().email().required(),
       phase3TutorPhone: Joi.string().required(),
-    }).validate({ ...req.params, ...req.body });
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await YoungObject.findOne({ _id: value.young });
@@ -704,7 +704,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
 
 router.get("/:id/application", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (isYoung(req.user) && req.user._id.toString() !== id) {
@@ -855,7 +855,7 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
 
 router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.string().required().email().validate(req.query.email);
+    const { error, value } = Joi.string().required().email().validate(req.query.email, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canGetYoungByEmail(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let data = await YoungObject.findOne({ email: value });
@@ -872,7 +872,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     const { error: documentError, value: document } = Joi.string()
       .required()
       .valid(...keys)
-      .validate(req.params.document);
+      .validate(req.params.document, { stripUnknown: true });
     if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const young = await YoungObject.findById(req.user._id);
