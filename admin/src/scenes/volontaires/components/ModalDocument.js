@@ -61,7 +61,7 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
                   )}
                 </div>
                 <section className="flex flex-col items-center rounded-lg  w-[90%] lg:w-[70%]">
-                  <DndFileInput
+                  {/* <DndFileInput
                     newDesign={true}
                     placeholder="un document justificatif"
                     errorMessage="Vous devez téléverser un document justificatif"
@@ -82,6 +82,13 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
                       handleChange({ target: { value: res.data, name: nameFiles } });
                       handleSubmit();
                     }}
+                  /> */}
+                  <DndFileInput
+                    placeholder="un document justificatif"
+                    errorMessage="Vous devez téléverser un document justificatif"
+                    value={young.files[nameFiles]}
+                    path={`/referent/file/${young._id}/${nameFiles}`}
+                    name={nameFiles}
                   />
                 </section>
                 {comment && (
