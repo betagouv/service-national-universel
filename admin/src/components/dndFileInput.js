@@ -1,60 +1,48 @@
 import { Field } from "formik";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { requiredMessage } from "./errorMessage";
-import DownloadButton from "./buttons/DownloadButton";
 import RoundDownloadButton from "./buttons/RoundDownloadButton";
 import IconButton from "./buttons/IconButton";
 import ModalConfirm from "./modals/ModalConfirm";
 import deleteIcon from "../assets/delete.svg";
-import { slugifyFileName } from "../utils";
+import api from "../services/api";
+import { toastr } from "react-redux-toastr";
 
-function getFileName(file) {
-  return (file && file.name) || file;
-}
-
-export default function DndFileInput({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required, tw, setNewFilesList }) {
+export default function DndFileInput({ value, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required, tw, youngId }) {
   const [filesList, setFilesList] = useState(value || []);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
-  function onAdd(files) {
-    Object.keys(files).forEach((i) => {
-      const fileName = files[i].name.match(/(.*)(\..*)/);
-      const newName = `${slugifyFileName(fileName[1])}-${filesList.length}${fileName[2]}`;
-      Object.defineProperty(files[i], "name", {
-        writable: true,
-        value: newName,
-      });
-    });
-    handleChange([...filesList, ...files]);
+  async function handleAdd([...newFiles]) {
+    const res = await api.uploadFile(`/referent/file/${name}`, newFiles, { youngId });
+    if (res.code === "FILE_CORRUPTED") {
+      return toastr.error(
+        "Le fichier semble corrompu",
+        "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+        { timeOut: 0 },
+      );
+    }
+    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+    setFilesList(res.data);
   }
 
-  function handleChange(files) {
-    setFilesList(files);
-    onChange({ target: { files, name } });
+  async function handleDelete(fileId) {
+    const res = await api.remove(`/referent/${youngId}/file/${name}/${fileId}`);
+    setFilesList(res.data);
   }
-
-  useEffect(() => {
-    setNewFilesList && setNewFilesList(filesList);
-  }, [filesList]);
 
   return (
     <>
       <div className={tw}>
-        {filesList.map((e, i) => (
-          <File key={i} className="mx-1 justify-between">
-            <FileName className="mr-2">{getFileName(e)}</FileName>
+        {filesList?.map((file) => (
+          <File key={file._id} className="mx-1 justify-between">
+            <FileName className="mr-2">{file.name}</FileName>
             <div>
-              <IconButton
-                icon={deleteIcon}
-                bgColor="bg-indigo-600"
-                onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })}
-              />
+              <IconButton icon={deleteIcon} bgColor="bg-indigo-600" onClick={() => setModal({ isOpen: true, onConfirm: () => handleDelete(file._id) })} />
               <RoundDownloadButton
                 bgColor="bg-indigo-600"
                 source={() => {
-                  console.log(e);
-                  return source(getFileName(e));
+                  return source(file);
                 }}
                 title={`Télécharger`}
               />
@@ -70,7 +58,7 @@ export default function DndFileInput({ value, onChange, name, errorMessage = req
             name={name}
             value={[]}
             validate={(v) => (required && (!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
-            onChange={(e) => onAdd(e.target.files)}
+            onChange={(e) => handleAdd(e.target.files)}
           />
           <div className="flex flex-col items-center">
             <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -148,9 +136,4 @@ const File = styled.div`
       margin-right: 10px;
     }
   }
-`;
-
-const DownloadLink = styled(DownloadButton)`
-  margin-right: 0;
-  margin-top: 0;
 `;

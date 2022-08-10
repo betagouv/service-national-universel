@@ -5,6 +5,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
+const File = require("./file");
 
 const MODELNAME = "young";
 
@@ -1434,61 +1435,50 @@ const Schema = new mongoose.Schema({
     enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
   },
 
-  uuids: {
+  files: {
     cniFiles: {
-      type: Map,
-      of: String,
-      default: {},
+      type: [File],
+      default: [],
     },
     highSkilledActivityProofFiles: {
-      type: Map,
-      of: String,
-      default: {},
+      type: [File],
+      default: [],
     },
     dataProcessingConsentmentFiles: {
-      type: Map,
-      of: String,
-      default: {},
+      type: [File],
+      default: [],
     },
     parentConsentmentFiles: {
-      type: Map,
-      of: String,
-      default: {},
+      type: [File],
+      default: [],
     },
     imageRightFiles: {
-      type: Map,
-      of: String,
-      default: {},
+      type: [File],
+      default: [],
     },
     autoTestPCRFiles: {
-      type: Map,
-      of: String,
-      default: {},
+      type: [File],
+      default: [],
     },
     rulesFiles: {
-      type: Map,
-      of: String,
-      default: {},
+      type: [File],
+      default: [],
     },
     militaryPreparationFilesIdentity: {
-      type: Map,
-      of: String,
-      default: {},
+      type: [File],
+      default: [],
     },
     militaryPreparationFilesCensus: {
-      type: Map,
-      of: String,
-      default: {},
+      type: [File],
+      default: [],
     },
     militaryPreparationFilesAuthorization: {
-      type: Map,
-      of: String,
-      default: {},
+      type: [File],
+      default: [],
     },
     militaryPreparationFilesCertificate: {
-      type: Map,
-      of: String,
-      default: {},
+      type: [File],
+      default: [],
     },
   },
 
