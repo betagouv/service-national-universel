@@ -9,12 +9,12 @@ import deleteIcon from "../assets/delete.svg";
 import api from "../services/api";
 import { toastr } from "react-redux-toastr";
 
-export default function DndFileInput({ value, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required, tw, youngId }) {
-  const [filesList, setFilesList] = useState(value || []);
+export default function DndFileInput({ value, name, errorMessage = requiredMessage, placeholder = "votre fichier", required, tw, path }) {
+  const [filesList, setFilesList] = useState(value);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   async function handleAdd([...newFiles]) {
-    const res = await api.uploadFile(`/referent/file/${name}`, newFiles, { youngId });
+    const res = await api.uploadFile(`${path}`, newFiles);
     if (res.code === "FILE_CORRUPTED") {
       return toastr.error(
         "Le fichier semble corrompu",
@@ -26,8 +26,15 @@ export default function DndFileInput({ value, name, errorMessage = requiredMessa
     setFilesList(res.data);
   }
 
+  async function handleDownload(fileId) {
+    const res = await api.get(`${path}/${fileId}`);
+    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléchargement de votre fichier");
+    return res;
+  }
+
   async function handleDelete(fileId) {
-    const res = await api.remove(`/referent/${youngId}/file/${name}/${fileId}`);
+    const res = await api.remove(`${path}/${fileId}`);
+    if (!res.ok) return toastr.error("Une erreur s'est produite lors de la suppression de votre fichier");
     setFilesList(res.data);
   }
 
@@ -42,7 +49,7 @@ export default function DndFileInput({ value, name, errorMessage = requiredMessa
               <RoundDownloadButton
                 bgColor="bg-indigo-600"
                 source={() => {
-                  return source(file);
+                  return handleDownload(file._id);
                 }}
                 title={`Télécharger`}
               />

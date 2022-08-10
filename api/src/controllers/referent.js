@@ -542,7 +542,7 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
 
 // Todo: refactor
 // get /young/:id/file/:key/:filename accessible only by ref or themself
-router.get("/youngFile/:youngId/:key/:fileId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/file/:youngId/:key/:fileId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       youngId: Joi.string().required(),
@@ -596,7 +596,13 @@ router.get("/youngFile/:youngId/:key/:fileId", passport.authenticate("referent",
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const downloaded = await getFile(`app/young/${youngId}/${key}/${fileId}`);
+    let downloaded = null;
+    if (key.includes("militaryPreparationFiles")) {
+      downloaded = await getFile(`app/young/${youngId}/military-preparation/${key}/${fileId}`);
+    } else {
+      downloaded = await getFile(`app/young/${youngId}/${key}/${fileId}`);
+    }
+
     const decryptedBuffer = decrypt(downloaded.Body);
 
     return res.status(200).send({
@@ -657,28 +663,29 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
 });
 
 router.post(
-  "/file/:key",
+  "/file/:youngId/:key/",
   passport.authenticate("referent", { session: false, failWithError: true }),
   fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req, res) => {
     try {
       const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
       const { error, value } = Joi.object({
+        youngId: Joi.string().required(),
         key: Joi.string().required(),
         body: Joi.string().required(),
       })
         .unknown()
         .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-      const { key, body } = value;
-      const {
-        error: bodyError,
-        value: { names, youngId },
-      } = Joi.object({
-        names: Joi.array().items(Joi.string()).required(),
-        youngId: Joi.string().required(),
-      }).validate(JSON.parse(body), { stripUnknown: true });
+      const { youngId, key, body } = value;
+      // const {
+      //   error: bodyError,
+      //   value: { names, youngId },
+      // } = Joi.object({
+      //   names: Joi.array().items(Joi.string()).required(),
+      //   youngId: Joi.string().required(),
+      // }).validate(JSON.parse(body), { stripUnknown: true });
 
-      if (error || bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const young = await YoungModel.findById(youngId);
       if (!young) return res.status(404).send({ ok: false });
@@ -707,7 +714,7 @@ router.post(
           Object.keys(req.files || {}).map((e) => req.files[e]),
           { stripUnknown: true },
         );
-      if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
       for (let currentFile of files) {
         // If multiple file with same names are provided, currentFile is an array. We just take the latest.
@@ -755,8 +762,7 @@ router.post(
         fs.unlinkSync(tempFilePath);
       }
 
-      // Save both original file names and uuids in db.
-
+      // Save young with new docs & send back updated array of file docs
       await young.save({ fromUser: req.user });
       return res.status(200).send({ data: young.files[value.key], ok: true });
     } catch (error) {
@@ -767,7 +773,7 @@ router.post(
   },
 );
 
-router.delete("/:young/file/:key/:file", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/file/:young/:key/:file", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // Validate
     const { error, value } = Joi.object({
@@ -780,7 +786,14 @@ router.delete("/:young/file/:key/:file", passport.authenticate("referent", { ses
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Delete on s3
-    deleteFile(`app/young/${value.young}/${value.key}/${value.file}`);
+
+    if (value.key.includes("militaryPreparationFiles")) {
+      const res = await deleteFile(`app/young/${value.young}/military-preparation/${value.key}/${value.file}`);
+      console.log("res from router.delete:", res);
+    } else {
+      const res = await deleteFile(`app/young/${value.young}/${value.key}/${value.file}`);
+      console.log("res from router.delete:", res);
+    }
 
     // Retrieve young model and delete file record
     const young = await YoungModel.findById(value.young);

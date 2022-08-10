@@ -1,14 +1,13 @@
 import React from "react";
 import { Col } from "reactstrap";
 
-import api from "../../../services/api";
 import DndFileInput from "../../../components/dndFileInput";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Documents from "../components/Documents";
 import Select from "../components/Select";
 
-export default function Identite({ values, handleChange, handleSubmit, required = {}, errors, touched }) {
+export default function Identite({ values, handleChange, required = {}, errors, touched }) {
   return (
     <Col md={6} style={{ marginBottom: "20px" }}>
       <Box>
@@ -66,9 +65,8 @@ export default function Identite({ values, handleChange, handleSubmit, required 
               placeholder="une pièce d'identité"
               errorMessage="Vous devez téléverser une pièce d'identité"
               value={values.files.cniFiles}
-              source={(file) => api.get(`/referent/youngFile/${values._id}/cniFiles/${file._id}`)}
+              path={`/referent/file/${values._id}/cniFiles`}
               name="cniFiles"
-              youngId={values._id}
             />
           </Documents>
         </BoxContent>
