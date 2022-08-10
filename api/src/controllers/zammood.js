@@ -49,7 +49,7 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
     });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // TODO - JOI - no verif for support + verif body
+    // TODO - JOI - verif body coté SUPPORT
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -196,8 +196,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 
     const { errorBody, value } = Joi.object({
       status: Joi.string().required(),
-    })
-    .validate(req.body, { stripUnknown: true });
+    }).validate(req.body, { stripUnknown: true });
     if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { status } = value;
 
@@ -223,8 +222,7 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
 
     const { errorBody, value } = Joi.object({
       message: Joi.string().allow(null, ""),
-    })
-    .validate(req.body, { stripUnknown: true });
+    }).validate(req.body, { stripUnknown: true });
     if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { message } = value;
 
