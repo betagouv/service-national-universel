@@ -148,6 +148,11 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   const { error, value: id } = validateId(req.params.id);
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+  const { errorBody } = Joi.object({
+    options: Joi.object().allow(null, {}),
+  }).validate({ ...req.body }, { stripUnknown: true });
+  if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
   const session = await SessionPhase1Model.findById(id);
   if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -215,8 +220,6 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
 
   const buffer = await renderFromHtml(newhtml, req.body.options || { format: "A4", margin: 0 });
-
-  // TODO - JOI - no check of req.body + This route should use the pdf service
 
   res.contentType("application/pdf");
   res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');

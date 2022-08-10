@@ -13,13 +13,12 @@ const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
+const { validateId } = require("../utils/validator");
 
 router.get("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { ok, data } = await zammood.api(`/v0/ticket?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    // TODO - JOI - no verif for support + verif mail
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -33,7 +32,6 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
     const { ok, data, token } = await zammood.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // TODO - JOI - no verif for support + verif mail
     res.cookie("jwtzamoud", token, cookieOptions());
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -41,6 +39,7 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
 router.post("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { ok, data } = await zammood.api(`/v0/ticket/search`, {
@@ -62,10 +61,12 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
 // Get one tickets with its messages.
 router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const messages = await zammood.api(`/v0/ticket/withMessages?ticketId=${req.params.id}`, { method: "GET", credentials: "include" });
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const messages = await zammood.api(`/v0/ticket/withMessages?ticketId=${checkedId}`, { method: "GET", credentials: "include" });
     if (!messages.ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // TODO - JOI - verif req.param.id
     return res.status(200).send({ ok: true, data: messages.data });
   } catch (error) {
     capture(error);
@@ -189,12 +190,18 @@ router.post("/ticket/form", async (req, res) => {
 
 // Update one ticket.
 router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  const { status } = req.body;
   try {
-    const email = req.user.email;
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    // TODO - JOI - no verif
-    const response = await zammood.api(`/v0/ticket/${req.params.id}`, {
+    const { errorBody, value } = Joi.object({
+      status: Joi.string().required(),
+    })
+    .validate(req.body, { stripUnknown: true });
+    if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { status } = value;
+
+    const response = await zammood.api(`/v0/ticket/${checkedId}`, {
       method: "PUT",
       credentials: "include",
       body: JSON.stringify({
@@ -211,7 +218,15 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 
 router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    // TODO - JOI - no verif
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { errorBody, value } = Joi.object({
+      message: Joi.string().allow(null, ""),
+    })
+    .validate(req.body, { stripUnknown: true });
+    if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { message } = value;
 
     const userAttributes = await getUserAttributes(req.user);
     const response = await zammood.api("/v0/message", {
@@ -221,8 +236,8 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
         lastName: req.user.lastName,
         firstName: req.user.firstName,
         email: req.user.email,
-        message: req.body.message,
-        ticketId: req.params.id,
+        message: message,
+        ticketId: checkedId,
         attributes: userAttributes,
       }),
     });
