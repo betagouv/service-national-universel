@@ -142,7 +142,7 @@ exports.handler = async () => {
       obj["young_sessionCohort"] = session.cohort;
 
       // Creating or updating stats 📈
-      const existingYCStats = await YoungStats.findOne({ young__id: obj["young__id"] });
+      const existingYCStats = await YoungStats.findOne({ young__id: obj["young__id"]?.toString() });
       if (existingYCStats) {
         existingYCStats.set(obj);
         existingYCStats.save();
