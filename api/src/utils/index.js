@@ -44,14 +44,6 @@ function getReq(url, cb) {
   return http.get(url, cb);
 }
 
-function getUUID(doc, key, filename) {
-  const map = doc.uuids[key];
-  for (let [key, value] of map.entries()) {
-    if (value === filename) return key;
-  }
-  return undefined;
-}
-
 function uploadFile(path, file) {
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
@@ -718,7 +710,6 @@ module.exports = {
   uploadFile,
   uploadPublicPicture,
   getFile,
-  getUUID,
   fileExist,
   validatePassword,
   ERRORS,

@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "reactstrap";
-import DndFileInput from "../../../components/dndFileInput";
+import DndFileInput from "../../../components/dndFileInputV2";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { Formik } from "formik";
@@ -41,29 +41,10 @@ export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsu
           ) : null}
 
           <Formik initialValues={young} validateOnChange={false} validateOnBlur={false}>
-            {({ values, handleChange }) => (
+            {({ values }) => (
               <>
                 <div className="flex mt-2 items-center justify-center">
-                  <DndFileInput
-                    className="flex flex-col items-center"
-                    value={values[name]}
-                    name={name}
-                    onChange={async (e) => {
-                      const res = await api.uploadFile(`/young/file/${name}`, e.target.files);
-                      if (res.code === "FILE_CORRUPTED") {
-                        return toastr.error(
-                          "Le fichier semble corrompu",
-                          "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                          { timeOut: 0 },
-                        );
-                      }
-                      if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                      // We update it instant ( because the bucket is updated instant )
-                      toastr.success("Fichier téléversé");
-                      handleChange({ target: { value: res.data, name } });
-                      await updateStatus(res.young);
-                    }}
-                  />
+                  <DndFileInput className="flex flex-col items-center" value={values.files[name]} name={name} path={`/young/file/${name}`} />
                 </div>
               </>
             )}

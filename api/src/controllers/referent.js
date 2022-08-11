@@ -716,6 +716,7 @@ router.post(
         );
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
+      // Iterate over files to upload
       for (let currentFile of files) {
         // If multiple file with same names are provided, currentFile is an array. We just take the latest.
         if (Array.isArray(currentFile)) {
@@ -764,7 +765,7 @@ router.post(
 
       // Save young with new docs & send back updated array of file docs
       await young.save({ fromUser: req.user });
-      return res.status(200).send({ data: young.files[value.key], ok: true });
+      return res.status(200).send({ data: young.files[key], ok: true });
     } catch (error) {
       capture(error);
       if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: "FILE_CORRUPTED" });
@@ -786,7 +787,6 @@ router.delete("/file/:young/:key/:file", passport.authenticate("referent", { ses
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Delete on s3
-
     if (value.key.includes("militaryPreparationFiles")) {
       const res = await deleteFile(`app/young/${value.young}/military-preparation/${value.key}/${value.file}`);
       console.log("res from router.delete:", res);
@@ -798,7 +798,7 @@ router.delete("/file/:young/:key/:file", passport.authenticate("referent", { ses
     // Retrieve young model and delete file record
     const young = await YoungModel.findById(value.young);
     young.files[value.key].id(value.file).remove();
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     return res.status(200).send({ data: young.files[value.key], ok: true });
   } catch (e) {
@@ -1024,7 +1024,7 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
     const { error: documentError, value: document } = Joi.string()
       .required()
       .valid(...keys)
-      .validate(req.params.document);
+      .validate(req.params.document, { stripUnknown: true });
     if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const young = await YoungModel.findById(req.params.id);
@@ -1125,6 +1125,7 @@ router.put("/young/:id/phase1Files/:document", passport.authenticate("referent",
   }
 });
 
+// Not used anymore?
 router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];

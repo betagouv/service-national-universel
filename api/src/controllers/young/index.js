@@ -6,12 +6,6 @@ const crypto = require("crypto");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
-const NodeClam = require("clamscan");
-const mime = require("mime-types");
-const fs = require("fs");
-const FileType = require("file-type");
-const fileUpload = require("express-fileupload");
-const { decrypt, encrypt } = require("../../cryptoUtils");
 const config = require("../../config");
 const { capture } = require("../../sentry");
 const { getQPV, getDensity } = require("../../geo");
@@ -26,8 +20,6 @@ const MeetingPointModel = require("../../models/meetingPoint");
 const BusModel = require("../../models/bus");
 const YoungAuth = new AuthObject(YoungObject);
 const {
-  uploadFile,
-  deleteFile,
   validatePassword,
   ERRORS,
   inSevenDays,
@@ -38,8 +30,6 @@ const {
   updatePlacesSessionPhase1,
   translateFileStatusPhase1,
   getCcOfYoung,
-  getUUID,
-  getFile,
   notifDepartmentChange,
   autoValidationSessionPhase1Young,
 } = require("../../utils");
@@ -113,113 +103,6 @@ router.post("/signup_invite", async (req, res) => {
     return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-router.post(
-  "/file/:key",
-  passport.authenticate("young", { session: false, failWithError: true }),
-  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
-  async (req, res) => {
-    try {
-      const rootKeys = [
-        "cniFiles",
-        "highSkilledActivityProofFiles",
-        "parentConsentmentFiles",
-        "autoTestPCRFiles",
-        "imageRightFiles",
-        "dataProcessingConsentmentFiles",
-        "rulesFiles",
-        "equivalenceFiles",
-      ];
-      const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
-      const { error: keyError, value: key } = Joi.string()
-        .required()
-        .valid(...[...rootKeys, ...militaryKeys])
-        .validate(req.params.key);
-      if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-      const { error: bodyError, value: body } = Joi.string().required().validate(req.body.body);
-      if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-      const {
-        error: namesError,
-        value: { names },
-      } = Joi.object({ names: Joi.array().items(Joi.string()).required() }).validate(JSON.parse(body), { stripUnknown: true });
-      if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-      const user = await YoungObject.findById(req.user._id);
-      if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
-      let uuids = user.uuids[key];
-
-      const files = Object.keys(req.files || {}).map((e) => req.files[e]);
-
-      // Delete files: iterate over the list of files from the young record for the given key,
-      // if a file is not in the list from the request, delete it from s3 and remove it from the record.
-      for (const filename of user[key]) {
-        if (!files.includes(filename)) {
-          const uuid = getUUID(user, key, filename);
-          deleteFile(`app/young/${user._id}/military-preparation/${key}/${uuid || filename}`);
-          if (uuid) uuids.delete(uuid);
-        }
-      }
-
-      // Upload files: iterate over the list of files from the request,
-      // if one of them is not in the list from young record, upload it to s3 and add it to the record.
-      for (let i = 0; i < files.length; i++) {
-        let currentFile = files[i];
-        // If multiple file with same names are provided, currentFile is an array. We just take the latest.
-        if (Array.isArray(currentFile)) {
-          currentFile = currentFile[currentFile.length - 1];
-        }
-        const { name, tempFilePath, mimetype } = currentFile;
-        const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
-        const validTypes = ["image/jpeg", "image/png", "application/pdf"];
-        if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
-          fs.unlinkSync(tempFilePath);
-          return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
-        }
-
-        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            fs.unlinkSync(tempFilePath);
-            return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-          }
-        }
-
-        const data = fs.readFileSync(tempFilePath);
-        const encryptedBuffer = encrypt(data);
-        const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-
-        // If file is new then generate uuid, upload file and save uuid and name in db
-        if (!user[key].includes(name)) {
-          const uuid = crypto.randomUUID();
-          uuids.set(uuid, name);
-
-          if (militaryKeys.includes(key)) {
-            await uploadFile(`app/young/${user._id}/military-preparation/${key}/${uuid}`, resultingFile);
-          } else {
-            await uploadFile(`app/young/${user._id}/${key}/${uuid}`, resultingFile);
-          }
-          fs.unlinkSync(tempFilePath);
-        }
-      }
-      // Save both original file names and uuids in db.
-      user.set({ [key]: names });
-      user.set({ uuids: { [key]: uuids } });
-
-      await user.save({ fromUser: req.user });
-
-      return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
-    } catch (error) {
-      capture(error);
-      if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  },
-);
 
 router.post("/invite", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -1024,51 +907,11 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
   }
 });
 
-router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      youngId: Joi.string().required(),
-      key: Joi.string().required(),
-      fileName: Joi.string().required(),
-    })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const { youngId, key, fileName } = value;
-
-    const young = await YoungObject.findById(youngId);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (req.user._id.toString() !== young._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const uuid = getUUID(young, key, fileName);
-    const downloaded = await getFile(`app/young/${youngId}/${key}/${uuid || young.key.fileName}`);
-    const decryptedBuffer = decrypt(downloaded.Body);
-
-    let mimeFromFile = null;
-    try {
-      const { mime } = await FileType.fromBuffer(decryptedBuffer);
-      mimeFromFile = mime;
-    } catch (e) {
-      //
-    }
-
-    return res.status(200).send({
-      data: Buffer.from(decryptedBuffer, "base64"),
-      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
-      fileName: fileName,
-      ok: true,
-    });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.use("/:id/documents", require("./documents"));
 router.use("/:id/meeting-point", require("./meeting-point"));
 router.use("/:id/phase1", require("./phase1"));
 router.use("/:id/phase2", require("./phase2"));
 router.use("/inscription", require("./inscription"));
+router.use("/file", require("./file"));
 
 module.exports = router;

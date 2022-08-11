@@ -13,7 +13,7 @@ export default function DndFileInput({ value, name, errorMessage = requiredMessa
   const [filesList, setFilesList] = useState(value);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
-  async function handleAdd([...newFiles]) {
+  async function handleUpload([...newFiles]) {
     const res = await api.uploadFile(`${path}`, newFiles);
     if (res.code === "FILE_CORRUPTED") {
       return toastr.error(
@@ -65,7 +65,7 @@ export default function DndFileInput({ value, name, errorMessage = requiredMessa
             name={name}
             value={[]}
             validate={(v) => (required && (!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
-            onChange={(e) => handleAdd(e.target.files)}
+            onChange={(e) => handleUpload(e.target.files)}
           />
           <div className="flex flex-col items-center">
             <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">

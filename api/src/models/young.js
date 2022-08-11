@@ -6,6 +6,7 @@ const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
 const File = require("./file");
+const { FILEKEYS } = require("snu-lib");
 
 const MODELNAME = "young";
 
@@ -1436,50 +1437,17 @@ const Schema = new mongoose.Schema({
   },
 
   files: {
-    cniFiles: {
-      type: [File],
-      default: [],
-    },
-    highSkilledActivityProofFiles: {
-      type: [File],
-      default: [],
-    },
-    dataProcessingConsentmentFiles: {
-      type: [File],
-      default: [],
-    },
-    parentConsentmentFiles: {
-      type: [File],
-      default: [],
-    },
-    imageRightFiles: {
-      type: [File],
-      default: [],
-    },
-    autoTestPCRFiles: {
-      type: [File],
-      default: [],
-    },
-    rulesFiles: {
-      type: [File],
-      default: [],
-    },
-    militaryPreparationFilesIdentity: {
-      type: [File],
-      default: [],
-    },
-    militaryPreparationFilesCensus: {
-      type: [File],
-      default: [],
-    },
-    militaryPreparationFilesAuthorization: {
-      type: [File],
-      default: [],
-    },
-    militaryPreparationFilesCertificate: {
-      type: [File],
-      default: [],
-    },
+    cniFiles: [File],
+    highSkilledActivityProofFiles: [File],
+    dataProcessingConsentmentFiles: [File],
+    parentConsentmentFiles: [File],
+    imageRightFiles: [File],
+    autoTestPCRFiles: [File],
+    rulesFiles: [File],
+    militaryPreparationFilesIdentity: [File],
+    militaryPreparationFilesCensus: [File],
+    militaryPreparationFilesAuthorization: [File],
+    militaryPreparationFilesCertificate: [File],
   },
 
   missionsInMail: {
