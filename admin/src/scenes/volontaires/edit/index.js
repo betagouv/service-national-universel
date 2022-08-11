@@ -35,7 +35,6 @@ import JDC from "./JDC";
 import CohesionCenter from "./cohesion-center";
 import MeetingPoint from "./meeting-point";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
-import { unstable_batchedUpdates } from "react-dom";
 
 export default function VolontaireEdit(props) {
   const [young, setYoung] = useState();
@@ -49,10 +48,8 @@ export default function VolontaireEdit(props) {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return setYoung(null);
       const { data } = await api.get(`/referent/young/${id}`);
-      unstable_batchedUpdates(() => {
-        setDocumentTitle(`${data.firstName} ${data.lastName}`);
-        setYoung(data);
-      });
+      setDocumentTitle(`${data.firstName} ${data.lastName}`);
+      setYoung(data);
     })();
   }, []);
 
