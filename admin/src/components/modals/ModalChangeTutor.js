@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer, useState } from "react";
 import { Modal } from "reactstrap";
-import { translate } from "../../utils";
+import { translate, ES_NO_LIMIT } from "../../utils";
 
 import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { toastr } from "react-redux-toastr";
@@ -35,6 +35,7 @@ export default function ModalChangeTutor({ isOpen, tutor, onChange, onCancel, on
         query: {
           bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": tutor.structureId } }] },
         },
+        size: ES_NO_LIMIT,
       });
       if (responses.length) {
         setResponsables(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })).filter((e) => e._id.toString() !== tutor._id.toString()));
