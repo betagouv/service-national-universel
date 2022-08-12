@@ -44,7 +44,7 @@ export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsu
             {({ values }) => (
               <>
                 <div className="flex mt-2 items-center justify-center">
-                  <DndFileInput className="flex flex-col items-center" value={values.files[name]} name={name} path={`/young/file/${name}`} />
+                  <DndFileInput className="flex flex-col items-center" value={values.files[name]} name={name} path={`/young/files/${name}`} />
                 </div>
               </>
             )}

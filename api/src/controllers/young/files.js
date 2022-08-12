@@ -37,7 +37,7 @@ router.post(
         key: Joi.string().required(),
       })
         .unknown()
-        // .valid(...rootKeys, ...militaryKeys)
+        .valid(...[...rootKeys, ...militaryKeys])
         .validate(req.params, { stripUnknown: true });
       if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 

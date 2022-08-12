@@ -29,7 +29,7 @@ export default function ConsentmentImage({ values }) {
                 placeholder="un document justificatif"
                 errorMessage="Vous devez téléverser un document justificatif"
                 value={values.files.dataProcessingConsentmentFiles}
-                path={`/referent/file/${values._id}/dataProcessingConsentmentFiles`}
+                path={`/referent/files/${values._id}/dataProcessingConsentmentFiles`}
                 name="dataProcessingConsentmentFiles"
               />
             </Documents>

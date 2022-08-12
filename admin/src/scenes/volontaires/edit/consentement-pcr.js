@@ -30,23 +30,9 @@ export default function ConsentementPcr({ values, handleChange, handleSubmit }) 
             <DndFileInput
               placeholder="un document justificatif"
               errorMessage="Vous devez téléverser un document justificatif"
-              value={values.autoTestPCRFiles}
-              source={(e) => api.get(`/referent/youngFile/${values._id}/autoTestPCRFiles/${e}`)}
+              value={values.files.autoTestPCRFiles}
+              path={`/referent/files/${values._id}/autoTestPCRFiles`}
               name="autoTestPCRFiles"
-              onChange={async (e) => {
-                const res = await api.uploadFile("/referent/file/autoTestPCRFiles", e.target.files, { youngId: values._id });
-                if (res.code === "FILE_CORRUPTED") {
-                  return toastr.error(
-                    "Le fichier semble corrompu",
-                    "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                    { timeOut: 0 },
-                  );
-                }
-                if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                // We update and save it instant.
-                handleChange({ target: { value: res.data, name: "autoTestPCRFiles" } });
-                handleSubmit();
-              }}
             />
           </Documents>
         </BoxContent>

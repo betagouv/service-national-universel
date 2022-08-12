@@ -65,7 +65,7 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
                     placeholder="un document justificatif"
                     errorMessage="Vous devez téléverser un document justificatif"
                     value={young.files[nameFiles]}
-                    path={`/referent/file/${young._id}/${nameFiles}`}
+                    path={`/referent/files/${young._id}/${nameFiles}`}
                     name={nameFiles}
                   />
                 </section>

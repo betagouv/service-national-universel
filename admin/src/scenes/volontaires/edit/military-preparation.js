@@ -26,7 +26,7 @@ export default function MilitaryPreparation({ values }) {
                     placeholder="un document justificatif"
                     errorMessage="Vous devez téléverser le document"
                     value={values.files[file.name]}
-                    path={`/referent/file/${values._id}/${file.name}`}
+                    path={`/referent/files/${values._id}/${file.name}`}
                     name={file.name}
                   />
                 </Documents>
