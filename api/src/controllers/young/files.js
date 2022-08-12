@@ -13,6 +13,7 @@ const { capture } = require("../../sentry");
 const YoungObject = require("../../models/young");
 const { uploadFile, deleteFile, getFile, ERRORS } = require("../../utils");
 const { serializeYoung } = require("../../utils/serializer");
+const { FILEKEYS, MILITARYFILEKEYS } = require("snu-lib/constants");
 
 router.post(
   "/:key",
@@ -20,25 +21,12 @@ router.post(
   fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req, res) => {
     try {
-      const rootKeys = [
-        "cniFiles",
-        "highSkilledActivityProofFiles",
-        "parentConsentmentFiles",
-        "autoTestPCRFiles",
-        "imageRightFiles",
-        "dataProcessingConsentmentFiles",
-        "rulesFiles",
-        "equivalenceFiles",
-      ];
-      const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
+      // Validate
 
-      // Validate params & body
-      const { error: keyError, value } = Joi.object({
-        key: Joi.string().required(),
-      })
-        .unknown()
-        .valid(...[...rootKeys, ...militaryKeys])
-        .validate(req.params, { stripUnknown: true });
+      const { error: keyError, value: key } = Joi.string()
+        .required()
+        .valid(...FILEKEYS, ...MILITARYFILEKEYS)
+        .validate(req.params.key, { stripUnknown: true });
       if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const { error: bodyError, value: body } = Joi.string().required().validate(req.body.body);
@@ -47,7 +35,6 @@ router.post(
       const user = await YoungObject.findById(req.user._id);
       if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
 
-      // Validate files with Joi
       const { error: filesError, value: files } = Joi.array()
         .items(
           Joi.alternatives().try(
@@ -71,7 +58,8 @@ router.post(
         );
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-      // Upload files: iterate over the list of files from the request,
+      // Upload files
+
       for (let currentFile of files) {
         // If multiple file with same names are provided, currentFile is an array. We just take the latest.
         if (Array.isArray(currentFile)) {
@@ -97,6 +85,7 @@ router.post(
         }
 
         // Create document to embed in young record
+
         const newFile = {
           _id: mongoose.Types.ObjectId(),
           name,
@@ -104,28 +93,25 @@ router.post(
           uploadedAt: Date.now(),
           mimetype,
         };
-        // console.log("user:", user);
-        console.log("newFile:", newFile);
-        console.log("value.key:", value.key);
-        console.log("user.files:", user.files);
-        console.log("user.files[value.key]:", user.files[value.key]);
-        user.files[value.key].push(newFile);
+        user.files[key].push(newFile);
 
         // Upload file using ObjectId as file name
+
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-        if (militaryKeys.includes(value.key)) {
-          await uploadFile(`app/young/${user._id}/military-preparation/${value.key}/${newFile._id}`, resultingFile);
+        if (MILITARYFILEKEYS.includes(key)) {
+          await uploadFile(`app/young/${user._id}/military-preparation/${key}/${newFile._id}`, resultingFile);
         } else {
-          await uploadFile(`app/young/${user._id}/${value.key}/${newFile._id}`, resultingFile);
+          await uploadFile(`app/young/${user._id}/${key}/${newFile._id}`, resultingFile);
         }
         fs.unlinkSync(tempFilePath);
       }
 
       // Save young with new docs & send back updated array of file docs
+
       await user.save({ fromUser: req.user });
-      return res.status(200).send({ young: serializeYoung(user, user), data: user.files[value.key], ok: true });
+      return res.status(200).send({ young: serializeYoung(user, user), data: user.files[key], ok: true });
     } catch (error) {
       capture(error);
       if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
@@ -137,6 +123,7 @@ router.post(
 router.delete("/:key/:fileId", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     // Validate
+
     const { error, value } = Joi.object({
       key: Joi.string().required(),
       fileId: Joi.string().required(),
@@ -145,20 +132,20 @@ router.delete("/:key/:fileId", passport.authenticate("young", { session: false, 
       .validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    // Retrieve young model and delete file record
+
+    const user = await YoungObject.findById(req.user._id);
+    if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    user.files[value.key].id(value.fileId).remove();
+    await user.save({ fromUser: req.user });
+
     // Delete on s3
 
     if (value.key.includes("militaryPreparationFiles")) {
-      const res = await deleteFile(`app/young/${value.young}/military-preparation/${value.key}/${value.fileId}`);
-      console.log("res from router.delete:", res);
+      await deleteFile(`app/young/${value.young}/military-preparation/${value.key}/${value.fileId}`);
     } else {
-      const res = await deleteFile(`app/young/${value.young}/${value.key}/${value.fileId}`);
-      console.log("res from router.delete:", res);
+      await deleteFile(`app/young/${value.young}/${value.key}/${value.fileId}`);
     }
-
-    // Retrieve young model and delete file record
-    const user = await YoungObject.findById(req.user._id);
-    user.files[value.key].id(value.fileId).remove();
-    await user.save({ fromUser: req.user });
 
     return res.status(200).send({ data: user.files[value.key], ok: true });
   } catch (e) {
@@ -168,6 +155,8 @@ router.delete("/:key/:fileId", passport.authenticate("young", { session: false, 
 
 router.get("/:key/:fileId", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
+    // Validate
+
     const { error, value } = Joi.object({
       key: Joi.string().required(),
       fileId: Joi.string().required(),
@@ -181,12 +170,16 @@ router.get("/:key/:fileId", passport.authenticate("young", { session: false, fai
     const user = await YoungObject.findById(req.user._id);
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // Download from s3
+
     let downloaded = null;
     if (key.includes("militaryPreparationFiles")) {
       downloaded = await getFile(`app/young/${req.user._id}/military-preparation/${key}/${fileId}`);
     } else {
       downloaded = await getFile(`app/young/${req.user._id}/${key}/${fileId}`);
     }
+
+    // Send to app
 
     const decryptedBuffer = decrypt(downloaded.Body);
     return res.status(200).send({

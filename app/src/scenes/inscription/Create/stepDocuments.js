@@ -16,21 +16,28 @@ import FormFooter from "../../../components/form/FormFooter";
 import { setYoung } from "../../../redux/auth/actions";
 import { getAge, translate, urlWithScheme } from "../../../utils";
 import { supportURL } from "../../../config";
+import { MILITARYFILEKEYS } from "snu-lib/constants";
 
 export default function StepDocuments() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  // const [data, setData] = useState();
+  const [data, setData] = useState();
 
   useEffect(() => {
-    if (!young) {
+    if (young) {
+      setData({
+        cniFiles: young.files.cniFiles,
+        parentConsentmentFiles: young.files.parentConsentmentFiles,
+        dataProcessingConsentmentFiles: young.files.dataProcessingConsentmentFiles,
+      });
+    } else {
       history.push("/inscription/profil");
     }
   }, [young]);
 
-  // if (!data) return null;
+  if (!data) return null;
 
   const isParentFromFranceConnect = () => {
     if (young.parent1Status && young.parent2Status) {
@@ -43,6 +50,10 @@ export default function StepDocuments() {
   const onSubmit = async ({ values, type }) => {
     if (type === "next") setLoading(true);
     try {
+      for (const key of ["autoTestPCRFiles", "highSkilledActivityProofFiles", "imageRightFiles", "rulesFiles", ...MILITARYFILEKEYS]) {
+        delete values[key];
+      }
+      // delete values.autoTestPCRFiles;
       if (isParentFromFranceConnect()) delete values.parentConsentmentFiles;
       if (getAge(young.birthdateAt) >= 15) delete values.dataProcessingConsentmentFiles;
       const { ok, code, data } = await api.put(`/young/inscription/documents/${type}`, values);
@@ -51,7 +62,6 @@ export default function StepDocuments() {
       dispatch(setYoung(data));
       if (type === "next") history.push("/inscription/done");
     } catch (e) {
-      console.log(e);
       toastr.error("Erreur !");
     } finally {
       setLoading(false);
@@ -68,7 +78,6 @@ export default function StepDocuments() {
       <Formik initialValues={young.files} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit({ values, type: "next" })}>
         {({ values, handleSubmit, errors, touched }) => (
           <>
-            {console.log("values from stepDocument:", values)}
             <FormRow>
               <Col md={4}>
                 <Label>Pièce d&apos;identité du volontaire</Label>

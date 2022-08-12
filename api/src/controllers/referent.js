@@ -48,7 +48,6 @@ const {
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } = require("snu-lib/constants");
 const { department2region } = require("snu-lib/region-and-departments");
 const { translateCohort } = require("snu-lib/translation");
 const {
@@ -71,6 +70,9 @@ const {
   canModifyStructure,
   canSearchSessionPhase1,
   canCreateOrUpdateSessionPhase1,
+  SENDINBLUE_TEMPLATES,
+  YOUNG_STATUS_PHASE1,
+  MILITARYFILEKEYS,
 } = require("snu-lib/roles");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
@@ -1185,7 +1187,8 @@ router.post(
   fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req, res) => {
     try {
-      const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
+      // Validate
+
       const { error, value } = Joi.object({
         youngId: Joi.string().required(),
         key: Joi.string().required(),
@@ -1193,14 +1196,7 @@ router.post(
       })
         .unknown()
         .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-      const { youngId, key, body } = value;
-      // const {
-      //   error: bodyError,
-      //   value: { names, youngId },
-      // } = Joi.object({
-      //   names: Joi.array().items(Joi.string()).required(),
-      //   youngId: Joi.string().required(),
-      // }).validate(JSON.parse(body), { stripUnknown: true });
+      const { youngId, key } = value;
 
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -1209,7 +1205,6 @@ router.post(
 
       if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-      // Validate files with Joi
       const { error: filesError, value: files } = Joi.array()
         .items(
           Joi.alternatives().try(
@@ -1233,7 +1228,8 @@ router.post(
         );
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-      // Iterate over files to upload
+      // Upload files
+
       for (let currentFile of files) {
         // If multiple file with same names are provided, currentFile is an array. We just take the latest.
         if (Array.isArray(currentFile)) {
@@ -1258,7 +1254,8 @@ router.post(
           }
         }
 
-        // Create document to embed in young record
+        // Create document to embed in young record and upload file using ObjectId as file name
+
         const newFile = {
           _id: mongoose.Types.ObjectId(),
           name,
@@ -1268,11 +1265,10 @@ router.post(
         };
         young.files[key].push(newFile);
 
-        // Upload file using ObjectId as file name
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-        if (militaryKeys.includes(key)) {
+        if (MILITARYFILEKEYS.includes(key)) {
           await uploadFile(`app/young/${young._id}/military-preparation/${key}/${newFile._id}`, resultingFile);
         } else {
           await uploadFile(`app/young/${young._id}/${key}/${newFile._id}`, resultingFile);
@@ -1281,6 +1277,7 @@ router.post(
       }
 
       // Save young with new docs & send back updated array of file docs
+
       await young.save({ fromUser: req.user });
       return res.status(200).send({ data: young.files[key], ok: true });
     } catch (error) {
@@ -1294,6 +1291,7 @@ router.post(
 router.delete("/files/:young/:key/:file", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // Validate
+
     const { error, value } = Joi.object({
       young: Joi.string().required(),
       key: Joi.string().required(),
@@ -1304,6 +1302,7 @@ router.delete("/files/:young/:key/:file", passport.authenticate("referent", { se
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Delete on s3
+
     if (value.key.includes("militaryPreparationFiles")) {
       const res = await deleteFile(`app/young/${value.young}/military-preparation/${value.key}/${value.file}`);
       console.log("res from router.delete:", res);
@@ -1313,6 +1312,7 @@ router.delete("/files/:young/:key/:file", passport.authenticate("referent", { se
     }
 
     // Retrieve young model and delete file record
+
     const young = await YoungModel.findById(value.young);
     young.files[value.key].id(value.file).remove();
     await young.save({ fromUser: req.user });

@@ -713,15 +713,15 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     const { error, value } = Joi.object({
       cniFiles: Joi.alternatives().conditional("$isRequired", {
         is: Joi.boolean().valid(true).required(),
-        then: Joi.array().items(Joi.string().required()).required().min(1),
-        otherwise: Joi.array().items(Joi.string()),
+        then: Joi.array().items(Joi.object().required()).required().min(1),
+        otherwise: Joi.array().items(Joi.object()),
       }),
       parentConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
         is: Joi.boolean().valid(false).required(),
         then: Joi.alternatives().conditional("$isRequired", {
           is: Joi.boolean().valid(true).required(),
-          then: Joi.array().items(Joi.string().required()).required().min(1),
-          otherwise: Joi.array().items(Joi.string()),
+          then: Joi.array().items(Joi.object().required()).required().min(1),
+          otherwise: Joi.array().items(Joi.object()),
         }),
         otherwise: Joi.isError(new Error()),
       }),
@@ -731,17 +731,18 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
           is: Joi.boolean().valid(true).required(),
           then: Joi.alternatives().conditional("$isRequired", {
             is: Joi.boolean().valid(true).required(),
-            then: Joi.array().items(Joi.string().required()).required().min(1),
-            otherwise: Joi.array().items(Joi.string()),
+            then: Joi.array().items(Joi.object().required()).required().min(1),
+            otherwise: Joi.array().items(Joi.object()),
           }),
           otherwise: Joi.isError(new Error()),
         }),
         otherwise: Joi.isError(new Error()),
       }),
-    }).validate(req.body, { context: { needMoreConsent, isParentFromFranceconnect, isRequired } });
+    }).validate(req.body, { context: { needMoreConsent, isParentFromFranceconnect, isRequired } }, { stripUnknown: true });
 
     if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      console.error(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

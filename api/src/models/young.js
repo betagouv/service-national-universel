@@ -5,10 +5,15 @@ const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
-const File = require("./file");
-const { FILEKEYS } = require("snu-lib");
 
 const MODELNAME = "young";
+
+const File = new mongoose.Schema({
+  name: String,
+  uploadedAt: Date,
+  size: Number,
+  mimetype: String,
+});
 
 const Schema = new mongoose.Schema({
   sqlId: {
