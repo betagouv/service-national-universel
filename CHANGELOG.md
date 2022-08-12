@@ -1,3 +1,10 @@
+## [1.123.2](https://github.com/betagouv/service-national-universel/compare/v1.123.1...v1.123.2) (2022-08-11)
+
+
+### Bug Fixes
+
+* **admin:** liste referent delete modal ([3ef6626](https://github.com/betagouv/service-national-universel/commit/3ef66263b75bf567effc48fcb6a729177b691d89))
+
 ## [1.123.1](https://github.com/betagouv/service-national-universel/compare/v1.123.0...v1.123.1) (2022-08-10)
 
 
