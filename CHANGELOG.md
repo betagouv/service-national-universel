@@ -1,3 +1,10 @@
+## [1.123.3](https://github.com/betagouv/service-national-universel/compare/v1.123.2...v1.123.3) (2022-08-12)
+
+
+### Bug Fixes
+
+* **api:** disabled stats-young-metabase ([c26e9dc](https://github.com/betagouv/service-national-universel/commit/c26e9dc572000f983d4a9f4bbaacbed3d8981463))
+
 ## [1.123.2](https://github.com/betagouv/service-national-universel/compare/v1.123.1...v1.123.2) (2022-08-11)
 
 
