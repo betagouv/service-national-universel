@@ -50,7 +50,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-    }).validate({ ...req.params });
+    }).validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
     const young = await YoungModel.findById(value.id);
