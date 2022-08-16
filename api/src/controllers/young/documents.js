@@ -120,6 +120,7 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
   }
 });
 
+// todo: refacto
 router.post("/:type/:template/send-email", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -202,11 +203,11 @@ router.post(
       // Validate
 
       const { error, value } = Joi.object({
-        id: Joi.string(),
-        key: Joi.string().valid(...FILE_KEYS, ...MILITARY_FILE_KEYS),
-      })
-        .required()
-        .validate(req.params, { stripUnknown: true });
+        id: Joi.string().alphanum().length(24).required(),
+        key: Joi.string()
+          .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
+          .required(),
+      }).validate(req.params, { stripUnknown: true });
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       const { id, key } = value;
 
@@ -312,9 +313,11 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
     // Validate
 
     const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      key: Joi.string().required(),
-      fileId: Joi.string().required(),
+      id: Joi.string().alphanum().length(24).required(),
+      key: Joi.string()
+        .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
+        .required(),
+      fileId: Joi.string().alphanum().length(24).required(),
     })
       .unknown()
       .validate(req.params, { stripUnknown: true });
@@ -334,7 +337,8 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
     if (key.includes("militaryPreparationFiles")) {
       await deleteFile(`app/young/${id}/military-preparation/${key}/${fileId}`);
     } else {
-      await deleteFile(`app/young/${id}/${key}/${fileId}`);
+      const res = await deleteFile(`app/young/${id}/${key}/${fileId}`);
+      console.log("res from deleteFile:", res);
     }
 
     // Delete record
@@ -354,8 +358,10 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
     // Validate
 
     const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      key: Joi.string().required(),
+      id: Joi.string().alphanum().length(24).required(),
+      key: Joi.string()
+        .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
+        .required(),
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
@@ -381,14 +387,15 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
 
 // Download one file
 router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
-  console.log("params:", req.params);
   try {
     // Validate
 
     const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      key: Joi.string().required(),
-      fileId: Joi.string().required(),
+      id: Joi.string().alphanum().length(24).required(),
+      key: Joi.string()
+        .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
+        .required(),
+      fileId: Joi.string().alphanum().length(24).required(),
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });

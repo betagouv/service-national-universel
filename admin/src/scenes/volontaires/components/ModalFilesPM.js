@@ -8,6 +8,7 @@ import ModalButton from "../../../components/buttons/ModalButton";
 import { Footer, ModalContainer } from "../../../components/modals/Modal";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
+import FileSaver from "file-saver";
 
 export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -18,7 +19,7 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
   const handleClick = (e) => {
     setModal({
       isOpen: true,
-      onConfirm,
+      onConfirm: handleDownload,
       title: "Téléchargement de document",
       message:
         "En téléchargeant cette pièce jointe, vous vous engagez à la supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)",
@@ -30,12 +31,6 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
 
   const handleClickUpload = () => {
     hiddenFileInput.current.click();
-  };
-
-  const onConfirm = async (file) => {
-    setLoading(true);
-    await handleDownload(file._id);
-    setLoading(false);
   };
 
   async function handleUpload([...files]) {
@@ -57,9 +52,15 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
   }
 
   async function handleDownload(fileId) {
-    const res = await api.get(`${path}/${fileId}`);
-    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléchargement de votre fichier");
-    return res;
+    setLoading(true);
+    try {
+      const res = await api.get(`${path}/${fileId}`);
+      console.log("res from handleDownload:", res);
+      FileSaver.saveAs(new Blob([new Uint8Array(res.data.data)], { type: res.mimeType }));
+    } catch (e) {
+      toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
+    }
+    setLoading(false);
   }
 
   async function handleDelete(fileId) {
@@ -69,9 +70,11 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
   }
 
   async function getList(path) {
-    const res = await api.get(path);
-    if (!res.ok) return toastr.error("Une erreur s'est produite lors de la récupération de la liste de vos fichiers.");
-    setFilesList(res.data);
+    if (path) {
+      const res = await api.get(path);
+      if (!res.ok) return toastr.error("Une erreur s'est produite lors de la récupération de la liste de vos fichiers.");
+      setFilesList(res.data);
+    }
   }
 
   useEffect(() => {
@@ -94,7 +97,7 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
                       <div className="text-sm leading-5 font-normal text-gray-800">{file.name}</div>
                     </div>
                     <div className="flex flex-row items-center gap-4">
-                      <div className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer" onClick={() => handleClick(file)}>
+                      <div className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer" onClick={() => handleClick(file._id)}>
                         Télécharger
                       </div>
                       <div

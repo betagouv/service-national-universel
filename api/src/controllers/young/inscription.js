@@ -711,41 +711,45 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     } else {
       isParentFromFranceconnect = young.parent1FromFranceConnect === "true";
     }
+    const file = Joi.object({
+      _id: Joi.string().alphanum().length(24).required(),
+      uploadedAt: Joi.string().required(),
+      size: Joi.number().required(),
+      mimetype: Joi.string().required(),
+      name: Joi.string().required(),
+    });
 
     const { error, value } = Joi.object({
-      files: Joi.object({
-        cniFiles: Joi.alternatives().conditional("$isRequired", {
+      cniFiles: Joi.alternatives().conditional("$isRequired", {
+        is: Joi.boolean().valid(true).required(),
+        then: Joi.array().items(file.required()).required().min(1),
+        otherwise: Joi.array().items(file),
+      }),
+      parentConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
+        is: Joi.boolean().valid(false).required(),
+        then: Joi.alternatives().conditional("$isRequired", {
           is: Joi.boolean().valid(true).required(),
-          then: Joi.array().items(Joi.object().required()).required().min(1),
-          otherwise: Joi.array().items(Joi.object()),
+          then: Joi.array().items(file.required()).required().min(1),
+          otherwise: Joi.array().items(file),
         }),
-        parentConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
-          is: Joi.boolean().valid(false).required(),
+        otherwise: Joi.isError(new Error()),
+      }),
+      dataProcessingConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
+        is: Joi.boolean().valid(false).required(),
+        then: Joi.alternatives().conditional("$needMoreConsent", {
+          is: Joi.boolean().valid(true).required(),
           then: Joi.alternatives().conditional("$isRequired", {
             is: Joi.boolean().valid(true).required(),
-            then: Joi.array().items(Joi.object().required()).required().min(1),
-            otherwise: Joi.array().items(Joi.object()),
+            then: Joi.array().items(file.required()).required().min(1),
+            otherwise: Joi.array().items(file),
           }),
           otherwise: Joi.isError(new Error()),
         }),
-        dataProcessingConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
-          is: Joi.boolean().valid(false).required(),
-          then: Joi.alternatives().conditional("$needMoreConsent", {
-            is: Joi.boolean().valid(true).required(),
-            then: Joi.alternatives().conditional("$isRequired", {
-              is: Joi.boolean().valid(true).required(),
-              then: Joi.array().items(Joi.object().required()).required().min(1),
-              otherwise: Joi.array().items(Joi.object()),
-            }),
-            otherwise: Joi.isError(new Error()),
-          }),
-          otherwise: Joi.isError(new Error()),
-        }),
+        otherwise: Joi.isError(new Error()),
       }),
     }).validate(req.body, { context: { needMoreConsent, isParentFromFranceconnect, isRequired } }, { stripUnknown: true });
 
     if (error) {
-      console.error(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 

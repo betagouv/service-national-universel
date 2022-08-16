@@ -40,6 +40,7 @@ const {
   getFile,
   notifDepartmentChange,
   autoValidationSessionPhase1Young,
+  deleteFile,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
@@ -822,9 +823,17 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
       "city",
     ];
 
-    if (young.files) {
-      for (const key in young.files) {
-        young.set({ files: { [key]: undefined } });
+    for (const key in young.files) {
+      if (key.length) {
+        for (const file in key) {
+          try {
+            if (key.includes("military")) await deleteFile(`app/young/${id}/military-preparation/${key}/${file._id}`);
+            else await deleteFile(`app/young/${id}/${key}/${file._id}`);
+            young.set({ files: { [key]: undefined } });
+          } catch (e) {
+            console.error(e);
+          }
+        }
       }
     }
 

@@ -34,6 +34,7 @@ jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
   getFile: () => Promise.resolve({ Body: "" }),
   uploadFile: (path, file) => Promise.resolve({ path, file }),
+  deleteFile: (path, file) => Promise.resolve({ path, file }),
 }));
 
 jest.mock("../cryptoUtils", () => ({
@@ -81,7 +82,6 @@ describe("Young", () => {
         "region",
         "zip",
         "city",
-        // "files",
       ];
 
       //Check that the fields deleted are deleted

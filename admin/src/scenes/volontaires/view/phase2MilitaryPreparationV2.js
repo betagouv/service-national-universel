@@ -174,14 +174,14 @@ export default function Phase2militaryPrepartionV2({ young }) {
         onChange={() => setModal({ isOpen: false, template: null, data: null })}
         onConfirm={onRefuse}
       />
-      <ModalFilesPM
-        isOpen={modalFiles?.isOpen}
-        onCancel={() => setModalFiles({ isOpen: false })}
-        young={young}
-        nameFiles={modalFiles?.nameFiles}
-        title={modalFiles?.title}
-        path={`/young/${young._id}/documents/${modalFiles.nameFiles}`}
-      />
+      {modalFiles.nameFiles ? (
+        <ModalFilesPM
+          isOpen={modalFiles?.isOpen}
+          onCancel={() => setModalFiles({ isOpen: false })}
+          title={modalFiles?.title}
+          path={`/young/${young._id}/documents/${modalFiles?.nameFiles}`}
+        />
+      ) : null}
       <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
         <div className="mb-3">
           <div className="flex items-center justify-between px-4">

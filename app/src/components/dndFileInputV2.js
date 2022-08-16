@@ -62,7 +62,7 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
       );
     }
     if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-    onChange();
+    if (onChange) onChange();
     setFilesList(res.data);
   }
 
