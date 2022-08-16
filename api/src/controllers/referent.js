@@ -71,7 +71,7 @@ const {
   canCreateOrUpdateSessionPhase1,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS_PHASE1,
-  MILITARYFILEKEYS,
+  MILITARY_FILE_KEYS,
 } = require("snu-lib");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
@@ -408,7 +408,7 @@ router.post("/young/:id/refuse-military-preparation-files", passport.authenticat
 
     const newYoung = { statusMilitaryPreparationFiles: "REFUSED" };
 
-    for (let key of MILITARYFILEKEYS) {
+    for (let key of MILITARY_FILE_KEYS) {
       young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
       delete young.files[key];
     }

@@ -10,7 +10,7 @@ const ApplicationObject = require("../../models/application");
 const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout, uploadFile, deleteFile, getFile } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { canSendFileByMail, canDownloadYoungDocuments, canEditYoung } = require("snu-lib/roles");
-const { FILEKEYS, MILITARYFILEKEYS, SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const config = require("../../config");
 const NodeClam = require("clamscan");
 const fs = require("fs");
@@ -203,7 +203,7 @@ router.post(
 
       const { error, value } = Joi.object({
         id: Joi.string(),
-        key: Joi.string().valid(...FILEKEYS, ...MILITARYFILEKEYS),
+        key: Joi.string().valid(...FILE_KEYS, ...MILITARY_FILE_KEYS),
       })
         .required()
         .validate(req.params, { stripUnknown: true });
@@ -282,7 +282,7 @@ router.post(
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-        if (MILITARYFILEKEYS.includes(key)) {
+        if (MILITARY_FILE_KEYS.includes(key)) {
           await uploadFile(`app/young/${id}/military-preparation/${key}/${newFile._id}`, resultingFile);
         } else {
           await uploadFile(`app/young/${id}/${key}/${newFile._id}`, resultingFile);

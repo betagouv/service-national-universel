@@ -16,7 +16,7 @@ import FormFooter from "../../../components/form/FormFooter";
 import { setYoung } from "../../../redux/auth/actions";
 import { getAge, translate, urlWithScheme } from "../../../utils";
 import { supportURL } from "../../../config";
-import { MILITARYFILEKEYS } from "snu-lib/constants";
+import { MILITARY_FILE_KEYS } from "snu-lib/constants";
 
 export default function StepDocuments() {
   const young = useSelector((state) => state.Auth.young);
@@ -50,7 +50,7 @@ export default function StepDocuments() {
   const onSubmit = async ({ values, type }) => {
     if (type === "next") setLoading(true);
     try {
-      for (const key of ["autoTestPCRFiles", "highSkilledActivityProofFiles", "imageRightFiles", "rulesFiles", ...MILITARYFILEKEYS]) {
+      for (const key of ["autoTestPCRFiles", "highSkilledActivityProofFiles", "imageRightFiles", "rulesFiles", ...MILITARY_FILE_KEYS]) {
         delete values[key];
       }
       // delete values.autoTestPCRFiles;
