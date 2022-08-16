@@ -614,7 +614,7 @@ router.put("/representant/:type", passport.authenticate("young", { session: fals
 
 router.put("/representant-fromFranceConnect/:id", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error: error_id, value: id } = Joi.string().valid("1", "2").required.validate(req.params.id, { stripUnknown: true });
+    const { error: error_id, value: id } = Joi.string().valid("1", "2").required().validate(req.params.id, { stripUnknown: true });
     if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { error, value } = Joi.object({

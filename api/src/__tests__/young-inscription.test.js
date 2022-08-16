@@ -727,7 +727,7 @@ describe("Young", () => {
           parent1Email: fixture.parent1Email,
           parent1FromFranceConnect: "true",
         },
-        1,
+        "1",
       );
       expect(response.statusCode).toBe(200);
 
@@ -738,7 +738,7 @@ describe("Young", () => {
           parent2Email: fixture.parent2Email,
           parent2FromFranceConnect: "true",
         },
-        2,
+        "2",
       );
       expect(response1.statusCode).toBe(200);
     });
