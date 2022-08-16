@@ -1,5 +1,5 @@
 import { Field } from "formik";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { requiredMessage } from "./errorMessage";
 import RoundDownloadButton from "./buttons/RoundDownloadButton";
@@ -37,6 +37,19 @@ export default function DndFileInput({ value, name, errorMessage = requiredMessa
     if (!res.ok) return toastr.error("Une erreur s'est produite lors de la suppression de votre fichier");
     setFilesList(res.data);
   }
+
+  async function getList(path) {
+    const res = await api.get(path);
+    if (!res.ok) return toastr.error("Une erreur s'est produite lors de la récupération de la liste de vos fichiers.");
+    setFilesList(res.data);
+  }
+
+  // If no initial value was given (in the case of a modal window), first get files list
+  useEffect(() => {
+    if (!value) {
+      getList(path);
+    }
+  }, [path]);
 
   return (
     <>

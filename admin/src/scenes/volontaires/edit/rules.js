@@ -1,15 +1,12 @@
 import React from "react";
 import { Col } from "reactstrap";
-import { toastr } from "react-redux-toastr";
-
-import api from "../../../services/api";
 
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Select from "../components/Select";
 import Documents from "../components/Documents";
 import DndFileInput from "../../../components/dndFileInput";
 
-export default function Rules({ values, handleChange, handleSubmit }) {
+export default function Rules({ values, handleChange }) {
   return (
     <Col md={6} style={{ marginBottom: "20px" }}>
       <Box>
@@ -51,7 +48,7 @@ export default function Rules({ values, handleChange, handleSubmit }) {
               placeholder="un document justificatif"
               errorMessage="Vous devez téléverser un document justificatif"
               value={values.files.rulesFiles}
-              path={`/referent/files/${values._id}/rulesFiles`}
+              path={`/young/${values._id}/documents/rulesFiles`}
               name="rulesFiles"
             />
           </Documents>

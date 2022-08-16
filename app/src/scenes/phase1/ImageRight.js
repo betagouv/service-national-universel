@@ -212,7 +212,7 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                             value={values.files.imageRightFiles}
                             name="imageRightFiles"
                             className="lg:w-[50%] flex flex-col justify-center items-center lg:mt-0"
-                            path="/young/files/imageRightFiles"
+                            path={`/young/${young._id}/documents/imageRightFiles`}
                           />
 
                           {/* <div>OU</div>

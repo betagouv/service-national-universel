@@ -11,12 +11,12 @@ import { useDispatch } from "react-redux";
 export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsubTitle = null, name, template = null, young }) {
   const dispatch = useDispatch();
 
-  const updateStatus = async (tempYoung) => {
+  const updateStatus = async () => {
     if (young.statusMilitaryPreparationFiles === "WAITING_CORRECTION") {
       const responseChangeStatusPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
       if (!responseChangeStatusPM.ok) return toastr.error(translate(responseChangeStatusPM?.code), "Oups, une erreur est survenue de la modification de votre dossier.");
       else dispatch(setYoung(responseChangeStatusPM.data));
-    } else dispatch(setYoung(tempYoung));
+    }
   };
 
   return (
@@ -41,13 +41,9 @@ export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsu
           ) : null}
 
           <Formik initialValues={young} validateOnChange={false} validateOnBlur={false}>
-            {({ values }) => (
-              <>
-                <div className="flex mt-2 items-center justify-center">
-                  <DndFileInput className="flex flex-col items-center" value={values.files[name]} name={name} path={`/young/files/${name}`} />
-                </div>
-              </>
-            )}
+            <div className="flex mt-2 items-center justify-center">
+              <DndFileInput className="flex flex-col items-center" value={undefined} name={name} path={`/young/${young._id}/documents/${name}`} onChange={updateStatus} />
+            </div>
           </Formik>
           <button className="my-4 border-[1px] border-gray-300 text-gray-700 rounded-lg py-2 cursor-pointer w-full" onClick={onCancel}>
             Fermer

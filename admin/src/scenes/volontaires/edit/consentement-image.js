@@ -1,15 +1,12 @@
 import React from "react";
 import { Col } from "reactstrap";
-import { toastr } from "react-redux-toastr";
-
-import api from "../../../services/api";
 
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Select from "../components/Select";
 import Documents from "../components/Documents";
 import DndFileInput from "../../../components/dndFileInput";
 
-export default function ConsentmentImage({ values, handleChange, handleSubmit }) {
+export default function ConsentmentImage({ values, handleChange }) {
   return (
     <Col md={6} style={{ marginBottom: "20px" }}>
       <Box>
@@ -31,7 +28,7 @@ export default function ConsentmentImage({ values, handleChange, handleSubmit })
               placeholder="un document justificatif"
               errorMessage="Vous devez téléverser un document justificatif"
               value={values.files.imageRightFiles}
-              path={`/referent/files/${values._id}/imageRightFiles`}
+              path={`/young/${values._id}/documents/imageRightFiles`}
               name="imageRightFiles"
             />
           </Documents>

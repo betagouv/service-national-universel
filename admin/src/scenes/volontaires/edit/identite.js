@@ -65,7 +65,7 @@ export default function Identite({ values, handleChange, required = {}, errors, 
               placeholder="une pièce d'identité"
               errorMessage="Vous devez téléverser une pièce d'identité"
               value={values.files.cniFiles}
-              path={`/referent/files/${values._id}/cniFiles`}
+              path={`/young/${values._id}/documents/cniFiles`}
               name="cniFiles"
             />
           </Documents>

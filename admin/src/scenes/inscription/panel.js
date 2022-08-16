@@ -120,7 +120,7 @@ export default function InscriptionPanel({ onChange, value }) {
           <DownloadButton
             key={i}
             source={() => api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`)}
-            title={`Télécharger la pièce d’identité (${i + 1}/${value.cniFiles.length})`}
+            title={`Télécharger la pièce d’identité (${i + 1}/${value.files.cniFiles.length})`}
           />
         ))}
       </Info>
@@ -129,7 +129,7 @@ export default function InscriptionPanel({ onChange, value }) {
           <DownloadButton
             key={i}
             source={() => api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`)}
-            title={`Télécharger le formulaire (${i + 1}/${value.parentConsentmentFiles.length})`}
+            title={`Télécharger le formulaire (${i + 1}/${value.files.parentConsentmentFiles.length})`}
           />
         ))}
         {isFromFranceConnect(young) && (
@@ -148,7 +148,7 @@ export default function InscriptionPanel({ onChange, value }) {
             <DownloadButton
               key={i}
               source={() => api.get(`/referent/youngFile/${value._id}/dataProcessingConsentmentFiles/${e}`)}
-              title={`Télécharger le document (${i + 1}/${value.dataProcessingConsentmentFiles.length})`}
+              title={`Télécharger le document (${i + 1}/${value.files.dataProcessingConsentmentFiles.length})`}
             />
           ))}
           {isFromFranceConnect(young) && (

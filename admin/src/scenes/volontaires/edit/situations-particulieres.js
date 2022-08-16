@@ -189,7 +189,7 @@ export default function SituationParticulieres({ values, handleChange }) {
               placeholder="un document justificatif"
               errorMessage="Vous devez téléverser un document justificatif"
               value={values.files.highSkilledActivityProofFiles}
-              path={`/referent/files/${values._id}/highSkilledActivityProofFiles`}
+              path={`/young/${values._id}/documents/highSkilledActivityProofFiles`}
               name="highSkilledActivityProofFiles"
             />
           </Documents>

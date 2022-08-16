@@ -7,7 +7,7 @@ import { requiredMessage } from "../scenes/inscription/components/errorMessage";
 import api from "../services/api";
 import ModalConfirm from "./modals/ModalConfirm";
 
-export default function DndFileInput({ optional, value, name, errorMessage = requiredMessage, placeholder = "votre fichier", download, path, ...props }) {
+export default function DndFileInput({ optional, value, name, errorMessage = requiredMessage, placeholder = "votre fichier", download, path, onChange, ...props }) {
   const [filesList, setFilesList] = useState(value);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
@@ -40,6 +40,13 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
     );
   }, []);
 
+  // If no initial value was given (in the case of a modal window), first get files list
+  useEffect(() => {
+    if (!value) {
+      getList(path);
+    }
+  }, [path]);
+
   async function handleUpload([...newFiles]) {
     for (let index = 0; index < Object.keys(newFiles).length; index++) {
       let i = Object.keys(newFiles)[index];
@@ -55,6 +62,7 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
       );
     }
     if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+    onChange();
     setFilesList(res.data);
   }
 
@@ -80,6 +88,12 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
     setFilesList(res.data);
   }
 
+  async function getList(path) {
+    const res = await api.get(path);
+    if (!res.ok) return toastr.error("Une erreur s'est produite lors de la récupération de la liste de vos fichiers.");
+    setFilesList(res.data);
+  }
+
   return (
     <div style={{}} {...props}>
       <ImageInput id={`file-drop-${name}`}>
@@ -101,7 +115,7 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
           <span style={{ display: "block", fontSize: 13 }}>PDF, PNG ou JPG jusqu&apos;à 5 Mo</span>
         </>
       </ImageInput>
-      {filesList.map((file) => (
+      {filesList?.map((file) => (
         <File key={file._id}>
           {file.name} <span onClick={() => handleDelete(file._id)}>Retirer </span>
           {download && (

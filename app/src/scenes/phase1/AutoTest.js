@@ -219,7 +219,7 @@ export default function AutoTest({ isOpen, onCancel, correction }) {
                             value={values.files.autoTestPCRFiles}
                             name="autoTestPCRFiles"
                             className="lg:w-[50%] flex flex-col justify-center items-center lg:mt-0"
-                            path="/young/files/autoTestPCRFiles"
+                            path={`/young/${young._id}/documents/autoTestPCRFiles`}
                           />
                           <ErrorMessage errors={errors} touched={touched} name="autoTestPCRFiles" />
                           {/* <div>OU</div>

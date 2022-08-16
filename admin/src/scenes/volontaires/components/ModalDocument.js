@@ -64,8 +64,8 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
                   <DndFileInput
                     placeholder="un document justificatif"
                     errorMessage="Vous devez téléverser un document justificatif"
-                    value={young.files[nameFiles]}
-                    path={`/referent/files/${young._id}/${nameFiles}`}
+                    value={undefined} // Since this is a modal, the component will handle the data fetching by itself
+                    path={`/young/${young._id}/documents/${nameFiles}`}
                     name={nameFiles}
                   />
                 </section>

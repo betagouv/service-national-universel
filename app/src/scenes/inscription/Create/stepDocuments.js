@@ -89,7 +89,7 @@ export default function StepDocuments() {
                   errorMessage="Vous devez téléverser votre pièce d'identité"
                   value={values.cniFiles}
                   name="cniFiles"
-                  path="/young/files/cniFiles"
+                  path={`/young/${young._id}/documents/cniFiles`}
                 />
                 <ErrorMessage errors={errors} touched={touched} name="cniFiles" />
               </Col>
@@ -111,7 +111,7 @@ export default function StepDocuments() {
                         errorMessage="Vous devez téléverser le formulaire complété."
                         name="parentConsentmentFiles"
                         value={values.parentConsentmentFiles}
-                        path="/young/files/parentConsentmentFiles"
+                        path={`/young/${young._id}/documents/parentConsentmentFiles`}
                       />
                       <ErrorMessage errors={errors} touched={touched} name="parentConsentmentFiles" />
                     </>
@@ -131,7 +131,7 @@ export default function StepDocuments() {
                           errorMessage="Vous devez téléverser le formulaire complété."
                           name="dataProcessingConsentmentFiles"
                           value={values.dataProcessingConsentmentFiles}
-                          path="/young/files/dataProcessingConsentmentFiles"
+                          path={`/young/${young._id}/documents/dataProcessingConsentmentFiles`}
                         />
                         <ErrorMessage errors={errors} touched={touched} name="dataProcessingConsentmentFiles" />
                       </>

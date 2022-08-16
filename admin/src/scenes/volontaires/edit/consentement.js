@@ -29,7 +29,7 @@ export default function Consentement({ values }) {
                 placeholder="un document justificatif"
                 errorMessage="Vous devez téléverser un document justificatif"
                 value={values.files.parentConsentmentFiles}
-                path={`/referent/files/${values._id}/parentConsentmentFiles`}
+                path={`/young/${values._id}/documents/parentConsentmentFiles`}
                 name="parentConsentmentFiles"
               />
             )}

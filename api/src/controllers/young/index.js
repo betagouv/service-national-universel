@@ -1049,6 +1049,5 @@ router.use("/:id/meeting-point", require("./meeting-point"));
 router.use("/:id/phase1", require("./phase1"));
 router.use("/:id/phase2", require("./phase2"));
 router.use("/inscription", require("./inscription"));
-router.use("/files", require("./files"));
 
 module.exports = router;
