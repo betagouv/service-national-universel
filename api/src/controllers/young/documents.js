@@ -6,12 +6,9 @@ const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
 const YoungObject = require("../../models/young");
 const ContractObject = require("../../models/contract");
+const ApplicationObject = require("../../models/application");
 const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout, uploadFile, deleteFile, getFile } = require("../../utils");
-const certificate = require("../../templates/certificate");
-const form = require("../../templates/form");
-const convocation = require("../../templates/convocation");
-const contractPhase2 = require("../../templates/contractPhase2");
-const { sendTemplate, sendEmail } = require("../../sendinblue");
+const { sendTemplate } = require("../../sendinblue");
 const { canSendFileByMail, canDownloadYoungDocuments, canEditYoung } = require("snu-lib/roles");
 const { FILEKEYS, MILITARYFILEKEYS, SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const config = require("../../config");
@@ -64,6 +61,136 @@ function getMailParams(type, template, young, contract) {
 }
 
 const TIMEOUT_PDF_SERVICE = 15000;
+
+router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
+      .unknown()
+      .validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { id, type, template } = value;
+
+    const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // A young can only download their own documents.
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
+    if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    // Create html
+    const html = await getHtmlTemplate(type, template, young);
+    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const getPDF = async () =>
+      await fetch(config.API_PDF_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
+      }).then((response) => {
+        // ! On a retravaillé pour faire passer les tests
+        if (response.status && response.status !== 200) throw new Error("Error with PDF service");
+        res.set({
+          "content-length": response.headers.get("content-length"),
+          "content-disposition": `inline; filename="test.pdf"`,
+          "content-type": "application/pdf",
+          "cache-control": "public, max-age=1",
+        });
+        response.body.pipe(res);
+        if (res.statusCode !== 200) throw new Error("Error with PDF service");
+        response.body.on("error", (e) => {
+          capture(e);
+          res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+        });
+      });
+    try {
+      await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
+    } catch (e) {
+      res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
+      capture(e);
+    }
+  } catch (e) {
+    capture(e);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/:type/:template/send-email", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      type: Joi.string().required(),
+      template: Joi.string().required(),
+      contract_id: Joi.string(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body, ...req.query }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { id, type, template, fileName, contract_id } = value;
+
+    const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // A young can only send to them their own documents.
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    if (isReferent(req.user) && !canSendFileByMail(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    let contract;
+    if (type === "contract") {
+      if (!contract_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+      contract = await ContractObject.findById(contract_id);
+      if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    const html = await getHtmlTemplate(type, template, young, contract);
+    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const { object, message } = getMailParams(type, template, young, contract);
+
+    const getPDF = async () =>
+      await fetch(config.API_PDF_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
+      }).then((response) => {
+        if (response.status !== 200) throw new Error("Error with PDF service");
+        return response.buffer();
+      });
+
+    let buffer;
+    try {
+      buffer = await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
+    } catch (e) {
+      res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
+      capture(e);
+    }
+
+    const content = buffer.toString("base64");
+
+    let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
+    let cc = getCcOfYoung({ template: emailTemplate, young });
+
+    const mail = await sendTemplate(emailTemplate, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      attachment: [{ content, name: fileName }],
+      params: { object, message },
+      cc,
+    });
+    res.status(200).send({ ok: true, data: mail });
+  } catch (e) {
+    capture(e);
+    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 // Upload one or more files
 router.post(
@@ -297,136 +424,6 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
-      .unknown()
-      .validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { id, type, template } = value;
-
-    const young = await YoungObject.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    // A young can only download their own documents.
-    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
-    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
-    if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
-    // Create html
-    const html = await getHtmlTemplate(type, template, young);
-    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const getPDF = async () =>
-      await fetch(config.API_PDF_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
-      }).then((response) => {
-        // ! On a retravaillé pour faire passer les tests
-        if (response.status && response.status !== 200) throw new Error("Error with PDF service");
-        res.set({
-          "content-length": response.headers.get("content-length"),
-          "content-disposition": `inline; filename="test.pdf"`,
-          "content-type": "application/pdf",
-          "cache-control": "public, max-age=1",
-        });
-        response.body.pipe(res);
-        if (res.statusCode !== 200) throw new Error("Error with PDF service");
-        response.body.on("error", (e) => {
-          capture(e);
-          res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-        });
-      });
-    try {
-      await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
-    } catch (e) {
-      res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
-      capture(e);
-    }
-  } catch (e) {
-    capture(e);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/:type/:template/send-email", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      type: Joi.string().required(),
-      template: Joi.string().required(),
-      contract_id: Joi.string(),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body, ...req.query }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { id, type, template, fileName, contract_id } = value;
-
-    const young = await YoungObject.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    // A young can only send to them their own documents.
-    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-    if (isReferent(req.user) && !canSendFileByMail(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
-    let contract;
-    if (type === "contract") {
-      if (!contract_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-      contract = await ContractObject.findById(contract_id);
-      if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-
-    const html = await getHtmlTemplate(type, template, young, contract);
-    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const { object, message } = getMailParams(type, template, young, contract);
-
-    const getPDF = async () =>
-      await fetch(config.API_PDF_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
-      }).then((response) => {
-        if (response.status !== 200) throw new Error("Error with PDF service");
-        return response.buffer();
-      });
-
-    let buffer;
-    try {
-      buffer = await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
-    } catch (e) {
-      res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
-      capture(e);
-    }
-
-    const content = buffer.toString("base64");
-
-    let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
-    let cc = getCcOfYoung({ template: emailTemplate, young });
-
-    const mail = await sendTemplate(emailTemplate, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      attachment: [{ content, name: fileName }],
-      params: { object, message },
-      cc,
-    });
-    res.status(200).send({ ok: true, data: mail });
-  } catch (e) {
-    capture(e);
-    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
   }
 });
 

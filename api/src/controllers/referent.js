@@ -72,7 +72,7 @@ const {
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS_PHASE1,
   MILITARYFILEKEYS,
-} = require("snu-lib/roles");
+} = require("snu-lib");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -392,6 +392,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
 
+    console.error("grosseuh error:", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }

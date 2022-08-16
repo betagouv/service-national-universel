@@ -711,24 +711,14 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     }
 
     const { error, value } = Joi.object({
-      cniFiles: Joi.alternatives().conditional("$isRequired", {
-        is: Joi.boolean().valid(true).required(),
-        then: Joi.array().items(Joi.object().required()).required().min(1),
-        otherwise: Joi.array().items(Joi.object()),
-      }),
-      parentConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
-        is: Joi.boolean().valid(false).required(),
-        then: Joi.alternatives().conditional("$isRequired", {
+      files: Joi.object({
+        cniFiles: Joi.alternatives().conditional("$isRequired", {
           is: Joi.boolean().valid(true).required(),
           then: Joi.array().items(Joi.object().required()).required().min(1),
           otherwise: Joi.array().items(Joi.object()),
         }),
-        otherwise: Joi.isError(new Error()),
-      }),
-      dataProcessingConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
-        is: Joi.boolean().valid(false).required(),
-        then: Joi.alternatives().conditional("$needMoreConsent", {
-          is: Joi.boolean().valid(true).required(),
+        parentConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
+          is: Joi.boolean().valid(false).required(),
           then: Joi.alternatives().conditional("$isRequired", {
             is: Joi.boolean().valid(true).required(),
             then: Joi.array().items(Joi.object().required()).required().min(1),
@@ -736,7 +726,19 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
           }),
           otherwise: Joi.isError(new Error()),
         }),
-        otherwise: Joi.isError(new Error()),
+        dataProcessingConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
+          is: Joi.boolean().valid(false).required(),
+          then: Joi.alternatives().conditional("$needMoreConsent", {
+            is: Joi.boolean().valid(true).required(),
+            then: Joi.alternatives().conditional("$isRequired", {
+              is: Joi.boolean().valid(true).required(),
+              then: Joi.array().items(Joi.object().required()).required().min(1),
+              otherwise: Joi.array().items(Joi.object()),
+            }),
+            otherwise: Joi.isError(new Error()),
+          }),
+          otherwise: Joi.isError(new Error()),
+        }),
       }),
     }).validate(req.body, { context: { needMoreConsent, isParentFromFranceconnect, isRequired } }, { stripUnknown: true });
 

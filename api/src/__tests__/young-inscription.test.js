@@ -943,7 +943,17 @@ describe("Young", () => {
       date1.setFullYear(date1.getFullYear() - 16);
       const response1 = await selfUpdateYoung(
         {
-          cniFiles: ["cniFiles.jpg"],
+          files: {
+            cniFiles: [
+              {
+                _id: "62f6696dafcf890509c3c743",
+                name: "cniFiles.jpg",
+                size: 279143,
+                uploadedAt: "2022-08-12T14:53:33.752+00:00",
+                mimetype: "image/jpeg",
+              },
+            ],
+          },
         },
         {
           birthdateAt: date1,
@@ -955,8 +965,26 @@ describe("Young", () => {
       //Young 16 years old
       const response2 = await selfUpdateYoung(
         {
-          cniFiles: ["cniFiles.jpg"],
-          parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
+          files: {
+            cniFiles: [
+              {
+                _id: "62f6696dafcf890509c3c743",
+                name: "cniFiles.jpg",
+                size: 279143,
+                uploadedAt: "2022-08-12T14:53:33.752+00:00",
+                mimetype: "image/jpeg",
+              },
+            ],
+            parentConsentmentFiles: [
+              {
+                _id: "62f6696dafcf890509c3c743",
+                name: "parentConsentmentFiles.jpg",
+                size: 279143,
+                uploadedAt: "2022-08-12T14:53:33.752+00:00",
+                mimetype: "image/jpeg",
+              },
+            ],
+          },
         },
         {
           birthdateAt: date1,
@@ -970,9 +998,35 @@ describe("Young", () => {
       date2.setFullYear(date2.getFullYear() - 14);
       const response3 = await selfUpdateYoung(
         {
-          cniFiles: ["cniFiles.jpg"],
-          parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
-          dataProcessingConsentmentFiles: ["dataProcessingConsentmentFiles.pdf"],
+          files: {
+            cniFiles: [
+              {
+                _id: "62f6696dafcf890509c3c743",
+                name: "cniFiles.jpg",
+                size: 279143,
+                uploadedAt: "2022-08-12T14:53:33.752+00:00",
+                mimetype: "image/jpeg",
+              },
+            ],
+            parentConsentmentFiles: [
+              {
+                _id: "62f6696dafcf890509c3c743",
+                name: "parentConsentmentFiles.jpg",
+                size: 279143,
+                uploadedAt: "2022-08-12T14:53:33.752+00:00",
+                mimetype: "image/jpeg",
+              },
+            ],
+            dataProcessingConsentmentFiles: [
+              {
+                _id: "62f6696dafcf890509c3c743",
+                name: "dataProcessingConsentmentFiles.jpg",
+                size: 279143,
+                uploadedAt: "2022-08-12T14:53:33.752+00:00",
+                mimetype: "image/jpeg",
+              },
+            ],
+          },
         },
         {
           birthdateAt: date2,
@@ -987,7 +1041,17 @@ describe("Young", () => {
       date1.setFullYear(date1.getFullYear() - 16);
       const response1 = await selfUpdateYoung(
         {
-          cniFiles: ["cniFiles.jpg"],
+          files: {
+            cniFiles: [
+              {
+                _id: "62f6696dafcf890509c3c743",
+                name: "cniFiles.jpg",
+                size: 279143,
+                uploadedAt: "2022-08-12T14:53:33.752+00:00",
+                mimetype: "image/jpeg",
+              },
+            ],
+          },
         },
         {
           birthdateAt: date1,
@@ -999,7 +1063,17 @@ describe("Young", () => {
       //Young 16 years old
       const response2 = await selfUpdateYoung(
         {
-          parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
+          files: {
+            parentConsentmentFiles: [
+              {
+                _id: "62f6696dafcf890509c3c743",
+                name: "parentConsentmentFiles.jpg",
+                size: 279143,
+                uploadedAt: "2022-08-12T14:53:33.752+00:00",
+                mimetype: "image/jpeg",
+              },
+            ],
+          },
         },
         {
           birthdateAt: date1,
@@ -1013,9 +1087,27 @@ describe("Young", () => {
       date2.setFullYear(date2.getFullYear() - 14);
       const response3 = await selfUpdateYoung(
         {
-          cniFiles: ["cniFiles.jpg"],
-          parentConsentmentFiles: ["parentConsentmentFiles.pdf"],
-          dataProcessingConsentmentFiles: [""],
+          files: {
+            cniFiles: [
+              {
+                _id: "62f6696dafcf890509c3c743",
+                name: "cniFiles.jpg",
+                size: 279143,
+                uploadedAt: "2022-08-12T14:53:33.752+00:00",
+                mimetype: "image/jpeg",
+              },
+            ],
+            parentConsentmentFiles: [
+              {
+                _id: "62f6696dafcf890509c3c743",
+                name: "parentConsentmentFiles.jpg",
+                size: 279143,
+                uploadedAt: "2022-08-12T14:53:33.752+00:00",
+                mimetype: "image/jpeg",
+              },
+            ],
+            dataProcessingConsentmentFiles: [],
+          },
         },
         {
           birthdateAt: date2,
