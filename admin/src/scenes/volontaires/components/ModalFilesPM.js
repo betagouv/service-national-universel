@@ -39,7 +39,6 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
   };
 
   async function handleUpload([...files]) {
-    console.log("files from handleUpload:", files[0].target);
     for (let index = 0; index < Object.keys(files).length; index++) {
       let i = Object.keys(files)[index];
       if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
