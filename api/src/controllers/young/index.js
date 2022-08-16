@@ -226,7 +226,6 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
 });
 
 router.get("/validate_phase3/:young/:token", async (req, res) => {
-  // TODO - PASSPORT - add authenticate() ?
   try {
     const { error, value } = Joi.object({
       young: Joi.string().required(),
@@ -249,7 +248,6 @@ router.get("/validate_phase3/:young/:token", async (req, res) => {
 });
 
 router.put("/validate_phase3/:young/:token", async (req, res) => {
-  // TODO - PASSPORT - add authenticate() ? Maybe use same logic as validate mission phase 3 below.
   try {
     const { error, value } = Joi.object({
       young: Joi.string().required(),
