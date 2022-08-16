@@ -35,24 +35,31 @@ const {
 const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
 const mime = require("mime-types");
 
-const updatePlacesMission = async (app, fromUser) => {
+async function updateMission(app, fromUser) {
   try {
-    // Get all application for the mission
     const mission = await MissionObject.findById(app.missionId);
-    const applications = await ApplicationObject.find({ missionId: mission._id });
-    const placesTaken = applications.filter((application) => {
-      return ["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status);
-    }).length;
+
+    // Get all applications for the mission
+    const placesTaken = await ApplicationObject.countDocuments({ missionId: mission._id, status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
     const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
     if (mission.placesLeft !== placesLeft) {
-      console.log(`Mission ${mission.id}: total ${mission.placesTotal}, left from ${mission.placesLeft} to ${placesLeft}`);
       mission.set({ placesLeft });
-      await mission.save({ fromUser });
     }
+
+    // On met à jour le nb de candidatures en attente.
+    const pendingApplications = await ApplicationObject.countDocuments({
+      missionId: mission._id,
+      status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION", "WAITING_ACCEPTATION"] },
+    });
+    if (mission.pendingApplications !== pendingApplications) {
+      mission.set({ pendingApplications });
+    }
+
+    await mission.save({ fromUser });
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
-};
+}
 
 const getReferentManagerPhase2 = async (department) => {
   // get the referent_department manager_phase2
@@ -137,6 +144,9 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const mission = await MissionObject.findById(value.missionId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // On vérifie si les candidatures sont ouvertes.
+    if (mission.visibility === "HIDDEN") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
     value.isJvaMission = mission.isJvaMission;
 
     const young = await YoungObject.findById(value.youngId);
@@ -180,8 +190,9 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const data = await ApplicationObject.create(value);
     await updateYoungPhase2Hours(young);
     await updateStatusPhase2(young);
-    await updatePlacesMission(data, req.user);
+    await updateMission(data, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
+
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
@@ -233,7 +244,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     await updateYoungPhase2Hours(young);
     await updateStatusPhase2(young);
     await updateYoungStatusPhase2Contract(young, req.user);
-    await updatePlacesMission(application, req.user);
+    await updateMission(application, req.user);
 
     res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {

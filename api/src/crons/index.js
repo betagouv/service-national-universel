@@ -9,7 +9,7 @@ const noticePushMission = require("./noticePushMission");
 //const missionEnd = require("./missionEnd");
 const applicationPending = require("./applicationPending");
 //const newMissionReminder = require("./newMissionReminder");
-const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
+//const syncYoungStatsMetabase = require("./syncYoungStatsMetabase");
 const jeVeuxAiderDaily = require("./JeVeuxAiderDaily");
 const loginAttempts = require("./loginAttempts");
 const syncReferentSupport = require("./syncReferentSupport");
@@ -44,9 +44,11 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // cron.schedule("0 9 * * 1", function () {
   //   missionEnd.handler();
   // });
-  cron.schedule("0 1 * * *", function () {
-    syncYoungStatsMetabase.handler();
-  });
+
+  // desactivate for now because useless
+  // cron.schedule("0 1 * * *", function () {
+  //   syncYoungStatsMetabase.handler();
+  // });
 
   cron.schedule("0 9 * * 1", function () {
     noticePushMission.handler();
@@ -87,7 +89,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     computeGoalsInscription.handler();
   });
 
-  cron.schedule(everyHours(1), () => {
+  cron.schedule("0 1 * * *", () => {
     loginAttempts.handler();
   });
 

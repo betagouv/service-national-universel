@@ -48,11 +48,13 @@ function serializeYoungs(body) {
   return serializeHits(body, (hit) => {
     delete hit.sqlId;
     delete hit.password;
+    delete hit.nextLoginAttemptIn;
     delete hit.forgotPasswordResetToken;
     delete hit.forgotPasswordResetExpires;
     delete hit.invitationToken;
     delete hit.invitationExpires;
     delete hit.phase3Token;
+    delete hit.loginAttempts;
     return hit;
   });
 }
@@ -70,10 +72,12 @@ function serializeReferents(body) {
   return serializeHits(body, (hit) => {
     delete hit.sqlId;
     delete hit.password;
+    delete hit.nextLoginAttemptIn;
     delete hit.forgotPasswordResetToken;
     delete hit.forgotPasswordResetExpires;
     delete hit.invitationToken;
     delete hit.invitationExpires;
+    delete hit.loginAttempts;
     delete hit.__v;
     return hit;
   });

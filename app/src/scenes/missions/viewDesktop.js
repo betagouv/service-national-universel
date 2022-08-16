@@ -168,285 +168,292 @@ export default function viewDesktop() {
   if (!mission) return <Loader />;
 
   return (
-    <div className="bg-white mx-4 pb-12 my-4 rounded-xl w-full">
-      {/* BEGIN HEADER */}
+    <div className="flex">
+      <div className="bg-white mx-4 pb-12 my-4 rounded-xl w-full">
+        {/* BEGIN HEADER */}
 
-      <div className="flex flex-col lg:flex-row justify-between pt-8 px-12  border-gray-100 gap-4">
-        <div className="flex gap-4">
-          {/* icon */}
-          <div className="flex items-center">
-            <IconDomain domain={mission.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission.domains[0]} />
-          </div>
+        <div className="flex flex-col lg:flex-row justify-between pt-8 px-12  border-gray-100 gap-4">
+          <div className="flex gap-4">
+            {/* icon */}
+            <div className="flex items-center">
+              <IconDomain domain={mission.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission.domains[0]} />
+            </div>
 
-          {/* infos mission */}
-          <div className="flex flex-col">
-            <div className="">
-              <div className="text-gray-500 text-xs uppercase">{mission.structureName}</div>
-              <div className="text-gray-900 font-bold text-base">{mission.name}</div>
-              <div className="flex gap-2 flex-wrap">
-                {getTags()?.map((e, i) => (
-                  <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">
-                    {e}
-                  </div>
-                ))}
-                {mission.isMilitaryPreparation === "true" ? (
-                  <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
-                ) : null}
-                {mission?.duration ? (
-                  <div className="flex items-center gap-1 ml-2">
-                    <AiOutlineClockCircle className="text-gray-400" />
-                    <div className="text-xs">{mission.duration} heure(s)</div>
-                  </div>
-                ) : null}
+            {/* infos mission */}
+            <div className="flex flex-col">
+              <div className="">
+                <div className="text-gray-500 text-xs uppercase">{mission.structureName}</div>
+                <div className="text-gray-900 font-bold text-base">{mission.name}</div>
+                <div className="flex gap-2 flex-wrap">
+                  {getTags()?.map((e, i) => (
+                    <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">
+                      {e}
+                    </div>
+                  ))}
+                  {mission.isMilitaryPreparation === "true" ? (
+                    <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">Préparation militaire</div>
+                  ) : null}
+                  {mission?.duration ? (
+                    <div className="flex items-center gap-1 ml-2">
+                      <AiOutlineClockCircle className="text-gray-400" />
+                      <div className="text-xs">{mission.duration} heure(s)</div>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
+          <div className="flex items-center justify-center mt-3 lg:!mt-0">
+            {mission.application ? (
+              <ApplicationStatus
+                application={mission.application}
+                tutor={mission?.tutor}
+                mission={mission}
+                updateApplication={updateApplication}
+                loading={loading}
+                disabledAge={disabledAge}
+                disabledIncomplete={disabledIncomplete}
+                disabledPmRefused={disabledPmRefused}
+                scrollToBottom={scrollToBottom}
+                young={young}
+              />
+            ) : (
+              <ApplyButton
+                placesLeft={mission.placesLeft}
+                setModal={setModal}
+                disabledAge={disabledAge}
+                disabledIncomplete={disabledIncomplete}
+                disabledPmRefused={disabledPmRefused}
+                scrollToBottom={scrollToBottom}
+                young={young}
+                isMilitaryPreparation={mission?.isMilitaryPreparation}
+              />
+            )}
+          </div>
         </div>
-        <div className="flex items-center justify-center mt-3 lg:!mt-0">
-          {mission.application ? (
-            <ApplicationStatus
-              application={mission.application}
-              tutor={mission?.tutor}
-              mission={mission}
-              updateApplication={updateApplication}
-              loading={loading}
-              disabledAge={disabledAge}
-              disabledIncomplete={disabledIncomplete}
-              disabledPmRefused={disabledPmRefused}
-              scrollToBottom={scrollToBottom}
-              young={young}
-            />
-          ) : (
-            <ApplyButton
-              placesLeft={mission.placesLeft}
-              setModal={setModal}
-              disabledAge={disabledAge}
-              disabledIncomplete={disabledIncomplete}
-              disabledPmRefused={disabledPmRefused}
-              scrollToBottom={scrollToBottom}
-              young={young}
-              isMilitaryPreparation={mission?.isMilitaryPreparation}
-            />
-          )}
-        </div>
-      </div>
-      {/* END HEADER */}
+        {/* END HEADER */}
 
-      {/* Bouton de contrat */}
+        {/* Bouton de contrat */}
 
-      {contract && (
-        <div className="flex gap-7 mt-6 mx-12 flex-col">
-          {contractHasAllValidation(contract, young) ? (
-            <div className="relative w-1/6" ref={refContractButton}>
-              <button
-                disabled={loading}
-                className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 hover:border-blue-500 hover:bg-blue-500 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
-                onClick={() => setOpenContractButton((e) => !e)}>
-                <div className="flex items-center gap-2">
-                  <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d&quot;engagement</span>
-                </div>
-                <ChevronDown className="text-white font-medium" />
-              </button>
-              {/* display options */}
-              <div
-                className={`${
-                  openContractButton ? "block" : "hidden"
-                }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+        {contract && (
+          <div className="flex gap-7 mt-6 mx-12 flex-col">
+            {contractHasAllValidation(contract, young) ? (
+              <div className="relative w-1/6" ref={refContractButton}>
+                <button
+                  disabled={loading}
+                  className="flex justify-between gap-3 items-center rounded-full border-[1px] border-blue-600 bg-blue-600 hover:border-blue-500 hover:bg-blue-500 px-3 py-2 disabled:opacity-50 disabled:cursor-wait w-full"
+                  onClick={() => setOpenContractButton((e) => !e)}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white leading-4 text-xs font-medium whitespace-nowrap">Contrat d&quot;engagement</span>
+                  </div>
+                  <ChevronDown className="text-white font-medium" />
+                </button>
+                {/* display options */}
                 <div
-                  key="download"
-                  onClick={() => {
-                    setLoading(true);
-                    viewContract(contract._id);
-                    setOpenContractButton(false);
-                    setLoading(false);
-                  }}>
-                  <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
-                    <Download className="text-gray-400 w-4 h-4" />
-                    <div>Télécharger</div>
-                  </div>
-                </div>
-                <SendContractByMail young={young} contractId={contract._id} missionName={contract.missionName} />
-              </div>
-            </div>
-          ) : (
-            <div className="bg-gray-50 rounded-lg  px-10 py-6">
-              <div className="flex justify-between">
-                <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
-                <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
-                  <AiFillClockCircle className="text-sky-500" />
-                  <div>Contrat {contract?.invitationSent ? "envoyé" : "en brouillon"}</div>
-                </div>
-              </div>
-              <div className="text-sm mt-1">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
-              {contract?.invitationSent && (
-                <div className="grid gap-4 grid-cols-4   mt-4">
-                  <StatusContractPeople
-                    value={contract?.projectManagerStatus}
-                    description="Représentant de l’État"
-                    firstName={contract?.projectManagerFirstName}
-                    lastName={contract?.projectManagerLastName}
-                  />
-                  <StatusContractPeople
-                    value={contract?.structureManagerStatus}
-                    description="Représentant de la structure"
-                    firstName={contract?.structureManagerFirstName}
-                    lastName={contract?.structureManagerLastName}
-                  />
-                  {contract?.isYoungAdult === "true" ? (
-                    <StatusContractPeople value={contract?.youngContractStatus} description="Volontaire" firstName={contract?.youngFirstName} lastName={contract?.youngLastName} />
-                  ) : (
-                    <>
-                      <StatusContractPeople
-                        value={contract?.parent1Status}
-                        description="Représentant légal 1"
-                        firstName={contract?.parent1FirstName}
-                        lastName={contract?.parent1LastName}
-                      />
-                      {contract?.parent2Email && (
-                        <StatusContractPeople
-                          value={contract?.parent2Status}
-                          description="Représentant légal 2"
-                          firstName={contract?.parent2FirstName}
-                          lastName={contract?.parent2LastName}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="flex flex-col lg:flex-row my-8 ">
-        <div className="flex flex-col w-full lg:w-1/2 px-12">
-          <div className="text-lg font-bold mb-2">La mission en quelques mots</div>
-          <Detail title="Format" content={translate(mission.format)} />
-          <Detail title="Objectifs" content={mission.description} />
-          <Detail title="Actions" content={mission.actions} />
-          <Detail title="Contraintes" content={mission.contraintes} />
-          <InfoStructure title="à propos de la structure" structure={mission.structureId} />
-        </div>
-        <div className="flex flex-col w-full lg:w-1/2 px-12 lg:border-l-[1px] lg:border-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="text-lg font-bold mb-2">Informations pratiques</div>
-            <DoubleDayTile date1={mission.startAt} date2={mission.endAt} />
-          </div>
-          <Detail
-            title="Date"
-            content={
-              mission.startAt && mission.endAt ? `Du ${formatStringDateTimezoneUTC(mission.startAt)} au ${formatStringDateTimezoneUTC(mission.endAt)}` : "Aucune date renseignée"
-            }
-          />
-          <Detail title="Fréquence" content={mission.frequence} />
-          {mission.duration ? <Detail title="Durée estimée" content={`${mission.duration} heure(s)`} /> : null}
-          <Detail title="Période pour réaliser la mission" content={mission.period} />
-          <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
-        </div>
-      </div>
-      {mission.isMilitaryPreparation === "true" ? (
-        <>
-          <hr className="text-gray-100" />
-          <div className="mx-8 mt-8">
-            <DocumentsPM docRef={docRef} />
-          </div>
-        </>
-      ) : null}
-      {mission?.application?.status === "VALIDATED" && (
-        <>
-          <hr className="text-gray-100" />
-          <div className="mx-8 mt-8">
-            <div className="flex justify-between">
-              <div className="text-lg leading-6 font-semibold">Pièces jointes</div>
-              <div className="flex space-x-4 items-center">
-                {optionsType.reduce((nmb, option) => nmb + mission.application[option].length, 0) !== 0 && (
+                  className={`${
+                    openContractButton ? "block" : "hidden"
+                  }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
                   <div
-                    className="group flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
-                    onClick={() => setOpenAttachments(!openAttachments)}>
-                    Voir mes pièces jointes
-                    <BsChevronDown className={`ml-3 text-blue-600 group-hover:text-white h-5 w-5 ${openAttachments ? "rotate-180" : ""}`} />
+                    key="download"
+                    onClick={() => {
+                      setLoading(true);
+                      viewContract(contract._id);
+                      setOpenContractButton(false);
+                      setLoading(false);
+                    }}>
+                    <div className="group flex items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50 cursor-pointer">
+                      <Download className="text-gray-400 w-4 h-4" />
+                      <div>Télécharger</div>
+                    </div>
                   </div>
-                )}
-                <div
-                  className="text-white bg-blue-600  rounded-full p-2 "
-                  onClick={() => {
-                    setModalDocument({
-                      isOpen: true,
-                      stepOne: true,
-                    });
-                  }}>
-                  <HiPlus />
+                  <SendContractByMail young={young} contractId={contract._id} missionName={contract.missionName} />
                 </div>
               </div>
-            </div>
-            {openAttachments && (
-              <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full ">
-                {optionsType.map(
-                  (option, index) =>
-                    mission.application[option].length > 0 && (
-                      <FileCard
-                        key={index}
-                        name={translateAddFilePhase2(option)[3].toUpperCase() + translateAddFilePhase2(option).slice(4)}
-                        icon="reglement"
-                        filled={mission.application[option].length}
-                        color="text-blue-600 bg-white"
-                        status="Modifier"
-                        onClick={() =>
-                          setModalDocument({
-                            isOpen: true,
-                            name: option,
-                            stepOne: false,
-                          })
-                        }
+            ) : (
+              <div className="bg-gray-50 rounded-lg  px-10 py-6">
+                <div className="flex justify-between">
+                  <div className="text-lg font-bold">Contrat d’engagement en mission d’intérêt général</div>
+                  <div className="text-xs font-normal px-2  bg-sky-100 text-sky-500 rounded-sm items-center flex space-x-1">
+                    <AiFillClockCircle className="text-sky-500" />
+                    <div>Contrat {contract?.invitationSent ? "envoyé" : "en brouillon"}</div>
+                  </div>
+                </div>
+                <div className="text-sm mt-1">Ce contrat doit être validé par vos représentant(s) légal(aux), votre tuteur de mission et le référent départemental.</div>
+                {contract?.invitationSent && (
+                  <div className="grid gap-4 grid-cols-4   mt-4">
+                    <StatusContractPeople
+                      value={contract?.projectManagerStatus}
+                      description="Représentant de l’État"
+                      firstName={contract?.projectManagerFirstName}
+                      lastName={contract?.projectManagerLastName}
+                    />
+                    <StatusContractPeople
+                      value={contract?.structureManagerStatus}
+                      description="Représentant de la structure"
+                      firstName={contract?.structureManagerFirstName}
+                      lastName={contract?.structureManagerLastName}
+                    />
+                    {contract?.isYoungAdult === "true" ? (
+                      <StatusContractPeople
+                        value={contract?.youngContractStatus}
+                        description="Volontaire"
+                        firstName={contract?.youngFirstName}
+                        lastName={contract?.youngLastName}
                       />
-                    ),
+                    ) : (
+                      <>
+                        <StatusContractPeople
+                          value={contract?.parent1Status}
+                          description="Représentant légal 1"
+                          firstName={contract?.parent1FirstName}
+                          lastName={contract?.parent1LastName}
+                        />
+                        {contract?.parent2Email && (
+                          <StatusContractPeople
+                            value={contract?.parent2Status}
+                            description="Représentant légal 2"
+                            firstName={contract?.parent2FirstName}
+                            lastName={contract?.parent2LastName}
+                          />
+                        )}
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
             )}
-            <ModalPJ
-              isOpen={modalDocument?.isOpen}
-              name={modalDocument?.name}
-              young={young}
-              application={mission.application}
-              optionsType={optionsType}
-              onCancel={async () => {
-                setModalDocument({ isOpen: false });
-                await getMission();
-              }}
-              onSend={async (type, multipleDocument) => {
-                try {
-                  const responseNotification = await api.post(`/application/${mission.application._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
-                    type,
-                    multipleDocument,
-                  });
-                  if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                  toastr.success("L'email a bien été envoyé");
-                } catch (e) {
-                  toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                }
-              }}
-              onSave={async () => {
-                setModalDocument({ isOpen: false });
-                await getMission();
-              }}
-              typeChose={modalDocument?.stepOne}
-            />
           </div>
-        </>
-      )}
-      {modal === "APPLY" && (
-        <ApplyModal
-          value={mission}
-          onChange={() => setModal(null)}
-          onCancel={() => setModal(null)}
-          onSend={async () => {
-            await getMission();
-            setModal("DONE");
-          }}
-        />
-      )}
-      {modal === "DONE" && <ApplyDoneModal young={young} value={mission} onChange={() => setModal(null)} />}
+        )}
+
+        <div className="flex flex-col lg:flex-row my-8 ">
+          <div className="flex flex-col w-full lg:w-1/2 px-12">
+            <div className="text-lg font-bold mb-2">La mission en quelques mots</div>
+            <Detail title="Format" content={translate(mission.format)} />
+            <Detail title="Objectifs" content={mission.description} />
+            <Detail title="Actions" content={mission.actions} />
+            <Detail title="Contraintes" content={mission.contraintes} />
+            <InfoStructure title="à propos de la structure" structure={mission.structureId} />
+          </div>
+          <div className="flex flex-col w-full lg:w-1/2 px-12 lg:border-l-[1px] lg:border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="text-lg font-bold mb-2">Informations pratiques</div>
+              <DoubleDayTile date1={mission.startAt} date2={mission.endAt} />
+            </div>
+            <Detail
+              title="Date"
+              content={
+                mission.startAt && mission.endAt ? `Du ${formatStringDateTimezoneUTC(mission.startAt)} au ${formatStringDateTimezoneUTC(mission.endAt)}` : "Aucune date renseignée"
+              }
+            />
+            <Detail title="Fréquence" content={mission.frequence} />
+            {mission.duration ? <Detail title="Durée estimée" content={`${mission.duration} heure(s)`} /> : null}
+            <Detail title="Période pour réaliser la mission" content={mission.period} />
+            <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
+          </div>
+        </div>
+        {mission.isMilitaryPreparation === "true" ? (
+          <>
+            <hr className="text-gray-100" />
+            <div className="mx-8 mt-8">
+              <DocumentsPM docRef={docRef} />
+            </div>
+          </>
+        ) : null}
+        {mission?.application?.status === "VALIDATED" && (
+          <>
+            <hr className="text-gray-100" />
+            <div className="mx-8 mt-8">
+              <div className="flex justify-between">
+                <div className="text-lg leading-6 font-semibold">Pièces jointes</div>
+                <div className="flex space-x-4 items-center">
+                  {optionsType.reduce((nmb, option) => nmb + mission.application[option].length, 0) !== 0 && (
+                    <div
+                      className="group flex items-center rounded-lg text-blue-600 text-center text-sm py-2 px-10 border-blue-600 border-[1px] hover:bg-blue-600 hover:text-white transition duration-100 ease-in-out"
+                      onClick={() => setOpenAttachments(!openAttachments)}>
+                      Voir mes pièces jointes
+                      <BsChevronDown className={`ml-3 text-blue-600 group-hover:text-white h-5 w-5 ${openAttachments ? "rotate-180" : ""}`} />
+                    </div>
+                  )}
+                  <div
+                    className="text-white bg-blue-600  rounded-full p-2 "
+                    onClick={() => {
+                      setModalDocument({
+                        isOpen: true,
+                        stepOne: true,
+                      });
+                    }}>
+                    <HiPlus />
+                  </div>
+                </div>
+              </div>
+              {openAttachments && (
+                <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full ">
+                  {optionsType.map(
+                    (option, index) =>
+                      mission.application[option].length > 0 && (
+                        <FileCard
+                          key={index}
+                          name={translateAddFilePhase2(option)[3].toUpperCase() + translateAddFilePhase2(option).slice(4)}
+                          icon="reglement"
+                          filled={mission.application[option].length}
+                          color="text-blue-600 bg-white"
+                          status="Modifier"
+                          onClick={() =>
+                            setModalDocument({
+                              isOpen: true,
+                              name: option,
+                              stepOne: false,
+                            })
+                          }
+                        />
+                      ),
+                  )}
+                </div>
+              )}
+              <ModalPJ
+                isOpen={modalDocument?.isOpen}
+                name={modalDocument?.name}
+                young={young}
+                application={mission.application}
+                optionsType={optionsType}
+                onCancel={async () => {
+                  setModalDocument({ isOpen: false });
+                  await getMission();
+                }}
+                onSend={async (type, multipleDocument) => {
+                  try {
+                    const responseNotification = await api.post(`/application/${mission.application._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+                      type,
+                      multipleDocument,
+                    });
+                    if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                    toastr.success("L'email a bien été envoyé");
+                  } catch (e) {
+                    toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                  }
+                }}
+                onSave={async () => {
+                  setModalDocument({ isOpen: false });
+                  await getMission();
+                }}
+                typeChose={modalDocument?.stepOne}
+              />
+            </div>
+          </>
+        )}
+        {modal === "APPLY" && (
+          <ApplyModal
+            value={mission}
+            onChange={() => setModal(null)}
+            onCancel={() => setModal(null)}
+            onSend={async () => {
+              await getMission();
+              setModal("DONE");
+            }}
+          />
+        )}
+        {modal === "DONE" && <ApplyDoneModal young={young} value={mission} onChange={() => setModal(null)} />}
+      </div>
     </div>
   );
 }

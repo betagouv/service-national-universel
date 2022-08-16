@@ -1,3 +1,89 @@
+## [1.123.3](https://github.com/betagouv/service-national-universel/compare/v1.123.2...v1.123.3) (2022-08-12)
+
+
+### Bug Fixes
+
+* **api:** disabled stats-young-metabase ([c26e9dc](https://github.com/betagouv/service-national-universel/commit/c26e9dc572000f983d4a9f4bbaacbed3d8981463))
+
+## [1.123.2](https://github.com/betagouv/service-national-universel/compare/v1.123.1...v1.123.2) (2022-08-11)
+
+
+### Bug Fixes
+
+* **admin:** liste referent delete modal ([3ef6626](https://github.com/betagouv/service-national-universel/commit/3ef66263b75bf567effc48fcb6a729177b691d89))
+
+## [1.123.1](https://github.com/betagouv/service-national-universel/compare/v1.123.0...v1.123.1) (2022-08-10)
+
+
+### Bug Fixes
+
+* **api:** stats-young-center ([9e1ccce](https://github.com/betagouv/service-national-universel/commit/9e1ccce395a3e122d8e040e150365f5b58281a7f))
+
+# [1.123.0](https://github.com/betagouv/service-national-universel/compare/v1.122.0...v1.123.0) (2022-08-09)
+
+
+### Bug Fixes
+
+* **api:** Fix error sentry ([ac453e3](https://github.com/betagouv/service-national-universel/commit/ac453e36f47c7d262d8593ceb70a6aa60a9ab194))
+* **kb:** Sentry fix ([5999df7](https://github.com/betagouv/service-national-universel/commit/5999df7f37336c25420b8044f9887e8ae89a33ac))
+
+
+### Features
+
+* **admin:** Add a modal to reattribute missions in case of delete ([#1716](https://github.com/betagouv/service-national-universel/issues/1716)) ([f8fc173](https://github.com/betagouv/service-national-universel/commit/f8fc17319638c50572f089515b8cd0992b2d1e98))
+* **pdf:** use new pdf service for contracts ([#1728](https://github.com/betagouv/service-national-universel/issues/1728)) ([7c09afa](https://github.com/betagouv/service-national-universel/commit/7c09afaecf3b529da3e993c84cf3e123be4b7510))
+* **sentry:** Add kb to new sentry ([#1719](https://github.com/betagouv/service-national-universel/issues/1719)) ([1b854c5](https://github.com/betagouv/service-national-universel/commit/1b854c554a76e6dc4d248127560279e33e888625))
+
+# [1.122.0](https://github.com/betagouv/service-national-universel/compare/v1.121.0...v1.122.0) (2022-08-08)
+
+
+### Bug Fixes
+
+* **admin:** fix download mp files from young edit page ([3bb8492](https://github.com/betagouv/service-national-universel/commit/3bb8492bf77e757e018fd90b2278d5ec85439f82))
+* **api:** download pdf file for responsible ([#1727](https://github.com/betagouv/service-national-universel/issues/1727)) ([eeb4f18](https://github.com/betagouv/service-national-universel/commit/eeb4f18f54524ba0588402a4e95f5a664c07c7cc))
+* **api:** Hide data at serialization ([5e1700c](https://github.com/betagouv/service-national-universel/commit/5e1700c1f7e1688b03bc33d365f04f16a04c64e6))
+* **api:** webhook mails ([c96b8ac](https://github.com/betagouv/service-national-universel/commit/c96b8ac819191ab4181855e72f00e4e71d08421a))
+* **sentry:** Group transactions into sentry ([#1726](https://github.com/betagouv/service-national-universel/issues/1726)) ([71bf79b](https://github.com/betagouv/service-national-universel/commit/71bf79b78a9dbb5be1cb4ab20112e8ed7e126b93))
+
+
+### Features
+
+* **send-in-blue:** New app for webhook send in blue ([#1723](https://github.com/betagouv/service-national-universel/issues/1723)) ([21c8313](https://github.com/betagouv/service-national-universel/commit/21c83139f29066bd670f541084a99c6725f09aa0))
+
+# [1.121.0](https://github.com/betagouv/service-national-universel/compare/v1.120.1...v1.121.0) (2022-08-05)
+
+
+### Bug Fixes
+
+* **api:** stats-young-center - young_cohort: `à venir` is not a valid enum ([8c32959](https://github.com/betagouv/service-national-universel/commit/8c32959e9daed5173efb72245f0a72ed9c73e996))
+* **api:** webhooks SIB error ([#1722](https://github.com/betagouv/service-national-universel/issues/1722)) ([9ec33c6](https://github.com/betagouv/service-national-universel/commit/9ec33c653349d5c717b9f1329d37b6d143d6dfec))
+
+
+### Features
+
+* **secu:** Renouveau de la politique de mot de passe ([#1718](https://github.com/betagouv/service-national-universel/issues/1718)) ([35ec95b](https://github.com/betagouv/service-national-universel/commit/35ec95bf1800ee18064bd9a81c30152067e3c6e4))
+
+## [1.120.1](https://github.com/betagouv/service-national-universel/compare/v1.120.0...v1.120.1) (2022-08-04)
+
+
+### Bug Fixes
+
+* **admin/api:** Sentry capture only once ([b2b96e3](https://github.com/betagouv/service-national-universel/commit/b2b96e3cc5d8fc79b2c1ca777605d6c683828d70))
+* **app, admin:** correctly display the nb of results when searching for a mission ([d758f70](https://github.com/betagouv/service-national-universel/commit/d758f7018f7396548987c0b90f4d276f67d003a3))
+
+# [1.120.0](https://github.com/betagouv/service-national-universel/compare/v1.119.2...v1.120.0) (2022-08-03)
+
+
+### Bug Fixes
+
+* **api:** save updatedAt correctly ([#1717](https://github.com/betagouv/service-national-universel/issues/1717)) ([7b982e6](https://github.com/betagouv/service-national-universel/commit/7b982e66fa043cf0db4955362d364e7aa4e79af3))
+* **app:** message fermeture inscription ([5c2fe0d](https://github.com/betagouv/service-national-universel/commit/5c2fe0d49cde4f87309ccd2775621f680a9b249c))
+
+
+### Features
+
+* **pdf:** Add a way to generate pdf locally ([#1704](https://github.com/betagouv/service-national-universel/issues/1704)) ([97cf4bf](https://github.com/betagouv/service-national-universel/commit/97cf4bfede4b579a49995d3b886788fd95742ea0))
+
 ## [1.119.2](https://github.com/betagouv/service-national-universel/compare/v1.119.1...v1.119.2) (2022-08-01)
 
 
