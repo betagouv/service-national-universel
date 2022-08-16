@@ -1,3 +1,11 @@
+## [1.123.4](https://github.com/betagouv/service-national-universel/compare/v1.123.3...v1.123.4) (2022-08-16)
+
+
+### Bug Fixes
+
+* **github:** Use github action only for staging ([#1730](https://github.com/betagouv/service-national-universel/issues/1730)) ([1c7c1ec](https://github.com/betagouv/service-national-universel/commit/1c7c1ec6864b59e4e278e96c84a5e2bcf7900baf))
+* **Joi:** Securise api routes ([#1729](https://github.com/betagouv/service-national-universel/issues/1729)) ([ed6f408](https://github.com/betagouv/service-national-universel/commit/ed6f408f0794bb5edf2d59e88e8248698de8c2cc))
+
 ## [1.123.3](https://github.com/betagouv/service-national-universel/compare/v1.123.2...v1.123.3) (2022-08-12)
 
 
