@@ -381,7 +381,6 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
 
 // Download one file
 router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
-  console.log("params:", req.params);
   try {
     // Validate
 
