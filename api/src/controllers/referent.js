@@ -491,7 +491,11 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
       template: Joi.string().required(),
       subject: Joi.string().allow(null, ""),
       message: Joi.string().allow(null, ""),
-      app: Joi.object().allow(null, {}),
+      app: Joi.object({
+        missionName: Joi.string().allow(null, ""),
+        youngFirstName: Joi.string().allow(null, ""),
+        youngLastName: Joi.string().allow(null, ""),
+      }).allow(null, {}),
       missionName: Joi.string().allow(null, ""),
     })
       .unknown()
@@ -891,6 +895,7 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     res.status(200).send({ ok: true, data: user });
   } catch (error) {
     capture(error);
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
