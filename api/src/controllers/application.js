@@ -15,7 +15,7 @@ const fs = require("fs");
 const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
 const { sendTemplate } = require("../sendinblue");
-const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
+const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
 const { serializeApplication, serializeYoung } = require("../utils/serializer");
@@ -95,7 +95,7 @@ const getReferentManagerPhase2 = async (department) => {
 
 router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const JoiId = Joi.string().required().validate(req.params.id);
+    const JoiId = validateId(req.params.id);
     if (JoiId.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const JoiRank = Joi.string().required().validate(req.params.rank);
     if (JoiRank.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -255,7 +255,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
 
 router.put("/:id/visibilite", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const joiId = Joi.string().required().validate(req.params.id);
+    const joiId = validateId(req.params.id);
     if (joiId.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // const joiBody = validateUpdateApplication(req.body, req.user);
@@ -287,7 +287,7 @@ router.put("/:id/visibilite", passport.authenticate(["young"], { session: false,
 
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await ApplicationObject.findById(id);
@@ -479,7 +479,7 @@ router.post(
       const { error: keyError, value: key } = Joi.string()
         .required()
         .valid(...rootKeys)
-        .validate(req.params.key);
+        .validate(req.params.key, { stripUnknown: true });
       if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const { error: bodyError, value: body } = Joi.string().required().validate(req.body.body);
