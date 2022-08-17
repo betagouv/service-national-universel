@@ -75,56 +75,9 @@ jobs:
       - name: Add known hosts
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_KNOWN_HOSTS"
           echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
         env:
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
 
-      - name: Create SSH key
-        run: |
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          sudo chmod 600 ~/.ssh/id_ed25519
-        shell: bash
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Change ssh key file permissions
-        run: |
-          chmod go-rwx ~/.ssh/id_ed25519
-
-      - name: Remove git folder
-        run: |
-          rm -rf .git
-
-      - name: Add lib into current folder
-        run: |
-          cp -Rf ./lib ./api/snu-lib
-          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
-
-      - name: Push
-        working-directory: ${{ env.SUBFOLDER_NAME }}
-        run: |
-          git init
-          git config user.email "github.deployer@gmail.com"
-          git config user.name "Github Deployer"
-          git remote add cloudstaging "$CLEVER_CLOUD_GIT_REMOTE_STAGING"
-          git remote add cloudprod "$CLEVER_CLOUD_GIT_REMOTE_PROD"
-          git add .
-          git commit -m "For deploy"
-          git push -f -u cloudstaging master
-          git push -f -u cloudprod master
-        env:
-          CLEVER_CLOUD_GIT_REMOTE_STAGING: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_API_STAGING }}
-          CLEVER_CLOUD_GIT_REMOTE_PROD: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_API_PROD }}
-
-      - name: Notification on failure
-        if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_TITLE: Failed to deploy api
-
-      - name: Notification on success
-        if: ${{ success() }}
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_TITLE: api deployed
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
