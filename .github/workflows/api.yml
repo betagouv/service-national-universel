@@ -72,17 +72,21 @@ jobs:
         with:
           node-version: 16.x
 
-      - name: Create SSH key
+      - name: Add known hosts
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          sudo chmod 600 ~/.ssh/id_ed25519
           echo "$SSH_KNOWN_HOSTS"
           echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+        env:
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Create SSH key
+        run: |
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          sudo chmod 600 ~/.ssh/id_ed25519
         shell: bash
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
 
       - name: Change ssh key file permissions
         run: |
