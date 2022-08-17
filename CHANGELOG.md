@@ -1,3 +1,19 @@
+## [1.123.5](https://github.com/betagouv/service-national-universel/compare/v1.123.4...v1.123.5) (2022-08-17)
+
+
+### Bug Fixes
+
+* **github:** workflow ([8119582](https://github.com/betagouv/service-national-universel/commit/81195826604b9006afdd1571ea326f426ccab4a1))
+
+
+### Reverts
+
+* **api:** Force redeploy api ([2b6ca14](https://github.com/betagouv/service-national-universel/commit/2b6ca14374f9c85b6815119a41dedc76d015764f))
+* **api:** Force redeploy api ([59c5724](https://github.com/betagouv/service-national-universel/commit/59c5724571abc06d4835571e82efb18f9b5ec0bd))
+* **api:** Force redeploy api" ([5a75c7e](https://github.com/betagouv/service-national-universel/commit/5a75c7e911e350e2964d26259693304715055cf0))
+* **github:** Revert as it was ([27e5059](https://github.com/betagouv/service-national-universel/commit/27e5059fa927ea566bddf60e9ae61a66741e8d74))
+* **github:** Use github action only for staging ([#1730](https://github.com/betagouv/service-national-universel/issues/1730))" ([189b917](https://github.com/betagouv/service-national-universel/commit/189b91789d91775bed2e5513ca2fabdf3e4cf42c))
+
 ## [1.123.4](https://github.com/betagouv/service-national-universel/compare/v1.123.3...v1.123.4) (2022-08-16)
 
 
