@@ -1,3 +1,18 @@
+## [1.123.6](https://github.com/betagouv/service-national-universel/compare/v1.123.5...v1.123.6) (2022-08-18)
+
+
+### Bug Fixes
+
+* **app:** adress input check for MIGs ([#1731](https://github.com/betagouv/service-national-universel/issues/1731)) ([3b88ce2](https://github.com/betagouv/service-national-universel/commit/3b88ce2305e0552b7ccbbafde53b2e867074f5b4))
+
+
+### Reverts
+
+* **api:** Force redeploy api ([095f287](https://github.com/betagouv/service-national-universel/commit/095f287ea3187a9047f897ece7407d7e85d36921))
+* **api:** Force redeploy api ([4dd53cc](https://github.com/betagouv/service-national-universel/commit/4dd53cc1575c19e9d475f9426795bbd8bb90a5bb))
+* **api:** Force redeploy api ([a43e894](https://github.com/betagouv/service-national-universel/commit/a43e894f2b6a1d97d1c7d189e1ea948248611da5))
+* **api:** Force redeploy api ([08cc3d3](https://github.com/betagouv/service-national-universel/commit/08cc3d31b83135fba7619f62626588a2f7d7a137))
+
 ## [1.123.5](https://github.com/betagouv/service-national-universel/compare/v1.123.4...v1.123.5) (2022-08-17)
 
 
