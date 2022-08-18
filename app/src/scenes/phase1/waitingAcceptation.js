@@ -28,7 +28,10 @@ export default function WaitingAcceptation() {
     try {
       if (!confirm("Êtes vous certain(e) de vouloir vous désister du séjour de cohésion ?")) return;
       const { data, ok, code } = await api.put("/young", { ...young, statusPhase1: "WITHDRAWN" });
-      if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", translate(code));
+      }
       toastr.success("Votre désistement a bien été pris en compte");
       if (data) dispatch(setYoung(data));
     } catch (error) {
@@ -40,7 +43,10 @@ export default function WaitingAcceptation() {
     try {
       if (!confirm("Êtes vous certain(e) de vouloir valider votre participation au séjour de cohésion ?")) return;
       const { data, ok, code } = await api.put("/young", { ...young, status: "VALIDATED", statusPhase1: "AFFECTED" });
-      if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", translate(code));
+      }
       toastr.success("Votre participation a bien été pris en compte");
       if (data) dispatch(setYoung(data));
     } catch (error) {
