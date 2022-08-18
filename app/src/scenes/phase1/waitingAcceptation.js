@@ -7,6 +7,7 @@ import { setYoung } from "../../redux/auth/actions";
 import { HeroContainer, Hero, Content, Alert, InterTitle, WhiteButton, VioletButton } from "../../components/Content";
 import api from "../../services/api";
 import { translate } from "../../utils";
+import { capture } from "../../sentry";
 
 export default function WaitingAcceptation() {
   const young = useSelector((state) => state.Auth.young);
@@ -31,6 +32,7 @@ export default function WaitingAcceptation() {
       toastr.success("Votre désistement a bien été pris en compte");
       if (data) dispatch(setYoung(data));
     } catch (error) {
+      capture(error);
       toastr.error("Oups, une erreur est survenue", translate(error?.code));
     }
   };
@@ -42,6 +44,7 @@ export default function WaitingAcceptation() {
       toastr.success("Votre participation a bien été pris en compte");
       if (data) dispatch(setYoung(data));
     } catch (error) {
+      capture(error);
       toastr.error("Oups, une erreur est survenue", translate(error?.code));
     }
   };

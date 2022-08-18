@@ -45,12 +45,18 @@ export default function Contract({ young, admin }) {
       // todo : why not just
       // let { ok, data, code } = await api.get(`/application/${applicationId}`);
       let { ok, data, code } = await api.get(`/young/${young._id}/application`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       const currentApplication = data.find((e) => e._id === applicationId);
 
       if (currentApplication.contractId) {
         ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
-        if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+        if (!ok) {
+          capture(code);
+          return toastr.error("Oups, une erreur est survenue", code);
+        }
         setContract(data);
       }
       setApplication(currentApplication);
@@ -62,7 +68,10 @@ export default function Contract({ young, admin }) {
     const getMission = async () => {
       if (!application) return;
       const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       return setMission(data);
     };
     getMission();
@@ -107,7 +116,10 @@ export default function Contract({ young, admin }) {
     const getStructure = async () => {
       if (!application) return;
       const { ok, data, code } = await api.get(`/structure/${application.structureId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       return setStructure(data);
     };
     getStructure();

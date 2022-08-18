@@ -16,7 +16,10 @@ export default function application({ application, index, onChange, loading }) {
   React.useEffect(() => {
     (async () => {
       const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       setMission(data);
     })();
   }, [application]);

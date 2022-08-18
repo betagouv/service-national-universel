@@ -13,6 +13,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
+import { capture } from "../../../sentry";
 
 export default function Phase2militaryPrepartion({ young }) {
   const [applicationsToMilitaryPreparation, setApplicationsToMilitaryPreparation] = useState(null);
@@ -26,7 +27,10 @@ export default function Phase2militaryPrepartion({ young }) {
   const getApplications = async () => {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
-    if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+    if (!ok) {
+      capture(code);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
     return setApplicationsToMilitaryPreparation(data?.filter((a) => a?.mission?.isMilitaryPreparation === "true"));
   };
 

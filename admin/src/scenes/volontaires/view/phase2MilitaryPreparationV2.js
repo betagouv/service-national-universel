@@ -16,6 +16,7 @@ import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWith
 import api from "../../../services/api";
 import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 import ModalFilesPM from "../components/ModalFilesPM";
+import { capture } from "../../../sentry";
 
 export default function Phase2militaryPrepartionV2({ young }) {
   const optionsStatus = ["WAITING_CORRECTION", "REFUSED", "VALIDATED"];
@@ -55,7 +56,10 @@ export default function Phase2militaryPrepartionV2({ young }) {
   const getApplications = async () => {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
-    if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+    if (!ok) {
+      capture(code);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
     return setApplicationsToMilitaryPreparation(data?.filter((a) => a?.mission?.isMilitaryPreparation === "true"));
   };
 
@@ -155,6 +159,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
       }
       toastr.success("Fichiers mises à jour");
     } catch (error) {
+      capture(error);
       toastr.error("Oups, une erreur est survenue");
       return;
     }

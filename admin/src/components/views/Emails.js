@@ -8,6 +8,7 @@ import { formatLongDateUTC, colors, canViewEmailHistory, ROLES } from "../../uti
 import api from "../../services/api";
 import { Box } from "../../components/box";
 import Loader from "../../components/Loader";
+import { capture } from "../../sentry";
 
 export default function Emails({ email }) {
   const [emails, setEmails] = useState();
@@ -26,7 +27,10 @@ export default function Emails({ email }) {
     const { ok, data, code } = await api.get(`/email?email=${encodeURIComponent(email)}`);
     if (!ok) {
       setEmails([]);
-      return toastr.error("Oups, une erreur est survenue", code);
+      {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
     }
     if (user.role === ROLES.ADMIN) return setEmails(data);
     else {
