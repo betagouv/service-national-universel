@@ -27,7 +27,6 @@ const BusModel = require("../../models/bus");
 const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
-  deleteFile,
   validatePassword,
   ERRORS,
   inSevenDays,
@@ -41,6 +40,7 @@ const {
   getFile,
   notifDepartmentChange,
   autoValidationSessionPhase1Young,
+  deleteFile,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
