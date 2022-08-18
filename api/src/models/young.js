@@ -8,6 +8,13 @@ const { ENVIRONMENT } = require("../config");
 
 const MODELNAME = "young";
 
+const File = new mongoose.Schema({
+  name: String,
+  uploadedAt: Date,
+  size: Number,
+  mimetype: String,
+});
+
 const Schema = new mongoose.Schema({
   sqlId: {
     type: String,
@@ -1438,6 +1445,20 @@ const Schema = new mongoose.Schema({
   statusMilitaryPreparationFiles: {
     type: String,
     enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
+  },
+
+  files: {
+    cniFiles: [File],
+    highSkilledActivityProofFiles: [File],
+    dataProcessingConsentmentFiles: [File],
+    parentConsentmentFiles: [File],
+    imageRightFiles: [File],
+    autoTestPCRFiles: [File],
+    rulesFiles: [File],
+    militaryPreparationFilesIdentity: [File],
+    militaryPreparationFilesCensus: [File],
+    militaryPreparationFilesAuthorization: [File],
+    militaryPreparationFilesCertificate: [File],
   },
 
   missionsInMail: {
