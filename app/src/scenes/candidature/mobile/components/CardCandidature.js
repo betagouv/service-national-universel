@@ -9,6 +9,7 @@ import SixDotsVertical from "../../../../assets/icons/SixDotsVertical";
 import { Draggable } from "react-beautiful-dnd";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
+import { capture } from "../../../../sentry";
 
 export default function application({ application, index, onChange, loading }) {
   const [mission, setMission] = React.useState();

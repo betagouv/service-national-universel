@@ -15,6 +15,7 @@ import SelectStatusApplication from "../../../components/selectStatusApplication
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import { capture } from "../../../sentry";
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);

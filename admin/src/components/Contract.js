@@ -17,6 +17,7 @@ import DownloadContractButton from "./buttons/DownloadContractButton";
 import LoadingButton from "./buttons/LoadingButton";
 import ModalConfirm from "./modals/ModalConfirm";
 import HistoricComponent from "./views/Historic";
+import { capture } from "../sentry";
 
 export default function Contract({ young, admin }) {
   const history = useHistory();
