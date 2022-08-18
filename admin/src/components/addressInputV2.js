@@ -101,9 +101,6 @@ export default function AddressInputV2({
   };
 
   const getSuggestions = async (item) => {
-    console.log("item:", item);
-    console.log("keys:", keys);
-    console.log("values:", values);
     const errors = await Promise.all([validateField(keys.address), validateField(keys.city), validateField(keys.zip)]).then((arr) => arr.filter((error) => error !== false));
     if (errors.length) return;
     const text = item;
