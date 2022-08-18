@@ -27,6 +27,7 @@ const BusModel = require("../../models/bus");
 const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
+  deleteFile,
   validatePassword,
   ERRORS,
   inSevenDays,
@@ -821,6 +822,20 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
       "zip",
       "city",
     ];
+
+    for (const key in young.files) {
+      if (key.length) {
+        for (const file in key) {
+          try {
+            if (key.includes("military")) await deleteFile(`app/young/${id}/military-preparation/${key}/${file._id}`);
+            else await deleteFile(`app/young/${id}/${key}/${file._id}`);
+            young.set({ files: { [key]: undefined } });
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+    }
 
     for (const key in young._doc) {
       if (!fieldToKeep.find((val) => val === key)) {
