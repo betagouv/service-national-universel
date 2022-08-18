@@ -6,6 +6,7 @@ import ErrorMessage, { requiredMessage } from "./errorMessage";
 import { department2region, departmentLookUp, departmentToAcademy, departmentList, regionList } from "../utils";
 import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";
+import { toastr } from "react-redux-toastr";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
@@ -100,12 +101,15 @@ export default function AddressInputV2({
   };
 
   const getSuggestions = async (item) => {
+    console.log("item:", item);
+    console.log("keys:", keys);
+    console.log("values:", values);
     const errors = await Promise.all([validateField(keys.address), validateField(keys.city), validateField(keys.zip)]).then((arr) => arr.filter((error) => error !== false));
     if (errors.length) return;
     const text = item;
 
     setLoading(true);
-    const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
+    const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}&limit=1&postcode=${values.zip}`, {
       mode: "cors",
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -115,7 +119,23 @@ export default function AddressInputV2({
 
     setLoading(false);
     if (arr.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
-    else addressVerifiedHelpers.setValue("true");
+    else {
+      // If no match with complete query, try with postcode only
+      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${values.zip}&limit=1&postcode=${values.zip}`, {
+        mode: "cors",
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const res = await response.json();
+      const arr = res.features.filter((e) => e.properties.type !== "municipality");
+
+      setLoading(false);
+      if (arr.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
+      else {
+        toastr.error("Aucune adresse n'a été trouvée.");
+        addressVerifiedHelpers.setValue("false");
+      }
+    }
   };
 
   // keys is not defined at first load ??
@@ -270,7 +290,7 @@ export default function AddressInputV2({
               <SecondaryButton
                 onClick={() => {
                   setSuggestion({});
-                  addressVerifiedHelpers.setValue("true");
+                  addressVerifiedHelpers.setValue("false");
                 }}>
                 Non
               </SecondaryButton>
