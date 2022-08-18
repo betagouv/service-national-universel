@@ -12,6 +12,7 @@ import SendIcon from "../../../components/SendIcon";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
+import { capture } from "../../../sentry";
 
 const updateHeightElement = (e) => {
   e.style.height = "inherit";
@@ -59,7 +60,10 @@ export default function TicketMessage({ ticket: propTicket }) {
     const id = ticket?._id;
     if (!message) return setSending(false);
     const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message });
-    if (!ok) toastr.error("Oups, une erreur est survenue", translate(code));
+    if (!ok) {
+      capture(code);
+      toastr.error("Oups, une erreur est survenue", translate(code));
+    }
     setMessage("");
     updateHeightElement(inputRef?.current);
     getTicket(id);

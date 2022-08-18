@@ -45,6 +45,7 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage, fr
             setSuccessMessage("Votre demande a bien été envoyée ! Nous vous répondrons par mail.");
           } catch (e) {
             console.log(e);
+            capture(e);
             toastr.error("Oups, une erreur est survenue", translate(e.code));
           }
         }}>

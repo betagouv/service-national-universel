@@ -13,6 +13,7 @@ import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
 import { toastr } from "react-redux-toastr";
+import { capture } from "../../../sentry";
 
 const updateHeightElement = (e) => {
   e.style.height = "inherit";
@@ -61,7 +62,10 @@ export default function TicketView(props) {
     if (!message) return setSending(false);
     const id = props.match?.params?.id;
     const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage });
-    if (!ok) toastr.error("Oups, une erreur est survenue", translate(code));
+    if (!ok) {
+      capture(code);
+      toastr.error("Oups, une erreur est survenue", translate(code));
+    }
     setMessage("");
     updateHeightElement(inputRef?.current);
     getTicket();

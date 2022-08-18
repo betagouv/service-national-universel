@@ -37,6 +37,7 @@ import { BsChevronDown } from "react-icons/bs";
 import FileCard from "./../../scenes/militaryPreparation/components/FileCard";
 import ChevronDown from "../../assets/icons/ChevronDown";
 import Download from "../../assets/icons/Download";
+import { capture } from "../../sentry";
 
 export default function viewDesktop() {
   const [mission, setMission] = useState();
@@ -70,7 +71,10 @@ export default function viewDesktop() {
     const getContract = async () => {
       if (mission?.application?.contractId) {
         const { ok, data, code } = await api.get(`/contract/${mission.application.contractId}`);
-        if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+        if (!ok) {
+          capture(code);
+          return toastr.error("Oups, une erreur est survenue", code);
+        }
         setContract(data);
       }
     };

@@ -11,6 +11,7 @@ import { HeroContainer } from "../../../components/Content";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
 import { translate } from "../../../utils";
+import { capture } from "../../../sentry";
 
 export default function TicketCreate(props) {
   const history = useHistory();
@@ -46,6 +47,7 @@ export default function TicketCreate(props) {
               history.push("/besoin-d-aide");
             } catch (e) {
               console.log(e);
+              capture(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
             }
           }}>
