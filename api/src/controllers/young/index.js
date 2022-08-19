@@ -831,6 +831,7 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
             else await deleteFile(`app/young/${id}/${key}/${file._id}`);
             young.set({ files: { [key]: undefined } });
           } catch (e) {
+            capture(e);
             console.error(e);
           }
         }
