@@ -30,11 +30,6 @@ class Auth {
         rulesYoung: Joi.string().trim().required().valid("true"),
         acceptCGU: Joi.string().trim().required().valid("true"),
         frenchNationality: Joi.string().trim().required().valid("true"),
-        INEHash: Joi.string().trim().length(32).allow(""),
-        codeUAI: Joi.string().trim().allow(""),
-        niveau: Joi.string().trim().allow(""),
-        urlLogOut: Joi.string().trim().allow(""),
-        affiliation: Joi.string().trim().allow(""),
       }).validate(req.body);
 
       if (error) {
@@ -55,7 +50,6 @@ class Auth {
         frenchNationality,
         acceptCGU,
         rulesYoung,
-        INEHash,
         codeUAI,
         niveau,
         urlLogOut,
@@ -65,11 +59,6 @@ class Auth {
 
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-
-      if (INEHash) {
-        countDocuments = await this.model.countDocuments({ INEHash });
-        if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.EDUCONNECT_USER_ALREADY_REGISTERED });
-      }
 
       const user = await this.model.create({
         email,
@@ -83,7 +72,6 @@ class Auth {
         frenchNationality,
         acceptCGU,
         rulesYoung,
-        INEHash,
         codeUAI,
         niveau,
         urlLogOut,

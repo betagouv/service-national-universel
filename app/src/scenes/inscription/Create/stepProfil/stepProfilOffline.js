@@ -19,79 +19,32 @@ import EyeOpen from "../../../../assets/eye.svg";
 import EyeClose from "../../../../assets/eye-slash.svg";
 import FormFooter from "../../../../components/form/FormFooter";
 import { appURL, supportURL } from "../../../../config";
-import { EduconnectZone } from "./EduconnectZone";
-
-const youngInit = {
-  frenchNationality: "false",
-  firstName: "",
-  lastName: "",
-  birthdateAt: "",
-  email: "",
-  verifyEmail: "",
-  password: "",
-  verifyPassword: "",
-  birthCountry: "",
-  birthCity: "",
-  birthCityZip: "",
-  rulesYoung: "false",
-  acceptCGU: "false",
-  INEHash: "",
-  niveau: "",
-  urlLogOut: "",
-  affiliation: "",
-  codeUAI: "",
-};
 
 export default function StepProfil() {
   const [passwordText, setPasswordText] = useState(false);
-  const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const history = useHistory();
 
-  const isYoungFromEduConnect = young?.INEHash;
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-
-    const errorCode = urlParams.get("errorCode");
-    if (errorCode) {
-      if (errorCode === "EDUCONNECT_LOGIN_ERROR") toastr.error("Erreur pendant la connection a ÉduConnect");
-      if (errorCode === "EDUCONNECT_RESP_AUTH") toastr.error("Échec de l'identification ÉduConnect. Vous devez vous connecter avec un compte élève");
-      dispatch(setYoung(youngInit));
-    } else {
-      const prenom = urlParams.get("prenom");
-      const nom = urlParams.get("nom");
-      const dateNaissance = urlParams.get("dateNaissance");
-      const INEHash = urlParams.get("INEHash");
-      const niveau = urlParams.get("niveau");
-      const urlLogOut = urlParams.get("urlLogOut");
-      const affiliation = urlParams.get("affiliation");
-      const codeUAI = urlParams.get("codeUAI");
-
-      if (!young)
-        dispatch(
-          setYoung({
-            ...youngInit,
-            firstName: prenom ?? youngInit.firstName,
-            lastName: nom ?? youngInit.lastName,
-            birthdateAt: dateNaissance ? dateNaissance + " T00:00:00.000Z" : youngInit.birthdateAt,
-            INEHash: INEHash ?? youngInit.INEHash,
-            codeUAI: codeUAI ?? youngInit.codeUAI,
-            niveau: niveau ?? youngInit.niveau,
-            urlLogOut: urlLogOut ?? youngInit.urlLogOut,
-            affiliation: affiliation ?? youngInit.affiliation,
-          }),
-        );
-    }
-  }, []);
-
-  if (!young) return null;
+  const young = {
+    frenchNationality: "false",
+    firstName: "",
+    lastName: "",
+    birthdateAt: "",
+    email: "",
+    verifyEmail: "",
+    password: "",
+    verifyPassword: "",
+    birthCountry: "",
+    birthCity: "",
+    birthCityZip: "",
+    rulesYoung: "false",
+    acceptCGU: "false",
+  };
 
   return (
     <>
-      <EduconnectZone connected={isYoungFromEduConnect} />
       <Wrapper>
         <Heading>
           <h2>Création du profil du volontaire</h2>
@@ -105,7 +58,6 @@ export default function StepProfil() {
             setLoading(true);
             try {
               const {
-                INEHash,
                 niveau,
                 urlLogOut,
                 affiliation,
@@ -122,7 +74,7 @@ export default function StepProfil() {
                 rulesYoung,
                 acceptCGU,
               } = values;
-              const route = isYoungFromEduConnect ? "/educonnect/signup" : "/young/signup";
+              const route = "/young/signup";
               const { user, token, code, ok } = await api.post(route, {
                 email,
                 firstName,
@@ -135,7 +87,6 @@ export default function StepProfil() {
                 frenchNationality,
                 rulesYoung,
                 acceptCGU,
-                INEHash,
                 codeUAI,
                 niveau,
                 urlLogOut,
@@ -248,7 +199,6 @@ export default function StepProfil() {
                       className="form-control"
                       validate={(v) => !v && requiredMessage}
                       name="lastName"
-                      disabled={isYoungFromEduConnect}
                       value={values.lastName}
                       onChange={handleChange}
                     />
@@ -275,7 +225,6 @@ export default function StepProfil() {
                     />
                     <DateInput
                       value={values.birthdateAt}
-                      disabled={isYoungFromEduConnect}
                       onChange={(date) => {
                         handleChange({ target: { value: date, name: "birthdateAt" } });
                       }}
