@@ -1,3 +1,10 @@
+## [1.123.7](https://github.com/betagouv/service-national-universel/compare/v1.123.6...v1.123.7) (2022-08-19)
+
+
+### Bug Fixes
+
+* **admin:** Fix default filters in dashboard ([d074833](https://github.com/betagouv/service-national-universel/commit/d07483367787be867f73d89dcf1996a003aa5547))
+
 ## [1.123.6](https://github.com/betagouv/service-national-universel/compare/v1.123.5...v1.123.6) (2022-08-18)
 
 
