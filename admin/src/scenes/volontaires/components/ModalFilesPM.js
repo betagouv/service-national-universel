@@ -55,8 +55,7 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
     setLoading(true);
     try {
       const res = await api.get(`${path}/${fileId}`);
-      console.log("res from handleDownload:", res);
-      FileSaver.saveAs(new Blob([new Uint8Array(res.data.data)], { type: res.mimeType }));
+      FileSaver.saveAs(new Blob([new Uint8Array(res.data.data)], { type: res.mimeType }), res.fileName);
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
     }
