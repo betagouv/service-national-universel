@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import CloseSvg from "../../../assets/Close";
 import { ModalContainer, Footer } from "../../../components/modals/Modal";
-import DndFileInput from "../../../components/dndFileInput";
+import DndFileInput from "../../../components/dndFileInputV2";
 import { Formik } from "formik";
 import Select from "../components/Select";
 import { translate } from "../../../utils";

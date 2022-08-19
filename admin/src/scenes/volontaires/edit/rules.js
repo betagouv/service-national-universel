@@ -4,7 +4,7 @@ import { Col } from "reactstrap";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Select from "../components/Select";
 import Documents from "../components/Documents";
-import DndFileInput from "../../../components/dndFileInput";
+import DndFileInput from "../../../components/dndFileInputV2";
 
 export default function Rules({ values, handleChange }) {
   return (

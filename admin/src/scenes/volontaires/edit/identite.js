@@ -1,7 +1,7 @@
 import React from "react";
 import { Col } from "reactstrap";
 
-import DndFileInput from "../../../components/dndFileInput";
+import DndFileInput from "../../../components/dndFileInputV2";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Documents from "../components/Documents";

@@ -2,7 +2,7 @@ import React from "react";
 import { Col, Row } from "reactstrap";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Documents from "../components/Documents";
-import DndFileInput from "../../../components/dndFileInput";
+import DndFileInput from "../../../components/dndFileInputV2";
 
 export default function MilitaryPreparation({ values }) {
   const files = [

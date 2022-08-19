@@ -7,7 +7,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Select from "../components/Select";
 import Documents from "../components/Documents";
-import DndFileInput from "../../../components/dndFileInput";
+import DndFileInput from "../../../components/dndFileInputV2";
 
 export default function SituationParticulieres({ values, handleChange }) {
   return (
