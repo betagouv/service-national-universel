@@ -183,7 +183,6 @@ export default function StepProfil() {
                       name="firstName"
                       value={values.firstName}
                       onChange={handleChange}
-                      disabled={isYoungFromEduConnect}
                     />
                     <ErrorMessage errors={errors} touched={touched} name="firstName" />
                   </Col>
