@@ -10,6 +10,7 @@ import { translate, departmentList, department2region } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { SelectTag, step1Public, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/workflow";
+import { capture } from "../../sentry";
 
 export default function PublicSupportCenterForm({ setOpen, setSuccessMessage, fromPage }) {
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
