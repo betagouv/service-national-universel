@@ -50,8 +50,6 @@ module.exports = function () {
       return done(null, false);
     }),
   );
-
-  SSO(passport);
 };
 
 module.exports.getToken = getToken;

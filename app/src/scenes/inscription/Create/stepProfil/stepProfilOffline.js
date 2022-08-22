@@ -57,23 +57,7 @@ export default function StepProfil() {
           onSubmit={async (values) => {
             setLoading(true);
             try {
-              const {
-                niveau,
-                urlLogOut,
-                affiliation,
-                codeUAI,
-                email,
-                firstName,
-                lastName,
-                password,
-                birthdateAt,
-                birthCountry,
-                birthCity,
-                birthCityZip,
-                frenchNationality,
-                rulesYoung,
-                acceptCGU,
-              } = values;
+              const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, rulesYoung, acceptCGU } = values;
               const route = "/young/signup";
               const { user, token, code, ok } = await api.post(route, {
                 email,
@@ -87,10 +71,6 @@ export default function StepProfil() {
                 frenchNationality,
                 rulesYoung,
                 acceptCGU,
-                codeUAI,
-                niveau,
-                urlLogOut,
-                affiliation,
               });
               if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
               if (token) api.setToken(token);

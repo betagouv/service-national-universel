@@ -38,23 +38,7 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const {
-        email,
-        firstName,
-        lastName,
-        password,
-        birthdateAt,
-        birthCountry,
-        birthCity,
-        birthCityZip,
-        frenchNationality,
-        acceptCGU,
-        rulesYoung,
-        codeUAI,
-        niveau,
-        urlLogOut,
-        affiliation,
-      } = value;
+      const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung } = value;
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt });
@@ -72,10 +56,6 @@ class Auth {
         frenchNationality,
         acceptCGU,
         rulesYoung,
-        codeUAI,
-        niveau,
-        urlLogOut,
-        affiliation,
       });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
