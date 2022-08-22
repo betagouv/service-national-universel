@@ -4,6 +4,7 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import LoadingButton from "./buttons/LoadingButton";
 import ModalConfirm from "./modals/ModalConfirm";
+import ExportFiltersModal from "./modals/ExportFiltersModal";
 import api from "../services/api";
 import dayjs from "dayjs";
 
@@ -19,6 +20,7 @@ export default function ExportComponent({
 }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [filtersModal, setFiltersModal] = useState({ isOpen: false, onConfirm: null });
   const query = useRef(defaultQuery().query);
   const onClick = () => {
     handleClick?.();
@@ -71,6 +73,7 @@ export default function ExportComponent({
   return (
     <>
       <LoadingButton onClick={onClick}>{title}</LoadingButton>
+      <ExportFiltersModal isOpen={filtersModal.isOpen} />
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
