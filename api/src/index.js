@@ -85,7 +85,6 @@ app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
 app.use("/zammood", require("./controllers/zammood"));
 app.use("/signin", require("./controllers/signin"));
-app.use("/educonnect", require("./controllers/educonnect"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));
