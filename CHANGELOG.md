@@ -1,3 +1,12 @@
+## [1.123.8](https://github.com/betagouv/service-national-universel/compare/v1.123.7...v1.123.8) (2022-08-22)
+
+
+### Bug Fixes
+
+* **admin:** Capture sentry ([ee94fdf](https://github.com/betagouv/service-national-universel/commit/ee94fdf4c94b41583ed6624aaeac4697bf8e7480))
+* **all:** Delete educonnect ([#1734](https://github.com/betagouv/service-national-universel/issues/1734)) ([51c9fd2](https://github.com/betagouv/service-national-universel/commit/51c9fd2a968e71bb50e6317cc58bbc721e29b425))
+* **api:** Educonnect delete session ([571a236](https://github.com/betagouv/service-national-universel/commit/571a236f22b88c3c4c78224fb49738352efe4454))
+
 ## [1.123.7](https://github.com/betagouv/service-national-universel/compare/v1.123.6...v1.123.7) (2022-08-19)
 
 
