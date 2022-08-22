@@ -36,7 +36,7 @@ import changeSejour from "./scenes/phase1/changeSejour";
 import Maintenance from "./scenes/maintenance";
 
 import api, { initApi } from "./services/api";
-import { appURL, educonnectAllowed, maintenance } from "./config";
+import { appURL, maintenance } from "./config";
 import ModalCGU from "./components/modals/ModalCGU";
 
 import "./index.css";
@@ -140,7 +140,7 @@ const Espace = () => {
   }
   const youngInProcessInscription = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status);
 
-  if (!inscriptionCreationOpenForYoungs(young?.cohort, educonnectAllowed) && youngInProcessInscription) return <Redirect to="/inscription" />;
+  if (!inscriptionCreationOpenForYoungs(young?.cohort) && youngInProcessInscription) return <Redirect to="/inscription" />;
   if (youngInProcessInscription) return <Redirect to="/inscription/coordonnees" />;
 
   return (

@@ -17,11 +17,9 @@ import Desistement from "../../scenes/desistement";
 import { useSelector } from "react-redux";
 import { colors, YOUNG_STATUS, inscriptionModificationOpenForYoungs, inscriptionCreationOpenForYoungs, COHORTS } from "../../utils";
 
-import Closed from "./Home/closed.js";
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
 import HelpButton from "../../components/buttons/HelpButton";
-import { educonnectAllowed } from "../../config";
 import { SentryRoute } from "../../sentry";
 
 const Step = ({ step }) => {
@@ -61,7 +59,7 @@ export default function Index() {
   const young = useSelector((state) => state.Auth.young);
 
   const allowedCohorts = COHORTS.filter((c) => inscriptionModificationOpenForYoungs(c));
-  if (young?.cohort && !allowedCohorts.includes(young?.cohort) && !educonnectAllowed) {
+  if (young?.cohort && !allowedCohorts.includes(young?.cohort)) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
@@ -72,7 +70,7 @@ export default function Index() {
 
   return (
     <Switch>
-      {inscriptionCreationOpenForYoungs(young?.cohort, educonnectAllowed) ||
+      {inscriptionCreationOpenForYoungs(young?.cohort) ||
       (inscriptionModificationOpenForYoungs(young?.cohort) && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young?.status)) ? (
         <>
           <SentryRoute path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
