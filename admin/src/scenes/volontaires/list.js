@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import { DropdownItem, DropdownMenu, DropdownToggle, Modal, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
@@ -44,6 +44,8 @@ import plausibleEvent from "../../services/pausible";
 import DeletedVolontairePanel from "./deletedPanel";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import LoadingButton from "../../components/buttons/LoadingButton";
+import { ModalContainer, Content, Footer, Header as ModalHeader } from "../../components/modals/Modal";
 
 const FILTERS = [
   "SEARCH",
@@ -100,6 +102,9 @@ export default function VolontaireList() {
     setInfosClick(!infosClick);
   };
 
+  const [columnModalOpen, setColumnModalOpen] = useState(false);
+  const [columnsToDisplay, setColumnsToDisplay] = useState([]);
+
   const handleShowFilter = () => setFilterVisible(!filterVisible);
 
   useEffect(() => {
@@ -122,6 +127,230 @@ export default function VolontaireList() {
     track_total_hits: true,
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
+
+  async function transform(data) {
+    let all = data;
+    const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+    if (schoolsId?.length) {
+      const { responses } = await api.esQuery("school", {
+        query: { bool: { must: { ids: { values: schoolsId } } } },
+        size: ES_NO_LIMIT,
+      });
+      if (responses.length) {
+        const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+      }
+    }
+    return all.map((data) => {
+      let center = {};
+      if (data.sessionPhase1Id && centers && sessionsPhase1) {
+        center = centers.find((c) => sessionsPhase1.find((sessionPhase1) => sessionPhase1._id === data.sessionPhase1Id)?.cohesionCenterId === c._id);
+        if (!center) center = {};
+      }
+      let meetingPoint = {};
+      if (data.meetingPointId && meetingPoints) {
+        meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
+        if (!meetingPoint) meetingPoint = {};
+      }
+      let columns = {};
+      if (columnsToDisplay.identity)
+        columns.push({
+          _id: data._id,
+          Cohorte: data.cohort,
+          "Cohorte d'origine": data.originalCohort,
+          Prénom: data.firstName,
+          Nom: data.lastName,
+          Sexe: translate(data.gender),
+        });
+      if (columnsToDisplay.contact)
+        columns.push({
+          Email: data.email,
+          Téléphone: data.phone,
+        });
+      if (columnsToDisplay.birth)
+        columns.push({
+          "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
+          "Pays de naissance": data.birthCountry || "France",
+          "Ville de naissance": data.birthCity,
+          "Code postal de naissance": data.birthCityZip,
+        });
+      if (columnsToDisplay.address)
+        columns.push({
+          "Adresse postale": data.address,
+          "Code postal": data.zip,
+          Ville: data.city,
+          Pays: data.country,
+          "Nom de l'hébergeur": data.hostLastName,
+          "Prénom de l'hébergeur": data.hostFirstName,
+          "Lien avec l'hébergeur": data.hostRelationship,
+          "Adresse - étranger": data.foreignAddress,
+          "Code postal - étranger": data.foreignZip,
+          "Ville - étranger": data.foreignCity,
+          "Pays - étranger": data.foreignCountry,
+        });
+      if (columnsToDisplay.location)
+        columns.push({
+          Département: data.department,
+          Académie: data.academy,
+          Région: data.region,
+        });
+      if (columnsToDisplay.schoolSituation)
+        columns.push({
+          Situation: translate(data.situation),
+          Niveau: translate(data.grade),
+          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+          "UAI de l'établissement": data.esSchool?.uai,
+        });
+      if (columnsToDisplay.situation)
+        columns.push({
+          "Quartier Prioritaire de la ville": translate(data.qpv),
+          "Zone Rurale": translate(isInRuralArea(data)),
+          Handicap: translate(data.handicap),
+          "Bénéficiaire d'un PPS": translate(data.ppsBeneficiary),
+          "Bénéficiaire d'un PAI": translate(data.paiBeneficiary),
+          "Aménagement spécifique": translate(data.specificAmenagment),
+          "Nature de l'aménagement spécifique": translate(data.specificAmenagmentType),
+          "Aménagement pour mobilité réduite": translate(data.reducedMobilityAccess),
+          "Besoin d'être affecté(e) dans le département de résidence": translate(data.handicapInSameDepartment),
+          "Allergies ou intolérances alimentaires": translate(data.allergies),
+          "Activité de haut-niveau": translate(data.highSkilledActivity),
+          "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
+          "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
+          "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
+          "Structure médico-sociale": translate(data.medicosocialStructure),
+          "Nom de la structure médico-sociale": data.medicosocialStructureName, // différence avec au-dessus ?
+          "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
+          "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
+          "Ville de la structure médico-sociale": data.medicosocialStructureCity,
+        });
+      if (columnsToDisplay.representative1)
+        columns.push({
+          "Statut représentant légal 1": translate(data.parent1Status),
+          "Prénom représentant légal 1": data.parent1FirstName,
+          "Nom représentant légal 1": data.parent1LastName,
+          "Email représentant légal 1": data.parent1Email,
+          "Téléphone représentant légal 1": data.parent1Phone,
+          "Adresse représentant légal 1": data.parent1Address,
+          "Code postal représentant légal 1": data.parent1Zip,
+          "Ville représentant légal 1": data.parent1City,
+          "Département représentant légal 1": data.parent1Department,
+          "Région représentant légal 1": data.parent1Region,
+        });
+      if (columnsToDisplay.representative2)
+        columns.push({
+          "Statut représentant légal 2": translate(data.parent2Status),
+          "Prénom représentant légal 2": data.parent2FirstName,
+          "Nom représentant légal 2": data.parent2LastName,
+          "Email représentant légal 2": data.parent2Email,
+          "Téléphone représentant légal 2": data.parent2Phone,
+          "Adresse représentant légal 2": data.parent2Address,
+          "Code postal représentant légal 2": data.parent2Zip,
+          "Ville représentant légal 2": data.parent2City,
+          "Département représentant légal 2": data.parent2Department,
+          "Région représentant légal 2": data.parent2Region,
+        });
+      if (columnsToDisplay.consent)
+        columns.push({
+          "Consentement des représentants légaux": translate(data.parentConsentment),
+        });
+      if (columnsToDisplay.status)
+        columns.push({
+          "Statut général": translate(data.status),
+          Phase: translate(data.phase),
+          "Statut Phase 1": translatePhase1(data.statusPhase1),
+          "Statut Phase 2": translatePhase2(data.statusPhase2),
+          "Statut Phase 3": translate(data.statusPhase3),
+          "Dernier statut le": formatLongDateFR(data.lastStatusAt),
+        });
+      if (columnsToDisplay.phase1Affectation)
+        columns.push({
+          // Affectation
+          "ID centre": center._id || "",
+          "Code centre (2021)": center.code || "",
+          "Code centre (2022)": center.code2022 || "",
+          "Nom du centre": center.name || "",
+          "Ville du centre": center.city || "",
+          "Département du centre": center.department || "",
+          "Région du centre": center.region || "",
+        });
+      if (columnsToDisplay.phase1Transport)
+        columns.push({
+          "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
+          "Transport géré hors plateforme": null, // A faire
+          "Bus n˚": meetingPoint?.busExcelId,
+          "Adresse point de rassemblement": meetingPoint?.departureAddress,
+          "Date aller": meetingPoint?.departureAtString,
+          "Date retour": meetingPoint?.returnAtString,
+        });
+      if (columnsToDisplay.phase1DocumentStatus)
+        columns.push({
+          "Droit à l'image - Accord": translate(data.imageRight),
+          "Autotest PCR - Accord": translate(data.autoTestPCR),
+          "Règlement intérieur": translate(data.rulesYoung),
+          "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
+        });
+      if (columnsToDisplay.phase1DocumentAgreement)
+        columns.push({
+          "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",
+          "Autotest PCR - Statut": translateFileStatusPhase1(data.autoTestPCRFilesStatus) || "Non Renseigné",
+        });
+      if (columnsToDisplay.phase1Attendance)
+        columns.push({
+          "Présence à l'arrivée": !data.cohesionStayPresence ? "Non renseignée" : data.cohesionStayPresence === "true" ? "Présent" : "Absent",
+          "Présence à la JDM": !data.presenceJDM ? "Non renseignée" : data.presenceJDM === "true" ? "Présent" : "Absent",
+          "Date de départ": !data.departSejourAt ? "Non renseignée" : formatDateFRTimezoneUTC(data.departSejourAt),
+          "Motif du départ": data?.departSejourMotif,
+        });
+      if (columnsToDisplay.phase2)
+        columns.push({
+          "Domaine de MIG 1": data.domains[0],
+          "Domaine de MIG 2": data.domains[1],
+          "Domaine de MIG 3": data.domains[2],
+          "Projet professionnel": translate(data.professionnalProject),
+          "Information supplémentaire sur le projet professionnel": data.professionnalProjectPrecision,
+          "Période privilégiée pour réaliser des missions": data.period,
+          "Choix 1 période": translate(data.periodRanking[0]),
+          "Choix 2 période": translate(data.periodRanking[1]),
+          "Choix 3 période": translate(data.periodRanking[2]),
+          "Choix 4 période": translate(data.periodRanking[3]),
+          "Choix 5 période": translate(data.periodRanking[4]),
+          "Format de mission": translate(data.missionFormat),
+          "Engagement dans une structure en dehors du SNU": translate(data.engaged),
+          "Description engagement ": data.engagedDescription,
+          "Souhait MIG": data.desiredLocation,
+          "Mobilité aux alentours de son établissement": translate(data.mobilityNearSchool),
+          "Mobilité aux alentours de son domicile": translate(data.mobilityNearHome),
+          "Mobilité aux alentours d'un de ses proches": translate(data.mobilityNearRelative),
+          "Informations du proche":
+            data.mobilityNearRelative &&
+            [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity].filter((e) => e)?.join(", "),
+          "Mode de transport": data.mobilityTransport?.map((t) => translate(t)).join(", "),
+          "Autre mode de transport": data.mobilityTransportOther,
+          // Format de mission
+          // Engagement dans une structure en dehors du SNU
+          // Description engagement
+          // Souhait MIG
+        });
+      if (columnsToDisplay.accountDetails)
+        columns.push({
+          "Créé lé": formatLongDateFR(data.createdAt),
+          "Mis à jour le": formatLongDateFR(data.updatedAt),
+          "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
+        });
+      if (columnsToDisplay.desistement)
+        columns.push({
+          "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
+          "Message de désistement": data.withdrawnMessage,
+          // Date du désistement
+        });
+      return columns;
+    });
+  }
+
   return (
     <div>
       <Breadcrumbs items={[{ label: "Volontaires" }]} />
@@ -133,325 +362,117 @@ export default function VolontaireList() {
                 <Title>Volontaires</Title>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: ".25rem", justifyContent: "flex-end" }}>
-                <ExportComponent
-                  handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
-                  title="Exporter les volontaires wesh"
-                  defaultQuery={getExportQuery}
-                  exportTitle="Volontaires"
-                  index="young"
-                  react={{ and: FILTERS }}
-                  transform={async (data) => {
-                    let all = data;
-                    const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-                    if (schoolsId?.length) {
-                      const { responses } = await api.esQuery("school", {
-                        query: { bool: { must: { ids: { values: schoolsId } } } },
-                        size: ES_NO_LIMIT,
-                      });
-                      if (responses.length) {
-                        const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                        all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-                      }
-                    }
-                    return all.map((data) => {
-                      let center = {};
-                      if (data.sessionPhase1Id && centers && sessionsPhase1) {
-                        center = centers.find((c) => sessionsPhase1.find((sessionPhase1) => sessionPhase1._id === data.sessionPhase1Id)?.cohesionCenterId === c._id);
-                        if (!center) center = {};
-                      }
-                      let meetingPoint = {};
-                      if (data.meetingPointId && meetingPoints) {
-                        meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
-                        if (!meetingPoint) meetingPoint = {};
-                      }
-                      let columns = {};
-                      if (identity)
-                        columns.push({
-                          _id: data._id,
-                          Cohorte: data.cohort,
-                          "Cohorte d'origine": data.originalCohort,
-                          Prénom: data.firstName,
-                          Nom: data.lastName,
-                          Sexe: translate(data.gender),
-                        });
-                      if (contact)
-                        columns.push({
-                          Email: data.email,
-                          Téléphone: data.phone,
-                        });
-                      if (birth)
-                        columns.push({
-                          "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
-                          "Pays de naissance": data.birthCountry || "France",
-                          "Ville de naissance": data.birthCity,
-                          "Code postal de naissance": data.birthCityZip,
-                        });
-                      if (address)
-                        columns.push({
-                          "Adresse postale": data.address,
-                          "Code postal": data.zip,
-                          Ville: data.city,
-                          Pays: data.country,
-                          "Nom de l'hébergeur": data.hostLastName,
-                          "Prénom de l'hébergeur": data.hostFirstName,
-                          "Lien avec l'hébergeur": data.hostRelationship,
-                          "Adresse - étranger": data.foreignAddress,
-                          "Code postal - étranger": data.foreignZip,
-                          "Ville - étranger": data.foreignCity,
-                          "Pays - étranger": data.foreignCountry,
-                        });
-                      if (location)
-                        columns.push({
-                          Département: data.department,
-                          Académie: data.academy,
-                          Région: data.region,
-                        });
-                      if (schoolSituation)
-                        columns.push({
-                          Situation: translate(data.situation),
-                          Niveau: translate(data.grade),
-                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-                          "UAI de l'établissement": data.esSchool?.uai,
-                        });
-                      if (situation)
-                        columns.push({
-                          "Quartier Prioritaire de la ville": translate(data.qpv),
-                          "Zone Rurale": translate(isInRuralArea(data)),
-                          Handicap: translate(data.handicap),
-                          "Bénéficiaire d'un PPS": translate(data.ppsBeneficiary),
-                          "Bénéficiaire d'un PAI": translate(data.paiBeneficiary),
-                          "Aménagement spécifique": translate(data.specificAmenagment),
-                          "Nature de l'aménagement spécifique": translate(data.specificAmenagmentType),
-                          "Aménagement pour mobilité réduite": translate(data.reducedMobilityAccess),
-                          "Besoin d'être affecté(e) dans le département de résidence": translate(data.handicapInSameDepartment),
-                          "Allergies ou intolérances alimentaires": translate(data.allergies),
-                          "Activité de haut-niveau": translate(data.highSkilledActivity),
-                          "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
-                          "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
-                          "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
-
-                          // Structure M-S
-                          "Structure médico-sociale": translate(data.medicosocialStructure),
-                          "Nom de la structure médico-sociale": data.medicosocialStructureName,
-                          "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
-                          "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
-                          "Ville de la structure médico-sociale": data.medicosocialStructureCity,
-                        });
-                      if (representatives)
-                        columns.push({
-                          // Infos RL1
-                          "Statut représentant légal 1": translate(data.parent1Status),
-                          "Prénom représentant légal 1": data.parent1FirstName,
-                          "Nom représentant légal 1": data.parent1LastName,
-
-                          // Contact RL1
-                          "Email représentant légal 1": data.parent1Email,
-                          "Téléphone représentant légal 1": data.parent1Phone,
-                          "Adresse représentant légal 1": data.parent1Address,
-                          "Code postal représentant légal 1": data.parent1Zip,
-                          "Ville représentant légal 1": data.parent1City,
-                          "Département représentant légal 1": data.parent1Department,
-                          "Région représentant légal 1": data.parent1Region,
-
-                          // Infos RL2
-                          "Statut représentant légal 2": translate(data.parent2Status),
-                          "Prénom représentant légal 2": data.parent2FirstName,
-                          "Nom représentant légal 2": data.parent2LastName,
-
-                          // Contact RL2
-                          "Email représentant légal 2": data.parent2Email,
-                          "Téléphone représentant légal 2": data.parent2Phone,
-                          "Adresse représentant légal 2": data.parent2Address,
-                          "Code postal représentant légal 2": data.parent2Zip,
-                          "Ville représentant légal 2": data.parent2City,
-                          "Département représentant légal 2": data.parent2Department,
-                          "Région représentant légal 2": data.parent2Region,
-
-                          // Consentement
-                          "Consentement des représentants légaux": translate(data.parentConsentment),
-                        });
-                      if (status)
-                        columns.push({
-                          "Statut général": translate(data.status),
-                          Phase: translate(data.phase),
-                          "Statut Phase 1": translatePhase1(data.statusPhase1),
-                          "Statut Phase 2": translatePhase2(data.statusPhase2),
-                          "Statut Phase 3": translate(data.statusPhase3),
-                        });
-                      if (phase1)
-                        columns.push({
-                          // Affectation
-                          "ID centre": center._id || "",
-                          "Code centre (2021)": center.code || "",
-                          "Code centre (2022)": center.code2022 || "",
-                          "Nom du centre": center.name || "",
-                          "Ville du centre": center.city || "",
-                          "Département du centre": center.department || "",
-                          "Région du centre": center.region || "",
-
-                          // Transport
-                          "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
-                          "Bus n˚": meetingPoint?.busExcelId,
-                          "Adresse point de rassemblement": meetingPoint?.departureAddress,
-                          "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
-                          "Date aller": meetingPoint?.departureAtString,
-                          "Date retour": meetingPoint?.returnAtString,
-
-                          // Documents
-                          "Droit à l'image - Accord": translate(data.imageRight),
-                          "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",
-                          "Autotest PCR - Accord": translate(data.autoTestPCR),
-                          "Autotest PCR - Statut": translateFileStatusPhase1(data.autoTestPCRFilesStatus) || "Non Renseigné",
-                          "Règlement intérieur": translate(data.rulesYoung),
-                          "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
-
-                          // Présence
-
-                          "Présence à l'arrivée": !data.cohesionStayPresence ? "Non renseignée" : data.cohesionStayPresence === "true" ? "Présent" : "Absent",
-                          "Présence à la JDM": !data.presenceJDM ? "Non renseignée" : data.presenceJDM === "true" ? "Présent" : "Absent",
-                          "Date de départ": !data.departSejourAt ? "Non renseignée" : formatDateFRTimezoneUTC(data.departSejourAt),
-                          "Motif du départ": data?.departSejourMotif,
-                        });
-                      if (phase2)
-                        columns.push({
-                          // Preferences de MIG
-                          "Domaine de MIG 1": data.domains[0],
-                          "Domaine de MIG 2": data.domains[1],
-                          "Domaine de MIG 3": data.domains[2],
-                          "Projet professionnel": translate(data.professionnalProject),
-                          "Information supplémentaire sur le projet professionnel": data.professionnalProjectPrecision,
-                          "Période privilégiée pour réaliser des missions": data.period,
-                          "Choix 1 période": translate(data.periodRanking[0]),
-                          "Choix 2 période": translate(data.periodRanking[1]),
-                          "Choix 3 période": translate(data.periodRanking[2]),
-                          "Choix 4 période": translate(data.periodRanking[3]),
-                          "Choix 5 période": translate(data.periodRanking[4]),
-                          "Format de mission": translate(data.missionFormat),
-                          "Engagement dans une structure en dehors du SNU": translate(data.engaged),
-                          "Description engagement ": data.engagedDescription,
-                          "Souhait MIG": data.desiredLocation,
-
-                          // Mobilité
-                          "Mobilité aux alentours de son établissement": translate(data.mobilityNearSchool),
-                          "Mobilité aux alentours de son domicile": translate(data.mobilityNearHome),
-                          "Mobilité aux alentours d'un de ses proches": translate(data.mobilityNearRelative),
-                          "Informations du proche":
-                            data.mobilityNearRelative &&
-                            [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity]
-                              .filter((e) => e)
-                              ?.join(", "),
-                          "Mode de transport": data.mobilityTransport?.map((t) => translate(t)).join(", "),
-                          "Autre mode de transport": data.mobilityTransportOther,
-                        });
-                      if (phase3) columns.push({});
-                      if (lastStatus)
-                        columns.push({
-                          "Dernier statut le": formatLongDateFR(data.lastStatusAt),
-                        });
-                      if (account)
-                        columns.push({
-                          "Créé lé": formatLongDateFR(data.createdAt),
-                          "Mis à jour le": formatLongDateFR(data.updatedAt),
-                          "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                        });
-                      if (desistement)
-                        columns.push({
-                          "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
-                          "Message de désistement": data.withdrawnMessage,
-                        });
-                      return columns;
-                    });
-                  }}
-                />
-                {user.role === ROLES.REFERENT_DEPARTMENT && (
-                  <ExportComponent
-                    title="Exporter les volontaires scolarisés dans le département"
-                    defaultQuery={getExportQuery}
-                    exportTitle="Volontaires"
-                    index="young-having-school-in-department/volontaires"
-                    react={{ and: FILTERS }}
-                    transform={async (data) => {
-                      let all = data;
-                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-                      if (schoolsId?.length) {
-                        const { responses } = await api.esQuery("school", {
-                          query: { bool: { must: { ids: { values: schoolsId } } } },
-                          size: ES_NO_LIMIT,
-                        });
-                        if (responses.length) {
-                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-                        }
-                      }
-                      return all.map((data) => {
-                        return {
-                          _id: data._id,
-                          Cohorte: data.cohort,
-                          Prénom: data.firstName,
-                          Nom: data.lastName,
-                          Département: data.department,
-                          Situation: translate(data.situation),
-                          Niveau: translate(data.grade),
-                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-                          "UAI de l'établissement": data.esSchool?.uai,
-                          "Statut général": translate(data.status),
-                          "Statut Phase 1": translate(data.statusPhase1),
-                        };
-                      });
-                    }}
-                  />
-                )}
-                {user.role === ROLES.REFERENT_REGION && (
-                  <ExportComponent
-                    title="Exporter les volontaires scolarisés dans la région"
-                    defaultQuery={getExportQuery}
-                    exportTitle="Volontaires"
-                    index="young-having-school-in-region/volontaires"
-                    react={{ and: FILTERS }}
-                    transform={async (data) => {
-                      let all = data;
-                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-                      if (schoolsId?.length) {
-                        const { responses } = await api.esQuery("school", {
-                          query: { bool: { must: { ids: { values: schoolsId } } } },
-                          size: ES_NO_LIMIT,
-                        });
-                        if (responses.length) {
-                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-                        }
-                      }
-                      return all.map((data) => {
-                        return {
-                          _id: data._id,
-                          Cohorte: data.cohort,
-                          Prénom: data.firstName,
-                          Nom: data.lastName,
-                          Département: data.department,
-                          Situation: translate(data.situation),
-                          Niveau: translate(data.grade),
-                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-                          "Région de l'établissement": department2region[departmentLookUp[data.esSchool?.region]] || department2region[data.schoolDepartment],
-                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-                          "UAI de l'établissement": data.esSchool?.uai,
-                          "Statut général": translate(data.status),
-                          "Statut Phase 1": translate(data.statusPhase1),
-                        };
-                      });
-                    }}
-                  />
-                )}
+                <LoadingButton onClick={() => setColumnModalOpen(true)}>Exporter avec choix des colonnes</LoadingButton>
+                <Modal isOpen={columnModalOpen} size="xl">
+                  <ModalContainer className="pb-0">
+                    <ModalHeader>Sélectionnez les données à exporter</ModalHeader>
+                    <Content>
+                      <div>Sélectionnez pour choisir des sous-catégories</div>
+                      <div className="columns-2">
+                        <div className="">
+                          <div></div>Identité du volontaire
+                        </div>
+                        <div>Contact du volontaire</div>
+                      </div>
+                    </Content>
+                    <Footer>
+                      {user.role === ROLES.REFERENT_DEPARTMENT && (
+                        <ExportComponent
+                          title="Exporter les volontaires scolarisés dans le département"
+                          defaultQuery={getExportQuery}
+                          exportTitle="Volontaires"
+                          index="young-having-school-in-department/volontaires"
+                          react={{ and: FILTERS }}
+                          transform={async (data) => {
+                            let all = data;
+                            const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                            if (schoolsId?.length) {
+                              const { responses } = await api.esQuery("school", {
+                                query: { bool: { must: { ids: { values: schoolsId } } } },
+                                size: ES_NO_LIMIT,
+                              });
+                              if (responses.length) {
+                                const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                                all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                              }
+                            }
+                            return all.map((data) => {
+                              return {
+                                _id: data._id,
+                                Cohorte: data.cohort,
+                                Prénom: data.firstName,
+                                Nom: data.lastName,
+                                Département: data.department,
+                                Situation: translate(data.situation),
+                                Niveau: translate(data.grade),
+                                "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                                "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                                "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                                "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                                "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                                "UAI de l'établissement": data.esSchool?.uai,
+                                "Statut général": translate(data.status),
+                                "Statut Phase 1": translate(data.statusPhase1),
+                              };
+                            });
+                          }}
+                        />
+                      )}
+                      {user.role === ROLES.REFERENT_REGION && (
+                        <ExportComponent
+                          title="Exporter les volontaires scolarisés dans la région"
+                          defaultQuery={getExportQuery}
+                          exportTitle="Volontaires"
+                          index="young-having-school-in-region/volontaires"
+                          react={{ and: FILTERS }}
+                          transform={async (data) => {
+                            let all = data;
+                            const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                            if (schoolsId?.length) {
+                              const { responses } = await api.esQuery("school", {
+                                query: { bool: { must: { ids: { values: schoolsId } } } },
+                                size: ES_NO_LIMIT,
+                              });
+                              if (responses.length) {
+                                const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                                all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                              }
+                            }
+                            return all.map((data) => {
+                              return {
+                                _id: data._id,
+                                Cohorte: data.cohort,
+                                Prénom: data.firstName,
+                                Nom: data.lastName,
+                                Département: data.department,
+                                Situation: translate(data.situation),
+                                Niveau: translate(data.grade),
+                                "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                                "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                                "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                                "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                                "Région de l'établissement": department2region[departmentLookUp[data.esSchool?.region]] || department2region[data.schoolDepartment],
+                                "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                                "UAI de l'établissement": data.esSchool?.uai,
+                                "Statut général": translate(data.status),
+                                "Statut Phase 1": translate(data.statusPhase1),
+                              };
+                            });
+                          }}
+                        />
+                      )}
+                      <ExportComponent
+                        handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
+                        title="Exporter les volontaires"
+                        defaultQuery={getExportQuery}
+                        exportTitle="Volontaires"
+                        index="young"
+                        react={{ and: FILTERS }}
+                        transform={transform}
+                      />
+                    </Footer>
+                  </ModalContainer>
+                </Modal>
               </div>
             </Header>
             <Filter>
