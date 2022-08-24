@@ -1539,6 +1539,8 @@ Schema.plugin(patchHistory, {
     "/updatedAt",
     "/statusPhase2UpdatedAt",
     "/statusPhase3UpdatedAt",
+    "/statusPhase2ValidatedAt",
+    "/statusPhase3ValidatedAt",
   ],
 });
 
