@@ -9,13 +9,12 @@ import plausibleEvent from "../../../services/plausible";
 import gtagEvent from "../../../services/gtag";
 import { urlWithScheme, inscriptionCreationOpenForYoungs } from "../../../utils";
 import HomeClosed from "./closed";
-import { educonnectAllowed } from "../../../config";
 
 export default function Home({ location }) {
   const history = useHistory();
   const [cookies] = useCookies(["accept-cookie"]);
 
-  if (inscriptionCreationOpenForYoungs(null, educonnectAllowed)) {
+  if (inscriptionCreationOpenForYoungs(null)) {
     return (
       <div>
         <Header location={location} />

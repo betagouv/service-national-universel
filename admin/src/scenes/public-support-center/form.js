@@ -10,6 +10,7 @@ import { translate, departmentList, department2region } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { SelectTag, step1Public, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/workflow";
+import { capture } from "../../sentry";
 
 export default function PublicSupportCenterForm({ setOpen, setSuccessMessage, fromPage }) {
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
@@ -45,6 +46,7 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage, fr
             setSuccessMessage("Votre demande a bien été envoyée ! Nous vous répondrons par mail.");
           } catch (e) {
             console.log(e);
+            capture(e);
             toastr.error("Oups, une erreur est survenue", translate(e.code));
           }
         }}>

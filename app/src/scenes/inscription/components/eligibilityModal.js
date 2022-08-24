@@ -16,6 +16,7 @@ import { ModalContainer } from "../../../components/modals/Modal";
 import Note from "../../../components/Note";
 import { departmentList, translate } from "../../../utils";
 import plausibleEvent from "../../../services/plausible";
+import { capture } from "../../../sentry";
 
 const levels = [
   { label: "3ème", value: "3eme" },
@@ -67,6 +68,7 @@ export default function EligibilityModal({ onChange }) {
                   setSessions(data);
                   setDisplay(true);
                 } catch (e) {
+                  capture(e);
                   toastr.error("Oups, une erreur est survenue", translate(e.code));
                 }
               }}>

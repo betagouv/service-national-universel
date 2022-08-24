@@ -14,6 +14,7 @@ import MultiSelect from "../../components/Multiselect";
 
 import { legalStatus, typesStructure, sousTypesStructure, translate, getRegionByZip, getDepartmentByZip } from "../../utils";
 import { adminURL } from "../../config";
+import { capture } from "../../sentry";
 
 export default function Signup() {
   const dispatch = useDispatch();
@@ -61,6 +62,7 @@ export default function Signup() {
             history.push("/");
           } catch (e) {
             if (e && e.code === "USER_ALREADY_REGISTERED") return toastr.error("Le compte existe déja. Veuillez vous connecter");
+            capture(e);
             toastr.error("Oups, une erreur est survenue", translate(e?.code), { timeOut: 3000 });
             actions.setSubmitting(false);
             console.log("e", e);
