@@ -233,6 +233,7 @@ Schema.plugin(patchHistory, {
     "/invitationToken",
     "/invitationExpires",
     "/loginAttempts",
+    "/updatedAt",
   ],
 });
 

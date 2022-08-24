@@ -294,6 +294,7 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
+  excludes: ["/updatedAt"],
 });
 Schema.plugin(mongooseElastic(esClient, { ignore: ["jvaRawData"] }), MODELNAME);
 
