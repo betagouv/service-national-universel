@@ -238,7 +238,7 @@ Schema.plugin(patchHistory, {
 
 Schema.plugin(
   mongooseElastic(esClient, {
-    ignore: ["password", "lastLoginAt", "nextLoginAttemptIn", "forgotPasswordResetToken", "forgotPasswordResetExpires", "invitationToken", "invitationExpires", "loginAttempts"],
+    ignore: ["password", "nextLoginAttemptIn", "forgotPasswordResetToken", "forgotPasswordResetExpires", "invitationToken", "invitationExpires", "loginAttempts"],
   }),
   MODELNAME,
 );
