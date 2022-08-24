@@ -941,7 +941,7 @@ function ContractStatusbadgeItem({ contract, status, token, target }) {
 
   if (contract?.invitationSent !== "true") return <Badge text="Pas encore envoyé" />;
   else if (status === "VALIDATED") return <Badge text="Validé" color={APPLICATION_STATUS_COLORS.VALIDATED} />;
-  else if (user.role !== ROLES.ADMIN) {
+  else if (![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
     return (
       <>
         <Badge className="pb-2" text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
