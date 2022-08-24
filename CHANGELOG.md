@@ -1,3 +1,10 @@
+## [1.123.9](https://github.com/betagouv/service-national-universel/compare/v1.123.8...v1.123.9) (2022-08-24)
+
+
+### Bug Fixes
+
+* **api:** Save lasLoginAt into ES ([479c135](https://github.com/betagouv/service-national-universel/commit/479c135fb219406c58880f0741a1fa0b1cdcd0bf))
+
 ## [1.123.8](https://github.com/betagouv/service-national-universel/compare/v1.123.7...v1.123.8) (2022-08-22)
 
 
