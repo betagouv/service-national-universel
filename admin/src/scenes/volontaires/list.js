@@ -274,14 +274,14 @@ export default function VolontaireList() {
           "Date retour": meetingPoint?.returnAtString,
         },
         phase1DocumentStatus: {
-          "Droit à l'image - Accord": translate(data.imageRight),
-          "Autotest PCR - Accord": translate(data.autoTestPCR),
+          "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",
+          "Autotest PCR - Statut": translateFileStatusPhase1(data.autoTestPCRFilesStatus) || "Non Renseigné",
           "Règlement intérieur": translate(data.rulesYoung),
           "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
         },
         phase1DocumentAgreement: {
-          "Droit à l'image - Statut": translateFileStatusPhase1(data.imageRightFilesStatus) || "Non Renseigné",
-          "Autotest PCR - Statut": translateFileStatusPhase1(data.autoTestPCRFilesStatus) || "Non Renseigné",
+          "Droit à l'image - Accord": translate(data.imageRight),
+          "Autotest PCR - Accord": translate(data.autoTestPCR),
         },
         phase1Attendance: {
           "Présence à l'arrivée": !data.cohesionStayPresence ? "Non renseignée" : data.cohesionStayPresence === "true" ? "Présent" : "Absent",
@@ -301,10 +301,6 @@ export default function VolontaireList() {
           "Choix 3 période": translate(data.periodRanking[2]),
           "Choix 4 période": translate(data.periodRanking[3]),
           "Choix 5 période": translate(data.periodRanking[4]),
-          "Format de mission": translate(data.missionFormat),
-          "Engagement dans une structure en dehors du SNU": translate(data.engaged),
-          "Description engagement ": data.engagedDescription,
-          "Souhait MIG": data.desiredLocation,
           "Mobilité aux alentours de son établissement": translate(data.mobilityNearSchool),
           "Mobilité aux alentours de son domicile": translate(data.mobilityNearHome),
           "Mobilité aux alentours d'un de ses proches": translate(data.mobilityNearRelative),
@@ -313,10 +309,10 @@ export default function VolontaireList() {
             [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity].filter((e) => e)?.join(", "),
           "Mode de transport": data.mobilityTransport?.map((t) => translate(t)).join(", "),
           "Autre mode de transport": data.mobilityTransportOther,
-          // Format de mission
-          // Engagement dans une structure en dehors du SNU
-          // Description engagement
-          // Souhait MIG
+          "Format de mission": translate(data.missionFormat),
+          "Engagement dans une structure en dehors du SNU": translate(data.engaged),
+          "Description engagement ": data.engagedDescription,
+          "Souhait MIG": data.desiredLocation,
         },
         accountDetails: {
           "Créé lé": formatLongDateFR(data.createdAt),
@@ -339,6 +335,113 @@ export default function VolontaireList() {
     });
   }
 
+  const COLUMNS = [
+    {
+      title: "Identité du volontaire",
+      desc: "ID, cohorte, cohorte d'origine, prénom, nom, sexe.",
+      value: "identity",
+    },
+    {
+      title: "Contact du volontaire",
+      desc: "Email, téléphone",
+      value: "contact",
+    },
+    {
+      title: "Date et lieu de naissance du volontaire",
+      desc: "Date de naissance, pays de naissance, ville de naissance, code postal de naissance.",
+      value: "birth",
+    },
+    {
+      title: "Lieu de résidence du volontaire",
+      desc: "Adresse postale, code postal, ville, pays, nom de l'hébergeur, prénom de l'hébergeur, lien avec...",
+      value: "address",
+    },
+    {
+      title: "Localisation du volontaire",
+      desc: "Département, académie, région.",
+      value: "location",
+    },
+    {
+      title: "Situation scolaire",
+      desc: "Niveau, type d'établissement, nom de l'établissement, code postal de l'établissement, ville de l’établissement...",
+      value: "schoolSituation",
+    },
+    {
+      title: "Représentant légal 1",
+      desc: "Statut, nom, prénom, email, téléphone, adresse, code postal, ville, département et région du représentant légal.",
+      value: "representative1",
+    },
+    {
+      title: "Représentant légal 2",
+      desc: "Statut, nom, prénom, email, téléphone, adresse, code postal, ville, département et région du représentant légal.",
+      value: "representative2",
+    },
+    {
+      title: "Consentement",
+      desc: "Consentement des représentants légaux.",
+      value: "consent",
+    },
+    {
+      title: "Statut",
+      desc: "Statut général, statut phase 1, statut phase 2, statut phase 3, date du dernier statut.",
+      value: "status",
+    },
+    {
+      title: "Phase 1 - Affectation ",
+      desc: "ID, code, nom, ville, département et région du centre.",
+      value: "phase1Affectation",
+    },
+    {
+      title: "Phase 1 - Transport",
+      desc: "Autonomie, numéro de bus, point de rassemblement, dates d'aller et de retour.",
+      value: "phase1Transport",
+    },
+    {
+      title: "Phase 1 - Statut des documents",
+      desc: "Droit à l'image, autotest PCR, règlement intérieur, fiche sanitaire.",
+      value: "phase1DocumentStatus",
+    },
+    {
+      title: "Phase 1 - Accords",
+      desc: "Accords pour droit à l'image et autotests PCR.",
+      value: "phase1DocumentAgreement",
+    },
+    {
+      title: "Phase 1 - Présence",
+      desc: "Présence à l'arrivé, présence à la JDM, date de départ, motif de départ.",
+      value: "phase1Attendance",
+    },
+    {
+      title: "Phase 2",
+      desc: "Domaines MIG 1, MIG 2 et MIG 3, projet professionnel, période privilégiée, choix de périodes, mobilité, mobilité autour d'un proche, information du proche, mode de transport, format de mission, engagement hors SNU, souhait MIG",
+      value: "phase2",
+    },
+    {
+      title: "Compte",
+      desc: "Dates de création, d'édtion et de dernière connexion",
+      value: "accountDetails",
+    },
+    {
+      title: "Désistement",
+      desc: "Raison, message et date du désistement",
+      value: "desistement",
+    },
+  ];
+
+  console.log("filters:", FILTERS);
+
+  const listCategories = COLUMNS.map((cat) => (
+    <div key={cat.value} className="rounded-xl border-2 border-gray-100 px-3 py-2 mb-3">
+      <div className="flex justify-between w-full">
+        <div className="text-left text-lg w-3/4">{cat.title}</div>
+        <div className="h-4">
+          <Field type="checkbox" name="checked" value={cat.value} />
+        </div>
+      </div>
+      <div className="text-left text-gray-400 h-12 w-full text-ellipsis overflow-hidden">{cat.desc}</div>
+    </div>
+  ));
+
   return (
     <div>
       <Breadcrumbs items={[{ label: "Volontaires" }]} />
@@ -352,9 +455,9 @@ export default function VolontaireList() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: ".25rem", justifyContent: "flex-end" }}>
                 {/* Column selection modal */}
 
-                <LoadingButton onClick={() => setColumnModalOpen(true)}>Exporter avec choix des colonnes</LoadingButton>
+                <LoadingButton onClick={() => setColumnModalOpen(true)}>Exporter les volontaires</LoadingButton>
                 <Modal isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl">
-                  <ModalContainer className="pb-0">
+                  <ModalContainer>
                     <Formik
                       initialValues={{
                         checked: [],
@@ -365,56 +468,34 @@ export default function VolontaireList() {
                           <Content>
                             <div className="columns-2 w-full py-4">
                               <div className="text-left">Sélectionnez pour choisir des sous-catégories</div>
-                              <div className="text-right">Catégories choisies : {`${values.checked}`}</div>
+                              <div className="text-right">{volontaire?.length}</div>
                             </div>
-                            <div className="columns-2 w-full">
-                              {/* Identity */}
 
-                              <div className="rounded-xl border-2 border-gray-100 px-3 py-2">
-                                <div className="flex justify-between w-full">
-                                  <div className="text-left text-lg w-3/4">Identité du volontaire</div>
-                                  <div className="h-4">
-                                    <Field type="checkbox" name="checked" value="identity" />
-                                  </div>
-                                </div>
-                                <div className="text-left text-gray-400 h-12 w-full">ID, cohorte, cohorte d&apos;origine, prénom, nom, sexe.</div>
-                              </div>
-
-                              {/* Contact */}
-                              <div className="rounded-xl border-2 border-gray-100 px-3 py-2">
-                                <div className="flex justify-between w-full">
-                                  <div className="text-left text-lg w-3/4">Contact du volontaire</div>
-                                  <div className="h-4">
-                                    <Field type="checkbox" name="checked" value="contact" />
-                                  </div>
-                                </div>
-                                <div className="text-left text-gray-400 h-12 w-full">Email, téléphone.</div>
-                              </div>
+                            <div className="h-96 overflow-auto">
+                              <div className="columns-2 w-full">{listCategories}</div>
                             </div>
                           </Content>
-                          <Footer>
-                            <div className="bg-red-600 flex w-full">
-                              <ModalButton className="w-1/2˚∑" onClick={() => setColumnModalOpen(false)}>
-                                Annuler
-                              </ModalButton>
-                              <ExportComponent
-                                handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
-                                title="Exporter les volontaires"
-                                defaultQuery={getExportQuery}
-                                exportTitle="Volontaires"
-                                index="young"
-                                react={{ and: FILTERS }}
-                                transform={(data) => transform(data, values.checked)}
-                                className="w-full"
-                              />
+                          <div className="w-full flex mb-8 ml-12">
+                            <div className="w-1/2 object-center">
+                              <ModalButton onClick={() => setColumnModalOpen(false)}>Annuler</ModalButton>
                             </div>
-                          </Footer>
+                            <ExportComponent
+                              handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
+                              title="Exporter les volontaires"
+                              defaultQuery={getExportQuery}
+                              exportTitle="Volontaires"
+                              index="young"
+                              react={{ and: FILTERS }}
+                              transform={(data) => transform(data, values.checked)}
+                            />
+                          </div>
                         </>
                       )}
                     </Formik>
                   </ModalContainer>
                 </Modal>
                 {/* End column selection modal */}
+
                 {user.role === ROLES.REFERENT_DEPARTMENT && (
                   <ExportComponent
                     title="Exporter les volontaires scolarisés dans le département"
