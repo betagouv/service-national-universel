@@ -46,7 +46,8 @@ import DeletedVolontairePanel from "./deletedPanel";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import { ModalContainer, Content, Footer, Header as ModalHeader } from "../../components/modals/Modal";
+import { ModalContainer, Content, Footer } from "../../components/modals/Modal";
+import ModalButton from "../../components/buttons/ModalButton";
 
 const FILTERS = [
   "SEARCH",
@@ -104,9 +105,6 @@ export default function VolontaireList() {
   };
 
   const [columnModalOpen, setColumnModalOpen] = useState(false);
-  const [columnsToDisplay, setColumnsToDisplay] = useState({
-    identity: false,
-  });
 
   const handleShowFilter = () => setFilterVisible(!filterVisible);
 
@@ -355,7 +353,7 @@ export default function VolontaireList() {
                 {/* Column selection modal */}
 
                 <LoadingButton onClick={() => setColumnModalOpen(true)}>Exporter avec choix des colonnes</LoadingButton>
-                <Modal isOpen={columnModalOpen} size="xl">
+                <Modal isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl">
                   <ModalContainer className="pb-0">
                     <Formik
                       initialValues={{
@@ -363,121 +361,53 @@ export default function VolontaireList() {
                       }}>
                       {({ values }) => (
                         <>
-                          <ModalHeader>Sélectionnez les données à exporter</ModalHeader>
+                          <div className="text-xl">Sélectionnez les données à exporter</div>
                           <Content>
-                            <div>Sélectionnez pour choisir des sous-catégories</div>
-                            <div>Catégories choisies : {`${values.checked}`}</div>
-                            <div className="columns-2">
-                              <div className="rounded-xl border-2 border-gray-100 p-3 w-full">
+                            <div className="columns-2 w-full py-4">
+                              <div className="text-left">Sélectionnez pour choisir des sous-catégories</div>
+                              <div className="text-right">Catégories choisies : {`${values.checked}`}</div>
+                            </div>
+                            <div className="columns-2 w-full">
+                              {/* Identity */}
+
+                              <div className="rounded-xl border-2 border-gray-100 px-3 py-2">
                                 <div className="flex justify-between w-full">
-                                  <div className="text-left w-3/4">Identité du volontaire</div>
+                                  <div className="text-left text-lg w-3/4">Identité du volontaire</div>
                                   <div className="h-4">
                                     <Field type="checkbox" name="checked" value="identity" />
                                   </div>
                                 </div>
-                                <div className="text-left w-full">ID, cohorte, cohorte d&apos;origine, ville de naissance, code postal de la ville de naissance...</div>
+                                <div className="text-left text-gray-400 h-12 w-full">ID, cohorte, cohorte d&apos;origine, prénom, nom, sexe.</div>
                               </div>
-                              <div className="rounded-xl border-2 border-gray-100 p-2 w-full">
-                                <div>Contact du volontaire</div>
-                                <Field type="checkbox" name="checked" value="contact" />
+
+                              {/* Contact */}
+                              <div className="rounded-xl border-2 border-gray-100 px-3 py-2">
+                                <div className="flex justify-between w-full">
+                                  <div className="text-left text-lg w-3/4">Contact du volontaire</div>
+                                  <div className="h-4">
+                                    <Field type="checkbox" name="checked" value="contact" />
+                                  </div>
+                                </div>
+                                <div className="text-left text-gray-400 h-12 w-full">Email, téléphone.</div>
                               </div>
                             </div>
                           </Content>
                           <Footer>
-                            {user.role === ROLES.REFERENT_DEPARTMENT && (
+                            <div className="bg-red-600 flex w-full">
+                              <ModalButton className="w-1/2˚∑" onClick={() => setColumnModalOpen(false)}>
+                                Annuler
+                              </ModalButton>
                               <ExportComponent
-                                title="Exporter les volontaires scolarisés dans le département"
+                                handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
+                                title="Exporter les volontaires"
                                 defaultQuery={getExportQuery}
                                 exportTitle="Volontaires"
-                                index="young-having-school-in-department/volontaires"
+                                index="young"
                                 react={{ and: FILTERS }}
-                                transform={async (data) => {
-                                  let all = data;
-                                  const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-                                  if (schoolsId?.length) {
-                                    const { responses } = await api.esQuery("school", {
-                                      query: { bool: { must: { ids: { values: schoolsId } } } },
-                                      size: ES_NO_LIMIT,
-                                    });
-                                    if (responses.length) {
-                                      const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                                      all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-                                    }
-                                  }
-                                  return all.map((data) => {
-                                    return {
-                                      _id: data._id,
-                                      Cohorte: data.cohort,
-                                      Prénom: data.firstName,
-                                      Nom: data.lastName,
-                                      Département: data.department,
-                                      Situation: translate(data.situation),
-                                      Niveau: translate(data.grade),
-                                      "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-                                      "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-                                      "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-                                      "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-                                      "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-                                      "UAI de l'établissement": data.esSchool?.uai,
-                                      "Statut général": translate(data.status),
-                                      "Statut Phase 1": translate(data.statusPhase1),
-                                    };
-                                  });
-                                }}
+                                transform={(data) => transform(data, values.checked)}
+                                className="w-full"
                               />
-                            )}
-                            {user.role === ROLES.REFERENT_REGION && (
-                              <ExportComponent
-                                title="Exporter les volontaires scolarisés dans la région"
-                                defaultQuery={getExportQuery}
-                                exportTitle="Volontaires"
-                                index="young-having-school-in-region/volontaires"
-                                react={{ and: FILTERS }}
-                                transform={async (data) => {
-                                  let all = data;
-                                  const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-                                  if (schoolsId?.length) {
-                                    const { responses } = await api.esQuery("school", {
-                                      query: { bool: { must: { ids: { values: schoolsId } } } },
-                                      size: ES_NO_LIMIT,
-                                    });
-                                    if (responses.length) {
-                                      const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                                      all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-                                    }
-                                  }
-                                  return all.map((data) => {
-                                    return {
-                                      _id: data._id,
-                                      Cohorte: data.cohort,
-                                      Prénom: data.firstName,
-                                      Nom: data.lastName,
-                                      Département: data.department,
-                                      Situation: translate(data.situation),
-                                      Niveau: translate(data.grade),
-                                      "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-                                      "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-                                      "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-                                      "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-                                      "Région de l'établissement": department2region[departmentLookUp[data.esSchool?.region]] || department2region[data.schoolDepartment],
-                                      "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-                                      "UAI de l'établissement": data.esSchool?.uai,
-                                      "Statut général": translate(data.status),
-                                      "Statut Phase 1": translate(data.statusPhase1),
-                                    };
-                                  });
-                                }}
-                              />
-                            )}
-                            <ExportComponent
-                              handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
-                              title="Exporter les volontaires"
-                              defaultQuery={getExportQuery}
-                              exportTitle="Volontaires"
-                              index="young"
-                              react={{ and: FILTERS }}
-                              transform={(data) => transform(data, values.checked)}
-                            />
+                            </div>
                           </Footer>
                         </>
                       )}
@@ -485,6 +415,91 @@ export default function VolontaireList() {
                   </ModalContainer>
                 </Modal>
                 {/* End column selection modal */}
+                {user.role === ROLES.REFERENT_DEPARTMENT && (
+                  <ExportComponent
+                    title="Exporter les volontaires scolarisés dans le département"
+                    defaultQuery={getExportQuery}
+                    exportTitle="Volontaires"
+                    index="young-having-school-in-department/volontaires"
+                    react={{ and: FILTERS }}
+                    transform={async (data) => {
+                      let all = data;
+                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                      if (schoolsId?.length) {
+                        const { responses } = await api.esQuery("school", {
+                          query: { bool: { must: { ids: { values: schoolsId } } } },
+                          size: ES_NO_LIMIT,
+                        });
+                        if (responses.length) {
+                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                        }
+                      }
+                      return all.map((data) => {
+                        return {
+                          _id: data._id,
+                          Cohorte: data.cohort,
+                          Prénom: data.firstName,
+                          Nom: data.lastName,
+                          Département: data.department,
+                          Situation: translate(data.situation),
+                          Niveau: translate(data.grade),
+                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                          "UAI de l'établissement": data.esSchool?.uai,
+                          "Statut général": translate(data.status),
+                          "Statut Phase 1": translate(data.statusPhase1),
+                        };
+                      });
+                    }}
+                  />
+                )}
+                {user.role === ROLES.REFERENT_REGION && (
+                  <ExportComponent
+                    title="Exporter les volontaires scolarisés dans la région"
+                    defaultQuery={getExportQuery}
+                    exportTitle="Volontaires"
+                    index="young-having-school-in-region/volontaires"
+                    react={{ and: FILTERS }}
+                    transform={async (data) => {
+                      let all = data;
+                      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+                      if (schoolsId?.length) {
+                        const { responses } = await api.esQuery("school", {
+                          query: { bool: { must: { ids: { values: schoolsId } } } },
+                          size: ES_NO_LIMIT,
+                        });
+                        if (responses.length) {
+                          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+                        }
+                      }
+                      return all.map((data) => {
+                        return {
+                          _id: data._id,
+                          Cohorte: data.cohort,
+                          Prénom: data.firstName,
+                          Nom: data.lastName,
+                          Département: data.department,
+                          Situation: translate(data.situation),
+                          Niveau: translate(data.grade),
+                          "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
+                          "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
+                          "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
+                          "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
+                          "Région de l'établissement": department2region[departmentLookUp[data.esSchool?.region]] || department2region[data.schoolDepartment],
+                          "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
+                          "UAI de l'établissement": data.esSchool?.uai,
+                          "Statut général": translate(data.status),
+                          "Statut Phase 1": translate(data.statusPhase1),
+                        };
+                      });
+                    }}
+                  />
+                )}
               </div>
             </Header>
             <Filter>
