@@ -146,9 +146,6 @@ const Schema = new mongoose.Schema({
       },
     },
   },
-
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
 });
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);

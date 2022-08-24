@@ -150,8 +150,6 @@ const Schema = new mongoose.Schema({
   publisherUrl: { type: String },
 
   lastSyncAt: { type: Date },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
 });
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);

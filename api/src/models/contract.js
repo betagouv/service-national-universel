@@ -94,9 +94,6 @@ const Schema = new mongoose.Schema({
   structureManagerEmail: { type: String },
   structureSiret: { type: String },
   structureName: { type: String },
-
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
 });
 
 Schema.virtual("fromUser").set(function (fromUser) {

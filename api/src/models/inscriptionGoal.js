@@ -43,8 +43,6 @@ const Schema = new mongoose.Schema({
       description: "taux de remplissage (en pourcentage)",
     },
   },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
 });
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);

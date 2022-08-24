@@ -268,9 +268,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-
   //JVA mission
   lastSyncAt: { type: Date },
   isJvaMission: {
@@ -300,7 +297,6 @@ Schema.virtual("fromUser").set(function (fromUser) {
 
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
-  this.updatedAt = Date.now();
   next();
 });
 

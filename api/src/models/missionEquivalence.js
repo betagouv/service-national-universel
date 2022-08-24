@@ -99,8 +99,6 @@ const Schema = new mongoose.Schema({
       description: "Message de correction ou de refus",
     },
   },
-
-  createdAt: { type: Date, default: Date.now },
 });
 
 Schema.virtual("fromUser").set(function (fromUser) {
@@ -112,7 +110,6 @@ Schema.virtual("fromUser").set(function (fromUser) {
 
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
-  this.updatedAt = Date.now();
   next();
 });
 

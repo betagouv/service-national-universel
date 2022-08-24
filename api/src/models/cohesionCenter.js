@@ -127,9 +127,6 @@ const Schema = new mongoose.Schema({
       description: "Status de la globalite des cohortes d'un centre ",
     },
   },
-
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
 });
 
 Schema.virtual("fromUser").set(function (fromUser) {
@@ -141,7 +138,6 @@ Schema.virtual("fromUser").set(function (fromUser) {
 
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
-  this.updatedAt = Date.now();
   next();
 });
 

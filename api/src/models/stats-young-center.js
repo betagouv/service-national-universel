@@ -618,9 +618,6 @@ const Schema = new mongoose.Schema({
       description: "Liste des cohortes concernées par ce centre de cohésion",
     },
   },
-
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
 });
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
