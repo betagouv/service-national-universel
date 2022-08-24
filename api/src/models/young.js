@@ -1536,6 +1536,9 @@ Schema.plugin(patchHistory, {
     "/invitationExpires",
     "/phase3Token",
     "/loginAttempts",
+    "/updatedAt",
+    "/statusPhase2UpdatedAt",
+    "/statusPhase3UpdatedAt",
   ],
 });
 

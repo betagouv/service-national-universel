@@ -120,7 +120,7 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
-  excludes: ["/parent1Token", "/projectManagerToken", "/structureManagerToken", "/parent2Token", "/youngContractToken"],
+  excludes: ["/parent1Token", "/projectManagerToken", "/structureManagerToken", "/parent2Token", "/youngContractToken", "/updatedAt"],
 });
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
