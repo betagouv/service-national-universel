@@ -466,6 +466,10 @@ export default function VolontaireList() {
                         <>
                           <div className="text-xl">Sélectionnez les données à exporter</div>
                           <Content>
+                            <div className="rounded-xl bg-gray-100 w-full p-2 mt-4">
+                              <div>Rappel des filtres appliqués</div>
+                              <div>[Filtres]</div>
+                            </div>
                             <div className="columns-2 w-full py-4">
                               <div className="text-left">Sélectionnez pour choisir des sous-catégories</div>
                               <div className="text-right">{volontaire?.length}</div>
