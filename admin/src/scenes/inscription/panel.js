@@ -116,20 +116,20 @@ export default function InscriptionPanel({ onChange, value }) {
         </Info>
       )}
       <Info title="Pièce d’identité" id={value._id}>
-        {(value.files.cniFiles || []).map((e, i) => (
+        {(value.cniFiles || []).map((e, i) => (
           <DownloadButton
             key={i}
-            source={() => api.get(`/young/${value._id}/documents/cniFiles/${e}`)}
-            title={`Télécharger la pièce d’identité (${i + 1}/${value.files.cniFiles.length})`}
+            source={() => api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`)}
+            title={`Télécharger la pièce d’identité (${i + 1}/${value.cniFiles.length})`}
           />
         ))}
       </Info>
       <Info title="Consentements du ou des représentants légaux" id={value._id}>
-        {(value.files.parentConsentmentFiles || []).map((e, i) => (
+        {(value.parentConsentmentFiles || []).map((e, i) => (
           <DownloadButton
             key={i}
-            source={() => api.get(`/young/${value._id}/documents/parentConsentmentFiles/${e}`)}
-            title={`Télécharger le formulaire (${i + 1}/${value.files.parentConsentmentFiles.length})`}
+            source={() => api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`)}
+            title={`Télécharger le formulaire (${i + 1}/${value.parentConsentmentFiles.length})`}
           />
         ))}
         {isFromFranceConnect(young) && (
@@ -144,11 +144,11 @@ export default function InscriptionPanel({ onChange, value }) {
       </Info>
       {getAge(young?.birthdateAt) < 15 ? (
         <Info title="Traitement des données personnelles" id={value._id}>
-          {(value.files.dataProcessingConsentmentFiles || []).map((e, i) => (
+          {(value.dataProcessingConsentmentFiles || []).map((e, i) => (
             <DownloadButton
               key={i}
-              source={() => api.get(`/young/${value._id}/documents/dataProcessingConsentmentFiles/${e}`)}
-              title={`Télécharger le document (${i + 1}/${value.files.dataProcessingConsentmentFiles.length})`}
+              source={() => api.get(`/referent/youngFile/${value._id}/dataProcessingConsentmentFiles/${e}`)}
+              title={`Télécharger le document (${i + 1}/${value.dataProcessingConsentmentFiles.length})`}
             />
           ))}
           {isFromFranceConnect(young) && (

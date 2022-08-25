@@ -711,26 +711,19 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     } else {
       isParentFromFranceconnect = young.parent1FromFranceConnect === "true";
     }
-    const file = Joi.object({
-      _id: Joi.string().alphanum().length(24).required(),
-      uploadedAt: Joi.string().required(),
-      size: Joi.number().required(),
-      mimetype: Joi.string().required(),
-      name: Joi.string().required(),
-    });
 
     const { error, value } = Joi.object({
       cniFiles: Joi.alternatives().conditional("$isRequired", {
         is: Joi.boolean().valid(true).required(),
-        then: Joi.array().items(file.required()).required().min(1),
-        otherwise: Joi.array().items(file),
+        then: Joi.array().items(Joi.string().required()).required().min(1),
+        otherwise: Joi.array().items(Joi.string()),
       }),
       parentConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
         is: Joi.boolean().valid(false).required(),
         then: Joi.alternatives().conditional("$isRequired", {
           is: Joi.boolean().valid(true).required(),
-          then: Joi.array().items(file.required()).required().min(1),
-          otherwise: Joi.array().items(file),
+          then: Joi.array().items(Joi.string().required()).required().min(1),
+          otherwise: Joi.array().items(Joi.string()),
         }),
         otherwise: Joi.isError(new Error()),
       }),
@@ -740,17 +733,17 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
           is: Joi.boolean().valid(true).required(),
           then: Joi.alternatives().conditional("$isRequired", {
             is: Joi.boolean().valid(true).required(),
-            then: Joi.array().items(file.required()).required().min(1),
-            otherwise: Joi.array().items(file),
+            then: Joi.array().items(Joi.string().required()).required().min(1),
+            otherwise: Joi.array().items(Joi.string()),
           }),
           otherwise: Joi.isError(new Error()),
         }),
         otherwise: Joi.isError(new Error()),
       }),
-    }).validate(req.body, { context: { needMoreConsent, isParentFromFranceconnect, isRequired } }, { stripUnknown: true });
+    }).validate(req.body, { context: { needMoreConsent, isParentFromFranceconnect, isRequired }, stripUnknown: true });
 
     if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

@@ -39,8 +39,7 @@ export default function DocumentsPhase1({ young }) {
           ({documents}/{young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? "2" : "4"})
         </strong>
       </h3>
-      <ScrollSection
-        className={`flex flex-col md:flex-row items-center ${young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && "justify-between"} overflow-x-auto scrollbar-x pt-4`}>
+      <ScrollSection className={`flex flex-col md:flex-row items-center ${young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED && "justify-between"} overflow-x-auto scrollbar-x pt-4`}>
         {young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED ? (
           <>
             <FileCard

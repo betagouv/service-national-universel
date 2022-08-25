@@ -6,7 +6,7 @@ import { Button, Col, Modal, Row } from "reactstrap";
 import styled from "styled-components";
 import CloseSvg from "../../assets/Close";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import DndFileInput from "../../components/dndFileInputV2";
+import DndFileInput from "../../components/dndFileInput";
 import { ModalContainer } from "../../components/modals/Modal";
 import { setYoung } from "../../redux/auth/actions";
 import api from "../../services/api";
@@ -14,6 +14,7 @@ import { colors, translate } from "../../utils";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
 import DownloadButton from "./components/DownloadButton";
 import { Footer, FormGroup, FormRow, Logo, SuccessMessage, Title } from "./components/printable";
+import { YOUNG_STATUS_PHASE1 } from "snu-lib/constants";
 
 export default function AutoTest({ isOpen, onCancel, correction }) {
   const young = useSelector((state) => state.Auth.young);
@@ -216,10 +217,18 @@ export default function AutoTest({ isOpen, onCancel, correction }) {
                           <DndFileInput
                             placeholder="le formulaire"
                             errorMessage="Vous devez téléverser le formulaire"
-                            value={values.files.autoTestPCRFiles}
+                            value={values.autoTestPCRFiles}
                             name="autoTestPCRFiles"
                             className="lg:w-[50%] flex flex-col justify-center items-center lg:mt-0"
-                            path={`/young/${young._id}/documents/autoTestPCRFiles`}
+                            onChange={async (e) => {
+                              setUploading(true);
+                              const res = await api.uploadFile("/young/file/autoTestPCRFiles", e.target.files);
+                              if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                              // We update it instant ( because the bucket is updated instant )
+                              toastr.success("Fichier téléversé");
+                              handleChange({ target: { value: res.data, name: "autoTestPCRFiles" } });
+                              setUploading(false);
+                            }}
                           />
                           <ErrorMessage errors={errors} touched={touched} name="autoTestPCRFiles" />
                           {/* <div>OU</div>

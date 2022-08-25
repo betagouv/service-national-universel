@@ -6,7 +6,7 @@ import { Button, Col, Modal, Row } from "reactstrap";
 import styled from "styled-components";
 import CloseSvg from "../../assets/Close";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import DndFileInput from "../../components/dndFileInputV2";
+import DndFileInput from "../../components/dndFileInput";
 import { ModalContainer } from "../../components/modals/Modal";
 import { setYoung } from "../../redux/auth/actions";
 import api from "../../services/api";
@@ -209,9 +209,18 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                           <DndFileInput
                             placeholder="le formulaire"
                             errorMessage="Vous devez téléverser le formulaire"
+                            value={values.imageRightFiles}
                             name="imageRightFiles"
                             className="lg:w-[50%] flex flex-col justify-center items-center lg:mt-0"
-                            path={`/young/${young._id}/documents/imageRightFiles`}
+                            onChange={async (e) => {
+                              setUploading(true);
+                              const res = await api.uploadFile("/young/file/imageRightFiles", e.target.files);
+                              if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                              // We update it instant ( because the bucket is updated instant )
+                              toastr.success("Fichier téléversé");
+                              handleChange({ target: { value: res.data, name: "imageRightFiles" } });
+                              setUploading(false);
+                            }}
                           />
 
                           {/* <div>OU</div>

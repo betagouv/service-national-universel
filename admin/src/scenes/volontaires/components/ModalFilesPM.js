@@ -1,3 +1,4 @@
+import * as FileSaver from "file-saver";
 import React, { useEffect, useRef, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
@@ -8,18 +9,22 @@ import ModalButton from "../../../components/buttons/ModalButton";
 import { Footer, ModalContainer } from "../../../components/modals/Modal";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
-import FileSaver from "file-saver";
+import { slugifyFileName } from "../../../utils";
 
-export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
+function getFileName(file) {
+  return (file && file.name) || file;
+}
+
+export default function ModalFilesPM({ isOpen, onCancel, initialValues, young, nameFiles, title, onChange }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const [uploading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [filesList, setFilesList] = useState([]);
-  const [loading, setLoading] = useState(false);
 
+  const [loading, setLoading] = useState(false);
   const handleClick = (e) => {
     setModal({
       isOpen: true,
-      onConfirm: handleDownload,
+      onConfirm,
       title: "Téléchargement de document",
       message:
         "En téléchargeant cette pièce jointe, vous vous engagez à la supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)",
@@ -33,52 +38,45 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
     hiddenFileInput.current.click();
   };
 
-  async function handleUpload([...files]) {
+  const handleUpload = (event) => {
+    const files = event.target.files;
     for (let index = 0; index < Object.keys(files).length; index++) {
       let i = Object.keys(files)[index];
       if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
       if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
+      const fileName = files[i].name.match(/(.*)(\..*)/);
+      const newName = `${slugifyFileName(fileName[1])}-${filesList.length + index}${fileName[2]}`;
+      Object.defineProperty(files[i], "name", {
+        writable: true,
+        value: newName,
+      });
     }
-    const res = await api.uploadFile(`${path}`, files);
-    if (res.code === "FILE_CORRUPTED") {
-      return toastr.error(
-        "Le fichier semble corrompu",
-        "Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-        { timeOut: 0 },
-      );
-    }
-    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-    setFilesList(res.data);
-  }
+    uploadFiles([...filesList, ...files]);
+  };
 
-  async function handleDownload(fileId) {
+  const uploadFiles = async (files) => {
+    setUploading(true);
+    const res = await api.uploadFile(`/referent/file/${nameFiles}`, files, { youngId: young._id });
+    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+    // We update it instant ( because the bucket is updated instant )
+    setFilesList(res.data);
+    setUploading(false);
+  };
+
+  const onConfirm = async (file) => {
     setLoading(true);
     try {
-      const res = await api.get(`${path}/${fileId}`);
-      FileSaver.saveAs(new Blob([new Uint8Array(res.data.data)], { type: res.mimeType }), res.fileName);
+      const f = await api.get(`/referent/youngFile/${young._id}/military-preparation/${nameFiles}/${getFileName(file)}`);
+      FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
     }
     setLoading(false);
-  }
-
-  async function handleDelete(fileId) {
-    const res = await api.remove(`${path}/${fileId}`);
-    if (!res.ok) return toastr.error("Une erreur s'est produite lors de la suppression de votre fichier");
-    setFilesList(res.data);
-  }
-
-  async function getList(path) {
-    if (path) {
-      const res = await api.get(path);
-      if (!res.ok) return toastr.error("Une erreur s'est produite lors de la récupération de la liste de vos fichiers.");
-      setFilesList(res.data);
-    }
-  }
+  };
 
   useEffect(() => {
-    getList(path);
-  }, [path]);
+    setFilesList(initialValues);
+  }, [initialValues]);
 
   return (
     <>
@@ -89,21 +87,22 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
             <h3 className="mb-4">{title}</h3>
 
             {filesList?.length
-              ? filesList.map((file) => (
-                  <div key={file._id} className="flex flex-1 flex-row justify-between items-center border-[1px] border-gray-300 w-full rounded-lg py-2 px-3 mb-2">
+              ? filesList.map((file, index) => (
+                  <div key={index} className="flex flex-1 flex-row justify-between items-center border-[1px] border-gray-300 w-full rounded-lg py-2 px-3 mb-2">
                     <div className="flex flex-row items-center">
                       <PaperClip className="text-gray-400 mr-2" />
-                      <div className="text-sm leading-5 font-normal text-gray-800">{file.name}</div>
+                      <div className="text-sm leading-5 font-normal text-gray-800">{file}</div>
                     </div>
                     <div className="flex flex-row items-center gap-4">
-                      <div className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer" onClick={() => handleClick(file._id)}>
+                      <div className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer" onClick={() => handleClick(file)}>
                         Télécharger
                       </div>
                       <div
                         className="text-sm leading-5 font-normal text-gray-800 hover:underline cursor-pointer"
                         onClick={async () => {
                           setLoading(true);
-                          await handleDelete(file._id);
+                          setFilesList(filesList?.filter((f) => file !== f));
+                          await onChange({ data: filesList?.filter((f) => file !== f), name: nameFiles });
                           setLoading(false);
                         }}>
                         Supprimer
@@ -117,7 +116,7 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title }) {
               <div className="text-sm leading-5 font-medium text-blue-600 hover:underline mt-2 cursor-pointer" onClick={handleClickUpload}>
                 Téléversez le formulaire
               </div>
-              <input type="file" ref={hiddenFileInput} onChange={(e) => handleUpload(e.target.files)} className="hidden" accept=".jpg, .jpeg, .png, .pdf" multiple />
+              <input type="file" ref={hiddenFileInput} onChange={handleUpload} className="hidden" accept=".jpg, .jpeg, .png, .pdf" multiple />
               <div className="text-xs leading-4 font-normal text-gray-500 mt-1">PDF, PNG, JPG jusqu’à 5Mo</div>
             </div>
           </div>

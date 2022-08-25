@@ -31,8 +31,8 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
   const onConfirm = async (file) => {
     setLoading(true);
     try {
-      const f = await api.get(`/young/${young._id}/documents/${nameFiles}/${file.name}`);
-      FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName);
+      const f = await api.get(`/referent/youngFile/${young._id}/${nameFiles}/${getFileName(file)}`);
+      FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
     }
@@ -51,13 +51,13 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
 
             <div className="text-lg mb-4">Telecharger le(s) document(s) : </div>
             <div className="flex flex-col gap-2 justify-start">
-              {initialValues.files[nameFiles].map((e, i) => (
+              {initialValues[nameFiles].map((e, i) => (
                 <div key={i} className=" flex items-center">
                   <LoadingButton className="mr-2" color="#EFF6FF" textColor="#5145cd" loading={loading && modal?.value === e} onClick={() => handleClick(e)}>
                     <Download color="#5145cd" className="mr-2" />
                     Télécharger
                   </LoadingButton>
-                  <div className="ml-2">{e.name}</div>
+                  <div className="ml-2">{getFileName(e)}</div>
                 </div>
               ))}
             </div>

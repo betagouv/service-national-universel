@@ -150,6 +150,21 @@ export default function Phase2militaryPrepartionV2({ young }) {
     history.go(0);
   };
 
+  const onChangeFiles = async ({ data, name }) => {
+    try {
+      const { ok } = await api.put(`/referent/young/${young._id.toString()}/removeMilitaryFile/${name}`, { files: data });
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue");
+        return;
+      }
+      toastr.success("Fichiers mises à jour");
+    } catch (error) {
+      capture(error);
+      toastr.error("Oups, une erreur est survenue");
+      return;
+    }
+  };
+
   return (
     <>
       <ModalConfirm
@@ -178,14 +193,15 @@ export default function Phase2militaryPrepartionV2({ young }) {
         onChange={() => setModal({ isOpen: false, template: null, data: null })}
         onConfirm={onRefuse}
       />
-      {modalFiles.nameFiles ? (
-        <ModalFilesPM
-          isOpen={modalFiles?.isOpen}
-          onCancel={() => setModalFiles({ isOpen: false })}
-          title={modalFiles?.title}
-          path={`/young/${young._id}/documents/${modalFiles?.nameFiles}`}
-        />
-      ) : null}
+      <ModalFilesPM
+        isOpen={modalFiles?.isOpen}
+        onCancel={() => setModalFiles({ isOpen: false })}
+        initialValues={modalFiles?.initialValues ? modalFiles.initialValues : []}
+        young={young}
+        nameFiles={modalFiles?.nameFiles}
+        title={modalFiles?.title}
+        onChange={onChangeFiles}
+      />
       <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
         <div className="mb-3">
           <div className="flex items-center justify-between px-4">
@@ -286,52 +302,53 @@ export default function Phase2militaryPrepartionV2({ young }) {
               <FileCard
                 name="Pièce d’identité"
                 icon="reglement"
-                filled={young.files.militaryPreparationFilesIdentity.length}
+                filled={young.militaryPreparationFilesIdentity.length}
                 onClick={() =>
                   setModalFiles({
                     isOpen: true,
                     title: "Pièce d'identité",
                     nameFiles: "militaryPreparationFilesIdentity",
+                    initialValues: young.militaryPreparationFilesIdentity,
                   })
                 }
               />
               <FileCard
                 name="Autorisation parentale"
                 icon="image"
-                filled={young.files.militaryPreparationFilesAuthorization.length}
+                filled={young.militaryPreparationFilesAuthorization.length}
                 onClick={() =>
                   setModalFiles({
                     isOpen: true,
                     title: "Autorisation parentale",
                     nameFiles: "militaryPreparationFilesAuthorization",
-                    initialValues: young.files.militaryPreparationFilesAuthorization,
+                    initialValues: young.militaryPreparationFilesAuthorization,
                   })
                 }
               />
               <FileCard
                 name="Certifical médical de non contre-indication..."
                 icon="autotest"
-                filled={young.files.militaryPreparationFilesCertificate.length}
+                filled={young.militaryPreparationFilesCertificate.length}
                 onClick={() =>
                   setModalFiles({
                     isOpen: true,
                     title: "Certifical médical de non contre-indication...",
                     nameFiles: "militaryPreparationFilesCertificate",
-                    initialValues: young.files.militaryPreparationFilesCertificate,
+                    initialValues: young.militaryPreparationFilesCertificate,
                   })
                 }
               />
               <FileCard
                 name="Attestation de recensement"
                 icon="sanitaire"
-                filled={young.files.militaryPreparationFilesCensus.length}
+                filled={young.militaryPreparationFilesCensus.length}
                 description="Facultatif"
                 onClick={() =>
                   setModalFiles({
                     isOpen: true,
                     title: "Attestation de recensement",
                     nameFiles: "militaryPreparationFilesCensus",
-                    initialValues: young.files.militaryPreparationFilesCensus,
+                    initialValues: young.militaryPreparationFilesCensus,
                   })
                 }
               />

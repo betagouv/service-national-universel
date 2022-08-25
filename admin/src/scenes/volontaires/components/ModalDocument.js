@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import CloseSvg from "../../../assets/Close";
 import { ModalContainer, Footer } from "../../../components/modals/Modal";
-import DndFileInput from "../../../components/dndFileInputV2";
+import DndFileInput from "../../../components/dndFileInput";
 import { Formik } from "formik";
 import Select from "../components/Select";
 import { translate } from "../../../utils";
@@ -62,11 +62,26 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
                 </div>
                 <section className="flex flex-col items-center rounded-lg  w-[90%] lg:w-[70%]">
                   <DndFileInput
+                    newDesign={true}
                     placeholder="un document justificatif"
                     errorMessage="Vous devez téléverser un document justificatif"
-                    value={undefined} // Since this is a modal, the component will handle the data fetching by itself
-                    path={`/young/${young._id}/documents/${nameFiles}`}
+                    value={values[nameFiles]}
+                    source={(e) => api.get(`/referent/youngFile/${young._id}/${nameFiles}/${e}`)}
                     name={nameFiles}
+                    onChange={async (e) => {
+                      const res = await api.uploadFile(`/referent/file/${nameFiles}`, e.target.files, { youngId: young._id });
+                      if (res.code === "FILE_CORRUPTED") {
+                        return toastr.error(
+                          "Le fichier semble corrompu",
+                          "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                          { timeOut: 0 },
+                        );
+                      }
+                      if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                      // We update and save it instant.
+                      handleChange({ target: { value: res.data, name: nameFiles } });
+                      handleSubmit();
+                    }}
                   />
                 </section>
                 {comment && (

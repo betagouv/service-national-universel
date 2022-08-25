@@ -7,16 +7,16 @@ import { Col } from "reactstrap";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import DndFileInput from "../../../components/dndFileInputV2";
+import DndFileInput from "../../../components/dndFileInput";
 import ErrorMessage from "../components/errorMessage";
 import FormRow from "../../../components/form/FormRow";
 import InfoIcon from "../../../components/InfoIcon";
 import api from "../../../services/api";
 import FormFooter from "../../../components/form/FormFooter";
+import { STEPS } from "../utils";
 import { setYoung } from "../../../redux/auth/actions";
 import { getAge, translate, urlWithScheme } from "../../../utils";
 import { supportURL } from "../../../config";
-import { MILITARY_FILE_KEYS } from "snu-lib/constants";
 
 export default function StepDocuments() {
   const young = useSelector((state) => state.Auth.young);
@@ -28,9 +28,9 @@ export default function StepDocuments() {
   useEffect(() => {
     if (young) {
       setData({
-        cniFiles: young.files.cniFiles,
-        parentConsentmentFiles: young.files.parentConsentmentFiles,
-        dataProcessingConsentmentFiles: young.files.dataProcessingConsentmentFiles,
+        cniFiles: young.cniFiles,
+        parentConsentmentFiles: young.parentConsentmentFiles,
+        dataProcessingConsentmentFiles: young.dataProcessingConsentmentFiles,
       });
     } else {
       history.push("/inscription/profil");
@@ -50,10 +50,6 @@ export default function StepDocuments() {
   const onSubmit = async ({ values, type }) => {
     if (type === "next") setLoading(true);
     try {
-      for (const key of ["autoTestPCRFiles", "highSkilledActivityProofFiles", "imageRightFiles", "rulesFiles", ...MILITARY_FILE_KEYS]) {
-        delete values[key];
-      }
-      // delete values.autoTestPCRFiles;
       if (isParentFromFranceConnect()) delete values.parentConsentmentFiles;
       if (getAge(young.birthdateAt) >= 15) delete values.dataProcessingConsentmentFiles;
       const { ok, code, data } = await api.put(`/young/inscription/documents/${type}`, values);
@@ -62,6 +58,7 @@ export default function StepDocuments() {
       dispatch(setYoung(data));
       if (type === "next") history.push("/inscription/done");
     } catch (e) {
+      console.log(e);
       toastr.error("Erreur !");
     } finally {
       setLoading(false);
@@ -75,8 +72,8 @@ export default function StepDocuments() {
         <p>Téléversez ci-dessous les justificatifs requis pour votre inscription</p>
       </Heading>
 
-      <Formik initialValues={young.files} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit({ values, type: "next" })}>
-        {({ values, handleSubmit, errors, touched }) => (
+      <Formik initialValues={data} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit({ values, type: "next" })}>
+        {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormRow>
               <Col md={4}>
@@ -89,7 +86,21 @@ export default function StepDocuments() {
                   errorMessage="Vous devez téléverser votre pièce d'identité"
                   value={values.cniFiles}
                   name="cniFiles"
-                  path={`/young/${young._id}/documents/cniFiles`}
+                  onChange={async (e) => {
+                    const res = await api.uploadFile("/young/file/cniFiles", e.target.files);
+
+                    if (res.code === "FILE_CORRUPTED") {
+                      return toastr.error(
+                        "Le fichier semble corrompu",
+                        "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                        { timeOut: 0 },
+                      );
+                    }
+                    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                    // We update it instant ( because the bucket is updated instant )
+                    toastr.success("Fichier téléversé");
+                    handleChange({ target: { value: res.data, name: "cniFiles" } });
+                  }}
                 />
                 <ErrorMessage errors={errors} touched={touched} name="cniFiles" />
               </Col>
@@ -111,7 +122,21 @@ export default function StepDocuments() {
                         errorMessage="Vous devez téléverser le formulaire complété."
                         name="parentConsentmentFiles"
                         value={values.parentConsentmentFiles}
-                        path={`/young/${young._id}/documents/parentConsentmentFiles`}
+                        onChange={async (e) => {
+                          let { data: files, ok, code } = await api.uploadFile("/young/file/parentConsentmentFiles", e.target.files);
+
+                          if (code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 },
+                            );
+                          }
+
+                          if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          handleChange({ target: { value: files, name: "parentConsentmentFiles" } });
+                          toastr.success("Fichier téléversé");
+                        }}
                       />
                       <ErrorMessage errors={errors} touched={touched} name="parentConsentmentFiles" />
                     </>
@@ -131,7 +156,21 @@ export default function StepDocuments() {
                           errorMessage="Vous devez téléverser le formulaire complété."
                           name="dataProcessingConsentmentFiles"
                           value={values.dataProcessingConsentmentFiles}
-                          path={`/young/${young._id}/documents/dataProcessingConsentmentFiles`}
+                          onChange={async (e) => {
+                            let { data: files, ok, code } = await api.uploadFile("/young/file/dataProcessingConsentmentFiles", e.target.files);
+
+                            if (code === "FILE_CORRUPTED") {
+                              return toastr.error(
+                                "Le fichier semble corrompu",
+                                "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                                { timeOut: 0 },
+                              );
+                            }
+
+                            if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                            handleChange({ target: { value: files, name: "dataProcessingConsentmentFiles" } });
+                            toastr.success("Fichier téléversé");
+                          }}
                         />
                         <ErrorMessage errors={errors} touched={touched} name="dataProcessingConsentmentFiles" />
                       </>
