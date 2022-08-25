@@ -303,7 +303,7 @@ router.post("/export-presence", passport.authenticate("referent", { session: fal
 
 router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = validateId(req.params);
+    const { error, value } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canViewCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
