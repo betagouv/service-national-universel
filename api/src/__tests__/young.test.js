@@ -82,6 +82,7 @@ describe("Young", () => {
         "region",
         "zip",
         "city",
+        "files",
       ];
 
       //Check that the fields deleted are deleted

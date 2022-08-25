@@ -10,6 +10,7 @@ import SixDotsVertical from "../../../../assets/icons/SixDotsVertical";
 import { Draggable } from "react-beautiful-dnd";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
+import { capture } from "../../../../sentry";
 
 export default function application({ application: propsApplication, index, onChange, loading }) {
   const [application, setApplication] = React.useState(propsApplication);
@@ -19,7 +20,10 @@ export default function application({ application: propsApplication, index, onCh
   React.useEffect(() => {
     (async () => {
       const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       setMission(data);
       const t = [];
       data?.city && t.push(data?.city + (data?.zip ? ` - ${data?.zip}` : ""));

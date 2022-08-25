@@ -12,6 +12,7 @@ import api from "../../../services/api";
 import validator from "validator";
 import { slugifyFileName } from "../../../utils";
 import plausibleEvent from "../../../services/plausible";
+import { capture } from "../../../sentry";
 
 export default function CreateEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -136,6 +137,7 @@ export default function CreateEquivalence() {
       }
       setLoading(false);
     } catch (error) {
+      capture(error);
       toastr.error("Oups, une erreur est survenue");
       setLoading(false);
       return;

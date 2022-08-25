@@ -16,6 +16,7 @@ import rubberStampValided from "../../assets/rubberStampValided.svg";
 import DoubleDayTile from "../../components/DoubleDayTile";
 import Loader from "../../components/Loader";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import { capture } from "../../sentry";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import {
@@ -73,7 +74,10 @@ export default function viewMobile() {
     const getContract = async () => {
       if (mission?.application?.contractId) {
         const { ok, data, code } = await api.get(`/contract/${mission.application.contractId}`);
-        if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+        if (!ok) {
+          capture(code);
+          return toastr.error("Oups, une erreur est survenue", code);
+        }
         setContract(data);
       }
     };

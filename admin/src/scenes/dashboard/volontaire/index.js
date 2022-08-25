@@ -21,11 +21,13 @@ export default function Index() {
     setFilter((f) => ({ ...f, ...n }));
   }
 
+  const cohortList = ["Juillet 2022", "Juin 2022", "Février 2022", "2021"];
+
   useEffect(() => {
     if (state !== undefined && state?.params) {
       setFilter(state.params.filter);
     } else {
-      setFilter({ status: [YOUNG_STATUS.VALIDATED], cohort: ["2021"], region: [], department: [] });
+      setFilter({ status: [YOUNG_STATUS.VALIDATED], cohort: cohortList, region: [], department: [] });
     }
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
       updateFilter({ department: [user.department] });

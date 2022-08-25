@@ -11,6 +11,7 @@ import api from "../../../services/api";
 import validator from "validator";
 import InformationCircle from "../../../assets/icons/InformationCircle";
 import { slugifyFileName } from "../../../utils";
+import { capture } from "../../../sentry";
 
 export default function FormEquivalence({ young, onChange }) {
   const optionsType = ["Service Civique", "BAFA", "Jeune Sapeur Pompier"];
@@ -116,6 +117,7 @@ export default function FormEquivalence({ young, onChange }) {
       }
       setLoading(false);
     } catch (error) {
+      capture(error);
       toastr.error("Oups, une erreur est survenue");
       setLoading(false);
       return;

@@ -15,6 +15,7 @@ import SelectStatusApplication from "../../../components/selectStatusApplication
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import { capture } from "../../../sentry";
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
@@ -28,7 +29,10 @@ export default function ApplicationList({ young, onChangeApplication }) {
   const getApplications = async () => {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
-    if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+    if (!ok) {
+      capture(code);
+      return toastr.error("Oups, une erreur est survenue", code);
+    }
     data.sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0));
     return setApplications(data);
   };
@@ -118,7 +122,10 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
     (async () => {
       if (!hit.missionId) return;
       const { ok, data, code } = await api.get(`/mission/${hit.missionId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       return setMission(data);
     })();
   }, []);

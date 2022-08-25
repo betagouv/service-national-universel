@@ -11,6 +11,7 @@ import PaperClip from "../../../assets/icons/PaperClip";
 import api from "../../../services/api";
 import validator from "validator";
 import { slugifyFileName } from "../../../utils";
+import { capture } from "../../../sentry";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -148,6 +149,7 @@ export default function EditEquivalence() {
       }
       setLoading(false);
     } catch (error) {
+      capture(error);
       toastr.error("Oups, une erreur est survenue");
       setLoading(false);
       return;
