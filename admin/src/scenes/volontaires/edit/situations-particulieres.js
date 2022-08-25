@@ -1,17 +1,15 @@
 import React from "react";
 import { Row, Col } from "reactstrap";
-import { toastr } from "react-redux-toastr";
 import { Field } from "formik";
 
-import api from "../../../services/api";
 import { departmentList, regionList, isInRuralArea, translate } from "../../../utils";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Select from "../components/Select";
 import Documents from "../components/Documents";
-import DndFileInput from "../../../components/dndFileInput";
+import DndFileInput from "../../../components/dndFileInputV2";
 
-export default function SituationParticulieres({ values, handleChange, handleSubmit }) {
+export default function SituationParticulieres({ values, handleChange }) {
   return (
     <Col md={6} style={{ marginBottom: "20px" }}>
       <Box>
@@ -190,23 +188,9 @@ export default function SituationParticulieres({ values, handleChange, handleSub
             <DndFileInput
               placeholder="un document justificatif"
               errorMessage="Vous devez téléverser un document justificatif"
-              value={values.highSkilledActivityProofFiles}
-              source={(e) => api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`)}
+              value={values.files.highSkilledActivityProofFiles}
+              path={`/young/${values._id}/documents/highSkilledActivityProofFiles`}
               name="highSkilledActivityProofFiles"
-              onChange={async (e) => {
-                const res = await api.uploadFile("/referent/file/highSkilledActivityProofFiles", e.target.files, { youngId: values._id });
-                if (res.code === "FILE_CORRUPTED") {
-                  return toastr.error(
-                    "Le fichier semble corrompu",
-                    "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                    { timeOut: 0 },
-                  );
-                }
-                if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                // We update and save it instant.
-                handleChange({ target: { value: res.data, name: "highSkilledActivityProofFiles" } });
-                handleSubmit();
-              }}
             />
           </Documents>
         </BoxContent>

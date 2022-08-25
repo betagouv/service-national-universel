@@ -47,7 +47,6 @@ const {
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } = require("snu-lib/constants");
 const { department2region } = require("snu-lib/region-and-departments");
 const { translateCohort } = require("snu-lib/translation");
 const {
@@ -70,7 +69,10 @@ const {
   canModifyStructure,
   canSearchSessionPhase1,
   canCreateOrUpdateSessionPhase1,
-} = require("snu-lib/roles");
+  SENDINBLUE_TEMPLATES,
+  YOUNG_STATUS_PHASE1,
+  MILITARY_FILE_KEYS,
+} = require("snu-lib");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -405,10 +407,9 @@ router.post("/young/:id/refuse-military-preparation-files", passport.authenticat
 
     const newYoung = { statusMilitaryPreparationFiles: "REFUSED" };
 
-    const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
-    for (let key of militaryKeys) {
+    for (let key of MILITARY_FILE_KEYS) {
       young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
-      newYoung[key] = [];
+      delete young.files[key];
     }
 
     young.set(newYoung);
