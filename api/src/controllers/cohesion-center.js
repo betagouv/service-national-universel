@@ -303,12 +303,12 @@ router.post("/export-presence", passport.authenticate("referent", { session: fal
 
 router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = validateId(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canViewCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const center = await CohesionCenterModel.findById(value.id);
+    const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
