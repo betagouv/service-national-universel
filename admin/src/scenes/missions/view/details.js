@@ -39,7 +39,11 @@ export default function DetailsView({ mission, structure, tutor }) {
                   <div className="flex flex-row items-center gap-2">
                     <VscWarning className="w-6 h-6 text-red-500" />
                     <div>
-                      La mission est <strong>fermée</strong> aux candidatures : trop de candidatures en attente.
+                      La mission est <strong>fermée</strong> aux candidatures. Vous avez atteint le seuil des{" "}
+                      <Link to={`${mission._id}/youngs`} className="underline text-blue-800">
+                        candidatures à traiter
+                      </Link>
+                      .
                     </div>
                   </div>
                 ) : mission.visibility === "HIDDEN" ? (
