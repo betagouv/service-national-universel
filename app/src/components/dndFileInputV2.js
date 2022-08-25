@@ -40,7 +40,7 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
     );
   }, []);
 
-  // If no initial value was given (in the case of a modal window), first get files list
+  // If no initial value was given (in the case of a modal window), get files list
   useEffect(() => {
     if (!value) {
       getList(path);
