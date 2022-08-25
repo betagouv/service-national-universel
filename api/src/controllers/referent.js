@@ -302,7 +302,13 @@ router.post("/signup_invite", async (req, res) => {
     await updateTutorNameInMissionsAndApplications(referent, req.user);
 
     if (referent.role === ROLES.REFERENT_DEPARTMENT) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.referent.WELCOME, {
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.WELCOME_REF_DEP, {
+        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+      });
+    }
+
+    if (referent.role === ROLES.REFERENT_REGIONAL) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.WELCOME_REF_REG, {
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
       });
     }
