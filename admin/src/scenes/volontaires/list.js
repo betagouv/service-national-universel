@@ -46,7 +46,7 @@ import DeletedVolontairePanel from "./deletedPanel";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import { ModalContainer, Content, Footer } from "../../components/modals/Modal";
+import { ModalContainer, Content } from "../../components/modals/Modal";
 import ModalButton from "../../components/buttons/ModalButton";
 
 const FILTERS = [
@@ -466,10 +466,6 @@ export default function VolontaireList() {
                         <>
                           <div className="text-xl">Sélectionnez les données à exporter</div>
                           <Content>
-                            <div className="rounded-xl bg-gray-100 w-full p-2 mt-4">
-                              <div>Rappel des filtres appliqués</div>
-                              <div>[Filtres]</div>
-                            </div>
                             <div className="columns-2 w-full py-4">
                               <div className="text-left">Sélectionnez pour choisir des sous-catégories</div>
                               <div className="text-right">{volontaire?.length}</div>
@@ -479,19 +475,21 @@ export default function VolontaireList() {
                               <div className="columns-2 w-full">{listCategories}</div>
                             </div>
                           </Content>
-                          <div className="w-full flex mb-8 ml-12">
-                            <div className="w-1/2 object-center">
+                          <div className="flex gap-2 justify-center mb-4">
+                            <div className="w-1/2 p-0.5">
                               <ModalButton onClick={() => setColumnModalOpen(false)}>Annuler</ModalButton>
                             </div>
-                            <ExportComponent
-                              handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
-                              title="Exporter les volontaires"
-                              defaultQuery={getExportQuery}
-                              exportTitle="Volontaires"
-                              index="young"
-                              react={{ and: FILTERS }}
-                              transform={(data) => transform(data, values.checked)}
-                            />
+                            <div className="flex mt-2 w-1/2 h-10">
+                              <ExportComponent
+                                handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
+                                title="Exporter les volontaires"
+                                defaultQuery={getExportQuery}
+                                exportTitle="Volontaires"
+                                index="young"
+                                react={{ and: FILTERS }}
+                                transform={(data) => transform(data, values.checked)}
+                              />
+                            </div>
                           </div>
                         </>
                       )}
