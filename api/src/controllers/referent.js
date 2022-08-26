@@ -301,15 +301,19 @@ router.post("/signup_invite", async (req, res) => {
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
 
+    const toName = `${referent.firstName} ${referent.lastName}`;
+
     if (referent.role === ROLES.REFERENT_DEPARTMENT) {
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.WELCOME_REF_DEP, {
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+        params: { toName },
       });
     }
 
-    if (referent.role === ROLES.REFERENT_REGIONAL) {
+    if (referent.role === ROLES.REFERENT_REGION) {
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.WELCOME_REF_REG, {
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+        params: { toName },
       });
     }
 
