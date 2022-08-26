@@ -1,3 +1,17 @@
+# [1.124.0](https://github.com/betagouv/service-national-universel/compare/v1.123.10...v1.124.0) (2022-08-26)
+
+
+### Bug Fixes
+
+* **admin:** fix mission list address ([#1742](https://github.com/betagouv/service-national-universel/issues/1742)) ([5ce262c](https://github.com/betagouv/service-national-universel/commit/5ce262cd25e85a5bd0905bb0bcc559093e146dcb))
+* **api, admin, app:** refacto file upload ([#1743](https://github.com/betagouv/service-national-universel/issues/1743)) ([c904158](https://github.com/betagouv/service-national-universel/commit/c9041583e30a50e9ac532087e1e9ba560c0afa36))
+* **app:** remove error message when closing young pm file modal ([eb464e8](https://github.com/betagouv/service-national-universel/commit/eb464e850e528acf5a9e5e21cad9eb605c07c047))
+
+
+### Features
+
+* **SIB:** Add template for welcome + fixes ([#1745](https://github.com/betagouv/service-national-universel/issues/1745)) ([583d8da](https://github.com/betagouv/service-national-universel/commit/583d8daf782f44ebbf4112f163949075d45dbb70))
+
 ## [1.123.10](https://github.com/betagouv/service-national-universel/compare/v1.123.9...v1.123.10) (2022-08-25)
 
 
