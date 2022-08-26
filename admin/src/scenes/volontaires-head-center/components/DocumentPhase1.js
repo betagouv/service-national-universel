@@ -42,11 +42,11 @@ export default function DocumentPhase1(props) {
       setStatusRules(young.rulesYoung);
       setDataImageRight({
         imageRight: young.imageRight,
-        imageRightFiles: young.imageRightFiles,
+        imageRightFiles: young.files.imageRightFiles,
       });
       setDataAutoTestPCR({
         autoTestPCR: young.autoTestPCR,
-        autoTestPCRFiles: young.autoTestPCRFiles,
+        autoTestPCRFiles: young.files.autoTestPCRFiles,
       });
     }
   }, [young]);
@@ -102,7 +102,7 @@ export default function DocumentPhase1(props) {
             <p className="text-gray-500">
               Accord : {dataImageRight.imageRight && young.imageRightFilesStatus !== "TO_UPLOAD" ? translate(dataImageRight.imageRight) : "Non renseigné"}
             </p>
-            {young.imageRightFiles.length ? <ButtonPlain onClick={() => setIsOpenImg(true)}>Télécharger</ButtonPlain> : null}
+            {young.files.imageRightFiles.length ? <ButtonPlain onClick={() => setIsOpenImg(true)}>Télécharger</ButtonPlain> : null}
           </section>
           <ModalDocument
             isOpen={isOpenImg}
@@ -129,7 +129,7 @@ export default function DocumentPhase1(props) {
             <p className="text-gray-500">
               Accord : {dataAutoTestPCR.autoTestPCR && young.autoTestPCRFilesStatus !== "TO_UPLOAD" ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}
             </p>
-            {young.autoTestPCRFiles.length ? <ButtonPlain onClick={() => setIsOpenAut(true)}>Télécharger</ButtonPlain> : null}
+            {young.files.autoTestPCRFiles.length ? <ButtonPlain onClick={() => setIsOpenAut(true)}>Télécharger</ButtonPlain> : null}
           </section>
           <ModalDocument
             isOpen={isOpenAut}

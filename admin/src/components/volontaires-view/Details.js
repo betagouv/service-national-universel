@@ -19,11 +19,11 @@ export default function DetailsVolontaires({ young }) {
             <Details title="Dép" value={young.department} />
             <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
             <Details title="Adresse" value={young.address} />
-            {(young.cniFiles || []).map((e, i) => (
+            {(young.files.cniFiles || []).map((e, i) => (
               <DownloadButton
                 key={i}
-                source={() => api.get(`/referent/youngFile/${young._id}/cniFiles/${e}`)}
-                title={`Télécharger la pièce d’identité (${i + 1}/${young.cniFiles.length})`}
+                source={() => api.get(`/young/${young._id}/documents/cniFiles/${e}`)}
+                title={`Télécharger la pièce d’identité (${i + 1}/${young.files.cniFiles.length})`}
               />
             ))}
           </Bloc>
@@ -35,21 +35,21 @@ export default function DetailsVolontaires({ young }) {
             <Details title="Suivi médicosociale" value={t(young.medicosocialStructure)} />
             <Details title="Aménagement spécifique" value={t(young.specificAmenagment)} />
             <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
-            {(young.highSkilledActivityProofFiles || []).map((e, i) => (
+            {(young.files.highSkilledActivityProofFiles || []).map((e, i) => (
               <DownloadButton
                 key={i}
-                source={() => api.get(`/referent/youngFile/${young._id}/highSkilledActivityProofFiles/${e}`)}
-                title={`Télécharger la pièce jusitificative (${i + 1}/${young.highSkilledActivityProofFiles.length})`}
+                source={() => api.get(`/young/${young._id}/documents/highSkilledActivityProofFiles/${e}`)}
+                title={`Télécharger la pièce jusitificative (${i + 1}/${young.files.highSkilledActivityProofFiles.length})`}
               />
             ))}
           </Bloc>
           <Bloc title="Droit à l'image">
             <Details title="Autorisation" value={t(young.imageRight)} />
-            {(young.imageRightFiles || []).map((e, i) => (
+            {(young.files.imageRightFiles || []).map((e, i) => (
               <DownloadButton
                 key={i}
-                source={() => api.get(`/referent/youngFile/${young._id}/imageRightFiles/${e}`)}
-                title={`Télécharger le formulaire (${i + 1}/${young.imageRightFiles.length})`}
+                source={() => api.get(`/young/${young._id}/documents/imageRightFiles/${e}`)}
+                title={`Télécharger le formulaire (${i + 1}/${young.files.imageRightFiles.length})`}
               />
             ))}
           </Bloc>
