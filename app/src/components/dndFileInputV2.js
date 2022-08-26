@@ -45,7 +45,7 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
     if (!value) {
       getList(path);
     }
-  }, [path]);
+  }, []);
 
   async function handleUpload([...newFiles]) {
     for (let index = 0; index < Object.keys(newFiles).length; index++) {
