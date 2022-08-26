@@ -1,3 +1,11 @@
+## [1.123.10](https://github.com/betagouv/service-national-universel/compare/v1.123.9...v1.123.10) (2022-08-25)
+
+
+### Bug Fixes
+
+* **api:** Bug with call ([02e0256](https://github.com/betagouv/service-national-universel/commit/02e0256f07282d5c6b588ea991c1555c395b169e))
+* **api:** Fix call to session-phasea from centers ([0dabd01](https://github.com/betagouv/service-national-universel/commit/0dabd0126894b3e9e4595caceeae9f7611d7f756))
+
 ## [1.123.9](https://github.com/betagouv/service-national-universel/compare/v1.123.8...v1.123.9) (2022-08-24)
 
 
