@@ -374,8 +374,11 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    if (isReferent(req.user) && !canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
+    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
+    if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
     // Send response
 
     return res.status(200).send({ data: young.files[key], ok: true });
@@ -408,8 +411,11 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    if (isReferent(req.user) && !canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
+    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
+    if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
     // Download from s3
 
     let downloaded = null;
