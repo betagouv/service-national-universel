@@ -77,8 +77,8 @@ export default function DocumentPhase1(props) {
       } else {
         setStatusCohesionStayMedical("RECEIVED");
       }
-      setStatusAutoTestPCR(young.files.autoTestPCRFilesStatus);
-      setStatusImageRight(young.files.imageRightFilesStatus);
+      setStatusAutoTestPCR(young.autoTestPCRFilesStatus);
+      setStatusImageRight(young.imageRightFilesStatus);
       setStatusRules(young.rulesYoung);
       setDataImageRight({
         imageRight: young.imageRight,
