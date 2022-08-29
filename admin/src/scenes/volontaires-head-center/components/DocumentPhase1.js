@@ -124,10 +124,10 @@ export default function DocumentPhase1(props) {
                 ))}
               </select>
             </div>
-            <FileIcon icon="autotest" filled={young.files.autoTestPCRFilesStatus !== "TO_UPLOAD"} />
+            <FileIcon icon="autotest" filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"} />
             <p className="text-base font-bold mt-2">Autotest PCR</p>
             <p className="text-gray-500">
-              Accord : {dataAutoTestPCR.autoTestPCR && young.files.autoTestPCRFilesStatus !== "TO_UPLOAD" ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}
+              Accord : {dataAutoTestPCR.autoTestPCR && young.autoTestPCRFilesStatus !== "TO_UPLOAD" ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}
             </p>
             {young.files.autoTestPCRFiles.length ? <ButtonPlain onClick={() => setIsOpenAut(true)}>Télécharger</ButtonPlain> : null}
           </section>
