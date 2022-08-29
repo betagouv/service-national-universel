@@ -20,7 +20,7 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
   const young = useSelector((state) => state.Auth.young);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [showFields, setShowFields] = useState(!young.imageRightFiles?.length || correction);
+  const [showFields, setShowFields] = useState(!young.files.imageRightFiles?.length || correction);
   const isPlural = young?.parent1Status && young?.parent2Status;
 
   const dispatch = useDispatch();
@@ -43,7 +43,7 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                 </p>
               </div>
             </section>
-            {young.imageRightFiles && young.imageRightFiles.length && !correction ? (
+            {young.files.imageRightFiles && young.files.imageRightFiles.length && !correction ? (
               <>
                 <SuccessMessage>
                   <Logo>

@@ -103,7 +103,7 @@ export default function viewDesktop() {
       const ageAtStart = getDiffYear(mission.startAt, young.birthdateAt);
       setDisabledAge(ageAtStart < 16);
       setDisabledPmRefused(young.statusMilitaryPreparationFiles === "REFUSED");
-      if (!young.militaryPreparationFilesIdentity.length || !young.militaryPreparationFilesAuthorization.length || !young.militaryPreparationFilesCertificate.length) {
+      if (!young.files.militaryPreparationFilesIdentity.length || !young.files.militaryPreparationFilesAuthorization.length || !young.files.militaryPreparationFilesCertificate.length) {
         setDisabledIncomplete(true);
       } else {
         setDisabledIncomplete(false);
@@ -254,9 +254,8 @@ export default function viewDesktop() {
                 </button>
                 {/* display options */}
                 <div
-                  className={`${
-                    openContractButton ? "block" : "hidden"
-                  }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+                  className={`${openContractButton ? "block" : "hidden"
+                    }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
                   <div
                     key="download"
                     onClick={() => {

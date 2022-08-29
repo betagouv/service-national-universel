@@ -198,9 +198,8 @@ export default function Phase2militaryPrepartionV2({ young }) {
             {!cardOpen ? (
               <div className="flex items-center gap-5">
                 <div
-                  className={`text-xs font-normal ${themeBadge.background[young.statusMilitaryPreparationFiles]} ${
-                    themeBadge.text[young.statusMilitaryPreparationFiles]
-                  } px-2 py-[2px] rounded-sm `}>
+                  className={`text-xs font-normal ${themeBadge.background[young.statusMilitaryPreparationFiles]} ${themeBadge.text[young.statusMilitaryPreparationFiles]
+                    } px-2 py-[2px] rounded-sm `}>
                   {translate(young.statusMilitaryPreparationFiles)}
                 </div>
                 <BsChevronDown className="text-gray-400 h-5 w-5 cursor-pointer" onClick={() => setCardOpen(true)} />

@@ -24,7 +24,7 @@ export default function Phase2MilitaryPreparation({ young }) {
           title="Documents - Préparation militaire"
           titleRight={<Badge text={t(young.files.statusMilitaryPreparationFiles)} color={APPLICATION_STATUS_COLORS[young.statusMilitaryPreparationFiles]} />}>
           <Line>
-            {(young.militaryPreparationFilesIdentity || []).map((e, i) => (
+            {(young.files.militaryPreparationFilesIdentity || []).map((e, i) => (
               <DownloadButton
                 key={i}
                 source={() => api.get(`/young/${young._id}/documents/militaryPreparationFilesIdentity/${e}`)}

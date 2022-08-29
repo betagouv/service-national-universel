@@ -100,7 +100,7 @@ export default function DocumentPhase1(props) {
             <FileIcon icon="image" filled={young.imageRightFilesStatus !== "TO_UPLOAD"} />
             <p className="text-base font-bold mt-2">Droit à l&apos;image</p>
             <p className="text-gray-500">
-              Accord : {dataImageRight.imageRight && young.imageRightFilesStatus !== "TO_UPLOAD" ? translate(dataImageRight.imageRight) : "Non renseigné"}
+              Accord : {dataImageRight.imageRight && young.files.imageRightFilesStatus !== "TO_UPLOAD" ? translate(dataImageRight.imageRight) : "Non renseigné"}
             </p>
             {young.files.imageRightFiles.length ? <ButtonPlain onClick={() => setIsOpenImg(true)}>Télécharger</ButtonPlain> : null}
           </section>

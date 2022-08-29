@@ -62,9 +62,8 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
                   <div className="flex items-center gap-4">
                     <div className="text-lg leading-6 font-semibold ">Dossier d&apos;éligibilité aux préparations militaires</div>
                     <div
-                      className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
-                        theme.text[young.statusMilitaryPreparationFiles]
-                      } px-2 py-[2px] rounded-sm `}>
+                      className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${theme.text[young.statusMilitaryPreparationFiles]
+                        } px-2 py-[2px] rounded-sm `}>
                       {translate(young.statusMilitaryPreparationFiles)}
                     </div>
                   </div>
@@ -99,9 +98,8 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
                   <div className="flex items-end gap-2">
                     <div className="flex flex-col items-start gap-2">
                       <div
-                        className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
-                          theme.text[young.statusMilitaryPreparationFiles]
-                        } px-2 py-[2px] rounded-sm `}>
+                        className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${theme.text[young.statusMilitaryPreparationFiles]
+                          } px-2 py-[2px] rounded-sm `}>
                         {translate(young.statusMilitaryPreparationFiles)}
                       </div>
                       <div className="text-[15px] leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>

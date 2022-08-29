@@ -193,7 +193,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   <Details title="Région" value={young.parent2Region} />
                 </Bloc>
               ) : null}
-              {isFromFranceConnect() || (young.parentConsentmentFiles && young.parentConsentmentFiles.length) ? (
+              {isFromFranceConnect() || (young.files.parentConsentmentFiles && young.files.parentConsentmentFiles.length) ? (
                 <Bloc title="Attestations des représentants légaux">
                   {isFromFranceConnect() ? (
                     <div style={{ marginTop: "1rem" }}>
