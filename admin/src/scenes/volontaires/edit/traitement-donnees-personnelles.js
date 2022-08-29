@@ -1,14 +1,11 @@
 import React from "react";
 import { Col } from "reactstrap";
-import { toastr } from "react-redux-toastr";
-
-import api from "../../../services/api";
 
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Documents from "../components/Documents";
-import DndFileInput from "../../../components/dndFileInput";
+import DndFileInput from "../../../components/dndFileInputV2";
 
-export default function ConsentmentImage({ values, handleChange, handleSubmit }) {
+export default function ConsentmentImage({ values }) {
   const isFromFranceConnect = () => {
     return values.parent1FromFranceConnect === "true" && (!values.parent2Status || values.parent2FromFranceConnect === "true");
   };
@@ -31,23 +28,9 @@ export default function ConsentmentImage({ values, handleChange, handleSubmit })
               <DndFileInput
                 placeholder="un document justificatif"
                 errorMessage="Vous devez téléverser un document justificatif"
-                value={values.dataProcessingConsentmentFiles}
-                source={(e) => api.get(`/referent/youngFile/${values._id}/dataProcessingConsentmentFiles/${e}`)}
+                value={values.files.dataProcessingConsentmentFiles}
+                path={`/young/${values._id}/documents/dataProcessingConsentmentFiles`}
                 name="dataProcessingConsentmentFiles"
-                onChange={async (e) => {
-                  const res = await api.uploadFile("/referent/file/dataProcessingConsentmentFiles", e.target.files, { youngId: values._id });
-                  if (res.code === "FILE_CORRUPTED") {
-                    return toastr.error(
-                      "Le fichier semble corrompu",
-                      "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                      { timeOut: 0 },
-                    );
-                  }
-                  if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                  // We update and save it instant.
-                  handleChange({ target: { value: res.data, name: "dataProcessingConsentmentFiles" } });
-                  handleSubmit();
-                }}
               />
             </Documents>
           )}

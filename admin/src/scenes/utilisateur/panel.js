@@ -227,7 +227,7 @@ export default function UserPanel({ onChange, value }) {
             <Details title="Places restantes" value={missionsInfo.placesLeft} />
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "10px" }}>
               {missionsInfo.count > 0 ? (
-                <Link to={`/structure/${value._id}/missions`}>
+                <Link to={`/structure/${structure._id}/missions`}>
                   <Button className="btn-missions">Consulter toutes les missions</Button>
                 </Link>
               ) : null}

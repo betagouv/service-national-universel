@@ -22,7 +22,7 @@ export default function DetailsVolontaires({ young }) {
             {(young.files.cniFiles || []).map((e, i) => (
               <DownloadButton
                 key={i}
-                source={() => api.get(`/referent/youngFile/${young._id}/cniFiles/${e}`)}
+                source={() => api.get(`/young/${young._id}/documents/cniFiles/${e}`)}
                 title={`Télécharger la pièce d’identité (${i + 1}/${young.files.cniFiles.length})`}
               />
             ))}
@@ -38,7 +38,7 @@ export default function DetailsVolontaires({ young }) {
             {(young.files.highSkilledActivityProofFiles || []).map((e, i) => (
               <DownloadButton
                 key={i}
-                source={() => api.get(`/referent/youngFile/${young._id}/highSkilledActivityProofFiles/${e}`)}
+                source={() => api.get(`/young/${young._id}/documents/highSkilledActivityProofFiles/${e}`)}
                 title={`Télécharger la pièce jusitificative (${i + 1}/${young.files.highSkilledActivityProofFiles.length})`}
               />
             ))}
@@ -48,7 +48,7 @@ export default function DetailsVolontaires({ young }) {
             {(young.files.imageRightFiles || []).map((e, i) => (
               <DownloadButton
                 key={i}
-                source={() => api.get(`/referent/youngFile/${young._id}/imageRightFiles/${e}`)}
+                source={() => api.get(`/young/${young._id}/documents/imageRightFiles/${e}`)}
                 title={`Télécharger le formulaire (${i + 1}/${young.files.imageRightFiles.length})`}
               />
             ))}

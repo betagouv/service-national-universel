@@ -150,21 +150,6 @@ export default function Phase2militaryPrepartionV2({ young }) {
     history.go(0);
   };
 
-  const onChangeFiles = async ({ data, name }) => {
-    try {
-      const { ok } = await api.put(`/referent/young/${young._id.toString()}/removeMilitaryFile/${name}`, { files: data });
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue");
-        return;
-      }
-      toastr.success("Fichiers mises à jour");
-    } catch (error) {
-      capture(error);
-      toastr.error("Oups, une erreur est survenue");
-      return;
-    }
-  };
-
   return (
     <>
       <ModalConfirm
@@ -193,15 +178,14 @@ export default function Phase2militaryPrepartionV2({ young }) {
         onChange={() => setModal({ isOpen: false, template: null, data: null })}
         onConfirm={onRefuse}
       />
-      <ModalFilesPM
-        isOpen={modalFiles?.isOpen}
-        onCancel={() => setModalFiles({ isOpen: false })}
-        initialValues={modalFiles?.initialValues ? modalFiles.initialValues : []}
-        young={young}
-        nameFiles={modalFiles?.nameFiles}
-        title={modalFiles?.title}
-        onChange={onChangeFiles}
-      />
+      {modalFiles.nameFiles ? (
+        <ModalFilesPM
+          isOpen={modalFiles?.isOpen}
+          onCancel={() => setModalFiles({ isOpen: false })}
+          title={modalFiles?.title}
+          path={`/young/${young._id}/documents/${modalFiles?.nameFiles}`}
+        />
+      ) : null}
       <div className="flex flex-col w-full rounded-lg bg-white px-4 pt-3 mb-4 shadow-md">
         <div className="mb-3">
           <div className="flex items-center justify-between px-4">
@@ -307,7 +291,6 @@ export default function Phase2militaryPrepartionV2({ young }) {
                     isOpen: true,
                     title: "Pièce d'identité",
                     nameFiles: "militaryPreparationFilesIdentity",
-                    initialValues: young.files.militaryPreparationFilesIdentity,
                   })
                 }
               />

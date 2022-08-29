@@ -21,7 +21,7 @@ export default function RoundButton({ source, icon, bgColor, ...rest }) {
     setButtonsLoading(true);
     try {
       const f = await source();
-      FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
+      FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName);
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
     }

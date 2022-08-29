@@ -99,7 +99,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
                 {(young.files.cniFiles || []).map((e, i) => (
                   <DownloadButton
                     key={i}
-                    source={() => api.get(`/referent/youngFile/${young._id}/cniFiles/${e}`)}
+                    source={() => api.get(`/young/${young._id}/documents/cniFiles/${e._id}`)}
                     title={`Télécharger la pièce d’identité (${i + 1}/${young.files.cniFiles.length})`}
                   />
                 ))}
@@ -120,7 +120,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
                 {(young.files.highSkilledActivityProofFiles || []).map((e, i) => (
                   <DownloadButton
                     key={i}
-                    source={() => api.get(`/referent/youngFile/${young._id}/highSkilledActivityProofFiles/${e}`)}
+                    source={() => api.get(`/young/${young._id}/documents/highSkilledActivityProofFiles/${e._id}`)}
                     title={`Télécharger la pièce jusitificative (${i + 1}/${young.files.highSkilledActivityProofFiles.length})`}
                   />
                 ))}
@@ -130,7 +130,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   {(young.files.dataProcessingConsentmentFiles || []).map((e, i) => (
                     <DownloadButton
                       key={i}
-                      source={() => api.get(`/referent/youngFile/${young._id}/dataProcessingConsentmentFiles/${e}`)}
+                      source={() => api.get(`/young/${young._id}/documents/dataProcessingConsentmentFiles/${e._id}`)}
                       title={`Télécharger le document (${i + 1}/${young.files.dataProcessingConsentmentFiles.length})`}
                     />
                   ))}
@@ -207,7 +207,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
                     (young.files.parentConsentmentFiles || []).map((e, i) => (
                       <DownloadButton
                         key={i}
-                        source={() => api.get(`/referent/youngFile/${young._id}/parentConsentmentFiles/${e}`)}
+                        source={() => api.get(`/young/${young._id}/documents/parentConsentmentFiles/${e._id}`)}
                         title={`Télécharger l'attestation (${i + 1}/${young.files.parentConsentmentFiles.length})`}
                       />
                     ))
