@@ -27,7 +27,7 @@ export default function Phase2MilitaryPreparation({ young }) {
             {(young.files.militaryPreparationFilesIdentity || []).map((e, i) => (
               <DownloadButton
                 key={i}
-                source={() => api.get(`/young/${young._id}/documents/militaryPreparationFilesIdentity/${e}`)}
+                source={() => api.get(`/young/${young._id}/documents/militaryPreparationFilesIdentity/${e._id}`)}
                 title={`Télécharger la pièce d'identité (${i + 1}/${young.files.militaryPreparationFilesIdentity.length})`}
               />
             ))}
@@ -36,7 +36,7 @@ export default function Phase2MilitaryPreparation({ young }) {
             {(young.files.militaryPreparationFilesCensus || []).map((e, i) => (
               <DownloadButton
                 key={i}
-                source={() => api.get(`/young/${young._id}/documents/militaryPreparationFilesCensus/${e}`)}
+                source={() => api.get(`/young/${young._id}/documents/militaryPreparationFilesCensus/${e._id}`)}
                 title={`Télécharger l'attestation de recensement (${i + 1}/${young.files.militaryPreparationFilesCensus.length})`}
               />
             ))}
@@ -45,7 +45,7 @@ export default function Phase2MilitaryPreparation({ young }) {
             {(young.files.militaryPreparationFilesAuthorization || []).map((e, i) => (
               <DownloadButton
                 key={i}
-                source={() => api.get(`/young/${young._id}/documents/militaryPreparationFilesAuthorization/${e}`)}
+                source={() => api.get(`/young/${young._id}/documents/militaryPreparationFilesAuthorization/${e._id}`)}
                 title={`Télécharger l'autorisation parentale pour effectuer une préparation militaire (${i + 1}/${young.files.militaryPreparationFilesAuthorization.length})`}
               />
             ))}
@@ -54,7 +54,7 @@ export default function Phase2MilitaryPreparation({ young }) {
             {(young.files.militaryPreparationFilesCertificate || []).map((e, i) => (
               <DownloadButton
                 key={i}
-                source={() => api.get(`/young/${young._id}/documents/militaryPreparationFilesCertificate/${e}`)}
+                source={() => api.get(`/young/${young._id}/documents/militaryPreparationFilesCertificate/${e._id}`)}
                 title={`Télécharger le certificat médical de non contre indication à la pratique sportive  (${i + 1}/${young.files.militaryPreparationFilesCertificate.length})`}
               />
             ))}
