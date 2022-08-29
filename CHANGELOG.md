@@ -1,3 +1,11 @@
+## [1.124.1](https://github.com/betagouv/service-national-universel/compare/v1.124.0...v1.124.1) (2022-08-29)
+
+
+### Bug Fixes
+
+* **admin:** Download PM for responsibles ([#1747](https://github.com/betagouv/service-national-universel/issues/1747)) ([0d4511b](https://github.com/betagouv/service-national-universel/commit/0d4511b31bf55d7538934aa05043c93753739247))
+* **all:** Fix bugs with uuid files ([#1746](https://github.com/betagouv/service-national-universel/issues/1746)) ([255b498](https://github.com/betagouv/service-national-universel/commit/255b498e8aa284406d20e81a8d2710ffdad0c196))
+
 # [1.124.0](https://github.com/betagouv/service-national-universel/compare/v1.123.10...v1.124.0) (2022-08-26)
 
 
