@@ -18,13 +18,13 @@ export default function DocumentsPhase1({ young }) {
     if (young) {
       let nb = 0;
       if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) {
-        if (young.files.imageRightFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
-        if (young.files.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
+        if (young.imageRightFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
+        if (young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
       } else {
-        if (young.files.imageRightFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
+        if (young.imageRightFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
         if (young.cohesionStayMedicalFileReceived === "true") nb++;
         if (young.rulesYoung === "true") nb++;
-        if (young.files.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
+        if (young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.VALIDATED) nb++;
       }
 
       setDocuments(nb);
@@ -65,17 +65,17 @@ export default function DocumentsPhase1({ young }) {
         <FileCard
           name="Droit à l'image"
           icon="image"
-          filled={young.files.imageRightFilesStatus !== "TO_UPLOAD"}
-          color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.files.imageRightFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
-          status={translateFileStatusPhase1(young.files.imageRightFilesStatus)}
+          filled={young.imageRightFilesStatus !== "TO_UPLOAD"}
+          color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.imageRightFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
+          status={translateFileStatusPhase1(young.imageRightFilesStatus)}
           onClick={() => setIsOpenIm(true)}
         />
         <FileCard
           name="Utilisation d'autotest"
           icon="autotest"
-          filled={young.files.autoTestPCRFilesStatus !== "TO_UPLOAD"}
-          color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.files.autoTestPCRFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
-          status={translateFileStatusPhase1(young.files.autoTestPCRFilesStatus)}
+          filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"}
+          color={["TO_UPLOAD", "WAITING_CORRECTION"].includes(young.autoTestPCRFilesStatus) ? "bg-indigo-700 text-white" : "bg-white text-indigo-700"}
+          status={translateFileStatusPhase1(young.autoTestPCRFilesStatus)}
           onClick={() => setIsOpenAut(true)}
         />
       </ScrollSection>
@@ -85,12 +85,12 @@ export default function DocumentsPhase1({ young }) {
       <ImageRight
         isOpen={isOpenIm}
         onCancel={() => setIsOpenIm(false)}
-        correction={young.files.imageRightFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.files.imageRightFilesComment : ""}
+        correction={young.imageRightFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.imageRightFilesComment : ""}
       />
       <AutoTest
         isOpen={isOpenAut}
         onCancel={() => setIsOpenAut(false)}
-        correction={young.files.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.files.autoTestPCRFilesComment : ""}
+        correction={young.autoTestPCRFilesStatus === FILE_STATUS_PHASE1.WAITING_CORRECTION ? young.autoTestPCRFilesComment : ""}
       />
     </>
   );
