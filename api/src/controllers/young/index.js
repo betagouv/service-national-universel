@@ -51,7 +51,6 @@ const { canDeleteYoung, canGetYoungByEmail, canInviteYoung, canEditYoung, canSen
 const { translateCohort } = require("snu-lib/translation");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ROLES } = require("snu-lib/constants");
 const { canUpdateYoungStatus, youngCanChangeSession } = require("snu-lib");
-const Sentry = require("@sentry/react");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
