@@ -37,8 +37,8 @@ export default function DocumentPhase1(props) {
       } else {
         setStatusCohesionStayMedical("RECEIVED");
       }
-      setStatusAutoTestPCR(young.files.autoTestPCRFilesStatus);
-      setStatusImageRight(young.files.imageRightFilesStatus);
+      setStatusAutoTestPCR(young.autoTestPCRFilesStatus);
+      setStatusImageRight(young.imageRightFilesStatus);
       setStatusRules(young.rulesYoung);
       setDataImageRight({
         imageRight: young.imageRight,
@@ -97,7 +97,7 @@ export default function DocumentPhase1(props) {
                 ))}
               </select>
             </div>
-            <FileIcon icon="image" filled={young.files.imageRightFilesStatus !== "TO_UPLOAD"} />
+            <FileIcon icon="image" filled={young.imageRightFilesStatus !== "TO_UPLOAD"} />
             <p className="text-base font-bold mt-2">Droit à l&apos;image</p>
             <p className="text-gray-500">
               Accord : {dataImageRight.imageRight && young.files.imageRightFilesStatus !== "TO_UPLOAD" ? translate(dataImageRight.imageRight) : "Non renseigné"}
