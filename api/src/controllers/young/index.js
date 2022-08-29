@@ -139,6 +139,8 @@ router.post(
       const { error: bodyError, value: body } = Joi.string().required().validate(req.body.body);
       if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+      if (key !== "equivalenceFiles") throw "Route deprecated.";
+
       const {
         error: namesError,
         value: { names },
