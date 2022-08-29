@@ -219,10 +219,10 @@ export default function DocumentPhase1(props) {
                 ))}
               </select>
             </div>
-            <FileIcon icon="image" filled={young.files.imageRightFilesStatus !== "TO_UPLOAD"} />
+            <FileIcon icon="image" filled={young.imageRightFilesStatus !== "TO_UPLOAD"} />
             <p className="text-base font-bold mt-2">Droit à l&apos;image</p>
             <p className="text-gray-500">
-              Accord : {dataImageRight.imageRight && young.files.imageRightFilesStatus !== "TO_UPLOAD" ? translate(dataImageRight.imageRight) : "Non renseigné"}
+              Accord : {dataImageRight.imageRight && young.imageRightFilesStatus !== "TO_UPLOAD" ? translate(dataImageRight.imageRight) : "Non renseigné"}
             </p>
             <ButtonPlain onClick={() => setIsOpenImg(true)}>Gérer le document</ButtonPlain>
           </section>
@@ -235,7 +235,7 @@ export default function DocumentPhase1(props) {
             name="imageRight"
             nameFiles="imageRightFiles"
             title="Consentement de droit à l'image"
-            comment={young.files.imageRightFilesComment}
+            comment={young.imageRightFilesComment}
           />
           {statusImageRight === FILE_STATUS_PHASE1.TO_UPLOAD && (
             <ButtonPlain
@@ -258,10 +258,10 @@ export default function DocumentPhase1(props) {
                 ))}
               </select>
             </div>
-            <FileIcon icon="autotest" filled={young.files.autoTestPCRFilesStatus !== "TO_UPLOAD"} />
+            <FileIcon icon="autotest" filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"} />
             <p className="text-base font-bold mt-2">Autotest PCR</p>
             <p className="text-gray-500">
-              Accord : {dataAutoTestPCR.autoTestPCR && young.files.autoTestPCRFilesStatus !== "TO_UPLOAD" ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}
+              Accord : {dataAutoTestPCR.autoTestPCR && young.autoTestPCRFilesStatus !== "TO_UPLOAD" ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}
             </p>
             <ButtonPlain onClick={() => setIsOpenAut(true)}>Gérer le document</ButtonPlain>
           </section>
@@ -273,7 +273,7 @@ export default function DocumentPhase1(props) {
             name="autoTestPCR"
             nameFiles="autoTestPCRFiles"
             title="Consentement à l'utilisation d'autotest COVID"
-            comment={young.files.autoTestPCRFilesComment}
+            comment={young.autoTestPCRFilesComment}
           />
           {statusAutoTestPCR === FILE_STATUS_PHASE1.TO_UPLOAD && (
             <ButtonPlain
