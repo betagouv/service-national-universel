@@ -232,6 +232,7 @@ router.post(
           Object.keys(req.files || {}).map((e) => req.files[e]),
           { stripUnknown: true },
         );
+      console.log("files:", files);
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
       // Check permissions
