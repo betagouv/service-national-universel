@@ -96,11 +96,11 @@ export default function VolontaireViewDetails({ young, onChange }) {
                 {user.role === ROLES.ADMIN && young.location?.lat && young.location?.lon ? (
                   <Details title="GPS" value={`${young.location?.lat} , ${young.location?.lon}`} copy />
                 ) : null}
-                {(young.cniFiles || []).map((e, i) => (
+                {(young.files.cniFiles || []).map((e, i) => (
                   <DownloadButton
                     key={i}
                     source={() => api.get(`/referent/youngFile/${young._id}/cniFiles/${e}`)}
-                    title={`Télécharger la pièce d’identité (${i + 1}/${young.cniFiles.length})`}
+                    title={`Télécharger la pièce d’identité (${i + 1}/${young.files.cniFiles.length})`}
                   />
                 ))}
               </Bloc>
@@ -117,21 +117,21 @@ export default function VolontaireViewDetails({ young, onChange }) {
                 <Details title="Doit être affecté dans son département de résidence" value={t(young.handicapInSameDepartment) || "Non"} />
                 <Details title="Doit être affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment) || "Non"} />
                 <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
-                {(young.highSkilledActivityProofFiles || []).map((e, i) => (
+                {(young.files.highSkilledActivityProofFiles || []).map((e, i) => (
                   <DownloadButton
                     key={i}
                     source={() => api.get(`/referent/youngFile/${young._id}/highSkilledActivityProofFiles/${e}`)}
-                    title={`Télécharger la pièce jusitificative (${i + 1}/${young.highSkilledActivityProofFiles.length})`}
+                    title={`Télécharger la pièce jusitificative (${i + 1}/${young.files.highSkilledActivityProofFiles.length})`}
                   />
                 ))}
               </Bloc>
               {getAge(young?.birthdateAt) < 15 ? (
                 <Bloc title="Traitement des données personnelles">
-                  {(young.dataProcessingConsentmentFiles || []).map((e, i) => (
+                  {(young.files.dataProcessingConsentmentFiles || []).map((e, i) => (
                     <DownloadButton
                       key={i}
                       source={() => api.get(`/referent/youngFile/${young._id}/dataProcessingConsentmentFiles/${e}`)}
-                      title={`Télécharger le document (${i + 1}/${young.dataProcessingConsentmentFiles.length})`}
+                      title={`Télécharger le document (${i + 1}/${young.files.dataProcessingConsentmentFiles.length})`}
                     />
                   ))}
                   {isFromFranceConnect(young) && (
@@ -193,7 +193,7 @@ export default function VolontaireViewDetails({ young, onChange }) {
                   <Details title="Région" value={young.parent2Region} />
                 </Bloc>
               ) : null}
-              {isFromFranceConnect() || (young.parentConsentmentFiles && young.parentConsentmentFiles.length) ? (
+              {isFromFranceConnect() || (young.files.parentConsentmentFiles && young.files.parentConsentmentFiles.length) ? (
                 <Bloc title="Attestations des représentants légaux">
                   {isFromFranceConnect() ? (
                     <div style={{ marginTop: "1rem" }}>
@@ -204,11 +204,11 @@ export default function VolontaireViewDetails({ young, onChange }) {
                       Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
                     </div>
                   ) : (
-                    (young.parentConsentmentFiles || []).map((e, i) => (
+                    (young.files.parentConsentmentFiles || []).map((e, i) => (
                       <DownloadButton
                         key={i}
                         source={() => api.get(`/referent/youngFile/${young._id}/parentConsentmentFiles/${e}`)}
-                        title={`Télécharger l'attestation (${i + 1}/${young.parentConsentmentFiles.length})`}
+                        title={`Télécharger l'attestation (${i + 1}/${young.files.parentConsentmentFiles.length})`}
                       />
                     ))
                   )}

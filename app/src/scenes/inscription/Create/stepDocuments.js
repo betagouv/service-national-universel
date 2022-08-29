@@ -28,9 +28,9 @@ export default function StepDocuments() {
   useEffect(() => {
     if (young) {
       setData({
-        cniFiles: young.cniFiles,
-        parentConsentmentFiles: young.parentConsentmentFiles,
-        dataProcessingConsentmentFiles: young.dataProcessingConsentmentFiles,
+        cniFiles: young.files.cniFiles,
+        parentConsentmentFiles: young.files.parentConsentmentFiles,
+        dataProcessingConsentmentFiles: young.files.dataProcessingConsentmentFiles,
       });
     } else {
       history.push("/inscription/profil");

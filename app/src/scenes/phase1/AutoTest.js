@@ -22,7 +22,7 @@ export default function AutoTest({ isOpen, onCancel, correction }) {
   const isPlural = young?.parent1Status && young?.parent2Status;
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [showFields, setShowFields] = useState(!young.autoTestPCRFiles?.length || correction);
+  const [showFields, setShowFields] = useState(!young.files.autoTestPCRFiles?.length || correction);
 
   return (
     <>
@@ -48,7 +48,7 @@ export default function AutoTest({ isOpen, onCancel, correction }) {
                 </p>
               </div>
             </section>
-            {young.autoTestPCRFiles && young.autoTestPCRFiles.length && !correction ? (
+            {young.files.autoTestPCRFiles && young.files.autoTestPCRFiles.length && !correction ? (
               <>
                 <SuccessMessage>
                   <Logo>

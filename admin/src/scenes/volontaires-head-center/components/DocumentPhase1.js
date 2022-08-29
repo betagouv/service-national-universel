@@ -37,16 +37,16 @@ export default function DocumentPhase1(props) {
       } else {
         setStatusCohesionStayMedical("RECEIVED");
       }
-      setStatusAutoTestPCR(young.autoTestPCRFilesStatus);
-      setStatusImageRight(young.imageRightFilesStatus);
+      setStatusAutoTestPCR(young.files.autoTestPCRFilesStatus);
+      setStatusImageRight(young.files.imageRightFilesStatus);
       setStatusRules(young.rulesYoung);
       setDataImageRight({
         imageRight: young.imageRight,
-        imageRightFiles: young.imageRightFiles,
+        imageRightFiles: young.files.imageRightFiles,
       });
       setDataAutoTestPCR({
         autoTestPCR: young.autoTestPCR,
-        autoTestPCRFiles: young.autoTestPCRFiles,
+        autoTestPCRFiles: young.files.autoTestPCRFiles,
       });
     }
   }, [young]);
@@ -97,12 +97,12 @@ export default function DocumentPhase1(props) {
                 ))}
               </select>
             </div>
-            <FileIcon icon="image" filled={young.imageRightFilesStatus !== "TO_UPLOAD"} />
+            <FileIcon icon="image" filled={young.files.imageRightFilesStatus !== "TO_UPLOAD"} />
             <p className="text-base font-bold mt-2">Droit à l&apos;image</p>
             <p className="text-gray-500">
-              Accord : {dataImageRight.imageRight && young.imageRightFilesStatus !== "TO_UPLOAD" ? translate(dataImageRight.imageRight) : "Non renseigné"}
+              Accord : {dataImageRight.imageRight && young.files.imageRightFilesStatus !== "TO_UPLOAD" ? translate(dataImageRight.imageRight) : "Non renseigné"}
             </p>
-            {young.imageRightFiles.length ? <ButtonPlain onClick={() => setIsOpenImg(true)}>Télécharger</ButtonPlain> : null}
+            {young.files.imageRightFiles.length ? <ButtonPlain onClick={() => setIsOpenImg(true)}>Télécharger</ButtonPlain> : null}
           </section>
           <ModalDocument
             isOpen={isOpenImg}
@@ -124,12 +124,12 @@ export default function DocumentPhase1(props) {
                 ))}
               </select>
             </div>
-            <FileIcon icon="autotest" filled={young.autoTestPCRFilesStatus !== "TO_UPLOAD"} />
+            <FileIcon icon="autotest" filled={young.files.autoTestPCRFilesStatus !== "TO_UPLOAD"} />
             <p className="text-base font-bold mt-2">Autotest PCR</p>
             <p className="text-gray-500">
-              Accord : {dataAutoTestPCR.autoTestPCR && young.autoTestPCRFilesStatus !== "TO_UPLOAD" ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}
+              Accord : {dataAutoTestPCR.autoTestPCR && young.files.autoTestPCRFilesStatus !== "TO_UPLOAD" ? translate(dataAutoTestPCR.autoTestPCR) : "Non renseigné"}
             </p>
-            {young.autoTestPCRFiles.length ? <ButtonPlain onClick={() => setIsOpenAut(true)}>Télécharger</ButtonPlain> : null}
+            {young.files.autoTestPCRFiles.length ? <ButtonPlain onClick={() => setIsOpenAut(true)}>Télécharger</ButtonPlain> : null}
           </section>
           <ModalDocument
             isOpen={isOpenAut}
