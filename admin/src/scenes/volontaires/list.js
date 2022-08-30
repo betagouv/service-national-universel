@@ -154,13 +154,15 @@ export default function VolontaireList() {
         if (!meetingPoint) meetingPoint = {};
       }
       const COLUMNS = {
+        id: {
+          ID: data._id,
+        },
         identity: {
-          _id: data._id,
-          Cohorte: data.cohort,
-          "Cohorte d'origine": data.originalCohort,
           Prénom: data.firstName,
           Nom: data.lastName,
           Sexe: translate(data.gender),
+          Cohorte: data.cohort,
+          "Cohorte d'origine": data.originalCohort,
         },
         contact: {
           Email: data.email,
@@ -322,7 +324,7 @@ export default function VolontaireList() {
         desistement: {
           "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
           "Message de désistement": data.withdrawnMessage,
-          // Date du désistement
+          // Date du désistement: not found in db
         },
       };
 
@@ -338,7 +340,7 @@ export default function VolontaireList() {
   const COLUMNS = [
     {
       title: "Identité du volontaire",
-      desc: "ID, cohorte, cohorte d'origine, prénom, nom, sexe.",
+      desc: "Prénom, nom, sexe, cohorte, cohorte d'origine.",
       value: "identity",
     },
     {
@@ -353,7 +355,7 @@ export default function VolontaireList() {
     },
     {
       title: "Lieu de résidence du volontaire",
-      desc: "Adresse postale, code postal, ville, pays, nom de l'hébergeur, prénom de l'hébergeur, lien avec...",
+      desc: "Adresse postale, code postal, ville, pays, nom et prénom de l'hébergeur, lien avec l'hébergeur, adresse - étranger, code postal - étranger, ville - étranger, pays - étranger.",
       value: "address",
     },
     {
@@ -363,8 +365,13 @@ export default function VolontaireList() {
     },
     {
       title: "Situation scolaire",
-      desc: "Niveau, type d'établissement, nom de l'établissement, code postal de l'établissement, ville de l’établissement...",
+      desc: "Niveau, type d'établissement, nom de l'établissement, code postal de l'établissement, ville de l'établissement, département de l'établissement, UAI de l'établissement.",
       value: "schoolSituation",
+    },
+    {
+      title: "Situation particulière",
+      desc: "Quartier Prioritaire de la ville, Zone Rurale, Handicap, PPS, PAI, Aménagement spécifique, Nature de l'aménagement spécifique, Aménagement pour mobilité réduite, Besoin d'être affecté(e) dans le département de résidence, Allergies ou intolérances alimentaires, Activité de haut-niveau, Nature de l'activité de haut-niveau, Activités de haut niveau nécessitant d'être affecté dans le département de résidence, Document activité de haut-niveau, Structure médico-sociale, Nom de la structure médico-sociale, Adresse de la structure médico-sociale, Code postal de la structure médico-sociale, Ville de la structure médico-sociale",
+      value: "situation",
     },
     {
       title: "Représentant légal 1",
@@ -428,17 +435,17 @@ export default function VolontaireList() {
     },
   ];
 
-  console.log("filters:", FILTERS);
-
   const listCategories = COLUMNS.map((cat) => (
-    <div key={cat.value} className="rounded-xl border-2 border-gray-100 px-3 py-2 mb-3">
+    <div key={cat.value} className="rounded-xl border-2 border-gray-100 px-3 py-2">
       <div className="flex justify-between w-full">
         <div className="text-left text-lg w-3/4">{cat.title}</div>
         <div className="h-4">
           <Field type="checkbox" name="checked" value={cat.value} />
         </div>
       </div>
-      <div className="text-left text-gray-400 h-12 w-full text-ellipsis overflow-hidden">{cat.desc}</div>
+      <div className="flex justify-between w-full text-gray-400">
+        <div className="text-left h-12 text-ellipsis overflow-hidden hover:h-full">{cat.desc}</div>
+      </div>
     </div>
   ));
 
@@ -460,19 +467,44 @@ export default function VolontaireList() {
                   <ModalContainer>
                     <Formik
                       initialValues={{
-                        checked: [],
+                        checked: [
+                          "id",
+                          "identity",
+                          "contact",
+                          "birth",
+                          "address",
+                          "location",
+                          "schoolSituation",
+                          "situation",
+                          "representative1",
+                          "representative2",
+                          "consent",
+                          "status",
+                          "phase1Affectation",
+                          "phase1Transport",
+                          "phase1DocumentStatus",
+                          "phase1DocumentAgreement",
+                          "phase1Attendance",
+                          "phase2",
+                          "accountDetails",
+                          "desistement",
+                        ],
                       }}>
-                      {({ values }) => (
+                      {({ values, setFieldValue }) => (
                         <>
                           <div className="text-xl">Sélectionnez les données à exporter</div>
                           <Content>
-                            <div className="columns-2 w-full py-4">
-                              <div className="text-left">Sélectionnez pour choisir des sous-catégories</div>
-                              <div className="text-right">{volontaire?.length}</div>
+                            <div className="flex w-full py-4">
+                              <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
+                              <div className="w-1/2 text-right">
+                                <div className="text-snu-purple-300 cursor-pointer hover:underline" onClick={() => setFieldValue("checked", ["id"])}>
+                                  Tout déselectionner.
+                                </div>
+                              </div>
                             </div>
 
                             <div className="h-96 overflow-auto">
-                              <div className="columns-2 w-full">{listCategories}</div>
+                              <div className="grid grid-cols-2 gap-4 w-full">{listCategories}</div>
                             </div>
                           </Content>
                           <div className="flex gap-2 justify-center mb-4">
