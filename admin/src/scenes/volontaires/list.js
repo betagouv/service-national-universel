@@ -154,9 +154,6 @@ export default function VolontaireList() {
         if (!meetingPoint) meetingPoint = {};
       }
       const COLUMNS = {
-        id: {
-          ID: data._id,
-        },
         identity: {
           Prénom: data.firstName,
           Nom: data.lastName,
@@ -269,7 +266,7 @@ export default function VolontaireList() {
         },
         phase1Transport: {
           "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
-          "Transport géré hors plateforme": null, // A faire
+          // "Transport géré hors plateforme": // Doublon?
           "Bus n˚": meetingPoint?.busExcelId,
           "Adresse point de rassemblement": meetingPoint?.departureAddress,
           "Date aller": meetingPoint?.departureAtString,
@@ -324,11 +321,11 @@ export default function VolontaireList() {
         desistement: {
           "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
           "Message de désistement": data.withdrawnMessage,
-          // Date du désistement: not found in db
+          // Date du désistement: // not found in db
         },
       };
 
-      let columns = {};
+      let columns = { ID: data._id };
       for (const element of values) {
         let key;
         for (key in COLUMNS[element]) columns[key] = COLUMNS[element][key];
@@ -425,29 +422,15 @@ export default function VolontaireList() {
     },
     {
       title: "Compte",
-      desc: "Dates de création, d'édtion et de dernière connexion",
+      desc: "Dates de création, d'édition et de dernière connexion.",
       value: "accountDetails",
     },
     {
       title: "Désistement",
-      desc: "Raison, message et date du désistement",
+      desc: "Raison et message du désistement.",
       value: "desistement",
     },
   ];
-
-  const listCategories = COLUMNS.map((cat) => (
-    <div key={cat.value} className="rounded-xl border-2 border-gray-100 px-3 py-2">
-      <div className="flex justify-between w-full">
-        <div className="text-left text-lg w-3/4">{cat.title}</div>
-        <div className="h-4">
-          <Field type="checkbox" name="checked" value={cat.value} />
-        </div>
-      </div>
-      <div className="flex justify-between w-full text-gray-400">
-        <div className="text-left h-12 text-ellipsis overflow-hidden hover:h-full">{cat.desc}</div>
-      </div>
-    </div>
-  ));
 
   return (
     <div>
@@ -468,7 +451,6 @@ export default function VolontaireList() {
                     <Formik
                       initialValues={{
                         checked: [
-                          "id",
                           "identity",
                           "contact",
                           "birth",
@@ -497,14 +479,80 @@ export default function VolontaireList() {
                             <div className="flex w-full py-4">
                               <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
                               <div className="w-1/2 text-right">
-                                <div className="text-snu-purple-300 cursor-pointer hover:underline" onClick={() => setFieldValue("checked", ["id"])}>
-                                  Tout déselectionner.
-                                </div>
+                                {values.checked == "" ? (
+                                  <div
+                                    className="text-snu-purple-300 cursor-pointer hover:underline"
+                                    onClick={() =>
+                                      setFieldValue("checked", [
+                                        "id",
+                                        "identity",
+                                        "contact",
+                                        "birth",
+                                        "address",
+                                        "location",
+                                        "schoolSituation",
+                                        "situation",
+                                        "representative1",
+                                        "representative2",
+                                        "consent",
+                                        "status",
+                                        "phase1Affectation",
+                                        "phase1Transport",
+                                        "phase1DocumentStatus",
+                                        "phase1DocumentAgreement",
+                                        "phase1Attendance",
+                                        "phase2",
+                                        "accountDetails",
+                                        "desistement",
+                                      ])
+                                    }>
+                                    Tout sélectionner.
+                                  </div>
+                                ) : (
+                                  <div className="text-snu-purple-300 cursor-pointer hover:underline" onClick={() => setFieldValue("checked", [])}>
+                                    Tout déselectionner.
+                                  </div>
+                                )}
                               </div>
                             </div>
 
-                            <div className="h-96 overflow-auto">
-                              <div className="grid grid-cols-2 gap-4 w-full">{listCategories}</div>
+                            <div className="h-[60vh] overflow-auto">
+                              <div className="grid grid-cols-2 gap-4 w-full">
+                                {COLUMNS.map((cat) => (
+                                  <div
+                                    key={cat.value}
+                                    className="rounded-xl border-2 border-gray-100 px-3 py-2 cursor-pointer"
+                                    onClick={() => {
+                                      if (!values.checked.includes(cat.value)) {
+                                        const newValues = [...values.checked, cat.value];
+                                        setFieldValue("checked", newValues);
+                                      } else {
+                                        const newValues = values.checked.filter((item) => item !== cat.value);
+                                        setFieldValue("checked", newValues);
+                                      }
+                                    }}>
+                                    <div className="flex justify-between w-full">
+                                      <div className="text-left text-lg w-3/4">{cat.title}</div>
+                                      <div className="h-4">
+                                        <Field type="checkbox" name="checked" value={cat.value} />
+                                      </div>
+                                    </div>
+                                    {cat.desc.length > 150 ? (
+                                      cat.desc.length > 300 ? (
+                                        <div className="transition-[height] ease-in-out w-full text-gray-400 text-left h-10 text-ellipsis overflow-hidden hover:h-64 duration-300">
+                                          {cat.desc}
+                                        </div>
+                                      ) : (
+                                        <div className="transition-[height] ease-in-out w-full text-gray-400 text-left h-10 text-ellipsis overflow-hidden hover:h-36 duration-300">
+                                          {cat.desc}
+                                        </div>
+                                      )
+                                    ) : (
+                                      <div className="w-full text-gray-400 text-left h-10">{cat.desc}</div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </Content>
                           <div className="flex gap-2 justify-center mb-4">
