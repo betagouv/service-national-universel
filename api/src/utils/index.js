@@ -29,6 +29,12 @@ const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, MISSION_STATUS,
 const { translateFileStatusPhase1 } = require("snu-lib/translation");
 const { getQPV, getDensity } = require("../geo");
 
+// Timeout a promise in ms
+const timeout = (prom, time) => {
+  let timer;
+  return Promise.race([prom, new Promise((_r, rej) => (timer = setTimeout(rej, time)))]).finally(() => clearTimeout(timer));
+};
+
 function sanitizeAll(text) {
   return sanitizeHtml(text || "", { allowedTags: ["li", "br", "b"], allowedAttributes: {} });
 }
@@ -545,6 +551,8 @@ const updateApplication = async (mission, fromUser = null) => {
     application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
     await application.save({ fromUser });
 
+    // ! Should update contract too if it exists
+
     if (sendinblueTemplate) {
       const young = await YoungModel.findById(application.youngId);
       let cc = getCcOfYoung({ template: sendinblueTemplate, young });
@@ -642,9 +650,6 @@ const ERRORS = {
   OPERATION_UNAUTHORIZED: "OPERATION_UNAUTHORIZED",
   OPERATION_NOT_ALLOWED: "OPERATION_NOT_ALLOWED",
   USER_ALREADY_REGISTERED: "USER_ALREADY_REGISTERED",
-  EDUCONNECT_LOGIN_ERROR: "EDUCONNECT_LOGIN_ERROR",
-  EDUCONNECT_RESP_AUTH: "EDUCONNECT_RESP_AUTH",
-  EDUCONNECT_USER_ALREADY_REGISTERED: "EDUCONNECT_USER_ALREADY_REGISTERED",
   PASSWORD_NOT_VALIDATED: "PASSWORD_NOT_VALIDATED",
   INVITATION_TOKEN_EXPIRED_OR_INVALID: "INVITATION_TOKEN_EXPIRED_OR_INVALID",
   FILE_CORRUPTED: "FILE_CORRUPTED",
@@ -652,6 +657,9 @@ const ERRORS = {
   UNSUPPORTED_TYPE: "UNSUPPORTED_TYPE",
   USER_NOT_FOUND: "USER_NOT_FOUND",
   LINKED_OBJECT: "LINKED_OBJECT",
+  LINKED_MISSIONS: "LINKED_MISSIONS",
+  LINKED_STRUCTURE: "LINKED_STRUCTURE",
+  PDF_ERROR: "PDF_ERROR",
   NO_TEMPLATE_FOUND: "NO_TEMPLATE_FOUND",
   INVALID_BODY: "INVALID_BODY",
   INVALID_PARAMS: "INVALID_PARAMS",
@@ -697,6 +705,7 @@ const STEPS = {
 };
 
 module.exports = {
+  timeout,
   uploadFile,
   uploadPublicPicture,
   getFile,

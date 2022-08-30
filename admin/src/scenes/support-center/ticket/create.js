@@ -74,6 +74,7 @@ export default function Create(props) {
               history.push("/besoin-d-aide");
             } catch (e) {
               console.log(e);
+              capture(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
             }
           }}>

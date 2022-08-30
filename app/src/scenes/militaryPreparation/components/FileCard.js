@@ -3,7 +3,7 @@ import FileIcon from "../../../assets/FileIcon";
 
 export default function FileCard({ name, status, filled, icon, color, onClick, tw, description }) {
   return (
-    <section className={`min-w-[250px] max-w-[250px] md:!basis-1/4 bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 ${tw}`}>
+    <section className={`md:w-1/4  md:!basis-1/4 bg-gray-50 rounded-lg m-2 text-center flex flex-col items-center justify-center p-4 ${tw}`}>
       <FileIcon filled={filled} icon={icon} />
       <section className="min-h-[52px]">
         <p className="text-base font-bold mt-2">{name}</p>

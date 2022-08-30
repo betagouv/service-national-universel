@@ -38,10 +38,10 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
 
   return (
     <>
-      <div className="w-full mb-4" ref={docRef}>
+      <div className="w-full mb-4 " ref={docRef}>
         {showHelp ? (
           <>
-            <div className="hidden md:flex items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4 w-full">
+            <div className="hidden md:flex items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4 w-full ">
               {!showFolder ? (
                 <>
                   <div className="flex flex-col items-center lg:items-start">
@@ -60,11 +60,10 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
               ) : (
                 <>
                   <div className="flex items-center gap-4">
-                    <div className="text-lg leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>
+                    <div className="text-lg leading-6 font-semibold ">Dossier d&apos;éligibilité aux préparations militaires</div>
                     <div
-                      className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
-                        theme.text[young.statusMilitaryPreparationFiles]
-                      } px-2 py-[2px] rounded-sm `}>
+                      className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${theme.text[young.statusMilitaryPreparationFiles]
+                        } px-2 py-[2px] rounded-sm `}>
                       {translate(young.statusMilitaryPreparationFiles)}
                     </div>
                   </div>
@@ -79,7 +78,7 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
                 </>
               )}
             </div>
-            <div className="flex md:hidden items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4" ref={docRef}>
+            <div className="flex md:hidden items-center lg:justify-between flex-wrap lg:!flex-nowrap justify-center gap-4 " ref={docRef}>
               {!showFolder ? (
                 <>
                   <div className="flex flex-col items-start">
@@ -99,9 +98,8 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
                   <div className="flex items-end gap-2">
                     <div className="flex flex-col items-start gap-2">
                       <div
-                        className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
-                          theme.text[young.statusMilitaryPreparationFiles]
-                        } px-2 py-[2px] rounded-sm `}>
+                        className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${theme.text[young.statusMilitaryPreparationFiles]
+                          } px-2 py-[2px] rounded-sm `}>
                         {translate(young.statusMilitaryPreparationFiles)}
                       </div>
                       <div className="text-[15px] leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>
@@ -119,18 +117,18 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
           </>
         ) : null}
         {open ? (
-          <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full justify-between">
+          <div className="flex flex-row overflow-x-auto gap-4 my-4 w-full justify-between ">
             <FileCard
               name="Pièce d’identité"
               icon="reglement"
-              filled={young.militaryPreparationFilesIdentity.length}
-              color={young.militaryPreparationFilesIdentity.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.militaryPreparationFilesIdentity.length ? "Modifier" : "À renseigner"}
+              filled={young.files.militaryPreparationFilesIdentity.length}
+              color={young.files.militaryPreparationFilesIdentity.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+              status={young.files.militaryPreparationFilesIdentity.length ? "Modifier" : "À renseigner"}
               onClick={() =>
                 setModalDocument({
                   isOpen: true,
                   title: "Pièce d'identité",
-                  subTitle: "Déposez ici la copie d’une pièce d’identité en cours de validité (CNI, passeport).",
+                  subTitle: "Déposez ici la copie d’une pièce d’identité en cours de validité (CNI recto/verso, passeport) .",
                   name: "militaryPreparationFilesIdentity",
                 })
               }
@@ -138,9 +136,9 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
             <FileCard
               name="Autorisation parentale"
               icon="image"
-              filled={young.militaryPreparationFilesAuthorization.length}
-              color={young.militaryPreparationFilesAuthorization.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.militaryPreparationFilesAuthorization.length ? "Modifier" : "À renseigner"}
+              filled={young.files.militaryPreparationFilesAuthorization.length}
+              color={young.files.militaryPreparationFilesAuthorization.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+              status={young.files.militaryPreparationFilesAuthorization.length ? "Modifier" : "À renseigner"}
               onClick={() =>
                 setModalDocument({
                   isOpen: true,
@@ -154,9 +152,9 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
             <FileCard
               name="Certifical médical de non contre-indication..."
               icon="autotest"
-              filled={young.militaryPreparationFilesCertificate.length}
-              color={young.militaryPreparationFilesCertificate.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.militaryPreparationFilesCertificate.length ? "Modifier" : "À renseigner"}
+              filled={young.files.militaryPreparationFilesCertificate.length}
+              color={young.files.militaryPreparationFilesCertificate.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+              status={young.files.militaryPreparationFilesCertificate.length ? "Modifier" : "À renseigner"}
               onClick={() =>
                 setModalDocument({
                   isOpen: true,
@@ -170,9 +168,9 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
             <FileCard
               name="Attestation de recensement"
               icon="sanitaire"
-              filled={young.militaryPreparationFilesCensus.length}
-              color={young.militaryPreparationFilesCensus.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.militaryPreparationFilesCensus.length ? "Modifier" : "À renseigner"}
+              filled={young.files.militaryPreparationFilesCensus.length}
+              color={young.files.militaryPreparationFilesCensus.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+              status={young.files.militaryPreparationFilesCensus.length ? "Modifier" : "À renseigner"}
               description="Facultatif"
               onClick={() =>
                 setModalDocument({

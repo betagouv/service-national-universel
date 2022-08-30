@@ -4,7 +4,7 @@ const request = require("supertest");
 
 // This part should be done at the beginning (before require models or anything else.).
 process.env.ES_ENDPOINT = "http://localhost:9200";
-jest.mock("@selego/mongoose-elastic", () => () => () => {});
+jest.mock("@selego/mongoose-elastic", () => () => () => { });
 jest.mock("@elastic/elasticsearch", () => ({
   Client: jest.fn().mockImplementation(() => {
     return {
@@ -409,7 +409,7 @@ describe("Es", () => {
       const res = await msearch("referent", buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(200);
       const filters = getFilter()[0].bool.should;
-      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE]);
+      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER]);
       expect(filters[1]).toStrictEqual({
         bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_REGION } }, { term: { "region.keyword": passport.user.region } }] },
       });
@@ -429,12 +429,9 @@ describe("Es", () => {
       const res = await msearch("referent", buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(200);
       const filters = getFilter()[0].bool.should;
-      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE]);
+      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER]);
       expect(filters[1]).toStrictEqual({
         bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "region.keyword": passport.user.region } }] },
-      });
-      expect(filters[2]).toStrictEqual({
-        bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { term: { "region.keyword": passport.user.region } }] },
       });
 
       passport.user.role = ROLES.ADMIN;

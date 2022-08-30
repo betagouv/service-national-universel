@@ -9,10 +9,13 @@ module.exports = (env) => {
       template: "./public/index.html",
       filename: "index.html",
       inject: "body",
-      favicon: path.join("public/favicon.ico"),
+      favicon: path.join("public/favicon_dev.ico"),
     }),
     new webpack.HotModuleReplacementPlugin(),
     new ReactRefreshWebpackPlugin(),
+    new webpack.ProvidePlugin({
+      process: "process/browser",
+    }),
   ].filter(Boolean);
 
   return {

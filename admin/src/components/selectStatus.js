@@ -112,6 +112,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
     const now = new Date();
     young.lastStatusAt = now.toISOString();
     if (statusName === "statusPhase2") young.statusPhase2UpdatedAt = now.toISOString();
+    if (statusName === "statusPhase3") young.statusPhase3UpdatedAt = now.toISOString();
     if (status === "WITHDRAWN" && (values?.withdrawnReason || values?.withdrawnMessage)) {
       young.withdrawnReason = values?.withdrawnReason;
       young.withdrawnMessage = values?.withdrawnMessage || "";
@@ -128,7 +129,11 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
       //   young.phase = YOUNG_PHASE.COHESION_STAY;
       // }
 
-      const { lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase, inscriptionCorrectionMessage, inscriptionRefusedMessage, withdrawnReason } = young;
+      const { lastStatusAt, statusPhase2UpdatedAt, statusPhase3UpdatedAt, withdrawnMessage, phase, inscriptionCorrectionMessage, inscriptionRefusedMessage, withdrawnReason } =
+        young;
+
+      const shouldValidateStatusPhase2 = statusName === "statusPhase2" && young[statusName] === YOUNG_STATUS.VALIDATED;
+      const shouldValidateStatusPhase3 = statusName === "statusPhase3" && young[statusName] === YOUNG_STATUS.VALIDATED;
 
       const {
         ok,
@@ -137,7 +142,10 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
       } = await api.put(`/referent/young/${young._id}`, {
         [statusName]: young[statusName],
         lastStatusAt,
-        statusPhase2UpdatedAt,
+        ...(statusName === "statusPhase2" && { statusPhase2UpdatedAt }),
+        ...(shouldValidateStatusPhase2 && { statusPhase2ValidatedAt: statusPhase2UpdatedAt }),
+        ...(statusName === "statusPhase3" && { statusPhase3UpdatedAt }),
+        ...(shouldValidateStatusPhase3 && { statusPhase3ValidatedAt: statusPhase3UpdatedAt }),
         withdrawnMessage,
         phase,
         inscriptionCorrectionMessage,

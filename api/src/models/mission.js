@@ -107,6 +107,13 @@ const Schema = new mongoose.Schema({
       description: "Nombre de places encore disponibles pour cette mission",
     },
   }, // OK
+  pendingApplications: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Le nombre de candidatures en attente.",
+    },
+  },
 
   actions: {
     type: String,
@@ -180,6 +187,7 @@ const Schema = new mongoose.Schema({
       description: "Identifiant de l'utilisateur tuteur de la mission",
     },
   },
+
   tutorName: {
     type: String,
     documentation: {
@@ -292,6 +300,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
+  this.updatedAt = Date.now();
   next();
 });
 
@@ -303,6 +312,7 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
+  excludes: ["/updatedAt"],
 });
 Schema.plugin(mongooseElastic(esClient, { ignore: ["jvaRawData"] }), MODELNAME);
 

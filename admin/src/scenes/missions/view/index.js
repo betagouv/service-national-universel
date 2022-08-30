@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Switch, Route, useHistory } from "react-router-dom";
+import { Switch, useHistory } from "react-router-dom";
+import { SentryRoute } from "../../../sentry";
 
 import api from "../../../services/api";
 import Details from "./details";
@@ -53,6 +54,17 @@ export default function Index({ ...props }) {
     if (mission) fetchApplication();
   }, [mission]);
 
+  async function fetchMission() {
+    const id = props.match && props.match.params && props.match.params.id;
+    const missionResponse = await api.get(`/mission/${id}`);
+    if (!missionResponse.ok) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la mission", translate(missionResponse.code));
+      return history.push("/mission");
+    }
+    setDocumentTitle(`${missionResponse.data?.name}`);
+    setMission(missionResponse.data);
+  }
+
   async function fetchApplication() {
     const applicationResponse = await api.get(`/mission/${mission._id}/application`);
     if (!applicationResponse.ok) {
@@ -67,10 +79,10 @@ export default function Index({ ...props }) {
     <>
       <Breadcrumbs items={[{ label: "Missions", to: "/mission" }, { label: "Fiche de la mission" }]} />
       <Switch>
-        <Route path="/mission/:id/youngs" component={() => <Youngs mission={mission} applications={applications} updateApplications={fetchApplication} />} />
-        <Route path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
-        <Route path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} />} />
-        <Route path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />
+        <SentryRoute path="/mission/:id/youngs" component={() => <Youngs mission={mission} updateMission={fetchMission} applications={applications} />} />
+        <SentryRoute path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
+        <SentryRoute path="/mission/:id/propose-mission" component={() => <ProposeMission mission={mission} updateMission={fetchMission} />} />
+        <SentryRoute path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />
       </Switch>
     </>
   );

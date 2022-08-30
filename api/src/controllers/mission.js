@@ -173,6 +173,49 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
+router.post("/multiaction/change-tutor", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      ids: Joi.array().items(Joi.string().required()).required(),
+      tutorId: Joi.string().required(),
+      tutorName: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    const { tutorId, tutorName, ids } = value;
+
+    const missions = await MissionObject.find({ _id: { $in: ids } });
+    if (missions?.length !== ids.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (missions.some((mission) => !canCreateOrModifyMission(req.user, mission))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    for (let mission of missions) {
+      mission.set({ tutorId, tutorName });
+      await mission.save({ fromUser: req.user });
+
+      // ! update application ne met pas à jour le tutorId. Faire cette tache pour corriger : https://www.notion.so/jeveuxaider/Model-Supprimer-tutorId-de-applications-et-contrats-5dae140ba40745e69dde7029baecdabd
+      //await updateApplication(mission, req.user);
+
+      // ? Envoi d'un email au nouveau responsable
+      // await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
+      //   emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
+      //   params: {
+      //     missionName: mission.name,
+      //   },
+      // });
+    }
+
+    res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
@@ -276,10 +319,10 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canCreateOrModifyMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canCreateOrModifyMission(req.user, mission)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const applications = await ApplicationObject.find({ missionId: mission._id });
     if (applications && applications.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });

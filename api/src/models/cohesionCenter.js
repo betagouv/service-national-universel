@@ -141,6 +141,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
+  this.updatedAt = Date.now();
   next();
 });
 
@@ -152,6 +153,7 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
+  excludes: ["/updatedAt"],
 });
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);

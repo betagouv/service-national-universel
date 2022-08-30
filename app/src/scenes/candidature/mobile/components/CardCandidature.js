@@ -9,6 +9,7 @@ import SixDotsVertical from "../../../../assets/icons/SixDotsVertical";
 import { Draggable } from "react-beautiful-dnd";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
+import { capture } from "../../../../sentry";
 
 export default function application({ application, index, onChange, loading }) {
   const [mission, setMission] = React.useState();
@@ -16,7 +17,10 @@ export default function application({ application, index, onChange, loading }) {
   React.useEffect(() => {
     (async () => {
       const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       setMission(data);
     })();
   }, [application]);

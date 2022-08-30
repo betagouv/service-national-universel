@@ -3,6 +3,7 @@ import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
 import { Spinner } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
@@ -16,13 +17,24 @@ import PinLocation from "../../../assets/PinLocation";
 
 const FILTERS = ["SEARCH"];
 
-export default function ProposeMission({ mission }) {
+export default function ProposeMission({ mission, updateMission }) {
   const user = useSelector((state) => state.Auth.user);
 
   const [search, setSearch] = useState(undefined);
 
   const getDefaultQuery = () => {
-    let defaultQuery = { query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED"] } }] } }, track_total_hits: true };
+    let defaultQuery = {
+      query: {
+        bool: {
+          filter: [
+            { terms: { "status.keyword": ["VALIDATED"] } },
+            { terms: { "statusPhase1.keyword": ["DONE", "EXEMPTED"] } },
+            { terms: { "statusPhase2.keyword": ["IN_PROGRESS", "WAITING_REALISATION"] } },
+          ],
+        },
+      },
+      track_total_hits: true,
+    };
     if (user.role === ROLES.REFERENT_DEPARTMENT) defaultQuery.query.bool.filter.push({ term: { "department.keyword": user.department } });
     if (user.role === ROLES.REFERENT_REGION) defaultQuery.query.bool.filter.push({ term: { "region.keyword": user.region } });
 
@@ -36,10 +48,16 @@ export default function ProposeMission({ mission }) {
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <MissionView mission={mission} tab="propose-mission">
         <div style={{}}>
-          <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-            <SearchBox getDefaultQuery={getDefaultQuery} setSearch={setSearch} />
-            <ResultBox getDefaultQuery={getDefaultQuery} search={search} mission={mission} />
-          </ReactiveBase>
+          {mission.visibility === "HIDDEN" ? (
+            <div>
+              Cette mission est <strong>fermée</strong> aux candidatures.
+            </div>
+          ) : (
+            <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+              <SearchBox getDefaultQuery={getDefaultQuery} setSearch={setSearch} />
+              <ResultBox getDefaultQuery={getDefaultQuery} search={search} mission={mission} updateMission={updateMission} />
+            </ReactiveBase>
+          )}
         </div>
       </MissionView>
     </div>
@@ -73,8 +91,9 @@ const SearchBox = ({ getDefaultQuery, setSearch }) => {
   );
 };
 
-const ResultBox = ({ getDefaultQuery, search, mission }) => {
+const ResultBox = ({ getDefaultQuery, search, mission, updateMission }) => {
   const [applicationsToTheMission, setApplicationsToTheMission] = useState([]);
+  const history = useHistory();
 
   useEffect(() => {
     getApplicationsToTheMission();
@@ -120,6 +139,18 @@ const ResultBox = ({ getDefaultQuery, search, mission }) => {
     if (!okMail) return toastr.error("Oups, une erreur est survenue lors de l'envoi du mail", codeMail);
     toastr.success("Email envoyé !");
     await getApplicationsToTheMission();
+
+    updateMission();
+    // On vérifie qu'il reste des places de candidature, sinon on redirige.
+    try {
+      const res = await api.get(`/mission/${mission._id}/`);
+      if (res.data.pendingApplications >= res.data.placesLeft * 5) {
+        history.push(`/mission/${mission._id}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     return;
   };
 

@@ -19,6 +19,13 @@ export default function xxxxxxx({ young, onSend }) {
     return {
       query: {
         bool: {
+          must: [
+            {
+              script: {
+                script: "doc['pendingApplications'].value < doc['placesLeft'].value * 5",
+              },
+            },
+          ],
           filter: [
             {
               range: {
@@ -28,6 +35,7 @@ export default function xxxxxxx({ young, onSend }) {
               },
             },
             { term: { "status.keyword": "VALIDATED" } },
+            { term: { "visibility.keyword": "VISIBLE" } },
             {
               range: {
                 placesLeft: {

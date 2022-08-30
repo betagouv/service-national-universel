@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Redirect } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import * as Sentry from "@sentry/react";
-import { Integrations } from "@sentry/tracing";
 
 import { setUser, setSessionPhase1 } from "./redux/auth/actions";
 import Auth from "./scenes/auth";
@@ -37,23 +35,18 @@ import Header from "./components/header";
 import Footer from "./components/footer";
 import Loader from "./components/Loader";
 
-import api from "./services/api";
+import api, { initApi } from "./services/api";
+import { initSentry, SentryRoute, history } from "./sentry";
 
-import { SENTRY_URL, environment, adminURL } from "./config";
+import { adminURL } from "./config";
 import { ROLES, ROLES_LIST, COHESION_STAY_END } from "./utils";
 
 import "./index.css";
 import ModalCGU from "./components/modals/ModalCGU";
 import Team from "./scenes/team";
 
-if (environment === "production") {
-  Sentry.init({
-    dsn: SENTRY_URL,
-    environment: "admin",
-    integrations: [new Integrations.BrowserTracing()],
-    tracesSampleRate: 1.0,
-  });
-}
+initSentry();
+initApi();
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -77,15 +70,15 @@ export default function App() {
   if (loading) return <Loader />;
 
   return (
-    <Router>
+    <Router history={history}>
       <div className="main">
         <Switch>
-          <Route path="/validate" component={Validate} />
-          <Route path="/conditions-generales-utilisation" component={CGU} />
-          <Route path="/auth" component={Auth} />
-          <Route path="/session-phase1-partage" component={SessionShareIndex} />
-          <Route path="/public-besoin-d-aide" component={PublicSupport} />
-          <Route path="/" component={Home} />
+          <SentryRoute path="/validate" component={Validate} />
+          <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+          <SentryRoute path="/auth" component={Auth} />
+          <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
+          <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+          <SentryRoute path="/" component={Home} />
         </Switch>
         <Footer />
       </div>
@@ -169,7 +162,7 @@ const Home = () => {
         <Drawer open={drawerVisible} onOpen={setDrawerVisible} />
         <div className={drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`}>
           <Switch>
-            <Route path="/auth" component={Auth} />
+            <SentryRoute path="/auth" component={Auth} />
             <RestrictedRoute path="/structure" component={Structure} />
             <RestrictedRoute path="/settings" component={Settings} />
             <RestrictedRoute path="/profil" component={Profil} />
@@ -217,5 +210,5 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
   if (!roles.includes(user.role)) {
     return <Redirect to="/dashboard" />;
   }
-  return <Route {...rest} render={(props) => <Component {...props} />} />;
+  return <SentryRoute {...rest} render={(props) => <Component {...props} />} />;
 };

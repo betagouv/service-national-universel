@@ -23,7 +23,7 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
       birthCountry: Joi.string().trim().required(),
       birthCity: Joi.string().trim().required(),
       birthCityZip: Joi.string().trim().allow(null, ""),
-    }).validate(req.body);
+    }).validate(req.body, { stripUnknown: true });
 
     if (error) {
       if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
@@ -169,7 +169,7 @@ router.put("/coordonnee/:type", passport.authenticate("young", { session: false,
           ),
         }),
       }),
-    }).validate(req.body);
+    }).validate(req.body, { stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -233,7 +233,7 @@ router.put("/availability", passport.authenticate("young", { session: false, fai
         // We have to add an invalid cohort to trigger error when no cohort is available.
         // Because valid() with no params *is* valid.
         .valid(...(sessionsId.length ? sessionsId : ["INVALID_COHORT"])),
-    }).validate(req.body);
+    }).validate(req.body, { stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -319,7 +319,7 @@ router.put("/particulieres/:type", passport.authenticate("young", { session: fal
         then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
         otherwise: Joi.isError(new Error()),
       }),
-    }).validate(req.body);
+    }).validate(req.body, { stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -538,7 +538,7 @@ router.put("/representant/:type", passport.authenticate("young", { session: fals
         }),
         otherwise: Joi.isError(new Error()),
       }),
-    }).validate(req.body);
+    }).validate(req.body, { stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -614,13 +614,15 @@ router.put("/representant/:type", passport.authenticate("young", { session: fals
 
 router.put("/representant-fromFranceConnect/:id", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const id = req.params.id;
+    const { error: error_id, value: id } = Joi.string().valid("1", "2").required().validate(req.params.id, { stripUnknown: true });
+    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
     const { error, value } = Joi.object({
       [`parent${id}FirstName`]: validateFirstName().trim().required(),
       [`parent${id}LastName`]: Joi.string().uppercase().trim().required(),
       [`parent${id}Email`]: Joi.string().lowercase().trim().email().required(),
       [`parent${id}FromFranceConnect`]: Joi.string().trim().required().valid("true"),
-    }).validate(req.body);
+    }).validate(req.body, { stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -665,7 +667,7 @@ router.put("/consentements", passport.authenticate("young", { session: false, fa
         then: Joi.boolean().required().valid(true),
         otherwise: Joi.isError(new Error()),
       }),
-    }).validate(req.body, { context: { needMoreConsent: needMoreConsent } });
+    }).validate(req.body, { context: { needMoreConsent: needMoreConsent }, stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -709,19 +711,26 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     } else {
       isParentFromFranceconnect = young.parent1FromFranceConnect === "true";
     }
+    const file = Joi.object({
+      _id: Joi.string().alphanum().length(24).required(),
+      uploadedAt: Joi.string().required(),
+      size: Joi.number().required(),
+      mimetype: Joi.string().required(),
+      name: Joi.string().required(),
+    });
 
     const { error, value } = Joi.object({
       cniFiles: Joi.alternatives().conditional("$isRequired", {
         is: Joi.boolean().valid(true).required(),
-        then: Joi.array().items(Joi.string().required()).required().min(1),
-        otherwise: Joi.array().items(Joi.string()),
+        then: Joi.array().items(file.required()).required().min(1),
+        otherwise: Joi.array().items(file),
       }),
       parentConsentmentFiles: Joi.alternatives().conditional("$isParentFromFranceconnect", {
         is: Joi.boolean().valid(false).required(),
         then: Joi.alternatives().conditional("$isRequired", {
           is: Joi.boolean().valid(true).required(),
-          then: Joi.array().items(Joi.string().required()).required().min(1),
-          otherwise: Joi.array().items(Joi.string()),
+          then: Joi.array().items(file.required()).required().min(1),
+          otherwise: Joi.array().items(file),
         }),
         otherwise: Joi.isError(new Error()),
       }),
@@ -731,17 +740,17 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
           is: Joi.boolean().valid(true).required(),
           then: Joi.alternatives().conditional("$isRequired", {
             is: Joi.boolean().valid(true).required(),
-            then: Joi.array().items(Joi.string().required()).required().min(1),
-            otherwise: Joi.array().items(Joi.string()),
+            then: Joi.array().items(file.required()).required().min(1),
+            otherwise: Joi.array().items(file),
           }),
           otherwise: Joi.isError(new Error()),
         }),
         otherwise: Joi.isError(new Error()),
       }),
-    }).validate(req.body, { context: { needMoreConsent, isParentFromFranceconnect, isRequired } });
+    }).validate(req.body, { context: { needMoreConsent, isParentFromFranceconnect, isRequired } }, { stripUnknown: true });
 
     if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -775,7 +784,7 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
         then: Joi.boolean().valid(true).required(),
         otherwise: Joi.isError(new Error()),
       }),
-    }).validate(req.body, { context: { needMoreConsent } });
+    }).validate(req.body, { context: { needMoreConsent }, stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -805,7 +814,7 @@ const checkParameter = (parameter) => {
   const keys = ["next", "save", "correction"];
   return Joi.string()
     .valid(...keys)
-    .validate(parameter);
+    .validate(parameter, { stripUnknown: true });
 };
 
 const needRequired = (joi, isRequired) => {

@@ -82,11 +82,11 @@ export default function DocumentPhase1(props) {
       setStatusRules(young.rulesYoung);
       setDataImageRight({
         imageRight: young.imageRight,
-        imageRightFiles: young.imageRightFiles,
+        imageRightFiles: young.files.imageRightFiles,
       });
       setDataAutoTestPCR({
         autoTestPCR: young.autoTestPCR,
-        autoTestPCRFiles: young.autoTestPCRFiles,
+        autoTestPCRFiles: young.files.autoTestPCRFiles,
       });
     }
   }, [young]);

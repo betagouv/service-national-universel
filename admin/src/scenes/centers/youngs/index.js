@@ -14,6 +14,7 @@ import PencilAlt from "../../../assets/icons/PencilAlt";
 import ShieldCheck from "../../../assets/icons/ShieldCheck";
 import Template from "../../../assets/icons/Template.js";
 import SelectAction from "../../../components/SelectAction";
+import WithTooltip from "../../../components/WithTooltip";
 import api from "../../../services/api";
 import {
   canSearchInElasticSearch,
@@ -73,7 +74,7 @@ export default function CenterYoungIndex() {
     setLoading(false);
   };
 
-  const exportData = async () => {
+  const esYoungBySession = async () => {
     let body = {
       query: {
         bool: {
@@ -250,6 +251,11 @@ export default function CenterYoungIndex() {
     }
 
     const data = await getAllResults(`sessionphase1young/${filter.SESSION}`, body);
+    return data;
+  };
+
+  const exportData = async () => {
+    const data = await esYoungBySession();
     const result = await transformData({ data, centerId: id });
     const csv = await toArrayOfArray(result);
     await toXLSX(`volontaires_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`, csv);
@@ -257,17 +263,68 @@ export default function CenterYoungIndex() {
 
   const exportDataTransport = async () => {
     try {
-      const { ok, data, code } = await api.post(`/session-phase1/${sessionId}/transport-data`);
-      if (!ok) {
-        toastr.error("Erreur !", translate(code));
+      let result = {
+        noMeetingPoint: {
+          youngs: [],
+          meetingPoint: [],
+        },
+      };
+      const youngs = await esYoungBySession(filter);
+
+      let resultMeetingPoints = await api.get(`/meeting-point/center/${id}`);
+      const meetingPoints = resultMeetingPoints ? resultMeetingPoints.data : [];
+
+      for (const young of youngs) {
+        const tempYoung = {
+          _id: young._id,
+          cohort: young.cohort,
+          firstName: young.firstName,
+          lastName: young.lastName,
+          email: young.email,
+          phone: young.phone,
+          address: young.address,
+          zip: young.zip,
+          city: young.city,
+          department: young.department,
+          region: young.region,
+          birthdateAt: young.birthdateAt,
+          gender: young.gender,
+          parent1FirstName: young.parent1FirstName,
+          parent1LastName: young.parent1LastName,
+          parent1Email: young.parent1Email,
+          parent1Phone: young.parent1Phone,
+          parent1Status: young.parent1Status,
+          parent2FirstName: young.parent2FirstName,
+          parent2LastName: young.parent2LastName,
+          parent2Email: young.parent2Email,
+          parent2Phone: young.parent2Phone,
+          parent2Status: young.parent2Status,
+          statusPhase1: young.statusPhase1,
+          meetingPointId: young.meetingPointId,
+        };
+        if (young.deplacementPhase1Autonomous === "true") {
+          result.noMeetingPoint.youngs.push(tempYoung);
+        } else {
+          const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
+          if (youngMeetingPoint) {
+            if (!result[youngMeetingPoint.busExcelId]) {
+              result[youngMeetingPoint.busExcelId] = {};
+              result[youngMeetingPoint.busExcelId]["youngs"] = [];
+              result[youngMeetingPoint.busExcelId]["meetingPoint"] = [];
+            }
+            if (!result[youngMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
+              result[youngMeetingPoint.busExcelId]["meetingPoint"].push(youngMeetingPoint);
+            }
+            result[youngMeetingPoint.busExcelId]["youngs"].push(tempYoung);
+          }
+        }
       }
       // Transform data into array of objects before excel converts
-      const formatedRep = Object.keys(data).map((key) => {
+      const formatedRep = Object.keys(result).map((key) => {
         return {
           name: key != "noMeetingPoint" ? key : "Autonome",
-          data: data[key].youngs.map((young) => {
-            const meetingPoint = young.meetingPointId && data[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
-
+          data: result[key].youngs.map((young) => {
+            const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
             return {
               _id: young._id,
               Cohorte: young.cohort,
@@ -301,14 +358,12 @@ export default function CenterYoungIndex() {
           }),
         };
       });
-
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
       const fileExtension = ".xlsx";
-
       const wb = XLSX.utils.book_new();
       formatedRep.forEach((sheet) => {
         let ws = XLSX.utils.json_to_sheet(sheet.data);
-        XLSX.utils.book_append_sheet(wb, ws, sheet.name);
+        XLSX.utils.book_append_sheet(wb, ws, sheet.name.substring(0, 30));
       });
       const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
       const resultData = new Blob([excelBuffer], { type: fileType });
@@ -550,7 +605,7 @@ const transformData = async ({ data, centerId }) => {
       "Département représentant légal 2": data.parent2Department,
       "Région représentant légal 2": data.parent2Region,
       "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-      Statut: translate(data.status),
+      "Statut général": translate(data.status),
       "Statut Phase 1": translatePhase1(data.statusPhase1),
       "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
       "Message de desistement": data.withdrawnMessage,

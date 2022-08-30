@@ -11,6 +11,21 @@ const { createApplication, getApplicationByIdHelper } = require("./helpers/appli
 const { getYoungByIdHelper, createYoungHelper } = require("./helpers/young");
 const { expectContractToEqual, getContractByIdHelper, createContractHelper } = require("./helpers/contract");
 
+// We mock node-fetch for PDF generation.
+jest.mock("node-fetch", () =>
+  jest.fn(() =>
+    Promise.resolve({
+      headers: {
+        get: () => "",
+      },
+      body: {
+        pipe: (res) => res.status(200).send({}),
+        on: () => "",
+      },
+    }),
+  ),
+);
+
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),

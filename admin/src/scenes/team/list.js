@@ -20,6 +20,7 @@ import Panel from "./panel";
 import Eye from "../../assets/icons/Eye";
 import Pencil from "../../assets/icons/Pencil";
 import Trash from "../../assets/icons/Trash";
+import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -276,6 +277,7 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
   const onClickDelete = () => {
     setModal({
@@ -286,13 +288,18 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
     });
   };
 
+  const onReferentDeleted = () => {
+    setModalReferentDeleted({
+      isOpen: true,
+    });
+  };
+
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${hit._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce profil a été supprimé.");
-      return history.go(0);
+      return onReferentDeleted();
     } catch (e) {
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
     }
@@ -329,6 +336,7 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
+      <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.go(0)} />
     </>
   );
 };

@@ -3,14 +3,13 @@ const router = express.Router();
 const passport = require("passport");
 const crypto = require("crypto");
 const { canCreateOrUpdateContract, canViewContract, ROLES } = require("snu-lib/roles");
-const renderFromHtml = require("../htmlToPdf");
 const { capture } = require("../sentry");
 const ContractObject = require("../models/contract");
 const YoungObject = require("../models/young");
 const ApplicationObject = require("../models/application");
 const ReferentObject = require("../models/referent");
 const StructureObject = require("../models/structure");
-const { ERRORS, isYoung, isReferent } = require("../utils");
+const { ERRORS, isYoung, isReferent, timeout } = require("../utils");
 const { sendTemplate } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
@@ -21,6 +20,8 @@ const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
 const Joi = require("joi");
 const patches = require("./patches");
+const fetch = require("node-fetch");
+const config = require("../config");
 
 async function createContract(data, fromUser) {
   const { sendMessage } = data;
@@ -103,7 +104,7 @@ async function updateContract(id, data, fromUser) {
 }
 
 async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
-  const departmentReferentPhase2 = await ReferentObject.findOne({
+  const departmentReferentPhase2 = await ReferentObject.find({
     department: contract.youngDepartment,
     subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
   });
@@ -112,8 +113,10 @@ async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
     email: contract.projectManagerEmail,
     name: `${contract.projectManagerFirstName} ${contract.projectManagerLastName}`,
     token: contract.projectManagerToken,
-    cc: departmentReferentPhase2 ? departmentReferentPhase2.email : null,
-    ccName: departmentReferentPhase2 ? `${departmentReferentPhase2.firstName} ${departmentReferentPhase2.lastName}` : null,
+    cc: departmentReferentPhase2.map((referent) => ({
+      name: `${referent.firstName} ${referent.lastName}`,
+      email: referent.email,
+    })),
     isValidateAgainMail,
   });
 }
@@ -170,8 +173,8 @@ async function sendContractEmail(contract, options) {
     cta: `${APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
   };
   const emailTo = [{ name: options.name, email: options.email }];
-  if (options.cc) {
-    cc = [{ name: options.ccName, email: options.cc }];
+  if (options?.cc?.length) {
+    cc = options.cc;
   }
   await sendTemplate(template, {
     emailTo,
@@ -393,6 +396,7 @@ router.post("/token/:token", async (req, res) => {
   }
 });
 
+const TIMEOUT_PDF_SERVICE = 10000;
 router.post("/:id/download", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: idError, value: id } = validateId(req.params.id);
@@ -414,11 +418,33 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
     const newhtml = await contractTemplate.render(contract);
     if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const buffer = await renderFromHtml(newhtml, { format: "A4", margin: 0 });
-    res.contentType("application/pdf");
-    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-    res.set("Cache-Control", "public, max-age=1");
-    res.send(buffer);
+    const getPDF = async () =>
+      await fetch(config.API_PDF_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+        body: JSON.stringify({ html: newhtml, options: { format: "A4", margin: 0 } }),
+      }).then((response) => {
+        // ! On a retravaillé pour faire passer les tests
+        if (response.status && response.status !== 200) throw new Error("Error with PDF service");
+        res.set({
+          "content-length": response.headers.get("content-length"),
+          "content-disposition": `inline; filename="test.pdf"`,
+          "content-type": "application/pdf",
+          "cache-control": "public, max-age=1",
+        });
+        response.body.pipe(res);
+        if (res.statusCode !== 200) throw new Error("Error with PDF service");
+        response.body.on("error", (e) => {
+          capture(e);
+          res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+        });
+      });
+    try {
+      await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
+    } catch (e) {
+      res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
+      capture(e);
+    }
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

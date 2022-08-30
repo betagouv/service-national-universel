@@ -14,15 +14,14 @@ if (environment === "staging") {
 }
 if (environment === "production") {
   snuApiUrl = "https://api.snu.gouv.fr";
-  supportApiUrl = "https://support-snu-api.cleverapps.io";
+  supportApiUrl = "https://api-support.snu.gouv.fr";
   adminURL = "https://admin.snu.gouv.fr";
   appURL = "https://moncompte.snu.gouv.fr";
-  supportURL = "https://support-snu-app.cleverapps.io";
+  supportURL = "https://admin-support.snu.gouv.fr";
   baseDeConnaissanceURL = "https://support.snu.gouv.fr";
 }
 
 const S3PREFIX = "";
-const SENTRY_URL = "https://415a2c2d9246422fa05cd5e96dd39c23@o348403.ingest.sentry.io/5557988";
 
 let franceConnectUrl = "https://fcp.integ01.dev-franceconnect.fr/api/v1";
 
@@ -30,4 +29,4 @@ if (environment === "production") {
   franceConnectUrl = "https://app.francecon0nect.gouv.fr/api/v1";
 }
 
-export { snuApiUrl, supportApiUrl, S3PREFIX, SENTRY_URL, environment, franceConnectUrl, adminURL, appURL, supportURL, baseDeConnaissanceURL };
+export { snuApiUrl, supportApiUrl, S3PREFIX, environment, franceConnectUrl, adminURL, appURL, supportURL, baseDeConnaissanceURL };

@@ -11,7 +11,7 @@ const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const { ERRORS, updatePlacesSessionPhase1, updatePlacesBus, getSignedUrl, getBaseUrl, sanitizeAll, isYoung, isReferent, YOUNG_STATUS } = require("../utils");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { SENDINBLUE_TEMPLATES, MINISTRES, COHESION_STAY_LIMIT_DATE } = require("snu-lib/constants");
 
 const {
   canCreateOrUpdateSessionPhase1,
@@ -28,6 +28,29 @@ const { validateSessionPhase1, validateId } = require("../utils/validator");
 const renderFromHtml = require("../htmlToPdf");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
+const { COHESION_STAY_END } = require("snu-lib");
+
+const getCohesionCenterLocation = (cohesionCenter) => {
+  let t = "";
+  if (cohesionCenter.city) {
+    t = `à ${cohesionCenter.city}`;
+    if (cohesionCenter.zip) {
+      t += `, ${cohesionCenter.zip}`;
+    }
+  }
+  return t;
+};
+
+const getMinistres = (date) => {
+  if (!date) return;
+  for (const item of MINISTRES) {
+    if (date < new Date(item.date_end)) return item;
+  }
+};
+
+const destinataireLabel = ({ firstName, lastName }, ministres) => {
+  return `félicite${ministres.length > 1 ? "nt" : ""} <strong>${firstName} ${lastName}</strong>`;
+};
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -46,7 +69,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
 router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const session = await SessionPhase1Model.findById(id);
@@ -70,7 +93,7 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
 
 router.get("/:id", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const session = await SessionPhase1Model.findById(id);
@@ -122,36 +145,31 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const { error, value: id } = Joi.string().required().validate(req.params.id);
+
+  const { error, value: id } = validateId(req.params.id);
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+  const { errorBody } = Joi.object({
+    options: Joi.object().allow(null, {}),
+  }).validate({ ...req.body }, { stripUnknown: true });
+  if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
   const session = await SessionPhase1Model.findById(id);
   if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
-  if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
+    if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
-    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-  }
+    if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
   const body = {
-    sessionPhase1Id: session._id,
-    statusPhase1: "DONE",
+      sessionPhase1Id: session._id,
+      statusPhase1: "DONE",
   };
 
   const youngs = await YoungModel.find(body);
-
-  const getLocationCohesionCenter = (cohesionCenter) => {
-    let t = "";
-    if (cohesionCenter.city) {
-      t = `à ${cohesionCenter.city}`;
-      if (cohesionCenter.zip) {
-        t += `, ${cohesionCenter.zip}`;
-      }
-    }
-    return t;
-  };
 
   let html = `<!DOCTYPE html>
   <html lang="en">
@@ -164,43 +182,41 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     <body style="margin: 0;">
       {{BODY}}
     </body>
-  </html>`;
+</html>`;
 
-  const subHtml = `<div style="position: relative; margin: 0;min-height:100vh;width:100%;max-height:100vh;">
-  <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" style="min-height:100vh;width:100%;" />
-  <div class="container">
-    <div class="text-center l4">
-      <p>${
-        ["Juin 2022", "Juillet 2022"].includes(session.cohort) ? "félicite" : "félicitent"
-      } <strong>{{FIRST_NAME}} {{LAST_NAME}}</strong>, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
-      <p>pour la réalisation de son <strong>séjour de cohésion</strong> au centre de :</p>
-      <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
-      <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
-      <br />
-      <p class="text-date">Fait le {{DATE}}</p>
-    </div>
-  </div>
-</div>`;
+  const subHtml = `
+  <div style="position: relative; margin: 0;min-height:100vh;width:100%;max-height:100vh;">
+    <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="bg" />
+      <div class="container">
+        <div class="text-center l4">
+          <p>{{TO}}, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
+          <p>pour la réalisation de son <strong>séjour de cohésion</strong>, {{COHESION_DATE}}, au centre de :</p>
+          <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
+          <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
+          <br />
+          <p class="text-date">Fait le {{DATE}}</p>
+        </div>
+      </div>
+    </div>`;
 
-  let template = getSignedUrl("certificates/certificateTemplate.png");
-  if (session.cohort === "2019") template = getSignedUrl("certificates/certificateTemplate-2019.png");
-  if (["2020", "2021", "Février 2022"].includes(session.cohort)) template = getSignedUrl("certificates/certificateTemplate.png");
-  if (["Juin 2022", "Juillet 2022"].includes(session.cohort)) template = getSignedUrl("certificates/certificateTemplate_2022.png");
-
-  const d = new Date();
+  const d = COHESION_STAY_END[youngs[0].cohort];
+  const ministresData = getMinistres(d);
+  const template = ministresData.template;
+  const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   const data = [];
-  for (const young of youngs) {
+    for (const young of youngs) {
     data.push(
       subHtml
-        .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
-        .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
-        .replace(/{{COHORT}}/g, sanitizeAll(session.cohort))
+        .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
+        .replace(/{{COHORT}}/g, sanitizeAll(young.cohort))
+        .replace(/{{COHESION_DATE}}/g, sanitizeAll(COHESION_STAY_LIMIT_DATE[young.cohort]?.toLowerCase()))
         .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
-        .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(getLocationCohesionCenter(cohesionCenter)))
-        .replace(/{{GENERAL_BG}}/g, sanitizeAll(template))
+        .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
+        .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+        .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
         .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))),
     );
-  }
+    }
 
   const newhtml = html.replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl())).replace(/{{BODY}}/g, data.join(""));
 
@@ -214,7 +230,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const sessionPhase1 = await SessionPhase1Model.findById(id);
@@ -398,83 +414,6 @@ router.post("/check-token/:token", async (req, res) => {
     } else {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/:sessionId/transport-data", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      sessionId: Joi.string().required(),
-    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
-
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const sessionPhase1 = await SessionPhase1Model.findById(value.sessionId);
-    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    let result = {
-      noMeetingPoint: {
-        youngs: [],
-        meetingPoint: [],
-      },
-    };
-    const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
-    const meetingPoints = await MeetingPointObject.find({ centerId: sessionPhase1.cohesionCenterId });
-
-    for (const young of youngs) {
-      const tempYoung = {
-        _id: young._id,
-        cohort: young.cohort,
-        firstName: young.firstName,
-        lastName: young.lastName,
-        email: young.email,
-        phone: young.phone,
-        address: young.address,
-        zip: young.zip,
-        city: young.city,
-        department: young.department,
-        region: young.region,
-        birthdateAt: young.birthdateAt,
-        gender: young.gender,
-        parent1FirstName: young.parent1FirstName,
-        parent1LastName: young.parent1LastName,
-        parent1Email: young.parent1Email,
-        parent1Phone: young.parent1Phone,
-        parent1Status: young.parent1Status,
-        parent2FirstName: young.parent2FirstName,
-        parent2LastName: young.parent2LastName,
-        parent2Email: young.parent2Email,
-        parent2Phone: young.parent2Phone,
-        parent2Status: young.parent2Status,
-        statusPhase1: young.statusPhase1,
-        meetingPointId: young.meetingPointId,
-      };
-
-      if (young.deplacementPhase1Autonomous === "true") {
-        result.noMeetingPoint.youngs.push(tempYoung);
-      } else {
-        const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
-
-        if (youngMeetingPoint) {
-          if (!result[youngMeetingPoint.busExcelId]) {
-            result[youngMeetingPoint.busExcelId] = {};
-            result[youngMeetingPoint.busExcelId]["youngs"] = [];
-            result[youngMeetingPoint.busExcelId]["meetingPoint"] = [];
-          }
-
-          if (!result[youngMeetingPoint.busExcelId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
-            result[youngMeetingPoint.busExcelId]["meetingPoint"].push(youngMeetingPoint);
-          }
-
-          result[youngMeetingPoint.busExcelId]["youngs"].push(tempYoung);
-        }
-      }
-    }
-
-    res.status(200).send({ ok: true, data: result });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

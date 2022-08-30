@@ -31,12 +31,16 @@ import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../compo
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
+import ModalPJ from "../../volontaires/components/ModalPJ";
+import { HiOutlineAdjustments, HiPlus } from "react-icons/hi";
+import { MdOutlineAttachFile } from "react-icons/md";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
-export default function Youngs({ mission, applications, updateApplications }) {
-  const [missionTemp, setMissionTemp] = useState(mission);
+export default function Youngs({ mission, applications, updateMission }) {
   const [young, setYoung] = useState();
+
+  const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
 
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
@@ -54,20 +58,12 @@ export default function Youngs({ mission, applications, updateApplications }) {
   });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
-  const updateMission = async () => {
-    const { data, ok } = await api.get(`/mission/${mission._id}`);
-    if (ok) {
-      setMissionTemp(data);
-      updateApplications();
-    }
-  };
-
   if (!applications) return <Loader />;
 
   return (
     <div>
       <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-        <MissionView mission={missionTemp} tab="youngs">
+        <MissionView mission={mission} tab="youngs">
           <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ float: "right", marginBottom: "1.5rem", marginRight: "1.5rem" }}>
               <div style={{ display: "flex" }}>
@@ -117,6 +113,7 @@ export default function Youngs({ mission, applications, updateApplications }) {
                         "Candidature créée lé": formatLongDateUTC(data.createdAt),
                         "Candidature mise à jour le": formatLongDateUTC(data.updatedAt),
                         "Statut de la candidature": translate(data.status),
+                        "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option]?.length, 0) !== 0}`),
                       };
                     });
                   }}
@@ -168,14 +165,24 @@ export default function Youngs({ mission, applications, updateApplications }) {
                       <Table>
                         <thead>
                           <tr>
-                            <th width="50%">Volontaire</th>
-                            <th>Date</th>
-                            <th width="20%">Statut pour la mission</th>
+                            <th className="w-5/12 ">Volontaire</th>
+                            <th className="w-3/12 ">Date</th>
+                            <th className="w-3/12 ">Statut pour la mission </th>
+                            <th className="w-1/12">
+                              <MdOutlineAttachFile className="w-full" />
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
                           {data.map((hit) => (
-                            <Hit key={hit._id} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} onChangeApplication={updateMission} />
+                            <Hit
+                              key={hit._id}
+                              hit={hit}
+                              onClick={() => handleClick(hit)}
+                              selected={young?._id === hit._id}
+                              onChangeApplication={updateMission}
+                              optionsType={optionsType}
+                            />
                           ))}
                         </tbody>
                       </Table>
@@ -197,11 +204,13 @@ export default function Youngs({ mission, applications, updateApplications }) {
   );
 }
 
-const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
+const Hit = ({ hit, onClick, onChangeApplication, selected, optionsType }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalDurationOpen, setModalDurationOpen] = useState(false);
   const user = useSelector((state) => state.Auth.user);
+  const [openModalPJ, setOpenModalPJ] = useState(false);
   const history = useHistory();
+
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
       <td>
@@ -295,38 +304,42 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
             />
           </React.Fragment>
         )}
-        {hit.status === "WAITING_VERIFICATION" && (
-          <React.Fragment>
-            <CopyLink
-              onClick={async () => {
-                setModal({
-                  isOpen: true,
-                  title: "Envoyer un rappel",
-                  message: "Souhaitez-vous envoyer un mail au volontaire pour lui rappeler de remplir les documents pour la préparation militaire ?",
-                  onConfirm: async () => {
-                    try {
-                      const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER_RENOTIFY}`);
-                      if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                      toastr.success("L'email a bien été envoyé");
-                    } catch (e) {
-                      toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                    }
-                  },
-                });
-              }}>
-              ✉️ Envoyer un rappel au volontaire
-            </CopyLink>
-            <ModalConfirm
-              isOpen={modal?.isOpen}
-              title={modal?.title}
-              message={modal?.message}
-              onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-              onConfirm={() => {
-                modal?.onConfirm();
-                setModal({ isOpen: false, onConfirm: null });
+      </td>
+      <td>
+        {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit?.status) && (
+          <>
+            <div className="flex justify-center">
+              <div className="bg-blue-600  rounded-full text-white p-2 " onClick={() => setOpenModalPJ(true)}>
+                {optionsType.reduce((sum, option) => sum + hit[option]?.length, 0) !== 0 ? <HiOutlineAdjustments /> : <HiPlus />}
+              </div>
+            </div>
+            <ModalPJ
+              isOpen={openModalPJ}
+              application={hit}
+              young={hit}
+              optionsType={optionsType}
+              onCancel={() => {
+                setOpenModalPJ(false);
+                onChangeApplication();
+              }}
+              onSend={async (type, multipleDocument) => {
+                try {
+                  const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
+                    type,
+                    multipleDocument,
+                  });
+                  if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                  toastr.success("L'email a bien été envoyé");
+                } catch (e) {
+                  toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                }
+              }}
+              onSave={() => {
+                setOpenModalPJ(false);
+                onChangeApplication();
               }}
             />
-          </React.Fragment>
+          </>
         )}
       </td>
     </tr>

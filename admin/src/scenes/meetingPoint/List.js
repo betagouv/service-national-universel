@@ -298,7 +298,7 @@ const Hit = ({ hit, user }) => {
       ) : (
         <td>chargement...</td>
       )}
-      {user.role === ROLES.ADMIN ? (
+      {[ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) ? (
         <td className="rounded-r-lg">
           <div className="flex justify-center items-center">
             <Link to={`/point-de-rassemblement/${hit._id}`}>

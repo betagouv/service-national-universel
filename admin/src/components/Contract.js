@@ -17,6 +17,7 @@ import DownloadContractButton from "./buttons/DownloadContractButton";
 import LoadingButton from "./buttons/LoadingButton";
 import ModalConfirm from "./modals/ModalConfirm";
 import HistoricComponent from "./views/Historic";
+import { capture } from "../sentry";
 
 export default function Contract({ young, admin }) {
   const history = useHistory();
@@ -38,33 +39,45 @@ export default function Contract({ young, admin }) {
     saveButton: false,
     submitButton: false,
   });
+
   useEffect(() => {
     const getApplication = async () => {
       if (!young) return;
       // todo : why not just
       // let { ok, data, code } = await api.get(`/application/${applicationId}`);
       let { ok, data, code } = await api.get(`/young/${young._id}/application`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       const currentApplication = data.find((e) => e._id === applicationId);
 
       if (currentApplication.contractId) {
         ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
-        if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+        if (!ok) {
+          capture(code);
+          return toastr.error("Oups, une erreur est survenue", code);
+        }
         setContract(data);
       }
       setApplication(currentApplication);
     };
     getApplication();
   }, []);
+
   useEffect(() => {
     const getMission = async () => {
       if (!application) return;
       const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       return setMission(data);
     };
     getMission();
   }, [application]);
+
   useEffect(() => {
     const getTutor = async () => {
       try {
@@ -81,6 +94,7 @@ export default function Contract({ young, admin }) {
     };
     getTutor();
   }, [application]);
+
   useEffect(() => {
     const getManagerDepartment = async () => {
       try {
@@ -98,11 +112,15 @@ export default function Contract({ young, admin }) {
     };
     getManagerDepartment();
   }, [young]);
+
   useEffect(() => {
     const getStructure = async () => {
       if (!application) return;
       const { ok, data, code } = await api.get(`/structure/${application.structureId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       return setStructure(data);
     };
     getStructure();
@@ -265,7 +283,7 @@ export default function Contract({ young, admin }) {
               firstName={contract?.structureManagerFirstName}
               validationDate={contract?.structureManagerValidationDate}
             />
-            {!isYoungAdult ? (
+            {contract?.isYoungAdult === "false" || isYoungAdult === "false" ? (
               <>
                 <ContractStatusBadge
                   title="Représentant légal 1"
@@ -923,7 +941,7 @@ function ContractStatusbadgeItem({ contract, status, token, target }) {
 
   if (contract?.invitationSent !== "true") return <Badge text="Pas encore envoyé" />;
   else if (status === "VALIDATED") return <Badge text="Validé" color={APPLICATION_STATUS_COLORS.VALIDATED} />;
-  else if (user.role !== ROLES.ADMIN) {
+  else if (![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
     return (
       <>
         <Badge className="pb-2" text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />

@@ -5,12 +5,19 @@
 import * as Sentry from "@sentry/nextjs";
 
 const SENTRY_DSN = process.env.SENTRY_DSN;
+const SENTRY_TRACING_SAMPLE_RATE = process.env.SENTRY_TRACING_SAMPLE_RATE;
 
 Sentry.init({
+  enabled: Boolean(SENTRY_DSN),
   dsn: SENTRY_DSN,
   // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: 1.0,
-  environment: "support",
+  tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE || 0.01),
+  environment: "kb",
+  deploy: {
+    env: "kb",
+  },
+  validate: true,
+
   // ...
   // Note: if you want to override the automatic release value, do not set a
   // `release` value here - use the environment variable `SENTRY_RELEASE`, so

@@ -1,9 +1,9 @@
 require("dotenv").config({ path: "./.env-staging" });
+const { initSentry } = require("./sentry");
 
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
-const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const logger = require("morgan");
@@ -21,11 +21,12 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 const app = express();
+const registerSentryErrorHandler = initSentry(app);
 app.use(helmet());
 
-if (ENVIRONMENT === "development") {
-  app.use(logger("dev"));
-}
+// if (ENVIRONMENT === "development") {
+app.use(logger("dev"));
+// }
 
 // eslint-disable-next-line no-unused-vars
 function handleError(err, req, res, next) {
@@ -41,20 +42,23 @@ function handleError(err, req, res, next) {
 }
 
 const origin = [APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, "https://inscription.snu.gouv.fr"];
-app.use(cors({ credentials: true, origin }));
-app.use(bodyParser.json());
-app.use(bodyParser.text({ type: "application/x-ndjson" }));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+  cors({
+    credentials: true,
+    origin,
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Referer", "User-Agent", "sentry-trace", "baggage"],
+  }),
+);
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.text({ limit: "50mb", type: "application/x-ndjson" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 require("./crons");
 app.use(cookieParser());
 
 app.use(express.static(__dirname + "/../public"));
 
-app.use(session({ secret: "secret", resave: false, saveUninitialized: true }));
-
 app.use(passport.initialize());
-app.use(passport.session({}));
 
 app.use("/es", require("./controllers/es"));
 app.use("/mission", require("./controllers/mission"));
@@ -77,12 +81,9 @@ app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
 app.use("/zammood", require("./controllers/zammood"));
 app.use("/signin", require("./controllers/signin"));
-app.use("/educonnect", require("./controllers/educonnect"));
 
 //services
 app.use("/jeveuxaider", require("./services/jeveuxaider"));
-
-app.use(handleError);
 
 app.get("/", async (req, res) => {
   // ! Memory usage
@@ -100,6 +101,9 @@ app.get("/", async (req, res) => {
   const d = new Date();
   res.status(200).send("SNU " + d.toLocaleString());
 });
+
+registerSentryErrorHandler();
+app.use(handleError);
 
 require("./passport")();
 

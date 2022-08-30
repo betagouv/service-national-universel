@@ -30,11 +30,6 @@ class Auth {
         rulesYoung: Joi.string().trim().required().valid("true"),
         acceptCGU: Joi.string().trim().required().valid("true"),
         frenchNationality: Joi.string().trim().required().valid("true"),
-        INEHash: Joi.string().trim().length(32).allow(""),
-        codeUAI: Joi.string().trim().allow(""),
-        niveau: Joi.string().trim().allow(""),
-        urlLogOut: Joi.string().trim().allow(""),
-        affiliation: Joi.string().trim().allow(""),
       }).validate(req.body);
 
       if (error) {
@@ -43,33 +38,11 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const {
-        email,
-        firstName,
-        lastName,
-        password,
-        birthdateAt,
-        birthCountry,
-        birthCity,
-        birthCityZip,
-        frenchNationality,
-        acceptCGU,
-        rulesYoung,
-        INEHash,
-        codeUAI,
-        niveau,
-        urlLogOut,
-        affiliation,
-      } = value;
+      const { email, firstName, lastName, password, birthdateAt, birthCountry, birthCity, birthCityZip, frenchNationality, acceptCGU, rulesYoung } = value;
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-
-      if (INEHash) {
-        countDocuments = await this.model.countDocuments({ INEHash });
-        if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.EDUCONNECT_USER_ALREADY_REGISTERED });
-      }
 
       const user = await this.model.create({
         email,
@@ -83,11 +56,6 @@ class Auth {
         frenchNationality,
         acceptCGU,
         rulesYoung,
-        INEHash,
-        codeUAI,
-        niveau,
-        urlLogOut,
-        affiliation,
       });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
@@ -110,15 +78,24 @@ class Auth {
 
     const { password, email } = value;
     try {
+      const now = new Date();
       const user = await this.model.findOne({ email });
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
-      if (user.loginAttempts > 15) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
+      if (user.loginAttempts > 12) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
+      if (user.nextLoginAttemptIn > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
 
       const match = config.ENVIRONMENT === "development" || (await user.comparePassword(password));
       if (!match) {
         const loginAttempts = (user.loginAttempts || 0) + 1;
-        user.set({ loginAttempts });
+
+        let date = now;
+        if (loginAttempts > 5) {
+          date = new Date(now.getTime() + 60 * 1000);
+        }
+
+        user.set({ loginAttempts, nextLoginAttemptIn: date });
         await user.save();
+        if (date > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: date } });
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 

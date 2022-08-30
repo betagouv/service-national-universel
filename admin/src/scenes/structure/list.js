@@ -108,7 +108,7 @@ export default function List() {
                         Facebook: data.facebook,
                         Twitter: data.twitter,
                         Instagram: data.instagram,
-                        Statut: translate(data.status),
+                        "Statut général": translate(data.status),
                         "Taille d'équipe": data.team?.length,
                         "Membre 1 - Prénom": data.team[0]?.firstName,
                         "Membre 1 - Nom": data.team[0]?.lastName,

@@ -13,6 +13,7 @@ import Badge from "../../components/Badge";
 import { setYoung } from "../../redux/auth/actions";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import { capture } from "../../sentry";
 
 export default function changeSejour() {
   const young = useSelector((state) => state.Auth.young);
@@ -57,6 +58,7 @@ export default function changeSejour() {
         setIsElegible(!!data);
         setSejourGoal(sejourGoal);
       } catch (e) {
+        capture(e);
         toastr.error("Oups, une erreur est survenue", translate(e.code));
       }
       setLoading(false);
@@ -84,7 +86,10 @@ export default function changeSejour() {
         cohortDetailedChangeReason: messageTextArea,
         cohort: newSejour,
       });
-      if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", translate(code));
+      }
       toastr.success("Cohorte modifiée avec succés. Votre nouvelle cohorte se tiendra en " + newSejour);
       dispatch(setYoung(data));
       setmodalConfirmControlOk(false);

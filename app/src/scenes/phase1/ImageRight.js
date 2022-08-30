@@ -6,7 +6,7 @@ import { Button, Col, Modal, Row } from "reactstrap";
 import styled from "styled-components";
 import CloseSvg from "../../assets/Close";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import DndFileInput from "../../components/dndFileInput";
+import DndFileInput from "../../components/dndFileInputV2";
 import { ModalContainer } from "../../components/modals/Modal";
 import { setYoung } from "../../redux/auth/actions";
 import api from "../../services/api";
@@ -20,7 +20,7 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
   const young = useSelector((state) => state.Auth.young);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [showFields, setShowFields] = useState(!young.imageRightFiles?.length || correction);
+  const [showFields, setShowFields] = useState(!young.files.imageRightFiles?.length || correction);
   const isPlural = young?.parent1Status && young?.parent2Status;
 
   const dispatch = useDispatch();
@@ -43,7 +43,7 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                 </p>
               </div>
             </section>
-            {young.imageRightFiles && young.imageRightFiles.length && !correction ? (
+            {young.files.imageRightFiles && young.files.imageRightFiles.length && !correction ? (
               <>
                 <SuccessMessage>
                   <Logo>
@@ -209,18 +209,9 @@ export default function ImageRight({ isOpen, onCancel, correction }) {
                           <DndFileInput
                             placeholder="le formulaire"
                             errorMessage="Vous devez téléverser le formulaire"
-                            value={values.imageRightFiles}
                             name="imageRightFiles"
                             className="lg:w-[50%] flex flex-col justify-center items-center lg:mt-0"
-                            onChange={async (e) => {
-                              setUploading(true);
-                              const res = await api.uploadFile("/young/file/imageRightFiles", e.target.files);
-                              if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                              // We update it instant ( because the bucket is updated instant )
-                              toastr.success("Fichier téléversé");
-                              handleChange({ target: { value: res.data, name: "imageRightFiles" } });
-                              setUploading(false);
-                            }}
+                            path={`/young/${young._id}/documents/imageRightFiles`}
                           />
 
                           {/* <div>OU</div>

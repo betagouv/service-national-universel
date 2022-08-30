@@ -4,8 +4,9 @@ import { translate } from "../../utils";
 import Button from "./button";
 import { Field } from "formik";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
+import AddressInputV2 from "../../components/addressInputV2";
 
-export default function MobilityCard({ title, handleChange, values, errors, touched }) {
+export default function MobilityCard({ title, handleChange, values, errors, touched, validateField }) {
   return (
     <Container>
       <h2 className="mb-4 !text-sm tracking-wider text-gray-800 uppercase font-bold">{title}</h2>
@@ -26,31 +27,19 @@ export default function MobilityCard({ title, handleChange, values, errors, touc
             onChange={handleChange}
           />
           <ErrorMessage errors={errors} touched={touched} name="mobilityNearRelativeName" />
-          <Field placeholder="Adresse" className="form-control" name="mobilityNearRelativeAddress" value={values.mobilityNearRelativeAddress} onChange={handleChange} />
-          <ErrorMessage errors={errors} touched={touched} name="mobilityNearRelativeAddress" />
-          <Field
-            validate={(v) => {
-              if (!v) return requiredMessage;
-              if (!/^\d{5}$/.test(v)) return "Format incorrect";
+          <AddressInputV2
+            keys={{
+              city: "mobilityNearRelativeCity",
+              zip: "mobilityNearRelativeZip",
+              address: "mobilityNearRelativeAddress",
             }}
-            placeholder="Code postal"
-            className="form-control"
-            name="mobilityNearRelativeZip"
-            value={values.mobilityNearRelativeZip}
-            onChange={handleChange}
+            countryByDefault="France"
+            values={values}
+            handleChange={handleChange}
+            errors={errors}
+            touched={touched}
+            validateField={validateField}
           />
-          <ErrorMessage errors={errors} touched={touched} name="mobilityNearRelativeZip" />
-          <Field
-            validate={(v) => {
-              if (!v) return requiredMessage;
-            }}
-            placeholder="Ville"
-            className="form-control"
-            name="mobilityNearRelativeCity"
-            value={values.mobilityNearRelativeCity}
-            onChange={handleChange}
-          />
-          <ErrorMessage errors={errors} touched={touched} name="mobilityNearRelativeCity" />
         </>
       ) : null}
     </Container>
@@ -106,7 +95,6 @@ const Container = styled.div`
     margin-top: 0.5rem;
   }
 `;
-
 
 const ItemContainer = styled.div`
   border-top-width: 1px;

@@ -38,6 +38,9 @@ import {
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { MdOutlineOpenInNew } from "react-icons/md";
 import Badge from "../../components/Badge";
+import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
+import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
+import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Utilisateurs");
@@ -48,10 +51,13 @@ export default function Edit(props) {
   const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
   const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
+  const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const dispatch = useDispatch();
-  
+
   useEffect(() => {
     (async () => {
       try {
@@ -72,9 +78,7 @@ export default function Edit(props) {
         const structureResponse = await api.get("/structure");
         if (!structureResponse.ok) return setStructures(null);
         setStructures(structureResponse.data);
-        userResponse.data.structureId
-        ? setStructure(structureResponse.data.find(item => item._id == userResponse.data.structureId))
-        : null;
+        userResponse.data.structureId ? setStructure(structureResponse.data.find((item) => item._id == userResponse.data.structureId)) : null;
       } catch (e) {
         console.log(e);
         return toastr.error("Une erreur s'est produite lors du chargement de cet utilisateur");
@@ -159,14 +163,35 @@ export default function Edit(props) {
     });
   };
 
+  const onDeleteTutorLinked = (target) => {
+    setModalTutor({
+      isOpen: true,
+      value: target,
+      onConfirm: () => onConfirmDelete(target),
+    });
+  };
+
+  const onUniqueResponsible = (target) => {
+    setModalUniqueResponsable({
+      isOpen: true,
+      responsable: target,
+    });
+  };
+
+  const onReferentDeleted = () => {
+    setModalReferentDeleted({
+      isOpen: true,
+    });
+  };
+
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${user._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_OBJECT") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
+      if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(user);
+      if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(user);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce profil a été supprimé.");
-      return history.push(`/user`);
+      return onReferentDeleted();
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
@@ -387,6 +412,23 @@ export default function Edit(props) {
           }}
         />
       </div>
+      <ModalChangeTutor
+        isOpen={modalTutor?.isOpen}
+        title={modalTutor?.title}
+        message={modalTutor?.message}
+        tutor={modalTutor?.value}
+        onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modalTutor?.onConfirm();
+          setModalTutor({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalUniqueResponsable
+        isOpen={modalUniqueResponsable?.isOpen}
+        responsable={modalUniqueResponsable?.responsable}
+        onConfirm={() => setModalUniqueResponsable({ isOpen: false })}
+      />
+      <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.push("/user")} />
     </>
   );
 }
@@ -451,8 +493,8 @@ const Select = ({ title, name, values, onChange, disabled, options, allowEmpty =
 };
 
 const AutocompleteSelectStructure = ({ options, user, setStructure, onClick, disabled, loading }) => {
-  const optionsMap = options.map(e => ({ label: e.name, value: e.name, _id: e._id }));
-  const defaultStructure = optionsMap.find(item => item._id === user.structureId)
+  const optionsMap = options.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+  const defaultStructure = optionsMap.find((item) => item._id === user.structureId);
   return (
     <>
       <Row className="detail">

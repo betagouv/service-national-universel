@@ -14,6 +14,7 @@ import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import Badge from "../../../components/Badge";
 import Title from "../../../components/views/Title";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 
 export default function Wrapper({ mission, tab, children }) {
   const history = useHistory();
@@ -67,12 +68,21 @@ export default function Wrapper({ mission, tab, children }) {
               Détails
             </Tab>
             <Tab isActive={tab === "youngs"} onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
-              Volontaires
+              <div className="flex items-center flex-nowrap">
+                {mission.pendingApplications >= mission.placesLeft * 5 && mission.placesLeft > 0 && <ExclamationCircle className="text-red-600 mr-2" />}
+                <span>Candidatures</span>
+              </div>
             </Tab>
             {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
-              <Tab isActive={tab === "propose-mission"} onClick={() => history.push(`/mission/${mission._id}/propose-mission`)}>
-                Proposer cette mission
-              </Tab>
+              mission.visibility === "HIDDEN" || mission.pendingApplications >= mission.placesLeft * 5 || mission.placesLeft < 1 ? (
+                <Tab isActive={tab === "propose-mission"} disabled>
+                  Proposer cette mission
+                </Tab>
+              ) : (
+                <Tab isActive={tab === "propose-mission"} onClick={() => history.push(`/mission/${mission._id}/propose-mission`)}>
+                  Proposer cette mission
+                </Tab>
+              )
             ) : null}
             {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) ? (
               <Tab isActive={tab === "historique"} onClick={() => history.push(`/mission/${mission._id}/historique`)}>

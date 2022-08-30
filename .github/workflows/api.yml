@@ -4,11 +4,11 @@ env:
   ENVIRONMENT_NAME: snu-api
 
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-  SLACK_COLOR: '#3278BD'
-  SLACK_ICON_EMOJI: ':package:'
+  SLACK_COLOR: "#3278BD"
+  SLACK_ICON_EMOJI: ":package:"
   SLACK_USERNAME: Github
   MSG_MINIMAL: true
-  SLACK_FOOTER: ''
+  SLACK_FOOTER: ""
 
 name: Test & Deploy API
 
@@ -33,17 +33,17 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 16.x
-      
+
       - name: Start MongoDB 4.0
         uses: supercharge/mongodb-github-action@1.7.0
         with:
-          mongodb-version: '4.0'
+          mongodb-version: "4.0"
 
       - name: Add lib into current folder
         run: |
           cp -Rf ./lib ./api/snu-lib
           sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
-      
+
       - name: Install packages
         working-directory: ${{ env.SUBFOLDER_NAME }}
         run: npm install
@@ -58,7 +58,7 @@ jobs:
           workingDirectory: ${{ env.SUBFOLDER_NAME }}
           coverageCommand: npm run coverage
 
-  deloy:
+  deploy:
     needs: [test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest

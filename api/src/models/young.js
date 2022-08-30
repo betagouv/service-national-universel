@@ -8,6 +8,13 @@ const { ENVIRONMENT } = require("../config");
 
 const MODELNAME = "young";
 
+const File = new mongoose.Schema({
+  name: String,
+  uploadedAt: Date,
+  size: Number,
+  mimetype: String,
+});
+
 const Schema = new mongoose.Schema({
   sqlId: {
     type: String,
@@ -79,36 +86,6 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date de naissance du volontaire",
-    },
-  },
-  INEHash: {
-    type: String,
-    documentation: {
-      description: "Hash INE du jeune connecte via Educonnect",
-    },
-  },
-  codeUAI: {
-    type: String,
-    documentation: {
-      description: "UAI de(s) établissement(s) de rattachement administratif de l'élève (dans la plupart des cas, il sera monovalué)",
-    },
-  },
-  niveau: {
-    type: String,
-    documentation: {
-      description: "Code de la nomenclature BCN N MEF STAT 4Code de la nomenclature BCN N MEF STAT 4",
-    },
-  },
-  urlLogOut: {
-    type: String,
-    documentation: {
-      description: "Url de deconnexion Educonnect",
-    },
-  },
-  affiliation: {
-    type: String,
-    documentation: {
-      description: "Type d'utilisateur (1d, 2d, les 2)",
     },
   },
   cohort: {
@@ -321,6 +298,12 @@ const Schema = new mongoose.Schema({
     default: Date.now,
     documentation: {
       description: "Date de dernière connexion",
+    },
+  },
+  nextLoginAttemptIn: {
+    type: Date,
+    documentation: {
+      description: "Date pour autoriser la prochaine tentative de connexion",
     },
   },
   forgotPasswordResetToken: {
@@ -1434,6 +1417,20 @@ const Schema = new mongoose.Schema({
     enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
   },
 
+  files: {
+    cniFiles: [File],
+    highSkilledActivityProofFiles: [File],
+    dataProcessingConsentmentFiles: [File],
+    parentConsentmentFiles: [File],
+    imageRightFiles: [File],
+    autoTestPCRFiles: [File],
+    rulesFiles: [File],
+    militaryPreparationFilesIdentity: [File],
+    militaryPreparationFilesCensus: [File],
+    militaryPreparationFilesAuthorization: [File],
+    militaryPreparationFilesCertificate: [File],
+  },
+
   missionsInMail: {
     type: [
       {
@@ -1452,6 +1449,13 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "Le volontaire a accepté les conditions de la phase 1",
+    },
+  },
+
+  status_equivalence: {
+    type: String,
+    documentation: {
+      description: "Statut de la dernière demande d'équivalence phase 2",
     },
   },
 
@@ -1492,7 +1496,7 @@ Schema.methods.comparePassword = async function (p) {
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
-  // sendinblue.sync(doc, MODELNAME);
+  sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
   sendinblue.sync(doc, MODELNAME);
@@ -1510,6 +1514,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
+  this.updatedAt = Date.now();
   next();
 });
 
@@ -1521,9 +1526,40 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
-  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/phase3Token", "/loginAttempts"],
+  excludes: [
+    "/password",
+    "/lastLoginAt",
+    "/nextLoginAttemptIn",
+    "/forgotPasswordResetToken",
+    "/forgotPasswordResetExpires",
+    "/invitationToken",
+    "/invitationExpires",
+    "/phase3Token",
+    "/loginAttempts",
+    "/updatedAt",
+    "/statusPhase2UpdatedAt",
+    "/statusPhase3UpdatedAt",
+    "/statusPhase2ValidatedAt",
+    "/statusPhase3ValidatedAt",
+  ],
 });
-Schema.plugin(mongooseElastic(esClient, { ignore: ["historic"] }), MODELNAME);
+
+Schema.plugin(
+  mongooseElastic(esClient, {
+    ignore: [
+      "historic",
+      "missionsInMail",
+      "password",
+      "nextLoginAttemptIn",
+      "forgotPasswordResetToken",
+      "forgotPasswordResetExpires",
+      "invitationExpires",
+      "phase3Token",
+      "loginAttempts",
+    ],
+  }),
+  MODELNAME,
+);
 
 Schema.index({ sessionPhase1Id: 1 });
 Schema.index({ sessionPhase1Id: 1, status: 1 });
