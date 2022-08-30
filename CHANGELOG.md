@@ -1,3 +1,11 @@
+## [1.124.2](https://github.com/betagouv/service-national-universel/compare/v1.124.1...v1.124.2) (2022-08-30)
+
+
+### Bug Fixes
+
+* **admin:** Fix modal document head center ([d6d050f](https://github.com/betagouv/service-national-universel/commit/d6d050f795a1ab2ecb0d57dbb20775cc1965dad5))
+* **admin:** restore inscription panel ([784d01d](https://github.com/betagouv/service-national-universel/commit/784d01da5fa421755a81a991b833512e657ac75f))
+
 ## [1.124.1](https://github.com/betagouv/service-national-universel/compare/v1.124.0...v1.124.1) (2022-08-29)
 
 
