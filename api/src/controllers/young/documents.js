@@ -426,6 +426,10 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
       downloaded = await getFile(`app/young/${id}/${key}/${fileId}`);
     }
 
+    if (!downloaded) {
+      downloaded = await getFile(`app/young/${id}/${key}/${young.files[key].id(fileId).name}`);
+    }
+
     // Send to app
 
     const decryptedBuffer = decrypt(downloaded.Body);
