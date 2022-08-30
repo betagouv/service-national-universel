@@ -428,7 +428,7 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
       }
     } catch (e) {
       if (!downloaded) {
-        downloaded = await getFile(`app/young/${id}/${key}/${young.files[key].id(fileId).name}`);
+        downloaded = await getFile(`app/young/${id}/${key}/${fileId}`);
       }
     }
 
