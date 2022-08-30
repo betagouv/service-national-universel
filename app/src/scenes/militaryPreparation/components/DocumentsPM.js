@@ -128,7 +128,7 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
                 setModalDocument({
                   isOpen: true,
                   title: "Pièce d'identité",
-                  subTitle: "Déposez ici la copie d’une pièce d’identité en cours de validité (CNI, passeport).",
+                  subTitle: "Déposez ici la copie d’une pièce d’identité en cours de validité (CNI recto/verso, passeport) .",
                   name: "militaryPreparationFilesIdentity",
                 })
               }

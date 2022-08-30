@@ -6,7 +6,7 @@ import DndFileInput from "../../../components/dndFileInputV2";
 
 export default function MilitaryPreparation({ values }) {
   const files = [
-    { name: "militaryPreparationFilesIdentity", placeholder: "Pièce d’identité en cours de validité (CNI, passeport)" },
+    { name: "militaryPreparationFilesIdentity", placeholder: "Pièce d’identité en cours de validité (CNI recto/verso, passeport) " },
     { name: "militaryPreparationFilesCensus", placeholder: "Attestation de recensement" },
     { name: "militaryPreparationFilesAuthorization", placeholder: "Consentement à la participation à une préparation militaire" },
     { name: "militaryPreparationFilesCertificate", placeholder: "Certificat d’absence de contre-indication à la pratique sportive" },
