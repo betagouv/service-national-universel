@@ -10,10 +10,6 @@ import { Footer, ModalContainer } from "../../../components/modals/Modal";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
 
-function getFileName(file) {
-  return (file && file.name) || file;
-}
-
 export default function ModalDocument({ isOpen, onCancel, initialValues, young, title, nameFiles }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(false);
@@ -31,10 +27,10 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
   const onConfirm = async (file) => {
     setLoading(true);
     try {
-      const f = await api.get(`/young/${young._id}/documents/${nameFiles}/${file.name}`);
+      const f = await api.get(`/young/${young._id}/documents/${nameFiles}/${file._id}`);
       FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName);
     } catch (e) {
-      toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
+      toastr.error("Oups, une erreur est survenue pendant le téléchargement", e.toString());
     }
     setLoading(false);
   };
@@ -51,7 +47,7 @@ export default function ModalDocument({ isOpen, onCancel, initialValues, young, 
 
             <div className="text-lg mb-4">Telecharger le(s) document(s) : </div>
             <div className="flex flex-col gap-2 justify-start">
-              {initialValues.files[nameFiles].map((e, i) => (
+              {initialValues[nameFiles].map((e, i) => (
                 <div key={i} className=" flex items-center">
                   <LoadingButton className="mr-2" color="#EFF6FF" textColor="#5145cd" loading={loading && modal?.value === e} onClick={() => handleClick(e)}>
                     <Download color="#5145cd" className="mr-2" />
