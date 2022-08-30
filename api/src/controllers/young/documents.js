@@ -420,14 +420,16 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     // Download from s3
 
     let downloaded = null;
-    if (key.includes("militaryPreparationFiles")) {
-      downloaded = await getFile(`app/young/${id}/military-preparation/${key}/${fileId}`);
-    } else {
-      downloaded = await getFile(`app/young/${id}/${key}/${fileId}`);
-    }
-
-    if (!downloaded) {
-      downloaded = await getFile(`app/young/${id}/${key}/${young.files[key].id(fileId).name}`);
+    try {
+      if (key.includes("militaryPreparationFiles")) {
+        downloaded = await getFile(`app/young/${id}/military-preparation/${key}/${fileId}`);
+      } else {
+        downloaded = await getFile(`app/young/${id}/${key}/${fileId}`);
+      }
+    } catch (e) {
+      if (!downloaded) {
+        downloaded = await getFile(`app/young/${id}/${key}/${young.files[key].id(fileId).name}`);
+      }
     }
 
     // Send to app
