@@ -18,6 +18,10 @@ function validateString(string) {
   return Joi.string().validate(string, { stripUnknown: true });
 }
 
+function validateArray(array) {
+  return Joi.array().items(Joi.string().allow(null, "")).validate(array, { stripUnknown: true });
+}
+
 function validateMission(mission) {
   return Joi.object()
     .keys({
@@ -322,11 +326,11 @@ function validateYoung(young, user) {
     statusPhase1MotifDetail: Joi.string().allow(null, ""),
     statusPhase2: Joi.string().allow(null, ""),
     statusPhase2UpdatedAt: Joi.string().allow(null, ""),
-    statusPhase2ValidatedAt: Joi.string().allow(null, ""),
+    statusPhase2Validatedt: Joi.string().allow(null, ""),
     statusPhase2Contract: Joi.array().items(Joi.string().allow(null, "")),
     statusPhase3: Joi.string().allow(null, ""),
     statusPhase3UpdatedAt: Joi.string().allow(null, ""),
-    statusPhase3ValidatedAt: Joi.string().allow(null, ""),
+    statusPhase3Validatedt: Joi.string().allow(null, ""),
     lastStatusAt: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
     withdrawnReason: Joi.string().allow(null, ""),
     withdrawnMessage: Joi.string().allow(null, ""),
@@ -592,7 +596,7 @@ function validateReferent(referent) {
         .allow(null)
         .valid(...ROLES_LIST),
       region: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
+      department: Joi.array().items(Joi.string().allow(null, "")),
       subRole: Joi.string()
         .allow(null, "")
         .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST),
@@ -626,7 +630,7 @@ function validateSelf(referent) {
       email: Joi.string().lowercase().trim().email().allow(null, ""),
       password: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
+      department: Joi.array().items(Joi.string().allow(null, "")),
       subRole: Joi.string()
         .allow(null, "")
         .valid(...[...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST]),
@@ -673,6 +677,7 @@ function validatePhase1Document(phase1document, key) {
 module.exports = {
   validateId,
   validateString,
+  validateArray,
   validateMission,
   validateStructure,
   validateProgram,

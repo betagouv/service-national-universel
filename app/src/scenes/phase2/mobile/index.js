@@ -13,7 +13,6 @@ import { copyToClipboard } from "../../../utils";
 import CardMission from "./components/CardMission";
 import CardEquivalence from "./components/CardEquivalence";
 import CardPM from "./components/CardPM";
-import plausibleEvent from "../../../services/plausible";
 
 export default function IndexPhase2Mobile() {
   const young = useSelector((state) => state.Auth.young);
@@ -58,21 +57,21 @@ export default function IndexPhase2Mobile() {
           <div className="text-gray-300 text-sm mt-2 mb-2 font-normal">
             Mettez votre énergie au service d’une société plus solidaire et découvrez votre talent pour l’engagement en réalisant une mission d’intérêt général !
           </div>
-          <Link to="/preferences" onClick={() => plausibleEvent("Phase2/CTA - Renseigner mes préférences")}>
+          <Link to="/preferences">
             <div className="flex items-center mb-4">
               <HiOutlineAdjustments className="text-gray-400 mr-1" />
               <div className="text-gray-200 text-sm underline">Renseigner mes préférences mission </div>
             </div>
           </Link>
           {applications.length > 0 ? (
-            <Link to="/mission" onClick={() => plausibleEvent("Phase2/CTA - Trouver une mission")}>
+            <Link to="/mission">
               <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center justify-center hover:bg-white hover:text-gray-800">
                 <HiOutlineSearch className="text-[#ffffff] group-hover:text-gray-800" />
                 <div className="text-[#ffffff] group-hover:text-gray-800 text-sm">Trouver une mission</div>
               </div>
             </Link>
           ) : (
-            <Link to="/mission" onClick={() => plausibleEvent("Phase2/CTA - Trouver une mission")}>
+            <Link to="/mission">
               <div className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center justify-center border-blue-600 bg-blue-600">
                 <HiOutlineSearch className="text-blue-300" />
                 <div className="text-blue-100 text-sm">Trouver une mission</div>
@@ -156,7 +155,7 @@ export default function IndexPhase2Mobile() {
             <ArrowUpRight className="text-gray-400 text-2xl" />
           </a>
         </div>
-        <Link to="/ma-preparation-militaire" onClick={() => plausibleEvent("Phase2/CTA - PM - PartezPM")}>
+        <Link to="/ma-preparation-militaire">
           <div className="group border-[1px] border-gray-200 hover:border-gray-300 rounded-lg mt-3 p-3 flex items-center gap-4">
             <Medaille className="text-gray-400" />
             <div className="w-full">
@@ -176,7 +175,7 @@ export default function IndexPhase2Mobile() {
             <div className="px-3 pb-4">
               <div className="font-bold text-lg text-gray-900 ">Demandez la reconnaissance d’un engagement déjà réalisé</div>
               <div className="text-gray-600 text-sm mt-2 mb-3">Faîtes reconnaitre comme mission d’intérêt général un engagement déjà réalisé au service de la société</div>
-              <Link to="phase2/equivalence" onClick={() => plausibleEvent("Phase 2/ CTA - EquivalenceMIGdemande")}>
+              <Link to="phase2/equivalence">
                 <div className="rounded-lg text-blue-600 text-center text-sm py-1 border-[1px] border-blue-600">Faire ma demande</div>
               </Link>
             </div>

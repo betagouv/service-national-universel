@@ -10,7 +10,7 @@ import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { Box, BoxTitle } from "../../components/box";
-import { translate, ROLES, SENDINBLUE_TEMPLATES, legalStatus, typesStructure, sousTypesStructure, ENABLE_PM } from "../../utils";
+import { translate, ROLES, SENDINBLUE_TEMPLATES, legalStatus, typesStructure, sousTypesStructure } from "../../utils";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 
@@ -20,10 +20,7 @@ export default function Create() {
   const [networks, setNetworks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const redirect = new URLSearchParams(window.location.search).get("redirect");
-
   useEffect(() => {
-    if (redirect) window.scrollTo(0, 0);
     (async () => {
       const { data } = await api.get(`/structure/networks`);
       setNetworks(data);
@@ -53,20 +50,10 @@ export default function Create() {
         twitter: "",
         instagram: "",
         legalStatus: "",
-        isMilitaryPreparation: "false",
       }}
       onSubmit={async (values) => {
         try {
           setIsLoading(true);
-
-          const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "email.keyword": values.email } }] } } };
-          const { responses } = await api.esQuery("referent", body);
-          if (responses.length && responses[0].hits.hits.length) {
-            toastr.warning("Utilisateur déjà inscrit", "Merci de vérifier si la structure existe déjà sur la plateforme");
-            setIsLoading(false);
-            return;
-          }
-
           if (!values.location) {
             values.location = {
               lat: null,
@@ -90,12 +77,10 @@ export default function Create() {
           if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
           toastr.success("Invitation envoyée");
           setIsLoading(false);
-          if (redirect) history.push(redirect);
-          else history.push(`/structure/${data._id}`);
+          history.push(`/structure/${data._id}`);
         } catch (e) {
           console.log(e);
           toastr.error("Erreur!");
-          setIsLoading(false);
         }
       }}>
       {({ values, handleChange, handleSubmit, errors, touched }) => (
@@ -313,19 +298,6 @@ export default function Create() {
                         </Field>
                       </div>
                     )}
-                    {ENABLE_PM && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
-                      <FormGroup>
-                        <label>PRÉPARATION MILITAIRE</label>
-                        <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
-                          <option key="false" value="false">
-                            Non
-                          </option>
-                          <option key="true" value="true">
-                            Oui
-                          </option>
-                        </Field>
-                      </FormGroup>
-                    ) : null}
                   </FormGroup>
                 </Wrapper>
               </Col>

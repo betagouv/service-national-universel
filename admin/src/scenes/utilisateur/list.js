@@ -23,9 +23,6 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import plausibleEvent from "../../services/pausible";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
-import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
-import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
@@ -262,9 +259,6 @@ const Action = ({ hit, structure }) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
-  const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
-  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
 
   const handleImpersonate = async () => {
     try {
@@ -288,35 +282,14 @@ const Action = ({ hit, structure }) => {
     });
   };
 
-  const onDeleteTutorLinked = (target) => {
-    setModalTutor({
-      isOpen: true,
-      value: target,
-      onConfirm: () => onConfirmDelete(target),
-    });
-  };
-
-  const onUniqueResponsible = (target) => {
-    setModalUniqueResponsable({
-      isOpen: true,
-      responsable: target,
-    });
-  };
-
-  const onReferentDeleted = () => {
-    setModalReferentDeleted({
-      isOpen: true,
-    });
-  };
-
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${hit._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(user);
-      if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(hit);
+      if (!ok && code === "LINKED_OBJECT") return toastr.error(translate(code), "Ce responsable est affilié comme tuteur sur une ou plusieurs missions.");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      return onReferentDeleted();
+      toastr.success("Ce profil a été supprimé.");
+      return history.go(0);
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
@@ -357,23 +330,6 @@ const Action = ({ hit, structure }) => {
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
-      <ModalChangeTutor
-        isOpen={modalTutor?.isOpen}
-        title={modalTutor?.title}
-        message={modalTutor?.message}
-        tutor={modalTutor?.value}
-        onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
-        onConfirm={() => {
-          modalTutor?.onConfirm();
-          setModalTutor({ isOpen: false, onConfirm: null });
-        }}
-      />
-      <ModalUniqueResponsable
-        isOpen={modalUniqueResponsable?.isOpen}
-        responsable={modalUniqueResponsable?.responsable}
-        onConfirm={() => setModalUniqueResponsable({ isOpen: false })}
-      />
-      <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.go(0)} />
     </>
   );
 };

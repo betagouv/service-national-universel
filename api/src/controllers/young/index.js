@@ -40,7 +40,6 @@ const {
   getFile,
   notifDepartmentChange,
   autoValidationSessionPhase1Young,
-  deleteFile,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
@@ -133,19 +132,17 @@ router.post(
       const { error: keyError, value: key } = Joi.string()
         .required()
         .valid(...[...rootKeys, ...militaryKeys])
-        .validate(req.params.key, { stripUnknown: true });
+        .validate(req.params.key);
       if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const { error: bodyError, value: body } = Joi.string().required().validate(req.body.body);
       if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-      if (key !== "equivalenceFiles") throw "Route deprecated.";
-
       const {
         error: namesError,
         value: { names },
       } = Joi.object({ names: Joi.array().items(Joi.string()).required() }).validate(JSON.parse(body), { stripUnknown: true });
-      if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const user = await YoungObject.findById(req.user._id);
       if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
@@ -296,7 +293,7 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
       phase3TutorLastName: Joi.string().required(),
       phase3TutorEmail: Joi.string().lowercase().trim().email().required(),
       phase3TutorPhone: Joi.string().required(),
-    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    }).validate({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await YoungObject.findOne({ _id: value.young });
@@ -480,11 +477,8 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { error: idError, value: id } = validateId(req.params.id);
-    if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
+    const { id } = req.params;
     const young = await YoungObject.findById(id);
-
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     if (!youngCanChangeSession(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -705,7 +699,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
 
 router.get("/:id/application", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (isYoung(req.user) && req.user._id.toString() !== id) {
@@ -790,7 +784,6 @@ router.post("/france-connect/user-info", async (req, res) => {
 });
 
 // Delete one user (only admin can delete user)
-// And apparently referent in same geography as well (see canDeleteYoung())
 router.put("/:id/soft-delete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
@@ -825,21 +818,6 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
       "city",
     ];
 
-    for (const key in young.files) {
-      if (key.length) {
-        for (const file in key) {
-          try {
-            if (key.includes("military")) await deleteFile(`app/young/${id}/military-preparation/${key}/${file._id}`);
-            else await deleteFile(`app/young/${id}/${key}/${file._id}`);
-            young.set({ files: { [key]: undefined } });
-          } catch (e) {
-            capture(e);
-            console.error(e);
-          }
-        }
-      }
-    }
-
     for (const key in young._doc) {
       if (!fieldToKeep.find((val) => val === key)) {
         young.set({ [key]: undefined });
@@ -871,7 +849,7 @@ router.put("/:id/soft-delete", passport.authenticate("referent", { session: fals
 
 router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.string().required().email().validate(req.query.email, { stripUnknown: true });
+    const { error, value } = Joi.string().required().email().validate(req.query.email);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canGetYoungByEmail(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let data = await YoungObject.findOne({ email: value });
@@ -888,7 +866,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     const { error: documentError, value: document } = Joi.string()
       .required()
       .valid(...keys)
-      .validate(req.params.document, { stripUnknown: true });
+      .validate(req.params.document);
     if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const young = await YoungObject.findById(req.user._id);
@@ -1037,7 +1015,6 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (req.user._id.toString() !== young._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    // add UUID logic here
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 

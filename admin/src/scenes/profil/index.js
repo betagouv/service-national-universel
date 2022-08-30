@@ -5,6 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { VISITOR_SUBROLES } from "snu-lib/roles";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import CustomMultiSelect from "../../components/CustomMultiSelect";
 import { requiredMessage } from "../../components/errorMessage";
 import Loader from "../../components/Loader";
 import PasswordEye from "../../components/PasswordEye";
@@ -26,6 +27,11 @@ export default function Profil() {
     if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
     if (role === ROLES.VISITOR) subRole = VISITOR_SUBROLES;
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
+  };
+
+  const getDepartment = (role) => {
+    if (role !== ROLES.REFERENT_DEPARTMENT) return;
+    return user.department.map((e) => ({ value: e, label: e }));
   };
 
   if (user === undefined) return <Loader />;
@@ -75,7 +81,16 @@ export default function Profil() {
                       validate={(v) => !v && requiredMessage}
                     />
                     {user.role === ROLES.REFERENT_DEPARTMENT ? (
-                      <Item className="col-span-2" title="Département" disabled values={values} name="department" handleChange={handleChange} type={"text"} />
+                      <MultiSelect
+                        name="department"
+                        required
+                        onChange={handleChange}
+                        placeholder="Sélectionnez le(s) département(s)..."
+                        title="Département"
+                        options={getDepartment(values.role)}
+                        validate={(v) => !v.length && requiredMessage}
+                        disabled
+                      />
                     ) : null}
                     {user.role === ROLES.REFERENT_REGION ? <Item title="Région" disabled values={values} name="region" handleChange={handleChange} type={"text"} /> : null}
                     <Item
@@ -215,6 +230,18 @@ const Item = ({ title, values, name, handleChange, disabled, required, errors, t
         />
       )}
       {errors && touched && <p className="text-xs text-red-500" errors={errors} touched={touched} name={name} />}
+    </div>
+  );
+};
+
+const MultiSelect = ({ title, required, name, placeholder, disabled, options, className, validate }) => {
+  return (
+    <div className={className}>
+      <label className="mb-2 inline-block text-xs uppercase text-brand-grey">
+        {required && <span className="text-red-500 mr-1">*</span>}
+        {title}
+      </label>
+      <Field name={name} options={options} component={CustomMultiSelect} placeholder={placeholder} disabled={disabled} validate={validate} />
     </div>
   );
 };

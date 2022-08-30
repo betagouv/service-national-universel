@@ -20,7 +20,7 @@ export default function WaitingAffectation({ young }) {
               <br />
               <strong className="flex items-center">
                 {translateCohort(young.cohort)}{" "}
-                {youngCanChangeSession(young) ? (
+                {youngCanChangeSession({ cohort: young.cohort, statusPhase1: young.statusPhase1 }) ? (
                   <Link to="/changer-de-sejour">
                     <img src={edit} alt="edit icon" className="h-9 w-9 ml-2 hover:w-10 hover:h-10 hover:cursor-pointer" />
                   </Link>

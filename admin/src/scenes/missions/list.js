@@ -45,6 +45,7 @@ export default function List() {
   useEffect(() => {
     if (user.role !== ROLES.SUPERVISOR) return;
     (async () => {
+      if (!user.structureId) return;
       const { data } = await api.get(`/structure/${user.structureId}/children`);
       const ids = data.map((s) => s._id);
       setStructureIds([...ids, user.structureId]);
@@ -53,6 +54,7 @@ export default function List() {
   }, []);
   useEffect(() => {
     (async () => {
+      if (!user.structureId) return;
       const { data } = await api.get(`/structure/${user.structureId}`);
       setStructure(data);
     })();
@@ -152,7 +154,7 @@ export default function List() {
               <FilterRow visible={filterVisible}>
                 <div className="uppercase text-xs text-snu-purple-800">Général</div>
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? user.department : []} />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"

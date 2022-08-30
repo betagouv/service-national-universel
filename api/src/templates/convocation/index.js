@@ -65,6 +65,7 @@ const render = async (young) => {
     return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = (meetingPoint) => {
+    if (young.cohort === "Juillet 2022" && young.deplacementPhase1Autonomous !== "true") return "vendredi 15 juillet, 18:00";
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return returnMeetingDate[young.cohort]; // new Date("2021-07-02T12:00:00.000+00:00");
     return meetingPoint.returnAtString;
   };
@@ -74,7 +75,7 @@ const render = async (young) => {
   };
 
   try {
-    if (!["AFFECTED", "DONE"].includes(young.statusPhase1)) throw `young ${young.id} not affected`;
+    if (young.statusPhase1 !== "AFFECTED") throw `young ${young.id} not affected`;
     if (!young.sessionPhase1Id || (!young.meetingPointId && young.deplacementPhase1Autonomous !== "true")) throw `young ${young.id} unauthorized`;
     const session = await SessionPhase1.findById(young.sessionPhase1Id);
     if (!session) throw `session ${young.sessionPhase1Id} not found for young ${young._id}`;
@@ -122,6 +123,16 @@ const render = async (young) => {
       .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${getDepartureMeetingDate(meetingPoint).split(",")[1]}`))
       .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
       .replace(/{{TRANSPORT}}/g, sanitizeAll(bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : ""))
+      .replace(
+        /{{MEETING_DATE_TEMPLATE}}/g,
+        sanitizeAll(
+          young?.cohort === "Juillet 2022" && young.deplacementPhase1Autonomous !== "true"
+            ? "Le retour est prévu le <b>vendredi 15 juillet à 18h</b> au même point de rendez-vous.\
+             (Cet horaire est donné à titre indicatif, il vous sera confirmé ultérieurement.)"
+            : "Le retour de votre séjour est prévu le <b>{{MEETING_DATE_RETURN}} à {{MEETING_HOURS_RETURN}}</b>, \
+            au même endroit que le jour du départ en centre.",
+        ),
+      )
       .replace(
         /{{MEETING_DATE_RETURN}}/g,
         sanitizeAll(

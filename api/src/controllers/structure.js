@@ -190,13 +190,6 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const applicationsLinkedToReferent = await ApplicationObject.find({ missionId: { $in: missionsLinkedToReferent.map((mission) => mission._id) } });
     if (applicationsLinkedToReferent.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
 
-    const referentsLinkedToStructure = await ReferentObject.find({ structureId: checkedId });
-
-    for (const referent of referentsLinkedToStructure) {
-      referent.set({ structureId: undefined });
-      await referent.save({ fromUser: req.user });
-    }
-
     await structure.remove();
     console.log(`Structure ${req.params.id} has been deleted by ${req.user._id}`);
     res.status(200).send({ ok: true });

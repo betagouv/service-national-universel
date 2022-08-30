@@ -23,11 +23,14 @@ import { Footer } from "../../components/modals/Modal";
 import ModalButton from "../../components/buttons/ModalButton";
 import api from "../../services/api";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
+import CustomMultiSelect from "../CustomMultiSelect";
 
 export default function InviteHeader({ setOpen, open, label = "Inviter un référent" }) {
   const { user } = useSelector((state) => state.Auth);
 
   const [centers, setCenters] = useState(null);
+
+  // TODO - Refresh session on reselect other center
 
   useEffect(() => {
     (async () => {
@@ -35,7 +38,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
         let { data } = await api.get("/cohesion-center");
 
         if (user.role === ROLES.REFERENT_REGION) data = data.filter((e) => e.region === user.region);
-        if (user.role === ROLES.REFERENT_DEPARTMENT) data = data.filter((e) => e.department === user.department);
+        if (user.role === ROLES.REFERENT_DEPARTMENT) data = data.filter((e) => user.department.includes(e.department));
 
         const c = data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         setCenters(c);
@@ -66,7 +69,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
               subRole: "",
               email: "",
               region: "",
-              department: "",
+              department: [],
               cohesionCenterName: "",
               cohesionCenterId: "",
               sessionPhase1Id: "",
@@ -160,7 +163,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       <Col md={6}>
                         <FormGroup>
                           <div>Département</div>
-                          <ChooseDepartment validate={(v) => !v && requiredMessage} name="department" value={values.department} onChange={handleChange} />
+                          <ChooseDepartment />
                           <ErrorMessage errors={errors} touched={touched} name="department" />
                         </FormGroup>
                       </Col>
@@ -237,40 +240,25 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
   );
 }
 
-const ChooseDepartment = ({ value, onChange, validate }) => {
+const ChooseDepartment = () => {
   const { user } = useSelector((state) => state.Auth);
-  const [list, setList] = useState(departmentList);
+  const [list, setList] = useState([]);
 
   useEffect(() => {
-    //force the value if it is a referent_department
-    if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      return onChange({ target: { value: user.department, name: "department" } });
-    }
-    //filter the array if it is a referent_region
-    if (user.role === ROLES.REFERENT_REGION) {
-      setList(region2department[user.region]);
-    }
+    const list = user.role === ROLES.REFERENT_REGION ? region2department[user.region] : user.role === ROLES.REFERENT_DEPARTMENT ? user.department : departmentList;
+
+    setList(list.map((e) => ({ value: e, label: e })));
   }, []);
 
   return (
     <Field
-      disabled={user.role === ROLES.REFERENT_DEPARTMENT}
-      as="select"
-      validate={validate}
-      className="form-control"
-      placeholder="Département"
       name="department"
-      value={value}
-      onChange={onChange}>
-      <option disabled value="" label=""></option>
-      {list.map((e) => {
-        return (
-          <option value={e} key={e}>
-            {e}
-          </option>
-        );
-      })}
-    </Field>
+      options={list}
+      component={CustomMultiSelect}
+      placeholder="Sélectionnez le(s) département(s)..."
+      disabled={user.role === ROLES.REFERENT_DEPARTMENT && user.department.length === 1}
+      validate={(v) => !v.length && requiredMessage}
+    />
   );
 };
 

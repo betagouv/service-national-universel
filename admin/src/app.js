@@ -70,7 +70,7 @@ export default function App() {
   if (loading) return <Loader />;
 
   return (
-    <Router history={history}>
+    <Router>
       <div className="main">
         <Switch>
           <SentryRoute path="/validate" component={Validate} />

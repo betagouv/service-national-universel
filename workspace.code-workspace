@@ -16,11 +16,8 @@
       "path": "pdf"
     },
     {
-      "path": "send-in-blue"
-    },
-    {
       "path": "lib"
-    }
+    },
   ],
   "settings": {}
 }

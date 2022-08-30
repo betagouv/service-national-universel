@@ -3,7 +3,6 @@ import { HiOutlineSearch } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import CheckCircle from "../../assets/icons/CheckCircle";
-import plausibleEvent from "../../services/plausible";
 import { permissionPhase2 } from "../../utils";
 import DocumentsPM from "./components/DocumentsPM";
 
@@ -81,7 +80,6 @@ export default function HomeDesktop() {
               <div className="text-lg leading-6 font-semibold"> N’attendez plus !</div>
               <Link
                 to="/mission?MILITARY_PREPARATION=true"
-                onClick={() => plausibleEvent("Phase2/CTA - PM - TrouvezPM")}
                 className="group flex gap-1 rounded-[10px] border-[1px] py-2.5 px-3 items-center bg-blue-600 hover:bg-white hover:border-blue-600 mt-4">
                 <HiOutlineSearch className="text-[#ffffff] group-hover:text-blue-600 mr-2" />
                 <div className="text-[#ffffff] group-hover:text-blue-600 text-sm flex-1">Trouver une préparation militaire</div>

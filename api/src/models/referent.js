@@ -72,13 +72,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  nextLoginAttemptIn: {
-    type: Date,
-    documentation: {
-      description: "Date pour autoriser la prochaine tentative de connexion",
-    },
-  },
-
   forgotPasswordResetToken: {
     type: String,
     default: "",
@@ -122,8 +115,7 @@ const Schema = new mongoose.Schema({
     },
   },
   department: {
-    type: String,
-    default: "",
+    type: [String],
     documentation: {
       description: "Département de l'utilisateur, si applicable",
     },
@@ -194,7 +186,7 @@ Schema.methods.comparePassword = async function (p) {
 
 //Sync with Sendinblue
 Schema.post("save", function (doc) {
-  sendinblue.sync(doc, MODELNAME);
+  // sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
   sendinblue.sync(doc, MODELNAME);
@@ -212,7 +204,6 @@ Schema.virtual("user").set(function (user) {
 
 Schema.pre("save", function (next, params) {
   this.user = params?.fromUser;
-  this.updatedAt = Date.now();
   next();
 });
 
@@ -224,25 +215,9 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
-  excludes: [
-    "/password",
-    "/lastLoginAt",
-    "/nextLoginAttemptIn",
-    "/forgotPasswordResetToken",
-    "/forgotPasswordResetExpires",
-    "/invitationToken",
-    "/invitationExpires",
-    "/loginAttempts",
-    "/updatedAt",
-  ],
+  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/loginAttempts"],
 });
-
-Schema.plugin(
-  mongooseElastic(esClient, {
-    ignore: ["password", "nextLoginAttemptIn", "forgotPasswordResetToken", "forgotPasswordResetExpires", "invitationToken", "invitationExpires", "loginAttempts"],
-  }),
-  MODELNAME,
-);
+Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 
