@@ -18,7 +18,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title } from "../../comp
 import { translate, getFilterLabel, formatStringLongDate, formatStringDateTimezoneUTC, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import { ModalContainer, Content } from "../../components/modals/Modal";
+import { ModalContainer } from "../../components/modals/Modal";
 import ModalButton from "../../components/buttons/ModalButton";
 import { Formik, Field } from "formik";
 import { Modal } from "reactstrap";

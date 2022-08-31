@@ -46,7 +46,7 @@ import DeletedVolontairePanel from "./deletedPanel";
 import DeleteFilters from "../../components/buttons/DeleteFilters";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import { ModalContainer, Content } from "../../components/modals/Modal";
+import { ModalContainer } from "../../components/modals/Modal";
 import ModalButton from "../../components/buttons/ModalButton";
 
 const FILTERS = [
