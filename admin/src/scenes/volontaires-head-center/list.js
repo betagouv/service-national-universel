@@ -323,7 +323,7 @@ export default function List() {
           <div style={{ flex: 1, position: "relative" }}>
             <Header>
               <div>
-                <Title>Volontaires</Title>
+                <Title>Volontaires yo</Title>
               </div>
               <div style={{ display: "flex" }}>
                 {/* Column selection modal */}

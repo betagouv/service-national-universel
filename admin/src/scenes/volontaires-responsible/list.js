@@ -81,16 +81,23 @@ export default function List() {
   console.log(filterVisible);
 
   async function transform(data, values) {
+    console.log("yo");
     let all = data;
+    console.log("🚀 ~ file: list.js ~ line 86 ~ transform ~ data", data);
     const youngIds = [...new Set(data.map((item) => item.youngId))];
+    console.log("🚀 ~ file: list.js ~ line 87 ~ transform ~ youngIds", youngIds);
     if (youngIds?.length) {
       const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
+      console.log("🚀 ~ file: list.js ~ line 89 ~ transform ~ responses", responses);
       if (responses.length) {
         const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
         all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
+        console.log("🚀 ~ file: list.js ~ line 92 ~ transform ~ all", all);
       }
     }
+
     return all.map((data) => {
+      console.log("wesh");
       const COLUMNS = {
         identity: {
           Prénom: data.youngFirstName,
@@ -144,6 +151,7 @@ export default function List() {
         let key;
         for (key in COLUMNS[element]) columns[key] = COLUMNS[element][key];
       }
+      console.log("🚀 ~ file: list.js ~ line 149 ~ returnall.map ~ columns", columns);
       return columns;
     });
   }
@@ -208,7 +216,7 @@ export default function List() {
               {/* Column selection modal */}
 
               <LoadingButton onClick={() => setColumnModalOpen(true)}>Exporter les volontaires</LoadingButton>
-              <Modal isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl" centered>
+              <Modal toggle={() => setColumnModalOpen(false)} isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl" centered>
                 <ModalContainer>
                   <Formik
                     initialValues={{
@@ -217,75 +225,61 @@ export default function List() {
                     {({ values, setFieldValue }) => (
                       <>
                         <div className="text-xl">Sélectionnez les données à exporter</div>
-                        <Content>
-                          <div className="flex w-full py-4">
-                            <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
-                            <div className="w-1/2 text-right">
-                              {values.checked == "" ? (
-                                <div
-                                  className="text-snu-purple-300 cursor-pointer hover:underline"
-                                  onClick={() =>
-                                    setFieldValue("checked", [
-                                      "identity",
-                                      "contact",
-                                      "birth",
-                                      "address",
-                                      "location",
-                                      "representative1",
-                                      "representative2",
-                                      "mission",
-                                      "application",
-                                    ])
-                                  }>
-                                  Tout sélectionner
+                        <div className="flex w-full p-4">
+                          <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
+                          <div className="w-1/2 text-right">
+                            {values.checked == "" ? (
+                              <div
+                                className="text-snu-purple-300 cursor-pointer hover:underline"
+                                onClick={() =>
+                                  setFieldValue("checked", ["identity", "contact", "birth", "address", "location", "representative1", "representative2", "mission", "application"])
+                                }>
+                                Tout sélectionner
+                              </div>
+                            ) : (
+                              <div className="text-snu-purple-300 cursor-pointer hover:underline" onClick={() => setFieldValue("checked", [])}>
+                                Tout déselectionner
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="h-[60vh] overflow-auto grid grid-cols-2 gap-4 w-full p-3">
+                          {COLUMNS.map((cat) => (
+                            <div
+                              key={cat.value}
+                              className="rounded-xl border-2 border-gray-100 px-3 py-2 hover:shadow-ninaButton cursor-pointer"
+                              onClick={() => {
+                                if (!values.checked.includes(cat.value)) {
+                                  const newValues = [...values.checked, cat.value];
+                                  setFieldValue("checked", newValues);
+                                } else {
+                                  const newValues = values.checked.filter((item) => item !== cat.value);
+                                  setFieldValue("checked", newValues);
+                                }
+                              }}>
+                              <div className="flex justify-between w-full">
+                                <div className="text-left text-lg w-3/4">{cat.title}</div>
+                                <div className="h-4">
+                                  <Field type="checkbox" name="checked" value={cat.value} />
                                 </div>
+                              </div>
+                              {cat.desc.length > 150 ? (
+                                cat.desc.length > 300 ? (
+                                  <div className="transition-[height] ease-in-out w-full text-gray-400 text-left h-10 text-ellipsis overflow-hidden hover:h-64 duration-300">
+                                    {cat.desc}
+                                  </div>
+                                ) : (
+                                  <div className="transition-[height] ease-in-out w-full text-gray-400 text-left h-10 text-ellipsis overflow-hidden hover:h-36 duration-300">
+                                    {cat.desc}
+                                  </div>
+                                )
                               ) : (
-                                <div className="text-snu-purple-300 cursor-pointer hover:underline" onClick={() => setFieldValue("checked", [])}>
-                                  Tout déselectionner
-                                </div>
+                                <div className="w-full text-gray-400 text-left h-10">{cat.desc}</div>
                               )}
                             </div>
-                          </div>
-
-                          <div className="h-[60vh] overflow-auto">
-                            <div className="grid grid-cols-2 gap-4 w-full">
-                              {COLUMNS.map((cat) => (
-                                <div
-                                  key={cat.value}
-                                  className="rounded-xl border-2 border-gray-100 px-3 py-2 cursor-pointer"
-                                  onClick={() => {
-                                    if (!values.checked.includes(cat.value)) {
-                                      const newValues = [...values.checked, cat.value];
-                                      setFieldValue("checked", newValues);
-                                    } else {
-                                      const newValues = values.checked.filter((item) => item !== cat.value);
-                                      setFieldValue("checked", newValues);
-                                    }
-                                  }}>
-                                  <div className="flex justify-between w-full">
-                                    <div className="text-left text-lg w-3/4">{cat.title}</div>
-                                    <div className="h-4">
-                                      <Field type="checkbox" name="checked" value={cat.value} />
-                                    </div>
-                                  </div>
-                                  {cat.desc.length > 150 ? (
-                                    cat.desc.length > 300 ? (
-                                      <div className="transition-[height] ease-in-out w-full text-gray-400 text-left h-10 text-ellipsis overflow-hidden hover:h-64 duration-300">
-                                        {cat.desc}
-                                      </div>
-                                    ) : (
-                                      <div className="transition-[height] ease-in-out w-full text-gray-400 text-left h-10 text-ellipsis overflow-hidden hover:h-36 duration-300">
-                                        {cat.desc}
-                                      </div>
-                                    )
-                                  ) : (
-                                    <div className="w-full text-gray-400 text-left h-10">{cat.desc}</div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </Content>
+                          ))}
+                        </div>
                         <div className="flex gap-2 justify-center mb-4">
                           <div className="w-1/2 p-0.5">
                             <ModalButton onClick={() => setColumnModalOpen(false)}>Annuler</ModalButton>
