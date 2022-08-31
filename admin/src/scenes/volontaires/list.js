@@ -484,7 +484,6 @@ export default function VolontaireList() {
                                     className="text-snu-purple-300 cursor-pointer hover:underline"
                                     onClick={() =>
                                       setFieldValue("checked", [
-                                        "id",
                                         "identity",
                                         "contact",
                                         "birth",
