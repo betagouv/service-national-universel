@@ -116,20 +116,20 @@ export default function InscriptionPanel({ onChange, value }) {
         </Info>
       )}
       <Info title="Pièce d’identité" id={value._id}>
-        {(value.files.cniFiles || []).map((e, i) => (
+        {(young?.files.cniFiles || []).map((e, i) => (
           <DownloadButton
             key={i}
             source={() => api.get(`/young/${value._id}/documents/cniFiles/${e}`)}
-            title={`Télécharger la pièce d’identité (${i + 1}/${value.files.cniFiles.length})`}
+            title={`Télécharger la pièce d’identité (${i + 1}/${young.files.cniFiles.length})`}
           />
         ))}
       </Info>
       <Info title="Consentements du ou des représentants légaux" id={value._id}>
-        {(value.files.parentConsentmentFiles || []).map((e, i) => (
+        {(young?.files.parentConsentmentFiles || []).map((e, i) => (
           <DownloadButton
             key={i}
             source={() => api.get(`/young/${value._id}/documents/parentConsentmentFiles/${e}`)}
-            title={`Télécharger le formulaire (${i + 1}/${value.files.parentConsentmentFiles.length})`}
+            title={`Télécharger le formulaire (${i + 1}/${young.files.parentConsentmentFiles.length})`}
           />
         ))}
         {isFromFranceConnect(young) && (
@@ -144,7 +144,7 @@ export default function InscriptionPanel({ onChange, value }) {
       </Info>
       {getAge(young?.birthdateAt) < 15 ? (
         <Info title="Traitement des données personnelles" id={value._id}>
-          {(value.files.dataProcessingConsentmentFiles || []).map((e, i) => (
+          {(young?.files.dataProcessingConsentmentFiles || []).map((e, i) => (
             <DownloadButton
               key={i}
               source={() => api.get(`/young/${value._id}/documents/dataProcessingConsentmentFiles/${e}`)}

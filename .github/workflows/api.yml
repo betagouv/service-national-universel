@@ -106,7 +106,7 @@ jobs:
           git remote add cloudprod "$CLEVER_CLOUD_GIT_REMOTE_PROD"
           git add .
           git commit -m "For deploy"
-          git push -f -u cloudstaging master
+          # git push -f -u cloudstaging master
           git push -f -u cloudprod master
         env:
           CLEVER_CLOUD_GIT_REMOTE_STAGING: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_API_STAGING }}
