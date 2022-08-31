@@ -319,7 +319,7 @@ export default function VolontaireList() {
           "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
         },
         desistement: {
-          "Raison du desistement": getLabelWithdrawnReason(data.withdrawnReason),
+          "Raison du désistement": getLabelWithdrawnReason(data.withdrawnReason),
           "Message de désistement": data.withdrawnMessage,
           // Date du désistement: // not found in db
         },
@@ -446,7 +446,7 @@ export default function VolontaireList() {
                 {/* Column selection modal */}
 
                 <LoadingButton onClick={() => setColumnModalOpen(true)}>Exporter les volontaires</LoadingButton>
-                <Modal isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl" centered>
+                <Modal toggle={() => setColumnModalOpen(false)} isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl" centered>
                   <ModalContainer>
                     <Formik
                       initialValues={{
@@ -520,7 +520,7 @@ export default function VolontaireList() {
                                 {COLUMNS.map((cat) => (
                                   <div
                                     key={cat.value}
-                                    className="rounded-xl border-2 border-gray-100 px-3 py-2 cursor-pointer"
+                                    className="rounded-xl border-2 border-gray-100 px-3 py-2 hover:shadow-ninaButton cursor-pointer"
                                     onClick={() => {
                                       if (!values.checked.includes(cat.value)) {
                                         const newValues = [...values.checked, cat.value];
