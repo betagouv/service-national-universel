@@ -77,7 +77,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
             onSubmit={async (values, { setSubmitting }) => {
               try {
                 const obj = { ...values };
-                if (obj.role === ROLES.REFERENT_DEPARTMENT) obj.region = department2region[obj.department];
+                if (obj.role === ROLES.REFERENT_DEPARTMENT) obj.region = department2region[obj.department[0]];
                 if (obj.role === ROLES.REFERENT_REGION) obj.department = null;
                 if (obj.role !== ROLES.HEAD_CENTER) {
                   obj.cohesionCenterId = null;
