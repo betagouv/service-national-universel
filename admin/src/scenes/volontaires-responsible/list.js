@@ -80,64 +80,6 @@ export default function List() {
   if (!missions) return <Loader />;
   console.log(filterVisible);
 
-    return all.map((data) => {
-      const COLUMNS = {
-        identity: {
-          Prénom: data.youngFirstName,
-          Nom: data.youngLastName,
-          Cohorte: data.youngCohort,
-        },
-        contact: {
-          Email: data.youngEmail,
-          Téléphone: data.young.phone,
-        },
-        birth: {
-          "Date de naissance": data.youngBirthdateAt,
-        },
-        address: {
-          "Adresse du volontaire": data.young.address,
-          "Code postal du volontaire": data.young.zip,
-          "Ville du volontaire": data.young.city,
-        },
-        location: {
-          Département: data.young.department,
-          Académie: data.young.academy,
-          Région: data.young.region,
-        },
-        representative1: {
-          "Prénom représentant légal 1": data.young.parent1FirstName,
-          "Nom représentant légal 1": data.young.parent1LastName,
-          "Email représentant légal 1": data.young.parent1Email,
-          "Téléphone représentant légal 1": data.young.parent1Phone,
-        },
-        representative2: {
-          "Prénom représentant légal 2": data.young.parent2LastName,
-          "Nom représentant légal 2": data.young.parent2LastName,
-          "Email représentant légal 2": data.young.parent2Email,
-          "Téléphone représentant légal 2": data.young.parent2Phone,
-        },
-        mission: {
-          "Nom de la mission": data.missionName,
-          "Département de la mission": data.missionDepartment,
-          "Région de la mission": data.missionRegion,
-        },
-        candidature: {
-          "Candidature créée lé": data.createdAt,
-          "Candidature mise à jour le": data.updatedAt,
-          "Statut de la candidature": translate(data.status),
-          Tuteur: data.tutorName,
-        },
-      };
-
-      let columns = { ID: data._id };
-      for (const element of values) {
-        let key;
-        for (key in COLUMNS[element]) columns[key] = COLUMNS[element][key];
-      }
-      return columns;
-    });
-  }
-
   const COLUMNS = [
     {
       title: "Identité du volontaire",
