@@ -446,7 +446,7 @@ export default function VolontaireList() {
                 {/* Column selection modal */}
 
                 <LoadingButton onClick={() => setColumnModalOpen(true)}>Exporter les volontaires</LoadingButton>
-                <Modal isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl">
+                <Modal isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl" centered>
                   <ModalContainer>
                     <Formik
                       initialValues={{
@@ -505,11 +505,11 @@ export default function VolontaireList() {
                                         "desistement",
                                       ])
                                     }>
-                                    Tout sélectionner.
+                                    Tout sélectionner
                                   </div>
                                 ) : (
                                   <div className="text-snu-purple-300 cursor-pointer hover:underline" onClick={() => setFieldValue("checked", [])}>
-                                    Tout déselectionner.
+                                    Tout déselectionner
                                   </div>
                                 )}
                               </div>
