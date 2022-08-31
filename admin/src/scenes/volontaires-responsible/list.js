@@ -17,6 +17,11 @@ import ContractLink from "../../components/ContractLink";
 import { Filter, FilterRow, ResultTable, Table, Header, Title } from "../../components/list";
 import { translate, getFilterLabel, formatStringLongDate, formatStringDateTimezoneUTC, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import LoadingButton from "../../components/buttons/LoadingButton";
+import { ModalContainer, Content } from "../../components/modals/Modal";
+import ModalButton from "../../components/buttons/ModalButton";
+import { Formik, Field } from "formik";
+import { Modal } from "reactstrap";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
@@ -25,6 +30,8 @@ export default function List() {
   const [missions, setMissions] = useState();
   const [panel, setPanel] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
+  const [columnModalOpen, setColumnModalOpen] = useState(false);
+
   const history = useHistory();
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => ({
@@ -72,6 +79,123 @@ export default function List() {
 
   if (!missions) return <Loader />;
   console.log(filterVisible);
+
+  async function transform(data, values) {
+    let all = data;
+    const youngIds = [...new Set(data.map((item) => item.youngId))];
+    if (youngIds?.length) {
+      const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
+      if (responses.length) {
+        const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
+      }
+    }
+    return all.map((data) => {
+      const COLUMNS = {
+        identity: {
+          Prénom: data.youngFirstName,
+          Nom: data.youngLastName,
+          Cohorte: data.youngCohort,
+        },
+        contact: {
+          Email: data.youngEmail,
+          Téléphone: data.young.phone,
+        },
+        birth: {
+          "Date de naissance": data.youngBirthdateAt,
+        },
+        address: {
+          "Adresse du volontaire": data.young.address,
+          "Code postal du volontaire": data.young.zip,
+          "Ville du volontaire": data.young.city,
+        },
+        location: {
+          Département: data.young.department,
+          Académie: data.young.academy,
+          Région: data.young.region,
+        },
+        representative1: {
+          "Prénom représentant légal 1": data.young.parent1FirstName,
+          "Nom représentant légal 1": data.young.parent1LastName,
+          "Email représentant légal 1": data.young.parent1Email,
+          "Téléphone représentant légal 1": data.young.parent1Phone,
+        },
+        representative2: {
+          "Prénom représentant légal 2": data.young.parent2LastName,
+          "Nom représentant légal 2": data.young.parent2LastName,
+          "Email représentant légal 2": data.young.parent2Email,
+          "Téléphone représentant légal 2": data.young.parent2Phone,
+        },
+        mission: {
+          "Nom de la mission": data.missionName,
+          "Département de la mission": data.missionDepartment,
+          "Région de la mission": data.missionRegion,
+        },
+        candidature: {
+          "Candidature créée lé": data.createdAt,
+          "Candidature mise à jour le": data.updatedAt,
+          "Statut de la candidature": translate(data.status),
+          Tuteur: data.tutorName,
+        },
+      };
+
+      let columns = { ID: data._id };
+      for (const element of values) {
+        let key;
+        for (key in COLUMNS[element]) columns[key] = COLUMNS[element][key];
+      }
+      return columns;
+    });
+  }
+
+  const COLUMNS = [
+    {
+      title: "Identité du volontaire",
+      desc: "Prénom, nom, cohorte.",
+      value: "identity",
+    },
+    {
+      title: "Contact du volontaire",
+      desc: "Email, téléphone.",
+      value: "contact",
+    },
+    {
+      title: "Date de naissance du volontaire",
+      desc: "Date de naissance.",
+      value: "birth",
+    },
+    {
+      title: "Lieu de résidence du volontaire",
+      desc: "Adresse postale, code postal, ville.",
+      value: "address",
+    },
+    {
+      title: "Localisation du volontaire",
+      desc: "Département, académie, région.",
+      value: "location",
+    },
+    {
+      title: "Représentant légal 1",
+      desc: "Statut, nom, prénom, email, téléphone, adresse, code postal, ville, département et région du représentant légal.",
+      value: "representative1",
+    },
+    {
+      title: "Représentant légal 2",
+      desc: "Statut, nom, prénom, email, téléphone, adresse, code postal, ville, département et région du représentant légal.",
+      value: "representative2",
+    },
+    {
+      title: "Mission",
+      desc: "Nom, département et région de la mission",
+      value: "mission",
+    },
+    {
+      title: "Candidature",
+      desc: "Date de création, date de mise à jour, statut.",
+      value: "application",
+    },
+  ];
+
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -81,56 +205,109 @@ export default function List() {
               <div>
                 <Title>Volontaires</Title>
               </div>
-              <ExportComponent
-                handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
-                defaultQuery={getExportQuery}
-                title="Exporter les volontaires"
-                exportTitle="Volontaires"
-                index="application"
-                react={{ and: FILTERS }}
-                transform={async (data) => {
-                  let all = data;
-                  const youngIds = [...new Set(data.map((item) => item.youngId))];
-                  if (youngIds?.length) {
-                    const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
-                    if (responses.length) {
-                      const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                      all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
-                    }
-                  }
-                  return all.map((data) => {
-                    return {
-                      _id: data._id,
-                      Cohorte: data.youngCohort,
-                      Prénom: data.youngFirstName,
-                      Nom: data.youngLastName,
-                      "Date de naissance": data.youngBirthdateAt,
-                      Email: data.youngEmail,
-                      Téléphone: data.young.phone,
-                      "Adresse du volontaire": data.young.address,
-                      "Code postal du volontaire": data.young.zip,
-                      "Ville du volontaire": data.young.city,
-                      "Département du volontaire": data.young.department,
-                      "Prénom représentant légal 1": data.young.parent1FirstName,
-                      "Nom représentant légal 1": data.young.parent1LastName,
-                      "Email représentant légal 1": data.young.parent1Email,
-                      "Téléphone représentant légal 1": data.young.parent1Phone,
-                      "Prénom représentant légal 2": data.young.parent2LastName,
-                      "Nom représentant légal 2": data.young.parent2LastName,
-                      "Email représentant légal 2": data.young.parent2Email,
-                      "Téléphone représentant légal 2": data.young.parent2Phone,
-                      "Choix - Ordre de la candidature": data.priority,
-                      "Nom de la mission": data.missionName,
-                      "Département de la mission": data.missionDepartment,
-                      "Région de la mission": data.missionRegion,
-                      "Candidature créée lé": data.createdAt,
-                      "Candidature mise à jour le": data.updatedAt,
-                      "Statut de la candidature": translate(data.status),
-                      Tuteur: data.tutorName,
-                    };
-                  });
-                }}
-              />
+              {/* Column selection modal */}
+
+              <LoadingButton onClick={() => setColumnModalOpen(true)}>Exporter les volontaires</LoadingButton>
+              <Modal isOpen={columnModalOpen} onCancel={() => setColumnModalOpen(false)} size="xl" centered>
+                <ModalContainer>
+                  <Formik
+                    initialValues={{
+                      checked: ["identity", "contact", "birth", "address", "location", "representative1", "representative2", "mission", "application"],
+                    }}>
+                    {({ values, setFieldValue }) => (
+                      <>
+                        <div className="text-xl">Sélectionnez les données à exporter</div>
+                        <Content>
+                          <div className="flex w-full py-4">
+                            <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
+                            <div className="w-1/2 text-right">
+                              {values.checked == "" ? (
+                                <div
+                                  className="text-snu-purple-300 cursor-pointer hover:underline"
+                                  onClick={() =>
+                                    setFieldValue("checked", [
+                                      "identity",
+                                      "contact",
+                                      "birth",
+                                      "address",
+                                      "location",
+                                      "representative1",
+                                      "representative2",
+                                      "mission",
+                                      "application",
+                                    ])
+                                  }>
+                                  Tout sélectionner
+                                </div>
+                              ) : (
+                                <div className="text-snu-purple-300 cursor-pointer hover:underline" onClick={() => setFieldValue("checked", [])}>
+                                  Tout déselectionner
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="h-[60vh] overflow-auto">
+                            <div className="grid grid-cols-2 gap-4 w-full">
+                              {COLUMNS.map((cat) => (
+                                <div
+                                  key={cat.value}
+                                  className="rounded-xl border-2 border-gray-100 px-3 py-2 cursor-pointer"
+                                  onClick={() => {
+                                    if (!values.checked.includes(cat.value)) {
+                                      const newValues = [...values.checked, cat.value];
+                                      setFieldValue("checked", newValues);
+                                    } else {
+                                      const newValues = values.checked.filter((item) => item !== cat.value);
+                                      setFieldValue("checked", newValues);
+                                    }
+                                  }}>
+                                  <div className="flex justify-between w-full">
+                                    <div className="text-left text-lg w-3/4">{cat.title}</div>
+                                    <div className="h-4">
+                                      <Field type="checkbox" name="checked" value={cat.value} />
+                                    </div>
+                                  </div>
+                                  {cat.desc.length > 150 ? (
+                                    cat.desc.length > 300 ? (
+                                      <div className="transition-[height] ease-in-out w-full text-gray-400 text-left h-10 text-ellipsis overflow-hidden hover:h-64 duration-300">
+                                        {cat.desc}
+                                      </div>
+                                    ) : (
+                                      <div className="transition-[height] ease-in-out w-full text-gray-400 text-left h-10 text-ellipsis overflow-hidden hover:h-36 duration-300">
+                                        {cat.desc}
+                                      </div>
+                                    )
+                                  ) : (
+                                    <div className="w-full text-gray-400 text-left h-10">{cat.desc}</div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </Content>
+                        <div className="flex gap-2 justify-center mb-4">
+                          <div className="w-1/2 p-0.5">
+                            <ModalButton onClick={() => setColumnModalOpen(false)}>Annuler</ModalButton>
+                          </div>
+                          <div className="flex mt-2 w-1/2 h-10">
+                            <ExportComponent
+                              handleClick={() => plausibleEvent("Volontaires/CTA - Exporter volontaires")}
+                              title="Exporter les volontaires"
+                              defaultQuery={getExportQuery}
+                              exportTitle="Volontaires"
+                              index="young"
+                              react={{ and: FILTERS }}
+                              transform={(data) => transform(data, values.checked)}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </Formik>
+                </ModalContainer>
+              </Modal>
+              {/* End column selection modal */}
             </Header>
             <Filter>
               <FilterRow visible>
