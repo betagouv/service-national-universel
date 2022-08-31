@@ -80,24 +80,7 @@ export default function List() {
   if (!missions) return <Loader />;
   console.log(filterVisible);
 
-  async function transform(data, values) {
-    console.log("yo");
-    let all = data;
-    console.log("🚀 ~ file: list.js ~ line 86 ~ transform ~ data", data);
-    const youngIds = [...new Set(data.map((item) => item.youngId))];
-    console.log("🚀 ~ file: list.js ~ line 87 ~ transform ~ youngIds", youngIds);
-    if (youngIds?.length) {
-      const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
-      console.log("🚀 ~ file: list.js ~ line 89 ~ transform ~ responses", responses);
-      if (responses.length) {
-        const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
-        console.log("🚀 ~ file: list.js ~ line 92 ~ transform ~ all", all);
-      }
-    }
-
     return all.map((data) => {
-      console.log("wesh");
       const COLUMNS = {
         identity: {
           Prénom: data.youngFirstName,
@@ -151,7 +134,6 @@ export default function List() {
         let key;
         for (key in COLUMNS[element]) columns[key] = COLUMNS[element][key];
       }
-      console.log("🚀 ~ file: list.js ~ line 149 ~ returnall.map ~ columns", columns);
       return columns;
     });
   }
@@ -290,9 +272,75 @@ export default function List() {
                               title="Exporter les volontaires"
                               defaultQuery={getExportQuery}
                               exportTitle="Volontaires"
-                              index="young"
+                              index="application"
                               react={{ and: FILTERS }}
-                              transform={(data) => transform(data, values.checked)}
+                              transform={async (data) => {
+                                let all = data;
+                                const youngIds = [...new Set(data.map((item) => item.youngId))];
+                                if (youngIds?.length) {
+                                  const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
+                                  if (responses.length) {
+                                    const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                                    all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
+                                  }
+                                }
+                                return all.map((data) => {
+                                  const COLUMNS = {
+                                    identity: {
+                                      Prénom: data.youngFirstName,
+                                      Nom: data.youngLastName,
+                                      Cohorte: data.youngCohort,
+                                    },
+                                    contact: {
+                                      Email: data.youngEmail,
+                                      Téléphone: data.young.phone,
+                                    },
+                                    birth: {
+                                      "Date de naissance": data.youngBirthdateAt,
+                                    },
+                                    address: {
+                                      "Adresse du volontaire": data.young.address,
+                                      "Code postal du volontaire": data.young.zip,
+                                      "Ville du volontaire": data.young.city,
+                                    },
+                                    location: {
+                                      Département: data.young.department,
+                                      Académie: data.young.academy,
+                                      Région: data.young.region,
+                                    },
+                                    representative1: {
+                                      "Prénom représentant légal 1": data.young.parent1FirstName,
+                                      "Nom représentant légal 1": data.young.parent1LastName,
+                                      "Email représentant légal 1": data.young.parent1Email,
+                                      "Téléphone représentant légal 1": data.young.parent1Phone,
+                                    },
+                                    representative2: {
+                                      "Prénom représentant légal 2": data.young.parent2LastName,
+                                      "Nom représentant légal 2": data.young.parent2LastName,
+                                      "Email représentant légal 2": data.young.parent2Email,
+                                      "Téléphone représentant légal 2": data.young.parent2Phone,
+                                    },
+                                    mission: {
+                                      "Nom de la mission": data.missionName,
+                                      "Département de la mission": data.missionDepartment,
+                                      "Région de la mission": data.missionRegion,
+                                    },
+                                    candidature: {
+                                      "Candidature créée lé": data.createdAt,
+                                      "Candidature mise à jour le": data.updatedAt,
+                                      "Statut de la candidature": translate(data.status),
+                                      Tuteur: data.tutorName,
+                                    },
+                                  };
+
+                                  let columns = { ID: data._id };
+                                  for (const element of values.checked) {
+                                    let key;
+                                    for (key in COLUMNS[element]) columns[key] = COLUMNS[element][key];
+                                  }
+                                  return columns;
+                                });
+                              }}
                             />
                           </div>
                         </div>
