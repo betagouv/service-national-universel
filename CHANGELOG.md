@@ -1,3 +1,10 @@
+# [1.125.0](https://github.com/betagouv/service-national-universel/compare/v1.124.2...v1.125.0) (2022-08-31)
+
+
+### Features
+
+* **admin:** add column selection to young list export ([#1735](https://github.com/betagouv/service-national-universel/issues/1735)) ([f1df43c](https://github.com/betagouv/service-national-universel/commit/f1df43cd3c186f4122af5018fbf765061a6112fa))
+
 ## [1.124.2](https://github.com/betagouv/service-national-universel/compare/v1.124.1...v1.124.2) (2022-08-30)
 
 
