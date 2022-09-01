@@ -1,3 +1,20 @@
+# [1.126.0](https://github.com/betagouv/service-national-universel/compare/v1.125.0...v1.126.0) (2022-09-01)
+
+
+### Bug Fixes
+
+* **api, admin, app:** remove content-type header on calls to api-adresse ([#1753](https://github.com/betagouv/service-national-universel/issues/1753)) ([d69f19e](https://github.com/betagouv/service-national-universel/commit/d69f19ed7566def689592db69d4a516d96823889))
+
+
+### Features
+
+* **admin:** REF DEP : rattachement à plusieurs départements ([#1608](https://github.com/betagouv/service-national-universel/issues/1608)) ([0ec6a40](https://github.com/betagouv/service-national-universel/commit/0ec6a406ecc7bccf632c3e421529d8ffea536e74))
+
+
+### Reverts
+
+* Revert "chore(deploy): disable push to staging" ([286c7b1](https://github.com/betagouv/service-national-universel/commit/286c7b14b2154ea26ecbdd7930dbc58aa852e7f1))
+
 # [1.125.0](https://github.com/betagouv/service-national-universel/compare/v1.124.2...v1.125.0) (2022-08-31)
 
 
