@@ -47,7 +47,6 @@ export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Utilisateurs");
   const [user, setUser] = useState();
   console.log("🚀 ~ file: edit.js ~ line 49 ~ Edit ~ user", user);
-  const [service, setService] = useState();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
   const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
@@ -70,11 +69,6 @@ export default function Edit(props) {
         if (!userResponse.ok) return setUser(null);
         setUser(userResponse.data);
         setDocumentTitle(`${userResponse.data.firstName} ${userResponse.data.lastName}`);
-
-        // fetching service info
-        const serviceResponse = await api.get(`/department-service/${userResponse.data.department}`);
-        if (!serviceResponse.ok) return setService(null);
-        setService(serviceResponse.data);
 
         // fetching structures info
         const structureResponse = await api.get("/structure");
@@ -107,7 +101,7 @@ export default function Edit(props) {
     })();
   }, [user]);
 
-  if (user === undefined || service === undefined) return <Loader />;
+  if (user === undefined) return <Loader />;
 
   const getSubtitle = () => {
     const createdAt = new Date(user.createdAt);
