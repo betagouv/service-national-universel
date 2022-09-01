@@ -109,7 +109,6 @@ export default function AddressInputV2({
     const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}&limit=1&postcode=${values.zip}`, {
       mode: "cors",
       method: "GET",
-      headers: { "Content-Type": "application/json" },
     });
     const res = await response.json();
     const arr = res.features.filter((e) => e.properties.type !== "municipality");
@@ -121,7 +120,6 @@ export default function AddressInputV2({
       const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${values.zip}&limit=1&postcode=${values.zip}`, {
         mode: "cors",
         method: "GET",
-        headers: { "Content-Type": "application/json" },
       });
       const res = await response.json();
       const arr = res.features.filter((e) => e.properties.type !== "municipality");

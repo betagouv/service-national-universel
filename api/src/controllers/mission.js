@@ -26,7 +26,6 @@ const putLocation = async (city, zip) => {
   const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
     mode: "cors",
     method: "GET",
-    headers: { "Content-Type": "application/json" },
   });
   const resMunicipality = await responseMunicipality.json();
   if (resMunicipality.features.length > 0) {
@@ -39,7 +38,6 @@ const putLocation = async (city, zip) => {
   const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&type=locality`, {
     mode: "cors",
     method: "GET",
-    headers: { "Content-Type": "application/json" },
   });
   const resLocality = await responseLocality.json();
   if (resLocality.features.length > 0) {
@@ -54,7 +52,6 @@ const putLocation = async (city, zip) => {
   const responsePostcode = await fetch(url, {
     mode: "cors",
     method: "GET",
-    headers: { "Content-Type": "application/json" },
   });
   const resPostcode = await responsePostcode.json();
   if (resPostcode.features.length > 0) {
