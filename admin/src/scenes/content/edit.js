@@ -154,7 +154,7 @@ export default function Edit(props) {
                       </FormGroup>
                       {values.visibility === "DEPARTMENT" ? (
                         <FormGroup>
-                          <label>Département</label>
+                          <label>Département(s)</label>
                           <ChooseDepartment validate={(v) => !v && requiredMessage} value={values.department} onChange={handleChange} />
                           <ErrorMessage errors={errors} touched={touched} name="department" />
                         </FormGroup>

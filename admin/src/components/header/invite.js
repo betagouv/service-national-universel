@@ -162,8 +162,8 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                     <Row>
                       <Col md={6}>
                         <FormGroup>
-                          <div>Département</div>
-                          <ChooseDepartment />
+                          <div>Département(s)</div>
+                          <ChooseDepartment handleChange={handleChange} />
                           <ErrorMessage errors={errors} touched={touched} name="department" />
                         </FormGroup>
                       </Col>
@@ -240,7 +240,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
   );
 }
 
-const ChooseDepartment = () => {
+const ChooseDepartment = ({ handleChange }) => {
   const { user } = useSelector((state) => state.Auth);
   const [list, setList] = useState([]);
 
@@ -256,6 +256,9 @@ const ChooseDepartment = () => {
       options={list}
       component={CustomMultiSelect}
       placeholder="Sélectionnez le(s) département(s)..."
+      onChangeAdditionnel={(val) => {
+        handleChange({ target: { name: "region", value: department2region[val[0]] } });
+      }}
       disabled={user.role === ROLES.REFERENT_DEPARTMENT && user.department.length === 1}
       validate={(v) => !v.length && requiredMessage}
     />

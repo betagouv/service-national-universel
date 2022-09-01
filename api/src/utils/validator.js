@@ -596,7 +596,7 @@ function validateReferent(referent) {
         .allow(null)
         .valid(...ROLES_LIST),
       region: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
+      department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
       subRole: Joi.string()
         .allow(null, "")
         .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST),
