@@ -181,9 +181,9 @@ export default function Edit(props) {
         try {
           //if mission doesn't have location, put one from city and zip code
           //or put Paris location
-          if (!values.location || !values.location.lat || !values.location.lon) {
-            values.location = await putLocation(values.city, values.zip);
-          }
+          // if (!values.location || !values.location.lat || !values.location.lon) {
+          //   values.location = await putLocation(values.city, values.zip);
+          // }
 
           values.duration = values.duration?.toString();
           if (!values.domains.includes(values.mainDomain)) values.domains = [values.mainDomain, ...values.domains];

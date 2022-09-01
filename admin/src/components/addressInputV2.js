@@ -31,7 +31,7 @@ export default function AddressInputV2({
   const [addressVerified, _, addressVerifiedHelpers] = useField({
     value: values[keys.addressVerified],
     name: "addressVerified",
-    validate: (v) => v !== "true" && (values[keys.address] || values[keys.zip] || values[keys.city]) && addressInFrance && "Il est obligatoire de vérifier l'adresse",
+    // validate: (v) => v !== "true" && (values[keys.address] || values[keys.zip] || values[keys.city]) && addressInFrance && "Il est obligatoire de vérifier l'adresse",
   });
 
   useEffect(() => {
@@ -40,6 +40,7 @@ export default function AddressInputV2({
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
     }
     if (!values[keys.country]) handleChange({ target: { name: keys.country, value: countryByDefault } });
+    addressVerifiedHelpers.setValue("true"); // Deactivate location check
   }, []);
 
   useEffect(() => {
@@ -261,7 +262,7 @@ export default function AddressInputV2({
           {addressInFrance ? (
             <>
               <Col md={12} style={{ display: "flex", alignItems: "flex-end" }}>
-                {addressVerified.value !== "true" ? (
+                {/* {addressVerified.value !== "true" ? (
                   <PrimaryButton style={{ marginLeft: "auto" }} onClick={() => getSuggestions(`${values[keys.address]}, ${values[keys.city]} ${values[keys.zip]}`)}>
                     {!loading ? "Vérifier" : <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
                   </PrimaryButton>
@@ -270,7 +271,7 @@ export default function AddressInputV2({
                     <InfoIcon color="#32257F" style={{ flex: "none" }} />
                     <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>L&apos;adresse a été vérifiée</div>
                   </div>
-                )}
+                )} */}
               </Col>
               <ErrorMessage errors={errors} touched={touched} name="addressVerified" />
             </>
@@ -279,7 +280,7 @@ export default function AddressInputV2({
       ) : (
         <Row>
           <Col md={12} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <b style={{ marginBottom: "16px" }}>Est-ce que c&apos;est la bonne adresse ?</b>
+            {/* <b style={{ marginBottom: "16px" }}>Est-ce que c&apos;est la bonne adresse ?</b>
             <p>{suggestion.properties.name}</p>
             <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
             <p>France</p>
@@ -293,7 +294,7 @@ export default function AddressInputV2({
               </SecondaryButton>
               <PrimaryButton onClick={onSuggestionSelected}>Oui</PrimaryButton>
             </div>
-            <ErrorMessage errors={errors} touched={touched} name="addressVerified" />
+            <ErrorMessage errors={errors} touched={touched} name="addressVerified" /> */}
           </Col>
         </Row>
       )}
