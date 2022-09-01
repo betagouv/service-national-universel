@@ -89,9 +89,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
       mode: "cors",
       method: "GET",
     });
-    console.log("🚀 ~ file: addressInputV2.js ~ line 92 ~ getSuggestions ~ response", response);
     const res = await response.json();
-    console.log("🚀 ~ file: addressInputV2.js ~ line 94 ~ getSuggestions ~ res", res);
     const arr = res.features.filter((e) => e.properties.type !== "municipality");
 
     setLoading(false);
