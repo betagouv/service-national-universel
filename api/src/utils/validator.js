@@ -18,6 +18,10 @@ function validateString(string) {
   return Joi.string().validate(string, { stripUnknown: true });
 }
 
+function validateArray(array) {
+  return Joi.array().items(Joi.string().allow(null, "")).validate(array, { stripUnknown: true });
+}
+
 function validateMission(mission) {
   return Joi.object()
     .keys({
@@ -592,7 +596,7 @@ function validateReferent(referent) {
         .allow(null)
         .valid(...ROLES_LIST),
       region: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
+      department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
       subRole: Joi.string()
         .allow(null, "")
         .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST),
@@ -673,6 +677,7 @@ function validatePhase1Document(phase1document, key) {
 module.exports = {
   validateId,
   validateString,
+  validateArray,
   validateMission,
   validateStructure,
   validateProgram,

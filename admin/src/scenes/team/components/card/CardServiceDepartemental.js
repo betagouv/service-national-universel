@@ -12,7 +12,7 @@ export default function CardDepartement({ servicesDep, department, getService })
   const handleSubmit = async (value) => {
     try {
       value.department = department;
-      const { ok, data } = await api.post("/department-service", value);
+      const { ok } = await api.post("/department-service", value);
       if (!ok) return toastr.error("Une erreur s'est produite lors de la mise a jour du service départemental");
       toastr.success("Le service départemental a été mis à jour ");
       await getService();

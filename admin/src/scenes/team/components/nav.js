@@ -2,18 +2,21 @@ import React, { useEffect, useState } from "react";
 import InfoDepartement from "./InfoDepartment";
 import FilterDepartment from "./filter/FilterDepartment";
 import { useSelector } from "react-redux";
-import { ROLES, getDepartmentNumber } from "../../../utils";
+import { ROLES, getDepartmentNumber, department2region } from "../../../utils";
 
 export default function Nav({ filter, updateFilter }) {
   const user = useSelector((state) => state.Auth.user);
   const [currentTab, setCurrentTab] = useState();
+  const [userInTheSameRegion, setUserInTheSameRegion] = useState();
 
   useEffect(() => {
     if (currentTab === "region") {
       updateFilter({ department: [], role: [ROLES.REFERENT_REGION, ROLES.VISITOR] });
-    } else if (currentTab === "department") {
+    } else if (user.department.map((department) => department2region[department]).includes(currentTab)) {
+      updateFilter({ department: [], role: [ROLES.REFERENT_REGION, ROLES.VISITOR], region: [currentTab] });
+    } else if (user.department.includes(currentTab) || currentTab === "department") {
       if (user.role === ROLES.REFERENT_DEPARTMENT) {
-        updateFilter({ department: [user.department], role: [ROLES.REFERENT_DEPARTMENT] });
+        updateFilter({ department: [currentTab], role: [ROLES.REFERENT_DEPARTMENT], region: [] });
       } else {
         updateFilter({ role: [ROLES.REFERENT_DEPARTMENT] });
       }
@@ -22,7 +25,13 @@ export default function Nav({ filter, updateFilter }) {
 
   useEffect(() => {
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      setCurrentTab("department");
+      setCurrentTab(user.department[0]);
+      const region = department2region[user.department[0]];
+      if (user.department.every((depart) => department2region[depart] === region)) {
+        setUserInTheSameRegion(true);
+      } else {
+        setUserInTheSameRegion(false);
+      }
     } else setCurrentTab("region");
   }, [user]);
 
@@ -42,17 +51,32 @@ export default function Nav({ filter, updateFilter }) {
               </>
             ) : (
               <>
-                <TabItem name="department" setCurrentTab={setCurrentTab} active={currentTab === "department"}>
-                  {user.department} ({getDepartmentNumber(user.department)})
-                </TabItem>
-                <TabItem name="region" setCurrentTab={setCurrentTab} active={currentTab === "region"}>
-                  Équipe régionale
-                </TabItem>
+                {user.department.map((department) => (
+                  <TabItem key={department} name={department} setCurrentTab={setCurrentTab} active={currentTab === department}>
+                    {department} ({getDepartmentNumber(department)})
+                  </TabItem>
+                ))}
+                {userInTheSameRegion ? (
+                  <TabItem name="region" setCurrentTab={setCurrentTab} active={currentTab === "region"}>
+                    Équipe régionale
+                  </TabItem>
+                ) : (
+                  user.department.map((department) => (
+                    <TabItem
+                      key={department2region[department]}
+                      name={department2region[department]}
+                      setCurrentTab={setCurrentTab}
+                      active={currentTab === department2region[department]}>
+                      Équipe régionale ({department2region[department]})
+                    </TabItem>
+                  ))
+                )}
               </>
             )}
           </nav>
         </div>
-        {currentTab === "department" && <InfoDepartement department={filter?.department?.length ? filter.department[0] : null} />}
+        {user.role === ROLES.REFERENT_REGION && currentTab === "department" ? <InfoDepartement department={filter?.department?.length ? filter.department[0] : null} /> : null}
+        {user.role === ROLES.REFERENT_DEPARTMENT && user.department.includes(currentTab) ? <InfoDepartement department={currentTab} /> : null}
       </div>
     </>
   );

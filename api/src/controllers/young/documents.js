@@ -9,7 +9,7 @@ const ContractObject = require("../../models/contract");
 const ApplicationObject = require("../../models/application");
 const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout, uploadFile, deleteFile, getFile } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
-const { canSendFileByMail, canDownloadYoungDocuments, canEditYoung } = require("snu-lib/roles");
+const { canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib/roles");
 const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const config = require("../../config");
 const NodeClam = require("clamscan");
@@ -141,7 +141,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
-    if (isReferent(req.user) && !canSendFileByMail(req.user, young)) {
+    if (isReferent(req.user) && !canSendFileByMailToYoung(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 

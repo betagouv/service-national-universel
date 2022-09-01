@@ -4,7 +4,7 @@ const request = require("supertest");
 
 // This part should be done at the beginning (before require models or anything else.).
 process.env.ES_ENDPOINT = "http://localhost:9200";
-jest.mock("@selego/mongoose-elastic", () => () => () => {});
+jest.mock("@selego/mongoose-elastic", () => () => () => { });
 jest.mock("@elastic/elasticsearch", () => ({
   Client: jest.fn().mockImplementation(() => {
     return {
@@ -257,11 +257,11 @@ describe("Es", () => {
     it("should filter department for referent department", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.REFERENT_DEPARTMENT;
-      passport.user.department = "foo";
+      passport.user.department = ["foo"];
 
       let res = await msearch("cohesioncenter", buildMsearchQuery("cohesioncenter", matchAll));
       expect(res.statusCode).toEqual(200);
-      expect(getFilter()[0].term["department.keyword"]).toStrictEqual("foo");
+      expect(getFilter()[0].terms["department.keyword"]).toStrictEqual(["foo"]);
 
       passport.user.role = ROLES.ADMIN;
     });
@@ -405,13 +405,16 @@ describe("Es", () => {
 
       passport.user.role = ROLES.REFERENT_DEPARTMENT;
       passport.user.region = "foo";
-      passport.department = "bar";
+      passport.department = ["bar"];
       const res = await msearch("referent", buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(200);
       const filters = getFilter()[0].bool.should;
       expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER]);
       expect(filters[1]).toStrictEqual({
         bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_REGION } }, { term: { "region.keyword": passport.user.region } }] },
+      });
+      expect(filters[2]).toStrictEqual({
+        bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { terms: { "department.keyword": passport.user.department } }] },
       });
 
       passport.user.role = ROLES.ADMIN;
@@ -422,7 +425,7 @@ describe("Es", () => {
 
       passport.user.role = ROLES.REFERENT_REGION;
       passport.user.region = "foo";
-      passport.department = "bar";
+      passport.department = ["bar"];
       const res = await msearch("referent", buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(200);
       const filters = getFilter()[0].bool.should;
@@ -451,7 +454,7 @@ describe("Es", () => {
       const passport = require("passport");
 
       passport.user.role = ROLES.REFERENT_DEPARTMENT;
-      passport.user.department = "plop";
+      passport.user.department = ["plop"];
       let res = await msearch("cohesionyoung/" + center._id, buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(403);
     });
@@ -469,7 +472,7 @@ describe("Es", () => {
       const passport = require("passport");
 
       passport.user.role = ROLES.REFERENT_DEPARTMENT;
-      passport.user.department = "bim";
+      passport.user.department = ["bim"];
       let res = await msearch("cohesionyoung/" + center._id, buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(200);
     });
@@ -527,11 +530,11 @@ describe("Es", () => {
     it("should filter department for referent department", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.REFERENT_DEPARTMENT;
-      passport.user.department = "foo";
+      passport.user.department = ["foo"];
 
       let res = await msearch("young", buildMsearchQuery("young", matchAll));
       expect(res.statusCode).toEqual(200);
-      expect(getFilter()[1].term["department.keyword"]).toStrictEqual("foo");
+      expect(getFilter()[1].terms["department.keyword"]).toStrictEqual(["foo"]);
 
       passport.user.role = ROLES.ADMIN;
     });

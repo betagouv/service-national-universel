@@ -10,7 +10,7 @@ function getNewReferentFixture() {
     email: faker.internet.email().toLowerCase(),
     password: faker.internet.password(),
     region: faker.address.state(),
-    department: faker.address.state(),
+    department: [faker.address.state()],
     phone: faker.phone.phoneNumber(),
     mobile: faker.phone.phoneNumber(),
     role: ROLES.ADMIN,

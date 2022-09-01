@@ -41,11 +41,12 @@ import Badge from "../../components/Badge";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
+import CustomMultiSelect from "../../components/CustomMultiSelect";
 
 export default function Edit(props) {
   const setDocumentTitle = useDocumentTitle("Utilisateurs");
   const [user, setUser] = useState();
-  const [service, setService] = useState();
+  console.log("🚀 ~ file: edit.js ~ line 49 ~ Edit ~ user", user);
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
   const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
@@ -68,11 +69,6 @@ export default function Edit(props) {
         if (!userResponse.ok) return setUser(null);
         setUser(userResponse.data);
         setDocumentTitle(`${userResponse.data.firstName} ${userResponse.data.lastName}`);
-
-        // fetching service info
-        const serviceResponse = await api.get(`/department-service/${userResponse.data.department}`);
-        if (!serviceResponse.ok) return setService(null);
-        setService(serviceResponse.data);
 
         // fetching structures info
         const structureResponse = await api.get("/structure");
@@ -105,7 +101,7 @@ export default function Edit(props) {
     })();
   }, [user]);
 
-  if (user === undefined || service === undefined) return <Loader />;
+  if (user === undefined) return <Loader />;
 
   const getSubtitle = () => {
     const createdAt = new Date(user.createdAt);
@@ -327,21 +323,7 @@ export default function Edit(props) {
                           </>
                         ) : null}
 
-                        {values.role === ROLES.REFERENT_DEPARTMENT ? (
-                          <Select
-                            disabled={currentUser.role !== ROLES.ADMIN}
-                            name="department"
-                            values={values}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              handleChange({ target: { name: "department", value } });
-                              const region = department2region[value];
-                              handleChange({ target: { name: "region", value: region } });
-                            }}
-                            title="Département"
-                            options={departmentList.map((d) => ({ value: d, label: d }))}
-                          />
-                        ) : null}
+                        {values.role === ROLES.REFERENT_DEPARTMENT ? <ChooseDepartment handleChange={handleChange} currentUser={currentUser} /> : null}
                         {values.role === ROLES.REFERENT_REGION ? (
                           <Select
                             disabled={values.role === ROLES.REFERENT_DEPARTMENT}
@@ -432,6 +414,31 @@ export default function Edit(props) {
     </>
   );
 }
+
+const ChooseDepartment = ({ currentUser, handleChange }) => {
+  const list = departmentList.map((e) => ({ value: e, label: e }));
+
+  return (
+    <Row className="detail">
+      <Col md={4}>
+        <label>Département(s)</label>
+      </Col>
+      <Col md={8}>
+        <Field
+          name="department"
+          options={list}
+          component={CustomMultiSelect}
+          placeholder="Sélectionnez le(s) département(s)..."
+          disabled={currentUser.role !== ROLES.ADMIN}
+          onChangeAdditionnel={(val) => {
+            handleChange({ target: { name: "region", value: department2region[val[0]] } });
+          }}
+          validate={(v) => !v.length && requiredMessage}
+        />
+      </Col>
+    </Row>
+  );
+};
 
 const Item = ({ title, values, name, handleChange, type = "text", disabled = false }) => {
   const renderInput = () => {

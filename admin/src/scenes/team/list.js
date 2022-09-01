@@ -39,6 +39,7 @@ export default function List() {
       query: { bool: { must: { match_all: {} }, filter: [] } },
       track_total_hits: true,
     };
+    if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
     if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
     if (filter.role?.length) body.query.bool.filter.push({ terms: { "role.keyword": filter.role } });
     return body;
@@ -62,7 +63,7 @@ export default function List() {
     getService();
     updateFilter({ region: [user.region] });
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: [user.department] });
+      updateFilter({ department: user.department });
     }
   }, []);
 
@@ -86,15 +87,19 @@ export default function List() {
                       const services = await getService();
                       return all.map((data) => {
                         let structure = {};
+                        let department = Array.isArray(data.department) ? data.department : [data.department];
+                        department = department.find((d) => filter.department[0] === d);
+
                         if (data.structureId && structures) {
                           structure = structures.find((s) => s._id === data.structureId);
                           if (!structure) structure = {};
                         }
                         let service = {};
                         if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
-                          service = services.find((s) => s.department === data.department);
+                          service = services.find((s) => s.department === department);
                           if (!service) service = {};
                         }
+
                         return {
                           _id: data._id,
                           Prénom: data.firstName,
@@ -104,11 +109,11 @@ export default function List() {
                           Fonction: translate(data.subRole),
                           Téléphone: data.phone,
                           Portable: data.mobile,
-                          Département: data.department,
+                          Département: department,
                           Région: data.region,
                           Structure: structure?.name,
                           "Nom de la direction du service départemental": service?.directionName,
-                          "Adresse du service départemental": service?.address + service?.complementAddress,
+                          "Adresse du service départemental": service?.address ? service?.address + service?.complementAddress : "",
                           "Code Postal du service départemental": service?.zip,
                           "Ville du service départemental": service?.city,
                           "Créé lé": formatLongDateFR(data.createdAt),

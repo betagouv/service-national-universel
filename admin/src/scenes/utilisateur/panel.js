@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-
-import { translate, ROLES, ES_NO_LIMIT, copyToClipboard, canUpdateReferent, canDeleteReferent, formatPhoneNumberFR } from "../../utils";
+import { translate, ROLES, ES_NO_LIMIT, copyToClipboard, canUpdateReferent, canDeleteReferent, formatPhoneNumberFR, department2region } from "../../utils";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -37,7 +36,7 @@ export default function UserPanel({ onChange, value }) {
     (async () => {
       if (!value.structureId) return;
       const { ok, data, code } = await api.get(`/structure/${value.structureId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survnue lors de la récupération de la structure", translate(code));
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
       return setStructure(data);
     })();
     (async () => {
@@ -163,8 +162,11 @@ export default function UserPanel({ onChange, value }) {
       <Info title="Informations">
         <Details title="Rôle" value={translate(value.role)} />
         <Details title="Fonction" value={translate(value.subRole)} />
-        <Details title="Région" value={value.region} />
-        <Details title="Département" value={value.department} />
+        {value.role === ROLES.REFERENT_DEPARTMENT ? (
+          value.department.map((v, i) => <Details key={i} title="Département" value={`${v} (${department2region[v]})`} />)
+        ) : (
+          <Details title="Région" value={value.region} />
+        )}
         <Details title="Tel fixe" value={formatPhoneNumberFR(value.phone)} />
         <Details title="Tel Mobile" value={formatPhoneNumberFR(value.mobile)} />
       </Info>
@@ -235,11 +237,6 @@ export default function UserPanel({ onChange, value }) {
           </Info>
         </React.Fragment>
       ) : null}
-      {/* <div>
-        {Object.keys(value).map((e) => {
-          return <div>{`${e}:${value[e]}`}</div>;
-        })}
-      </div> */}
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
