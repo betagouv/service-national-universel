@@ -88,7 +88,6 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
     const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
       mode: "cors",
       method: "GET",
-      headers: { "Content-Type": "application/json" },
     });
     const res = await response.json();
     const arr = res.features.filter((e) => e.properties.type !== "municipality");
