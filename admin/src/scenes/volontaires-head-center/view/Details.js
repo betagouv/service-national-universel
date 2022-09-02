@@ -53,18 +53,6 @@ export default function DetailsVolontaires({ young }) {
               <div className="quote">{`« ${young.motivations} »`}</div>
             </Bloc>
           )}
-
-          {![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(user?.role) && (
-            <Bloc title="Situation">
-              <Details title="Statut" value={t(young.situation)} />
-              <Details title="Type" value={young.schoolType} />
-              <Details title="Nom" value={young.schoolName} />
-              <Details title="Région" value={young.schoolRegion} />
-              <Details title="Dép" value={young.schoolDepartment} />
-              <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
-              <Details title="Adresse" value={young.schoolAdress} />
-            </Bloc>
-          )}
         </Col>
         <Col md={6}>
           <Bloc title="Situation">
