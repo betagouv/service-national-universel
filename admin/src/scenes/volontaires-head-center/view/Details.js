@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
@@ -8,6 +9,8 @@ import DownloadButton from "../../../components/buttons/DownloadButton";
 import { Box, BoxTitle } from "../../../components/box";
 
 export default function DetailsVolontaires({ young }) {
+  const user = useSelector((state) => state.Auth.user);
+
   return (
     <Box>
       <Row>
@@ -48,6 +51,18 @@ export default function DetailsVolontaires({ young }) {
           {young.motivations && (
             <Bloc title="Motivations">
               <div className="quote">{`« ${young.motivations} »`}</div>
+            </Bloc>
+          )}
+
+          {![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(user?.role) && (
+            <Bloc title="Situation">
+              <Details title="Statut" value={t(young.situation)} />
+              <Details title="Type" value={young.schoolType} />
+              <Details title="Nom" value={young.schoolName} />
+              <Details title="Région" value={young.schoolRegion} />
+              <Details title="Dép" value={young.schoolDepartment} />
+              <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
+              <Details title="Adresse" value={young.schoolAdress} />
             </Bloc>
           )}
         </Col>
