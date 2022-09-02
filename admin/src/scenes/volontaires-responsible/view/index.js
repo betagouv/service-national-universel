@@ -6,7 +6,7 @@ import Phase2Contract from "./phase2Contract";
 import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
 
 import api from "../../../services/api";
-import Details from "../../../components/volontaires-view/Details";
+import Details from "./Details";
 import Wrapper from "./wrapper";
 import { ENABLE_PM } from "../../../utils";
 
