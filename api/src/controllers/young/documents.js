@@ -386,8 +386,11 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
     let applications;
     if (req.user?.role?.includes([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])) {
       const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+      console.log("🚀 ~ file: documents.js ~ line 389 ~ router.get ~ structures", structures);
       const structuresIds = structures?.map(({ _id }) => _id?.toString());
+      console.log("🚀 ~ file: documents.js ~ line 391 ~ router.get ~ structuresIds", structuresIds);
       applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: { $in: structuresIds } });
+      console.log("🚀 ~ file: documents.js ~ line 393 ~ router.get ~ applications", applications);
     }
 
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
@@ -429,8 +432,11 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     let applications;
     if (req.user?.role?.includes([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])) {
       const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+      console.log("🚀 ~ file: documents.js ~ line 435 ~ router.get ~ structures", structures);
       const structuresIds = structures?.map(({ _id }) => _id?.toString());
+      console.log("🚀 ~ file: documents.js ~ line 437 ~ router.get ~ structuresIds", structuresIds);
       applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: { $in: structuresIds } });
+      console.log("🚀 ~ file: documents.js ~ line 439 ~ router.get ~ applications", applications);
     }
 
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
