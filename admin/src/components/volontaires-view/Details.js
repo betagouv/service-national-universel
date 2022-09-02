@@ -22,7 +22,7 @@ export default function DetailsVolontaires({ young }) {
             <Details title="Dép" value={young.department} />
             <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
             <Details title="Adresse" value={young.address} />
-            {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role) &&
+            {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(user?.role) &&
               (young.files.cniFiles || []).map((e, i) => (
                 <DownloadButton
                   key={i}
@@ -32,7 +32,7 @@ export default function DetailsVolontaires({ young }) {
               ))}
           </Bloc>
 
-          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role) && (
+          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(user?.role) && (
             <Bloc title="Situations particulières">
               <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
               <Details title="Handicap" value={t(young.handicap)} />
@@ -51,7 +51,7 @@ export default function DetailsVolontaires({ young }) {
             </Bloc>
           )}
 
-          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role) && (
+          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(user?.role) && (
             <Bloc title="Droit à l'image">
               <Details title="Autorisation" value={t(young.imageRight)} />
               {(young.files.imageRightFiles || []).map((e, i) => (
@@ -70,7 +70,7 @@ export default function DetailsVolontaires({ young }) {
             </Bloc>
           )}
 
-          {![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role) && (
+          {![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(user?.role) && (
             <Bloc title="Situation">
               <Details title="Statut" value={t(young.situation)} />
               <Details title="Type" value={young.schoolType} />
@@ -83,7 +83,7 @@ export default function DetailsVolontaires({ young }) {
           )}
         </Col>
         <Col md={6}>
-          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role) && (
+          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(user?.role) && (
             <Bloc title="Situation">
               <Details title="Statut" value={t(young.situation)} />
               <Details title="Type" value={young.schoolType} />
