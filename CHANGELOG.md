@@ -1,3 +1,19 @@
+## [1.126.1](https://github.com/betagouv/service-national-universel/compare/v1.126.0...v1.126.1) (2022-09-02)
+
+
+### Bug Fixes
+
+* **admin:** hide private info in young view for resp ([#1754](https://github.com/betagouv/service-national-universel/issues/1754)) ([b4eec4f](https://github.com/betagouv/service-national-universel/commit/b4eec4f37bf87a7827bdb38ad46b7c90ce28a7ce))
+* **api:** Download documents supervisor ([#1755](https://github.com/betagouv/service-national-universel/issues/1755)) ([540d7bc](https://github.com/betagouv/service-national-universel/commit/540d7bc2cbc157bc38b0da37e69a6c2d76c9d9c3))
+* **api:** download files rules (to revert !!!) ([d6a6d11](https://github.com/betagouv/service-national-universel/commit/d6a6d116a4af214cdf1e41535386291779485e6e))
+* **api:** Fix download rights ([5b479c2](https://github.com/betagouv/service-national-universel/commit/5b479c2c44b77316f330d5fed1b7a3883d17510d))
+* **api:** log error ([ac4813e](https://github.com/betagouv/service-national-universel/commit/ac4813ec974d6a0dce7cc2675d168f260fa6e91f))
+
+
+### Reverts
+
+* **api:** Revert rights to download ([e118407](https://github.com/betagouv/service-national-universel/commit/e11840769e838d02a664f3a6db2ab60e0ab63d02))
+
 # [1.126.0](https://github.com/betagouv/service-national-universel/compare/v1.125.0...v1.126.0) (2022-09-01)
 
 
