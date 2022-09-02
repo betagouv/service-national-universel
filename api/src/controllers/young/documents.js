@@ -79,10 +79,13 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-    const structuresIds = structures?.map(({ _id }) => _id?.toString());
+    let applications;
+    if (req.user?.role.includes([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])) {
+      const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+      const structuresIds = structures?.map(({ _id }) => _id?.toString());
+      applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: { $in: structuresIds } });
+    }
 
-    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: { $in: structuresIds } });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
@@ -380,10 +383,13 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
 
     if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-    const structuresIds = structures?.map(({ _id }) => _id?.toString());
+    let applications;
+    if (req.user?.role.includes([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])) {
+      const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+      const structuresIds = structures?.map(({ _id }) => _id?.toString());
+      applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: { $in: structuresIds } });
+    }
 
-    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: { $in: structuresIds } });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
@@ -420,10 +426,13 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
 
     if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-    const structuresIds = structures?.map(({ _id }) => _id?.toString());
+    let applications;
+    if (req.user?.role.includes([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])) {
+      const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+      const structuresIds = structures?.map(({ _id }) => _id?.toString());
+      applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: { $in: structuresIds } });
+    }
 
-    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: { $in: structuresIds } });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
