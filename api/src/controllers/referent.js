@@ -42,7 +42,6 @@ const {
   translateFileStatusPhase1,
   getCcOfYoung,
   notifDepartmentChange,
-  //  updateApplicationsWithYoungOrMission,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
@@ -387,8 +386,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       const populationDensity = await getDensity(newYoung.cityCode);
       newYoung.populationDensity = populationDensity;
     }
-
-    // await updateApplicationsWithYoungOrMission({ young, newYoung });
 
     young.set(newYoung);
     await young.save({ fromUser: req.user });
@@ -901,7 +898,7 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     const user = await ReferentModel.findById(req.user._id);
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     user.set(value);
-    await user.save();
+    await user.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(user, req.user);
     res.status(200).send({ ok: true, data: user });
   } catch (error) {

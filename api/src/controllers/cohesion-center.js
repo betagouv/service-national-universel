@@ -93,12 +93,12 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     if (center.waitingList.indexOf(young._id) !== -1) {
       const i = center.waitingList.indexOf(young._id);
       center.waitingList.splice(i, 1);
-      await center.save();
+      await center.save({ fromUser: req.user });
     }
     if (oldCenter && oldCenter.waitingList.indexOf(young._id) !== -1) {
       const i = oldCenter.waitingList.indexOf(young._id);
       oldCenter.waitingList.splice(i, 1);
-      await oldCenter.save();
+      await oldCenter.save({ fromUser: req.user });
     }
     // update center infos
     if (bus) await updatePlacesBus(bus);
@@ -140,7 +140,7 @@ router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authentica
     await young.save({ fromUser: req.user });
 
     center.waitingList.push(young._id);
-    await center.save();
+    await center.save({ fromUser: req.user });
 
     return res.status(200).send({ data: serializeCohesionCenter(center), ok: true });
   } catch (error) {
@@ -368,7 +368,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const previousCohorts = center.cohorts || [];
     center.set(newCenter);
-    await center.save();
+    await center.save({ fromUser: req.user });
 
     // if we change the cohorts, we need to update the sessionPhase1
     if (newCenter?.cohorts?.length) {
@@ -384,7 +384,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
           const session = await SessionPhase1.findOne({ cohesionCenterId, cohort });
           if (session) {
             session.set({ placesTotal, placesLeft, status });
-            await session.save();
+            await session.save({ fromUser: req.user });
           } else {
             await SessionPhase1.create({ cohesionCenterId, cohort, placesTotal, placesLeft, status });
           }

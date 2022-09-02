@@ -235,8 +235,8 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     const young = await YoungObject.findById(contract.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     await updateYoungStatusPhase2Contract(young, req.user);
-    await updateYoungPhase2Hours(young);
-    await updateStatusPhase2(young);
+    await updateYoungPhase2Hours(young, req.user);
+    await updateStatusPhase2(young, req.user);
 
     return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
   } catch (error) {

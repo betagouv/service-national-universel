@@ -32,7 +32,6 @@ const {
   inSevenDays,
   isYoung,
   isReferent,
-  // updateApplicationsWithYoungOrMission,
   updatePlacesBus,
   updatePlacesSessionPhase1,
   translateFileStatusPhase1,
@@ -419,7 +418,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (value?.department && young?.department && value?.department !== young?.department) {

@@ -322,7 +322,7 @@ const sendAutoCancelMeetingPoint = async (young) => {
 
 // }
 
-async function updateYoungPhase2Hours(young) {
+async function updateYoungPhase2Hours(young, fromUser) {
   const applications = await ApplicationModel.find({
     youngId: young._id,
     status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] },
@@ -341,11 +341,11 @@ async function updateYoungPhase2Hours(young) {
         .reduce((acc, current) => acc + current, 0),
     ),
   });
-  await young.save();
+  await young.save({ fromUser });
 }
 // This function should always be called after updateYoungPhase2Hours.
 // This could be refactored in one function.
-const updateStatusPhase2 = async (young) => {
+const updateStatusPhase2 = async (young, fromUser) => {
   const applications = await ApplicationModel.find({ youngId: young._id });
   young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
 
@@ -388,7 +388,7 @@ const updateStatusPhase2 = async (young) => {
     // We change young status to WAITING_LIST if he has no estimated hours of phase 2.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
   }
-  await young.save();
+  await young.save({ fromUser });
 };
 
 const checkStatusContract = (contract) => {
@@ -440,39 +440,6 @@ const getBaseUrl = () => {
   if (ENVIRONMENT === "production") return "https://api.snu.gouv.fr";
   return "http://localhost:8080";
 };
-
-async function updateApplicationsWithYoungOrMission({ young, newYoung, mission, newMission }) {
-  if (young && Object.keys(young).length !== 0) {
-    const noNeedToUpdate = isObjectKeysIsEqual(young, newYoung, ["firstName", "lastName", "email", "birthdateAt", "city", "department", "cohort"]);
-    if (noNeedToUpdate) return;
-
-    const applications = await ApplicationModel.find({ youngId: young._id });
-    for (const application of applications) {
-      application.youngFirstName = newYoung.firstName;
-      application.youngLastName = newYoung.lastName;
-      application.youngEmail = newYoung.email;
-      application.youngBirthdateAt = newYoung.birthdateAt;
-      application.youngCity = newYoung.city;
-      application.youngDepartment = newYoung.department;
-      application.youngCohort = newYoung.cohort;
-      await application.save();
-      console.log(`Update application ${application._id}`);
-    }
-  } else if (mission && Object.keys(mission).length !== 0) {
-    const noNeedToUpdate = isObjectKeysIsEqual(mission, newMission, ["name", "department", "region"]);
-    console.log(noNeedToUpdate);
-    if (noNeedToUpdate) return;
-
-    const applications = await ApplicationModel.find({ missionId: mission._id });
-    for (const application of applications) {
-      application.missionName = newMission.name;
-      application.missionDepartment = newMission.department;
-      application.missionRegion = newMission.region;
-      await application.save();
-      console.log(`Update application ${application._id}`);
-    }
-  }
-}
 
 const isObjectKeysIsEqual = (object, newObject, keys) => {
   for (const key of keys) {
@@ -728,7 +695,6 @@ module.exports = {
   updateYoungPhase2Hours,
   updateStatusPhase2,
   getSignedUrlForApiAssociation,
-  updateApplicationsWithYoungOrMission,
   updateYoungStatusPhase2Contract,
   checkStatusContract,
   sanitizeAll,
