@@ -1,3 +1,17 @@
+# [1.127.0](https://github.com/betagouv/service-national-universel/compare/v1.126.1...v1.127.0) (2022-09-05)
+
+
+### Bug Fixes
+
+* **admin:** fix ES query for propose mission ([8b60acc](https://github.com/betagouv/service-national-universel/commit/8b60accc69c4e9ee6914d76d8b0c3c8ee3f7d5fd))
+* **api:** gif refdeps access to all missions ([#1760](https://github.com/betagouv/service-national-universel/issues/1760)) ([a2a1497](https://github.com/betagouv/service-national-universel/commit/a2a14975b3e8d692c15dc3d0e96c745a87a14f0d))
+* **plausible:** Use link per id ([e68a363](https://github.com/betagouv/service-national-universel/commit/e68a363e97c4c2181ff10fd675868bd5122031fd))
+
+
+### Features
+
+* **admin/app:** Improve tracking on plausible ([#1758](https://github.com/betagouv/service-national-universel/issues/1758)) ([508017f](https://github.com/betagouv/service-national-universel/commit/508017f0b1c128f5c8cd2ebfc603abeba229c3a9))
+
 ## [1.126.1](https://github.com/betagouv/service-national-universel/compare/v1.126.0...v1.126.1) (2022-09-02)
 
 
