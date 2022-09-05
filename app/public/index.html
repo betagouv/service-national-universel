@@ -21,13 +21,20 @@
     })(document, "script");
     */
     </script>
-    <script async defer data-domain="moncompte.snu.gouv.fr" src="https://plausible.io/js/plausible.js"></script>
+    <script defer data-domain="moncompte.snu.gouv.fr" src="https://plausible.io/js/script.manual.outbound-links.file-downloads.js"></script>
     <script>
       window.plausible =
         window.plausible ||
         function () {
           (window.plausible.q = window.plausible.q || []).push(arguments);
         };
+    </script>
+    <script>
+      var url = window.location.href;
+      // Replace every all-numeric sequences located between two slashes by "_ID_"
+      var redactedUrl = url.replace(/\/\d+\//g, "/_ID_/");
+      // Send the pageview event to Plausible
+      plausible("pageview", { u: redactedUrl });
     </script>
     <!--
   Start of global snippet: Please do not remove
