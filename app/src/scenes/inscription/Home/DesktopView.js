@@ -83,7 +83,7 @@ export default function DesktopView() {
         </div>
         {/* Info Container */}
         <div>
-          <div className="w-9/12 m-auto pt-4 pb-4 grid grid-cols-1 grid-rows-4  gap-x-8 gap-y-4 md:grid-cols-4 text-sm		">
+          <div className="w-9/12 m-auto pt-4 pb-4 grid grid-cols-1 grid-rows-4  gap-x-8 gap-y-4 md:grid-cols-5 text-sm		">
             <div>
               <p className="hidden md:block text-[#32267f] text-[1rem]">
                 Vérifiez si vous êtes <strong>éligible au SNU :</strong>
@@ -108,6 +108,14 @@ export default function DesktopView() {
                 séjour du{" "}
                 <strong>
                   3 au 15 juillet <br /> 2022
+                </strong>
+              </p>
+            </div>
+            <div>
+              <p className="hidden md:block text-center text-[#6b7280] text-[1rem]">
+                séjour du{" "}
+                <strong>
+                  23 octobre au 4 novembre <br /> 2022
                 </strong>
               </p>
             </div>
@@ -145,6 +153,20 @@ export default function DesktopView() {
                   </p>
                   {condition.isDate2 ? (
                     <p style={{ color: "red", fontSize: "0.7rem" }}>Inscriptions clôturées</p>
+                  ) : (
+                    <p>
+                      <StopIcon />
+                    </p>
+                  )}
+                </div>
+                <div className="text-center flex justify-between items-center	 md:flex-col ">
+                  <p className="block md:hidden text-[0.8rem] uppercase text-[#6b7280]">
+                    du <strong>3 au 15 juillet 2022</strong>
+                  </p>
+                  {condition.isDate3 ? (
+                    <p>
+                      <p style={{ color: "red", fontSize: "0.7rem" }}>Inscriptions clôturées</p>
+                    </p>
                   ) : (
                     <p>
                       <StopIcon />

@@ -71,6 +71,16 @@ router.post("/eligibility/2022", async (req, res) => {
       buffer: 1.25,
       id: "Juillet 2022",
     },
+    {
+      month: "Octobre",
+      excludedGrade: [],
+      excludedZip: [],
+      includedBirthdate: { begin: "2004-11-05", end: "2007-10-23" },
+      inscriptionLimitDate: "2022-10-03, 00:00:01",
+      stringDate: "23 octobre au 4 novembre 2022",
+      buffer: 1.25,
+      id: "Octobre 2022",
+    },
   ].filter((el) => {
     if (Date.now() > new Date(el.inscriptionLimitDate).getTime()) return false;
     else if (el.excludedGrade.includes(schoolLevel)) return false;
