@@ -35,7 +35,7 @@ export default function ProposeMission({ mission, updateMission }) {
       },
       track_total_hits: true,
     };
-    if (user.role === ROLES.REFERENT_DEPARTMENT) defaultQuery.query.bool.filter.push({ term: { "department.keyword": user.department } });
+    if (user.role === ROLES.REFERENT_DEPARTMENT) defaultQuery.query.bool.filter.push({ terms: { "department.keyword": user.department } });
     if (user.role === ROLES.REFERENT_REGION) defaultQuery.query.bool.filter.push({ term: { "region.keyword": user.region } });
 
     if (mission.location?.lat && mission.location?.lon) {
