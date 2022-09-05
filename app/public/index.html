@@ -32,7 +32,7 @@
     <script>
       var url = window.location.href;
       // Replace every all-numeric sequences located between two slashes by "_ID_"
-      var redactedUrl = url.replace(/\/\d+\//g, "/_ID_/");
+      var redactedUrl = url.replace(/[0-9a-fA-F]{24}/g, ":id");
       // Send the pageview event to Plausible
       plausible("pageview", { u: redactedUrl });
     </script>
