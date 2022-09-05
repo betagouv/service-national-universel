@@ -29,6 +29,7 @@ export default function InformationsComplementaires({ values, handleChange }) {
             placeholder="Sélectionnez une cohorte"
             title="Cohorte"
             options={[
+              { value: "Octobre 2022", label: "Octobre 2022" },
               { value: "Juillet 2022", label: "Juillet 2022" },
               { value: "Juin 2022", label: "Juin 2022" },
               { value: "Février 2022", label: "Février 2022" },
