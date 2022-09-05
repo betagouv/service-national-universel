@@ -32,8 +32,6 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
       filter.push({ terms: { "structureId.keyword": [user.structureId] } });
     }
 
-    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ terms: { "department.keyword": user.department } });
-
     // A supervisor can only see their structures' missions.
     if (user.role === ROLES.SUPERVISOR) {
       if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
