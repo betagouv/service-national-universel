@@ -1,3 +1,10 @@
+## [1.127.1](https://github.com/betagouv/service-national-universel/compare/v1.127.0...v1.127.1) (2022-09-06)
+
+
+### Bug Fixes
+
+* **api:** Fix mimetype errors ([#1769](https://github.com/betagouv/service-national-universel/issues/1769)) ([43cb0c8](https://github.com/betagouv/service-national-universel/commit/43cb0c891da2e607f43829ed587c72f9b9b7ada1))
+
 # [1.127.0](https://github.com/betagouv/service-national-universel/compare/v1.126.1...v1.127.0) (2022-09-05)
 
 
