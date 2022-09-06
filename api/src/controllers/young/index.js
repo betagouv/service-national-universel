@@ -1046,7 +1046,7 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
     } catch (e) {
-      //
+      capture(e);
     }
 
     return res.status(200).send({

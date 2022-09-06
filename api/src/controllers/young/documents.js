@@ -432,12 +432,20 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
       }
     }
 
-    // Send to app
+    // * Recalculate mimetype for reupload
+    let mimeFromFile = null;
+    try {
+      const { mime } = await FileType.fromBuffer(decryptedBuffer);
+      mimeFromFile = mime;
+    } catch (e) {
+      capture(e);
+    }
 
+    // Send to app
     const decryptedBuffer = decrypt(downloaded.Body);
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
-      mimeType: young.files[key].id(fileId).mimetype,
+      mimeType: mimeFromFile || young.files[key].id(fileId).mimetype,
       fileName: young.files[key].id(fileId).name,
       ok: true,
     });

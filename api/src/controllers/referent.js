@@ -613,7 +613,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
     } catch (e) {
-      //
+      capture(e);
     }
 
     return res.status(200).send({
@@ -657,7 +657,7 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
     } catch (e) {
-      //
+      capture(e);
     }
 
     return res.status(200).send({
