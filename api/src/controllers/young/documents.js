@@ -283,7 +283,7 @@ router.post(
 
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
-        const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+        const resultingFile = { mimetype: mimeFromMagicNumbers, encoding: "7bit", data: encryptedBuffer };
         if (MILITARY_FILE_KEYS.includes(key)) {
           await uploadFile(`app/young/${id}/military-preparation/${key}/${newFile._id}`, resultingFile);
         } else {
