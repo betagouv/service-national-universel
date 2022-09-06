@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import ProfileButton from "./ProfileButton";
 import { Popover } from "@headlessui/react";
 import SeeAsContext from "../contexts/seeAs";
+import { translateRoleBDC } from "../utils/constants";
 
 const Wrapper = ({ children }) => {
   const { mutate, user, restriction } = useUser();
@@ -30,7 +31,8 @@ const Wrapper = ({ children }) => {
 
   const router = useRouter();
 
-  const withSeeAs = ["admin", "referent"].includes(user?.role);
+  const withSeeAs = ["admin", "referent_department", "referent_region"].includes(user?.role);
+  const categoryAccessibleReferent = ["referent", "head_center", " young", "visitor"];
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -80,16 +82,16 @@ const Wrapper = ({ children }) => {
                   <Popover.Button className="flex items-center justify-center gap-3 rounded-none border-none bg-white p-0 text-left shadow-none">
                     <img src="/assets/change-user.png" className="h-5 w-5 grayscale" />
                     <div className="flex h-full flex-col justify-center">
-                      <span className="text-sm font-medium text-gray-700">Voir en tant que</span>
+                      <span className="text-sm font-medium text-gray-700">Voir les articles de</span>
                       {/* {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[seeAs || user.role]}</span>} */}
                     </div>
                   </Popover.Button>
 
                   <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] lg:min-w-0">
                     <div className="flex flex-col gap-4 rounded-md border border-gray-300 bg-white px-4 py-3">
-                      {roles.map((role) => (
+                      {roles.filter((role)=> user.role === "admin" ? true : categoryAccessibleReferent.includes(role) ).map((role) => (
                         <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} cursor-pointer text-gray-700`}>
-                          {role}
+                          {translateRoleBDC[role]}
                         </a>
                       ))}
                     </div>
