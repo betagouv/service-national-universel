@@ -82,7 +82,7 @@ const Wrapper = ({ children }) => {
                   <Popover.Button className="flex items-center justify-center gap-3 rounded-none border-none bg-white p-0 text-left shadow-none">
                     <img src="/assets/change-user.png" className="h-5 w-5 grayscale" />
                     <div className="flex h-full flex-col justify-center">
-                      <span className="text-sm font-medium text-gray-700">Voir les articles de</span>
+                      <span className="text-sm font-medium text-gray-700">Voir les articles pour</span>
                       {/* {!!user.role && <span className="text-xs font-medium text-gray-500">{SUPPORT_ROLES[seeAs || user.role]}</span>} */}
                     </div>
                   </Popover.Button>
