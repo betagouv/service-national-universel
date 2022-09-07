@@ -31,11 +31,15 @@ export default function TicketCreate(props) {
 
       <CardContainer>
         <Card onClick={() => history.push("/phase1")}>
-          <Unlock style={{ transform: "scale(0.8)" }} />
+          <div className="w-12">
+            <Unlock style={{ transform: "scale(0.7)" }} />
+          </div>
           <div className="text-sm font-bold">Débloquez votre accès gratuit au code de la route</div>
         </Card>
         <Card onClick={() => history.push("/phase1")}>
-          <QuestionBubble />
+          <div className="ml-1 w-11">
+            <QuestionBubble />
+          </div>
           <div className="text-sm font-bold">Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?</div>
         </Card>
       </CardContainer>
@@ -242,10 +246,13 @@ const Card = styled.div`
   flex: 2;
   align-items: center;
   padding: 0.5rem;
-  gap: 1rem;
+  gap: 0.5rem;
   border-radius: 0.5rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   background-color: #fff;
   margin: 0 auto;
   cursor: pointer;
+  &:hover {
+    transform: translate(-1px, 1px);
+  }
 `;

@@ -1,7 +1,7 @@
 import * as React from "react";
 
 const QuestionBubble = (props) => (
-  <svg width={65} height={40} fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+  <svg width={60} height={40} fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
     <path
       d="M8.0625 26.3437V9.65625C8.0625 9.15625 8.46875 8.71875 8.96875 8.71875H33.4687C33.9687 8.75 34.375 9.15625 34.375 9.6875V25.4062C34.375 25.9062 33.9687 26.3437 33.4687 26.3437H32.6562"
       fill="#D6F1FF"
