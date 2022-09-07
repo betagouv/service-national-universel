@@ -20,6 +20,7 @@ const mongoose = require("mongoose");
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
 const { getHtmlTemplate } = require("../../templates/utils");
+const mime = require("mime-types");
 
 function getMailParams(type, template, young, contract) {
   if (type === "certificate" && template === "1")
@@ -445,7 +446,7 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     const decryptedBuffer = decrypt(downloaded.Body);
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
-      mimeType: mimeFromFile || young.files[key].id(fileId).mimetype,
+      mimeType: mime.lookup(young.files[key].id(fileId).name),
       fileName: young.files[key].id(fileId).name,
       ok: true,
     });
