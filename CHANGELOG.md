@@ -1,3 +1,25 @@
+# [1.128.0](https://github.com/betagouv/service-national-universel/compare/v1.127.1...v1.128.0) (2022-09-07)
+
+
+### Bug Fixes
+
+* **admin:** Ajout du role dans l'historique ([#1772](https://github.com/betagouv/service-national-universel/issues/1772)) ([b724800](https://github.com/betagouv/service-national-universel/commit/b7248006f34e08c2349ba5bc5887e54892f77685))
+* **api:** Mimetype / trust extension ([#1770](https://github.com/betagouv/service-national-universel/issues/1770)) ([2cf6b0e](https://github.com/betagouv/service-national-universel/commit/2cf6b0e9775c0fd91104f184b607dbffb7ca5fdd))
+* **cron:** Add 2 hours to time from JVA ([0a12b3a](https://github.com/betagouv/service-national-universel/commit/0a12b3ae66ace0b66ed85623aa7c741bc0f20e7b))
+* **github:** Redeploy on changes on lib ([6530e99](https://github.com/betagouv/service-national-universel/commit/6530e99037cd9b611be480bcb15df2179adf2d04))
+* **kb:** Fix change role ([#1768](https://github.com/betagouv/service-national-universel/issues/1768)) ([8eedf9a](https://github.com/betagouv/service-national-universel/commit/8eedf9aaf765fc4213875b381b74f3cb5d01372b))
+* **lib:** Runtime error ! ([0b93852](https://github.com/betagouv/service-national-universel/commit/0b93852c84bd2af0ed85c9c421beda55133595ac))
+
+
+### Features
+
+* **api:** sync contact support ([#1771](https://github.com/betagouv/service-national-universel/issues/1771)) ([375d12d](https://github.com/betagouv/service-national-universel/commit/375d12d4e61d7325e4ca1368cd238554682f5298))
+
+
+### Reverts
+
+* **api:** Force redeploy api ([22e5033](https://github.com/betagouv/service-national-universel/commit/22e5033e454e6d56c852fc0f8fb4a21041fd2e93))
+
 ## [1.127.1](https://github.com/betagouv/service-national-universel/compare/v1.127.0...v1.127.1) (2022-09-06)
 
 
