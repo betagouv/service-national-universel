@@ -54,6 +54,8 @@ function addOneYear(date) {
   return newDate;
 }
 
+const TWO_HOURS = 2 * 60 * 60 * 1000;
+
 const fetchMission = (page = 1) => {
   //preoprod : https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/
   //prod : https://www.jeveuxaider.gouv.fr/
@@ -184,11 +186,14 @@ const sync = async (result) => {
           : ""
         : "";
 
+      const startAt = new Date(mission.start_date);
+      const endAt = new Date(mission.end_date);
+
       const infoMission = {
         name: mission.name,
         mainDomain: jva2SnuDomaines[mission.domaine.name],
-        startAt: new Date(mission.start_date),
-        endAt: mission.end_date ? new Date(mission.end_date) : addOneYear(mission.start_date),
+        startAt: new Date(startAt.getTime() + TWO_HOURS),
+        endAt: mission.end_date ? new Date(endAt.getTime() + TWO_HOURS) : addOneYear(mission.start_date),
         placesTotal: mission.snu_mig_places,
         description: mission.objectifs,
         frequence: frequence,
