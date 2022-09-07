@@ -89,11 +89,13 @@ const Wrapper = ({ children }) => {
 
                   <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] lg:min-w-0">
                     <div className="flex flex-col gap-4 rounded-md border border-gray-300 bg-white px-4 py-3">
-                      {roles.filter((role)=> user.role === "admin" ? true : categoryAccessibleReferent.includes(role) ).map((role) => (
-                        <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} cursor-pointer text-gray-700`}>
-                          {translateRoleBDC[role]}
-                        </a>
-                      ))}
+                      {roles
+                        .filter((role) => (user.role === "admin" ? true : categoryAccessibleReferent.includes(role)))
+                        .map((role) => (
+                          <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} cursor-pointer text-gray-700`}>
+                            {translateRoleBDC[role]}
+                          </a>
+                        ))}
                     </div>
                   </Popover.Panel>
                 </Popover>
@@ -141,9 +143,7 @@ const Wrapper = ({ children }) => {
             </Link>
           </div>
           <div className="flex max-w-full flex-wrap items-center justify-center  gap-4">
-            <span className="cursor-pointer text-center text-xs text-[#6A6A6A]">
-              Tous droits réservés - Ministère de l'éducation nationale et de la jeunesse - 2022
-            </span>
+            <span className="cursor-pointer text-center text-xs text-[#6A6A6A]">Tous droits réservés - Ministère de l'éducation nationale et de la jeunesse - 2022</span>
           </div>
           <div className="flex max-w-full flex-wrap items-center justify-center  gap-4">
             <Link href="https://www.gouvernement.fr/">
