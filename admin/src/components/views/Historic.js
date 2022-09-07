@@ -28,15 +28,15 @@ export default function Historic({ model, value }) {
   return !data ? (
     <Loader />
   ) : (
-      <div className="flex flex-col gap-3 w-full">
-        {data.length === 0 ? <div className="italic p-1">Aucune données</div> : null}
-        {user?.role === ROLES.ADMIN ? (
-          <input onChange={(e) => setFilter(e.target.value)} value={filter} className="bg-white p-2 rounded-lg w-[350px]" placeholder="Rechercher..." />
-        ) : null}
-        {data.map((hit) => (
-          <Hit model={model} key={hit._id} hit={hit} filter={filter} />
-        ))}
-      </div>
+    <div className="flex flex-col gap-3 w-full">
+      {data.length === 0 ? <div className="italic p-1">Aucune données</div> : null}
+      {user?.role === ROLES.ADMIN ? (
+        <input onChange={(e) => setFilter(e.target.value)} value={filter} className="bg-white p-2 rounded-lg w-[350px]" placeholder="Rechercher..." />
+      ) : null}
+      {data.map((hit) => (
+        <Hit model={model} key={hit._id} hit={hit} filter={filter} />
+      ))}
+    </div>
   );
 }
 
@@ -93,9 +93,16 @@ const Hit = ({ hit, model, filter }) => {
     <div className="bg-white shadow-md rounded-lg">
       <div className="flex p-3 border-b justify-between items-center cursor-pointer" onClick={() => setViewDetails((e) => !e)}>
         <div>
-          <span className="font-bold">{hit.user && hit.user.firstName ? [hit.user.firstName, hit.user.lastName].join(" ") : "Acteur non renseigné"}</span>
+          <span className="font-bold">
+            {hit.user && hit.user.role
+              ? [hit.user.firstName, hit.user.lastName, `(${hit.user.role})`].join(" ")
+              : hit.user && hit.user.firstName
+              ? [hit.user.firstName, hit.user.lastName].join(" ")
+              : "Acteur non renseigné"}
+          </span>
           ,&nbsp;{formatStringLongDate(hit.date)}
         </div>
+
         <div className="flex gap-2 items-center text-coolGray-500">
           <span className="italic">
             {hit.ops.length} action{hit.ops.length > 1 ? "s" : ""}
