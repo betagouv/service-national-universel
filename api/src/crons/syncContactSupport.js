@@ -18,7 +18,6 @@ exports.handler = async () => {
     const response = await zammood.api(`/v0/young`, { method: "POST", credentials: "include", body: JSON.stringify({ contacts }) });
     if (!response.ok) slack.error({ title: "Fail sync contacts (young + ref) to Zammood", text: JSON.stringify(response.code) });
   } catch (e) {
-    capture(`ERROR`, JSON.stringify(e));
     capture(e);
   }
 };
@@ -27,7 +26,7 @@ const getUserAttributes = async (user) => {
   try {
     const structureLink = `${ADMIN_URL}/structure/${user.structureId}`;
     const missionsLink = `${ADMIN_URL}/structure/${user.structureId}/missions`;
-    // const centerLink = `${ADMIN_URL}/centre/${user.cohesionCenterId}`;
+    const centerLink = `${ADMIN_URL}/centre/${user.cohesionCenterId}`;
     const profilLink = isYoung(user) ? `${ADMIN_URL}/volontaire/${user._id}` : `${ADMIN_URL}/user/${user._id}`;
     const role = isYoung(user) ? "young" : user.role;
     const userAttributes = [
@@ -75,6 +74,6 @@ const getUserAttributes = async (user) => {
     }
     return userAttributes;
   } catch (e) {
-    console.log(e);
+    capture(e);
   }
 };
