@@ -34,7 +34,7 @@ export default function TicketCreate(props) {
           <Unlock style={{ transform: "scale(0.8)" }} />
           <div className="text-sm font-bold">Débloquez votre accès gratuit au code de la route</div>
         </Card>
-        <Card>
+        <Card onClick={() => history.push("/phase1")}>
           <QuestionBubble />
           <div className="text-sm font-bold">Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?</div>
         </Card>
