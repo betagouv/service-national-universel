@@ -12,6 +12,8 @@ import ErrorMessage, { requiredMessage } from "../../inscription/components/erro
 import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
 import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
+import Unlock from "../../../assets/icons/Unlock";
+import QuestionBubble from "../../../assets/icons/QuestionBubble";
 
 export default function TicketCreate(props) {
   const history = useHistory();
@@ -26,7 +28,19 @@ export default function TicketCreate(props) {
         <h4>Contacter quelqu&apos;un</h4>
         <p>Vous avez un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l&apos;un de vos référents ?</p>
       </Heading>
-      <Form>
+
+      <CardContainer>
+        <Card onClick={() => history.push("/phase1")}>
+          <Unlock style={{ transform: "scale(0.8)" }} />
+          <div className="text-sm font-bold">Débloquez votre accès gratuit au code de la route</div>
+        </Card>
+        <Card>
+          <QuestionBubble />
+          <div className="text-sm font-bold">Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?</div>
+        </Card>
+      </CardContainer>
+
+      <Form className="mt-4">
         <Formik
           initialValues={{ step1: null, step2: null, message: "" }}
           validateOnChange={false}
@@ -210,4 +224,28 @@ const Form = styled.div`
   @media (max-width: 767px) {
     width: 100%;
   }
+`;
+
+const CardContainer = styled.div`
+  margin: 0 auto;
+  display: flex;
+  gap: 1rem;
+  width: clamp(700px, 80%, 1000px);
+  @media (max-width: 900px) {
+    width: 100%;
+    flex-direction: column;
+  }
+`;
+
+const Card = styled.div`
+  display: flex;
+  flex: 2;
+  align-items: center;
+  padding: 0.5rem;
+  gap: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  margin: 0 auto;
+  cursor: pointer;
 `;
