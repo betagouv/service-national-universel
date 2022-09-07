@@ -253,6 +253,6 @@ const Card = styled.div`
   margin: 0 auto;
   cursor: pointer;
   &:hover {
-    transform: translate(-1px, 1px);
+    box-shadow: 0 5px 15px 3px rgba(0, 0, 0, 0.2);
   }
 `;
