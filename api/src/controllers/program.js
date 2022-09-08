@@ -4,7 +4,7 @@ const passport = require("passport");
 const { capture } = require("../sentry");
 
 const ProgramObject = require("../models/program");
-const { ERRORS } = require("../utils");
+const { ERRORS, isYoung } = require("../utils");
 const { validateId, validateString, validateArray, validateProgram } = require("../utils/validator");
 const { ROLES, canCreateOrUpdateProgram } = require("snu-lib/roles");
 
@@ -58,7 +58,12 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     if (req.user.role === ROLES.ADMIN) data = await ProgramObject.find({});
     else if (req.user.role === ROLES.HEAD_CENTER) data = await ProgramObject.find({ visibility: "HEAD_CENTER" });
     else {
-      const { error: errorDepartement, value: checkedDepartement } = validateArray(req.user.department);
+      let errorDepartement, checkedDepartement;
+      if (isYoung(req.user)) {
+        ({ error: errorDepartement, value: checkedDepartement } = validateString(req.user.department));
+      } else {
+        ({ error: errorDepartement, value: checkedDepartement } = validateArray(req.user.department));
+      }
       const { error: errorRegion, value: checkedRegion } = validateString(req.user.region);
       if (errorDepartement || errorRegion) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       data = await ProgramObject.find({ $or: [{ visibility: "NATIONAL" }, { department: checkedDepartement }, { region: checkedRegion }] });
