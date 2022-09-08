@@ -610,7 +610,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
     } catch (e) {
-      //
+      capture(e);
     }
 
     return res.status(200).send({
@@ -654,7 +654,7 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
     } catch (e) {
-      //
+      capture(e);
     }
 
     return res.status(200).send({
@@ -748,7 +748,7 @@ router.post(
 
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
-        const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+        const resultingFile = { mimetype: mimeFromMagicNumbers, encoding: "7bit", data: encryptedBuffer };
         if (militaryKeys.includes(key)) {
           await uploadFile(`app/young/${young._id}/military-preparation/${key}/${name}`, resultingFile);
         } else {

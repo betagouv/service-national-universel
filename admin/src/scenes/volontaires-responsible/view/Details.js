@@ -2,10 +2,8 @@ import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
-import { translate as t } from "../../utils";
-import api from "../../services/api";
-import DownloadButton from "../buttons/DownloadButton";
-import { Box, BoxTitle } from "../box";
+import { translate as t } from "../../../utils";
+import { Box, BoxTitle } from "../../../components/box";
 
 export default function DetailsVolontaires({ young }) {
   return (
@@ -19,47 +17,14 @@ export default function DetailsVolontaires({ young }) {
             <Details title="Dép" value={young.department} />
             <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
             <Details title="Adresse" value={young.address} />
-            {(young.files.cniFiles || []).map((e, i) => (
-              <DownloadButton
-                key={i}
-                source={() => api.get(`/young/${young._id}/documents/cniFiles/${e}`)}
-                title={`Télécharger la pièce d’identité (${i + 1}/${young.files.cniFiles.length})`}
-              />
-            ))}
           </Bloc>
-          <Bloc title="Situations particulières">
-            <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
-            <Details title="Handicap" value={t(young.handicap)} />
-            <Details title="PPS" value={t(young.ppsBeneficiary)} />
-            <Details title="PAI" value={t(young.paiBeneficiary)} />
-            <Details title="Suivi médicosociale" value={t(young.medicosocialStructure)} />
-            <Details title="Aménagement spécifique" value={t(young.specificAmenagment)} />
-            <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
-            {(young.files.highSkilledActivityProofFiles || []).map((e, i) => (
-              <DownloadButton
-                key={i}
-                source={() => api.get(`/young/${young._id}/documents/highSkilledActivityProofFiles/${e}`)}
-                title={`Télécharger la pièce jusitificative (${i + 1}/${young.files.highSkilledActivityProofFiles.length})`}
-              />
-            ))}
-          </Bloc>
-          <Bloc title="Droit à l'image">
-            <Details title="Autorisation" value={t(young.imageRight)} />
-            {(young.files.imageRightFiles || []).map((e, i) => (
-              <DownloadButton
-                key={i}
-                source={() => api.get(`/young/${young._id}/documents/imageRightFiles/${e}`)}
-                title={`Télécharger le formulaire (${i + 1}/${young.files.imageRightFiles.length})`}
-              />
-            ))}
-          </Bloc>
+
           {young.motivations && (
             <Bloc title="Motivations">
               <div className="quote">{`« ${young.motivations} »`}</div>
             </Bloc>
           )}
-        </Col>
-        <Col md={6}>
+
           <Bloc title="Situation">
             <Details title="Statut" value={t(young.situation)} />
             <Details title="Type" value={young.schoolType} />
@@ -69,6 +34,9 @@ export default function DetailsVolontaires({ young }) {
             <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
             <Details title="Adresse" value={young.schoolAdress} />
           </Bloc>
+        </Col>
+
+        <Col md={6}>
           <Bloc title="Représentant légal n°1">
             <Details title="Statut" value={t(young.parent1Status)} />
             <Details title="Prénom" value={young.parent1FirstName} />
@@ -80,6 +48,7 @@ export default function DetailsVolontaires({ young }) {
             <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
             <Details title="Adresse" value={young.parent1Address} />
           </Bloc>
+
           {young.parent2Status ? (
             <Bloc title="Représentant légal n°2">
               <Details title="Statut" value={t(young.parent2Status)} />

@@ -1,3 +1,62 @@
+# [1.128.0](https://github.com/betagouv/service-national-universel/compare/v1.127.1...v1.128.0) (2022-09-07)
+
+
+### Bug Fixes
+
+* **admin:** Ajout du role dans l'historique ([#1772](https://github.com/betagouv/service-national-universel/issues/1772)) ([b724800](https://github.com/betagouv/service-national-universel/commit/b7248006f34e08c2349ba5bc5887e54892f77685))
+* **api:** Mimetype / trust extension ([#1770](https://github.com/betagouv/service-national-universel/issues/1770)) ([2cf6b0e](https://github.com/betagouv/service-national-universel/commit/2cf6b0e9775c0fd91104f184b607dbffb7ca5fdd))
+* **cron:** Add 2 hours to time from JVA ([0a12b3a](https://github.com/betagouv/service-national-universel/commit/0a12b3ae66ace0b66ed85623aa7c741bc0f20e7b))
+* **github:** Redeploy on changes on lib ([6530e99](https://github.com/betagouv/service-national-universel/commit/6530e99037cd9b611be480bcb15df2179adf2d04))
+* **kb:** Fix change role ([#1768](https://github.com/betagouv/service-national-universel/issues/1768)) ([8eedf9a](https://github.com/betagouv/service-national-universel/commit/8eedf9aaf765fc4213875b381b74f3cb5d01372b))
+* **lib:** Runtime error ! ([0b93852](https://github.com/betagouv/service-national-universel/commit/0b93852c84bd2af0ed85c9c421beda55133595ac))
+
+
+### Features
+
+* **api:** sync contact support ([#1771](https://github.com/betagouv/service-national-universel/issues/1771)) ([375d12d](https://github.com/betagouv/service-national-universel/commit/375d12d4e61d7325e4ca1368cd238554682f5298))
+
+
+### Reverts
+
+* **api:** Force redeploy api ([22e5033](https://github.com/betagouv/service-national-universel/commit/22e5033e454e6d56c852fc0f8fb4a21041fd2e93))
+
+## [1.127.1](https://github.com/betagouv/service-national-universel/compare/v1.127.0...v1.127.1) (2022-09-06)
+
+
+### Bug Fixes
+
+* **api:** Fix mimetype errors ([#1769](https://github.com/betagouv/service-national-universel/issues/1769)) ([43cb0c8](https://github.com/betagouv/service-national-universel/commit/43cb0c891da2e607f43829ed587c72f9b9b7ada1))
+
+# [1.127.0](https://github.com/betagouv/service-national-universel/compare/v1.126.1...v1.127.0) (2022-09-05)
+
+
+### Bug Fixes
+
+* **admin:** fix ES query for propose mission ([8b60acc](https://github.com/betagouv/service-national-universel/commit/8b60accc69c4e9ee6914d76d8b0c3c8ee3f7d5fd))
+* **api:** gif refdeps access to all missions ([#1760](https://github.com/betagouv/service-national-universel/issues/1760)) ([a2a1497](https://github.com/betagouv/service-national-universel/commit/a2a14975b3e8d692c15dc3d0e96c745a87a14f0d))
+* **plausible:** Use link per id ([e68a363](https://github.com/betagouv/service-national-universel/commit/e68a363e97c4c2181ff10fd675868bd5122031fd))
+
+
+### Features
+
+* **admin/app:** Improve tracking on plausible ([#1758](https://github.com/betagouv/service-national-universel/issues/1758)) ([508017f](https://github.com/betagouv/service-national-universel/commit/508017f0b1c128f5c8cd2ebfc603abeba229c3a9))
+
+## [1.126.1](https://github.com/betagouv/service-national-universel/compare/v1.126.0...v1.126.1) (2022-09-02)
+
+
+### Bug Fixes
+
+* **admin:** hide private info in young view for resp ([#1754](https://github.com/betagouv/service-national-universel/issues/1754)) ([b4eec4f](https://github.com/betagouv/service-national-universel/commit/b4eec4f37bf87a7827bdb38ad46b7c90ce28a7ce))
+* **api:** Download documents supervisor ([#1755](https://github.com/betagouv/service-national-universel/issues/1755)) ([540d7bc](https://github.com/betagouv/service-national-universel/commit/540d7bc2cbc157bc38b0da37e69a6c2d76c9d9c3))
+* **api:** download files rules (to revert !!!) ([d6a6d11](https://github.com/betagouv/service-national-universel/commit/d6a6d116a4af214cdf1e41535386291779485e6e))
+* **api:** Fix download rights ([5b479c2](https://github.com/betagouv/service-national-universel/commit/5b479c2c44b77316f330d5fed1b7a3883d17510d))
+* **api:** log error ([ac4813e](https://github.com/betagouv/service-national-universel/commit/ac4813ec974d6a0dce7cc2675d168f260fa6e91f))
+
+
+### Reverts
+
+* **api:** Revert rights to download ([e118407](https://github.com/betagouv/service-national-universel/commit/e11840769e838d02a664f3a6db2ab60e0ab63d02))
+
 # [1.126.0](https://github.com/betagouv/service-national-universel/compare/v1.125.0...v1.126.0) (2022-09-01)
 
 

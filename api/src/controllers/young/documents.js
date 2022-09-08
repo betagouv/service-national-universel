@@ -20,6 +20,7 @@ const mongoose = require("mongoose");
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
 const { getHtmlTemplate } = require("../../templates/utils");
+const mime = require("mime-types");
 
 function getMailParams(type, template, young, contract) {
   if (type === "certificate" && template === "1")
@@ -283,7 +284,7 @@ router.post(
 
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
-        const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+        const resultingFile = { mimetype: mimeFromMagicNumbers, encoding: "7bit", data: encryptedBuffer };
         if (MILITARY_FILE_KEYS.includes(key)) {
           await uploadFile(`app/young/${id}/military-preparation/${key}/${newFile._id}`, resultingFile);
         } else {
@@ -432,12 +433,20 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
       }
     }
 
-    // Send to app
-
+    // * Recalculate mimetype for reupload
     const decryptedBuffer = decrypt(downloaded.Body);
+    let mimeFromFile = null;
+    try {
+      const { mime } = await FileType.fromBuffer(decryptedBuffer);
+      mimeFromFile = mime;
+    } catch (e) {
+      capture(e);
+    }
+
+    // Send to app
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
-      mimeType: young.files[key].id(fileId).mimetype,
+      mimeType: mime.lookup(young.files[key].id(fileId).name),
       fileName: young.files[key].id(fileId).name,
       ok: true,
     });

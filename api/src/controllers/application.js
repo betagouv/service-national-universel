@@ -38,7 +38,7 @@ async function updateMission(app, fromUser) {
     // On met à jour le nb de candidatures en attente.
     const pendingApplications = await ApplicationObject.countDocuments({
       missionId: mission._id,
-      status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION", "WAITING_ACCEPTATION"] },
+      status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION"] },
     });
     if (mission.pendingApplications !== pendingApplications) {
       mission.set({ pendingApplications });
