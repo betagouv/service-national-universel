@@ -15,7 +15,7 @@ exports.handler = async () => {
     for (const contact of contacts) {
       contact.attributes = await getUserAttributes(contact);
     }
-    const response = await zammood.api(`/v0/young`, { method: "POST", credentials: "include", body: JSON.stringify({ contacts }) });
+    const response = await zammood.api(`/v0/contact`, { method: "POST", credentials: "include", body: JSON.stringify({ contacts }) });
     if (!response.ok) slack.error({ title: "Fail sync contacts (young + ref) to Zammood", text: JSON.stringify(response.code) });
   } catch (e) {
     capture(e);
