@@ -20,6 +20,7 @@ export default function TicketCreate(props) {
   const young = useSelector((state) => state.Auth.young);
   const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
   const fromPage = new URLSearchParams(props.location.search).get("from");
+  console.log(young.statusPhase1);
 
   return (
     <Container>
@@ -29,20 +30,24 @@ export default function TicketCreate(props) {
         <p>Vous avez un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l&apos;un de vos référents ?</p>
       </Heading>
 
-      <CardContainer>
-        <Card onClick={() => history.push("/phase1")}>
-          <div className="w-12">
-            <Unlock style={{ transform: "scale(0.7)" }} />
-          </div>
-          <div className="text-sm font-bold">Débloquez votre accès gratuit au code de la route</div>
-        </Card>
-        <Card onClick={() => history.push("/phase1")}>
-          <div className="ml-1 w-11">
-            <QuestionBubble />
-          </div>
-          <div className="text-sm font-bold">Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?</div>
-        </Card>
-      </CardContainer>
+      {/* Links to Phase 1 page */}
+
+      {["EXEMPTED", "DONE"].includes(young?.statusPhase1) && (
+        <CardContainer>
+          <Card onClick={() => history.push("/phase1")}>
+            <div className="w-12">
+              <Unlock style={{ transform: "scale(0.7)" }} />
+            </div>
+            <div className="text-sm font-bold">Débloquez votre accès gratuit au code de la route</div>
+          </Card>
+          <Card onClick={() => history.push("/phase1")}>
+            <div className="ml-1 w-11">
+              <QuestionBubble />
+            </div>
+            <div className="text-sm font-bold">Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?</div>
+          </Card>
+        </CardContainer>
+      )}
 
       <Form className="mt-4">
         <Formik
