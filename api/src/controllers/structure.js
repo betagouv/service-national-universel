@@ -15,14 +15,14 @@ const { validateId, validateStructure } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
-const setAndSave = async (data, keys) => {
+const setAndSave = async (data, keys, fromUser) => {
   data.set({ ...keys });
-  await data.save();
+  await data.save({ fromUser });
 };
 
 // Update "network name" to ease search ("Affilié à un réseau national" filter).
 // See: https://trello.com/c/BjRN9NME/523-admin-filtre-affiliation-%C3%A0-une-t%C3%AAte-de-r%C3%A9seau
-async function updateNetworkName(structure) {
+async function updateNetworkName(structure, fromUser) {
   if (structure.networkId) {
     // When the structure is a child (part of a network), get the network
     const network = await StructureObject.findById(structure.networkId);
@@ -34,7 +34,7 @@ async function updateNetworkName(structure) {
     await setAndSave(structure, { networkName: structure.name });
     // Then update their childs.
     const childs = await StructureObject.find({ networkId: structure._id });
-    for (const child of childs) await setAndSave(child, { networkName: structure.name });
+    for (const child of childs) await setAndSave(child, { networkName: structure.name }, fromUser);
   }
 }
 async function updateMissionStructureName(structure) {
@@ -64,8 +64,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!canCreateStructure(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await StructureObject.create(checkedStructure);
-    await updateNetworkName(data);
-    await updateResponsibleAndSupervisorRole(data);
+    await updateNetworkName(data, req.user);
+    await updateResponsibleAndSupervisorRole(data, req.user);
     sendTemplate(SENDINBLUE_TEMPLATES.referent.STRUCTURE_REGISTERED, {
       emailTo: [{ name: `${req.user.firstName} ${req.user.lastName}`, email: `${req.user.email}` }],
     });
@@ -91,9 +91,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     structure.set(checkedStructure);
     await structure.save({ fromUser: req.user });
-    await updateNetworkName(structure);
-    await updateMissionStructureName(structure);
-    await updateResponsibleAndSupervisorRole(structure);
+    await updateNetworkName(structure, req.user);
+    await updateMissionStructureName(structure, req.user);
+    await updateResponsibleAndSupervisorRole(structure, req.user);
     return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
   } catch (error) {
     capture(error);
