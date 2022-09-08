@@ -138,11 +138,11 @@ a:hover {
 }
 
 .modal-backdrop {
-  background-color: #58576580;
+  background-color: #585765;
 }
 
 .modal-backdrop.show {
-  opacity: 0.88;
+  opacity: 0.5;
 }
 
 h2 {
