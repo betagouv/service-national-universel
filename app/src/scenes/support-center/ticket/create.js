@@ -20,7 +20,6 @@ export default function TicketCreate(props) {
   const young = useSelector((state) => state.Auth.young);
   const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
   const fromPage = new URLSearchParams(props.location.search).get("from");
-  console.log(young.statusPhase1);
 
   return (
     <Container>
@@ -33,7 +32,7 @@ export default function TicketCreate(props) {
       {/* Links to Phase 1 page */}
 
       {["EXEMPTED", "DONE"].includes(young?.statusPhase1) && (
-        <CardContainer>
+        <CardContainer className="mb-3">
           <Card onClick={() => history.push("/phase1")}>
             <div className="w-12">
               <Unlock style={{ transform: "scale(0.7)" }} />
@@ -49,7 +48,7 @@ export default function TicketCreate(props) {
         </CardContainer>
       )}
 
-      <Form className="mt-4">
+      <Form>
         <Formik
           initialValues={{ step1: null, step2: null, message: "" }}
           validateOnChange={false}
