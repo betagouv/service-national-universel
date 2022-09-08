@@ -102,7 +102,11 @@ export default function viewMobile() {
       const ageAtStart = getDiffYear(mission.startAt, young.birthdateAt);
       setDisabledAge(ageAtStart < 16);
       setDisabledPmRefused(young.statusMilitaryPreparationFiles === "REFUSED");
-      if (!young.files.militaryPreparationFilesIdentity.length || !young.files.militaryPreparationFilesAuthorization.length || !young.files.militaryPreparationFilesCertificate.length) {
+      if (
+        !young.files.militaryPreparationFilesIdentity.length ||
+        !young.files.militaryPreparationFilesAuthorization.length ||
+        !young.files.militaryPreparationFilesCertificate.length
+      ) {
         setDisabledIncomplete(true);
       } else {
         setDisabledIncomplete(false);
@@ -216,8 +220,9 @@ export default function viewMobile() {
           <div className="bg-gray-50 rounded-lg  p-3">
             <div className="flex">
               <div
-                className={`text-xs font-normal px-2 py-1 ${contract?.invitationSent ? "bg-sky-100 text-sky-500" : "bg-gray-200 text-gray-600"
-                  } rounded-sm items-center flex space-x-1`}>
+                className={`text-xs font-normal px-2 py-1 ${
+                  contract?.invitationSent ? "bg-sky-100 text-sky-500" : "bg-gray-200 text-gray-600"
+                } rounded-sm items-center flex space-x-1`}>
                 {contract?.invitationSent && <AiFillClockCircle className="text-sky-500" />}
                 <div>Contrat {contract?.invitationSent ? "envoyé" : "en brouillon"}</div>
               </div>
@@ -672,8 +677,9 @@ const ApplicationStatus = ({
               </button>
               {/* display options */}
               <div
-                className={`${openContractButton ? "block" : "hidden"
-                  }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
+                className={`${
+                  openContractButton ? "block" : "hidden"
+                }  rounded-lg !min-w-full lg:!min-w-3/4 bg-white transition absolute right-0 shadow overflow-hidden z-50 top-[40px]`}>
                 <div
                   key="download"
                   onClick={() => {

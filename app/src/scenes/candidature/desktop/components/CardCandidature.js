@@ -79,7 +79,7 @@ export default function application({ application: propsApplication, index, onCh
             <div className="flex flex-1">
               {/* icon */}
               <div className="flex items-center">
-                <DomainThumb domain={mission?.domain} size="3rem" />
+                {mission?.isMilitaryPreparation === "true" ? <DomainThumb domain={"military"} size="3rem" /> : <DomainThumb domain={mission?.mainDomain} size="3rem" />}
               </div>
 
               {/* infos mission */}

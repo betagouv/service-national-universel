@@ -79,7 +79,7 @@ export default function application({ application, index, onChange, loading }) {
           <div className="flex my-3">
             {/* icon */}
             <div className="flex items-start">
-              <DomainThumb domain={mission?.domain} size="3rem" />
+              {mission?.isMilitaryPreparation === "true" ? <DomainThumb domain={"military"} size="3rem" /> : <DomainThumb domain={mission?.mainDomain} size="3rem" />}
             </div>
 
             {/* infos mission */}
