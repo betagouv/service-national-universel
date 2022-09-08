@@ -95,7 +95,7 @@ const Hit = ({ hit, model, filter }) => {
         <div>
           <span className="font-bold">
             {hit.user && hit.user.role
-              ? [hit.user.firstName, hit.user.lastName, `(${hit.user.role})`].join(" ")
+              ? [hit.user.firstName, hit.user.lastName, `(${translate(hit.user.role)})`].join(" ")
               : hit.user && hit.user.firstName
               ? [hit.user.firstName, hit.user.lastName].join(" ")
               : "Acteur non renseigné"}
