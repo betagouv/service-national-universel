@@ -39,14 +39,14 @@ export default function TicketCreate(props) {
               <Unlock style={{ transform: "scale(0.7)" }} />
             </div>
             <div className="text-sm font-bold grow">Débloquez votre accès gratuit au code de la route</div>
-            <ChevronRight className="scale-[200%] stroke-white fill-gray-300 w-2 mr-1" />
+            <ChevronRight className="scale-[200%] stroke-white fill-gray-300 w-4 mr-1" />
           </div>
           <div className="flex items-center p-2 gap-2 rounded-lg bg-white shadow-md cursor-pointer hover:shadow-lg" onClick={() => history.push("/phase1")}>
             <div className="ml-1 w-11">
               <QuestionBubble />
             </div>
             <div className="text-sm font-bold">Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?</div>
-            <ChevronRight className="scale-[200%] stroke-white fill-gray-300 w-2 mr-1" />
+            <ChevronRight className="scale-[200%] stroke-white fill-gray-300 w-4 mr-1" />
           </div>
         </div>
       )}
