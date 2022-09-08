@@ -136,7 +136,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     sessionPhase1.set(value);
     await sessionPhase1.save({ fromUser: req.user });
 
-    const data = await updatePlacesSessionPhase1(sessionPhase1);
+    const data = await updatePlacesSessionPhase1(sessionPhase1, req.user);
     res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
   } catch (error) {
     capture(error);
@@ -289,8 +289,8 @@ router.post("/:sessionId/assign-young/:youngId", passport.authenticate("referent
     await young.save({ fromUser: req.user });
 
     // update session infos
-    const data = await updatePlacesSessionPhase1(session);
-    if (oldSession) await updatePlacesSessionPhase1(oldSession);
+    const data = await updatePlacesSessionPhase1(session, req.user);
+    if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
     if (bus) await updatePlacesBus(bus);
 
     return res.status(200).send({

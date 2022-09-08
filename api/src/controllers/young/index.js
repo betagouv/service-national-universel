@@ -453,12 +453,12 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.sessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     // if they had a meeting point, we check if we need to update the places taken / left in the bus
     if (young.meetingPointId) {
-      const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
+      const meetingPoint = await MeetingPointModel.findById(young.meetingPointId, req.user);
       if (meetingPoint) {
         const bus = await BusModel.findById(meetingPoint.busId);
         if (bus) await updatePlacesBus(bus);
@@ -554,7 +554,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     // if they had a session, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
@@ -615,7 +615,7 @@ router.post("/:id/session-phase1/cancel", passport.authenticate("referent", { se
     // if they had a session, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     // if they had a meetingPoint, we check if we need to update the places taken / left in the bus

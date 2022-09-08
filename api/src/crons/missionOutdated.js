@@ -1,5 +1,6 @@
 require("dotenv").config({ path: "./../../.env-staging" });
 require("../mongo");
+const path = require("path");
 const { capture } = require("../sentry");
 const Mission = require("../models/mission");
 const Referent = require("../models/referent");
@@ -10,6 +11,7 @@ const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
 const { ADMIN_URL, APP_URL } = require("../config");
 const { getCcOfYoung } = require("../utils");
+const fileName = path.basename(__filename, ".js");
 
 const clean = async () => {
   let countAutoArchived = 0;
@@ -18,7 +20,7 @@ const clean = async () => {
     countAutoArchived++;
     console.log(`${mission._id} ${mission.name} archived.`);
     mission.set({ status: "ARCHIVED" });
-    await mission.save();
+    await mission.save({ fromUser: { firstName: `Cron ${fileName}` } });
     await cancelApplications(mission);
 
     // notify structure
@@ -80,7 +82,7 @@ const cancelApplications = async (mission) => {
     let sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_ARCHIVED_AUTO;
 
     application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
-    await application.save();
+    await application.save({ fromUser: { firstName: `Cron ${fileName}` } });
 
     if (sendinblueTemplate) {
       const young = await YoungObject.findById(application.youngId);

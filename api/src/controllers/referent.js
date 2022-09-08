@@ -393,7 +393,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.sessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
@@ -461,7 +461,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     // if they had a session, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     // if they had a meetingPoint, we check if we need to update the places taken / left in the bus

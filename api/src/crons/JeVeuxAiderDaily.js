@@ -2,6 +2,8 @@ require("dotenv").config({ path: "./../../.env-staging" });
 
 const fetch = require("node-fetch");
 require("../mongo");
+const path = require("path");
+const fileName = path.basename(__filename, ".js");
 const { capture } = require("../sentry");
 const { JVA_API_KEY } = require("../config");
 const slack = require("../slack");
@@ -156,7 +158,7 @@ const sync = async (result) => {
         //Set structureId to referent
         for (const resp of newResps) {
           resp.set({ structureId: newStructure.id });
-          await resp.save();
+          await resp.save({ fromUser: { firstName: `Cron ${fileName}` } });
         }
         structure = newStructure;
       }
@@ -256,7 +258,7 @@ const sync = async (result) => {
         delete infoMission.frequence;
         const left = missionExist.placesLeft + infoMission.placesTotal - missionExist.placesTotal;
         missionExist.set({ ...infoMission, placesLeft: left });
-        await missionExist.save();
+        await missionExist.save({ fromUser: { firstName: `Cron ${fileName}` } });
       }
     } catch (e) {
       capture(e);
@@ -277,7 +279,7 @@ const cleanData = async () => {
     //Cancel mission
     for (const mission of missionsTodelete) {
       mission.set({ status: MISSION_STATUS.CANCEL });
-      await mission.save();
+      await mission.save({ fromUser: { firstName: `Cron ${fileName}` } });
 
       //Check and cancel application link to the mission
       await updateApplication(mission);

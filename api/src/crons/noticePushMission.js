@@ -1,5 +1,6 @@
 require("../mongo");
 const esClient = require("../es");
+const path = require("path");
 
 const { capture } = require("../sentry");
 const Young = require("../models/young");
@@ -8,6 +9,7 @@ const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, translate, formatStringDate } = require("snu-lib");
 const { APP_URL } = require("../config");
 const { getCcOfYoung } = require("../utils");
+const fileName = path.basename(__filename, ".js");
 
 exports.handler = async () => {
   try {
@@ -56,7 +58,7 @@ exports.handler = async () => {
         // This is used in order to minimize risk of version conflict.
         const youngForUpdate = await Young.findOne({ _id: young._id });
         youngForUpdate.set({ missionsInMail });
-        await youngForUpdate.save();
+        await youngForUpdate.save({ fromUser: { firstName: `Cron ${fileName}` } });
       }
     });
     slack.info({
