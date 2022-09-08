@@ -14,6 +14,7 @@ import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import Unlock from "../../../assets/icons/Unlock";
 import QuestionBubble from "../../../assets/icons/QuestionBubble";
+import ChevronRight from "../../../assets/icons/ChevronRight";
 
 export default function TicketCreate(props) {
   const history = useHistory();
@@ -33,17 +34,19 @@ export default function TicketCreate(props) {
 
       {["EXEMPTED", "DONE"].includes(young?.statusPhase1) && (
         <div className="mx-auto mb-3 gap-4 flex flex-col w-full md:flex-row md:w-4/5 md:max-w-[1000px] md:min-w-[700px]">
-          <div className="flex items-center p-2 gap-2 rounded-lg bg-white md:w-1/2 shadow-md cursor-pointer hover:shadow-lg" onClick={() => history.push("/phase1")}>
+          <div className="flex items-center p-2 gap-2 rounded-lg bg-white shadow-md cursor-pointer hover:shadow-lg" onClick={() => history.push("/phase1")}>
             <div className="w-12">
               <Unlock style={{ transform: "scale(0.7)" }} />
             </div>
-            <div className="text-sm font-bold">Débloquez votre accès gratuit au code de la route</div>
+            <div className="text-sm font-bold grow">Débloquez votre accès gratuit au code de la route</div>
+            <ChevronRight className="scale-[200%] stroke-white fill-gray-300 w-2 mr-1" />
           </div>
-          <div className="flex items-center p-2 gap-2 rounded-lg bg-white md:w-1/2 shadow-md cursor-pointer hover:shadow-lg" onClick={() => history.push("/phase1")}>
+          <div className="flex items-center p-2 gap-2 rounded-lg bg-white shadow-md cursor-pointer hover:shadow-lg" onClick={() => history.push("/phase1")}>
             <div className="ml-1 w-11">
               <QuestionBubble />
             </div>
             <div className="text-sm font-bold">Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?</div>
+            <ChevronRight className="scale-[200%] stroke-white fill-gray-300 w-2 mr-1" />
           </div>
         </div>
       )}
