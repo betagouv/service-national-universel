@@ -1,3 +1,12 @@
+## [1.128.1](https://github.com/betagouv/service-national-universel/compare/v1.128.0...v1.128.1) (2022-09-08)
+
+
+### Bug Fixes
+
+* **api:** Bug with multi-departments ([09c50ba](https://github.com/betagouv/service-national-universel/commit/09c50ba58c3185c997ae28d7d697ae038ae29db3))
+* **api:** fix mimetype decryptedBuffer ([7671b6c](https://github.com/betagouv/service-national-universel/commit/7671b6c67649a25db9e8629853149585dddf4620))
+* **app/admin:** Fix modal for app and admin ([3574fc4](https://github.com/betagouv/service-national-universel/commit/3574fc44c147c59e9c08457a5012e2d6fcbb9092))
+
 # [1.128.0](https://github.com/betagouv/service-national-universel/compare/v1.127.1...v1.128.0) (2022-09-07)
 
 
