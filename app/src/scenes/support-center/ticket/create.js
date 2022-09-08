@@ -32,20 +32,20 @@ export default function TicketCreate(props) {
       {/* Links to Phase 1 page */}
 
       {["EXEMPTED", "DONE"].includes(young?.statusPhase1) && (
-        <CardContainer className="mb-3">
-          <Card onClick={() => history.push("/phase1")}>
+        <div className="mx-auto mb-3 gap-4 flex flex-col w-full md:flex-row md:w-4/5 md:max-w-[1000px] md:min-w-[700px]">
+          <div className="flex items-center p-2 gap-2 rounded-lg bg-white md:w-1/2 shadow-md cursor-pointer hover:shadow-lg" onClick={() => history.push("/phase1")}>
             <div className="w-12">
               <Unlock style={{ transform: "scale(0.7)" }} />
             </div>
             <div className="text-sm font-bold">Débloquez votre accès gratuit au code de la route</div>
-          </Card>
-          <Card onClick={() => history.push("/phase1")}>
+          </div>
+          <div className="flex items-center p-2 gap-2 rounded-lg bg-white md:w-1/2 shadow-md cursor-pointer hover:shadow-lg" onClick={() => history.push("/phase1")}>
             <div className="ml-1 w-11">
               <QuestionBubble />
             </div>
             <div className="text-sm font-bold">Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?</div>
-          </Card>
-        </CardContainer>
+          </div>
+        </div>
       )}
 
       <Form>
@@ -231,32 +231,5 @@ const Form = styled.div`
   width: clamp(700px, 80%, 1000px);
   @media (max-width: 767px) {
     width: 100%;
-  }
-`;
-
-const CardContainer = styled.div`
-  margin: 0 auto;
-  display: flex;
-  gap: 1rem;
-  width: clamp(700px, 80%, 1000px);
-  @media (max-width: 900px) {
-    width: 100%;
-    flex-direction: column;
-  }
-`;
-
-const Card = styled.div`
-  display: flex;
-  flex: 2;
-  align-items: center;
-  padding: 0.5rem;
-  gap: 0.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  background-color: #fff;
-  margin: 0 auto;
-  cursor: pointer;
-  &:hover {
-    box-shadow: 0 5px 15px 3px rgba(0, 0, 0, 0.2);
   }
 `;
