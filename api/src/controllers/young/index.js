@@ -32,7 +32,6 @@ const {
   inSevenDays,
   isYoung,
   isReferent,
-  // updateApplicationsWithYoungOrMission,
   updatePlacesBus,
   updatePlacesSessionPhase1,
   translateFileStatusPhase1,
@@ -419,7 +418,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (value?.department && young?.department && value?.department !== young?.department) {
@@ -455,12 +453,12 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.sessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     // if they had a meeting point, we check if we need to update the places taken / left in the bus
     if (young.meetingPointId) {
-      const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
+      const meetingPoint = await MeetingPointModel.findById(young.meetingPointId, req.user);
       if (meetingPoint) {
         const bus = await BusModel.findById(meetingPoint.busId);
         if (bus) await updatePlacesBus(bus);
@@ -556,7 +554,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     // if they had a session, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
@@ -617,7 +615,7 @@ router.post("/:id/session-phase1/cancel", passport.authenticate("referent", { se
     // if they had a session, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     // if they had a meetingPoint, we check if we need to update the places taken / left in the bus

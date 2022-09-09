@@ -163,7 +163,7 @@ function validatePassword(password) {
   return schema.validate(password);
 }
 
-const updatePlacesCenter = async (center) => {
+const updatePlacesCenter = async (center, fromUser) => {
   // console.log(`update place center ${center?._id} ${center?.name}`);
   try {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
@@ -172,7 +172,7 @@ const updatePlacesCenter = async (center) => {
     if (center.placesLeft !== placesLeft) {
       console.log(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
       center.set({ placesLeft });
-      await center.save();
+      await center.save({ fromUser });
       await center.index();
     } else {
       // console.log(`Center ${center.id}: total ${center.placesTotal} left not changed ${center.placesLeft}`);
@@ -186,7 +186,7 @@ const updatePlacesCenter = async (center) => {
 // first iteration
 // duplicate of updatePlacesCenter
 // we'll remove the updatePlacesCenter function once the migration is done
-const updatePlacesSessionPhase1 = async (sessionPhase1) => {
+const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
   // console.log(`update place sessionPhase1 ${sessionPhase1?._id}`);
   try {
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
@@ -197,7 +197,7 @@ const updatePlacesSessionPhase1 = async (sessionPhase1) => {
     if (sessionPhase1.placesLeft !== placesLeft) {
       console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left from ${sessionPhase1.placesLeft} to ${placesLeft}`);
       sessionPhase1.set({ placesLeft });
-      await sessionPhase1.save();
+      await sessionPhase1.save({ fromUser });
       await sessionPhase1.index();
     } else {
       // console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left not changed ${sessionPhase1.placesLeft}`);
@@ -208,7 +208,7 @@ const updatePlacesSessionPhase1 = async (sessionPhase1) => {
   return sessionPhase1;
 };
 
-const updateCenterDependencies = async (center) => {
+const updateCenterDependencies = async (center, fromUser) => {
   const youngs = await YoungModel.find({ cohesionCenterId: center._id });
   youngs.forEach(async (young) => {
     young.set({
@@ -216,21 +216,21 @@ const updateCenterDependencies = async (center) => {
       cohesionCenterZip: center.zip,
       cohesionCenterCity: center.city,
     });
-    await young.save();
+    await young.save({ fromUser });
   });
   const referents = await ReferentModel.find({ cohesionCenterId: center._id });
   referents.forEach(async (referent) => {
     referent.set({ cohesionCenterName: center.name });
-    await referent.save();
+    await referent.save({ fromUser });
   });
   const meetingPoints = await MeetingPointModel.find({ centerId: center._id });
   meetingPoints.forEach(async (meetingPoint) => {
     meetingPoint.set({ centerCode: center.code2022 });
-    await meetingPoint.save();
+    await meetingPoint.save({ fromUser });
   });
 };
 
-const deleteCenterDependencies = async (center) => {
+const deleteCenterDependencies = async (center, fromUser) => {
   const youngs = await YoungModel.find({ cohesionCenterId: center._id });
   youngs.forEach(async (young) => {
     young.set({
@@ -239,17 +239,17 @@ const deleteCenterDependencies = async (center) => {
       cohesionCenterZip: undefined,
       cohesionCenterCity: undefined,
     });
-    await young.save();
+    await young.save({ fromUser });
   });
   const referents = await ReferentModel.find({ cohesionCenterId: center._id });
   referents.forEach(async (referent) => {
     referent.set({ cohesionCenterId: undefined, cohesionCenterName: undefined });
-    await referent.save();
+    await referent.save({ fromUser });
   });
   const meetingPoints = await MeetingPointModel.find({ centerId: center._id });
   meetingPoints.forEach(async (meetingPoint) => {
     meetingPoint.set({ centerId: undefined, centerCode: undefined });
-    await meetingPoint.save();
+    await meetingPoint.save({ fromUser });
   });
 };
 
@@ -304,25 +304,7 @@ const sendAutoCancelMeetingPoint = async (young) => {
   );
 };
 
-// pourrait être utile un jour
-
-// const assignYoungToWaitingList = async (young, newCohort) => {
-//   if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED || young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ) {
-//   young.set({ status: "VALIDATED", statusPhase1: "WAITING_AFFECTATION", cohort:"" });
-//   await young.save();
-
-//   //add young to waiting list
-//   //todo sélectionner le centre avec la date newCohort
-//   const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-//   console.log(`add young ${young._id} to waiting list`)
-//   sessionPhase1.waitingList.push(young._id);
-//   await sessionPhase1.save();
-
-//   }
-
-// }
-
-async function updateYoungPhase2Hours(young) {
+async function updateYoungPhase2Hours(young, fromUser) {
   const applications = await ApplicationModel.find({
     youngId: young._id,
     status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] },
@@ -341,11 +323,11 @@ async function updateYoungPhase2Hours(young) {
         .reduce((acc, current) => acc + current, 0),
     ),
   });
-  await young.save();
+  await young.save({ fromUser });
 }
 // This function should always be called after updateYoungPhase2Hours.
 // This could be refactored in one function.
-const updateStatusPhase2 = async (young) => {
+const updateStatusPhase2 = async (young, fromUser) => {
   const applications = await ApplicationModel.find({ youngId: young._id });
   young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
 
@@ -388,7 +370,7 @@ const updateStatusPhase2 = async (young) => {
     // We change young status to WAITING_LIST if he has no estimated hours of phase 2.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
   }
-  await young.save();
+  await young.save({ fromUser });
 };
 
 const checkStatusContract = (contract) => {
@@ -441,39 +423,6 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
-async function updateApplicationsWithYoungOrMission({ young, newYoung, mission, newMission }) {
-  if (young && Object.keys(young).length !== 0) {
-    const noNeedToUpdate = isObjectKeysIsEqual(young, newYoung, ["firstName", "lastName", "email", "birthdateAt", "city", "department", "cohort"]);
-    if (noNeedToUpdate) return;
-
-    const applications = await ApplicationModel.find({ youngId: young._id });
-    for (const application of applications) {
-      application.youngFirstName = newYoung.firstName;
-      application.youngLastName = newYoung.lastName;
-      application.youngEmail = newYoung.email;
-      application.youngBirthdateAt = newYoung.birthdateAt;
-      application.youngCity = newYoung.city;
-      application.youngDepartment = newYoung.department;
-      application.youngCohort = newYoung.cohort;
-      await application.save();
-      console.log(`Update application ${application._id}`);
-    }
-  } else if (mission && Object.keys(mission).length !== 0) {
-    const noNeedToUpdate = isObjectKeysIsEqual(mission, newMission, ["name", "department", "region"]);
-    console.log(noNeedToUpdate);
-    if (noNeedToUpdate) return;
-
-    const applications = await ApplicationModel.find({ missionId: mission._id });
-    for (const application of applications) {
-      application.missionName = newMission.name;
-      application.missionDepartment = newMission.department;
-      application.missionRegion = newMission.region;
-      await application.save();
-      console.log(`Update application ${application._id}`);
-    }
-  }
-}
-
 const isObjectKeysIsEqual = (object, newObject, keys) => {
   for (const key of keys) {
     if (object[key] !== newObject[key] && Date.parse(object[key]) !== Date.parse(newObject[key])) {
@@ -511,7 +460,7 @@ async function inscriptionCheck(value, young, req) {
   // if they had a cohesion center, we check if we need to update the places taken / left
   if (young.sessionPhase1Id) {
     const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-    if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+    if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
   }
 }
 
@@ -728,7 +677,6 @@ module.exports = {
   updateYoungPhase2Hours,
   updateStatusPhase2,
   getSignedUrlForApiAssociation,
-  updateApplicationsWithYoungOrMission,
   updateYoungStatusPhase2Contract,
   checkStatusContract,
   sanitizeAll,

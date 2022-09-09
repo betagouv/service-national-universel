@@ -20,18 +20,7 @@ const { ADMIN_URL, APP_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region, canCreateYoungApplication, canViewYoungApplications, canApplyToPhase2 } = require("snu-lib");
 const { serializeApplication, serializeYoung } = require("../utils/serializer");
 const { config } = require("dotenv");
-const {
-  uploadFile,
-  ERRORS,
-  isYoung,
-  isReferent,
-  // updateApplicationsWithYoungOrMission,
-  getCcOfYoung,
-  updateYoungPhase2Hours,
-  updateStatusPhase2,
-  getFile,
-  updateYoungStatusPhase2Contract,
-} = require("../utils");
+const { uploadFile, ERRORS, isYoung, isReferent, getCcOfYoung, updateYoungPhase2Hours, updateStatusPhase2, getFile, updateYoungStatusPhase2Contract } = require("../utils");
 const { translateAddFilePhase2, translateAddFilesPhase2 } = require("snu-lib/translation");
 const mime = require("mime-types");
 
@@ -188,8 +177,8 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     }
 
     const data = await ApplicationObject.create(value);
-    await updateYoungPhase2Hours(young);
-    await updateStatusPhase2(young);
+    await updateYoungPhase2Hours(young, req.user);
+    await updateStatusPhase2(young, req.user);
     await updateMission(data, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
 
@@ -241,8 +230,8 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     application.set(value);
     await application.save({ fromUser: req.user });
 
-    await updateYoungPhase2Hours(young);
-    await updateStatusPhase2(young);
+    await updateYoungPhase2Hours(young, req.user);
+    await updateStatusPhase2(young, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
     await updateMission(application, req.user);
 

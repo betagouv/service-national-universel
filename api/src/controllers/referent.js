@@ -42,7 +42,6 @@ const {
   translateFileStatusPhase1,
   getCcOfYoung,
   notifDepartmentChange,
-  //  updateApplicationsWithYoungOrMission,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1 } = require("../utils/serializer");
@@ -388,15 +387,13 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung.populationDensity = populationDensity;
     }
 
-    // await updateApplicationsWithYoungOrMission({ young, newYoung });
-
     young.set(newYoung);
     await young.save({ fromUser: req.user });
 
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.sessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
@@ -464,7 +461,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     // if they had a session, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {
       const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1);
+      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
@@ -901,7 +898,7 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     const user = await ReferentModel.findById(req.user._id);
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     user.set(value);
-    await user.save();
+    await user.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(user, req.user);
     res.status(200).send({ ok: true, data: user });
   } catch (error) {

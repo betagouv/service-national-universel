@@ -11,7 +11,7 @@ const ApplicationObject = require("../models/application");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 // eslint-disable-next-line no-unused-vars
-const { ERRORS, isYoung, updateApplicationsWithYoungOrMission, updateApplication } = require("../utils/index.js");
+const { ERRORS, isYoung, updateApplication } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
 const { canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib/roles");
 const { MISSION_STATUS } = require("snu-lib/constants");
@@ -122,8 +122,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    // await updateApplicationsWithYoungOrMission({ mission, newMission: checkedMission });
 
     if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
       checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);

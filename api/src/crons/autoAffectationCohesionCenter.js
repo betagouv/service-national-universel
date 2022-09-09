@@ -8,6 +8,7 @@ const { capture, captureMessage } = require("../sentry");
 const YoungModel = require("../models/young");
 const CohesionCenterObject = require("../models/cohesionCenter");
 const { updatePlacesCenter, sanitizeAll } = require("../utils");
+const fileName = path.basename(__filename, ".js");
 
 const clean = async () => {
   let countAutoWithdrawn = 0;
@@ -28,10 +29,10 @@ const clean = async () => {
       console.log(`${young._id} ${young.firstName} ${young.lastName} is not quick enough. but its statusPhase1 is '${young.statusPhase1}'`);
     }
     young.set({ autoAffectationPhase1ExpiresAt: undefined });
-    await young.save();
+    await young.save({ fromUser: { firstName: `Cron ${fileName}` } });
     if (young.cohesionCenterId) {
       const center = await CohesionCenterObject.findById(young.cohesionCenterId);
-      if (center) await updatePlacesCenter(center);
+      if (center) await updatePlacesCenter(center, { firstName: `Cron ${fileName}` });
     }
   }
   captureMessage(`${Date.now()} - ${countAutoWithdrawn} youngs has been auto withdrawn (48h w/out response)`);
