@@ -115,7 +115,7 @@ const Wrapper = ({ children }) => {
       </header>
       {!!seeAs && withSeeAs && user?.role !== seeAs && (
         <button onClick={() => setSeeAs("admin")} className="noprint rounded-none border-none bg-red-500 font-normal">
-          Vous visualisez la base de connaissance en tant que {seeAs}, pour retourner à votre vue cliquez ici
+          Vous visualisez la base de connaissance en tant que {translateRoleBDC[seeAs]}, pour retourner à votre vue cliquez ici
         </button>
       )}
       <main className="flex-1 bg-[#F3F4F6] print:bg-transparent">{children}</main>
