@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { translateApplication, translate } from "../../../../utils";
-import DomainThumb from "../../../../components/DomainThumb";
+import { translateApplicationForYoungs } from "snu-lib/translation";
 import LocationMarker from "../../../../assets/icons/LocationMarker";
 import EyeOff from "../../../../assets/icons/EyeOff";
 import Eye from "../../../../assets/icons/Eye";
@@ -10,6 +10,7 @@ import { Draggable } from "react-beautiful-dnd";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../../sentry";
+import IconDomain from "../../../missions/components/IconDomain";
 
 export default function application({ application, index, onChange, loading }) {
   const [mission, setMission] = React.useState();
@@ -71,7 +72,7 @@ export default function application({ application, index, onChange, loading }) {
           {/* STATUT */}
           <div className="flex items-center">
             <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
-              {translateApplication(application.status)}
+              {translateApplicationForYoungs(application.status)}
             </div>
           </div>
           {/* END STATUT */}
@@ -79,17 +80,17 @@ export default function application({ application, index, onChange, loading }) {
           <div className="flex my-3">
             {/* icon */}
             <div className="flex items-start">
-              <DomainThumb domain={mission?.domain} size="3rem" />
+              <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
             </div>
 
             {/* infos mission */}
             <div className="flex flex-col flex-1">
               <div className="space-y-1">
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 ml-2">
                   <div className="text-gray-500 text-xs uppercase font-medium">{mission?.structureName}</div>
                 </div>
-                <div className="text-gray-900 font-bold text-base">{mission?.name}</div>
-                <div className="flex justify-between">
+                <div className="text-gray-900 font-bold text-base ml-2">{mission?.name}</div>
+                <div className="flex justify-between ml-2">
                   <div className="text-gray-500 text-xs">{mission?.placesLeft} places disponibles</div>
                   {/* TODO */}
                   <div className="flex items-center space-x-2">
