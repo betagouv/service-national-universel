@@ -423,8 +423,10 @@ export default function List() {
                   )}
                   {dropdownControlDistanceOpen && (
                     <div>
-                      <div className="font-bold text-center">Distance maximum</div>
-                      <div className="text-sm text-gray-500 text-center">
+                      <div className="font-bold text-center mb-2">Distance maximum</div>
+                      {/* TODO */}
+                      {/* redirection En savoir plus */}
+                      <div className="text-[13px] text-gray-500 text-center">
                         Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. En savoir plus
                       </div>
                       <div className="flex w-full flex-col space-y-2 py-2 px-2">
@@ -438,9 +440,9 @@ export default function List() {
                               onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
                             />
                             <label htmlFor="main-address" className="cursor-pointer">
-                              <span className="text-xs text-gray-700">Autours de mon adresse principale</span>
+                              <span className="text-[13px] text-gray-700 leading-[15px]">Autour de mon adresse principale</span>
                               <br />
-                              <span className="text-sm text-gray-700">{young.city}</span>
+                              <span className="text-[14px] text-gray-700">{young.city}</span>
                             </label>
                           </div>
                           {young?.mobilityNearRelativeCity ? (
@@ -453,9 +455,9 @@ export default function List() {
                                 onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
                               />
                               <label htmlFor="second-address" className="cursor-pointer">
-                                <span className="text-xs text-gray-700">Autours de l&apos;adresse de mon proche</span>
+                                <span className="text-[13px] text-gray-700">Autour de l&apos;adresse de mon proche</span>
                                 <br />
-                                <span className="text-sm text-gray-700">{young?.mobilityNearRelativeCity}</span>
+                                <span className="text-[14px] text-gray-700">{young?.mobilityNearRelativeCity}</span>
                               </label>
                             </div>
                           ) : (
