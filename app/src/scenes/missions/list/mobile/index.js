@@ -438,7 +438,15 @@ export default function List() {
                               type="radio"
                               checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
                               onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
+                              className="hidden"
                             />
+                            <label htmlFor="main-address" className="mr-2">
+                              {focusedAddress.address === young.address ? (
+                                <img src={require("../../../../assets/radioInput.svg")} alt="" />
+                              ) : (
+                                <img src={require("../../../../assets/radioUnchecked.svg")} />
+                              )}
+                            </label>
                             <label htmlFor="main-address" className="cursor-pointer">
                               <span className="text-xs text-gray-700 leading-[15px]">Autour de mon adresse principale</span>
                               <br />
@@ -453,7 +461,15 @@ export default function List() {
                                 type="radio"
                                 checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
                                 onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
+                                className="hidden"
                               />
+                              <label htmlFor="second-address" className="mr-2">
+                                {focusedAddress.address === young.mobilityNearRelativeAddress ? (
+                                  <img src={require("../../../../assets/radioInput.svg")} alt="" />
+                                ) : (
+                                  <img src={require("../../../../assets/radioUnchecked.svg")} />
+                                )}
+                              </label>
                               <label htmlFor="second-address" className="cursor-pointer">
                                 <span className="text-xs text-gray-700">Autour de l&apos;adresse de mon proche</span>
                                 <br />
