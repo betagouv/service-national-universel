@@ -388,9 +388,9 @@ export default function List() {
                       onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
                     />
                     <label htmlFor="main-address" className="cursor-pointer">
-                      <span className="text-xs text-gray-700">Autours de mon adresse principale</span>
+                      <span className="text-[13px] text-gray-700">Autour de mon adresse principale</span>
                       <br />
-                      <span className="text-sm text-gray-700">{young.city}</span>
+                      <span className="text-[15px] text-gray-700">{young.city}</span>
                     </label>
                   </div>
                   {young?.mobilityNearRelativeCity ? (
@@ -403,18 +403,18 @@ export default function List() {
                         onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
                       />
                       <label htmlFor="second-address" className="cursor-pointer">
-                        <span className="text-xs text-gray-700">Autours de l&apos;adresse de mon proche</span>
+                        <span className="text-[13px] text-gray-700">Autour de l&apos;adresse de mon proche</span>
                         <br />
-                        <span className="text-sm text-gray-700">{young?.mobilityNearRelativeCity}</span>
+                        <span className="text-[15px] text-gray-700">{young?.mobilityNearRelativeCity}</span>
                       </label>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
                       <input id="second-address" name="address" type="radio" value={young.city} disabled />
                       <label htmlFor="second-address">
-                        <span className="text-xs text-gray-400">Autours de l&apos;adresse de mon proche</span>
+                        <span className="text-[13px] text-gray-400">Autours de l&apos;adresse de mon proche</span>
                         <br />
-                        <Link to="/preferences" className="text-sm text-blue-600 underline hover:underline">
+                        <Link to="/preferences" className="text-[15px] text-blue-600 underline hover:underline">
                           Renseigner une adresse
                         </Link>
                       </label>
