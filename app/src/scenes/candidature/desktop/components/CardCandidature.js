@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { translateApplication, translate } from "../../../../utils";
-import DomainThumb from "../../../../components/DomainThumb";
+import { translateApplicationForYoungs } from "snu-lib/translation";
 import LocationMarker from "../../../../assets/icons/LocationMarker";
 import EyeOff from "../../../../assets/icons/EyeOff";
 import Eye from "../../../../assets/icons/Eye";
@@ -11,6 +11,8 @@ import { Draggable } from "react-beautiful-dnd";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../../sentry";
+import IconDomain from "../../../missions/components/IconDomain";
+import styled from "styled-components";
 
 export default function application({ application: propsApplication, index, onChange, loading }) {
   const [application, setApplication] = React.useState(propsApplication);
@@ -79,33 +81,33 @@ export default function application({ application: propsApplication, index, onCh
             <div className="flex flex-1">
               {/* icon */}
               <div className="flex items-center">
-                {mission?.isMilitaryPreparation === "true" ? <DomainThumb domain={"military"} size="3rem" /> : <DomainThumb domain={mission?.mainDomain} size="3rem" />}
+                <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
               </div>
 
               {/* infos mission */}
               <div className="flex flex-col flex-1">
                 <div className="space-y-2">
-                  <div className="flex space-x-4">
+                  <div className="flex space-x-4 ml-2">
                     <div className="text-gray-500 text-xs uppercase font-medium">{mission?.structureName}</div>
                     <div className="text-gray-500 text-xs font-normal">
                       Places disponibles:&nbsp;{mission?.placesLeft}/{mission?.placesTotal}
                     </div>
                   </div>
                   <Link to={`/mission/${application.missionId}`}>
-                    <div className="text-gray-900 font-bold text-base hover:underline">{mission?.name}</div>
+                    <div className="text-gray-900 font-bold text-base hover:underline ml-2">{mission?.name}</div>
                   </Link>
-                  <div className="flex space-x-2">
+                  <Tags>
                     {(tags || []).map((e, i) => (
-                      <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">
+                      <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs ml-2 mb-2">
                         {e}
                       </div>
                     ))}
                     {mission?.isMilitaryPreparation === "true" ? (
-                      <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs">
+                      <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs ml-2 mb-2">
                         Préparation militaire
                       </div>
                     ) : null}
-                  </div>
+                  </Tags>
                 </div>
               </div>
             </div>
@@ -150,7 +152,7 @@ export default function application({ application: propsApplication, index, onCh
               {/* STATUT */}
               <div className="flex basis-[44%] items-center justify-end">
                 <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} px-2 py-[2px] rounded-sm`}>
-                  {translateApplication(application.status)}
+                  {translateApplicationForYoungs(application.status)}
                 </div>
               </div>
               {/* END STATUT */}
@@ -161,3 +163,8 @@ export default function application({ application: propsApplication, index, onCh
     </Draggable>
   );
 }
+
+const Tags = styled.div`
+  display: inline-flex;
+  flex-wrap: wrap;
+`;

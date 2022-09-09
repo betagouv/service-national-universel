@@ -48,5 +48,11 @@ export default function IconDomain({ domain, bgStyle = null, iconStyle = "text-w
     }
   }, [domain]);
 
-  return domain ? <div className={`flex items-center py-3 px-1.5 rounded-xl ${bgStyle ? bgStyle : "bg-[#212B44]"}`}>{icon}</div> : null;
+  return domain ? (
+    <div className={`flex items-center py-3 px-1.5 rounded-xl  ${bgStyle ? bgStyle : "bg-[#212B44]"}`}>{icon}</div>
+  ) : (
+    <div className={`flex items-center py-3 px-1.5 rounded-xl  ${bgStyle ? bgStyle : "bg-[#212B44]"} `}>
+      <img className="h-8 w-8" src={require("../../../assets/mission-domains/default.svg")} style={{}} />
+    </div>
+  );
 }
