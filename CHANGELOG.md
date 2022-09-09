@@ -1,3 +1,12 @@
+## [1.128.2](https://github.com/betagouv/service-national-universel/compare/v1.128.1...v1.128.2) (2022-09-09)
+
+
+### Bug Fixes
+
+* **api:** Improve traca des modifications ([#1775](https://github.com/betagouv/service-national-universel/issues/1775)) ([011806f](https://github.com/betagouv/service-national-universel/commit/011806f1eacb0aedd2164b32441340135ff445e2))
+* **app:** Design & responsive corrections /candidatures ([#1778](https://github.com/betagouv/service-national-universel/issues/1778)) ([05f44ee](https://github.com/betagouv/service-national-universel/commit/05f44eed71dd9fb390a46d68c0c15279b5ed54c9))
+* **kb:** Load content fix for each kind of user ([#1779](https://github.com/betagouv/service-national-universel/issues/1779)) ([c6eebcf](https://github.com/betagouv/service-national-universel/commit/c6eebcf5cb7cca63ab42ac3bcf68b458a4c78d82))
+
 ## [1.128.1](https://github.com/betagouv/service-national-universel/compare/v1.128.0...v1.128.1) (2022-09-08)
 
 
