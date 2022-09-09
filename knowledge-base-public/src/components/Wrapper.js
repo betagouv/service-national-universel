@@ -32,7 +32,7 @@ const Wrapper = ({ children }) => {
   const router = useRouter();
 
   const withSeeAs = ["admin", "referent_department", "referent_region"].includes(user?.role);
-  const categoryAccessibleReferent = ["referent", "head_center", " young", "visitor"];
+  const categoryAccessibleReferent = ["referent", "head_center", "young", "visitor"];
 
   return (
     <div className="flex min-h-screen w-full flex-col">
