@@ -441,7 +441,7 @@ export default function List() {
                               className="hidden"
                             />
                             <label htmlFor="main-address" className="mr-2">
-                              {focusedAddress.address === young.address ? (
+                              {focusedAddress?.address === young.address ? (
                                 <img src={require("../../../../assets/radioInput.svg")} alt="" />
                               ) : (
                                 <img src={require("../../../../assets/radioUnchecked.svg")} />
@@ -464,7 +464,7 @@ export default function List() {
                                 className="hidden"
                               />
                               <label htmlFor="second-address" className="mr-2">
-                                {focusedAddress.address === young.mobilityNearRelativeAddress ? (
+                                {focusedAddress?.address === young.mobilityNearRelativeAddress ? (
                                   <img src={require("../../../../assets/radioInput.svg")} alt="" />
                                 ) : (
                                   <img src={require("../../../../assets/radioUnchecked.svg")} />
@@ -814,3 +814,10 @@ const Missions = styled.div`
     }
   }
 `;
+
+// const DistanceRange = styled.div`
+//   input[type="range"]::-webkit-slider-thumb {
+//     border-radius: 50%;
+//     background: #4b5563;
+//   }
+// `;
