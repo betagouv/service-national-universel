@@ -80,7 +80,7 @@ export default function application({ application: propsApplication, index, onCh
             </div>
             <div className="flex flex-1">
               {/* icon */}
-              <div className="flex items-center">
+              <div className="flex items-center mr-2">
                 <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
               </div>
 
