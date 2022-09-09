@@ -423,15 +423,6 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
-const isObjectKeysIsEqual = (object, newObject, keys) => {
-  for (const key of keys) {
-    if (object[key] !== newObject[key] && Date.parse(object[key]) !== Date.parse(newObject[key])) {
-      return false;
-    }
-  }
-  return true;
-};
-
 async function inscriptionCheck(value, young, req) {
   // Check quartier prioritaires.
   if (value.zip && value.city && value.address) {
