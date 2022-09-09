@@ -434,6 +434,7 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     }
 
     // * Recalculate mimetype for reupload
+    const decryptedBuffer = decrypt(downloaded.Body);
     let mimeFromFile = null;
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
@@ -443,7 +444,6 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     }
 
     // Send to app
-    const decryptedBuffer = decrypt(downloaded.Body);
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
       mimeType: mime.lookup(young.files[key].id(fileId).name),
