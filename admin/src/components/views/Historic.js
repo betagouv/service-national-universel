@@ -43,6 +43,7 @@ export default function Historic({ model, value }) {
 
 const Hit = ({ hit, model, filter }) => {
   const [viewDetails, setViewDetails] = useState(true);
+  const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
   function isIsoDate(str) {
     if (!Date.parse(str)) return false;
@@ -110,7 +111,11 @@ const Hit = ({ hit, model, filter }) => {
               )
             ) : hit.user && hit.user.firstName ? (
               // * Scripts / Cron
-              [hit.user.firstName, hit.user.lastName].join(" ")
+              user?.role === ROLES.ADMIN ? (
+                [hit.user.firstName, hit.user.lastName].join(" ")
+              ) : (
+                "Modification automatique"
+              )
             ) : (
               "Acteur non renseigné"
             )}
