@@ -5,6 +5,7 @@ import { formatStringLongDate, translateModelFields, translate, translatePhase1,
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 import { HiOutlineChevronUp, HiOutlineChevronDown, HiArrowRight } from "react-icons/hi";
+import { useHistory } from "react-router-dom";
 
 export default function Historic({ model, value }) {
   const [data, setData] = useState();
@@ -42,6 +43,7 @@ export default function Historic({ model, value }) {
 
 const Hit = ({ hit, model, filter }) => {
   const [viewDetails, setViewDetails] = useState(true);
+  const history = useHistory();
   function isIsoDate(str) {
     if (!Date.parse(str)) return false;
     var d = new Date(str);
@@ -94,11 +96,24 @@ const Hit = ({ hit, model, filter }) => {
       <div className="flex p-3 border-b justify-between items-center cursor-pointer" onClick={() => setViewDetails((e) => !e)}>
         <div>
           <span className="font-bold">
-            {hit.user && hit.user.role
-              ? [hit.user.firstName, hit.user.lastName, `(${translate(hit.user.role)})`].join(" ")
-              : hit.user && hit.user.firstName
-              ? [hit.user.firstName, hit.user.lastName].join(" ")
-              : "Acteur non renseigné"}
+            {hit.user && hit.user.email ? (
+              hit.user.role ? (
+                // * Referent
+                <a onClick={() => history.push(`/user/${hit.user._id}`)} className="cursor-pointer text-snu-purple-300 hover:text-snu-purple-300 hover:underline">
+                  {`${hit.user.firstName} ${hit.user.lastName} (${translate(hit.user.role)})`}
+                </a>
+              ) : (
+                // * Young
+                <a onClick={() => history.push(`/volontaire/${hit.user._id}`)} className="cursor-pointer text-snu-purple-300 hover:text-snu-purple-300 hover:underline">
+                  {`${hit.user.firstName} ${hit.user.lastName} (Volontaire)`}
+                </a>
+              )
+            ) : hit.user && hit.user.firstName ? (
+              // * Scripts / Cron
+              [hit.user.firstName, hit.user.lastName].join(" ")
+            ) : (
+              "Acteur non renseigné"
+            )}
           </span>
           ,&nbsp;{formatStringLongDate(hit.date)}
         </div>
