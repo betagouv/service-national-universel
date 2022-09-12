@@ -10,6 +10,7 @@ import SixDotsVertical from "../../../../../assets/icons/SixDotsVertical";
 import { Draggable } from "react-beautiful-dnd";
 import api from "../../../../../services/api";
 import { toastr } from "react-redux-toastr";
+import IconDomain from "../../../components/IconDomain";
 
 export default function mission({ mission }) {
   const tags = [];
@@ -22,8 +23,9 @@ export default function mission({ mission }) {
       className="bg-white relative flex w-full justify-between shadow-nina rounded-xl p-4 border-[1px] border-[#ffffff] mb-4 hover:translate-x-1 transition duration-200 ease-in z-10">
       <div className="flex flex-1">
         {/* icon */}
-        <div className="flex items-center">
-          <DomainThumb domain={mission?.domain} size="3rem" />
+        <div className="flex items-center mr-3">
+          {/* <DomainThumb domain={mission?.domain} size="3rem" /> */}
+          <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
         </div>
 
         {/* infos mission */}
@@ -61,9 +63,7 @@ export default function mission({ mission }) {
 
         {/* STATUT */}
         <div className="flex basis-[40%] items-center justify-end">
-          <div className="text-gray-500 text-xs font-normal">
-            Places disponibles:&nbsp;{mission?.placesLeft}/{mission?.placesTotal}
-          </div>
+          <div className="text-gray-500 text-xs font-medium">&nbsp;{mission?.placesLeft} places disponibles</div>
         </div>
         {/* END STATUT */}
       </div>

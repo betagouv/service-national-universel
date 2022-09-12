@@ -699,6 +699,7 @@ const PeriodeItem = ({ name, onClick, active }) => {
 };
 
 const Missions = styled.div`
+  font-family: "Marianne";
   .pagination {
     display: flex;
     justify-content: flex-end;

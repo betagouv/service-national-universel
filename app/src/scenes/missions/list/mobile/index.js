@@ -760,6 +760,7 @@ const Select = ({ value, options, handleChangeValue, placeholder }) => {
 };
 
 const Missions = styled.div`
+  font-family: "Marianne";
   padding: 0.5rem;
   .pagination {
     display: flex;
