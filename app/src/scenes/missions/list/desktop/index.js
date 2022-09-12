@@ -342,7 +342,7 @@ export default function List() {
         {/* END HEADER */}
 
         {/* BEGIN CONTROL */}
-        <div className="bg-gray-50 p-10 rounded-lg space-y-6">
+        <div className="bg-gray-50 p-10 rounded-lg space-y-6 mb-4">
           {/* search bar recherche */}
           <div className="relative">
             <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-1.5 items-center">

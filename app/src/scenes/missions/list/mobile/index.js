@@ -348,7 +348,7 @@ export default function List() {
         </div>
 
         {/* BEGIN CONTROL */}
-        <div className="w-full bg-white rounded-lg space-y-6">
+        <div className="w-full bg-white rounded-lg space-y-6 mb-1">
           {/* BEGIN MODAL CONTROL*/}
           <Modal size={"20px"} isOpen={modalControl} toggle={setModalControl}>
             <div className="p-2 bg-gray-50 rounded-xl">
