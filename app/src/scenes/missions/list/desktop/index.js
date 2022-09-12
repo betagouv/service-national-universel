@@ -31,6 +31,8 @@ import VoitureSvg from "../../assets/Voiture";
 import TrainSvg from "../../assets/Train";
 import FuseeSvg from "../../assets/Fusee";
 import ReactTooltip from "react-tooltip";
+import { toastr } from "react-redux-toastr";
+import { capture } from "../../../../../../admin/src/sentry";
 
 const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 const DISTANCE_MAX = 100;
@@ -314,16 +316,23 @@ export default function List() {
   }, [filter?.DISTANCE]);
 
   useEffect(() => {
-    if (!young) return;
-    (async () => {
-      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
-      if (ok) return setReferentManagerPhase2(data);
-      setReferentManagerPhase2(null);
-    })();
-    return () => setReferentManagerPhase2();
+    const getManagerPhase2 = async () => {
+      try {
+        if (!young) return;
+        const { ok, data, code } = await api.get(`/referent/manager_phase2/${young.department}`);
+        if (ok) {
+          setReferentManagerPhase2(data);
+        } else {
+          capture(code);
+          toastr.error("Aucun référent n'a été trouvé");
+        }
+      } catch (e) {
+        return setReferentManagerPhase2(null);
+      }
+    };
+    getManagerPhase2();
   }, [young]);
 
-  console.log("young==>", young);
   return (
     <div className="flex">
       <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14 w-full">

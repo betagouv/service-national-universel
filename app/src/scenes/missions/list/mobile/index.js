@@ -315,9 +315,9 @@ export default function List() {
   }, [filter?.DISTANCE]);
 
   useEffect(() => {
-    if (!young) return;
     const getManagerPhase2 = async () => {
       try {
+        if (!young) return;
         const { ok, data, code } = await api.get(`/referent/manager_phase2/${young.department}`);
         if (ok) {
           setReferentManagerPhase2(data);
