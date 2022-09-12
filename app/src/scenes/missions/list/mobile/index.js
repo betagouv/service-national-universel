@@ -447,25 +447,26 @@ export default function List() {
                   {dropdownControlDistanceOpen && (
                     <div>
                       <div className="font-bold text-center mb-2 ">Distance maximum</div>
-                      {/* TODO */}
-                      {/* redirection En savoir plus */}
-                      {showMoreDetails === false ? (
-                        <div className="text-xs text-gray-500 text-center">
-                          Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré.{" "}
+
+                      <div className="text-xs text-gray-500 text-center">
+                        Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré.{" "}
+                        {showMoreDetails === false ? (
                           <span
                             onClick={() => {
                               setShowMoreDetails(true);
                             }}>
                             En savoir plus
                           </span>
-                        </div>
-                      ) : (
-                        <div className="text-xs text-gray-500 text-center">
-                          Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous
-                          conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaitre ces offres et y accéder, contactez tout de suite
-                          votre référent phase 2 : <span>{referentManagerPhase2 && referentManagerPhase2.email}</span>
-                        </div>
-                      )}
+                        ) : (
+                          <>
+                            <span>
+                              Il existe des offres de missions accessibles pour vous sous conditions partout en France, notamment certaines préparations militaires. Si vous
+                              souhaitez connaitre ces offres et y accéder, contactez tout de suite votre référent phase 2 :
+                            </span>{" "}
+                            <span>{referentManagerPhase2 && referentManagerPhase2.email}</span>
+                          </>
+                        )}
+                      </div>
 
                       <div className="flex w-full flex-col space-y-2 py-2 px-2">
                         <div className="flex justify-around my-3">
