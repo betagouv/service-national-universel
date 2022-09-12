@@ -61,7 +61,7 @@ app.post("/render", async (req, res) => {
       ),
       req.body.options || {}
     );
-    console.log(`${req.body.html} generated`);
+    // console.log(`${req.body.html} generated`);
     if (GENERATE_LOCALLY)
       fs.writeFileSync(
         `generated/${new Date().toISOString()}_test.pdf`,
