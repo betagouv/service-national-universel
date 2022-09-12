@@ -32,6 +32,8 @@ import { Modal } from "reactstrap";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../../../../admin/src/sentry";
+import RadioInput from "../../../../assets/radioInput.svg";
+import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
 
 const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
@@ -480,11 +482,7 @@ export default function List() {
                               className="hidden"
                             />
                             <label htmlFor="main-address" className="mr-2">
-                              {focusedAddress?.address === young.address ? (
-                                <img src={require("../../../../assets/radioInput.svg")} alt="" />
-                              ) : (
-                                <img src={require("../../../../assets/radioUnchecked.svg")} />
-                              )}
+                              {focusedAddress?.address === young.address ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                             </label>
                             <label htmlFor="main-address" className="cursor-pointer">
                               <span className="text-xs text-gray-700 leading-[15px]">Autour de mon adresse principale</span>
@@ -503,11 +501,7 @@ export default function List() {
                                 className="hidden"
                               />
                               <label htmlFor="second-address" className="mr-2">
-                                {focusedAddress?.address === young.mobilityNearRelativeAddress ? (
-                                  <img src={require("../../../../assets/radioInput.svg")} alt="" />
-                                ) : (
-                                  <img src={require("../../../../assets/radioUnchecked.svg")} />
-                                )}
+                                {focusedAddress?.address === young.mobilityNearRelativeAddress ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                               </label>
                               <label htmlFor="second-address" className="cursor-pointer">
                                 <span className="text-xs text-gray-700">Autour de l&apos;adresse de mon proche</span>

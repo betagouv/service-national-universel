@@ -33,6 +33,9 @@ import FuseeSvg from "../../assets/Fusee";
 import ReactTooltip from "react-tooltip";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../../../../admin/src/sentry";
+import InfobulleIcon from "../../../../assets/infobulleIcon.svg";
+import RadioInput from "../../../../assets/radioInput.svg";
+import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
 
 const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 const DISTANCE_MAX = 100;
@@ -401,7 +404,7 @@ export default function List() {
               <div className="flex justify-center items-center">
                 <div className="font-bold text-sm text-gray-00 mr-1"> Distance maximum </div>
                 <div>
-                  <img src={require("../../../../assets/info.svg")} data-tip data-for="info" />
+                  <img src={InfobulleIcon} data-tip data-for="info" />
                   <ReactTooltip id="info" className="w-[527px] bg-white opacity-100 shadow-xl" arrowColor="white">
                     <div className="text-[#414458] text-[15px] text-left mb-2">Visibilité des missions</div>
                     <div className="text-[#83869A] text-[12px] text-left">
@@ -425,11 +428,7 @@ export default function List() {
                       className="hidden"
                     />
                     <label htmlFor="main-address" className="mr-2">
-                      {focusedAddress?.address === young.address ? (
-                        <img src={require("../../../../assets/radioInput.svg")} alt="" />
-                      ) : (
-                        <img src={require("../../../../assets/radioUnchecked.svg")} />
-                      )}
+                      {focusedAddress?.address === young.address ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                     </label>
                     <label htmlFor="main-address" className="cursor-pointer">
                       <span className="text-[13px] text-gray-700">Autour de mon adresse principale</span>
@@ -448,11 +447,7 @@ export default function List() {
                         className="hidden"
                       />
                       <label htmlFor="second-address" className="mr-2">
-                        {focusedAddress?.address === young.mobilityNearRelativeAddress ? (
-                          <img src={require("../../../../assets/radioInput.svg")} alt="" />
-                        ) : (
-                          <img src={require("../../../../assets/radioUnchecked.svg")} />
-                        )}
+                        {focusedAddress?.address === young.mobilityNearRelativeAddress ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                       </label>
                       <label htmlFor="second-address" className="cursor-pointer">
                         <span className="text-[13px] text-gray-700">Autour de l&apos;adresse de mon proche</span>
