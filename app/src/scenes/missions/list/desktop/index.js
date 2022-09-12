@@ -389,20 +389,18 @@ export default function List() {
               className={`${
                 dropdownControlDistanceOpen ? "block" : "hidden"
               } w-full rounded-lg bg-white transition absolute top-[calc(100%+8px)] left-0 shadow overflow-hidden p-3 z-20`}>
-              <div className="text-center">
-                <div className="inline-flex items-center ">
-                  <div className="font-bold text-sm text-gray-00 mr-1 "> Distance maximum </div>
-                  <div>
-                    <img src={require("../../../../assets/info.svg")} data-tip data-for="info" />
-                    <ReactTooltip id="info" className="w-[527px] bg-white opacity-100 shadow-xl" arrowColor="white">
-                      <div className="text-[#414458] text-[15px] text-left mb-2">Visibilité des missions</div>
-                      <div className="text-[#83869A] text-[12px] text-left">
-                        Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous
-                        conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaitre ces offres et y accéder, contactez tout de suite
-                        votre référent phase 2 : <span>{referentManagerPhase2 && referentManagerPhase2.email}</span>
-                      </div>
-                    </ReactTooltip>
-                  </div>
+              <div className="flex justify-center items-center">
+                <div className="font-bold text-sm text-gray-00 mr-1"> Distance maximum </div>
+                <div>
+                  <img src={require("../../../../assets/info.svg")} data-tip data-for="info" />
+                  <ReactTooltip id="info" className="w-[527px] bg-white opacity-100 shadow-xl" arrowColor="white">
+                    <div className="text-[#414458] text-[15px] text-left mb-2">Visibilité des missions</div>
+                    <div className="text-[#83869A] text-[12px] text-left">
+                      Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous
+                      conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaitre ces offres et y accéder, contactez tout de suite votre
+                      référent phase 2 : <span>{referentManagerPhase2 && referentManagerPhase2.email}</span>
+                    </div>
+                  </ReactTooltip>
                 </div>
               </div>
 
