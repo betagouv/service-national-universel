@@ -24,7 +24,6 @@ export default function mission({ mission }) {
       <div className="flex flex-1">
         {/* icon */}
         <div className="flex items-center mr-3">
-          {/* <DomainThumb domain={mission?.domain} size="3rem" /> */}
           <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
         </div>
 

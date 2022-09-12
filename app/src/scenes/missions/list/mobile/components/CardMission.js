@@ -2,14 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import DomainThumb from "../../../../../components/DomainThumb";
 import LocationMarker from "../../../../../assets/icons/LocationMarker";
+import IconDomain from "../../../components/IconDomain";
 
 export default function mission({ mission }) {
   return (
     <Link to={`/mission/${mission._id}`} className="bg-white relative flex  justify-between shadow-nina rounded-xl p-3 border-[1px] border-[#ffffff] mb-4 z-10">
       <div className="flex flex-1">
         {/* icon */}
-        <div className="flex items-center">
-          <DomainThumb domain={mission?.domain} size="3rem" />
+        <div className="flex items-center mr-3">
+          <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
         </div>
 
         {/* infos mission */}
@@ -22,9 +23,7 @@ export default function mission({ mission }) {
           </div>
           <div className="flex flex-1 items-center justify-between">
             <div className="flex flex-1 items-center justify-start">
-              <div className="text-gray-500 text-xs font-normal">
-                Places disponibles:&nbsp;{mission?.placesLeft}/{mission?.placesTotal}
-              </div>
+              <div className="text-gray-500 text-xs font-medium">&nbsp;{mission?.placesLeft} places disponibles</div>
             </div>
             {mission?.sort?.length ? (
               <div className="flex items-center justify-end space-x-2">
