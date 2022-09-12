@@ -40,10 +40,11 @@ export default function List() {
   const [filter, setFilter] = React.useState({ DOMAINS: [], DISTANCE: 50 });
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
-  const [focusedAddress, setFocusedAddress] = React.useState();
+  const [focusedAddress, setFocusedAddress] = React.useState({ address: young?.address, zip: young?.zip });
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
   const [marginDistance, setMarginDistance] = useState();
+  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
 
   const callSingleAddressAPI = async (params) => {
     try {
@@ -312,6 +313,17 @@ export default function List() {
     }
   }, [filter?.DISTANCE]);
 
+  useEffect(() => {
+    if (!young) return;
+    (async () => {
+      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
+      if (ok) return setReferentManagerPhase2(data);
+      setReferentManagerPhase2(null);
+    })();
+    return () => setReferentManagerPhase2();
+  }, [young]);
+
+  console.log("young==>", young);
   return (
     <div className="flex">
       <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14 w-full">
@@ -387,7 +399,7 @@ export default function List() {
                       <div className="text-[#83869A] text-[12px] text-left">
                         Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous
                         conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaitre ces offres et y accéder, contactez tout de suite
-                        votre référent phase 2 : coralie.brenac1@ac-toulouse.fr
+                        votre référent phase 2 : <span>{referentManagerPhase2 && referentManagerPhase2.email}</span>
                       </div>
                     </ReactTooltip>
                   </div>
