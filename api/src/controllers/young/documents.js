@@ -172,8 +172,8 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     try {
       buffer = await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
     } catch (e) {
-      res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
       capture(e);
+      return res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
     }
 
     const content = buffer.toString("base64");
