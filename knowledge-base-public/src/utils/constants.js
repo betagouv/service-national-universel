@@ -4,6 +4,6 @@ export const translateRoleBDC = {
   structure: "Responsable de structure",
   young: "Volontaire",
   head_center: "Chef de centre",
-  public: "Publique",
+  public: "Public",
   visitor: "Visiteur régional",
 };
