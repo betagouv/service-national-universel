@@ -73,6 +73,15 @@ export default function List() {
 
   const getDefaultQuery = () => {
     let body = {
+      script_fields: {
+        distance: {
+          params: {
+            lat: filter.LOCATION.lat,
+            lon: filter.LOCATION.lon,
+          },
+          script: "doc['location'].arcDistance(params.lat, params.lon)*0.001",
+        },
+      },
       query: {
         bool: {
           must: [
@@ -311,6 +320,7 @@ export default function List() {
     }
   }, [filter?.DISTANCE]);
 
+  console.log("filter==>", filter);
   return (
     <div className="flex">
       <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14 w-full">
@@ -629,12 +639,20 @@ export default function List() {
                 size={25}
                 showLoader={true}
                 loader="Chargement..."
-                innerClass={{ pagination: "pagination" }}
+                innerClass={{ pagination: "pagination", sortOptions: "sortOptions" }}
                 dataField="created_at"
                 renderResultStats={({ numberOfResults }) => {
                   return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
                 }}
+                sortOptions={[
+                  { label: "Le plus récent", dataField: "createdAt.keyword", sortBy: "asc" },
+                  { label: "Le plus proche", dataField: "sort.keyword", sortBy: "asc" },
+                  { label: "Le plus long", dataField: "duration.keyword", sortBy: "desc" },
+                  { label: "Le plus court", dataField: "duration.keyword", sortBy: "asc" },
+                ]}
+                defaultSortOption="Le plus proche"
                 render={({ data }) => {
+                  console.log("data==>", data);
                   return data.map((e) => {
                     const tags = [];
                     e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
@@ -733,5 +751,15 @@ const Missions = styled.div`
       background-repeat: no-repeat;
       background-size: 8px;
     }
+  }
+
+  .sortOptions {
+    font-family: "Marianne";
+    outline: 0;
+    color: #374151;
+    font-weight: 400;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
   }
 `;
