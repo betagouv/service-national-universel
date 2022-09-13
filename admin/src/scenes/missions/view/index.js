@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { Switch, useHistory } from "react-router-dom";
 import { SentryRoute } from "../../../sentry";
 
@@ -8,7 +9,7 @@ import Youngs from "./youngs";
 import Historic from "./history";
 import ProposeMission from "./propose-mission";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../../utils";
+import { translate, ROLES } from "../../../utils";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 
@@ -19,6 +20,7 @@ export default function Index({ ...props }) {
   const [structure, setStructure] = useState();
   const [applications, setApplications] = useState();
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -71,7 +73,9 @@ export default function Index({ ...props }) {
       toastr.error("Oups, une erreur est survenue lors de la récupération des volontaires", translate(applicationResponse.code));
       return history.push("/mission");
     }
-    setApplications(applicationResponse.data.filter((e) => e.status !== "WAITING_ACCEPTATION"));
+    setApplications(applicationResponse.data);
+    // Do not show proposed missions to structures
+    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) setApplications(applicationResponse.data.filter((e) => e.status !== "WAITING_ACCEPTATION"));
   }
 
   if (!mission) return <div />;
