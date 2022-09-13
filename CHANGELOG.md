@@ -1,3 +1,14 @@
+## [1.128.3](https://github.com/betagouv/service-national-universel/compare/v1.128.2...v1.128.3) (2022-09-13)
+
+
+### Bug Fixes
+
+* **admin:** Error with sentry ([5e4cbad](https://github.com/betagouv/service-national-universel/commit/5e4cbad5ffc71c957598d4fe3cd949ae6769ec90))
+* **admin:** Search ES/cohesioncenter using department ([d0c3ec9](https://github.com/betagouv/service-national-universel/commit/d0c3ec98c14ab67c09012cf96af9835a0ac5aceb))
+* **api:** Error sentry ([1719aaa](https://github.com/betagouv/service-national-universel/commit/1719aaa117afaa399079eeb7cece588218a152e7))
+* **api:** Wrong call mongoDB ([57d5032](https://github.com/betagouv/service-national-universel/commit/57d5032fad9730b3747094496e27870e3a07e41f))
+* wording public ([3ddfa6a](https://github.com/betagouv/service-national-universel/commit/3ddfa6aba547e6573349ae1a4cb5f1b62e54f14a))
+
 ## [1.128.2](https://github.com/betagouv/service-national-universel/compare/v1.128.1...v1.128.2) (2022-09-09)
 
 
