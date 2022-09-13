@@ -31,8 +31,6 @@ import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
 import CGU from "./scenes/CGU";
 import PublicSupport from "./scenes/public-support-center";
-import SupportCenterMaintenance from "./scenes/support-center-maintenance";
-
 import Desistement from "./scenes/desistement";
 import changeSejour from "./scenes/phase1/changeSejour";
 import Maintenance from "./scenes/maintenance";
@@ -93,7 +91,7 @@ export default function App() {
             <SentryRoute path="/bug" component={Bug} />
             <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
             <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-            <SentryRoute path="/besoin-d-aide" component={SupportCenterMaintenance} />
+            <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
             <SentryRoute path="/validate-contract/done" component={ContractDone} />
             <SentryRoute path="/validate-contract" component={Contract} />
             <SentryRoute path="/inscription" component={Inscription} />
