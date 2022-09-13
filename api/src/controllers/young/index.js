@@ -458,7 +458,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
 
     // if they had a meeting point, we check if we need to update the places taken / left in the bus
     if (young.meetingPointId) {
-      const meetingPoint = await MeetingPointModel.findById(young.meetingPointId, req.user);
+      const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
       if (meetingPoint) {
         const bus = await BusModel.findById(meetingPoint.busId);
         if (bus) await updatePlacesBus(bus);
