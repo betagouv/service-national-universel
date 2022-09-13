@@ -97,7 +97,7 @@ export default function PanelView({ onChange, mission }) {
         </div>
       </div>
       <Info title="Volontaires">
-        <Details title="Candidature(s)" value={applications?.length} />
+        <Details title="Candidature(s)" value={applications?.filter((e) => e.status !== "WAITING_ACCEPTATION").length} />
         <Details title="Validée(s)" value={mission.placesTotal - mission.placesLeft} />
         <Details title="Disponible(s)" value={mission.placesLeft} />
         <Details title="Total" value={mission.placesTotal} />
