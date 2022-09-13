@@ -110,7 +110,7 @@ export default function Create(props) {
                   souhaitez joindre des pièces envoyez votre demande à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
                 </p>
               ) : null}
-              {values.type?.id && values.type?.id !== "OTHER" && ![ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role) ? (
+              {values.type?.id && !["OTHER", "QUESTION_SUPPORT"].includes(values.type?.id) && ![ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role) ? (
                 <SelectTag
                   name="subject"
                   options={Object.values(subjectsList).filter((e) => e.parentId === values?.type?.id)}
