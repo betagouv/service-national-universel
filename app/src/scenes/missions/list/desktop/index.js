@@ -73,15 +73,6 @@ export default function List() {
 
   const getDefaultQuery = () => {
     let body = {
-      script_fields: {
-        distance: {
-          params: {
-            lat: filter.LOCATION.lat,
-            lon: filter.LOCATION.lon,
-          },
-          script: "doc['location'].arcDistance(params.lat, params.lon)*0.001",
-        },
-      },
       query: {
         bool: {
           must: [
@@ -320,7 +311,6 @@ export default function List() {
     }
   }, [filter?.DISTANCE]);
 
-  console.log("filter==>", filter);
   return (
     <div className="flex">
       <div className="bg-white mx-4 pb-12 my-4 rounded-lg p-14 w-full">
@@ -642,7 +632,7 @@ export default function List() {
                 innerClass={{ pagination: "pagination", sortOptions: "sortOptions" }}
                 dataField="created_at"
                 renderResultStats={({ numberOfResults }) => {
-                  return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
+                  return <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
                 }}
                 sortOptions={[
                   { label: "Le plus récent", dataField: "createdAt.keyword", sortBy: "asc" },
@@ -652,13 +642,12 @@ export default function List() {
                 ]}
                 defaultSortOption="Le plus proche"
                 render={({ data }) => {
-                  console.log("data==>", data);
                   return data.map((e) => {
                     const tags = [];
                     e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
                     // tags.push(e.remote ? "À distance" : "En présentiel");
                     e.domains.forEach((d) => tags.push(translate(d)));
-                    return <CardMission key={e._id} mission={e} />;
+                    return <CardMission key={e._id} mission={e} youngLocation={filter.LOCATION} />;
                   });
                 }}
                 renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
@@ -759,7 +748,6 @@ const Missions = styled.div`
     color: #374151;
     font-weight: 400;
     font-size: 12px;
-    display: flex;
-    justify-content: space-between;
+    margin-left: 60%;
   }
 `;
