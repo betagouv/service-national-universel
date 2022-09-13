@@ -187,7 +187,7 @@ export default function VolontairePanel({ onChange, value }) {
           <Details title="Adresse" value={young.schoolAdress} />
         </Info>
 
-        {![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(user.role) && (
+        {![ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && (
           <Info title="Situations particulières" id={young._id}>
             <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
             <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
@@ -231,9 +231,7 @@ export default function VolontairePanel({ onChange, value }) {
           </Info>
         )}
 
-        {![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(user.role) && (
-          <div className="info">{young?.historic?.length > 0 && <Historic value={young.historic} />}</div>
-        )}
+        {![ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && <div className="info">{young?.historic?.length > 0 && <Historic value={young.historic} />}</div>}
 
         {young.motivations && (
           <div className="info">
