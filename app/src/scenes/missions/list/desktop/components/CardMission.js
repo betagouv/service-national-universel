@@ -70,7 +70,7 @@ export default function mission({ mission, youngLocation }) {
 
       <div className="flex flex-1 justify-between">
         {/* DISTANCE */}
-        {mission?.sort?.length ? (
+        {youngLocation && mission.location ? (
           <div className="flex basis-[60%] items-center justify-end space-x-2">
             <LocationMarker className="text-gray-400" />
             <div className="text-gray-800 text-base font-bold">à {getDistance(youngLocation.lat, youngLocation.lon, mission.location.lat, mission.location.lon).toFixed(1)} km</div>

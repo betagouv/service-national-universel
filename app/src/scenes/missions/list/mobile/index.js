@@ -667,10 +667,17 @@ export default function List() {
               innerClass={{ pagination: "pagination" }}
               dataField="created_at"
               renderResultStats={({ numberOfResults }) => {
-                return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
+                return <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
               }}
+              sortOptions={[
+                { label: "Le plus récent", dataField: "createdAt.keyword", sortBy: "asc" },
+                { label: "Le plus proche", dataField: "sort.keyword", sortBy: "asc" },
+                { label: "Le plus long", dataField: "duration.keyword", sortBy: "desc" },
+                { label: "Le plus court", dataField: "duration.keyword", sortBy: "asc" },
+              ]}
+              defaultSortOption="Le plus proche"
               render={({ data }) => {
-                return data.map((e) => <CardMission key={e._id} mission={e} />);
+                return data.map((e) => <CardMission key={e._id} mission={e} youngLocation={filter.LOCATION} />);
               }}
               renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
             />
@@ -795,5 +802,13 @@ const Missions = styled.div`
       background-repeat: no-repeat;
       background-size: 8px;
     }
+  }
+  .sortOptions {
+    font-family: "Marianne";
+    outline: 0;
+    color: #374151;
+    font-weight: 400;
+    font-size: 12px;
+    margin-left: 60%;
   }
 `;
