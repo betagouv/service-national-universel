@@ -400,12 +400,12 @@ export default function List() {
                 <div className="font-bold text-sm text-gray-00 mr-1"> Distance maximum </div>
                 <div>
                   <img src={InfobulleIcon} data-tip data-for="info" />
-                  <ReactTooltip id="info" className="w-[527px] bg-white opacity-100 shadow-xl" arrowColor="white">
+                  <ReactTooltip delayHide={3000} clickable={true} id="info" className="w-[527px] bg-white opacity-100 shadow-xl" arrowColor="white">
                     <div className="text-[#414458] text-[15px] text-left mb-2">Visibilité des missions</div>
                     <div className="text-[#83869A] text-[12px] text-left">
                       Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous
-                      conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaitre ces offres et y accéder, contactez tout de suite votre
-                      référent phase 2 : <span>{referentManagerPhase2 && referentManagerPhase2.email}</span>
+                      conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaître ces offres et y accéder, contactez tout de suite votre
+                      référent phase 2 : <a href={`mailto:${referentManagerPhase2?.email}`}>{referentManagerPhase2?.email}</a>
                     </div>
                   </ReactTooltip>
                 </div>
