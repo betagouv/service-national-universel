@@ -133,12 +133,14 @@ export default function Index(props) {
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280", marginBottom: "0.5rem" }}>
-              Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez
-              une réponse par mail.
+              <h5>Votre centre d&apos;aide est en cours de maintenance technique. ⚙️</h5>
+              <h5>
+                Pour toute demande, merci de nous contacter par mail à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
+              </h5>
             </div>
-            <div className="zammad-container">
+            {/* <div className="zammad-container">
               <LinkButton onClick={() => setOpen(true)}>Contacter quelqu&apos;un</LinkButton>
-            </div>
+            </div> */}
           </div>
         </div>
         {open && <ZammoodForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
