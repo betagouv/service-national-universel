@@ -135,6 +135,9 @@ export default function Index(props) {
             <div className="help-section-text" style={{ color: "#6B7280", marginBottom: "0.5rem" }}>
               <h5>Votre centre d&apos;aide est en cours de maintenance technique. ⚙️</h5>
               <h5>
+                Nous vous invitons à consulter notre base de connaissance : <a href="https://support.snu.gouv.fr/base-de-connaissance">cliquez ici</a>
+              </h5>
+              <h5>
                 Pour toute demande, merci de nous contacter par mail à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
               </h5>
             </div>
