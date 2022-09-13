@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
@@ -31,6 +32,7 @@ export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const onClickDelete = () => {
@@ -184,20 +186,24 @@ export default function VolontairePanel({ onChange, value }) {
           <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
           <Details title="Adresse" value={young.schoolAdress} />
         </Info>
-        <Info title="Situations particulières" id={young._id}>
-          <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
-          <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
-          <Details title="Handicap" value={t(young.handicap)} />
-          <Details title="Allergies ou intolérances" value={t(young.allergies)} />
-          <Details title="PPS" value={t(young.ppsBeneficiary)} />
-          <Details title="PAI" value={t(young.paiBeneficiary)} />
-          <Details title="Suivi médicosocial" value={t(young.medicosocialStructure)} />
-          <Details title="Aménagement spécifique" value={t(young.specificAmenagment) || "Non"} />
-          <Details title="Aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess) || "Non"} />
-          <Details title="Affecté dans son département de résidence" value={t(young.handicapInSameDepartment) || "Non"} />
-          <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
-          <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment) || "Non"} />
-        </Info>
+
+        {![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(user.role) && (
+          <Info title="Situations particulières" id={young._id}>
+            <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
+            <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
+            <Details title="Handicap" value={t(young.handicap)} />
+            <Details title="Allergies ou intolérances" value={t(young.allergies)} />
+            <Details title="PPS" value={t(young.ppsBeneficiary)} />
+            <Details title="PAI" value={t(young.paiBeneficiary)} />
+            <Details title="Suivi médicosocial" value={t(young.medicosocialStructure)} />
+            <Details title="Aménagement spécifique" value={t(young.specificAmenagment) || "Non"} />
+            <Details title="Aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess) || "Non"} />
+            <Details title="Affecté dans son département de résidence" value={t(young.handicapInSameDepartment) || "Non"} />
+            <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
+            <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment) || "Non"} />
+          </Info>
+        )}
+
         {young.parent1Status && (
           <Info title="Représentant légal n°1" id={young._id}>
             <Details title="Statut" value={t(young.parent1Status)} />
@@ -224,7 +230,11 @@ export default function VolontairePanel({ onChange, value }) {
             <Details title="Région" value={young.parent2Region} />
           </Info>
         )}
-        <div className="info">{young?.historic?.length > 0 && <Historic value={young.historic} />}</div>
+
+        {![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(user.role) && (
+          <div className="info">{young?.historic?.length > 0 && <Historic value={young.historic} />}</div>
+        )}
+
         {young.motivations && (
           <div className="info">
             <div className="info-title">Motivations</div>
