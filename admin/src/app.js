@@ -24,6 +24,8 @@ import Center from "./scenes/centers";
 import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
 import SupportCenter from "./scenes/support-center";
+import SupportCenterMaintenance from "./scenes/support-center-maintenance";
+import MailboxMaintenance from "./scenes/mailbox-maintenance";
 import Association from "./scenes/association";
 import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
@@ -175,8 +177,8 @@ const Home = () => {
             <RestrictedRoute path="/centre" component={Center} />
             <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
             <RestrictedRoute path="/association" component={Association} />
-            <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
-            <RestrictedRoute path="/boite-de-reception" component={Inbox} />
+            <RestrictedRoute path="/besoin-d-aide" component={SupportCenterMaintenance} />
+            <RestrictedRoute path="/boite-de-reception" component={MailboxMaintenance} />
             <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />
             <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />
             <RestrictedRoute path="/equipe" component={Team} />

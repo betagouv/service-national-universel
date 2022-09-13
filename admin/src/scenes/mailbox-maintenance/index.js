@@ -7,12 +7,10 @@ export default function SupportCenterMaintenance() {
   return (
     <HeroContainer>
       <img src={tools} />
-      <h5>Votre centre d&apos;aide est en cours de maintenance technique. ⚙️</h5>
+      <h5>La boîte de réception est actuellement en maintenance pour 24h00.</h5>
+      <h5>Les formulaires de contacts ont également été bloqués. Vous aurez accès à toutes les demandes des volontaires reçues avant le 13 septembre 11h00 dès demain.</h5>
       <h5>
-        Nous vous invitons à consulter notre base de connaissance : <a href="https://support.snu.gouv.fr/base-de-connaissance">cliquez ici</a>
-      </h5>
-      <h5>
-        Pour toute demande, merci de nous contacter par mail à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
+        Veuillez nous excuser de la gène occasionnée. L’équipe support reste disponible à l’adresse : <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
       </h5>
     </HeroContainer>
   );
