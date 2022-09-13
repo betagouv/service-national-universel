@@ -221,6 +221,19 @@ export default function List() {
 
       setFilter({ ...filter, LOCATION: filterLocation });
     })();
+
+    const getManagerPhase2 = async () => {
+      try {
+        if (!young) return;
+        const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
+
+        if (!ok) return toastr.error("Aucun référent n'a été trouvé");
+        setReferentManagerPhase2(data);
+      } catch (e) {
+        capture(e);
+      }
+    };
+    getManagerPhase2();
   }, [young]);
 
   React.useEffect(() => {
@@ -317,24 +330,6 @@ export default function List() {
       setMarginDistance(marginLeftDistance(ele));
     }
   }, [filter?.DISTANCE]);
-
-  useEffect(() => {
-    const getManagerPhase2 = async () => {
-      try {
-        if (!young) return;
-        const { ok, data, code } = await api.get(`/referent/manager_phase2/${young.department}`);
-        if (ok) {
-          setReferentManagerPhase2(data);
-        } else {
-          capture(code);
-          toastr.error("Aucun référent n'a été trouvé");
-        }
-      } catch (e) {
-        return setReferentManagerPhase2(null);
-      }
-    };
-    getManagerPhase2();
-  }, [young]);
 
   return (
     <div className="flex">
