@@ -454,7 +454,7 @@ export default function List() {
                     <div className="flex items-center gap-2">
                       <input id="second-address" name="address" type="radio" value={young.city} disabled />
                       <label htmlFor="second-address">
-                        <span className="text-[13px] text-gray-400">Autours de l&apos;adresse de mon proche</span>
+                        <span className="text-[13px] text-gray-400">Autour de l&apos;adresse de mon proche</span>
                         <br />
                         <Link to="/preferences" className="text-[15px] text-blue-600 underline hover:underline">
                           Renseigner une adresse
