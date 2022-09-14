@@ -10,6 +10,7 @@ import { APPLICATION_STATUS, ENABLE_PM, SENDINBLUE_TEMPLATES, translate } from "
 
 import { toastr } from "react-redux-toastr";
 import plausibleEvent from "../../../services/plausible";
+import { capture } from "../../../sentry";
 
 export default function ApplyModal({ value, onChange, onSend, onCancel }) {
   const [sending, setSending] = useState(false);
@@ -46,26 +47,19 @@ export default function ApplyModal({ value, onChange, onSend, onCancel }) {
       }
     }
     try {
-      let needPMnotif = false;
       const { ok, data, code } = await api.post(`/application`, application);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
       const responseNotification = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
       if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
       if (ENABLE_PM && value.isMilitaryPreparation === "true") {
         if (!["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
-          needPMnotif = true;
           const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
           if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
           else dispatch(setYoung(responseChangeStatsPM.data));
         }
-
-        if (needPMnotif || young.statusMilitaryPreparationFiles === "WAITING_VALIDATION") {
-          const responseReminderReferent = await api.post(`/application/notify/docs-military-preparation/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED}`);
-          if (!responseReminderReferent?.ok) return toastr.error(translate(responseReminderReferent?.code), "Une erreur s'est produite avec le service de notification.");
-        }
       }
     } catch (e) {
-      console.log(e);
+      capture(e);
       onCancel();
       return toastr.error("Oups, une erreur est survenue lors de la candidature");
     }
