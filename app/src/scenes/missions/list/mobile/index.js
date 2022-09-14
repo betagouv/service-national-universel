@@ -670,12 +670,12 @@ export default function List() {
                 return <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
               }}
               sortOptions={[
-                { label: "Le plus récent", dataField: "createdAt.keyword", sortBy: "asc" },
-                { label: "Le plus proche", dataField: "sort.keyword", sortBy: "asc" },
-                { label: "Le plus long", dataField: "duration.keyword", sortBy: "desc" },
-                { label: "Le plus court", dataField: "duration.keyword", sortBy: "asc" },
+                { label: "La plus récente", dataField: "createdAt.keyword", sortBy: "asc" },
+                { label: "La plus proche", dataField: "sort.keyword", sortBy: "asc" },
+                { label: "La plus longue", dataField: "duration.keyword", sortBy: "desc" },
+                { label: "La plus courte", dataField: "duration.keyword", sortBy: "asc" },
               ]}
-              defaultSortOption="Le plus proche"
+              defaultSortOption="La plus proche"
               render={({ data }) => {
                 return data.map((e) => <CardMission key={e._id} mission={e} youngLocation={filter.LOCATION} />);
               }}
