@@ -16,6 +16,7 @@ import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 import { capture } from "../../../sentry";
+import IconDomain from "../../../components/IconDomain";
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
@@ -131,20 +132,25 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
   }, []);
 
   const [openModalPJ, setOpenModalPJ] = useState(false);
-
+  console.log("mission==>", mission);
   if (!mission) return null;
   return (
     <tr>
       <td>
         <Link to={`/mission/${hit.missionId}`}>
-          <div>
+          <div className="flex flex-1">
+            <div className="flex items-center mr-4">
+              <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
+            </div>
             {/* A déplacer */}
             {/* <div className="text-snu-purple-300 font-medium uppercase text-xs mb-2">
               {hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}
             </div> */}
-            <div className="uppercase text-gray-500 font-medium text-[11px] tracking-wider">{mission.structureName}</div>
-            <div className="text-[#242526] font-bold text-base">{mission.name}</div>
-            <div className="text-coolGray-500 text-xs">{`• ${mission.city} (${mission.department})`}</div>
+            <div>
+              <div className="uppercase text-gray-500 font-medium text-[11px] tracking-wider">{mission.structureName}</div>
+              <div className="text-[#242526] font-bold text-base">{mission.name}</div>
+              <div className="text-coolGray-500 text-xs">{`• ${mission.city} (${mission.department})`}</div>
+            </div>
           </div>
         </Link>
       </td>
