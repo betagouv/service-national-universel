@@ -30,6 +30,10 @@ import TrainSvg from "../../assets/Train";
 import FuseeSvg from "../../assets/Fusee";
 import { Modal } from "reactstrap";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
+import { toastr } from "react-redux-toastr";
+import { capture } from "../../../../../../admin/src/sentry";
+import RadioInput from "../../../../assets/radioInput.svg";
+import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
 
 const FILTERS = ["DOMAINS", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
@@ -46,6 +50,8 @@ export default function List() {
   const [keyWordOpen, setKeyWordOpen] = React.useState(false);
   const [keyWord, setKeyWord] = React.useState("");
   const [marginDistance, setMarginDistance] = useState();
+  const [showMoreDetails, setShowMoreDetails] = useState(false);
+  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
 
   const callSingleAddressAPI = async (params) => {
     try {
@@ -218,6 +224,18 @@ export default function List() {
 
       setFilter({ ...filter, LOCATION: filterLocation });
     })();
+
+    const getManagerPhase2 = async () => {
+      try {
+        if (!young) return;
+        const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
+        if (!ok) return toastr.error("Aucun référent n'a été trouvé");
+        setReferentManagerPhase2(data);
+      } catch (e) {
+        capture(e);
+      }
+    };
+    getManagerPhase2();
   }, [young]);
 
   React.useEffect(() => {
@@ -357,6 +375,7 @@ export default function List() {
                   className="text-xs text-gray-500"
                   onClick={() => {
                     setModalControl(false);
+                    setShowMoreDetails(false);
                   }}>
                   Fermer
                 </div>
@@ -423,10 +442,29 @@ export default function List() {
                   )}
                   {dropdownControlDistanceOpen && (
                     <div>
-                      <div className="font-bold text-center">Distance maximum</div>
-                      <div className="text-sm text-gray-500 text-center">
-                        Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. En savoir plus
+                      <div className="font-bold text-center mb-2 ">Distance maximum</div>
+
+                      <div className="text-xs text-gray-500 text-center">
+                        Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré.{" "}
+                        {showMoreDetails === false ? (
+                          <button
+                            className="text-blue-500"
+                            onClick={() => {
+                              setShowMoreDetails(true);
+                            }}>
+                            En savoir plus
+                          </button>
+                        ) : (
+                          <>
+                            <span>
+                              Il existe des offres de missions accessibles pour vous sous conditions partout en France, notamment certaines préparations militaires. Si vous
+                              souhaitez connaitre ces offres et y accéder, contactez tout de suite votre référent phase 2 :
+                            </span>{" "}
+                            <a href={`mailto:${referentManagerPhase2?.email}`}>{referentManagerPhase2?.email}</a>
+                          </>
+                        )}
                       </div>
+
                       <div className="flex w-full flex-col space-y-2 py-2 px-2">
                         <div className="flex justify-around my-3">
                           <div className="flex items-center gap-2">
@@ -436,11 +474,15 @@ export default function List() {
                               type="radio"
                               checked={focusedAddress?.address !== young?.mobilityNearRelativeAddress}
                               onChange={() => setFocusedAddress({ address: young?.address, zip: young?.zip })}
+                              className="hidden"
                             />
+                            <label htmlFor="main-address" className="mr-2">
+                              {focusedAddress?.address === young.address ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                            </label>
                             <label htmlFor="main-address" className="cursor-pointer">
-                              <span className="text-xs text-gray-700">Autours de mon adresse principale</span>
+                              <span className="text-xs text-gray-700 leading-[15px]">Autour de mon adresse principale</span>
                               <br />
-                              <span className="text-sm text-gray-700">{young.city}</span>
+                              <span className="text-[13px] text-gray-700">{young.city}</span>
                             </label>
                           </div>
                           {young?.mobilityNearRelativeCity ? (
@@ -451,20 +493,24 @@ export default function List() {
                                 type="radio"
                                 checked={focusedAddress?.address === young?.mobilityNearRelativeAddress}
                                 onChange={() => setFocusedAddress({ address: young?.mobilityNearRelativeAddress, zip: young?.mobilityNearRelativeZip })}
+                                className="hidden"
                               />
+                              <label htmlFor="second-address" className="mr-2">
+                                {focusedAddress?.address === young.mobilityNearRelativeAddress ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                              </label>
                               <label htmlFor="second-address" className="cursor-pointer">
-                                <span className="text-xs text-gray-700">Autours de l&apos;adresse de mon proche</span>
+                                <span className="text-xs text-gray-700">Autour de l&apos;adresse de mon proche</span>
                                 <br />
-                                <span className="text-sm text-gray-700">{young?.mobilityNearRelativeCity}</span>
+                                <span className="text-[13px] text-gray-700">{young?.mobilityNearRelativeCity}</span>
                               </label>
                             </div>
                           ) : (
                             <div className="flex items-center gap-2">
                               <input id="second-address" name="address" type="radio" value={young.city} disabled />
                               <label htmlFor="second-address">
-                                <span className="text-xs text-gray-400">Autours de l&apos;adresse de mon proche</span>
+                                <span className="text-xs text-gray-400">Autour de l&apos;adresse de mon proche</span>
                                 <br />
-                                <Link to="/preferences" className="text-sm text-blue-600 underline hover:underline">
+                                <Link to="/preferences" className="text-[13px] text-blue-600 underline hover:underline">
                                   Renseigner une adresse
                                 </Link>
                               </label>
@@ -796,3 +842,10 @@ const Missions = styled.div`
     }
   }
 `;
+
+// const DistanceRange = styled.div`
+//   input[type="range"]::-webkit-slider-thumb {
+//     border-radius: 50%;
+//     background: #4b5563;
+//   }
+// `;
