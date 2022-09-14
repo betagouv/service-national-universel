@@ -31,7 +31,7 @@ import FuseeSvg from "../../assets/Fusee";
 import { Modal } from "reactstrap";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 import { toastr } from "react-redux-toastr";
-import { capture } from "../../../../../../admin/src/sentry";
+import { capture } from "../../../../../src/sentry";
 import RadioInput from "../../../../assets/radioInput.svg";
 import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
 

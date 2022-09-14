@@ -32,7 +32,7 @@ import TrainSvg from "../../assets/Train";
 import FuseeSvg from "../../assets/Fusee";
 import ReactTooltip from "react-tooltip";
 import { toastr } from "react-redux-toastr";
-import { capture } from "../../../../../../admin/src/sentry";
+import { capture } from "../../../../../src/sentry";
 import InfobulleIcon from "../../../../assets/infobulleIcon.svg";
 import RadioInput from "../../../../assets/radioInput.svg";
 import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
