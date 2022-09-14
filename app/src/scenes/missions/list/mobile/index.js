@@ -447,18 +447,20 @@ export default function List() {
                       <div className="text-xs text-gray-500 text-center">
                         Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré.{" "}
                         {showMoreDetails === false ? (
-                          <span
+                          <button
+                            className="text-blue-500"
                             onClick={() => {
                               setShowMoreDetails(true);
                             }}>
                             En savoir plus
-                          </span>
+                          </button>
                         ) : (
                           <>
                             <span>
                               Il existe des offres de missions accessibles pour vous sous conditions partout en France, notamment certaines préparations militaires. Si vous
-                              souhaitez connaitre ces offres et y accéder, contactez tout de suite votre référent phase 2 :{referentManagerPhase2 && referentManagerPhase2.email}
-                            </span>
+                              souhaitez connaitre ces offres et y accéder, contactez tout de suite votre référent phase 2 :
+                            </span>{" "}
+                            <a href={`mailto:${referentManagerPhase2?.email}`}>{referentManagerPhase2?.email}</a>
                           </>
                         )}
                       </div>
@@ -506,7 +508,7 @@ export default function List() {
                             <div className="flex items-center gap-2">
                               <input id="second-address" name="address" type="radio" value={young.city} disabled />
                               <label htmlFor="second-address">
-                                <span className="text-xs text-gray-400">Autours de l&apos;adresse de mon proche</span>
+                                <span className="text-xs text-gray-400">Autour de l&apos;adresse de mon proche</span>
                                 <br />
                                 <Link to="/preferences" className="text-[13px] text-blue-600 underline hover:underline">
                                   Renseigner une adresse
