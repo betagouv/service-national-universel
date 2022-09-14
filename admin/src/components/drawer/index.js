@@ -240,7 +240,7 @@ const Drawer = (props) => {
   const [open, setOpen] = useState();
   const [from, setFrom] = useState();
   const history = useHistory();
-  const ssoSupportStorage = localStorage.getItem("sso-support");
+  const ssoSupportStorage = localStorage?.getItem("sso-support");
 
   useEffect(() => {
     setOpen(props.open);

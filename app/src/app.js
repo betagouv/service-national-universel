@@ -82,7 +82,7 @@ export default function App() {
       <ScrollToTop />
       <GoogleTags />
       <div className="main">
-        {maintenance & !localStorage.getItem("override_maintenance") ? (
+        {maintenance & !localStorage?.getItem("override_maintenance") ? (
           <Switch>
             <SentryRoute path="/" component={Maintenance} />
           </Switch>

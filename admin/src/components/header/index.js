@@ -80,7 +80,7 @@ export default function HeaderIndex({ onClickBurger, drawerVisible, sessionsList
                 onClick={() => {
                   dispatch(setSessionPhase1(session));
                   setSelectSessionOpen(false);
-                  localStorage.setItem("active_session_chef_de_centre", JSON.stringify(session));
+                  localStorage?.setItem("active_session_chef_de_centre", JSON.stringify(session));
                   // on retourne au dashboard !
                   history.push("/");
                 }}>

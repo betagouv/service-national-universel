@@ -35,7 +35,7 @@ export default function Signin() {
             <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Espace Administrateur</h1>
             <h2 className="mb-8 text-base font-normal text-brand-grey">A destination des référents et des structures d’accueil</h2>
 
-            {maintenance && !localStorage.getItem("override_maintenance") ? (
+            {maintenance && !localStorage?.getItem("override_maintenance") ? (
               <div className="flex items-center m-4">
                 <div className="bg-yellow-50 p-3 rounded-lg shadow-sm ">
                   <div className="flex space-x-2 items-center ">
