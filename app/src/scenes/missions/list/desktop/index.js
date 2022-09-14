@@ -7,8 +7,6 @@ import CardMission from "./components/CardMission";
 import { apiURL } from "../../../../config";
 import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM, ES_NO_LIMIT, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../../utils";
 import api from "../../../../services/api";
-import Loader from "../../../../components/Loader";
-import FilterGeoloc from "../../components/FilterGeoloc";
 import Sante from "../../../../assets/mission-domaines/sante";
 import Solidarite from "../../../../assets/mission-domaines/solidarite";
 import Citoyennete from "../../../../assets/mission-domaines/citoyennete";
