@@ -52,14 +52,14 @@ export default function ApplyModal({ value, onChange, onSend, onCancel }) {
       const responseNotification = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
       if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
       if (ENABLE_PM && value.isMilitaryPreparation === "true") {
-        if (!["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+        if (!["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
           needPMnotif = true;
-          const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
+          const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
           if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
           else dispatch(setYoung(responseChangeStatsPM.data));
         }
 
-        if (needPMnotif || young.statusMilitaryPreparationFiles === "WAITING_VALIDATION") {
+        if (needPMnotif || young.statusMilitaryPreparationFiles === "WAITING_VERIFICATION") {
           const responseReminderReferent = await api.post(`/application/notify/docs-military-preparation/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED}`);
           if (!responseReminderReferent?.ok) return toastr.error(translate(responseReminderReferent?.code), "Une erreur s'est produite avec le service de notification.");
         }

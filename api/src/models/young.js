@@ -1414,7 +1414,8 @@ const Schema = new mongoose.Schema({
   },
   statusMilitaryPreparationFiles: {
     type: String,
-    enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
+    // todo: remove WAITING_VALIDATION enum after sync
+    enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
   },
 
   files: {

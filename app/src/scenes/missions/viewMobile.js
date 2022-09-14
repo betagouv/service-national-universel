@@ -740,9 +740,9 @@ const ApplicationStatus = ({
               onClick={async () => {
                 try {
                   if (mission.isMilitaryPreparation === "true") {
-                    if (!["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+                    if (!["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
                       const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
-                        statusMilitaryPreparationFiles: "WAITING_VALIDATION",
+                        statusMilitaryPreparationFiles: "WAITING_VERIFICATION",
                       });
                       if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
                     }
