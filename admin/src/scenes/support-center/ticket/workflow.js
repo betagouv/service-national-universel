@@ -63,6 +63,11 @@ export const typesReferent = {
     label: "J'ai un problème technique",
     tags: ["TAG_problème_technique", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
   },
+  QUESTION_SUPPORT: {
+    id: "QUESTION_SUPPORT",
+    label: "J'ai une question sur la boîte de réception ?",
+    tags: ["TAG_question", "TAG_question_support", "AGENT_Startup_Support"],
+  },
   SPECIAL_CASE: {
     id: "SPECIAL_CASE",
     label: "J'ai un cas particulier (volontaire)",
