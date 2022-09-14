@@ -181,49 +181,28 @@ function referent({ user, onClick, newTickets, openedTickets, closedTickets, tic
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      {user.email === "helene.dubourdieu@gmail.com" || user.region === "Normandie" || department2region[user.department] === "Normandie" ? (
-        <DrawerConnectToZammood title="Boîte de réception" history={history}>
-          {!tickets ? (
-            <div />
-          ) : (
-            <>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-                <div>{newTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-                <div>{openedTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
-                <div>{closedTickets}</div>
-              </div>
-            </>
-          )}
-        </DrawerConnectToZammood>
-      ) : (
-        <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
-          {!tickets ? (
-            <div />
-          ) : (
-            <>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
-                <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-                <div>{newTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
-                <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
-                <div>{openedTickets}</div>
-              </div>
-              <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
-                <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
-                <div>{closedTickets}</div>
-              </div>
-            </>
-          )}
-        </DrawerTabWithIcons>
-      )}
+
+      <DrawerConnectToZammood title="Boîte de réception" history={history}>
+        {!tickets ? (
+          <div />
+        ) : (
+          <>
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-rose-500">
+              <MailCloseIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+              <div>{newTickets}</div>
+            </div>
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-amber-400">
+              <MailOpenIcon color="#ffffff" style={{ margin: 0, "padding-top": "2px" }} />
+              <div>{openedTickets}</div>
+            </div>
+            <div className="flex justify-evenly content-center rounded-lg w-14 mr-2.5 px-2  bg-green-500">
+              <SuccessIcon color="#ffffff" style={{ margin: 0, "padding-top": "3px" }} />
+              <div>{closedTickets}</div>
+            </div>
+          </>
+        )}
+      </DrawerConnectToZammood>
+
       <HelpButton to={`/besoin-d-aide?from=${from}`} title="Besoin d'aide" onClick={onClick} />
     </>
   );
