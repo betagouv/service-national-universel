@@ -457,9 +457,8 @@ export default function List() {
                           <>
                             <span>
                               Il existe des offres de missions accessibles pour vous sous conditions partout en France, notamment certaines préparations militaires. Si vous
-                              souhaitez connaitre ces offres et y accéder, contactez tout de suite votre référent phase 2 :
-                            </span>{" "}
-                            <span>{referentManagerPhase2 && referentManagerPhase2.email}</span>
+                              souhaitez connaitre ces offres et y accéder, contactez tout de suite votre référent phase 2 :{referentManagerPhase2 && referentManagerPhase2.email}
+                            </span>
                           </>
                         )}
                       </div>
