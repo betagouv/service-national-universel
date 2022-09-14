@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import DomainThumb from "../../../../../components/DomainThumb";
 import LocationMarker from "../../../../../assets/icons/LocationMarker";
 import IconDomain from "../../../components/IconDomain";
 

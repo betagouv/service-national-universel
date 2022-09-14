@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { translateApplication, translate } from "../../../../../utils";
-import DomainThumb from "../../../../../components/DomainThumb";
 import LocationMarker from "../../../../../assets/icons/LocationMarker";
 import EyeOff from "../../../../../assets/icons/EyeOff";
 import Eye from "../../../../../assets/icons/Eye";
