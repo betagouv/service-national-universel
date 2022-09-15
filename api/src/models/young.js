@@ -1414,7 +1414,8 @@ const Schema = new mongoose.Schema({
   },
   statusMilitaryPreparationFiles: {
     type: String,
-    enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
+    // todo: remove WAITING_VALIDATION enum after sync
+    enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
   },
 
   files: {
@@ -1503,6 +1504,15 @@ Schema.post("findOneAndUpdate", function (doc) {
 });
 Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
+});
+
+Schema.post("find", function (results) {
+  for (const doc of results) {
+    if (doc.statusMilitaryPreparationFiles === "WAITING_VALIDATION") {
+      doc.statusMilitaryPreparationFiles = "WAITING_VERIFICATION";
+    }
+  }
+  return results;
 });
 
 Schema.virtual("fromUser").set(function (fromUser) {

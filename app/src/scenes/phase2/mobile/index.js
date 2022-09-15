@@ -40,7 +40,7 @@ export default function IndexPhase2Mobile() {
   }, []);
 
   React.useEffect(() => {
-    if (["WAITING_CORRECTION", "REFUSED", "VALIDATED", "WAITING_VALIDATION"].includes(young.statusMilitaryPreparationFiles)) {
+    if (["WAITING_CORRECTION", "REFUSED", "VALIDATED", "WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(young.statusMilitaryPreparationFiles)) {
       setHasPM(true);
     } else {
       setHasPM(false);

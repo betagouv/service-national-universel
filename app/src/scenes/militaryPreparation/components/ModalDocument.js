@@ -13,7 +13,7 @@ export default function ModalDocument({ isOpen, onCancel, title, subTitle, subsu
 
   const updateStatus = async () => {
     if (young.statusMilitaryPreparationFiles === "WAITING_CORRECTION") {
-      const responseChangeStatusPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
+      const responseChangeStatusPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
       if (!responseChangeStatusPM.ok) return toastr.error(translate(responseChangeStatusPM?.code), "Oups, une erreur est survenue de la modification de votre dossier.");
       else dispatch(setYoung(responseChangeStatusPM.data));
     }

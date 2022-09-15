@@ -37,12 +37,14 @@ export default function Phase2militaryPrepartionV2({ young }) {
   const themeBadge = {
     background: {
       WAITING_VALIDATION: "bg-sky-100",
+      WAITING_VERIFICATION: "bg-sky-100",
       WAITING_CORRECTION: "bg-[#FD7A02]",
       VALIDATED: "bg-[#71C784]",
       REFUSED: "bg-red-500",
     },
     text: {
       WAITING_VALIDATION: "text-sky-600",
+      WAITING_VERIFICATION: "text-sky-600",
       WAITING_CORRECTION: "text-white",
       VALIDATED: "text-white",
       REFUSED: "text-white",
@@ -65,7 +67,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
 
   if (!applicationsToMilitaryPreparation) return <Loader />;
 
-  if (!["WAITING_VALIDATION", "VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+  if (!["WAITING_VALIDATION", "WAITING_VERIFICATION", "VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
     // display nothing if the young has not validated the files at least one time
     return null;
   }
@@ -206,7 +208,8 @@ export default function Phase2militaryPrepartionV2({ young }) {
               </div>
             ) : (
               <>
-                {young.statusMilitaryPreparationFiles === "WAITING_VALIDATION" ? (
+                {/* todo: remove WAITING_VALIDATION after sync */}
+                {young.statusMilitaryPreparationFiles in ["WAITING_VERIFICATION", "WAITING_VALIDATION"] ? (
                   <div className="flex items-center gap-5 ">
                     <button
                       className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 hover:bg-indigo-400 transition duration-300 ease-in-out"

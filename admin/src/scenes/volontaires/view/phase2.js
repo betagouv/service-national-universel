@@ -11,7 +11,7 @@ import { colors, ENABLE_PM, translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } f
 import CardEquivalence from "../components/Equivalence";
 import Toolbox from "../components/Toolbox";
 import ApplicationList from "./applicationList.js";
-import Phase2militaryPrepartionV2 from "./phase2MilitaryPreparationV2";
+import Phase2MilitaryPreparation from "./phase2MilitaryPreparationV2";
 import WrapperPhase2 from "./wrapper";
 
 export default function Phase2({ young, onChange }) {
@@ -73,7 +73,7 @@ export default function Phase2({ young, onChange }) {
             </Col>
           </Row>
         </Box>
-        {ENABLE_PM ? <Phase2militaryPrepartionV2 young={young} /> : null}
+        {ENABLE_PM ? <Phase2MilitaryPreparation young={young} /> : null}
         {equivalences.map((equivalence, index) => (
           <CardEquivalence key={index} equivalence={equivalence} young={young} />
         ))}
