@@ -48,10 +48,10 @@ export default function ModalPM({ theme, open, setOpen, young }) {
               <div className="flex flex-col flex-1">
                 <div className="text-base font-bold">Corrections demandées</div>
                 <div className="text-sm text-gray-500">{young.militaryPreparationCorrectionMessage}</div>
+                <button className="mt-4 border-[1px] border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white px-4 py-2 rounded-lg" onClick={onCorrection}>
+                  Envoyer ma correction
+                </button>
               </div>
-              <button className="mr-4 border-[1px] border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white px-4 py-2 rounded-lg" onClick={onCorrection}>
-                Envoyer ma correction
-              </button>
             </div>
           </>
         ) : null}
