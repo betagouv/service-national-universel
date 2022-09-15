@@ -4,7 +4,7 @@ const request = require("supertest");
 
 // This part should be done at the beginning (before require models or anything else.).
 process.env.ES_ENDPOINT = "http://localhost:9200";
-jest.mock("@selego/mongoose-elastic", () => () => () => { });
+jest.mock("@selego/mongoose-elastic", () => () => () => {});
 jest.mock("@elastic/elasticsearch", () => ({
   Client: jest.fn().mockImplementation(() => {
     return {
@@ -325,7 +325,15 @@ describe("Es", () => {
       passport.user.structureId = structure._id.toString();
       let res = await msearch("application", buildMsearchQuery("application", matchAll));
       let expectedBody = buildMsearchQuery("application", {
-        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": [passport.user.structureId] } }] } },
+        query: {
+          bool: {
+            must: { match_all: {} },
+            filter: [
+              { terms: { "structureId.keyword": [passport.user.structureId] } },
+              { terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } },
+            ],
+          },
+        },
       });
       expect(res.statusCode).toEqual(200);
       expect(esClient.msearch).toHaveBeenCalledWith({ body: expectedBody, index: "application" });

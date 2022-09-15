@@ -13,7 +13,7 @@ const ReferentObject = require("../models/referent");
 // eslint-disable-next-line no-unused-vars
 const { ERRORS, isYoung, updateApplication } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
-const { canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib/roles");
+const { ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib/roles");
 const { MISSION_STATUS } = require("snu-lib/constants");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
@@ -256,7 +256,10 @@ router.get("/:id/application", passport.authenticate("referent", { session: fals
 
     if (!canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const data = await ApplicationObject.find({ missionId: id });
+    let data = [];
+    if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
+      data = await ApplicationObject.find({ missionId: id, status: { $ne: "WAITING_ACCEPTATION " } });
+    } else data = await ApplicationObject.find({ missionId: id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     for (let i = 0; i < data.length; i++) {
       const application = data[i];

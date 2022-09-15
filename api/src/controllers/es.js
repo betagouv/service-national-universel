@@ -419,10 +419,11 @@ router.post("/application/:action(_msearch|export)", passport.authenticate(["ref
 
     if (!canSearchInElasticSearch(user, "application")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    // A responsible cans only see their structure's applications.
+    // A responsible can only see their structure's applications.
     if (user.role === ROLES.RESPONSIBLE) {
       if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+      filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
     }
 
     // A supervisor can only see their structures' applications.
@@ -430,6 +431,7 @@ router.post("/application/:action(_msearch|export)", passport.authenticate(["ref
       if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
       filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+      filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
     }
 
     if (req.params.action === "export") {
