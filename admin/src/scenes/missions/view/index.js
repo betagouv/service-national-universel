@@ -73,9 +73,7 @@ export default function Index({ ...props }) {
       toastr.error("Oups, une erreur est survenue lors de la récupération des volontaires", translate(applicationResponse.code));
       return history.push("/mission");
     }
-    // Do not show proposed missions to structures
-    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) setApplications(applicationResponse.data.filter((e) => e.status !== "WAITING_ACCEPTATION"));
-    else setApplications(applicationResponse.data);
+    setApplications(applicationResponse.data);
   }
 
   if (!mission) return <div />;
