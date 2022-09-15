@@ -67,7 +67,7 @@ export default function CardPM({ young }) {
           <hr className="text-gray-200" />
           {young.statusMilitaryPreparationFiles === "WAITING_CORRECTION" ? (
             <>
-              <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mb-4 gap-6">
+              <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mt-4 mb-4 gap-6">
                 <div className="flex flex-col flex-1">
                   <div className="text-base font-bold">Corrections demandées</div>
                   <div className="text-sm text-gray-500">{young.militaryPreparationCorrectionMessage}</div>

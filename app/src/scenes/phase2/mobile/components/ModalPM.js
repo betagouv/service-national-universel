@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "reactstrap";
-import { translateStatusMilitaryPreparationFiles } from "../../../../utils";
+import { translateStatusMilitaryPreparationFiles, translate } from "../../../../utils";
 import CloseSvg from "../../../../assets/Close";
 import Prepa from "../../../../assets/icons/Prepa";
 import DocumentsPM from "../../../militaryPreparation/components/DocumentsPM";
@@ -44,7 +44,7 @@ export default function ModalPM({ theme, open, setOpen, young }) {
         </div>
         {young.statusMilitaryPreparationFiles === "WAITING_CORRECTION" ? (
           <>
-            <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mb-4 gap-6">
+            <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mt-4 mb-4 gap-6">
               <div className="flex flex-col flex-1">
                 <div className="text-base font-bold">Corrections demandées</div>
                 <div className="text-sm text-gray-500">{young.militaryPreparationCorrectionMessage}</div>
