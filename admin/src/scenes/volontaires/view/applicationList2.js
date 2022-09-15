@@ -14,7 +14,7 @@ import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWith
 import SelectStatusApplication from "../../../components/selectStatusApplication";
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import { ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import IconDomain from "../../../components/IconDomain";
 
@@ -117,6 +117,7 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
   const [mission, setMission] = useState();
   const [modalDurationOpen, setModalDurationOpen] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [tags, setTags] = useState();
 
   const history = useHistory();
   useEffect(() => {
@@ -127,18 +128,25 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
         capture(code);
         return toastr.error("Oups, une erreur est survenue", code);
       }
-      return setMission(data);
+      setMission(data);
+      // test pour tags, return à remettre si casse
+      const t = [];
+      data?.city && t.push(data?.city + (data?.zip ? ` - ${data?.zip}` : ""));
+      (data?.domains || []).forEach((d) => t.push(translate(d)));
+      setTags(t);
     })();
   }, []);
 
   const [openModalPJ, setOpenModalPJ] = useState(false);
-  console.log("mission==>", mission);
+  // console.log("mission==>", mission);
+  console.log("tags", tags);
   if (!mission) return null;
   return (
     <tr>
       <td>
         <Link to={`/mission/${hit.missionId}`}>
           <div className="flex flex-1">
+            {/* icon */}
             <div className="flex items-center mr-4">
               <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
             </div>
@@ -146,10 +154,27 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
             {/* <div className="text-snu-purple-300 font-medium uppercase text-xs mb-2">
               {hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}
             </div> */}
-            <div>
+
+            {/* mission info */}
+            <div className="flex flex-col flex-1">
               <div className="uppercase text-gray-500 font-medium text-[11px] tracking-wider">{mission.structureName}</div>
               <div className="text-[#242526] font-bold text-base">{mission.name}</div>
-              <div className="text-coolGray-500 text-xs">{`• ${mission.city} (${mission.department})`}</div>
+              {/* tags */}
+              {/* <div className="text-coolGray-500 text-xs">{`• ${mission.city} (${mission.department})`}</div> */}
+              {tags && (
+                <div className=" flex-inline flex-wrap">
+                  {tags.map((tag, index) => {
+                    return (
+                      <div key={index} className=" flex flex-1 text-[11px] text-gray-600 rounded-full border-gray-200 border-[1px] justify-center items-center mb-2 mt-1 ">
+                        {tag}
+                      </div>
+                    );
+                  })}
+                  {mission.isMilitaryPreparation === "true" ? (
+                    <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full text-xs mb-2">Préparation militaire</div>
+                  ) : null}
+                </div>
+              )}
             </div>
           </div>
         </Link>
@@ -164,7 +189,13 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
           <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.endAt)}</span>
         </div>
       </td>
-      <td>{mission.placesLeft <= 1 ? <div> {mission.placesLeft} place disponible</div> : <div> {mission.placesLeft} places disponibles</div>}</td>
+      <td>
+        {mission.placesLeft <= 1 ? (
+          <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} place disponible</div>
+        ) : (
+          <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} places disponibles</div>
+        )}
+      </td>
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatusApplication
           hit={hit}
