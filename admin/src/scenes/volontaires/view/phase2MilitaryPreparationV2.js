@@ -29,6 +29,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
   const history = useHistory();
 
   const theme = {
+    WAITING_VERIFICATION: "text-sky-400 h-4 w-4",
     WAITING_CORRECTION: "text-[#4484FF] h-4 w-4",
     VALIDATED: "text-[#27AF66] h-4 w-4",
     REFUSED: "text-[#EF6737] h-4 w-4",
@@ -36,14 +37,12 @@ export default function Phase2militaryPrepartionV2({ young }) {
 
   const themeBadge = {
     background: {
-      WAITING_VALIDATION: "bg-sky-100",
       WAITING_VERIFICATION: "bg-sky-100",
       WAITING_CORRECTION: "bg-[#FD7A02]",
       VALIDATED: "bg-[#71C784]",
       REFUSED: "bg-red-500",
     },
     text: {
-      WAITING_VALIDATION: "text-sky-600",
       WAITING_VERIFICATION: "text-sky-600",
       WAITING_CORRECTION: "text-white",
       VALIDATED: "text-white",
@@ -67,7 +66,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
 
   if (!applicationsToMilitaryPreparation) return <Loader />;
 
-  if (!["WAITING_VALIDATION", "WAITING_VERIFICATION", "VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+  if (!["WAITING_VERIFICATION", "VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
     // display nothing if the young has not validated the files at least one time
     return null;
   }
@@ -200,8 +199,9 @@ export default function Phase2militaryPrepartionV2({ young }) {
             {!cardOpen ? (
               <div className="flex items-center gap-5">
                 <div
-                  className={`text-xs font-normal ${themeBadge.background[young.statusMilitaryPreparationFiles]} ${themeBadge.text[young.statusMilitaryPreparationFiles]
-                    } px-2 py-[2px] rounded-sm `}>
+                  className={`text-xs font-normal ${themeBadge.background[young.statusMilitaryPreparationFiles]} ${
+                    themeBadge.text[young.statusMilitaryPreparationFiles]
+                  } px-2 py-[2px] rounded-sm `}>
                   {translate(young.statusMilitaryPreparationFiles)}
                 </div>
                 <BsChevronDown className="text-gray-400 h-5 w-5 cursor-pointer" onClick={() => setCardOpen(true)} />
@@ -209,7 +209,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
             ) : (
               <>
                 {/* todo: remove WAITING_VALIDATION after sync */}
-                {young.statusMilitaryPreparationFiles in ["WAITING_VERIFICATION", "WAITING_VALIDATION"] ? (
+                {young.statusMilitaryPreparationFiles === "WAITING_VERIFICATION" ? (
                   <div className="flex items-center gap-5 ">
                     <button
                       className="group flex items-center justify-center rounded-lg shadow-ninaButton px-4 py-2 hover:bg-indigo-400 transition duration-300 ease-in-out"

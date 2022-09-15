@@ -42,7 +42,7 @@ export default function IndexDesktop() {
   }, []);
 
   React.useEffect(() => {
-    if (["WAITING_CORRECTION", "REFUSED", "VALIDATED", "WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(young.statusMilitaryPreparationFiles)) {
+    if (["WAITING_CORRECTION", "REFUSED", "VALIDATED", "WAITING_VERIFICATION"].includes(young.statusMilitaryPreparationFiles)) {
       setHasPM(true);
     } else {
       setHasPM(false);
