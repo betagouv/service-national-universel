@@ -1,3 +1,17 @@
+# [1.129.0](https://github.com/betagouv/service-national-universel/compare/v1.128.3...v1.129.0) (2022-09-14)
+
+
+### Bug Fixes
+
+* **admin/app:** Fix sentry error with localStorage ([5845e65](https://github.com/betagouv/service-national-universel/commit/5845e6563ce3bd1b1b52f5c2df28b87fabc92326))
+* **app:** Use sentry in app ([447813e](https://github.com/betagouv/service-national-universel/commit/447813e1e5f7dfe2d37ef0ce526e6408b8ccb336))
+
+
+### Features
+
+* **admin:** Add support question ([#1788](https://github.com/betagouv/service-national-universel/issues/1788)) ([36dd07c](https://github.com/betagouv/service-national-universel/commit/36dd07cb0749eae315d092bdd339fc6f2c60bfc7))
+* **admin:** open support referent ([#1789](https://github.com/betagouv/service-national-universel/issues/1789)) ([7942e8f](https://github.com/betagouv/service-national-universel/commit/7942e8f620fda1a755c5aa2b8e7bc55a4dce51af))
+
 ## [1.128.3](https://github.com/betagouv/service-national-universel/compare/v1.128.2...v1.128.3) (2022-09-13)
 
 

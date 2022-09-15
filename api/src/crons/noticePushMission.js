@@ -18,7 +18,12 @@ exports.handler = async () => {
     let countMissionSent = {};
     let countMissionSentCohort = {};
 
-    const cursor = Young.find({ cohort: { $nin: ["2019", "2020"] }, status: "VALIDATED", statusPhase1: "DONE", statusPhase2: { $ne: "VALIDATED" } }).cursor();
+    const cursor = Young.find({
+      cohort: { $nin: ["2019", "2020", "2021"] },
+      status: "VALIDATED",
+      statusPhase1: "DONE",
+      statusPhase2: { $nin: ["VALIDATED", "WITHDRAWN"] },
+    }).cursor();
     await cursor.eachAsync(async function (young) {
       countTotal++;
       const esMissions = await getMissions({ young });
