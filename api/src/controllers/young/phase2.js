@@ -220,7 +220,7 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-      statusMilitaryPreparationFiles: Joi.string().required().valid("VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"),
+      statusMilitaryPreparationFiles: Joi.string().required().valid("VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"),
     }).validate(
       {
         ...req.params,

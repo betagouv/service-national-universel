@@ -400,22 +400,22 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
           email: referent.email,
         }));
         template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED;
-        params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}` };
+        params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2` };
       } else {
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
         template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
-        params = { ...params, cta: `${ADMIN_URL}/volontaire` };
+        params = { ...params, cta: `${ADMIN_URL}/volontaire${application.youngId}/phase2` };
       }
     } else if (template === SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION) {
       // when it is a new application, there are 2 possibilities
       if (mission.isMilitaryPreparation === "true") {
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
         template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED;
-        params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}` };
+        params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2` };
       } else {
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
         template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
-        params = { ...params, cta: `${ADMIN_URL}/volontaire` };
+        params = { ...params, cta: `${ADMIN_URL}/volontaire${application.youngId}/phase2` };
       }
     } else if (template === SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION) {
       if (isYoung(req.user)) {
