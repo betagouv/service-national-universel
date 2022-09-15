@@ -1506,6 +1506,15 @@ Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
 });
 
+Schema.post("find", function (results) {
+  for (const doc of results) {
+    if (doc.statusMilitaryPreparationFiles === "WAITING_VALIDATION") {
+      doc.statusMilitaryPreparationFiles = "WAITING_VERIFICATION";
+    }
+  }
+  return results;
+});
+
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
     const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
