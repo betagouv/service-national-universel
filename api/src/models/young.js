@@ -1419,7 +1419,7 @@ const Schema = new mongoose.Schema({
   militaryPreparationCorrectionMessage: {
     type: String,
     documentation: {
-      description: "Message de correction",
+      description: "Message de correction du dossier de préparation militaire",
     },
   },
 
