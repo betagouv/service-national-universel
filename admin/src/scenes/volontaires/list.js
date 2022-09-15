@@ -37,6 +37,7 @@ import {
   translateEquivalenceStatus,
   department2region,
   translateFileStatusPhase1,
+  translateStatusMilitaryPreparationFiles,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -1119,7 +1120,7 @@ export default function VolontaireList() {
                   dataField="statusMilitaryPreparationFiles.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION_FILES_STATUS") }}
                   renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
+                    return `${translateStatusMilitaryPreparationFiles(e)} (${count})`;
                   }}
                   title=""
                   URLParams={true}
