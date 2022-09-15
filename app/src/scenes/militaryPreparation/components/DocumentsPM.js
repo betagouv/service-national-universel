@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import ModalDocument from "./ModalDocument";
 import ModalInform from "./ModalInfom";
 import { BsChevronDown } from "react-icons/bs";
-import { translate } from "../../../utils";
+import { translate, translateStatusMilitaryPreparationFiles } from "../../../utils";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 
 export default function DocumentsPM({ docRef = null, showHelp = true }) {
@@ -62,9 +62,10 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
                   <div className="flex items-center gap-4">
                     <div className="text-lg leading-6 font-semibold ">Dossier d&apos;éligibilité aux préparations militaires</div>
                     <div
-                      className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${theme.text[young.statusMilitaryPreparationFiles]
-                        } px-2 py-[2px] rounded-sm `}>
-                      {translate(young.statusMilitaryPreparationFiles)}
+                      className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
+                        theme.text[young.statusMilitaryPreparationFiles]
+                      } px-2 py-[2px] rounded-sm `}>
+                      {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
                     </div>
                   </div>
                   {young.statusMilitaryPreparationFiles !== "REFUSED" ? (
@@ -98,9 +99,10 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
                   <div className="flex items-end gap-2">
                     <div className="flex flex-col items-start gap-2">
                       <div
-                        className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${theme.text[young.statusMilitaryPreparationFiles]
-                          } px-2 py-[2px] rounded-sm `}>
-                        {translate(young.statusMilitaryPreparationFiles)}
+                        className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
+                          theme.text[young.statusMilitaryPreparationFiles]
+                        } px-2 py-[2px] rounded-sm `}>
+                        {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
                       </div>
                       <div className="text-[15px] leading-6 font-semibold">Dossier d&apos;éligibilité aux préparations militaires</div>
                     </div>

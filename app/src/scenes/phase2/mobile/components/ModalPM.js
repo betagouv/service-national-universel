@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "reactstrap";
-import { translate } from "../../../../utils";
+import { translateStatusMilitaryPreparationFiles } from "../../../../utils";
 import CloseSvg from "../../../../assets/Close";
 import Prepa from "../../../../assets/icons/Prepa";
 import DocumentsPM from "../../../militaryPreparation/components/DocumentsPM";
@@ -34,7 +34,7 @@ export default function ModalPM({ theme, open, setOpen, young }) {
             className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
               theme.text[young.statusMilitaryPreparationFiles]
             } px-2 py-[2px] rounded-sm `}>
-            {translate(young.statusMilitaryPreparationFiles)}
+            {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
           </div>
           <CloseSvg className="text-gray-500" height={12} width={12} onClick={() => setOpen(false)} />
         </div>

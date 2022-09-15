@@ -3,7 +3,7 @@ import { Row } from "reactstrap";
 import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 
-import { translate as t, APPLICATION_STATUS_COLORS } from "../../../utils";
+import { translate as t, translateStatusMilitaryPreparationFiles, APPLICATION_STATUS_COLORS } from "../../../utils";
 import Badge from "../../../components/Badge";
 import { Box, BoxTitle } from "../../../components/box";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -22,7 +22,12 @@ export default function Phase2MilitaryPreparation({ young }) {
       <Box>
         <Bloc
           title="Documents - Préparation militaire"
-          titleRight={<Badge text={t(young.files.statusMilitaryPreparationFiles)} color={APPLICATION_STATUS_COLORS[young.statusMilitaryPreparationFiles]} />}>
+          titleRight={
+            <Badge
+              text={translateStatusMilitaryPreparationFiles(young.files.statusMilitaryPreparationFiles)}
+              color={APPLICATION_STATUS_COLORS[young.statusMilitaryPreparationFiles]}
+            />
+          }>
           <Line>
             {(young.files.militaryPreparationFilesIdentity || []).map((e, i) => (
               <DownloadButton

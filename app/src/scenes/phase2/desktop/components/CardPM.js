@@ -1,5 +1,5 @@
 import React from "react";
-import { translate } from "../../../../utils";
+import { translateStatusMilitaryPreparationFiles } from "../../../../utils";
 import { BsChevronDown } from "react-icons/bs";
 import DocumentsPM from "../../../militaryPreparation/components/DocumentsPM";
 import Prepa from "../../../../assets/icons/Prepa";
@@ -16,13 +16,13 @@ export default function CardPM({ young }) {
 
   const theme = {
     background: {
-      WAITING_VALIDATION: "bg-sky-100",
+      WAITING_VERIFICATION: "bg-sky-100",
       WAITING_CORRECTION: "bg-[#FD7A02]",
       VALIDATED: "bg-[#71C784]",
       REFUSED: "bg-red-500",
     },
     text: {
-      WAITING_VALIDATION: "text-sky-600",
+      WAITING_VERIFICATION: "text-sky-600",
       WAITING_CORRECTION: "text-white",
       VALIDATED: "text-white",
       REFUSED: "text-white",
@@ -56,7 +56,7 @@ export default function CardPM({ young }) {
               className={`text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
                 theme.text[young.statusMilitaryPreparationFiles]
               } px-2 py-[2px] rounded-sm `}>
-              {translate(young.statusMilitaryPreparationFiles)}
+              {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
             </div>
             {young.statusMilitaryPreparationFiles !== "REFUSED" ? <BsChevronDown className={`text-gray-400 h-5 w-5 ${open ? "rotate-180" : ""}`} /> : null}
           </div>

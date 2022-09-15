@@ -14,7 +14,7 @@ import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, translate, translateStatusMilitaryPreparationFiles } from "../../../utils";
 import ModalFilesPM from "../components/ModalFilesPM";
 import { capture } from "../../../sentry";
 
@@ -202,7 +202,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
                   className={`text-xs font-normal ${themeBadge.background[young.statusMilitaryPreparationFiles]} ${
                     themeBadge.text[young.statusMilitaryPreparationFiles]
                   } px-2 py-[2px] rounded-sm `}>
-                  {translate(young.statusMilitaryPreparationFiles)}
+                  {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
                 </div>
                 <BsChevronDown className="text-gray-400 h-5 w-5 cursor-pointer" onClick={() => setCardOpen(true)} />
               </div>
@@ -240,7 +240,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
                           onClick={() => setOpen((e) => !e)}>
                           <div className="flex items-center gap-2">
                             <GoPrimitiveDot className={theme[young.statusMilitaryPreparationFiles]} />
-                            <span className="text-sm leading-5 font-normal">{translate(young.statusMilitaryPreparationFiles)}</span>
+                            <span className="text-sm leading-5 font-normal">{translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}</span>
                           </div>
                           <ChevronDown className="ml-2 text-gray-400 cursor-pointer" />
                         </button>
