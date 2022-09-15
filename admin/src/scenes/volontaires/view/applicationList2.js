@@ -145,7 +145,7 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
     <tr>
       <td>
         <Link to={`/mission/${hit.missionId}`}>
-          <div className="flex flex-1">
+          <div className="flex basis-[30%]">
             {/* icon */}
             <div className="flex items-center mr-4">
               <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
@@ -162,16 +162,20 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
               {/* tags */}
               {/* <div className="text-coolGray-500 text-xs">{`• ${mission.city} (${mission.department})`}</div> */}
               {tags && (
-                <div className=" flex-inline flex-wrap">
+                <div className=" inline-flex flex-wrap">
                   {tags.map((tag, index) => {
                     return (
-                      <div key={index} className=" flex flex-1 text-[11px] text-gray-600 rounded-full border-gray-200 border-[1px] justify-center items-center mb-2 mt-1 ">
+                      <div
+                        key={index}
+                        className=" flex text-[11px] text-gray-600 rounded-full border-gray-200 border-[1px] justify-center items-center mb-2 mt-1 mr-1 px-4  py-0.5">
                         {tag}
                       </div>
                     );
                   })}
                   {mission.isMilitaryPreparation === "true" ? (
-                    <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full text-xs mb-2">Préparation militaire</div>
+                    <div className="flex justify-center items-center bg-blue-900 text-white border-gray-200 border-[1px] rounded-full text-[11px] mb-2 mr-1 px-4 py-0.5">
+                      Préparation militaire
+                    </div>
                   ) : null}
                 </div>
               )}
@@ -179,21 +183,25 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
           </div>
         </Link>
       </td>
+      {/* data */}
       <td>
-        <div>
-          <span className="text-gray-500 mr-1 text-xs">Du</span>
-          <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.startAt)}</span>
-        </div>
-        <div>
-          <span className="text-gray-500 text-xs mr-1">Au</span>
-          <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.endAt)}</span>
+        <div className="flex flex-col flex-1 ">
+          <div>
+            <span className="text-gray-500 mr-1 text-xs">Du</span>
+            <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.startAt)}</span>
+          </div>
+          <div>
+            <span className="text-gray-500 text-xs mr-1">Au</span>
+            <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.endAt)}</span>
+          </div>
         </div>
       </td>
+      {/* places disponibles */}
       <td>
         {mission.placesLeft <= 1 ? (
-          <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} place disponible</div>
+          <div className="font-medium text-xs text-gray-700 flex flex-1"> {mission.placesLeft} place disponible</div>
         ) : (
-          <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} places disponibles</div>
+          <div className="font-medium text-xs text-gray-700 flex flex-1"> {mission.placesLeft} places disponibles</div>
         )}
       </td>
       <td onClick={(e) => e.stopPropagation()}>
