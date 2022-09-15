@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 

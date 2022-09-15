@@ -1,14 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { translateApplication, translate } from "../../../../../utils";
+import { translate } from "../../../../../utils";
 import LocationMarker from "../../../../../assets/icons/LocationMarker";
-import EyeOff from "../../../../../assets/icons/EyeOff";
-import Eye from "../../../../../assets/icons/Eye";
-import Check from "../../../../../assets/icons/Check";
-import SixDotsVertical from "../../../../../assets/icons/SixDotsVertical";
-import { Draggable } from "react-beautiful-dnd";
-import api from "../../../../../services/api";
-import { toastr } from "react-redux-toastr";
 import IconDomain from "../../../components/IconDomain";
 import { getDistance } from "../../../../../utils";
 

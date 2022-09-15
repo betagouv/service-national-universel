@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import CardMission from "./components/CardMission";
 import { apiURL } from "../../../../config";
-import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM, ES_NO_LIMIT, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../../utils";
 import api from "../../../../services/api";
 import Sante from "../../../../assets/mission-domaines/sante";
 import Solidarite from "../../../../assets/mission-domaines/solidarite";
