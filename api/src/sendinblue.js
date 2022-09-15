@@ -28,15 +28,15 @@ const api = async (path, options = {}) => {
 async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc } = {}) {
   try {
     const body = {};
+    if (ENVIRONMENT !== "production") {
+      const regexp = /(selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|fr\.ey\.com)/;
+      to = to.filter((e) => e.email.match(regexp));
+      if (cc?.length) cc = cc.filter((e) => e.email.match(regexp));
+      if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp));
+    }
     body.to = [to];
     if (cc?.length) body.cc = cc;
-    body.bcc = bcc;
-    if (ENVIRONMENT !== "production") {
-      const regexp = /(selego\.co|beta\.gouv\.fr|fr\.ey\.com)/;
-      body.to = body.to.filter((e) => e.email.match(regexp));
-      if (body.cc) body.cc = body.cc.filter((e) => e.email.match(regexp));
-      if (body.bcc) body.bcc = body.bcc.filter((e) => e.email.match(regexp));
-    }
+    if (bcc?.length) body.bcc = bcc;
     body.htmlContent = htmlContent;
     body.sender = { name: SENDER_NAME, email: SENDER_EMAIL };
     body.subject = subject;
@@ -58,7 +58,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
   try {
     const body = { templateId: parseInt(id) };
     if (!force && ENVIRONMENT !== "production") {
-      const regexp = /(selego\.co|beta\.gouv\.fr|fr\.ey\.com)/;
+      const regexp = /(selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|fr\.ey\.com)/;
       emailTo = emailTo.filter((e) => e.email.match(regexp));
       if (cc?.length) cc = cc.filter((e) => e.email.match(regexp));
       if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp));
