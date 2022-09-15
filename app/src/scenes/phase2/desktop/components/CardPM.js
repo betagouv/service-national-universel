@@ -7,6 +7,8 @@ import { useDispatch } from "react-redux";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../../redux/auth/actions";
+import { capture } from "../../../../sentry";
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 export default function CardPM({ young }) {
   const [open, setOpen] = React.useState(false);
@@ -28,9 +30,17 @@ export default function CardPM({ young }) {
   };
 
   const onCorrection = async () => {
-    const responseChangeStatusPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
-    if (!responseChangeStatusPM.ok) return toastr.error(translate(responseChangeStatusPM?.code), "Oups, une erreur est survenue de la modification de votre dossier.");
-    else dispatch(setYoung(responseChangeStatusPM.data));
+    try {
+      const responseChangeStatusPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
+      if (!responseChangeStatusPM.ok) return toastr.error(translate(responseChangeStatusPM?.code), "Oups, une erreur est survenue de la modification de votre dossier.");
+
+      const responseReminderReferent = await api.post(`/application/notify/docs-military-preparation/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED}`);
+      if (!responseReminderReferent?.ok) return toastr.error(translate(responseReminderReferent?.code), "Une erreur s'est produite avec le service de notification.");
+
+      dispatch(setYoung(responseChangeStatusPM.data));
+    } catch (e) {
+      capture(e);
+    }
   };
 
   return (

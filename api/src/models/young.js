@@ -1416,6 +1416,12 @@ const Schema = new mongoose.Schema({
     type: String,
     enum: ["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"],
   },
+  militaryPreparationCorrectionMessage: {
+    type: String,
+    documentation: {
+      description: "Message de correction",
+    },
+  },
 
   files: {
     cniFiles: [File],
