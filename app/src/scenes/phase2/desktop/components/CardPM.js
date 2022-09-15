@@ -3,9 +3,14 @@ import { translate } from "../../../../utils";
 import { BsChevronDown } from "react-icons/bs";
 import DocumentsPM from "../../../militaryPreparation/components/DocumentsPM";
 import Prepa from "../../../../assets/icons/Prepa";
+import { useDispatch } from "react-redux";
+import api from "../../../../services/api";
+import { toastr } from "react-redux-toastr";
+import { setYoung } from "../../../../redux/auth/actions";
 
 export default function CardPM({ young }) {
   const [open, setOpen] = React.useState(false);
+  const dispatch = useDispatch();
 
   const theme = {
     background: {
@@ -20,6 +25,12 @@ export default function CardPM({ young }) {
       VALIDATED: "text-white",
       REFUSED: "text-white",
     },
+  };
+
+  const onCorrection = async () => {
+    const responseChangeStatusPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
+    if (!responseChangeStatusPM.ok) return toastr.error(translate(responseChangeStatusPM?.code), "Oups, une erreur est survenue de la modification de votre dossier.");
+    else dispatch(setYoung(responseChangeStatusPM.data));
   };
 
   return (
@@ -44,6 +55,19 @@ export default function CardPM({ young }) {
       {open ? (
         <>
           <hr className="text-gray-200" />
+          {young.statusMilitaryPreparationFiles === "WAITING_CORRECTION" ? (
+            <>
+              <div className="flex justify-between items-center px-2 py-3 rounded-lg bg-gray-50 mb-4 gap-6">
+                <div className="flex flex-col flex-1">
+                  <div className="text-base font-bold">Corrections demandées</div>
+                  <div className="text-sm text-gray-500">{"test"}</div>
+                </div>
+                <button className="mr-4 border-[1px] border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white px-4 py-2 rounded-lg" onClick={onCorrection}>
+                  Envoyer ma correction
+                </button>
+              </div>
+            </>
+          ) : null}
           <DocumentsPM showHelp={false} />
         </>
       ) : null}
