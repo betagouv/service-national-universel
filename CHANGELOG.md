@@ -1,3 +1,18 @@
+# [1.130.0](https://github.com/betagouv/service-national-universel/compare/v1.129.0...v1.130.0) (2022-09-15)
+
+
+### Bug Fixes
+
+* pm status files ([#1792](https://github.com/betagouv/service-national-universel/issues/1792)) ([abe31a0](https://github.com/betagouv/service-national-universel/commit/abe31a03fdba4fbb57aeeaa0ff12d6dc1d6d915a))
+* translate status pm files ([#1793](https://github.com/betagouv/service-national-universel/issues/1793)) ([43abb51](https://github.com/betagouv/service-national-universel/commit/43abb51bc1b31aaecd8236962aa0dc4543f54006))
+* **all:** Rework notifications PM ([#1790](https://github.com/betagouv/service-national-universel/issues/1790)) ([d80fa93](https://github.com/betagouv/service-national-universel/commit/d80fa93d30923ef6389a726c3894705de49d49ae))
+
+
+### Features
+
+* Rework dossier PM correction ([#1794](https://github.com/betagouv/service-national-universel/issues/1794)) ([3a0bcb3](https://github.com/betagouv/service-national-universel/commit/3a0bcb3cc83c268e09d5e0ed0ac4e046581c98db))
+* **api:** Add education et jeunesse et sport to be able to send mails on platform ([96b5094](https://github.com/betagouv/service-national-universel/commit/96b5094a5d624454f0d4d45b492fef41111ba6c2))
+
 # [1.129.0](https://github.com/betagouv/service-national-universel/compare/v1.128.3...v1.129.0) (2022-09-14)
 
 
