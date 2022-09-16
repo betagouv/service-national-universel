@@ -55,10 +55,12 @@ function validateMission(mission) {
       department: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
       country: Joi.string().allow(null, ""),
-      location: Joi.object().keys({
-        lat: Joi.number().allow(null),
-        lon: Joi.number().allow(null),
-      }),
+      location: Joi.object()
+        .keys({
+          lat: Joi.number().allow(null),
+          lon: Joi.number().allow(null),
+        })
+        .allow(null, ""),
       addressVerified: Joi.string().allow(null, ""),
       remote: Joi.string().allow(null, ""),
       isMilitaryPreparation: Joi.string().allow(null, ""),

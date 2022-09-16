@@ -69,30 +69,37 @@ const putLocation = async (city, zip) => {
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedMission } = validateMission(req.body);
+    console.log("🚀 ~ file: mission.js ~ line 72 ~ router.post ~ checkedMission", checkedMission);
+    console.log("🚀 ~ file: mission.js ~ line 72 ~ router.post ~ error", error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!canCreateOrModifyMission(req.user, checkedMission)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
 
-    if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
-      checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+    if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
+      if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+        checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+        if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+        }
+      }
     }
 
     const data = await MissionObject.create({ ...checkedMission, fromUser: req.user });
 
-    const referentsDepartment = await UserObject.find({
-      department: checkedMission.department,
-      subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
-    });
-    if (referentsDepartment?.length) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
-        emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
-        params: {
-          cta: `${ADMIN_URL}/mission/${data._id}`,
-        },
-      });
-    }
-
     if (data.status === MISSION_STATUS.WAITING_VALIDATION) {
+      const referentsDepartment = await UserObject.find({
+        department: checkedMission.department,
+        subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+      });
+      if (referentsDepartment?.length) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
+          emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
+          params: {
+            cta: `${ADMIN_URL}/mission/${data._id}`,
+          },
+        });
+      }
+
       const responsible = await UserObject.findById(checkedMission.tutorId);
       if (responsible)
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
@@ -123,12 +130,19 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
-      checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+    if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
+      if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+        checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+        if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+        }
+      }
     }
 
-    if (checkedMission.description !== mission.description || checkedMission.actions !== mission.actions) {
-      checkedMission.status = "WAITING_VALIDATION";
+    if (checkedMission.status !== MISSION_STATUS.DRAFT) {
+      if (checkedMission.description !== mission.description || checkedMission.actions !== mission.actions) {
+        checkedMission.status = "WAITING_VALIDATION";
+      }
     }
 
     const oldStatus = mission.status;
