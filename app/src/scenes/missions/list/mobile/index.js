@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -366,7 +366,7 @@ export default function List() {
         </div>
 
         {/* BEGIN CONTROL */}
-        <div className="w-full bg-white rounded-lg space-y-6">
+        <div className="w-full bg-white rounded-lg space-y-6 mb-1">
           {/* BEGIN MODAL CONTROL*/}
           <Modal size={"20px"} isOpen={modalControl} toggle={setModalControl}>
             <div className="p-2 bg-gray-50 rounded-xl">
@@ -713,10 +713,17 @@ export default function List() {
               innerClass={{ pagination: "pagination" }}
               dataField="created_at"
               renderResultStats={({ numberOfResults }) => {
-                return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
+                return <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
               }}
+              sortOptions={[
+                { label: "La plus récente", dataField: "createdAt.keyword", sortBy: "asc" },
+                { label: "La plus proche", dataField: "sort.keyword", sortBy: "asc" },
+                { label: "La plus longue", dataField: "duration.keyword", sortBy: "desc" },
+                { label: "La plus courte", dataField: "duration.keyword", sortBy: "asc" },
+              ]}
+              defaultSortOption="La plus proche"
               render={({ data }) => {
-                return data.map((e) => <CardMission key={e._id} mission={e} />);
+                return data.map((e) => <CardMission key={e._id} mission={e} youngLocation={filter.LOCATION} />);
               }}
               renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
             />
@@ -806,6 +813,7 @@ const Select = ({ value, options, handleChangeValue, placeholder }) => {
 };
 
 const Missions = styled.div`
+  font-family: "Marianne";
   padding: 0.5rem;
   .pagination {
     display: flex;
@@ -840,6 +848,14 @@ const Missions = styled.div`
       background-repeat: no-repeat;
       background-size: 8px;
     }
+  }
+  .sortOptions {
+    font-family: "Marianne";
+    outline: 0;
+    color: #374151;
+    font-weight: 400;
+    font-size: 12px;
+    margin-left: 60%;
   }
 `;
 

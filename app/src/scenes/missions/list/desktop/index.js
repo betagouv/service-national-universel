@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import CardMission from "./components/CardMission";
 import { apiURL } from "../../../../config";
-import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM, ES_NO_LIMIT, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../../utils";
 import api from "../../../../services/api";
-import Loader from "../../../../components/Loader";
-import FilterGeoloc from "../../components/FilterGeoloc";
 import Sante from "../../../../assets/mission-domaines/sante";
 import Solidarite from "../../../../assets/mission-domaines/solidarite";
 import Citoyennete from "../../../../assets/mission-domaines/citoyennete";
@@ -362,10 +360,10 @@ export default function List() {
         {/* END HEADER */}
 
         {/* BEGIN CONTROL */}
-        <div className="bg-gray-50 p-10 rounded-lg space-y-6">
+        <div className="bg-gray-50 p-10 rounded-lg space-y-6 mb-4">
           {/* search bar recherche */}
-          <div className="relative">
-            <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-1.5 items-center">
+          <div className="relative flex justify-center">
+            <div className="flex bg-white border-[1px] border-gray-300 rounded-full overflow-hidden p-1.5 items-center  w-9/12">
               <input
                 value={filter?.SEARCH}
                 onChange={(e) => {
@@ -671,18 +669,25 @@ export default function List() {
                 size={25}
                 showLoader={true}
                 loader="Chargement..."
-                innerClass={{ pagination: "pagination" }}
+                innerClass={{ pagination: "pagination", sortOptions: "sortOptions" }}
                 dataField="created_at"
                 renderResultStats={({ numberOfResults }) => {
-                  return <div className="text-gray-700 my-3 text-sm">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
+                  return <div className="text-gray-700 my-3 text-sm w-28 basis-3/4">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""}`}</div>;
                 }}
+                sortOptions={[
+                  { label: "La plus récente", dataField: "createdAt.keyword", sortBy: "asc" },
+                  { label: "La plus proche", dataField: "sort.keyword", sortBy: "asc" },
+                  { label: "La plus longue", dataField: "duration.keyword", sortBy: "desc" },
+                  { label: "La plus courte", dataField: "duration.keyword", sortBy: "asc" },
+                ]}
+                defaultSortOption="La plus proche"
                 render={({ data }) => {
                   return data.map((e) => {
                     const tags = [];
                     e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
                     // tags.push(e.remote ? "À distance" : "En présentiel");
                     e.domains.forEach((d) => tags.push(translate(d)));
-                    return <CardMission key={e._id} mission={e} />;
+                    return <CardMission key={e._id} mission={e} youngLocation={filter.LOCATION} />;
                   });
                 }}
                 renderNoResults={() => <div className="text-gray-700 mb-3 text-sm">Aucune mission ne correspond à votre recherche</div>}
@@ -741,6 +746,7 @@ const PeriodeItem = ({ name, onClick, active }) => {
 };
 
 const Missions = styled.div`
+  font-family: "Marianne";
   .pagination {
     display: flex;
     justify-content: flex-end;
@@ -774,5 +780,14 @@ const Missions = styled.div`
       background-repeat: no-repeat;
       background-size: 8px;
     }
+  }
+
+  .sortOptions {
+    font-family: "Marianne";
+    outline: 0;
+    color: #374151;
+    font-weight: 400;
+    font-size: 12px;
+    margin-left: 60%;
   }
 `;
