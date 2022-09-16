@@ -2,18 +2,12 @@ import { ReactiveBase } from "@appbaseio/reactivesearch";
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
 import Loader from "../../../components/Loader";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
-import ModalPJ from "../components/ModalPJ";
-import { HiOutlineAdjustments, HiPlus } from "react-icons/hi";
-import { MdOutlineAttachFile } from "react-icons/md";
-import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
 import { apiURL, environment } from "../../../config";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import IconDomain from "../../../components/IconDomain";
 import GrayListIcon from "../../../assets/grayListIcon.svg";
@@ -156,10 +150,8 @@ export default function ApplicationList({ young, onChangeApplication }) {
   );
 }
 
-const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
+const Hit = ({ hit, index, young, onChangeApplication }) => {
   const [mission, setMission] = useState();
-  const [modalDurationOpen, setModalDurationOpen] = useState(false);
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [tags, setTags] = useState();
 
   const history = useHistory();
@@ -178,8 +170,6 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
       setTags(t);
     })();
   }, []);
-
-  const [openModalPJ, setOpenModalPJ] = useState(false);
 
   if (!mission) return null;
   return (
