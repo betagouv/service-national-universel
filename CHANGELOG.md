@@ -1,3 +1,11 @@
+## [1.130.1](https://github.com/betagouv/service-national-universel/compare/v1.130.0...v1.130.1) (2022-09-16)
+
+
+### Bug Fixes
+
+* **admin:** code postal structure ([#1797](https://github.com/betagouv/service-national-universel/issues/1797)) ([5967790](https://github.com/betagouv/service-national-universel/commit/5967790b65dab4d5e1ab7f6f9e7cbb2e34e08f7c))
+* **app:** Corrections design page Trouver une mission ([#1783](https://github.com/betagouv/service-national-universel/issues/1783)) ([ef08669](https://github.com/betagouv/service-national-universel/commit/ef08669e01d06ff7119bb46c09a7db47dbd3d8ce))
+
 # [1.130.0](https://github.com/betagouv/service-national-universel/compare/v1.129.0...v1.130.0) (2022-09-15)
 
 
