@@ -353,6 +353,7 @@ const updateStatusPhase2 = async (young, fromUser) => {
       militaryPreparationFilesCensus: [],
       militaryPreparationFilesAuthorization: [],
       militaryPreparationFilesCertificate: [],
+      statusMilitaryPreparationFiles: undefined,
     });
     let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
     let cc = getCcOfYoung({ template, young });
