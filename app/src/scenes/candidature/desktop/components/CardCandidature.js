@@ -80,23 +80,25 @@ export default function application({ application: propsApplication, index, onCh
             </div>
             <div className="flex flex-1">
               {/* icon */}
-              <div className="flex items-center mr-2">
-                <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
-              </div>
+              <Link to={`/mission/${application.missionId}`}>
+                <div className="flex items-center mr-2">
+                  <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
+                </div>
+              </Link>
 
               {/* infos mission */}
               <div className="flex flex-col flex-1">
                 <div className="space-y-2">
-                  <div className="flex space-x-4 ml-2">
-                    <div className="text-gray-500 text-xs uppercase font-medium">{mission?.structureName}</div>
-                    <div className="text-gray-500 text-xs font-normal">
-                      Places disponibles:&nbsp;{mission?.placesLeft}/{mission?.placesTotal}
-                    </div>
-                  </div>
                   <Link to={`/mission/${application.missionId}`}>
-                    <div className="text-gray-900 font-bold text-base hover:underline ml-2">{mission?.name}</div>
+                    <div className="flex space-x-4 ml-2">
+                      <div className="text-gray-500 text-xs uppercase font-medium">{mission?.structureName}</div>
+                      <div className="text-gray-500 text-xs font-normal">
+                        Places disponibles:&nbsp;{mission?.placesLeft}/{mission?.placesTotal}
+                      </div>
+                    </div>
+                    <div className="text-gray-900 font-bold text-base ml-2">{mission?.name}</div>
                   </Link>
-                  <Tags>
+                  <Tags className="absolute">
                     {(tags || []).map((e, i) => (
                       <div key={i} className="flex justify-center items-center text-gray-600 border-gray-200 border-[1px] rounded-full px-4 py-1 text-xs ml-2 mb-2">
                         {e}
