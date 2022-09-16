@@ -19,6 +19,7 @@ import IconDomain from "../../../components/IconDomain";
 import GrayListIcon from "../../../assets/grayListIcon.svg";
 import BorderBottom from "../../../assets/borderBottom.svg";
 import ExportComponent2 from "../../../components/ExportXlsx2";
+import SelectStatusApplication2 from "../../../components/selectStatusApplication2";
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
@@ -50,7 +51,7 @@ export default function ApplicationList({ young, onChangeApplication }) {
       <div className="mb-4">
         <img className="w-full" src={BorderBottom} alt="" />
       </div>
-      <div className="flex mx-14 mb-4 justify-end">
+      <div className="flex mx-14 mb-2 justify-end">
         {/* <div>Filtre</div> */}
         <div>
           <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -178,38 +179,13 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
     })();
   }, []);
 
-  // const theme = {
-  //   background: {
-  //     WAITING_VALIDATION: "bg-sky-100",
-  //     WAITING_VERIFICATION: "bg-sky-100",
-  //     WAITING_ACCEPTATION: "bg-orange-500",
-  //     VALIDATED: "bg-[#71C784]",
-  //     DONE: "bg-[#5694CD]",
-  //     REFUSED: "bg-[#0B508F]",
-  //     CANCEL: "bg-[#F4F4F4]",
-  //     IN_PROGRESS: "bg-indigo-600",
-  //     ABANDON: "bg-gray-50",
-  //   },
-  //   text: {
-  //     WAITING_VALIDATION: "text-sky-600",
-  //     WAITING_VERIFICATION: "text-sky-600",
-  //     WAITING_ACCEPTATION: "text-white",
-  //     VALIDATED: "text-white",
-  //     DONE: "text-white",
-  //     REFUSED: "text-white",
-  //     CANCEL: "text-[#6B6B6B]",
-  //     IN_PROGRESS: "text-white",
-  //     ABANDON: "text-gray-400",
-  //   },
-  // };
-
   const [openModalPJ, setOpenModalPJ] = useState(false);
 
   if (!mission) return null;
   return (
-    <div className="relative w-full  bg-white shadow-nina rounded-xl p-4 border-[1px] border-white hover:border-gray-200 drop-shadow-md mb-4">
+    <div className="relative w-full  bg-white shadow-nina rounded-xl p-4 border-[1px] border-white hover:border-gray-200 shadow-ninaButton mb-4">
       {/* Choix*/}
-      <div className="text-gray-500 font-medium uppercase text-xs flex justify-end tracking-wider">
+      <div className="text-gray-500 font-medium uppercase text-xs flex justify-end tracking-wider mb-2">
         {hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}
       </div>
       <div className="flex justify-between  ">
@@ -268,136 +244,31 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
             {/* statut */}
             <div onClick={(e) => e.stopPropagation()}>
               <div>
-                <SelectStatusApplication
-                  hit={hit}
-                  callback={(status) => {
-                    if (status === "VALIDATED") {
-                      history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
-                    }
-                    onChangeApplication();
-                  }}
-                />
-                {hit.status === "VALIDATED" || hit.status === "IN_PROGRESS" || hit.status === "DONE" || hit.status === "ABANDON" ? (
-                  <ContractLink
-                    onClick={() => {
-                      history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
-                    }}>
-                    Contrat d&apos;engagement &gt;
-                  </ContractLink>
-                ) : null}
-                {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
-                  <div>
-                    <div style={{ textAlign: "center" }}>
-                      {!hit.missionDuration ? (
-                        <div className="text-[#007bff] hover:underline" onClick={() => setModalDurationOpen(true)}>
-                          Indiquer un nombre d&apos;heure
-                        </div>
-                      ) : (
-                        <span>
-                          Durée : {hit.missionDuration}h -{" "}
-                          <div className="text-[#007bff] hover:underline" onClick={() => setModalDurationOpen(true)}>
-                            Modifier
-                          </div>
-                        </span>
-                      )}
-                    </div>
-                    <ModalConfirmWithMessage
-                      isOpen={modalDurationOpen}
-                      title="Validation de réalisation de mission"
-                      message={`Merci de valider le nombre d'heures effectuées par ${hit.youngFirstName} pour la mission ${hit.missionName}.`}
-                      type="number"
-                      onChange={() => setModalDurationOpen(false)}
-                      defaultInput={hit.missionDuration}
-                      placeholder="Nombre d'heures"
-                      onConfirm={async (duration) => {
-                        try {
-                          const { ok, code } = await api.put("/application", { _id: hit._id, missionDuration: duration });
-                          if (!ok) {
-                            toastr.error("Une erreur s'est produite :", translate(code));
-                          } else {
-                            onChangeApplication();
-                            toastr.success("Mis à jour!");
-                          }
-                        } catch (e) {
-                          toastr.error("Une erreur s'est produite :", translate(e?.code));
-                        }
-                        setModalDurationOpen(false);
-                      }}
-                    />
-                  </div>
-                )}
-                {hit.status === "WAITING_VALIDATION" && (
-                  <React.Fragment>
-                    <div
-                      className="bg-none text-[#5145cd] text-[13px] italic my-0 mx-auto block border-O hover:outline-0 hover:underline p-0"
-                      onClick={async () => {
-                        setModal({
-                          isOpen: true,
-                          title: "Renvoyer un mail",
-                          message: "Souhaitez-vous renvoyer un mail à la structure ?",
-                          onConfirm: async () => {
-                            try {
-                              const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
-                              if (!responseNotification?.ok)
-                                return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                              toastr.success("L'email a bien été envoyé");
-                            } catch (e) {
-                              toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                            }
-                          },
-                        });
-                      }}>
-                      ✉️ Renvoyer un mail à la structure
-                    </div>
-                    <ModalConfirm
-                      isOpen={modal?.isOpen}
-                      title={modal?.title}
-                      message={modal?.message}
-                      onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-                      onConfirm={() => {
-                        modal?.onConfirm();
-                        setModal({ isOpen: false, onConfirm: null });
-                      }}
-                    />
-                  </React.Fragment>
+                {environment === "production" ? (
+                  <SelectStatusApplication
+                    hit={hit}
+                    callback={(status) => {
+                      if (status === "VALIDATED") {
+                        history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
+                      }
+                      onChangeApplication();
+                    }}
+                  />
+                ) : (
+                  <SelectStatusApplication2
+                    hit={hit}
+                    callback={(status) => {
+                      if (status === "VALIDATED") {
+                        history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
+                      }
+                      onChangeApplication();
+                    }}
+                  />
                 )}
               </div>
             </div>
-            <div>
-              {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
-                <div className=" flex justify-center ">
-                  <div className="bg-blue-600  rounded-full p-2 text-white" onClick={() => setOpenModalPJ(true)}>
-                    {optionsType.reduce((sum, option) => sum + hit[option].length, 0) !== 0 ? <HiOutlineAdjustments /> : <HiPlus />}
-                  </div>
-                </div>
-              )}
-              <ModalPJ
-                isOpen={openModalPJ}
-                young={young}
-                application={hit}
-                optionsType={optionsType}
-                onCancel={() => {
-                  setOpenModalPJ(false);
-                }}
-                onSend={async (type, multipleDocument) => {
-                  try {
-                    const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION}`, {
-                      type,
-                      multipleDocument,
-                    });
-                    if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                    toastr.success("L'email a bien été envoyé");
-                  } catch (e) {
-                    toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                  }
-                }}
-                onSave={() => {
-                  setOpenModalPJ(false);
-                  onChangeApplication();
-                }}
-              />
-            </div>
           </div>
+          {/* end statut */}
         </div>
       </div>
     </div>
