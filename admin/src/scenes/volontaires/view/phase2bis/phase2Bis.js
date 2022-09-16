@@ -1,23 +1,30 @@
 import React from "react";
+import { useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import Badge from "../../../components/Badge";
-import { Box, BoxTitle } from "../../../components/box";
-import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
-import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
-import SelectStatus from "../../../components/selectStatus";
-import { environment } from "../../../config";
-import api from "../../../services/api";
-import { colors, ENABLE_PM, translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../utils";
-import CardEquivalence from "../components/Equivalence";
-import Toolbox from "../components/Toolbox";
-import ApplicationList from "./applicationList.js";
-import Phase2militaryPrepartionV2 from "./phase2MilitaryPreparationV2";
-import WrapperPhase2 from "./wrapper";
-import ApplicationList2 from "./phase2bis/applicationList2";
+import Badge from "../../../../components/Badge";
+import { Box, BoxTitle } from "../../../../components/box";
+import DownloadAttestationButton from "../../../../components/buttons/DownloadAttestationButton";
+import MailAttestationButton from "../../../../components/buttons/MailAttestationButton";
+import SelectStatus from "../../../../components/selectStatus";
+import api from "../../../../services/api";
+import { colors, ENABLE_PM, translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../../utils";
+import CardEquivalence from "../../components/Equivalence";
+import Toolbox from "../../components/Toolbox";
+import Phase2militaryPrepartionV2 from "../phase2MilitaryPreparationV2";
+import WrapperPhase2 from "../wrapper";
+import ApplicationList2 from "./applicationList2";
+import GrayListIcon from "../../../../assets/listIconGray.svg";
+import BorderBottom from "../../../../assets/borderBottom.svg";
+import SettingIconGray from "../../../../assets/settingsPhase2Gray.svg";
+import BlueListIcon from "../../../../assets/listIconBlue.svg";
+import BlueSettingIcon from "../../../../assets/settingsPhase2Blue.svg";
+import IconDomainRounded from "../../../../components/IconDomainRounded";
 
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
+  const [settingPage, setSettingPage] = useState(false);
+
   React.useEffect(() => {
     (async () => {
       const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalences`);
@@ -25,6 +32,7 @@ export default function Phase2({ young, onChange }) {
     })();
   }, []);
 
+  console.log("young", young);
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2" onChange={onChange}>
@@ -144,11 +152,95 @@ export default function Phase2({ young, onChange }) {
             </Col>
           </Row>
         </Box>
-        <Box>
-          <ApplicationList young={young} onChangeApplication={onChange} />
-        </Box>
-
         <Toolbox young={young} />
+        <Box>
+          <div className="flex">
+            {!settingPage ? (
+              <>
+                <div className="ml-8 py-4 flex ">
+                  <img src={BlueListIcon} />
+                  <div className="text-sm text-blue-600 font-medium ml-2">Missions candidatées</div>
+                </div>
+                <div className="ml-8 py-4 flex ">
+                  <img src={SettingIconGray} />
+                  <div
+                    className="text-sm text-gray-500 font-medium ml-2"
+                    onClick={() => {
+                      setSettingPage(true);
+                    }}>
+                    Préférences
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="ml-8 py-4 flex ">
+                  <img src={GrayListIcon} />
+                  <div
+                    className="text-sm text-gray-500 font-medium ml-2"
+                    onClick={() => {
+                      setSettingPage(false);
+                    }}>
+                    Missions candidatées
+                  </div>
+                </div>
+                <div className="ml-8 py-4 flex ">
+                  <img src={BlueSettingIcon} />
+                  <div className="text-sm text-blue-600 font-medium ml-2">Préférences</div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <img className="w-full" src={BorderBottom} alt="" />
+          </div>
+          {!settingPage ? (
+            <ApplicationList2 young={young} onChangeApplication={onChange} />
+          ) : (
+            <div className="flex flex-col items-center justify-center">
+              {/* bloc1 */}
+              <div className="flex items-center flex-col  ">
+                <img className="my-11" src={BorderBottom} />
+              </div>
+              {/* bloc2 */}
+              <div className="flex items-center flex-col ">
+                <div className="text-sm font-bold text-[#242526] mb-7 ">Domaines favoris</div>
+                <div className="flex items-center justify-center space-x-12">
+                  {young.domains.map((domain, index) => {
+                    return (
+                      <div key={index} className="flex flex-col items-center">
+                        <IconDomainRounded domain={domain} />
+                        <div className="text-xs text-gray-700 font-medium lowercase mt-2">{domain}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <img className="my-11" src={BorderBottom} />
+              </div>
+              {/* bloc3 */}
+              <div className="flex items-center flex-col ">
+                <div className="text-sm font-bold text-[#242526] mb-7 ">Format préféré</div>
+                {young.missionFormat === "CONTINUOUS" ? (
+                  <div className="flex space-x-4">
+                    <div className="text-sm font-bold text-gray-700 border-b-2 border-blue-600 py-1">Regroupée sur des journées</div>{" "}
+                    <div className="text-sm font-medium text-gray-400 py-1">Répartie sur des heures</div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="text-sm font-medium  text-gray-400 py-1">Regroupée sur des journées</div>{" "}
+                    <div className="text-sm font-bold text-gray-700 border-b-2 border-blue-600 py-1">Répartie sur des heures</div>
+                  </div>
+                )}
+                <img className="my-11" src={BorderBottom} />
+              </div>
+              {/* bloc4 */}
+              <div>
+                <img className="my-11" src={BorderBottom} />
+              </div>
+            </div>
+          )}
+        </Box>
 
         {young.statusPhase2 === "VALIDATED" ? (
           <div style={{ display: "flex", alignItems: "flex-start" }}>
