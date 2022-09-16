@@ -2,7 +2,6 @@ import { ReactiveBase } from "@appbaseio/reactivesearch";
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import styled from "styled-components";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
 import Loader from "../../../components/Loader";
@@ -12,11 +11,14 @@ import { HiOutlineAdjustments, HiPlus } from "react-icons/hi";
 import { MdOutlineAttachFile } from "react-icons/md";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
-import { apiURL } from "../../../config";
+import { apiURL, environment } from "../../../config";
 import api from "../../../services/api";
 import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import IconDomain from "../../../components/IconDomain";
+import GrayListIcon from "../../../assets/grayListIcon.svg";
+import BorderBottom from "../../../assets/borderBottom.svg";
+import ExportComponent2 from "../../../components/ExportXlsx2";
 
 export default function ApplicationList({ young, onChangeApplication }) {
   const [applications, setApplications] = useState(null);
@@ -39,55 +41,103 @@ export default function ApplicationList({ young, onChangeApplication }) {
   };
 
   if (!applications) return <Loader />;
-  console.log("appliction==>", applications);
   return (
     <div className="p-1">
-      <div className="ml-14 my-4 text-sm text-gray-500 font-medium">Missions candidatées</div>
-      <div className="flex mx-14 mb-4 ">
+      <div className="ml-8 my-4 flex ">
+        <img src={GrayListIcon} />
+        <div className="text-sm text-gray-500 font-medium ml-2">Missions candidatées</div>
+      </div>
+      <div className="mb-4">
+        <img className="w-full" src={BorderBottom} alt="" />
+      </div>
+      <div className="flex mx-14 mb-4 justify-end">
         {/* <div>Filtre</div> */}
-        <div className="flex justify-end">
+        <div>
           <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div className="py-2">
-              <ExportComponent
-                defaultQuery={getExportQuery}
-                title="Exporter les candidatures"
-                exportTitle={`Candidatures-${young.firstName}-${young.lastName}`}
-                index="application"
-                transform={(all) => {
-                  return all.map((data) => {
-                    return {
-                      _id: data._id,
-                      Cohorte: data.youngCohort,
-                      Prénom: data.youngFirstName,
-                      Nom: data.youngLastName,
-                      "Date de naissance": data.youngBirthdateAt,
-                      Email: data.youngEmail,
-                      Téléphone: young.phone,
-                      "Adresse du volontaire": young.address,
-                      "Code postal du volontaire": young.zip,
-                      "Ville du volontaire": young.city,
-                      "Département du volontaire": young.department,
-                      "Prénom représentant légal 1": young.parent1FirstName,
-                      "Nom représentant légal 1": young.parent1LastName,
-                      "Email représentant légal 1": young.parent1Email,
-                      "Téléphone représentant légal 1": young.parent1Phone,
-                      "Prénom représentant légal 2": young.parent2LastName,
-                      "Nom représentant légal 2": young.parent2LastName,
-                      "Email représentant légal 2": young.parent2Email,
-                      "Téléphone représentant légal 2": young.parent2Phone,
-                      Choix: data.priority,
-                      "Nom de la mission": data.missionName,
-                      "Département de la mission": data.missionDepartment,
-                      "Région de la mission": data.missionRegion,
-                      "Candidature créée lé": data.createdAt,
-                      "Candidature mise à jour le": data.updatedAt,
-                      "Statut de la candidature": translate(data.status),
-                      Tuteur: data.tutorName,
-                      "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option].length, 0) !== 0}`),
-                    };
-                  });
-                }}
-              />
+              {environment === "production" ? (
+                <ExportComponent
+                  defaultQuery={getExportQuery}
+                  title="Exporter les candidatures"
+                  exportTitle={`Candidatures-${young.firstName}-${young.lastName}`}
+                  index="application"
+                  transform={(all) => {
+                    return all.map((data) => {
+                      return {
+                        _id: data._id,
+                        Cohorte: data.youngCohort,
+                        Prénom: data.youngFirstName,
+                        Nom: data.youngLastName,
+                        "Date de naissance": data.youngBirthdateAt,
+                        Email: data.youngEmail,
+                        Téléphone: young.phone,
+                        "Adresse du volontaire": young.address,
+                        "Code postal du volontaire": young.zip,
+                        "Ville du volontaire": young.city,
+                        "Département du volontaire": young.department,
+                        "Prénom représentant légal 1": young.parent1FirstName,
+                        "Nom représentant légal 1": young.parent1LastName,
+                        "Email représentant légal 1": young.parent1Email,
+                        "Téléphone représentant légal 1": young.parent1Phone,
+                        "Prénom représentant légal 2": young.parent2LastName,
+                        "Nom représentant légal 2": young.parent2LastName,
+                        "Email représentant légal 2": young.parent2Email,
+                        "Téléphone représentant légal 2": young.parent2Phone,
+                        Choix: data.priority,
+                        "Nom de la mission": data.missionName,
+                        "Département de la mission": data.missionDepartment,
+                        "Région de la mission": data.missionRegion,
+                        "Candidature créée lé": data.createdAt,
+                        "Candidature mise à jour le": data.updatedAt,
+                        "Statut de la candidature": translate(data.status),
+                        Tuteur: data.tutorName,
+                        "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option].length, 0) !== 0}`),
+                      };
+                    });
+                  }}
+                />
+              ) : (
+                <ExportComponent2
+                  defaultQuery={getExportQuery}
+                  title="Exporter les candidatures"
+                  exportTitle={`Candidatures-${young.firstName}-${young.lastName}`}
+                  index="application"
+                  transform={(all) => {
+                    return all.map((data) => {
+                      return {
+                        _id: data._id,
+                        Cohorte: data.youngCohort,
+                        Prénom: data.youngFirstName,
+                        Nom: data.youngLastName,
+                        "Date de naissance": data.youngBirthdateAt,
+                        Email: data.youngEmail,
+                        Téléphone: young.phone,
+                        "Adresse du volontaire": young.address,
+                        "Code postal du volontaire": young.zip,
+                        "Ville du volontaire": young.city,
+                        "Département du volontaire": young.department,
+                        "Prénom représentant légal 1": young.parent1FirstName,
+                        "Nom représentant légal 1": young.parent1LastName,
+                        "Email représentant légal 1": young.parent1Email,
+                        "Téléphone représentant légal 1": young.parent1Phone,
+                        "Prénom représentant légal 2": young.parent2LastName,
+                        "Nom représentant légal 2": young.parent2LastName,
+                        "Email représentant légal 2": young.parent2Email,
+                        "Téléphone représentant légal 2": young.parent2Phone,
+                        Choix: data.priority,
+                        "Nom de la mission": data.missionName,
+                        "Département de la mission": data.missionDepartment,
+                        "Région de la mission": data.missionRegion,
+                        "Candidature créée lé": data.createdAt,
+                        "Candidature mise à jour le": data.updatedAt,
+                        "Statut de la candidature": translate(data.status),
+                        Tuteur: data.tutorName,
+                        "Pièces jointes à l’engagement": translate(`${optionsType.reduce((sum, option) => sum + data[option].length, 0) !== 0}`),
+                      };
+                    });
+                  }}
+                />
+              )}
             </div>
           </ReactiveBase>
         </div>
@@ -99,7 +149,7 @@ export default function ApplicationList({ young, onChangeApplication }) {
           <Hit key={hit._id} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} optionsType={optionsType} />
         ))}
 
-        {applications.length ? null : <NoResult>Aucune candidature n&apos;est liée à ce volontaire.</NoResult>}
+        {applications.length ? null : <div className="italic text-center m-8">Aucune candidature n&apos;est liée à ce volontaire.</div>}
       </div>
     </div>
   );
@@ -157,9 +207,9 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
 
   if (!mission) return null;
   return (
-    <div className="relative  w-full  bg-white shadow-nina rounded-xl p-4 border-[1px] border-[#ffffff] hover:border-gray-200 drop-shadow-md mb-4">
+    <div className="relative w-full  bg-white shadow-nina rounded-xl p-4 border-[1px] border-white hover:border-gray-200 drop-shadow-md mb-4">
       {/* Choix*/}
-      <div className="text-sgray-500 font-medium uppercase text-xs flex justify-end tracking-wider">
+      <div className="text-gray-500 font-medium uppercase text-xs flex justify-end tracking-wider">
         {hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}
       </div>
       <div className="flex justify-between  ">
@@ -239,10 +289,15 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
                   <div>
                     <div style={{ textAlign: "center" }}>
                       {!hit.missionDuration ? (
-                        <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Indiquer un nombre d&apos;heure</ModifyDurationLink>
+                        <div className="text-[#007bff] hover:underline" onClick={() => setModalDurationOpen(true)}>
+                          Indiquer un nombre d&apos;heure
+                        </div>
                       ) : (
                         <span>
-                          Durée : {hit.missionDuration}h - <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Modifier</ModifyDurationLink>
+                          Durée : {hit.missionDuration}h -{" "}
+                          <div className="text-[#007bff] hover:underline" onClick={() => setModalDurationOpen(true)}>
+                            Modifier
+                          </div>
                         </span>
                       )}
                     </div>
@@ -273,7 +328,8 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
                 )}
                 {hit.status === "WAITING_VALIDATION" && (
                   <React.Fragment>
-                    <CopyLink
+                    <div
+                      className="bg-none text-[#5145cd] text-[13px] italic my-0 mx-auto block border-O hover:outline-0 hover:underline p-0"
                       onClick={async () => {
                         setModal({
                           isOpen: true,
@@ -292,7 +348,7 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
                         });
                       }}>
                       ✉️ Renvoyer un mail à la structure
-                    </CopyLink>
+                    </div>
                     <ModalConfirm
                       isOpen={modal?.isOpen}
                       title={modal?.title}
@@ -347,31 +403,3 @@ const Hit = ({ hit, index, young, onChangeApplication, optionsType }) => {
     </div>
   );
 };
-
-const CopyLink = styled.button`
-  background: none;
-  color: rgb(81, 69, 205);
-  font-size: 0.8rem;
-  font-style: italic;
-  margin: 0 auto;
-  display: block;
-  border: none;
-  :hover {
-    outline: none;
-    text-decoration: underline;
-  }
-  padding: 0;
-`;
-
-const NoResult = styled.div`
-  text-align: center;
-  font-style: italic;
-  margin: 2rem;
-`;
-
-const ModifyDurationLink = styled.span`
-  color: #007bff;
-  :hover {
-    text-decoration: underline;
-  }
-`;
