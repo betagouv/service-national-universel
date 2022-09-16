@@ -99,15 +99,14 @@ export default function PanelView({ onChange, mission }) {
           <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
         </div>
       </div>
-      <Info title="Volontaires">
-        {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) ? (
-          <Details title="Candidature(s)" value={applications?.filter((e) => e.status !== "WAITING_ACCEPTATION").length} />
-        ) : (
-          <Details title="Candidature(s)" value={applications?.length} />
+      <Info title="Candidatures">
+        <Details title="Candidature(s) de volontaire(s)" value={applications?.filter((e) => e.status !== "WAITING_ACCEPTATION").length} />
+        {![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && (
+          <Details title="Volontaire(s) ayant reçu une proposition de mission" value={applications?.filter((e) => e.status == "WAITING_ACCEPTATION").length} />
         )}
-        <Details title="Validée(s)" value={mission.placesTotal - mission.placesLeft} />
-        <Details title="Disponible(s)" value={mission.placesLeft} />
-        <Details title="Total" value={mission.placesTotal} />
+        <Details title="Nombre de place(s) proposée(s)" value={mission.placesLeft} />
+        <Details title="Place(s) occupés(s)" value={mission.placesTotal - mission.placesLeft} />
+        <Details title="Place(s) disponible(s)" value={mission.placesTotal} />
         <Link to={`/mission/${mission._id}/youngs`}>
           <PanelActionButton icon="eye" title="Consulter tous les volontaires" />
         </Link>
