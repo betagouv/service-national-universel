@@ -204,7 +204,7 @@ const ActionBox = styled.div`
       color: ${color};
     `}
     display: inline-flex;
-    align-items: start;
+    align-items: center;
     text-align: left;
     border-radius: 4px;
     padding: 5px 6px;
@@ -221,8 +221,8 @@ const ActionBox = styled.div`
       }
     }
     .down-icon {
-      margin-left: auto;
-      padding: 7px 15px;
+      // margin-left: auto;
+      margin-left: 15px;
       svg {
         height: 10px;
       }

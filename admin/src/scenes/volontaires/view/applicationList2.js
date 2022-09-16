@@ -179,7 +179,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
         {hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}
       </div>
       <div className="flex justify-between  ">
-        <Link className="flex flex-1 items-center" to={`/mission/${hit.missionId}`}>
+        <Link className="flex basis-[35%] items-center" to={`/mission/${hit.missionId}`}>
           {/* icon */}
           <div className="flex items-center mr-4">
             <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
@@ -209,9 +209,9 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             )}
           </div>
         </Link>
-        <div className="flex flex-1 justify-between items-center">
+        <div className="flex basis-[65%] justify-between items-center">
           {/* date */}
-          <div className="flex flex-col basis-[20%] justify-center">
+          <div className="flex flex-col basis-[30%] justify-center">
             <div>
               <span className="text-gray-500 mr-1 text-xs">Du</span>
               <span className="text-[#242526] text-xs">{formatStringDateTimezoneUTC(mission.startAt)}</span>
@@ -227,7 +227,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             {mission.placesLeft <= 1 ? (
               <div className="font-medium text-xs text-gray-700 "> {mission.placesLeft} place disponible</div>
             ) : (
-              <div className="font-medium text-xs text-gray-700"> {mission.placesLeft} places disponibles</div>
+              <div className="font-medium text-xs text-gray-700 "> {mission.placesLeft} places disponibles</div>
             )}
           </div>
           <div className="flex flex-col basis-[35%] justify-end">
