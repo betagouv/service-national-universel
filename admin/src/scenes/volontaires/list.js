@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, Modal, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch, SelectedFilters } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 
@@ -20,6 +20,7 @@ import {
   translate,
   translatePhase1,
   getFilterLabel,
+  getFilterLabel2,
   YOUNG_STATUS_COLORS,
   isInRuralArea,
   formatLongDateFR,
@@ -38,6 +39,7 @@ import {
   department2region,
   translateFileStatusPhase1,
   translateStatusMilitaryPreparationFiles,
+  translateFilter,
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -335,7 +337,7 @@ export default function VolontaireList() {
     });
   }
 
-  const COLUMNS = [
+  const fieldsAvailable = [
     {
       title: "Identité du volontaire",
       desc: "Prénom, nom, sexe, cohorte, cohorte d'origine.",
@@ -451,31 +453,37 @@ export default function VolontaireList() {
                   <ModalContainer>
                     <Formik
                       initialValues={{
-                        checked: [
-                          "identity",
-                          "contact",
-                          "birth",
-                          "address",
-                          "location",
-                          "schoolSituation",
-                          "situation",
-                          "representative1",
-                          "representative2",
-                          "consent",
-                          "status",
-                          "phase1Affectation",
-                          "phase1Transport",
-                          "phase1DocumentStatus",
-                          "phase1DocumentAgreement",
-                          "phase1Attendance",
-                          "phase2",
-                          "accountDetails",
-                          "desistement",
-                        ],
+                        checked: fieldsAvailable.map((e) => e.value),
                       }}>
                       {({ values, setFieldValue }) => (
                         <>
-                          <div className="text-xl">Sélectionnez les données à exporter</div>
+                          <div className="w-full">
+                            <div className="text-xl m-2 text-center">Sélectionnez les données à exporter</div>
+                            <div className="rounded-xl bg-gray-50 p-3 m-4">
+                              <div className="text-center text-base text-gray-400">Rappel des filtres appliqués</div>
+                              <SelectedFilters
+                                showClearAll={false}
+                                render={(props) => {
+                                  const { selectedValues, setValue } = props;
+                                  const clearFilter = (component) => {
+                                    setValue(component, null);
+                                  };
+
+                                  const filters = Object.keys(selectedValues).map((component) => {
+                                    if (!selectedValues[component].value) return null;
+                                    return (
+                                      <button className="m-2 text-gray-600" key={component} onClick={() => clearFilter(component)}>
+                                        {getFilterLabel2(selectedValues[component].value.toString(), translateFilter(selectedValues[component].label))}
+                                      </button>
+                                    );
+                                  });
+                                  console.log("🚀 ~ file: list.js ~ line 480 ~ filters ~ selectedValues", selectedValues);
+
+                                  return <div className="mt-3 flex justify-center">{filters}</div>;
+                                }}
+                              />
+                            </div>
+                          </div>
                           <div className="flex w-full p-4">
                             <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
                             <div className="w-1/2 text-right">
@@ -483,27 +491,10 @@ export default function VolontaireList() {
                                 <div
                                   className="text-snu-purple-300 cursor-pointer hover:underline"
                                   onClick={() =>
-                                    setFieldValue("checked", [
-                                      "identity",
-                                      "contact",
-                                      "birth",
-                                      "address",
-                                      "location",
-                                      "schoolSituation",
-                                      "situation",
-                                      "representative1",
-                                      "representative2",
-                                      "consent",
-                                      "status",
-                                      "phase1Affectation",
-                                      "phase1Transport",
-                                      "phase1DocumentStatus",
-                                      "phase1DocumentAgreement",
-                                      "phase1Attendance",
-                                      "phase2",
-                                      "accountDetails",
-                                      "desistement",
-                                    ])
+                                    setFieldValue(
+                                      "checked",
+                                      fieldsAvailable.map((e) => e.value),
+                                    )
                                   }>
                                   Tout sélectionner
                                 </div>
@@ -516,7 +507,7 @@ export default function VolontaireList() {
                           </div>
 
                           <div className="h-[60vh] overflow-auto grid grid-cols-2 gap-4 w-full p-3">
-                            {COLUMNS.map((cat) => (
+                            {fieldsAvailable.map((cat) => (
                               <div
                                 key={cat.value}
                                 className="rounded-xl border-2 border-gray-100 px-3 py-2 hover:shadow-ninaButton cursor-pointer"
@@ -984,7 +975,7 @@ export default function VolontaireList() {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Confirmation de participations au séjour de cohésion", "Confirmation de participations au séjour de cohésion")}
+                  renderLabel={(items) => getFilterLabel(items, "Confirmation de participation au séjour de cohésion", "Confirmation de participation au séjour de cohésion")}
                   showMissing
                   missingLabel="Non renseigné"
                 />
