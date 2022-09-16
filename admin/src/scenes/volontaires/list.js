@@ -477,7 +477,6 @@ export default function VolontaireList() {
                                       </button>
                                     );
                                   });
-                                  console.log("🚀 ~ file: list.js ~ line 480 ~ filters ~ selectedValues", selectedValues);
 
                                   return <div className="mt-3 flex justify-center">{filters}</div>;
                                 }}
