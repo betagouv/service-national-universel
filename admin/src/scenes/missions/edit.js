@@ -531,7 +531,15 @@ export default function Edit(props) {
                         <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</p>
                         <Row>
                           <Col>
-                            <Input type="number" name="duration" id="duration" onChange={handleChange} value={values.duration} />
+                            <input type="number" min={1} max={100} name="duration" id="duration" onChange={handleChange} value={values.duration} />
+                            <Field
+                              hidden
+                              value={values.duration}
+                              name="duration"
+                              onChange={handleChange}
+                              validate={(v) => (parseInt(v) < 1 || parseInt(v) > 100) && "Le nombre saisi doit être compris entre 1 et 100"}
+                            />
+                            <ErrorMessage errors={errors} touched={touched} name="duration" />
                           </Col>
                           <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
                         </Row>
