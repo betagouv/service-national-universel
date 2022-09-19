@@ -190,9 +190,9 @@ export default function Edit(props) {
               toastr.warning("Une localisation a été ajoutée automatiquement à partir de la ville et du code postal");
             }
 
-            values.duration = values.duration?.toString();
             if (!values.domains.includes(values.mainDomain)) values.domains = [values.mainDomain, ...values.domains];
           }
+          values.duration = values.duration?.toString();
 
           const { ok, code, data: mission } = values._id ? await api.put(`/mission/${values._id}`, values) : await api.post("/mission", values);
           if (!ok) throw new Error(translate(code));
