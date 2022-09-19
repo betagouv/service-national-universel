@@ -29,7 +29,7 @@ export default function ExportFieldCard({ field, values, setFieldValue }) {
         </div>
       </div>
       {field.desc.length > 3 && (
-        <button className="text-gray-500 text-center w-full" onClick={() => setIsOpen(!isOpen)}>
+        <button className="text-gray-500 text-center w-full hover:text-gray-800" onClick={() => setIsOpen(!isOpen)}>
           {!isOpen ? "Voir plus" : "Réduire"}
         </button>
       )}

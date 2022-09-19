@@ -508,23 +508,29 @@ export default function VolontaireList() {
                         <>
                           <div className="w-full px-4">
                             <div className="text-2xl text-center mb-4">Sélectionnez les données à exporter</div>
-                            <div className="rounded-xl bg-gray-50 py-3">
-                              <div className="text-center text-base text-gray-400">Rappel des filtres appliqués</div>
-                              <SelectedFilters
-                                showClearAll={false}
-                                render={(props) => {
-                                  const { selectedValues } = props;
+
+                            <SelectedFilters
+                              showClearAll={false}
+                              render={(props) => {
+                                const { selectedValues } = props;
+                                if (selectedValues.value) {
                                   return (
-                                    <div className="mt-2 mx-auto text-center text-base text-gray-600">
-                                      {Object.values(selectedValues)
-                                        .filter((e) => e.value.length > 0)
-                                        .map((e) => getSelectedFilterLabel(e.value[0], translateFilter(e.label)))
-                                        .join(" • ")}
+                                    <div className="rounded-xl bg-gray-50 py-3">
+                                      <div className="text-center text-base text-gray-400">Rappel des filtres appliqués</div>
+                                      <div className="mt-2 mx-auto text-center text-base text-gray-600">
+                                        {Object.values(selectedValues)
+                                          .filter((e) => e.value.length > 0)
+                                          .map((e) => getSelectedFilterLabel(e.value[0], translateFilter(e.label)))
+                                          .join(" • ")}
+                                      </div>
                                     </div>
                                   );
-                                }}
-                              />
-                            </div>
+                                } else {
+                                  return <div></div>;
+                                }
+                              }}
+                            />
+
                             <div className="flex pt-4 pb-1">
                               <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
                               <div className="w-1/2 text-right flex flex-row-reverse">
