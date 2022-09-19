@@ -100,13 +100,13 @@ export default function PanelView({ onChange, mission }) {
         </div>
       </div>
       <Info title="Candidatures">
-        <Details title="Candidature(s) de volontaire(s)" value={applications?.filter((e) => e.status !== "WAITING_ACCEPTATION").length} />
+        <Details title="Volontaire(s) ayant candidaté" value={applications?.filter((e) => e.status !== "WAITING_ACCEPTATION").length} />
         {![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && (
           <Details title="Volontaire(s) ayant reçu une proposition de mission" value={applications?.filter((e) => e.status == "WAITING_ACCEPTATION").length} />
         )}
-        <Details title="Nombre de place(s) proposée(s)" value={mission.placesLeft} />
+        <Details title="Place(s) proposée(s)" value={mission.placesTotal} />
         <Details title="Place(s) occupés(s)" value={mission.placesTotal - mission.placesLeft} />
-        <Details title="Place(s) disponible(s)" value={mission.placesTotal} />
+        <Details title="Place(s) disponible(s)" value={mission.placesLeft} />
         <Link to={`/mission/${mission._id}/youngs`}>
           <PanelActionButton icon="eye" title="Consulter tous les volontaires" />
         </Link>
