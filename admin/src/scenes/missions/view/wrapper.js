@@ -48,7 +48,7 @@ export default function Wrapper({ mission, tab, children }) {
     mission.name += " (copie)";
     delete mission._id;
     mission.placesLeft = mission.placesTotal;
-    mission.status = MISSION_STATUS.WAITING_VALIDATION;
+    mission.status = MISSION_STATUS.DRAFT;
     const { data, ok, code } = await api.post("/mission", mission);
     if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
     toastr.success("Mission dupliquée !");

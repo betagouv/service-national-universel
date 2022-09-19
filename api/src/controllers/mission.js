@@ -18,53 +18,8 @@ const { MISSION_STATUS } = require("snu-lib/constants");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, putLocation } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
-
-const putLocation = async (city, zip) => {
-  // try with municipality = city + zip
-  const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
-    mode: "cors",
-    method: "GET",
-  });
-  const resMunicipality = await responseMunicipality.json();
-  if (resMunicipality.features.length > 0) {
-    return {
-      lon: resMunicipality.features[0].geometry.coordinates[0],
-      lat: resMunicipality.features[0].geometry.coordinates[1],
-    };
-  }
-  // try with locality = city + zip
-  const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&type=locality`, {
-    mode: "cors",
-    method: "GET",
-  });
-  const resLocality = await responseLocality.json();
-  if (resLocality.features.length > 0) {
-    return {
-      lon: resLocality.features[0].geometry.coordinates[0],
-      lat: resLocality.features[0].geometry.coordinates[1],
-    };
-  }
-  // try with postcode = zip
-  let url = `https://api-adresse.data.gouv.fr/search/?q=${city || zip}`;
-  if (zip) url += `&postcode=${zip}`;
-  const responsePostcode = await fetch(url, {
-    mode: "cors",
-    method: "GET",
-  });
-  const resPostcode = await responsePostcode.json();
-  if (resPostcode.features.length > 0) {
-    return {
-      lon: resPostcode.features[0].geometry.coordinates[0],
-      lat: resPostcode.features[0].geometry.coordinates[1],
-    };
-  }
-  return {
-    lon: 2.352222,
-    lat: 48.856613,
-  };
-};
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -73,26 +28,31 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!canCreateOrModifyMission(req.user, checkedMission)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
 
-    if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
-      checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+    if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
+      if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+        checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+        if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+        }
+      }
     }
 
     const data = await MissionObject.create({ ...checkedMission, fromUser: req.user });
 
-    const referentsDepartment = await UserObject.find({
-      department: checkedMission.department,
-      subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
-    });
-    if (referentsDepartment?.length) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
-        emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
-        params: {
-          cta: `${ADMIN_URL}/mission/${data._id}`,
-        },
-      });
-    }
-
     if (data.status === MISSION_STATUS.WAITING_VALIDATION) {
+      const referentsDepartment = await UserObject.find({
+        department: checkedMission.department,
+        subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+      });
+      if (referentsDepartment?.length) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
+          emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
+          params: {
+            cta: `${ADMIN_URL}/mission/${data._id}`,
+          },
+        });
+      }
+
       const responsible = await UserObject.findById(checkedMission.tutorId);
       if (responsible)
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
@@ -123,12 +83,20 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
-      checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+    if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
+      if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+        checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+        if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+        }
+      }
     }
 
-    if (checkedMission.description !== mission.description || checkedMission.actions !== mission.actions) {
-      checkedMission.status = "WAITING_VALIDATION";
+    if (checkedMission.status !== MISSION_STATUS.DRAFT) {
+      // Sur changement de description ou actions, on doit revalider la mission
+      if (checkedMission.description !== mission.description || checkedMission.actions !== mission.actions) {
+        checkedMission.status = "WAITING_VALIDATION";
+      }
     }
 
     const oldStatus = mission.status;
@@ -139,6 +107,18 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (oldStatus !== mission.status) {
       await updateApplication(mission, req.user);
       if (mission.status === MISSION_STATUS.WAITING_VALIDATION) {
+        const referentsDepartment = await UserObject.find({
+          department: checkedMission.department,
+          subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+        });
+        if (referentsDepartment?.length) {
+          await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
+            emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
+            params: {
+              cta: `${ADMIN_URL}/mission/${mission._id}`,
+            },
+          });
+        }
         const responsible = await UserObject.findById(mission.tutorId);
         if (responsible)
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
