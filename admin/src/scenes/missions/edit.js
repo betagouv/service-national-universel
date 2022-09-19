@@ -247,11 +247,10 @@ export default function Edit(props) {
                 loading={loadings.submitButton}
                 disabled={loadings.saveButton || loadings.changeStructureButton}
                 onClick={async () => {
-                  let old_status = values.status;
                   await handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                   const erroredFields = await validateForm();
                   if (Object.keys(erroredFields).length) {
-                    await handleChange({ target: { value: old_status, name: "status" } });
+                    await handleChange({ target: { value: "DRAFT", name: "status" } });
                     return toastr.error("Il y a des erreurs dans le formulaire");
                   }
                   handleSubmit();
@@ -728,11 +727,10 @@ export default function Edit(props) {
                   loading={loadings.submitButton}
                   disabled={loadings.saveButton || loadings.changeStructureButton}
                   onClick={async () => {
-                    let old_status = values.status;
                     await handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                     const erroredFields = await validateForm();
                     if (Object.keys(erroredFields).length) {
-                      await handleChange({ target: { value: old_status, name: "status" } });
+                      await handleChange({ target: { value: "DRAFT", name: "status" } });
                       return toastr.error("Il y a des erreurs dans le formulaire");
                     }
                     handleSubmit();
