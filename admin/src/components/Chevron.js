@@ -13,8 +13,7 @@ export default function Chevron({ ...props }) {
 
 const ChevronContainer = styled.div`
   margin-left: auto;
-  padding: 7px 15px;
-  margin-left: 15px;
+  margin-left: 10px;
   svg {
     height: 10px;
   }
