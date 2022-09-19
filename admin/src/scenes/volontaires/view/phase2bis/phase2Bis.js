@@ -19,6 +19,7 @@ import SettingIconGray from "../../../../assets/settingsPhase2Gray.svg";
 import BlueListIcon from "../../../../assets/listIconBlue.svg";
 import BlueSettingIcon from "../../../../assets/settingsPhase2Blue.svg";
 import Preferences from "./preferences";
+// import Pencil from "../../../../assets/modifyIcon.svg";
 
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
@@ -108,19 +109,27 @@ export default function Phase2({ young, onChange }) {
               </>
             ) : (
               <>
-                <div className="ml-8 py-4 flex">
-                  <img src={GrayListIcon} />
-                  <div
-                    className="text-sm text-gray-500 font-medium ml-2 cursor-pointer"
-                    onClick={() => {
-                      setSettingPage(false);
-                    }}>
-                    Missions candidatées
+                <div className="flex justify-between w-full px-4 items-center">
+                  <div className="flex">
+                    <div className="ml-8 py-4 flex">
+                      <img src={GrayListIcon} />
+                      <div
+                        className="text-sm text-gray-500 font-medium ml-2 cursor-pointer"
+                        onClick={() => {
+                          setSettingPage(false);
+                        }}>
+                        Missions candidatées
+                      </div>
+                    </div>
+                    <div className="ml-8 py-4 flex ">
+                      <img src={BlueSettingIcon} />
+                      <div className="text-sm text-blue-600 font-medium ml-2">Préférences</div>
+                    </div>
                   </div>
-                </div>
-                <div className="ml-8 py-4 flex ">
-                  <img src={BlueSettingIcon} />
-                  <div className="text-sm text-blue-600 font-medium ml-2">Préférences</div>
+                  {/* <div className="bg-blue-100 rounded-[28px] px-[9px] py-[7px] flex items-center h-[32px] space-x-2 ">
+                    <img src={Pencil} />
+                    <div className="text-blue-600 text-xs font-medium cursor-pointer">Modifier</div>
+                  </div> */}
                 </div>
               </>
             )}

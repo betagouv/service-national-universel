@@ -137,7 +137,7 @@ export default function Preferences({ young }) {
             <label htmlFor="main-address" className="mr-2">
               {young.mobilityNearHome === "true" ? <img src={CheckboxInput} /> : <img src={CheckboxUnchecked} />}
             </label>
-            <label htmlFor="main-address" className="cursor-pointer">
+            <label htmlFor="main-address">
               <span className="text-[13px] text-gray-700">Autour de mon adresse principale</span>
               <br />
               <span className="text-[15px] text-gray-700">{young.city}</span>
@@ -148,7 +148,7 @@ export default function Preferences({ young }) {
             <label htmlFor="school-address" className="mr-2">
               {young.mobilityNearSchool === "true" ? <img src={CheckboxInput} /> : <img src={CheckboxUnchecked} />}
             </label>
-            <label htmlFor="school-address" className="cursor-pointer">
+            <label htmlFor="school-address">
               <span className="text-[13px] text-gray-700">Autour de l'établissement</span>
               <br />
               <span className="text-[15px] text-gray-700">{young.schoolCity}</span>
@@ -161,7 +161,7 @@ export default function Preferences({ young }) {
                 <label htmlFor="second-address" className="mr-2">
                   {young.mobilityNearRelative === "true" ? <img src={CheckboxInput} /> : <img src={CheckboxUnchecked} />}
                 </label>
-                <label htmlFor="second-address" className="cursor-pointer">
+                <label htmlFor="second-address">
                   <span className="text-[13px] text-gray-700">Autour de l&apos;adresse de mon proche</span>
                   <br />
                   <span className="text-[15px] text-gray-700">{young.mobilityNearRelativeCity}</span>
@@ -173,9 +173,7 @@ export default function Preferences({ young }) {
                 <label htmlFor="second-address">
                   <span className="text-[13px] text-gray-400">Autour de l&apos;adresse de mon proche</span>
                   <br />
-                  <Link to="/preferences" className="text-[15px] text-blue-600 underline hover:underline">
-                    Renseigner une adresse
-                  </Link>
+                  <div className="text-[15px] text-gray-400 ">Renseigner une adresse</div>
                 </label>
               </div>
             )}

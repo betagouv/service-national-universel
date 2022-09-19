@@ -3,8 +3,7 @@ import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import Loader from "../../../../components/Loader";
-import SelectStatusApplication from "../../../../components/selectStatusApplication";
-import { apiURL, environment } from "../../../../config";
+import { apiURL } from "../../../../config";
 import api from "../../../../services/api";
 import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, translate } from "../../../../utils";
 import { capture } from "../../../../sentry";
@@ -182,27 +181,15 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             {/* statut */}
             <div onClick={(e) => e.stopPropagation()}>
               <div>
-                {environment === "production" ? (
-                  <SelectStatusApplication
-                    hit={hit}
-                    callback={(status) => {
-                      if (status === "VALIDATED") {
-                        history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
-                      }
-                      onChangeApplication();
-                    }}
-                  />
-                ) : (
-                  <SelectStatusApplication2
-                    hit={hit}
-                    callback={(status) => {
-                      if (status === "VALIDATED") {
-                        history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
-                      }
-                      onChangeApplication();
-                    }}
-                  />
-                )}
+                <SelectStatusApplication2
+                  hit={hit}
+                  callback={(status) => {
+                    if (status === "VALIDATED") {
+                      history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
+                    }
+                    onChangeApplication();
+                  }}
+                />
               </div>
             </div>
           </div>
