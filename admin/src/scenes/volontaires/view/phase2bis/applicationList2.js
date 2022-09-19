@@ -9,7 +9,7 @@ import { APPLICATION_STATUS, ES_NO_LIMIT, formatStringDateTimezoneUTC, translate
 import { capture } from "../../../../sentry";
 import IconDomain from "../../../../components/IconDomain";
 
-import ExportComponent2 from "../../../../components/ExportXlsx2";
+import ExportComponent from "../../../../components/ExportXlsx";
 import SelectStatusApplication2 from "../../../../components/selectStatusApplication2";
 
 export default function ApplicationList({ young, onChangeApplication }) {
@@ -40,7 +40,7 @@ export default function ApplicationList({ young, onChangeApplication }) {
         <div>
           <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div className="py-2">
-              <ExportComponent2
+              <ExportComponent
                 defaultQuery={getExportQuery}
                 title="Exporter les candidatures"
                 exportTitle={`Candidatures-${young.firstName}-${young.lastName}`}
