@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, Modal, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, MultiDropdownList, DataSearch, SelectedFilters } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch, SelectedFilters, StateProvider } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 
@@ -20,7 +20,7 @@ import {
   translate,
   translatePhase1,
   getFilterLabel,
-  getFilterLabel2,
+  getSelectedFilterLabel,
   YOUNG_STATUS_COLORS,
   isInRuralArea,
   formatLongDateFR,
@@ -86,7 +86,6 @@ const FILTERS = [
   "ALLERGIES",
   "COHESION_PARTICIPATION",
   "COHESION_JDM",
-  "COHESION_PRESENCE",
   "DEPART",
   "DEPART_MOTIF",
   "SAME_DEPARTMENT_SPORT",
@@ -457,51 +456,51 @@ export default function VolontaireList() {
                       }}>
                       {({ values, setFieldValue }) => (
                         <>
-                          <div className="w-full">
-                            <div className="text-xl m-2 text-center">Sélectionnez les données à exporter</div>
-                            <div className="rounded-xl bg-gray-50 p-3 m-4">
+                          <div className="w-full px-4">
+                            <div className="text-2xl text-center mb-4">Sélectionnez les données à exporter</div>
+                            <div className="rounded-xl bg-gray-50 py-3">
                               <div className="text-center text-base text-gray-400">Rappel des filtres appliqués</div>
                               <SelectedFilters
                                 showClearAll={false}
                                 render={(props) => {
-                                  const { selectedValues, setValue } = props;
-                                  const clearFilter = (component) => {
-                                    setValue(component, null);
-                                  };
-
-                                  const filters = Object.keys(selectedValues).map((component) => {
-                                    if (!selectedValues[component].value) return null;
-                                    return (
-                                      <button className="m-2 text-gray-600" key={component} onClick={() => clearFilter(component)}>
-                                        {getFilterLabel2(selectedValues[component].value.toString(), translateFilter(selectedValues[component].label))}
-                                      </button>
-                                    );
-                                  });
-
-                                  return <div className="mt-3 flex justify-center">{filters}</div>;
+                                  const { selectedValues } = props;
+                                  return (
+                                    <div className="mt-2 mx-auto text-center text-base text-gray-600">
+                                      {Object.values(selectedValues)
+                                        .filter((e) => e.value.length > 0)
+                                        .map((e) => getSelectedFilterLabel(e.value[0], translateFilter(e.label)))
+                                        .join(" • ")}
+                                    </div>
+                                  );
                                 }}
                               />
                             </div>
-                          </div>
-                          <div className="flex w-full p-4">
-                            <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
-                            <div className="w-1/2 text-right">
-                              {values.checked == "" ? (
-                                <div
-                                  className="text-snu-purple-300 cursor-pointer hover:underline"
-                                  onClick={() =>
-                                    setFieldValue(
-                                      "checked",
-                                      fieldsAvailable.map((e) => e.value),
-                                    )
-                                  }>
-                                  Tout sélectionner
-                                </div>
-                              ) : (
-                                <div className="text-snu-purple-300 cursor-pointer hover:underline" onClick={() => setFieldValue("checked", [])}>
-                                  Tout déselectionner
-                                </div>
-                              )}
+                            <div className="flex pt-4 pb-1">
+                              <div className="w-1/2 text-left">Sélectionnez pour choisir des sous-catégories</div>
+                              <div className="w-1/2 text-right flex flex-row-reverse">
+                                {values.checked == "" ? (
+                                  <div
+                                    className="text-snu-purple-300 cursor-pointer"
+                                    onClick={() =>
+                                      setFieldValue(
+                                        "checked",
+                                        fieldsAvailable.map((e) => e.value),
+                                      )
+                                    }>
+                                    Tout sélectionner
+                                  </div>
+                                ) : (
+                                  <div className="text-snu-purple-300 cursor-pointer" onClick={() => setFieldValue("checked", [])}>
+                                    Tout déselectionner
+                                  </div>
+                                )}
+                                <StateProvider
+                                  render={({ searchState }) => {
+                                    console.log("🚀 ~ file: list.js ~ line 483 ~ VolontaireList ~ searchState", searchState.result.hits.total);
+                                    return <div className="mr-2">{JSON.stringify(searchState.result.hits.total)} résultats</div>;
+                                  }}
+                                />
+                              </div>
                             </div>
                           </div>
 
