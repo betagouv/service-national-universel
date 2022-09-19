@@ -2,7 +2,6 @@ import React from "react";
 import { useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import Badge from "../../../../components/Badge";
 import { Box, BoxTitle } from "../../../../components/box";
 import DownloadAttestationButton from "../../../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../../../components/buttons/MailAttestationButton";
@@ -19,7 +18,7 @@ import BorderBottom from "../../../../assets/borderBottom.svg";
 import SettingIconGray from "../../../../assets/settingsPhase2Gray.svg";
 import BlueListIcon from "../../../../assets/listIconBlue.svg";
 import BlueSettingIcon from "../../../../assets/settingsPhase2Blue.svg";
-import IconDomainRounded from "../../../../components/IconDomainRounded";
+import Preferences from "./preferences";
 
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
@@ -32,7 +31,6 @@ export default function Phase2({ young, onChange }) {
     })();
   }, []);
 
-  console.log("young", young);
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2" onChange={onChange}>
@@ -87,71 +85,7 @@ export default function Phase2({ young, onChange }) {
         {equivalences.map((equivalence, index) => (
           <CardEquivalence key={index} equivalence={equivalence} young={young} />
         ))}
-        <Box>
-          <Row>
-            <Col md={12}>
-              <Bloc borderBottom>
-                <BoxTitle style={{ marginBottom: 0 }}>Préférences de missions renseignées par le volontaire</BoxTitle>
-              </Bloc>
-            </Col>
-            <Col
-              md={6}
-              style={{
-                borderRight: "2px solid #f4f5f7",
-              }}>
-              <Bloc borderBottom>
-                <Details title="Domaines">{young.domains && young.domains.map((d, i) => <Badge key={i} text={t(d)} />)}</Details>
-                <Details title="Projet professionnel">
-                  {young.professionnalProject ? (
-                    <div>
-                      {t(young.professionnalProject)} {young.professionnalProjectPrecision ? `(${t(young.professionnalProjectPrecision)})` : null}
-                    </div>
-                  ) : null}
-                </Details>
-              </Bloc>
-              <Bloc>
-                <Details title="Format préféré" value={t(young.missionFormat)} />
-                <Details title="Engagement parallèle">
-                  <div>
-                    <span style={{ fontWeight: 600 }}>{t(young.engaged)}</span>&nbsp;({young.engagedDescription})
-                  </div>
-                  <div style={{ marginLeft: "1rem", fontStyle: "italic" }}></div>
-                </Details>
-                <Details title="Précision additonnelles">
-                  <div style={{ fontStyle: "italic" }}>{young.desiredLocation}</div>
-                </Details>
-              </Bloc>
-            </Col>
-            <Col md={6}>
-              <Bloc>
-                <Details title="Période privilégiée">
-                  <div style={{ fontWeight: 600 }}>{t(young.period)}</div>
-                  {young.periodRanking && young.periodRanking.map((p, i) => <div key={i} style={{ marginLeft: "1rem" }}>{`${i + 1}. ${t(p)}`}</div>)}
-                </Details>
-                <Details title="Mission à proximité de">
-                  {young.mobilityNearHome === "true" ? <div>Votre domicile</div> : null}
-                  {young.mobilityNearSchool === "true" ? <div>Votre établissement</div> : null}
-                  {young.mobilityNearRelative === "true" ? (
-                    <>
-                      <div>Hébergement chez un proche</div>
-                      <div style={{ marginLeft: "1rem" }}>{`${young.mobilityNearRelativeName || ""} • ${young.mobilityNearRelativeZip || ""} ${
-                        young.mobilityNearRelativeCity || ""
-                      }`}</div>
-                    </>
-                  ) : null}
-                </Details>
-                <Details title="Transports privilégiés">
-                  {young.mobilityTransport &&
-                    young.mobilityTransport.map((transport, i) => (
-                      <div key={i}>
-                        {t(transport)} {transport === "OTHER" ? `(${young.mobilityTransportOther})` : null}
-                      </div>
-                    ))}
-                </Details>
-              </Bloc>
-            </Col>
-          </Row>
-        </Box>
+
         <Toolbox young={young} />
         <Box>
           <div className="flex">
@@ -164,7 +98,7 @@ export default function Phase2({ young, onChange }) {
                 <div className="ml-8 py-4 flex ">
                   <img src={SettingIconGray} />
                   <div
-                    className="text-sm text-gray-500 font-medium ml-2"
+                    className="text-sm text-gray-500 font-medium ml-2 cursor-pointer"
                     onClick={() => {
                       setSettingPage(true);
                     }}>
@@ -174,10 +108,10 @@ export default function Phase2({ young, onChange }) {
               </>
             ) : (
               <>
-                <div className="ml-8 py-4 flex ">
+                <div className="ml-8 py-4 flex">
                   <img src={GrayListIcon} />
                   <div
-                    className="text-sm text-gray-500 font-medium ml-2"
+                    className="text-sm text-gray-500 font-medium ml-2 cursor-pointer"
                     onClick={() => {
                       setSettingPage(false);
                     }}>
@@ -195,51 +129,7 @@ export default function Phase2({ young, onChange }) {
           <div className="mb-4">
             <img className="w-full" src={BorderBottom} alt="" />
           </div>
-          {!settingPage ? (
-            <ApplicationList2 young={young} onChangeApplication={onChange} />
-          ) : (
-            <div className="flex flex-col items-center justify-center">
-              {/* bloc1 */}
-              <div className="flex items-center flex-col  ">
-                <img className="my-11" src={BorderBottom} />
-              </div>
-              {/* bloc2 */}
-              <div className="flex items-center flex-col ">
-                <div className="text-sm font-bold text-[#242526] mb-7 ">Domaines favoris</div>
-                <div className="flex items-center justify-center space-x-12">
-                  {young.domains.map((domain, index) => {
-                    return (
-                      <div key={index} className="flex flex-col items-center">
-                        <IconDomainRounded domain={domain} />
-                        <div className="text-xs text-gray-700 font-medium lowercase mt-2">{domain}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <img className="my-11" src={BorderBottom} />
-              </div>
-              {/* bloc3 */}
-              <div className="flex items-center flex-col ">
-                <div className="text-sm font-bold text-[#242526] mb-7 ">Format préféré</div>
-                {young.missionFormat === "CONTINUOUS" ? (
-                  <div className="flex space-x-4">
-                    <div className="text-sm font-bold text-gray-700 border-b-2 border-blue-600 py-1">Regroupée sur des journées</div>{" "}
-                    <div className="text-sm font-medium text-gray-400 py-1">Répartie sur des heures</div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="text-sm font-medium  text-gray-400 py-1">Regroupée sur des journées</div>{" "}
-                    <div className="text-sm font-bold text-gray-700 border-b-2 border-blue-600 py-1">Répartie sur des heures</div>
-                  </div>
-                )}
-                <img className="my-11" src={BorderBottom} />
-              </div>
-              {/* bloc4 */}
-              <div>
-                <img className="my-11" src={BorderBottom} />
-              </div>
-            </div>
-          )}
+          {!settingPage ? <ApplicationList2 young={young} onChangeApplication={onChange} /> : <Preferences young={young} />}
         </Box>
 
         {young.statusPhase2 === "VALIDATED" ? (
@@ -259,64 +149,6 @@ export default function Phase2({ young, onChange }) {
   );
 }
 
-const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled }) => {
-  return (
-    <Row
-      style={{
-        borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
-        borderRight: borderRight ? "2px solid #f4f5f7" : 0,
-        borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
-        backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}>
-      <Wrapper>
-        {title && (
-          <div style={{ display: "flex" }}>
-            <BoxTitle>{title}</BoxTitle>
-          </div>
-        )}
-        {children}
-      </Wrapper>
-    </Row>
-  );
-};
-
-const Details = ({ title, value, children }) => {
-  if (typeof value === "function") value = value();
-  return (
-    <div className="detail">
-      <Col md={5}>
-        <div className="detail-title">{`${title} :`}</div>
-      </Col>
-      <Col md={7}>
-        {value ? <div className="detail-text">{value || "Ceci est vide"}</div> : null}
-        {children ? children : null}
-      </Col>
-    </div>
-  );
-};
-
-const Wrapper = styled.div`
-  padding: 1rem 2rem;
-  width: 100%;
-  .detail {
-    display: flex;
-    align-items: flex-start;
-    margin: 0.5rem 0;
-    font-size: 14px;
-    text-align: left;
-    &-title {
-      color: #798399;
-    }
-    &-text {
-      color: rgba(26, 32, 44);
-    }
-  }
-  p {
-    font-size: 13px;
-    color: #798399;
-    margin-top: 1rem;
-  }
-`;
 const HourTitle = styled.div`
   text-transform: uppercase;
   color: ${colors.grey};
