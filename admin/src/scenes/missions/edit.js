@@ -74,9 +74,6 @@ export default function Edit(props) {
     if (props?.match?.params?.structureId) structureId = props.match.params.structureId;
     else if (defaultValue) structureId = defaultValue.structureId;
     else if (user.structureId) structureId = user.structureId;
-    console.log("🚀 ~ file: edit.js ~ line 75 ~ initStructure ~ props?.match?.params?.structureId", props?.match?.params?.structureId);
-    console.log("🚀 ~ file: edit.js ~ line 77 ~ initStructure ~ defaultValue.structureId", defaultValue?.structureId);
-    console.log("🚀 ~ file: edit.js ~ line 79 ~ initStructure ~ user.structureId", user.structureId);
 
     if (structureId) {
       const { data, ok } = await api.get(`/structure/${structureId}`);
@@ -278,7 +275,7 @@ export default function Edit(props) {
                     <BoxTitle>Détails de la mission</BoxTitle>
                     {values.status === "VALIDATED" ? (
                       <FormGroup>
-                        <label className="uppercase">visibilité pour les candidats</label>
+                        <label className="uppercase">Visibilité pour les candidats</label>
 
                         {values.placesLeft < 1 ? (
                           // Si les places sont toutes attribuées, on l'indique.

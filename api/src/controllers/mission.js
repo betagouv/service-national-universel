@@ -24,8 +24,6 @@ const { ADMIN_URL } = require("../config");
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedMission } = validateMission(req.body);
-    console.log("🚀 ~ file: mission.js ~ line 72 ~ router.post ~ checkedMission", checkedMission);
-    console.log("🚀 ~ file: m`ission.js ~ line 72 ~ router.post ~ error", error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!canCreateOrModifyMission(req.user, checkedMission)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
@@ -87,9 +85,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
       if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
-        console.log("🚀 ~ file: mission.js ~ line 90 ~ router.put ~ checkedMission", checkedMission);
         checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
-        console.log("🚀 ~ file: mission.js ~ line 91 ~ router.put ~ checkedMission", checkedMission);
         if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
           return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
         }
