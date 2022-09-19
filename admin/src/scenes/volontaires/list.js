@@ -1098,6 +1098,7 @@ export default function VolontaireList() {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut mission (candidature)", "Statut mission (candidature)")}
+                  showMissing={true}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
