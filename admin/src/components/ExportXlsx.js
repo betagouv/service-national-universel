@@ -70,9 +70,7 @@ export default function ExportComponent({
 
   return (
     <>
-      <button className="bg-write text-blue-600 border-blue-600 border-[1px] font-ubuntu text-sm rounded-lg p-2" onClick={onClick}>
-        {title}
-      </button>
+      <LoadingButton onClick={onClick}>{title}</LoadingButton>
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}

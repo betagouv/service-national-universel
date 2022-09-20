@@ -14,16 +14,15 @@ import Phase2militaryPrepartionV2 from "../phase2MilitaryPreparationV2";
 import WrapperPhase2 from "../wrapper";
 import ApplicationList2 from "./applicationList2";
 import GrayListIcon from "../../../../assets/listIconGray.svg";
-import BorderBottom from "../../../../assets/borderBottom.svg";
 import SettingIconGray from "../../../../assets/settingsPhase2Gray.svg";
 import BlueListIcon from "../../../../assets/listIconBlue.svg";
 import BlueSettingIcon from "../../../../assets/settingsPhase2Blue.svg";
 import Preferences from "./preferences";
-// import Pencil from "../../../../assets/modifyIcon.svg";
+// import Pencil from "../../../../assets/pencil.svg";
 
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
-  const [settingPage, setSettingPage] = useState(false);
+  const [blocOpened, setBlocOpened] = useState("missions");
 
   React.useEffect(() => {
     (async () => {
@@ -89,56 +88,52 @@ export default function Phase2({ young, onChange }) {
 
         <Toolbox young={young} />
         <Box>
-          <div className="flex">
-            {!settingPage ? (
+          <div className="flex border-b-[1px] border-b-gray-200 ">
+            {blocOpened === "missions" && (
               <>
-                <div className="ml-8 py-4 flex ">
+                <div className="ml-8 py-4 flex border-b-[2px] border-b-blue-500 ">
                   <img src={BlueListIcon} />
                   <div className="text-sm text-blue-600 font-medium ml-2">Missions candidatées</div>
                 </div>
                 <div className="ml-8 py-4 flex ">
-                  <img src={SettingIconGray} />
+                  <img className="w-2/12" src={SettingIconGray} />
                   <div
                     className="text-sm text-gray-500 font-medium ml-2 cursor-pointer"
                     onClick={() => {
-                      setSettingPage(true);
+                      setBlocOpened("preferences");
                     }}>
                     Préférences
                   </div>
                 </div>
               </>
-            ) : (
+            )}
+            {blocOpened === "preferences" && (
               <>
-                <div className="flex justify-between w-full px-4 items-center">
-                  <div className="flex">
-                    <div className="ml-8 py-4 flex">
-                      <img src={GrayListIcon} />
-                      <div
-                        className="text-sm text-gray-500 font-medium ml-2 cursor-pointer"
-                        onClick={() => {
-                          setSettingPage(false);
-                        }}>
-                        Missions candidatées
-                      </div>
-                    </div>
-                    <div className="ml-8 py-4 flex ">
-                      <img src={BlueSettingIcon} />
-                      <div className="text-sm text-blue-600 font-medium ml-2">Préférences</div>
-                    </div>
+                <div className="ml-8 py-4 flex">
+                  <img className="w-1/12" src={GrayListIcon} />
+                  <div
+                    className="text-sm text-gray-500 font-medium ml-2 cursor-pointer"
+                    onClick={() => {
+                      setBlocOpened("missions");
+                    }}>
+                    Missions candidatées
                   </div>
-                  {/* <div className="bg-blue-100 rounded-[28px] px-[9px] py-[7px] flex items-center h-[32px] space-x-2 ">
+                </div>
+                <div className="ml-8 py-4 flex border-b-[2px] border-b-blue-500">
+                  <img src={BlueSettingIcon} />
+                  <div className="text-sm text-blue-600 font-medium ml-2 ">Préférences</div>
+                </div>
+
+                {/* A rajouter prochain ticket */}
+                {/* <div className="bg-blue-100 rounded-[28px] px-[9px] py-[7px] flex items-center h-[32px] space-x-2 ">
                     <img src={Pencil} />
                     <div className="text-blue-600 text-xs font-medium cursor-pointer">Modifier</div>
                   </div> */}
-                </div>
               </>
             )}
           </div>
-
-          <div className="mb-4">
-            <img className="w-full" src={BorderBottom} alt="" />
-          </div>
-          {!settingPage ? <ApplicationList2 young={young} onChangeApplication={onChange} /> : <Preferences young={young} />}
+          {blocOpened === "missions" && <ApplicationList2 young={young} onChangeApplication={onChange} />}
+          {blocOpened === "preferences" && <Preferences young={young} />}
         </Box>
 
         {young.statusPhase2 === "VALIDATED" ? (

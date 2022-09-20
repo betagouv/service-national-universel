@@ -6,7 +6,6 @@ import { Box, BoxTitle } from "../../../components/box";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import SelectStatus from "../../../components/selectStatus";
-import { environment } from "../../../config";
 import api from "../../../services/api";
 import { colors, ENABLE_PM, translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../utils";
 import CardEquivalence from "../components/Equivalence";
@@ -14,8 +13,6 @@ import Toolbox from "../components/Toolbox";
 import ApplicationList from "./applicationList.js";
 import Phase2militaryPrepartionV2 from "./phase2MilitaryPreparationV2";
 import WrapperPhase2 from "./wrapper";
-import ApplicationList2 from "./phase2bis/applicationList2";
-
 export default function Phase2({ young, onChange }) {
   const [equivalences, setEquivalences] = React.useState([]);
   React.useEffect(() => {
