@@ -134,15 +134,18 @@ export default function VolontaireList() {
 
   async function transform(data, values) {
     let all = data;
-    const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-    if (schoolsId?.length) {
-      const { responses } = await api.esQuery("school", {
-        query: { bool: { must: { ids: { values: schoolsId } } } },
-        size: ES_NO_LIMIT,
-      });
-      if (responses.length) {
-        const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+    console.log("🚀 ~ file: list.js ~ line 137 ~ transform ~ data", data);
+    if (values.includes("schoolSituation")) {
+      const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+      if (schoolsId?.length) {
+        const { responses } = await api.esQuery("school", {
+          query: { bool: { must: { ids: { values: schoolsId } } } },
+          size: ES_NO_LIMIT,
+        });
+        if (responses.length) {
+          const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
+        }
       }
     }
     return all.map((data) => {
@@ -156,7 +159,7 @@ export default function VolontaireList() {
         meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
         if (!meetingPoint) meetingPoint = {};
       }
-      const COLUMNS = {
+      const allFields = {
         identity: {
           Prénom: data.firstName,
           Nom: data.lastName,
@@ -291,31 +294,31 @@ export default function VolontaireList() {
           "Date de départ": !data.departSejourAt ? "Non renseignée" : formatDateFRTimezoneUTC(data.departSejourAt),
           "Motif du départ": data?.departSejourMotif,
         },
-        phase2: {
-          "Domaine de MIG 1": data.domains[0],
-          "Domaine de MIG 2": data.domains[1],
-          "Domaine de MIG 3": data.domains[2],
-          "Projet professionnel": translate(data.professionnalProject),
-          "Information supplémentaire sur le projet professionnel": data.professionnalProjectPrecision,
-          "Période privilégiée pour réaliser des missions": data.period,
-          "Choix 1 période": translate(data.periodRanking[0]),
-          "Choix 2 période": translate(data.periodRanking[1]),
-          "Choix 3 période": translate(data.periodRanking[2]),
-          "Choix 4 période": translate(data.periodRanking[3]),
-          "Choix 5 période": translate(data.periodRanking[4]),
-          "Mobilité aux alentours de son établissement": translate(data.mobilityNearSchool),
-          "Mobilité aux alentours de son domicile": translate(data.mobilityNearHome),
-          "Mobilité aux alentours d'un de ses proches": translate(data.mobilityNearRelative),
-          "Informations du proche":
-            data.mobilityNearRelative &&
-            [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity].filter((e) => e)?.join(", "),
-          "Mode de transport": data.mobilityTransport?.map((t) => translate(t)).join(", "),
-          "Autre mode de transport": data.mobilityTransportOther,
-          "Format de mission": translate(data.missionFormat),
-          "Engagement dans une structure en dehors du SNU": translate(data.engaged),
-          "Description engagement ": data.engagedDescription,
-          "Souhait MIG": data.desiredLocation,
-        },
+        // phase2: {
+        //   "Domaine de MIG 1": data.domains[0],
+        //   "Domaine de MIG 2": data.domains[1],
+        //   "Domaine de MIG 3": data.domains[2],
+        //   "Projet professionnel": translate(data.professionnalProject),
+        //   "Information supplémentaire sur le projet professionnel": data.professionnalProjectPrecision,
+        //   "Période privilégiée pour réaliser des missions": data.period,
+        //   "Choix 1 période": translate(data.periodRanking[0]),
+        //   "Choix 2 période": translate(data.periodRanking[1]),
+        //   "Choix 3 période": translate(data.periodRanking[2]),
+        //   "Choix 4 période": translate(data.periodRanking[3]),
+        //   "Choix 5 période": translate(data.periodRanking[4]),
+        //   "Mobilité aux alentours de son établissement": translate(data.mobilityNearSchool),
+        //   "Mobilité aux alentours de son domicile": translate(data.mobilityNearHome),
+        //   "Mobilité aux alentours d'un de ses proches": translate(data.mobilityNearRelative),
+        //   "Informations du proche":
+        //     data.mobilityNearRelative &&
+        //     [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity].filter((e) => e)?.join(", "),
+        //   "Mode de transport": data.mobilityTransport?.map((t) => translate(t)).join(", "),
+        //   "Autre mode de transport": data.mobilityTransportOther,
+        //   "Format de mission": translate(data.missionFormat),
+        //   "Engagement dans une structure en dehors du SNU": translate(data.engaged),
+        //   "Description engagement ": data.engagedDescription,
+        //   "Souhait MIG": data.desiredLocation,
+        // },
         accountDetails: {
           "Créé lé": formatLongDateFR(data.createdAt),
           "Mis à jour le": formatLongDateFR(data.updatedAt),
@@ -328,161 +331,174 @@ export default function VolontaireList() {
         },
       };
 
-      let columns = { ID: data._id };
+      let fields = { ID: data._id };
       for (const element of values) {
         let key;
-        for (key in COLUMNS[element]) columns[key] = COLUMNS[element][key];
+        for (key in allFields[element]) fields[key] = allFields[element][key];
       }
-      return columns;
+      return fields;
     });
   }
 
-  const fieldsAvailable = [
+  const fieldCategories = [
     {
+      id: "identity",
       title: "Identité du volontaire",
       desc: ["Prénom", "Nom", "Sexe", "Cohorte", "Cohorte d'origine"],
-      value: "identity",
+      fields: ["firstName", "lastName", "gender", "cohort", "originalCohort"],
     },
     {
+      id: "contact",
       title: "Contact du volontaire",
       desc: ["Email", "Téléphone"],
-      value: "contact",
-    },
-    {
-      title: "Date et lieu de naissance du volontaire",
-      desc: ["Date de naissance", "Pays de naissance", "Ville de naissance", "Code postal de naissance"],
-      value: "birth",
-    },
-    {
-      title: "Lieu de résidence du volontaire",
-      desc: [
-        "Adresse postale",
-        "Code postal",
-        "Ville, pays, nom et prénom de l'hébergeur",
-        "Lien avec l'hébergeur",
-        "Adresse - étranger",
-        "Code postal - étranger",
-        "Ville - étranger",
-        "Pays - étranger",
-      ],
-      value: "address",
-    },
-    {
-      title: "Localisation du volontaire",
-      desc: ["Département", "Académie", "Région"],
-      value: "location",
-    },
-    {
-      title: "Situation scolaire",
-      desc: [
-        "Niveau",
-        "Type d'établissement",
-        "Nom de l'établissement",
-        "Code postal de l'établissement",
-        "Ville de l'établissement",
-        "Département de l'établissement",
-        "UAI de l'établissement",
-      ],
-      value: "schoolSituation",
-    },
-    {
-      title: "Situation particulière",
-      desc: [
-        "Quartier Prioritaire de la ville",
-        "Zone Rurale",
-        "Handicap",
-        "PPS",
-        "PAI",
-        "Aménagement spécifique",
-        "Nature de l'aménagement spécifique",
-        "Aménagement pour mobilité réduite",
-        "Besoin d'être affecté(e) dans le département de résidence",
-        "Allergies ou intolérances alimentaires",
-        "Activité de haut-niveau",
-        "Nature de l'activité de haut-niveau",
-        "Activités de haut niveau nécessitant d'être affecté dans le département de résidence",
-        "Document activité de haut-niveau",
-        "Structure médico-sociale",
-        "Nom de la structure médico-sociale",
-        "Adresse de la structure médico-sociale",
-        "Code postal de la structure médico-sociale",
-        "Ville de la structure médico-sociale",
-      ],
-      value: "situation",
-    },
-    {
-      title: "Représentant légal 1",
-      desc: ["Statut", "Nom", "Prénom", "Email", "Téléphone", "Adresse", "Code postal", "Ville", "Département et région du représentant légal"],
-      value: "representative1",
-    },
-    {
-      title: "Représentant légal 2",
-      desc: ["Statut", "Nom", "Prénom", "Email", "Téléphone", "Adresse", "Code postal", "Ville", "Département et région du représentant légal"],
-      value: "representative2",
-    },
-    {
-      title: "Consentement",
-      desc: ["Consentement des représentants légaux."],
-      value: "consent",
-    },
-    {
-      title: "Statut",
-      desc: ["Statut général", "Statut phase 1", "Statut phase 2", "Statut phase 3", "Date du dernier statut"],
-      value: "status",
-    },
-    {
-      title: "Phase 1 - Affectation ",
-      desc: ["ID", "Code", "Nom", "Ville", "Département et région du centre"],
-      value: "phase1Affectation",
-    },
-    {
-      title: "Phase 1 - Transport",
-      desc: ["Autonomie", "Numéro de bus", "Point de rassemblement", "Dates d'aller et de retour"],
-      value: "phase1Transport",
-    },
-    {
-      title: "Phase 1 - Statut des documents",
-      desc: ["Droit à l'image", "Autotest PCR", "Règlement intérieur", "Fiche sanitaire"],
-      value: "phase1DocumentStatus",
-    },
-    {
-      title: "Phase 1 - Accords",
-      desc: ["Accords pour droit à l'image et autotests PCR."],
-      value: "phase1DocumentAgreement",
-    },
-    {
-      title: "Phase 1 - Présence",
-      desc: ["Présence à l'arrivé", "Présence à la JDM", "Date de départ", "Motif de départ"],
-      value: "phase1Attendance",
-    },
-    {
-      title: "Phase 2",
-      desc: [
-        "Domaines MIG 1, MIG 2 et MIG 3",
-        "Projet professionnel",
-        "Période privilégiée",
-        "Choix de périodes",
-        "Mobilité",
-        "Mobilité autour d'un proche",
-        "Information du proche",
-        "Mode de transport",
-        "Format de mission",
-        "Engagement hors SNU",
-        "Souhait MIG",
-      ],
-      value: "phase2",
-    },
-    {
-      title: "Compte",
-      desc: ["Dates de création, d'édition et de dernière connexion."],
-      value: "accountDetails",
-    },
-    {
-      title: "Désistement",
-      desc: ["Raison du désistement", "Message de désistement"],
-      value: "desistement",
+      fields: ["email", "phone"],
     },
   ];
+
+  //   {
+  //     title: "Date et lieu de naissance du volontaire",
+  //     desc: ["Date de naissance", "Pays de naissance", "Ville de naissance", "Code postal de naissance"],
+  //     value: "birth",
+  //   },
+  //   {
+  //     title: "Lieu de résidence du volontaire",
+  //     desc: [
+  //       "Adresse postale",
+  //       "Code postal",
+  //       "Ville, pays, nom et prénom de l'hébergeur",
+  //       "Lien avec l'hébergeur",
+  //       "Adresse - étranger",
+  //       "Code postal - étranger",
+  //       "Ville - étranger",
+  //       "Pays - étranger",
+  //     ],
+  //     value: "address",
+  //   },
+  //   {
+  //     title: "Localisation du volontaire",
+  //     desc: ["Département", "Académie", "Région"],
+  //     value: "location",
+  //   },
+  //   {
+  //     title: "Situation scolaire",
+  //     desc: [
+  //       "Niveau",
+  //       "Type d'établissement",
+  //       "Nom de l'établissement",
+  //       "Code postal de l'établissement",
+  //       "Ville de l'établissement",
+  //       "Département de l'établissement",
+  //       "UAI de l'établissement",
+  //     ],
+  //     value: "schoolSituation",
+  //   },
+  //   {
+  //     title: "Situation particulière",
+  //     desc: [
+  //       "Quartier Prioritaire de la ville",
+  //       "Zone Rurale",
+  //       "Handicap",
+  //       "PPS",
+  //       "PAI",
+  //       "Aménagement spécifique",
+  //       "Nature de l'aménagement spécifique",
+  //       "Aménagement pour mobilité réduite",
+  //       "Besoin d'être affecté(e) dans le département de résidence",
+  //       "Allergies ou intolérances alimentaires",
+  //       "Activité de haut-niveau",
+  //       "Nature de l'activité de haut-niveau",
+  //       "Activités de haut niveau nécessitant d'être affecté dans le département de résidence",
+  //       "Document activité de haut-niveau",
+  //       "Structure médico-sociale",
+  //       "Nom de la structure médico-sociale",
+  //       "Adresse de la structure médico-sociale",
+  //       "Code postal de la structure médico-sociale",
+  //       "Ville de la structure médico-sociale",
+  //     ],
+  //     value: "situation",
+  //   },
+  //   {
+  //     title: "Représentant légal 1",
+  //     desc: ["Statut", "Nom", "Prénom", "Email", "Téléphone", "Adresse", "Code postal", "Ville", "Département et région du représentant légal"],
+  //     value: "representative1",
+  //   },
+  //   {
+  //     title: "Représentant légal 2",
+  //     desc: ["Statut", "Nom", "Prénom", "Email", "Téléphone", "Adresse", "Code postal", "Ville", "Département et région du représentant légal"],
+  //     value: "representative2",
+  //   },
+  //   {
+  //     title: "Consentement",
+  //     desc: ["Consentement des représentants légaux."],
+  //     value: "consent",
+  //   },
+  //   {
+  //     title: "Statut",
+  //     desc: ["Statut général", "Statut phase 1", "Statut phase 2", "Statut phase 3", "Date du dernier statut"],
+  //     value: "status",
+  //   },
+  //   {
+  //     title: "Phase 1 - Affectation ",
+  //     desc: ["ID", "Code", "Nom", "Ville", "Département et région du centre"],
+  //     value: "phase1Affectation",
+  //   },
+  //   {
+  //     title: "Phase 1 - Transport",
+  //     desc: ["Autonomie", "Numéro de bus", "Point de rassemblement", "Dates d'aller et de retour"],
+  //     value: "phase1Transport",
+  //   },
+  //   {
+  //     title: "Phase 1 - Statut des documents",
+  //     desc: ["Droit à l'image", "Autotest PCR", "Règlement intérieur", "Fiche sanitaire"],
+  //     value: "phase1DocumentStatus",
+  //   },
+  //   {
+  //     title: "Phase 1 - Accords",
+  //     desc: ["Accords pour droit à l'image et autotests PCR."],
+  //     value: "phase1DocumentAgreement",
+  //   },
+  //   {
+  //     title: "Phase 1 - Présence",
+  //     desc: ["Présence à l'arrivé", "Présence à la JDM", "Date de départ", "Motif de départ"],
+  //     value: "phase1Attendance",
+  //   },
+  //   {
+  //     title: "Phase 2",
+  //     desc: [
+  //       "Domaines MIG 1, MIG 2 et MIG 3",
+  //       "Projet professionnel",
+  //       "Période privilégiée",
+  //       "Choix de périodes",
+  //       "Mobilité",
+  //       "Mobilité autour d'un proche",
+  //       "Information du proche",
+  //       "Mode de transport",
+  //       "Format de mission",
+  //       "Engagement hors SNU",
+  //       "Souhait MIG",
+  //     ],
+  //     value: "phase2",
+  //   },
+  //   {
+  //     title: "Compte",
+  //     desc: ["Dates de création, d'édition et de dernière connexion."],
+  //     value: "accountDetails",
+  //   },
+  //   {
+  //     title: "Désistement",
+  //     desc: ["Raison du désistement", "Message de désistement"],
+  //     value: "desistement",
+  //   },
+  // ];\
+  function getFieldsToExport(selectedCategoryIds) {
+    let fieldsToExport = ["._id"];
+    for (const category in fieldCategories) {
+      if (selectedCategoryIds.includes(category.id)) {
+        fieldsToExport = [...fieldsToExport, ...category.fields];
+      }
+    }
+    return fieldsToExport;
+  }
 
   return (
     <div>
@@ -502,7 +518,7 @@ export default function VolontaireList() {
                   <ModalContainer>
                     <Formik
                       initialValues={{
-                        checked: fieldsAvailable.map((e) => e.value),
+                        checked: fieldCategories.map((e) => e.id),
                       }}>
                       {({ values, setFieldValue }) => (
                         <>
@@ -544,7 +560,7 @@ export default function VolontaireList() {
                                     onClick={() =>
                                       setFieldValue(
                                         "checked",
-                                        fieldsAvailable.map((e) => e.value),
+                                        fieldCategories.map((e) => e.id),
                                       )
                                     }>
                                     Tout sélectionner
@@ -564,8 +580,8 @@ export default function VolontaireList() {
                           </div>
 
                           <div className="h-[60vh] overflow-auto grid grid-cols-2 gap-4 w-full p-3">
-                            {fieldsAvailable.map((cat) => (
-                              <ExportFieldCard key={cat.value} field={cat} values={values} setFieldValue={setFieldValue} />
+                            {fieldCategories.map((category) => (
+                              <ExportFieldCard key={category.id} category={category} values={values} setFieldValue={setFieldValue} />
                             ))}
                           </div>
                           <div className="flex gap-2 justify-center mb-3">
@@ -581,6 +597,8 @@ export default function VolontaireList() {
                                 index="young"
                                 react={{ and: FILTERS }}
                                 transform={(data) => transform(data, values.checked)}
+                                // fieldsToExport={["firstName", "lastName", "gender", "cohort", "originalCohort", "email", "phone"]}
+                                fieldsToExport={(values) => getFieldsToExport(values)}
                               />
                             </div>
                           </div>
