@@ -258,11 +258,11 @@ export default function VolontaireList() {
           "Autotest PCR - Accord": translate(data.autoTestPCR),
         },
         // phase1Attendance: {
-          // "Présence à l'arrivée": !data.cohesionStayPresence ? "Non renseignée" : data.cohesionStayPresence === "true" ? "Présent" : "Absent",
-          // "Présence à la JDM": !data.presenceJDM ? "Non renseignée" : data.presenceJDM === "true" ? "Présent" : "Absent",
-          // "Date de départ": !data.departSejourAt ? "Non renseignée" : formatDateFRTimezoneUTC(data.departSejourAt),
-          // "Motif du départ": data?.departSejourMotif,
-        },
+        // "Présence à l'arrivée": !data.cohesionStayPresence ? "Non renseignée" : data.cohesionStayPresence === "true" ? "Présent" : "Absent",
+        // "Présence à la JDM": !data.presenceJDM ? "Non renseignée" : data.presenceJDM === "true" ? "Présent" : "Absent",
+        // "Date de départ": !data.departSejourAt ? "Non renseignée" : formatDateFRTimezoneUTC(data.departSejourAt),
+        // "Motif du départ": data?.departSejourMotif,
+        // },
         // phase2: {
         //   "Domaine de MIG 1": data.domains[0],
         //   "Domaine de MIG 2": data.domains[1],
