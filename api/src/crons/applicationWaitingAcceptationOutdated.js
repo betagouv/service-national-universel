@@ -14,7 +14,7 @@ const clean = async () => {
   const cursor = await ApplicationModel.find({ status: APPLICATION_STATUS.WAITING_ACCEPTATION }).cursor();
   await cursor.eachAsync(async function (application) {
     total++;
-    if (diffDays(application.createdAt, now) > 14) {
+    if (diffDays(application.createdAt, now) >= 14) {
       countAutoCancel++;
       application.set({ status: APPLICATION_STATUS.CANCEL });
       await application.save({ fromUser: { firstName: `Cron outdated waiting acceptation application` } });
@@ -70,7 +70,6 @@ exports.handler = async () => {
   try {
     clean();
   } catch (e) {
-    capture(`ERROR`, JSON.stringify(e));
     capture(e);
     slack.error({ title: "outdated waiting acceptation application", text: JSON.stringify(e) });
   }
@@ -81,7 +80,6 @@ exports.handlerNotice1Week = async () => {
   try {
     notify1Week();
   } catch (e) {
-    capture(`ERROR`, JSON.stringify(e));
     capture(e);
     slack.error({ title: "1 week notice outdated waiting acceptation application", text: JSON.stringify(e) });
   }
@@ -92,7 +90,6 @@ exports.handlerNotice13Days = async () => {
   try {
     notify13Days();
   } catch (e) {
-    capture(`ERROR`, JSON.stringify(e));
     capture(e);
     slack.error({ title: "13 days notice outdated waiting acceptation application", text: JSON.stringify(e) });
   }
@@ -100,6 +97,6 @@ exports.handlerNotice13Days = async () => {
 
 const diffDays = (date1, date2) => {
   const diffTime = Math.abs(date2 - date1);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   return diffDays;
 };
