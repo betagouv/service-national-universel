@@ -3,6 +3,7 @@ require("../mongo");
 const { capture } = require("../sentry");
 const slack = require("../slack");
 const ApplicationModel = require("../models/application");
+const StructureModel = require("../models/structure");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
 const { APP_URL } = require("../config");
 const { sendTemplate } = require("../sendinblue");
@@ -33,10 +34,10 @@ const notify1Week = async () => {
     if (diffDays(application.createdAt, now) === 7) {
       notice1week++;
       await sendTemplate(SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_1_WEEK_NOTICE, {
-        emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+        emailTo: [{ name: `${application?.youngFirstName} ${application?.youngLastName}`, email: application?.youngEmail }],
         params: {
-          missionName: application.missionName,
-          cta: `${APP_URL}/mission/${application.missionId}`,
+          missionName: application?.missionName,
+          cta: `${APP_URL}/mission/${application?.missionId}`,
         },
       });
     }
@@ -53,11 +54,13 @@ const notify13Days = async () => {
     total++;
     if (diffDays(application.createdAt, now) === 13) {
       notice13Days++;
+      const structure = await StructureModel.findById(application?.structureId);
       await sendTemplate(SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_13_DAY_NOTICE, {
-        emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+        emailTo: [{ name: `${application?.youngFirstName} ${application?.youngLastName}`, email: application?.youngEmail }],
         params: {
-          missionName: application.missionName,
-          cta: `${APP_URL}/mission/${application.missionId}`,
+          missionName: application?.missionName,
+          structureName: structure?.name,
+          cta: `${APP_URL}/mission/${application?.missionId}`,
         },
       });
     }
