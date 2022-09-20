@@ -14,6 +14,7 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import { environment } from "../../../config.js";
 import api from "../../../services/api";
 import {
   canAssignCohesionCenter,
@@ -36,6 +37,7 @@ import AssignCenter from "../components/AssignCenter";
 import DocumentPhase1 from "../components/DocumentPhase1";
 import ModalAffectations from "../components/ModalAffectation";
 import WrapperPhase1 from "./wrapper";
+import DocumentPhase1Bis from "../components/DocumentPhase1Bis.js";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -327,7 +329,7 @@ export default function Phase1(props) {
           young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
             <Row>
               <Bloc title="Documents" disabled={disabled}>
-                <DocumentPhase1 young={young} />
+                {environment === "production" ? <DocumentPhase1 young={young} /> : <DocumentPhase1Bis young={young} />}
               </Bloc>
             </Row>
           ) : null}
