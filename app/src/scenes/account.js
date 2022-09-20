@@ -10,7 +10,7 @@ import { setYoung } from "../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
 import { getPasswordErrorMessage, translate, putLocation } from "../utils";
 import validator from "validator";
-import AddressInput from "../components/addressInput";
+import AddressInputV2 from "../components/addressInputV2";
 import ModalConfirm from "../components/modals/ModalConfirm";
 import PasswordEye from "../components/PasswordEye";
 import { appURL } from "../config";
@@ -165,7 +165,7 @@ export default function Account() {
             });
           } else updateYoung(values);
         }}>
-        {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, errors, touched, validateField }) => (
           <>
             <h2 className="md:text-3xl  text-2xl font-bold mb-6">Mon profil</h2>
             <FormRow>
@@ -191,13 +191,14 @@ export default function Account() {
               />
             </FormRow>
             <div style={{ marginBottom: "1.5rem" }}>
-              <AddressInput
+              <AddressInputV2
+                countryByDefault="France"
                 keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
                 values={values}
                 handleChange={handleChange}
                 errors={errors}
                 touched={touched}
-                departAndRegionVisible={false}
+                validateField={validateField}
               />
             </div>
             <h2 className="md:text-3xl  text-2xl font-bold mb-6">Représentant Légal</h2>
