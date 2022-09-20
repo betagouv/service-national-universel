@@ -88,11 +88,12 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   });
 
   // everyday at 1:00 UTC
-  cron.schedule("0 7 * * *", () => {
-    applicationOutaded.handler();
-    applicationOutaded.handlerNotice1Week();
-    applicationOutaded.handlerNotice13Days();
-  });
+  // Activer un jour apres avertissement des jeunes
+  // cron.schedule("0 7 * * *", () => {
+  //   applicationOutaded.handler();
+  //   applicationOutaded.handlerNotice1Week();
+  //   applicationOutaded.handlerNotice13Days();
+  // });
 
   cron.schedule(everyHours(1), () => {
     computeGoalsInscription.handler();
